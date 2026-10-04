@@ -283,16 +283,4 @@ describe('launchWave', () => {
     expect(events).toEqual([{type: 'waveLaunched', wave: 1, earlyBonus: 0}]);
     expect(game.credits).toBe(RULES.startCredits);
   });
-
-  it('pays the early-call bonus when launching during a running wave', () => {
-    const game = createGame(SEED);
-    run(game, {type: 'launchWave'});
-    const events = run(game, {type: 'launchWave'});
-    const bonus = RULES.earlyCallBase + 1 * RULES.earlyCallPerWave;
-    expect(game.wave).toBe(2);
-    expect(game.credits).toBe(RULES.startCredits + bonus);
-    expect(events).toEqual([
-      {type: 'waveLaunched', wave: 2, earlyBonus: bonus},
-    ]);
-  });
 });

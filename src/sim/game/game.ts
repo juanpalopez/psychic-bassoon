@@ -3,6 +3,10 @@ import type {EnemyId, TowerId} from '../../content';
 import {stepCombat} from '../combat';
 import {buildRoute, generateMap} from '../map';
 import type {GameMap, Route} from '../map';
+import {deriveRng} from '../rng';
+import type {Rng} from '../rng';
+import {RNG_STREAMS} from '../streams';
+import {settleWave, startWave, stepSpawners} from '../waves';
 
 /** A tower on a plate. `level` counts from 0 (level 1) to 2 (level 3). */
 export interface Tower {
@@ -39,6 +43,20 @@ export interface Enemy {
   alive: boolean;
 }
 
+/** One robot a wave will release, and the pause before the next one. */
+export interface SpawnOrder {
+  readonly type: EnemyId;
+  readonly gap: number;
+}
+
+/** A wave releasing its robots over time. */
+export interface Spawner {
+  queue: SpawnOrder[];
+  /** Seconds until the next release. */
+  timer: number;
+  readonly wave: number;
+}
+
 /** A Rivet Mortar shell in flight. */
 export interface Shot {
   x: number;
@@ -72,7 +90,8 @@ export type RejectReason =
   | 'occupied'
   | 'notEnoughCredits'
   | 'maxLevel'
-  | 'noSuchTower';
+  | 'noSuchTower'
+  | 'waveInProgress';
 
 /** What happened during the last tick, for render and UI to react to. */
 export type GameEvent =
@@ -91,6 +110,11 @@ export type GameEvent =
       readonly type: 'waveLaunched';
       readonly wave: number;
       readonly earlyBonus: number;
+    }
+  | {
+      readonly type: 'waveCleared';
+      readonly wave: number;
+      readonly bonus: number;
     }
   | {
       readonly type: 'enemyKilled';
@@ -128,6 +152,9 @@ export interface GameState {
   towers: Tower[];
   enemies: Enemy[];
   shots: Shot[];
+  spawners: Spawner[];
+  /** Random stream for wave composition, separate from the map's. */
+  rng: Rng;
   nextId: number;
   /** Commands waiting for the next tick, in submission order. */
   pending: Command[];
@@ -150,6 +177,8 @@ export function createGame(seed: number): GameState {
     towers: [],
     enemies: [],
     shots: [],
+    spawners: [],
+    rng: deriveRng(seed, RNG_STREAMS.waves),
     nextId: 0,
     pending: [],
     events: [],
@@ -227,13 +256,17 @@ function sell(game: GameState, command: Extract<Command, {type: 'sell'}>) {
   game.events.push({type: 'towerSold', towerId: tower.id, refund});
 }
 
-function launchWave(game: GameState) {
+function launchWave(game: GameState, command: Command) {
+  if (game.running && game.spawners.length > 0) {
+    return reject(game, command, 'waveInProgress');
+  }
   const earlyBonus = game.running
     ? RULES.earlyCallBase + game.wave * RULES.earlyCallPerWave
     : 0;
   game.credits += earlyBonus;
   game.wave++;
   game.running = true;
+  startWave(game);
   game.events.push({type: 'waveLaunched', wave: game.wave, earlyBonus});
 }
 
@@ -247,7 +280,7 @@ function apply(game: GameState, command: Command) {
     case 'sell':
       return sell(game, command);
     case 'launchWave':
-      return launchWave(game);
+      return launchWave(game, command);
   }
 }
 
@@ -260,6 +293,10 @@ export function tick(game: GameState): void {
   const commands = game.pending;
   game.pending = [];
   for (const command of commands) apply(game, command);
-  if (!game.over) stepCombat(game);
+  if (!game.over) {
+    stepSpawners(game);
+    stepCombat(game);
+    if (!game.over) settleWave(game);
+  }
   game.tick++;
 }

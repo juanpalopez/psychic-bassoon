@@ -110,6 +110,11 @@ describe('grid and rules', () => {
     expect(RULES.earlyCallPerWave).toBe(2);
   });
 
+  it('matches the prototype wave-clear bonus', () => {
+    expect(RULES.waveClearBase).toBe(15);
+    expect(RULES.waveClearPerWave).toBe(2);
+  });
+
   it('matches the prototype tower mechanics', () => {
     expect(RULES.quenchSlowSeconds).toBe(1.4);
     expect(RULES.rocketSpeed).toBe(5.5);

@@ -1,10 +1,10 @@
 import {ENEMIES, RULES, TOWERS} from '../../content';
 import type {EnemyId} from '../../content';
 import type {Enemy, GameState, Tower} from '../game';
-import {TICK_SECONDS} from '../game/clock';
+import {TICK_SECONDS} from '../time';
 import {distance, positionAt} from '../map';
 import type {Point} from '../map';
-import {enemyStatsForWave} from '../waves';
+import {enemyStatsForWave} from './scaling';
 
 /** Puts a robot of `wave`'s strength on the spawn point. */
 export function spawnEnemy(

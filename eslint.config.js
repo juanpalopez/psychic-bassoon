@@ -101,6 +101,12 @@ export default tseslint.config(
               group: ['three', 'three/*'],
               message: 'src/sim must not import three.',
             },
+            {
+              // Contexts talk through each other's index.ts, never their files.
+              regex: '^\\.\\./[^./][^/]*/.+',
+              message:
+                'Import another context through its index.ts, not its files.',
+            },
           ],
         },
       ],
