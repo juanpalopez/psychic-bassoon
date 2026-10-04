@@ -25,7 +25,10 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `pnpm build && pnpm preview --port ${PORT} --strictPort`,
+    // CI builds `dist/` in an earlier step; locally, build first so the test never sees a stale build.
+    command: process.env.CI
+      ? `pnpm preview --port ${PORT} --strictPort`
+      : `pnpm build && pnpm preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: false,
     timeout: 120_000,
