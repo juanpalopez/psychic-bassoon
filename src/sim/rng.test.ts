@@ -1,5 +1,13 @@
 import {describe, expect, it} from 'vitest';
-import {cloneRng, createRng, nextFloat, nextInt, nextRange, pick} from './rng';
+import {
+  cloneRng,
+  createRng,
+  deriveRng,
+  nextFloat,
+  nextInt,
+  nextRange,
+  pick,
+} from './rng';
 
 // Reference values from the well-known mulberry32 snippet, run independently.
 const GOLDEN: [number, number[]][] = [
@@ -64,7 +72,6 @@ describe('createRng', () => {
   it('stores the seed as an unsigned 32-bit state', () => {
     expect(createRng(2 ** 32 + 1).state).toBe(1);
     expect(createRng(-1).state).toBe(4294967295);
-    expect(createRng(7.9).state).toBe(7);
   });
 
   it('keeps the state an unsigned 32-bit integer while drawing', () => {
@@ -77,13 +84,12 @@ describe('createRng', () => {
     }
   });
 
-  it('truncates a fractional seed', () => {
-    expect(draw(7.9, 5)).toEqual(draw(7, 5));
-  });
-
-  it.each([NaN, Infinity, -Infinity])('rejects the seed %s', seed => {
-    expect(() => createRng(seed)).toThrow(RangeError);
-  });
+  it.each([NaN, Infinity, -Infinity, 7.9, -1.5, 2 ** 53])(
+    'rejects the seed %s, which is not a safe integer',
+    seed => {
+      expect(() => createRng(seed)).toThrow(RangeError);
+    }
+  );
 
   it('keeps its state as plain data that survives JSON', () => {
     const original = createRng(5);
@@ -101,6 +107,83 @@ describe('cloneRng', () => {
     const fromCopy = [nextFloat(copy), nextFloat(copy), nextFloat(copy)];
     const fromOriginal = [nextFloat(rng), nextFloat(rng), nextFloat(rng)];
     expect(fromCopy).toEqual(fromOriginal);
+  });
+});
+
+describe('pinned helper sequences (seed 42, from the reference float)', () => {
+  it('nextInt(rng, 6) is floor(float * 6)', () => {
+    const rng = createRng(42);
+    const values = Array.from({length: 10}, () => nextInt(rng, 6));
+    expect(values).toEqual([3, 2, 5, 4, 1, 3, 1, 3, 5, 2]);
+  });
+
+  it('nextRange(rng, 0.8, 3.2) is min + float * (max - min)', () => {
+    const rng = createRng(42);
+    const values = Array.from({length: 10}, () => nextRange(rng, 0.8, 3.2));
+    expect(values).toEqual([
+      2.242649004608393, 1.8758973415941003, 2.845917904376984,
+      2.4073616994544866, 1.2195533569902182, 2.063822101242841,
+      1.455747186392546, 2.2993871694430714, 2.877139155939222,
+      1.9335609322413805,
+    ]);
+  });
+
+  it('pick(rng, items) is items[floor(float * length)]', () => {
+    const rng = createRng(42);
+    const values = Array.from({length: 10}, () =>
+      pick(rng, ['a', 'b', 'c', 'd'])
+    );
+    expect(values).toEqual(['c', 'b', 'd', 'c', 'a', 'c', 'b', 'c', 'd', 'b']);
+  });
+});
+
+describe('deriveRng', () => {
+  const firstDraws = (rng: ReturnType<typeof createRng>) =>
+    Array.from({length: 5}, () => nextFloat(rng));
+
+  it.each([
+    [0, 0, 2462723854],
+    [2024, 3, 3480218493],
+    [4294967295, 7, 1650816001],
+    [1, 1, 314344336],
+  ])(
+    'derives the pinned state for seed %i and stream %i',
+    (seed, stream, expected) => {
+      // Expected values come from an independent murmur3 fmix32 over
+      // (seed + (stream + 1) * 0x9e3779b9) mod 2^32.
+      expect(deriveRng(seed, stream).state).toBe(expected);
+    }
+  );
+
+  it('is deterministic for a seed and a stream', () => {
+    expect(firstDraws(deriveRng(2024, 3))).toEqual(
+      firstDraws(deriveRng(2024, 3))
+    );
+  });
+
+  it('gives each stream its own sequence', () => {
+    const streams = [0, 1, 2, 3, 4].map(stream =>
+      JSON.stringify(firstDraws(deriveRng(2024, stream)))
+    );
+    expect(new Set(streams).size).toBe(streams.length);
+  });
+
+  it('gives each seed its own sequence for the same stream', () => {
+    expect(firstDraws(deriveRng(1, 0))).not.toEqual(
+      firstDraws(deriveRng(2, 0))
+    );
+  });
+
+  it('does not depend on how much another stream has drawn', () => {
+    const map = deriveRng(99, 0);
+    const waves = deriveRng(99, 1);
+    const expected = firstDraws(deriveRng(99, 1));
+    for (let i = 0; i < 50; i++) nextFloat(map);
+    expect(firstDraws(waves)).toEqual(expected);
+  });
+
+  it.each([0.5, -1, NaN, Infinity])('rejects the stream %s', stream => {
+    expect(() => deriveRng(1, stream)).toThrow(RangeError);
   });
 });
 
@@ -132,8 +215,17 @@ describe('nextInt', () => {
     }
   });
 
-  it.each([0, -1, 1.5, NaN, Infinity])('rejects the bound %s', max => {
-    expect(() => nextInt(createRng(3), max)).toThrow(RangeError);
+  it.each([0, -1, 1.5, NaN, Infinity, 2 ** 32 + 1, 2 ** 53])(
+    'rejects the bound %s',
+    max => {
+      expect(() => nextInt(createRng(3), max)).toThrow(RangeError);
+    }
+  );
+
+  it('accepts the largest supported bound', () => {
+    const value = nextInt(createRng(3), 2 ** 32);
+    expect(value).toBeGreaterThanOrEqual(0);
+    expect(value).toBeLessThan(2 ** 32);
   });
 });
 
@@ -152,6 +244,7 @@ describe('nextRange', () => {
     [2, 1],
     [NaN, 1],
     [0, Infinity],
+    [-1e308, 1e308],
   ])('rejects the range [%s, %s)', (min, max) => {
     expect(() => nextRange(createRng(4), min, max)).toThrow(RangeError);
   });
