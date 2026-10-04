@@ -3,9 +3,6 @@ import {TICK_SECONDS} from '../time';
 
 export {TICK_SECONDS};
 
-/** Slack that stops float error from losing a tick at an exact boundary. */
-const EPSILON = 1e-9;
-
 /** Real time carried between frames, in seconds. Plain data. */
 export interface Clock {
   accumulator: number;
@@ -30,7 +27,7 @@ export function advanceClock(
   }
   if (!(elapsedSeconds > 0)) return 0;
   clock.accumulator += Math.min(elapsedSeconds, RULES.maxFrameSeconds);
-  const ticks = Math.floor(clock.accumulator / TICK_SECONDS + EPSILON);
+  const ticks = Math.floor(clock.accumulator / TICK_SECONDS);
   clock.accumulator = Math.max(0, clock.accumulator - ticks * TICK_SECONDS);
   return ticks * speed;
 }

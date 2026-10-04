@@ -87,6 +87,7 @@ export type Command =
 export type RejectReason =
   | 'gameOver'
   | 'notAPlate'
+  | 'unknownTower'
   | 'occupied'
   | 'notEnoughCredits'
   | 'maxLevel'
@@ -214,6 +215,8 @@ function isPlate(game: GameState, col: number, row: number): boolean {
 
 function build(game: GameState, command: Extract<Command, {type: 'build'}>) {
   const {tower, col, row} = command;
+  if (!Object.hasOwn(TOWERS, tower))
+    return reject(game, command, 'unknownTower');
   if (!isPlate(game, col, row)) return reject(game, command, 'notAPlate');
   if (game.towers.some(t => t.col === col && t.row === row)) {
     return reject(game, command, 'occupied');

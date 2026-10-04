@@ -47,7 +47,11 @@ export function parseArgs(argv: readonly string[]): Args {
   for (let i = 0; i < list.length; i++) {
     const [flag, inline] = (list[i] ?? '').split('=', 2);
     const name = flag?.replace(/^--/, '');
-    if (!name || !(name in DEFAULT_ARGS) || !flag?.startsWith('--')) {
+    if (
+      !name ||
+      !Object.hasOwn(DEFAULT_ARGS, name) ||
+      !flag?.startsWith('--')
+    ) {
       throw new Error(`unknown option "${list[i]}"`);
     }
     const raw = inline ?? list[++i];
@@ -149,8 +153,9 @@ export function summarizeWaves(
  */
 export function buildReport({seed, waves, speed}: Args): string {
   const bot = createBot(generateMap(seed));
+  // Past the last wave the bot may still build, but never launches another.
   const driven = createRunner(seed, game =>
-    game.wave >= waves && !game.running ? [] : bot(game)
+    bot(game).filter(c => c.type !== 'launchWave' || game.wave < waves)
   );
   const {game} = driven;
   const clears = new Map<number, ClearSnapshot>();

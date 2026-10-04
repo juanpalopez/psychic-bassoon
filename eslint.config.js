@@ -69,7 +69,12 @@ export default tseslint.config(
   },
   {
     // Named exports only. Tool config files need a default export.
-    files: ['src/**/*.ts', 'e2e/**/*.ts', 'scripts/**/*.mjs'],
+    files: [
+      'src/**/*.ts',
+      'e2e/**/*.ts',
+      'scripts/**/*.mjs',
+      'scripts/**/*.ts',
+    ],
     rules: {
       'no-restricted-exports': [
         'error',

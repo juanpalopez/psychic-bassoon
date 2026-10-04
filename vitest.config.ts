@@ -4,7 +4,5 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     environment: 'node',
-    // TODO(#7): remove once the first sim test exists.
-    passWithNoTests: true,
   },
 });
