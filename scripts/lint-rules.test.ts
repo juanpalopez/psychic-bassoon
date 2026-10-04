@@ -18,13 +18,31 @@ describe('sim determinism lint rules', () => {
     ['globalThis.Date()', 'export const a = globalThis.Date();\n'],
     ['new globalThis.Date()', 'export const a = new globalThis.Date();\n'],
     ['Math.random()', 'export const a = Math.random();\n'],
+    [
+      'globalThis.Math.random()',
+      'export const a = globalThis.Math.random();\n',
+    ],
+    [
+      "globalThis['Date'].now()",
+      "export const a = globalThis['Date'].now();\n",
+    ],
+    [
+      'destructuring Date from globalThis',
+      'const {Date: D} = globalThis;\nexport const a = D.now();\n',
+    ],
+    [
+      'an alias of globalThis',
+      'const g = globalThis;\nexport const a = g.Date.now();\n',
+    ],
     ['dynamic import of three', "export const a = import('three');\n"],
     ['dynamic import of render', "export const a = import('../render/x');\n"],
     ['globalThis.document', 'export const a = globalThis.document;\n'],
   ];
 
   it.each(forbidden)('rejects %s', async (_name, code) => {
-    expect((await ruleIds(code)).length).toBeGreaterThan(0);
+    const ids = await ruleIds(code);
+    expect(ids.length).toBeGreaterThan(0);
+    expect(ids).not.toContain('parse');
   });
 
   const allowed: [string, string][] = [

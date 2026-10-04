@@ -110,6 +110,12 @@ export default tseslint.config(
           name,
           message: 'src/sim must not use the DOM or browser APIs.',
         })),
+        {
+          // Every route to Math.random, Date or the DOM through the global
+          // object (member access, computed access, destructuring, aliases).
+          name: 'globalThis',
+          message: 'src/sim must not use globalThis.',
+        },
       ],
       'no-restricted-properties': [
         'error',

@@ -57,6 +57,6 @@ describe('check-size script', () => {
     const result = run(join(dist, 'missing'));
     expect(result.status).toBe(1);
     expect(result.output).toContain('is not a directory');
-    expect(result.output).not.toContain('at ');
+    expect(result.output).not.toMatch(/^\s+at /m);
   });
 });
