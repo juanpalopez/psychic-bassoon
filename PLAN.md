@@ -2,6 +2,8 @@
 
 _As of 2026-10-04. Living version: the Claude doc of the same name._
 
+> **Status:** Phase 0 is nearly done. Live: https://juanpalopez.github.io/psychic-bassoon/. Done: scaffold, lint and style, tests, CI, deploy, releases, Dependabot, branch protection and the README. Open: ticket #6 (move this plan into `docs/` and add the prototype, which is still missing) and the optional hardening in #42. Phase 1 starts after the Phase 0 gate is reported.
+
 ## Vision
 
 Scrapline becomes a 3D low-poly tower defense for mobile browsers. The camera is angled like League of Legends, and robots march along a procedurally generated conveyor. It lives in this repo, deploys to GitHub Pages, and doubles as a portfolio piece.
@@ -215,7 +217,7 @@ scrapline/
 - Least-privilege `permissions` on every workflow, `concurrency` to cancel superseded runs, no secrets in the repo.
 - Skip Git LFS in CI (`assets-src/` is source only; only compressed GLBs ship), which keeps runs fast and avoids LFS bandwidth quota.
 
-**Repository settings** (not code, set once in GitHub): protect `main` with required checks (`Conventional Commits`, `ci`), squash merge only, linear history, delete branches on merge, no direct pushes.
+**Repository settings** (not code, set once in GitHub): protect `main` with required checks (`Conventional Commits`, `ci`), squash merge only, linear history, delete branches on merge, no direct pushes. These are two repository rulesets, one for `main` and one for `v*` tags. Repository admins can bypass the `main` rules only through a pull request, and are the only ones who can create release tags.
 
 ## Gameplay changes
 
@@ -245,28 +247,30 @@ Each phase ends with a gate that must pass before the next starts.
 
 The table above is the summary. Each phase below lists its scope, out-of-scope items, work breakdown, tests and gate checklist. Work one phase at a time: finish and report the gate before starting the next. Tickets are on the Project Slag board for Phases 0–2 only; Phases 3–5 stay as roadmap here until they are next up. Ticket titles use `[Phase N] …` and carry a `phase-N` label (format in `CLAUDE.md`).
 
-### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30)
+### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30, #42, #48–#49)
 
 **Goal:** a deployable skeleton, so every later change ships through the same path.
 
 **In scope**
 - pnpm + Vite + TypeScript (strict, no `any`) + Three.js (version pinned), with the `src/{sim,render,ui,content}` layout.
-- ESLint and `tsc --noEmit` behind `pnpm lint`, including the rule that `src/sim` cannot import `render`, `ui`, `three` or the DOM.
+- ESLint and `tsc --noEmit` behind `pnpm lint`, including the rule that `src/sim` cannot import `render`, `ui`, `three` or the DOM (static or dynamic) and a DOM-free `tsconfig.sim.json`.
+- Code style: the Google TypeScript Style Guide, enforced by Prettier and ESLint (`pnpm format`, `pnpm lint`).
 - Vitest (`pnpm test`) and one Playwright smoke test (`pnpm test:e2e`).
 - `ci` workflow: frozen-lockfile install, `pnpm lint && pnpm test && pnpm build`, a bundle-size check and the Playwright smoke test, with pnpm caching and a pinned Node version.
 - `deploy` workflow: GitHub Pages from `main`, only after `ci` passes, with the correct Vite `base`.
 - `release` workflow: a `vMAJOR.MINOR.PATCH` tag re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached.
 - Dependabot config, and the `main` branch protection from the CI/CD pipeline section.
+- A README for setup, run, test and contributing.
 - Repo tidy: `docs/PLAN.md`, `prototype/scrapline.html` in place, codename recorded.
 
 **Out of scope:** any gameplay, art or HUD.
 
 **Gate checklist**
-- [ ] An empty Three.js scene is live on GitHub Pages from `main`.
-- [ ] CI is green; a deliberate bad import in `src/sim` fails lint.
-- [ ] `main` is protected: a PR with a failing check or a non-conforming title cannot merge.
-- [ ] A test tag produces a GitHub Release (then delete the test release and tag).
-- [ ] Every path mentioned in `CLAUDE.md` exists.
+- [x] An empty Three.js scene is live on GitHub Pages from `main` (verified in headless Chromium: WebGL2 canvas, no console errors).
+- [x] CI is green; a deliberate bad import in `src/sim` fails lint.
+- [x] `main` is protected: a PR with a failing check or a non-conforming title cannot merge (a probe PR with a bad title was `BLOCKED`; the probe was closed, not merged).
+- [x] A test tag produces a GitHub Release (then delete the test release and tag). Also checked: a malformed tag and an off-`main` tag both fail the `guard` job.
+- [ ] Every path that `CLAUDE.md` and the docs reference as existing exists. Paths for later phases are marked in `CLAUDE.md` as created in that phase. Open: `docs/PLAN.md` and `prototype/scrapline.html` (ticket #6).
 
 ### Phase 1 · Simulation port (tickets #7–#13)
 
@@ -383,9 +387,9 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 | Scope creep from lore and features | Phase gates: nothing new until the 3D port matches the prototype |
 | New enemies and branches break prototype balance | Add them behind content data flags in Phase 4; the Phase 1–2 sim stays prototype-identical and keeps its replay tests |
 
-- [ ] Repo name and whether it is public from day one
-- [ ] Embed the game in the personal site, or link out
+- [x] Repo name and whether it is public from day one: public from day one, repo `psychic-bassoon`, codename Project Slag.
+- [x] Embed the game in the personal site, or link out: link out. The game has its own project Pages site, and the personal site (another repo) links to it.
 - [ ] Portrait only, or landscape too
 - [ ] Music: commission, CC0 tracks, or skip for v1
-- [ ] Pages: is `main` the live "latest" build, or does the public link only update on tagged releases
+- [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN dev server only, or also upload `dist/` as a PR artifact (Pages can't preview PRs)
