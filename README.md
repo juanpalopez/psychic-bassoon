@@ -97,7 +97,7 @@ Work is planned in phases and tracked as tickets on the [project board](https://
 
 ### Assets
 
-Only [CC0](https://creativecommons.org/publicdomain/zero/1.0/) assets, compressed to GLB in `public/assets/`, with the source and licence recorded in `assets/CREDITS.md`.
+Only [CC0](https://creativecommons.org/publicdomain/zero/1.0/) assets, compressed to GLB in `public/assets/`, with the source and licence recorded in `assets/CREDITS.md` (created with the first asset).
 
 ## License
 
