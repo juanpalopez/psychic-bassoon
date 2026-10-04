@@ -9,7 +9,15 @@ const domGlobals = Object.keys(globals.browser).filter(
 );
 
 export default tseslint.config(
-  {ignores: ['dist', 'node_modules', 'playwright-report', 'test-results']},
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'playwright-report',
+      'test-results',
+      '.claude',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
@@ -139,6 +147,11 @@ export default tseslint.config(
         },
         {
           selector: "CallExpression[callee.name='Date']",
+          message: 'The sim must not read the clock; time is ticks.',
+        },
+        {
+          selector:
+            "MemberExpression[object.name='globalThis'][property.name='Date']",
           message: 'The sim must not read the clock; time is ticks.',
         },
       ],
