@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _As of 2026-10-04. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 and 1 are complete and their gates pass. Live: https://juanpalopez.github.io/psychic-bassoon/. Next: Phase 2, the 3D greybox (epic #14), starting with the renderer and camera. `pnpm sim -- --seed 42` shows the headless simulation. Use `prototype/scrapline.html` as the reference for rules and numbers.
+> **Status:** Phases 0 and 1 are complete. Phase 2 (3D greybox) is built and live at https://juanpalopez.github.io/psychic-bassoon/; its gate waits on a manual check on a real phone (60 fps with 80 robots, one-thumb play, touch gestures; ticket #27). `pnpm sim -- --seed 42` shows the headless simulation. Use `prototype/scrapline.html` as the reference for rules and numbers.
 
 ## Vision
 
@@ -318,7 +318,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 **Gate checklist**
 - [ ] Plays as well as the 2D prototype at 60 fps on your phone with 80 robots.
 - [ ] Every action is one-thumb in portrait.
-- [ ] Draw-call and triangle budgets met.
+- [x] Draw-call and triangle budgets met (e2e: 15 draw calls, about 39k triangles with 80 robots and every tower at level 3).
 
 ### Phase 3 · Art and UI
 
