@@ -245,7 +245,7 @@ Each phase ends with a gate that must pass before the next starts.
 
 The table above is the summary. Each phase below lists its scope, out-of-scope items, work breakdown, tests and gate checklist. Work one phase at a time: finish and report the gate before starting the next. Tickets are on the Project Slag board for Phases 0–2 only; Phases 3–5 stay as roadmap here until they are next up. Ticket titles use `[Phase N] …` and carry a `phase-N` label (format in `CLAUDE.md`).
 
-### Phase 0 · Repo and pipeline (tickets #1–#6, #18)
+### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30)
 
 **Goal:** a deployable skeleton, so every later change ships through the same path.
 
