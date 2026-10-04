@@ -2,7 +2,10 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-const domGlobals = Object.keys(globals.browser).filter((name) => !(name in globals.es2021));
+const allowedInSim = new Set(['structuredClone']);
+const domGlobals = Object.keys(globals.browser).filter(
+  (name) => !(name in globals.es2021) && !allowedInSim.has(name),
+);
 
 export default tseslint.config(
   { ignores: ['dist', 'node_modules', 'playwright-report', 'test-results'] },
@@ -54,6 +57,27 @@ export default tseslint.config(
         {
           object: 'Date',
           property: 'now',
+          message: 'The sim must not read the clock; time is ticks.',
+        },
+        ...domGlobals.map((name) => ({
+          object: 'globalThis',
+          property: name,
+          message: 'src/sim must not use the DOM or browser APIs.',
+        })),
+      ],
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            "ImportExpression[source.value=/(^|\\/)(render|ui)(\\/|$)|^three(\\/|$)/]",
+          message: 'src/sim must not import from render, ui or three.',
+        },
+        {
+          selector: "ImportExpression:not([source.type='Literal'])",
+          message: 'Dynamic import specifiers in src/sim must be string literals so the boundary rule can check them.',
+        },
+        {
+          selector: "NewExpression[callee.name='Date'][arguments.length=0]",
           message: 'The sim must not read the clock; time is ticks.',
         },
       ],
