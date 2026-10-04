@@ -84,12 +84,21 @@ src/
 
 ### Reviews
 
-- Every PR gets an adversarial review by a Claude agent before it merges. Use the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`), launched as a fresh subagent so it does not share the author's context. Never self-review inline.
-- Give it the PR number, the base branch and the ticket number. For a stack, review each PR against its own diff.
-- It hunts for bugs, regressions, mismatches with the ticket's "Done when" list, violations of this file, weak tests, inconsistencies, and CI/CD or security problems. It is read-only and returns a report.
-- Post the report on the PR as a comment headed `Adversarial review (Claude)`.
-- Fix every `blocker` and `major` finding, or reply on the PR with the reason for declining. Never dismiss a finding without a reason. Re-run the reviewer after fixes that touch the findings.
-- A PR with unresolved blockers does not merge. Review is not a substitute for CI: `ci` and `PR checks` must still pass.
+Every PR gets an adversarial review before it merges, scaled to its risk so reviews stay affordable. Reviewers are Claude subagents, never the author's own context.
+
+- **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
+- **Tiers:**
+  - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
+  - **Standard** (`sonnet`, the agent's default): most PRs.
+  - **Deep** (`opus`, pass `model: opus`): workflows, `src/sim`, secrets, permissions, deploy or release, determinism, rule changes in this file. When unsure, take the higher tier.
+- **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
+- **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
+- **Stacks:** a stack of small PRs in the same area gets one reviewer that reports per PR. Deep-tier PRs are reviewed on their own.
+- **Output limits:** at most 5 findings (blockers and majors first) plus at most 5 one-line minors, and a verdict. The report starts with `Reviewed commit: <sha>`.
+- **Re-review:** after fixes, send only the earlier findings and the diff since the reviewed commit.
+- **Post** the report on the PR as a comment headed `Adversarial review (Claude)`.
+- **Resolve:** fix every `blocker` and `major`, or reply on the PR with the reason for declining. Never dismiss a finding without a reason. A PR with unresolved blockers does not merge.
+- **Not a substitute for CI.** `ci` and `PR checks` must still pass. Move any finding a tool could catch (an ESLint rule, `actionlint`, a script) into CI, so the reviewer does not pay for it again.
 - Other reviewers (a human, or Copilot when quota allows) are welcome extras, never the only review.
 
 ### Stacked PRs

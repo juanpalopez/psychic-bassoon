@@ -17,7 +17,7 @@ Closes #
 - [ ] No hard-coded colours (CSS tokens only) and no `Math.random()` in the sim
 - [ ] New third-party assets are CC0 and recorded in `assets/CREDITS.md`
 - [ ] Docs updated if behaviour or rules changed
-- [ ] Adversarial review (Claude `adversarial-reviewer`) run and posted; blockers and majors fixed or answered
+- [ ] Adversarial review done at the right tier (see `docs/REVIEW-CHECKLIST.md`) and posted, or skipped by rule; blockers and majors fixed or answered
 
 ## Notes for the reviewer
 
