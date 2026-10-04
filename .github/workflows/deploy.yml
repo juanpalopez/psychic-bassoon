@@ -13,12 +13,36 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
+  check-tip:
+    name: check-tip
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    outputs:
+      is_tip: ${{ steps.tip.outputs.is_tip }}
+    env:
+      REPO: ${{ github.repository }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Only deploy the current tip of main
+        id: tip
+        run: |
+          tip=$(gh api "repos/${REPO}/commits/main" --jq .sha)
+          if [ "$tip" = "$HEAD_SHA" ]; then
+            echo "is_tip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_tip=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Skipping deploy: ${HEAD_SHA} is not the tip of main (${tip}). A re-run of an old CI run must not roll the site back."
+          fi
+
   deploy:
     name: deploy
-    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    needs: check-tip
+    if: needs.check-tip.outputs.is_tip == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
