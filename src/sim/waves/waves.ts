@@ -1,8 +1,8 @@
 import {RULES, WAVES} from '../../content';
 import type {EnemyId} from '../../content';
-import {spawnEnemy} from '../combat/combat';
+import {spawnEnemy} from '../combat';
 import type {GameState, SpawnOrder} from '../game';
-import {TICK_SECONDS} from '../game/clock';
+import {TICK_SECONDS} from '../time';
 import {nextFloat} from '../rng';
 import type {Rng} from '../rng';
 
