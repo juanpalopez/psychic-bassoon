@@ -9,7 +9,15 @@ const domGlobals = Object.keys(globals.browser).filter(
 );
 
 export default tseslint.config(
-  {ignores: ['dist', 'node_modules', 'playwright-report', 'test-results']},
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'playwright-report',
+      'test-results',
+      '.claude',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
@@ -102,6 +110,12 @@ export default tseslint.config(
           name,
           message: 'src/sim must not use the DOM or browser APIs.',
         })),
+        {
+          // Every route to Math.random, Date or the DOM through the global
+          // object (member access, computed access, destructuring, aliases).
+          name: 'globalThis',
+          message: 'src/sim must not use globalThis.',
+        },
       ],
       'no-restricted-properties': [
         'error',
@@ -135,6 +149,15 @@ export default tseslint.config(
         },
         {
           selector: "NewExpression[callee.name='Date'][arguments.length=0]",
+          message: 'The sim must not read the clock; time is ticks.',
+        },
+        {
+          selector: "CallExpression[callee.name='Date']",
+          message: 'The sim must not read the clock; time is ticks.',
+        },
+        {
+          selector:
+            "MemberExpression[object.name='globalThis'][property.name='Date']",
           message: 'The sim must not read the clock; time is ticks.',
         },
       ],
