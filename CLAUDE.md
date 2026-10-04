@@ -118,13 +118,33 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 
 ## Tickets
 
-Work is tracked in the GitHub Project "Project Slag" (codename for Scrapline). Every ticket follows this format:
+Work is tracked in the GitHub Project "Project Slag" (codename for Scrapline): <https://github.com/users/juanpalopez/projects/4> (owner `juanpalopez`, project number 4). The board is the source of truth for progress. Every ticket follows this format:
 
 - **Title:** `[Phase N] Imperative summary`, for example `[Phase 1] Seeded PRNG (mulberry32) with tests`. Epics read `[Phase N] Epic: name`.
 - **Labels:** exactly one `phase-N`, one area label (`sim`, `render`, `ui`, `content`, `infra`, `docs`), plus `epic` for epics.
 - **Body:** a short description, the plan section it comes from, and a "Done when" list that includes the tests. A gate ticket says which phase gate it closes.
 - Add every ticket to the project board. Only create tickets for the current phase and the one after it; later phases stay as roadmap in `docs/PLAN.md`.
 - Reference the ticket in commits and PRs (`Closes #N`).
+
+### Tracking progress
+
+Keep the board and the tickets current as you work, not after the fact.
+
+- **Status flow:** `Todo` → `In Progress` when you start a ticket → `Done` when its PR merges. Only move a ticket to `Done` when its "Done when" list is met. Closing it by merging a PR with `Closes #N` is the normal path.
+- **Comment on the ticket** when work starts (branch name) and when a PR opens (PR link plus what you verified and how). Note anything you could not verify.
+- **One ticket per PR.** If part of a ticket can only be checked after merge (a deploy, a release tag), leave it open and say what remains in a comment. Use `Refs #N` instead of `Closes #N` in that case.
+- **Blockers:** comment on the ticket and tell the user (missing file, repo setting, a decision). Don't work around them silently.
+- **Gate tickets** close a phase gate: close one only when the matching gate checklist in `docs/PLAN.md` is fully met, and report it before starting the next phase.
+- **Scope changes:** if work reveals a missing ticket, create it in the standard format and add it to the board rather than widening the current one.
+
+Moving a ticket's status with the CLI (Status field options: Todo, In Progress, Done):
+
+```bash
+gh project item-list 4 --owner juanpalopez --format json      # find the item id by issue number
+gh project field-list 4 --owner juanpalopez --format json     # Status field id and option ids
+gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
+  --field-id <STATUS_FIELD_ID> --single-select-option-id <OPTION_ID>
+```
 
 ## Naming
 
