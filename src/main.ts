@@ -1,3 +1,4 @@
+import {GRID} from './content';
 import {createScene} from './render/scene';
 
 const container = document.getElementById('app');
@@ -5,4 +6,4 @@ if (!container) {
   throw new Error('Missing #app container');
 }
 
-createScene(container);
+createScene(container, GRID);
