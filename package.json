@@ -16,7 +16,8 @@
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "check:size": "node scripts/check-size.mjs"
   },
   "dependencies": {
     "three": "0.186.1"
