@@ -33,6 +33,9 @@ export const RULES = {
   /** Calling a wave early pays `earlyCallBase + wave * earlyCallPerWave`. */
   earlyCallBase: 10,
   earlyCallPerWave: 2,
+  /** Clearing a wave pays `waveClearBase + wave * waveClearPerWave`. */
+  waveClearBase: 15,
+  waveClearPerWave: 2,
   /** Seconds a Quench Coil slow lasts after the last pulse. */
   quenchSlowSeconds: 1.4,
   /** Rivet Mortar shell speed, cells per second. */
