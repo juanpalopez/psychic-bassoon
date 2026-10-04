@@ -81,6 +81,31 @@ src/
   - Summary is imperative, lowercase, no trailing period, at most 72 characters.
   - Release notes are generated from these messages, so write them for a reader of the changelog.
 - Pull requests: the title follows the same format (PRs are squash-merged, so the title becomes the commit). Fill in the PR template and reference the ticket (`Closes #N`). The `PR checks` workflow rejects non-conforming titles and commits.
+
+### Reviews
+
+Every PR gets an adversarial review before it merges, scaled to its risk so reviews stay affordable. Reviewers are Claude subagents, never the author's own context.
+
+- **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
+- **Tiers:**
+  - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
+  - **Standard** (`sonnet`, the agent's default): most PRs.
+  - **Deep** (`opus`, pass `model: opus`): workflows, `src/sim`, secrets, permissions, deploy or release, determinism, rule changes in this file. When unsure, take the higher tier.
+- **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
+- **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
+- **Stacks:** review a stack as a whole in one pass (one reviewer, a report per PR, grouped by tier), not one reviewer per PR. The rules are in `docs/REVIEW-CHECKLIST.md`.
+- **Output limits:** at most 5 findings (blockers and majors first) plus at most 5 one-line minors, and a verdict. The report starts with `Reviewed commit: <sha>`.
+- **Re-review:** after fixes, send only the earlier findings and the diff since the reviewed commit.
+- **Post** the report on the PR as a comment headed `Adversarial review (Claude)`.
+- **Resolve:** fix every `blocker` and `major`, or reply on the PR with the reason for declining. Never dismiss a finding without a reason. A PR with unresolved blockers does not merge.
+- **Not a substitute for CI.** `ci` and `PR checks` must still pass. Move any finding a tool could catch (an ESLint rule, `actionlint`, a script) into CI, so the reviewer does not pay for it again.
+- Other reviewers (a human, or Copilot when quota allows) are welcome extras, never the only review.
+
+### Stacked PRs
+
+- Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
+- Open each PR with `gh pr create` using a conforming title (`gh stack submit --auto` generates titles that fail `PR checks`), then run `gh stack submit` to link them.
+- Merge from the bottom of the stack up, and run `gh stack sync` afterwards.
 - Assets: only compressed GLB in `public/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Use CC0 assets only unless asked otherwise.
 - Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets follow what the packs can supply; gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it.
 
