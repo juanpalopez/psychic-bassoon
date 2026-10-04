@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _As of 2026-10-04. Living version: the Claude doc of the same name._
 
-> **Status:** Phase 0 is nearly done. Live: https://juanpalopez.github.io/psychic-bassoon/. Done: scaffold, lint and style, tests, CI, deploy, releases, Dependabot, branch protection and the README. Open: the optional hardening in #42. Phase 1 starts after the Phase 0 gate is reported.
+> **Status:** Phase 0 is complete and its gate passes (see the checklist under Phase 0). Live: https://juanpalopez.github.io/psychic-bassoon/. Next: Phase 1, the simulation port, starting with ticket #7 (seeded PRNG), test-first, using `prototype/scrapline.html` as the reference for rules and numbers.
 
 ## Vision
 
@@ -249,7 +249,7 @@ Each phase ends with a gate that must pass before the next starts.
 
 The table above is the summary. Each phase below lists its scope, out-of-scope items, work breakdown, tests and gate checklist. Work one phase at a time: finish and report the gate before starting the next. Tickets are on the Project Slag board for Phases 0–2 only; Phases 3–5 stay as roadmap here until they are next up. Ticket titles use `[Phase N] …` and carry a `phase-N` label (format in `CLAUDE.md`).
 
-### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30, #42, #48–#49)
+### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30, #42, #48–#49): complete
 
 **Goal:** a deployable skeleton, so every later change ships through the same path.
 
