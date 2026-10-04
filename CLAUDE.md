@@ -93,7 +93,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
   - **Deep** (`opus`, pass `model: opus`): workflows, `src/sim`, secrets, permissions, deploy or release, determinism, rule changes in this file. When unsure, take the higher tier.
 - **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
 - **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
-- **Stacks:** a stack of small PRs in the same area gets one reviewer that reports per PR. Deep-tier PRs are reviewed on their own.
+- **Stacks:** review a stack as a whole in one pass (one reviewer, a report per PR, grouped by tier), not one reviewer per PR. The rules are in `docs/REVIEW-CHECKLIST.md`.
 - **Output limits:** at most 5 findings (blockers and majors first) plus at most 5 one-line minors, and a verdict. The report starts with `Reviewed commit: <sha>`.
 - **Re-review:** after fixes, send only the earlier findings and the diff since the reviewed commit.
 - **Post** the report on the PR as a comment headed `Adversarial review (Claude)`.

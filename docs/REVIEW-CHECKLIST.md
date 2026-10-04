@@ -16,6 +16,19 @@ When unsure, take the higher tier.
 
 Run `gh pr checks <N>` first. Lint, types, unit tests, build, bundle size, the smoke test and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
 
+## Review a stack as a whole
+
+A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per PR. This avoids paying for the same context seven times and catches problems that only show across layers.
+
+- **Launch once.** One reviewer gets all the PR numbers, bottom to top, with each PR's base, head commit and ticket. Read the checklist and shared context once.
+- **Per-PR diffs.** Review each PR's own diff (its base to its head), in stack order, never the cumulative diff.
+- **Group by tier.** All deep-tier PRs in the stack go in one deep review; the rest go in one standard review. A single-tier stack is one review.
+- **Cross-PR checks.** Look for what only a whole-stack view shows: a higher layer breaking an assumption of a lower one, duplicated or contradictory work, a ticket's requirement landing in the wrong PR, and config drift between layers (versions, scripts, paths, workflow names).
+- **Limits.** The tool-call limit of the tier applies to the whole review, plus 4 more calls per extra PR. Output limits apply per PR, plus at most 3 stack-level findings.
+- **Report.** One section per PR (`Reviewed commit`, findings, verdict), then a short `Stack-level` section.
+- **Posting.** Post each PR's section as a comment on that PR, and the stack-level section on the top PR.
+- **Fixes and re-review.** Fix a finding in the PR it belongs to, then `gh stack sync`. Re-review only the changed PRs and the ones above them, as a delta.
+
 ## What to check
 
 1. **Ticket.** Compare the diff with the ticket's "Done when". List unmet or unverified items and any work from a later phase.

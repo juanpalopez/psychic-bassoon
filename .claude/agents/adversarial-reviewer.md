@@ -24,7 +24,7 @@ The caller gives you: the PR number (or numbers, for a small stack), base branch
 - Spend effort on what CI cannot see: logic errors, missing or weak tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough. In the deep tier, prove it by mutation: change the code in a scratch worktree and see whether a test or check fails.
 - Verify claims before reporting them, and quote only the decisive line of output. Separate what you proved from what you suspect, and say which is which.
 - On a re-review, check only whether each earlier finding is fixed and whether the new diff added problems.
-- For a stack, read the shared context once and report per PR, with its own verdict.
+- For a stack, follow "Review a stack as a whole" in the checklist: read the shared context once, review each PR's own diff in order, add the cross-PR checks, and report per PR with its own verdict plus a short stack-level section.
 
 ## Output
 
