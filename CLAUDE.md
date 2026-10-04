@@ -6,7 +6,7 @@ Robot tower defense for mobile browsers: 3D low-poly remake of a 2D canvas proto
 - Lore and naming: `docs/PLAN.md` → Lore (Foundry Nine, FOREMAN, Engineer Quell)
 - Original prototype (rules and balance reference): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `docs/PLAN.md` and `prototype/scrapline.html` (Phase 0, ticket #6), `src/sim/rng.ts` (Phase 1), `src/render/models/`, `src/ui/tokens.css` and `docs/art/` (Phase 2), `assets/CREDITS.md` and `assets-src/` (with the first third-party asset).
+> Paths named in this file that do not exist yet are created in the phase that needs them: `src/sim/rng.ts` (Phase 1), `src/render/models/`, `src/ui/tokens.css` and `docs/art/` (Phase 2), `assets/CREDITS.md` and `assets-src/` (with the first third-party asset).
 
 ## Commands
 

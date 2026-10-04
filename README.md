@@ -5,7 +5,7 @@ A robot tower defense for mobile browsers. You are Engineer Quell, the last nigh
 It is a 3D low-poly remake of a 2D canvas prototype, built with Three.js and TypeScript, and it plays in portrait with one thumb.
 
 - **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/
-- **Plan and roadmap:** [`PLAN.md`](PLAN.md) (phases 0–5, each closed by a gate)
+- **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–5, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
 > **Status:** Phase 0 (repo and pipeline). The page shows an empty 3D scene. The game rules arrive in Phase 1 and the playable greybox in Phase 2.
