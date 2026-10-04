@@ -8,6 +8,8 @@ export const CAMERA = {
   minDistance: 7,
   /** Free space around the board when it is fitted to the screen, in cells. */
   fitMarginCells: 0.5,
+  /** The near edge of a tilted board is wider on screen than its centre. */
+  fitPerspectiveSlack: 1.25,
 } as const;
 
 /** Where the camera looks (on the ground plane) and how far away it is. */
@@ -50,7 +52,8 @@ export function fitDistance(view: View, bounds: Bounds): number {
   const aspect = view.width / Math.max(view.height, 1);
   const width = bounds.maxX - bounds.minX + CAMERA.fitMarginCells * 2;
   const depth = bounds.maxZ - bounds.minZ + CAMERA.fitMarginCells * 2;
-  const forWidth = width / (2 * HALF_FOV_TAN * aspect);
+  const forWidth =
+    (width * CAMERA.fitPerspectiveSlack) / (2 * HALF_FOV_TAN * aspect);
   const forDepth = (depth * SIN_PITCH) / (2 * HALF_FOV_TAN);
   return Math.max(forWidth, forDepth);
 }
