@@ -4,6 +4,7 @@ import {
   ENEMIES,
   ENEMY_IDS,
   GRID,
+  MAP,
   RULES,
   TOWERS,
   TOWER_IDS,
@@ -108,6 +109,19 @@ describe('grid and rules', () => {
     expect(RULES.rocketSpeed).toBe(5.5);
     expect(RULES.arcChainRadius).toBe(1.6);
     expect(RULES.arcChainFalloff).toBe(0.8);
+  });
+});
+
+describe('map generation', () => {
+  it('matches the prototype path generator', () => {
+    expect(MAP).toEqual({
+      minExtraCells: 16,
+      maxAttempts: 300,
+      minRunDown: 2,
+      runDownVariance: 2,
+      minTurnColumns: 3,
+      startMargin: 1,
+    });
   });
 });
 
