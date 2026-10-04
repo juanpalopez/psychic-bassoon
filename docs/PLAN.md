@@ -1,8 +1,10 @@
 # Scrapline: 3D Remake Plan
 
+Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its tracker board use Scrapline and Project Slag.
+
 _As of 2026-10-04. Living version: the Claude doc of the same name._
 
-> **Status:** Phase 0 is nearly done. Live: https://juanpalopez.github.io/psychic-bassoon/. Done: scaffold, lint and style, tests, CI, deploy, releases, Dependabot, branch protection and the README. Open: ticket #6 (move this plan into `docs/` and add the prototype, which is still missing) and the optional hardening in #42. Phase 1 starts after the Phase 0 gate is reported.
+> **Status:** Phase 0 is nearly done. Live: https://juanpalopez.github.io/psychic-bassoon/. Done: scaffold, lint and style, tests, CI, deploy, releases, Dependabot, branch protection and the README. Open: the optional hardening in #42. Phase 1 starts after the Phase 0 gate is reported.
 
 ## Vision
 
@@ -270,7 +272,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 - [x] CI is green; a deliberate bad import in `src/sim` fails lint.
 - [x] `main` is protected: a PR with a failing check or a non-conforming title cannot merge (a probe PR with a bad title was `BLOCKED`; the probe was closed, not merged).
 - [x] A test tag produces a GitHub Release (then delete the test release and tag). Also checked: a malformed tag and an off-`main` tag both fail the `guard` job.
-- [ ] Every path that `CLAUDE.md` and the docs reference as existing exists. Paths for later phases are marked in `CLAUDE.md` as created in that phase. Open: `docs/PLAN.md` and `prototype/scrapline.html` (ticket #6).
+- [x] Every path that `CLAUDE.md` and the docs reference as existing exists. Paths for later phases are marked in `CLAUDE.md` as created in that phase. `docs/PLAN.md` and `prototype/scrapline.html` landed with ticket #6.
 
 ### Phase 1 · Simulation port (tickets #7–#13)
 
