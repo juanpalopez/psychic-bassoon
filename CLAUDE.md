@@ -98,8 +98,8 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
 - **Tiers:**
   - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
-  - **Standard** (`sonnet`, the agent's default): most PRs.
-  - **Deep** (`opus`, pass `model: opus`): workflows, `src/sim`, secrets, permissions, deploy or release, determinism, rule changes in this file. When unsure, take the higher tier.
+  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic `src/sim` modules (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
+  - **Deep** (`opus`, pass `model: opus`): workflows, determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling), secrets, permissions, deploy or release, rule changes in this file. When unsure, take the higher tier.
 - **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
 - **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
 - **Stacks:** review a stack as a whole in one pass (one reviewer, a report per PR, grouped by tier), not one reviewer per PR. The rules are in `docs/REVIEW-CHECKLIST.md`.
