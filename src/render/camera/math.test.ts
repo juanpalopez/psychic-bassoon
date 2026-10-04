@@ -72,11 +72,18 @@ describe('clampCamera', () => {
   });
 
   it('stops zooming out when cells would be narrower than the minimum', () => {
-    const out = clampCamera(state({distance: 500}), PHONE, BOUNDS);
-    expect(out.distance).toBeCloseTo(maxDistance(PHONE), 9);
-    expect(pixelsPerUnit(out.distance, PHONE)).toBeGreaterThanOrEqual(
+    const tall: View = {width: 1600, height: 900};
+    const out = clampCamera(state({distance: 500}), tall, BOUNDS);
+    expect(out.distance).toBeCloseTo(maxDistance(tall), 9);
+    expect(pixelsPerUnit(out.distance, tall)).toBeGreaterThanOrEqual(
       CAMERA.minCellPixels - 1e-9
     );
+  });
+
+  it('lets a small screen zoom out far enough to fit the whole board', () => {
+    const out = clampCamera(state({distance: 500}), PHONE, BOUNDS);
+    expect(out.distance).toBeCloseTo(fitDistance(PHONE, BOUNDS), 9);
+    expect(out.distance).toBeGreaterThan(maxDistance(PHONE));
   });
 
   it('stops zooming in at the minimum distance', () => {

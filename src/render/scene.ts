@@ -1,6 +1,6 @@
 import {PerspectiveCamera, Scene, WebGLRenderer} from 'three';
 import {attachCameraControls} from './camera/controls';
-import {CAMERA, clampCamera, fitDistance, maxDistance} from './camera/math';
+import {CAMERA, clampCamera, fitDistance} from './camera/math';
 import type {Bounds, CameraState, View} from './camera/math';
 
 const MAX_PIXEL_RATIO = 2;
@@ -84,10 +84,10 @@ export function createScene(container: HTMLElement, board: Board): SceneHandle {
     apply(rig);
   };
   resize();
-  // Start fitted to the whole board, as far out as the pixel limit allows.
+  // Start fitted to the whole board.
   apply({
     ...rig,
-    distance: Math.min(fitDistance(view(), bounds), maxDistance(view())),
+    distance: fitDistance(view(), bounds),
   });
   window.addEventListener('resize', resize);
 

@@ -11,12 +11,12 @@ test('mounts a WebGL canvas sized to the viewport', async ({page}) => {
 
   await page.goto('/');
 
-  const canvas = page.locator('#app canvas');
+  const canvas = page.locator('#stage canvas');
   await expect(canvas).toBeVisible();
 
   const state = await page.evaluate(() => {
-    const canvasEl = document.querySelector<HTMLCanvasElement>('#app canvas');
-    const container = document.getElementById('app');
+    const canvasEl = document.querySelector<HTMLCanvasElement>('#stage canvas');
+    const container = document.getElementById('stage');
     if (!canvasEl || !container) return null;
     return {
       width: canvasEl.width,
