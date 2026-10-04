@@ -117,6 +117,12 @@ export type GameEvent =
       readonly bonus: number;
     }
   | {
+      readonly type: 'enemySpawned';
+      readonly enemyId: number;
+      readonly robot: EnemyId;
+      readonly wave: number;
+    }
+  | {
       readonly type: 'enemyKilled';
       readonly enemyId: number;
       readonly reward: number;

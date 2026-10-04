@@ -75,6 +75,10 @@ describe('spawnEnemy', () => {
       leak: ENEMIES.hauler.leak,
     });
     expect(game.enemies).toEqual([a, b]);
+    expect(game.events).toEqual([
+      {type: 'enemySpawned', enemyId: a.id, robot: 'hauler', wave: 10},
+      {type: 'enemySpawned', enemyId: b.id, robot: 'hauler', wave: 10},
+    ]);
   });
 });
 
