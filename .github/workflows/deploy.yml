@@ -78,3 +78,19 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Check the live page
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          for attempt in 1 2 3 4 5 6; do
+            status=$(curl -s -o page.html -w '%{http_code}' "$PAGE_URL" || true)
+            if [ "$status" = "200" ] && grep -q "src=\"${BASE_PATH}assets/" page.html; then
+              echo "Live page OK: $PAGE_URL"
+              exit 0
+            fi
+            echo "Attempt $attempt: HTTP $status, expected assets under ${BASE_PATH} not found yet"
+            sleep 10
+          done
+          echo "::error::The live page at $PAGE_URL did not serve the expected build."
+          exit 1
