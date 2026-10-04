@@ -1,0 +1,77 @@
+import {InstancedMesh, Matrix4, Vector3} from 'three';
+import {describe, expect, it} from 'vitest';
+import {GRID} from '../content';
+import {generateMap} from '../sim';
+import {createMapView, toWorld} from './map';
+
+function cellsOf(mesh: InstancedMesh): string[] {
+  const m = new Matrix4();
+  const p = new Vector3();
+  return Array.from({length: mesh.count}, (_, i) => {
+    mesh.getMatrixAt(i, m);
+    p.setFromMatrixPosition(m);
+    return `${p.x - 0.5},${p.z - 0.5}`;
+  }).sort();
+}
+
+describe('createMapView', () => {
+  const map = generateMap(42);
+  const view = createMapView(map);
+  const find = (name: string) => {
+    const found = view.group.getObjectByName(name);
+    if (!(found instanceof InstancedMesh)) throw new Error(`no ${name}`);
+    return found;
+  };
+
+  it('draws one tile per cell: the same plates and belt as the sim map', () => {
+    const plates: string[] = [];
+    const belt: string[] = [];
+    map.tiles.forEach((line, row) =>
+      line.forEach((tile, col) =>
+        (tile === 'plate' ? plates : belt).push(`${col},${row}`)
+      )
+    );
+    expect(cellsOf(find('plates'))).toEqual(plates.sort());
+    expect(cellsOf(find('belt'))).toEqual(belt.sort());
+    expect(find('plates').count + find('belt').count).toBe(
+      GRID.cols * GRID.rows
+    );
+  });
+
+  it('shows the same map for the same seed', () => {
+    const again = createMapView(generateMap(42));
+    const get = (v: typeof view, name: string) => {
+      const mesh = v.group.getObjectByName(name);
+      return mesh instanceof InstancedMesh ? cellsOf(mesh) : [];
+    };
+    expect(get(again, 'belt')).toEqual(get(view, 'belt'));
+    expect(get(again, 'plates')).toEqual(get(view, 'plates'));
+  });
+
+  it('puts the spawn marker above the first path cell and the core on the last', () => {
+    const first = map.path[0];
+    const last = map.path.at(-1);
+    const spawn = view.group.getObjectByName('spawn');
+    const core = view.group.getObjectByName('core');
+    expect(spawn?.position.x).toBe((first?.col ?? 0) + 0.5);
+    expect(spawn?.position.z).toBeLessThan(0.5);
+    expect(core?.position.x).toBe((last?.col ?? 0) + 0.5);
+    expect(core?.position.z).toBe((last?.row ?? 0) + 0.5);
+  });
+
+  it('frees its geometry and materials on dispose', () => {
+    let disposed = 0;
+    view.group.traverse(o => {
+      const mesh = o as InstancedMesh;
+      mesh.geometry?.addEventListener('dispose', () => disposed++);
+    });
+    view.dispose();
+    expect(disposed).toBeGreaterThan(0);
+  });
+});
+
+describe('toWorld', () => {
+  it('maps sim x to world x and sim y to world z, on the ground', () => {
+    expect(toWorld({x: 2.5, y: 7.5})).toEqual({x: 2.5, y: 0, z: 7.5});
+  });
+});
