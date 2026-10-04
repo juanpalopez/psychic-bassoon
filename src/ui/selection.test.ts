@@ -1,0 +1,98 @@
+import {describe, expect, it} from 'vitest';
+import {createGame, submit, tick} from '../sim';
+import type {GameState} from '../sim';
+import {
+  buildCommand,
+  reconcileSelection,
+  sellCommand,
+  selectAt,
+  upgradeCommand,
+} from './selection';
+import type {Selection} from './selection';
+
+const NONE: Selection = {kind: 'none'};
+
+function withTower(): {game: GameState; col: number; row: number} {
+  const game = createGame(42);
+  let spot = {col: 0, row: 0};
+  game.map.tiles.forEach((line, row) =>
+    line.forEach((tile, col) => {
+      if (tile === 'plate' && spot.col === 0 && spot.row === 0)
+        spot = {col, row};
+    })
+  );
+  submit(game, {type: 'build', tower: 'welder', ...spot});
+  tick(game);
+  return {game, ...spot};
+}
+
+describe('selectAt', () => {
+  it('selects a free plate', () => {
+    const game = createGame(42);
+    const spot = game.map.tiles.flatMap((l, row) =>
+      l.flatMap((t, col) => (t === 'plate' ? [{col, row}] : []))
+    )[0];
+    expect(selectAt(game, spot)).toEqual({kind: 'plate', ...spot});
+  });
+
+  it('selects the tower standing on a plate', () => {
+    const {game, col, row} = withTower();
+    expect(selectAt(game, {col, row})).toEqual({kind: 'tower', id: 0});
+  });
+
+  it('selects nothing on the belt, off the board, or with no tap', () => {
+    const game = createGame(42);
+    const belt = game.map.path[2];
+    expect(selectAt(game, belt)).toEqual(NONE);
+    expect(selectAt(game, undefined)).toEqual(NONE);
+  });
+});
+
+describe('reconcileSelection', () => {
+  it('keeps a selected tower that still stands', () => {
+    const {game} = withTower();
+    const sel: Selection = {kind: 'tower', id: 0};
+    expect(reconcileSelection(game, sel)).toBe(sel);
+  });
+
+  it('drops a selected tower that was sold', () => {
+    const {game} = withTower();
+    submit(game, {type: 'sell', towerId: 0});
+    tick(game);
+    expect(reconcileSelection(game, {kind: 'tower', id: 0})).toEqual(NONE);
+  });
+
+  it('turns a selected plate into the tower built on it', () => {
+    const {game, col, row} = withTower();
+    expect(reconcileSelection(game, {kind: 'plate', col, row})).toEqual({
+      kind: 'tower',
+      id: 0,
+    });
+  });
+});
+
+describe('commands from a selection', () => {
+  it('builds on the selected plate only', () => {
+    expect(buildCommand({kind: 'plate', col: 3, row: 4}, 'welder')).toEqual({
+      type: 'build',
+      tower: 'welder',
+      col: 3,
+      row: 4,
+    });
+    expect(buildCommand(NONE, 'welder')).toBeUndefined();
+    expect(buildCommand({kind: 'tower', id: 1}, 'welder')).toBeUndefined();
+  });
+
+  it('upgrades and sells the selected tower only', () => {
+    expect(upgradeCommand({kind: 'tower', id: 7})).toEqual({
+      type: 'upgrade',
+      towerId: 7,
+    });
+    expect(sellCommand({kind: 'tower', id: 7})).toEqual({
+      type: 'sell',
+      towerId: 7,
+    });
+    expect(upgradeCommand(NONE)).toBeUndefined();
+    expect(sellCommand({kind: 'plate', col: 1, row: 1})).toBeUndefined();
+  });
+});
