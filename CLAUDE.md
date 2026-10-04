@@ -85,7 +85,7 @@ src/
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.
-  - Summary is imperative, lowercase, no trailing period, at most 72 characters.
+  - Summary is imperative, lowercase, no trailing period, at most 72 characters. The one exception is Dependabot's `Bump …` wording.
   - Release notes are generated from these messages, so write them for a reader of the changelog.
 - Pull requests: the title follows the same format (PRs are squash-merged, so the title becomes the commit). Fill in the PR template and reference the ticket (`Closes #N`). The `PR checks` workflow rejects non-conforming titles and commits.
 
