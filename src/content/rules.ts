@@ -17,6 +17,12 @@ export const MAP = {
 
 /** Economy and combat constants ported from the 2D prototype. */
 export const RULES = {
+  /** Fixed simulation rate. Game speed adds ticks, never a bigger tick. */
+  tickRate: 30,
+  /** A slow frame is clamped to this many seconds before it is simulated. */
+  maxFrameSeconds: 0.05,
+  /** Fastest game speed the player can pick (1×, 2×, 3×). */
+  maxGameSpeed: 3,
   startCredits: 180,
   startLives: 20,
   towerLevels: 3,

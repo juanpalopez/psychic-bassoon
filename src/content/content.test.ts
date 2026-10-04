@@ -99,6 +99,12 @@ describe('grid and rules', () => {
     expect(RULES.minDamageFraction).toBe(0.25);
   });
 
+  it('runs on a fixed 30 Hz tick with the prototype frame clamp', () => {
+    expect(RULES.tickRate).toBe(30);
+    expect(RULES.maxFrameSeconds).toBe(0.05);
+    expect(RULES.maxGameSpeed).toBe(3);
+  });
+
   it('matches the prototype early-call bonus', () => {
     expect(RULES.earlyCallBase).toBe(10);
     expect(RULES.earlyCallPerWave).toBe(2);
