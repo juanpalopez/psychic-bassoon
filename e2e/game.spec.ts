@@ -42,8 +42,11 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
     .poll(() =>
       page.evaluate(
         () =>
-          (window as unknown as {scrapline: {game: {enemies: unknown[]}}})
-            .scrapline.game.enemies.length
+          (
+            window as unknown as {
+              scrapline: {app: {game: {enemies: unknown[]}}};
+            }
+          ).scrapline.app.game.enemies.length
       )
     )
     .toBeGreaterThan(0);

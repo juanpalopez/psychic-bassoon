@@ -26,6 +26,8 @@ export interface App {
   restart(seed: number): void;
   /** Events from every tick run this frame, for toasts and effects. */
   readonly frameEvents: readonly GameEvent[];
+  /** What the renderer drew last frame (draw calls, triangles). */
+  stats(): {calls: number; triangles: number};
   /** Called once a frame, after the sim and the scene are up to date. */
   subscribe(listener: () => void): void;
 }
@@ -128,6 +130,10 @@ export function createApp(container: HTMLElement, seed: number): App {
       return speed;
     },
     frameEvents,
+    stats() {
+      const {calls, triangles} = scene.renderer.info.render;
+      return {calls, triangles};
+    },
     get paused() {
       return paused;
     },

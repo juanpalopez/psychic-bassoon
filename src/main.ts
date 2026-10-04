@@ -1,4 +1,5 @@
 import {createApp} from './app';
+import {positionAt, spawnEnemy} from './sim';
 import {createAudio, soundFor} from './ui/audio';
 import {createHud} from './ui/hud';
 
@@ -42,5 +43,24 @@ app.subscribe(() => {
 
 // `?debug` exposes the app for the end-to-end and performance checks.
 if (new URLSearchParams(location.search).has('debug')) {
-  (window as unknown as {scrapline: typeof app}).scrapline = app;
+  const hook = {
+    app,
+    /** Puts `count` robots on the route, for the performance check. */
+    crowd(count: number): void {
+      const types = ['skitter', 'hauler', 'smelter', 'overseer'] as const;
+      for (let i = 0; i < count; i++) {
+        const robot = spawnEnemy(
+          app.game,
+          types[i % types.length] ?? 'hauler',
+          1
+        );
+        robot.speed = 0;
+        robot.distance = (i / count) * app.game.route.total;
+        const at = positionAt(app.game.route, robot.distance);
+        robot.x = at.x;
+        robot.y = at.y;
+      }
+    },
+  };
+  (window as unknown as {scrapline: typeof hook}).scrapline = hook;
 }
