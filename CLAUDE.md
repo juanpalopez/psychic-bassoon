@@ -81,6 +81,19 @@ src/
   - Summary is imperative, lowercase, no trailing period, at most 72 characters.
   - Release notes are generated from these messages, so write them for a reader of the changelog.
 - Pull requests: the title follows the same format (PRs are squash-merged, so the title becomes the commit). Fill in the PR template and reference the ticket (`Closes #N`). The `PR checks` workflow rejects non-conforming titles and commits.
+
+### Reviews
+
+- Every PR gets a Copilot review as an adversarial second reviewer of generated code. Request it as soon as the PR is open: `gh pr edit <N> --add-reviewer @copilot`. For a stack, request it on every PR in the stack.
+- Read the findings before merging. Fix real problems, and reply on the thread to say why when you decline one. Never dismiss a finding without a reason.
+- If Copilot cannot review (for example the quota limit is reached), say so in the PR and run `/code-review` instead. A PR with no review from either does not merge.
+- Review is a second opinion, not a gate in place of CI: `ci` and `PR checks` must still pass.
+
+### Stacked PRs
+
+- Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
+- Open each PR with `gh pr create` using a conforming title (`gh stack submit --auto` generates titles that fail `PR checks`), then run `gh stack submit` to link them.
+- Merge from the bottom of the stack up, and run `gh stack sync` afterwards.
 - Assets: only compressed GLB in `public/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Use CC0 assets only unless asked otherwise.
 - Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets follow what the packs can supply; gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it.
 

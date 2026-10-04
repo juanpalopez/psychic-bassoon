@@ -17,6 +17,7 @@ Closes #
 - [ ] No hard-coded colours (CSS tokens only) and no `Math.random()` in the sim
 - [ ] New third-party assets are CC0 and recorded in `assets/CREDITS.md`
 - [ ] Docs updated if behaviour or rules changed
+- [ ] Copilot review requested (`gh pr edit <N> --add-reviewer @copilot`) and its findings addressed or answered
 
 ## Notes for the reviewer
 
