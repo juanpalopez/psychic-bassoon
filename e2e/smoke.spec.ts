@@ -1,11 +1,11 @@
-import { expect, test } from '@playwright/test';
+import {expect, test} from '@playwright/test';
 
 // Proves the canvas mounts, gets a WebGL2 context and is sized to the viewport
 // without console errors. It does not prove that frames are drawn.
-test('mounts a WebGL canvas sized to the viewport', async ({ page }) => {
+test('mounts a WebGL canvas sized to the viewport', async ({page}) => {
   const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  page.on('console', (message) => {
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => {
     if (message.type() === 'error') errors.push(message.text());
   });
 
@@ -21,7 +21,9 @@ test('mounts a WebGL canvas sized to the viewport', async ({ page }) => {
     return {
       width: canvasEl.width,
       height: canvasEl.height,
-      expectedWidth: Math.round(container.clientWidth * Math.min(window.devicePixelRatio, 2)),
+      expectedWidth: Math.round(
+        container.clientWidth * Math.min(window.devicePixelRatio, 2)
+      ),
       hasWebgl2: canvasEl.getContext('webgl2') !== null,
     };
   });

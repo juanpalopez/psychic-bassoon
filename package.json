@@ -12,12 +12,14 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint . && tsc --noEmit && tsc -p tsconfig.sim.json --noEmit",
+    "lint": "prettier --check . && eslint . && tsc --noEmit && tsc -p tsconfig.sim.json --noEmit",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "check:size": "node scripts/check-size.mjs"
+    "check:size": "node scripts/check-size.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "three": "0.186.1"
@@ -28,7 +30,9 @@
     "@types/node": "22.20.5",
     "@types/three": "0.186.0",
     "eslint": "10.12.0",
+    "eslint-config-prettier": "10.1.8",
     "globals": "17.13.0",
+    "prettier": "3.9.9",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
     "vite": "8.3.2",
