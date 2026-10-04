@@ -1,0 +1,70 @@
+import {RULES, TOWER_IDS, TOWERS} from '../../content';
+import type {Command, GameState} from '../game';
+import type {Cell, GameMap} from '../map';
+import {run} from './replay';
+import type {RunResult} from './replay';
+
+/** The bot acts once a second. */
+const ACT_EVERY_TICKS = RULES.tickRate;
+
+/**
+ * Plates ordered by how much of the route a level-1 Welder would cover, best
+ * first, then reading order. Uses squared distances, so no rounding drift.
+ */
+export function rankPlates(map: GameMap): Cell[] {
+  const reach = TOWERS.welder.range[0] ?? 0;
+  const scored: {cell: Cell; covered: number}[] = [];
+  map.tiles.forEach((line, row) =>
+    line.forEach((tile, col) => {
+      if (tile !== 'plate') return;
+      const covered = map.path.filter(p => {
+        const dx = p.col - col;
+        const dy = p.row - row;
+        return dx * dx + dy * dy <= reach * reach;
+      }).length;
+      scored.push({cell: {col, row}, covered});
+    })
+  );
+  return scored
+    .sort(
+      (a, b) =>
+        b.covered - a.covered ||
+        a.cell.row - b.cell.row ||
+        a.cell.col - b.cell.col
+    )
+    .map(s => s.cell);
+}
+
+/**
+ * A scripted player: once a second it launches the next wave when the field
+ * is clear, otherwise builds the next tower type on the best free plate, or
+ * upgrades the lowest-level tower. It only reads the game, like a UI would.
+ */
+export function createBot(map: GameMap): (game: GameState) => Command[] {
+  const plates = rankPlates(map);
+  return game => {
+    if (game.tick % ACT_EVERY_TICKS !== 0) return [];
+    if (!game.running) return [{type: 'launchWave'}];
+    const type = TOWER_IDS[game.towers.length % TOWER_IDS.length];
+    const free = plates.find(
+      c => !game.towers.some(t => t.col === c.col && t.row === c.row)
+    );
+    if (type && free && game.credits >= TOWERS[type].cost[0]) {
+      return [{type: 'build', tower: type, ...free}];
+    }
+    const weakest = [...game.towers]
+      .filter(t => t.level < RULES.towerLevels - 1)
+      .sort((a, b) => a.level - b.level || a.id - b.id)[0];
+    if (weakest) return [{type: 'upgrade', towerId: weakest.id}];
+    return [];
+  };
+}
+
+/** Plays a whole game with the scripted player, recording what it did. */
+export function playBot(seed: number, ticks: number): RunResult {
+  let bot: ((game: GameState) => Command[]) | undefined;
+  return run(seed, ticks, game => {
+    bot ??= createBot(game.map);
+    return bot(game);
+  });
+}
