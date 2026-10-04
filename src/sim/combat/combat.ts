@@ -33,6 +33,12 @@ export function spawnEnemy(
     alive: true,
   };
   game.enemies.push(enemy);
+  game.events.push({
+    type: 'enemySpawned',
+    enemyId: enemy.id,
+    robot: type,
+    wave,
+  });
   return enemy;
 }
 

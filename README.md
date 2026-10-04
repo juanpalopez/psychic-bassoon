@@ -34,6 +34,16 @@ pnpm build               # type check and static build into dist/
 pnpm preview             # serve dist/ locally
 ```
 
+Until the 3D game lands (Phase 2) the simulation can be watched headless. It prints the seeded map, plays a scripted build order and logs each wave:
+
+```bash
+pnpm sim -- --seed 42               # 10 waves from seed 42
+pnpm sim -- --seed 7 --waves 25     # more waves
+pnpm sim -- --seed 42 --speed 3     # same output: speed only adds ticks per frame
+```
+
+The same seed always prints the same text.
+
 To test on a phone, run `pnpm dev --host` and open the "Network" URL Vite prints, on the same Wi-Fi.
 
 ### Test

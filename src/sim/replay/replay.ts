@@ -35,27 +35,47 @@ export function fingerprint(game: GameState): string {
   return hash.toString(16).padStart(8, '0');
 }
 
+/** A game being driven one tick at a time, with its command and event logs. */
+export interface Runner extends RunResult {
+  /** Submits the commands for the current tick, then runs it. */
+  step(): void;
+}
+
 /**
- * Runs a game from its seed. `commandsFor` supplies the commands to submit
- * before each tick; the run stops at `ticks` or at game over.
+ * Starts a game from its seed. `commandsFor` supplies the commands to submit
+ * before each tick.
  */
+export function createRunner(
+  seed: number,
+  commandsFor: (game: GameState) => readonly Command[]
+): Runner {
+  const game = createGame(seed);
+  const log: ScheduledCommand[] = [];
+  const events: LoggedEvent[] = [];
+  return {
+    game,
+    log,
+    events,
+    step() {
+      for (const command of commandsFor(game)) {
+        log.push({tick: game.tick, command});
+        submit(game, command);
+      }
+      tick(game);
+      for (const event of game.events) events.push({tick: game.tick, event});
+    },
+  };
+}
+
+/** Runs a game from its seed until `ticks` or game over. */
 export function run(
   seed: number,
   ticks: number,
   commandsFor: (game: GameState) => readonly Command[]
 ): RunResult {
-  const game = createGame(seed);
-  const log: ScheduledCommand[] = [];
-  const events: LoggedEvent[] = [];
-  while (game.tick < ticks && !game.over) {
-    for (const command of commandsFor(game)) {
-      log.push({tick: game.tick, command});
-      submit(game, command);
-    }
-    tick(game);
-    for (const event of game.events) events.push({tick: game.tick, event});
-  }
-  return {game, log, events};
+  const runner = createRunner(seed, commandsFor);
+  while (runner.game.tick < ticks && !runner.game.over) runner.step();
+  return runner;
 }
 
 /** Replays a recorded command list against a fresh game from the same seed. */

@@ -7,6 +7,11 @@ import type {RunResult} from './replay';
 /** The bot acts once a second. */
 const ACT_EVERY_TICKS = RULES.tickRate;
 
+const EARLY_CALL_SECONDS = 5;
+const EARLY_CALL_EVERY_WAVES = 4;
+const SELL_SECONDS = 7;
+const SELL_ABOVE_TOWERS = 20;
+
 /**
  * Plates ordered by how much of the route a level-1 Welder would cover, best
  * first, then reading order. Uses squared distances, so no rounding drift.
@@ -45,6 +50,23 @@ export function createBot(map: GameMap): (game: GameState) => Command[] {
   return game => {
     if (game.tick % ACT_EVERY_TICKS !== 0) return [];
     if (!game.running) return [{type: 'launchWave'}];
+    // During every 4th wave, try to call the next one early every 5 s. While robots are still being
+    // released the sim rejects it, so replays also cover a rejected command.
+    if (
+      game.wave % EARLY_CALL_EVERY_WAVES === 0 &&
+      game.tick % (EARLY_CALL_SECONDS * ACT_EVERY_TICKS) === 0
+    ) {
+      return [{type: 'launchWave'}];
+    }
+    // Every 7 s, once the field is crowded, sell the newest tower.
+    const newest = game.towers.at(-1);
+    if (
+      newest &&
+      game.towers.length > SELL_ABOVE_TOWERS &&
+      game.tick % (SELL_SECONDS * ACT_EVERY_TICKS) === 0
+    ) {
+      return [{type: 'sell', towerId: newest.id}];
+    }
     const type = TOWER_IDS[game.towers.length % TOWER_IDS.length];
     const free = plates.find(
       c => !game.towers.some(t => t.col === c.col && t.row === c.row)

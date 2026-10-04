@@ -23,6 +23,16 @@ describe('headless run', () => {
       expect(kinds.has(kind as never)).toBe(true);
     }
     expect(run.game.wave).toBeGreaterThanOrEqual(5);
+    // every command type, a rejection and an early call are in the replay
+    expect(new Set(run.log.map(c => c.command.type))).toEqual(
+      new Set(['build', 'upgrade', 'sell', 'launchWave'])
+    );
+    expect(kinds.has('commandRejected')).toBe(true);
+    expect(
+      run.events.some(
+        e => e.event.type === 'waveLaunched' && e.event.earlyBonus > 0
+      )
+    ).toBe(true);
     expect(run.log.length).toBeGreaterThan(10);
   });
 
@@ -41,7 +51,7 @@ describe('headless run', () => {
   it('ends in the pinned final state', () => {
     // Pinned on purpose: any change to the sim's rules or numbers changes
     // this value. Update it deliberately, in the PR that changes the rules.
-    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"c5812ec8"`);
+    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"f150f8ed"`);
   });
 
   it('survives a JSON save and load in the middle of the run', () => {
@@ -57,7 +67,9 @@ describe('headless run', () => {
   });
 
   it('changes when a command changes', () => {
-    const fewer = run.log.slice(1);
+    const build = [...run.log].reverse().find(c => c.command.type === 'build');
+    if (!build) throw new Error('no build in the log');
+    const fewer = run.log.filter(c => c !== build);
     expect(fingerprint(runReplay(SEED, fewer, TICKS).game)).not.toBe(
       fingerprint(run.game)
     );

@@ -155,6 +155,19 @@ describe('build', () => {
     expect(game.credits).toBe(RULES.startCredits);
   });
 
+  it('rejects an unknown tower type instead of throwing', () => {
+    const game = createGame(SEED);
+    const command = {
+      type: 'build',
+      tower: 'laser',
+      ...plate(game),
+    } as unknown as Command;
+    expect(run(game, command)).toEqual([
+      {type: 'commandRejected', command, reason: 'unknownTower'},
+    ]);
+    expect(game.credits).toBe(RULES.startCredits);
+  });
+
   it('rejects a build off the board', () => {
     const game = createGame(SEED);
     for (const cell of [

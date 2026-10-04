@@ -68,10 +68,3 @@ export function generateMap(seed: number): GameMap {
   }
   throw new Error(`no valid map for seed ${seed} in ${MAP.maxAttempts} tries`);
 }
-
-/** Draws the board as text, `#` for path and `.` for plates, one row a line. */
-export function renderMapAscii(map: GameMap): string {
-  return map.tiles
-    .map(line => line.map(tile => (tile === 'path' ? '#' : '.')).join(''))
-    .join('\n');
-}

@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {GRID, MAP} from '../../content';
 import {deriveRng, nextFloat} from '../rng';
 import {RNG_STREAMS} from '../streams';
-import {generateMap, renderMapAscii} from './mapgen';
+import {generateMap} from './mapgen';
 
 const SEEDS = Array.from({length: 300}, (_, i) => i * 7919 + 1);
 
@@ -126,16 +126,5 @@ describe('generateMap', () => {
       });
       expect(count).toBe(path.length);
     });
-  });
-});
-
-describe('renderMapAscii', () => {
-  it('draws the path as # and plates as .', () => {
-    const text = renderMapAscii(generateMap(42));
-    const lines = text.split('\n');
-    expect(lines).toHaveLength(GRID.rows);
-    for (const line of lines) {
-      expect(line).toMatch(new RegExp(`^[#.]{${GRID.cols}}$`));
-    }
   });
 });

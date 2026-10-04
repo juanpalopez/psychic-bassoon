@@ -75,6 +75,10 @@ describe('spawnEnemy', () => {
       leak: ENEMIES.hauler.leak,
     });
     expect(game.enemies).toEqual([a, b]);
+    expect(game.events).toEqual([
+      {type: 'enemySpawned', enemyId: a.id, robot: 'hauler', wave: 10},
+      {type: 'enemySpawned', enemyId: b.id, robot: 'hauler', wave: 10},
+    ]);
   });
 });
 
@@ -359,5 +363,43 @@ describe('determinism', () => {
     put(game, 'overseer');
     tick(game);
     expect(alive(game)).toHaveLength(1);
+  });
+});
+
+describe('range boundary', () => {
+  it('hits a robot exactly at range, as the prototype does (<=)', () => {
+    const game = createGame(SEED);
+    const spots = game.map.tiles.flatMap((line, row) =>
+      line.flatMap((tile, col) =>
+        tile === 'plate'
+          ? game.map.path.flatMap((p, i) =>
+              Math.abs(p.col - col) + Math.abs(p.row - row) === 2 &&
+              (p.col === col || p.row === row)
+                ? [{col, row, index: i}]
+                : []
+            )
+          : []
+      )
+    );
+    const spot = spots[0];
+    if (!spot) throw new Error('no plate exactly 2 cells from the path');
+    game.credits = 10_000;
+    submit(game, {
+      type: 'build',
+      tower: 'quenchCoil',
+      col: spot.col,
+      row: spot.row,
+    });
+    tick(game);
+    submit(game, {type: 'upgrade', towerId: 0}); // level 2 range is exactly 2.0
+    tick(game);
+    const enemy = spawnEnemy(game, 'hauler', 1);
+    enemy.speed = 0;
+    // the route has one extra point at the front, so path cell i is point i + 1
+    enemy.distance = game.route.cumulative[spot.index + 1] ?? 0;
+    const tower = game.towers[0];
+    if (tower) tower.cooldown = 0;
+    tick(game);
+    expect(enemy.slow).toBe(TOWERS.quenchCoil.slow?.[1]);
   });
 });
