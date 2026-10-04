@@ -1,6 +1,20 @@
 /** Board size in cells. */
 export const GRID = {cols: 9, rows: 13} as const;
 
+/** Path generation shape, ported from the 2D prototype. */
+export const MAP = {
+  /** Give up and retry when the path is shorter than rows + this many cells. */
+  minExtraCells: 16,
+  maxAttempts: 300,
+  /** Each straight run down the board is this many cells, plus 0..1 more. */
+  minRunDown: 2,
+  runDownVariance: 2,
+  /** A sideways turn moves at least this many columns. */
+  minTurnColumns: 3,
+  /** The path starts at least this many columns in from either edge. */
+  startMargin: 1,
+} as const;
+
 /** Economy and combat constants ported from the 2D prototype. */
 export const RULES = {
   startCredits: 180,
