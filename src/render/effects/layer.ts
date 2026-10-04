@@ -35,6 +35,8 @@ export interface EffectsLayer {
   readonly group: Group;
   /** Starts the visuals an event calls for. */
   spawn(event: GameEvent): void;
+  /** Drops every running effect (a new game starts). */
+  clear(): void;
   /** Draws mortar shells from the sim's shots. */
   setShells(shots: readonly Shot[]): void;
   /** Ages and redraws everything. `dt` is in seconds. */
@@ -46,7 +48,8 @@ export interface EffectsLayer {
 
 /**
  * Pooled GPU buffers for shot beams, arcs, rings, blasts, sparks and shells:
- * a fixed number of draw calls and no allocation per effect once warm.
+ * a fixed number of draw calls; buffers are written without temporary arrays
+ * (event payloads still allocate a few small objects per shot).
  * `reducedMotion` is read on every spawn so a changed setting applies at once.
  */
 export function createEffectsLayer(
@@ -132,18 +135,22 @@ export function createEffectsLayer(
     fade: number
   ): void => {
     const o = index * 6;
-    linePositions.set([ax, EFFECT_HEIGHT, az, bx, EFFECT_HEIGHT, bz], o);
-    lineColors.set(
-      [
-        rgb.r * fade,
-        rgb.g * fade,
-        rgb.b * fade,
-        rgb.r * fade,
-        rgb.g * fade,
-        rgb.b * fade,
-      ],
-      o
-    );
+    const r = rgb.r * fade;
+    const g = rgb.g * fade;
+    const b = rgb.b * fade;
+    // written by index: no temporary arrays in the frame loop
+    linePositions[o] = ax;
+    linePositions[o + 1] = EFFECT_HEIGHT;
+    linePositions[o + 2] = az;
+    linePositions[o + 3] = bx;
+    linePositions[o + 4] = EFFECT_HEIGHT;
+    linePositions[o + 5] = bz;
+    lineColors[o] = r;
+    lineColors[o + 1] = g;
+    lineColors[o + 2] = b;
+    lineColors[o + 3] = r;
+    lineColors[o + 4] = g;
+    lineColors[o + 5] = b;
   };
 
   return {
@@ -155,6 +162,9 @@ export function createEffectsLayer(
       for (const effect of effectsFromEvent(event, reducedMotion(), random)) {
         effects.push(effect);
       }
+    },
+    clear() {
+      effects.length = 0;
     },
     setShells(list) {
       const count = Math.min(list.length, MAX_SHELLS);

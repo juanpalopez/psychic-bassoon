@@ -26,6 +26,8 @@ export interface App {
   restart(seed: number): void;
   /** Events from every tick run this frame, for toasts and effects. */
   readonly frameEvents: readonly GameEvent[];
+  /** What the renderer drew last frame (draw calls, triangles). */
+  stats(): {calls: number; triangles: number};
   /** Called once a frame, after the sim and the scene are up to date. */
   subscribe(listener: () => void): void;
 }
@@ -82,8 +84,14 @@ export function createApp(container: HTMLElement, seed: number): App {
   };
 
   // Built once: the frame loop must not allocate.
+  let captured = false;
   const frameOptions: FrameOptions = {
-    beforeTick: g => interpolator.capture(g),
+    beforeTick: g => {
+      // Once per frame, before its first tick, so the blend spans every tick
+      // the frame ran (at 2x and 3x too).
+      if (!captured) interpolator.capture(g);
+      captured = true;
+    },
     afterTick: g => {
       for (const event of g.events) {
         frameEvents.push(event);
@@ -103,6 +111,7 @@ export function createApp(container: HTMLElement, seed: number): App {
     const elapsed = lastMs === undefined ? 0 : (now - lastMs) / 1000;
     lastMs = now;
     frameEvents.length = 0;
+    captured = false;
     if (!paused && !game.over) {
       stepFrame(game, clock, elapsed, speed, frameOptions);
       alpha = Math.min(1, clock.accumulator / TICK_SECONDS);
@@ -128,6 +137,10 @@ export function createApp(container: HTMLElement, seed: number): App {
       return speed;
     },
     frameEvents,
+    stats() {
+      const {calls, triangles} = scene.renderer.info.render;
+      return {calls, triangles};
+    },
     get paused() {
       return paused;
     },
@@ -144,6 +157,7 @@ export function createApp(container: HTMLElement, seed: number): App {
       game = createGame(nextSeed);
       clock = createClock();
       selection = {kind: 'none'};
+      effects.clear();
       towersDirty = true;
       alpha = 1;
       showMap();

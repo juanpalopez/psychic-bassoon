@@ -105,6 +105,10 @@ export function attachCameraControls(
     }
   };
 
+  const cancel = (e: PointerEvent): void => {
+    pointers.delete(e.pointerId);
+  };
+
   const wheel = (e: WheelEvent): void => {
     e.preventDefault();
     setState(zoomBy(getState(), Math.exp(-e.deltaY * WHEEL_ZOOM)));
@@ -113,13 +117,13 @@ export function attachCameraControls(
   element.addEventListener('pointerdown', down);
   element.addEventListener('pointermove', move);
   element.addEventListener('pointerup', up);
-  element.addEventListener('pointercancel', up);
+  element.addEventListener('pointercancel', cancel);
   element.addEventListener('wheel', wheel, {passive: false});
   return () => {
     element.removeEventListener('pointerdown', down);
     element.removeEventListener('pointermove', move);
     element.removeEventListener('pointerup', up);
-    element.removeEventListener('pointercancel', up);
+    element.removeEventListener('pointercancel', cancel);
     element.removeEventListener('wheel', wheel);
   };
 }

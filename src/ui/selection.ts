@@ -32,7 +32,12 @@ export function reconcileSelection(
     return game.towers.some(t => t.id === selection.id) ? selection : NONE;
   }
   if (selection.kind === 'plate') {
-    return selectAt(game, selection);
+    const next = selectAt(game, selection);
+    const same =
+      next.kind === 'plate' &&
+      next.col === selection.col &&
+      next.row === selection.row;
+    return same ? selection : next;
   }
   return selection;
 }

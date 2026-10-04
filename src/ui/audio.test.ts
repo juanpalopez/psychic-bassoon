@@ -64,6 +64,28 @@ describe('createAudio', () => {
     expect(calls.oscillators).toBe(1);
   });
 
+  it('keeps trying to resume a suspended context on later gestures', () => {
+    const {context, calls} = fakeContext();
+    const audio = createAudio(
+      () => ({...context, state: 'suspended'}),
+      () => 0
+    );
+    audio.unlock();
+    audio.unlock();
+    expect(calls.resumed).toBe(2);
+  });
+
+  it('stops resuming once the context is running', () => {
+    const {context, calls} = fakeContext();
+    const audio = createAudio(
+      () => ({...context, state: 'running'}),
+      () => 0
+    );
+    audio.unlock();
+    audio.unlock();
+    expect(calls.resumed).toBe(1);
+  });
+
   it('creates the context only once however often it is unlocked', () => {
     let made = 0;
     const {context} = fakeContext();

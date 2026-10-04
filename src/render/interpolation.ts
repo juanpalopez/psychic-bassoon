@@ -36,9 +36,10 @@ function newTrack(tracks: Map<number, Track>, enemy: Enemy): Track {
  */
 export function createInterpolator(): Interpolator {
   const tracks = new Map<number, Track>();
+  const live = new Set<number>();
   return {
     capture(game) {
-      const live = new Set<number>();
+      live.clear();
       for (const enemy of game.enemies) {
         live.add(enemy.id);
         const track = tracks.get(enemy.id) ?? newTrack(tracks, enemy);
