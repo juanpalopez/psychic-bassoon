@@ -21,11 +21,7 @@ jobs:
           lfs: false
 
       - name: Require a semantic version tag
-        run: |
-          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
-            echo "::error::Tag '$TAG' is not vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-suffix."
-            exit 1
-          fi
+        run: bash scripts/check-release-tag.sh "$TAG"
 
       - name: Require the tag to be on main
         run: |

@@ -22,6 +22,27 @@ jobs:
       - uses: actions/checkout@v7
         with:
           lfs: false
+          persist-credentials: false
+
+      - name: Lint workflows (actionlint)
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          # Published in actionlint_1.7.12_checksums.txt on the release page.
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          command -v shellcheck >/dev/null || { echo "::error::shellcheck is missing from the runner, so actionlint would skip shell checks."; exit 1; }
+          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -sSfL --retry 3 -o "$archive" "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/${archive}"
+          echo "${ACTIONLINT_SHA256}  ${archive}" | sha256sum -c -
+          tar -xzf "$archive" actionlint
+          ./actionlint -color
+          # The fixture must be rejected with exit code 1 (findings), not 3 (cannot read).
+          status=0
+          ./actionlint scripts/fixtures/bad-workflow.yml >/dev/null 2>&1 || status=$?
+          if [ "$status" -ne 1 ]; then
+            echo "::error::actionlint exited with ${status} on scripts/fixtures/bad-workflow.yml; the self-test expects 1."
+            exit 1
+          fi
 
       - uses: pnpm/action-setup@v6
 

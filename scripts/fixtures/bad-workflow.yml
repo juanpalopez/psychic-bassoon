@@ -1,0 +1,10 @@
+# Deliberately broken: actionlint must reject this file. CI runs it as a self-test
+# so a broken or skipped actionlint step cannot pass silently.
+name: bad
+on: pull_request
+jobs:
+  j:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "${{ github.event.pull_request.title }}"
+      - run: echo "${{ steps.missing.outputs.value }}"

@@ -9,3 +9,4 @@ public
 .github
 *.md
 prototype
+scripts/fixtures

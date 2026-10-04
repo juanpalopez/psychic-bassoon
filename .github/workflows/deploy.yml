@@ -78,3 +78,25 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Check the live page serves this build
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          want=$(grep -o "src=\"${BASE_PATH}assets/[^\"]*\"" dist/index.html | head -n 1)
+          if [ -z "$want" ]; then
+            echo "::error::No hashed entry script found in dist/index.html."
+            exit 1
+          fi
+          for attempt in 1 2 3 4 5 6; do
+            status=$(curl -sS --max-time 20 -o page.html -w '%{http_code}' "${PAGE_URL}?ci=${HEAD_SHA}" || true)
+            if [ "$status" = "200" ] && grep -qF "$want" page.html; then
+              echo "Live page serves this build: ${want}"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: HTTP ${status}, expected ${want} not served yet"
+            sleep 10
+          done
+          echo "::error::The live page at ${PAGE_URL} did not serve this build (${want}). The site may already be published; re-run the deploy or check Pages."
+          exit 1
