@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _As of 2026-10-04. Living version: the Claude doc of the same name._
 
-> **Status:** Phase 0 is complete and its gate passes (see the checklist under Phase 0). Live: https://juanpalopez.github.io/psychic-bassoon/. Next: Phase 1, the simulation port, starting with ticket #7 (seeded PRNG), test-first, using `prototype/scrapline.html` as the reference for rules and numbers.
+> **Status:** Phases 0 and 1 are complete and their gates pass. Live: https://juanpalopez.github.io/psychic-bassoon/. Next: Phase 2, the 3D greybox (epic #14), starting with the renderer and camera. `pnpm sim -- --seed 42` shows the headless simulation. Use `prototype/scrapline.html` as the reference for rules and numbers.
 
 ## Vision
 
@@ -295,9 +295,9 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 **Out of scope:** new enemies, upgrade branches, targeting modes beyond the prototype, anything visual.
 
 **Gate checklist**
-- [ ] The headless replay test passes.
-- [ ] Numbers in `src/content` match the prototype; any difference is a bug.
-- [ ] `src/sim` has no imports from `render`, `ui`, `three` or the DOM.
+- [x] The headless replay test passes.
+- [x] Numbers in `src/content` match the prototype; any difference is a bug.
+- [x] `src/sim` has no imports from `render`, `ui`, `three` or the DOM.
 
 ### Phase 2 · 3D greybox (epic #14, tickets #19–#27)
 
