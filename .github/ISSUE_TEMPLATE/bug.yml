@@ -1,0 +1,26 @@
+name: Bug report
+description: Something behaves differently from the prototype or the plan
+title: "[Phase N] Fix: "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Expected versus actual behaviour.
+    validations:
+      required: true
+  - type: input
+    id: seed
+    attributes:
+      label: Seed
+      description: The map seed, if the bug is reproducible from one.
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Include the commands you sent, or the wave and towers placed.
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser

@@ -1,0 +1,40 @@
+name: Ticket
+description: A unit of work for the current phase
+title: "[Phase N] "
+body:
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Phase
+      description: Also set the matching phase-N label and one area label (sim, render, ui, content, infra, docs).
+      options:
+        - Phase 0 · Repo and pipeline
+        - Phase 1 · Simulation port
+        - Phase 2 · 3D greybox
+        - Phase 3 · Art and UI
+        - Phase 4 · Lore and chapters
+        - Phase 5 · Polish and launch
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Description
+      description: What needs to happen and why.
+    validations:
+      required: true
+  - type: input
+    id: plan-section
+    attributes:
+      label: Plan section
+      description: The part of docs/PLAN.md this comes from.
+  - type: textarea
+    id: done-when
+    attributes:
+      label: Done when
+      description: A checklist that includes the tests. For a gate ticket, say which gate it closes.
+      placeholder: |
+        - [ ] Tests written first and passing
+        - [ ] ...
+    validations:
+      required: true
