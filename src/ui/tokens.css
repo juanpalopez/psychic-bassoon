@@ -1,0 +1,51 @@
+/*
+ * Design tokens for the HUD. They mirror the dark factory-floor look of the
+ * 2D prototype; Phase 3 replaces the values with the Claude Design system.
+ * Components use these variables and never hard-code a colour.
+ */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --bg: #11151b;
+  --board: #161b22;
+  --panel: #1a2029;
+  --raise: #232b36;
+  --line: #313b48;
+
+  /* text */
+  --fg: #e3e8ee;
+  --dim: #8794a3;
+
+  /* accents */
+  --accent: #f2b134;
+  --accent-ink: #1d1505;
+  --danger: #ff4d5e;
+  --ok: #5fd38a;
+
+  /* towers (also the tint of their models) */
+  --welder: #3ddbd9;
+  --rivet-mortar: #ff8a3d;
+  --quench-coil: #9b8cff;
+  --mainline-arc: #e8f06a;
+
+  /* type */
+  --display: 'Chakra Petch', 'Rajdhani', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-md: 14px;
+  --text-lg: 17px;
+  --text-xl: 38px;
+
+  /* spacing and shape */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --tap: 48px; /* minimum tap target is 44px */
+}
