@@ -137,6 +137,10 @@ export default tseslint.config(
           selector: "NewExpression[callee.name='Date'][arguments.length=0]",
           message: 'The sim must not read the clock; time is ticks.',
         },
+        {
+          selector: "CallExpression[callee.name='Date']",
+          message: 'The sim must not read the clock; time is ticks.',
+        },
       ],
     },
   },
