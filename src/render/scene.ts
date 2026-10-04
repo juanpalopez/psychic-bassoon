@@ -1,10 +1,10 @@
 import {PerspectiveCamera, Scene, WebGLRenderer} from 'three';
 import {attachCameraControls} from './camera/controls';
+import {PALETTE} from './palette';
 import {CAMERA, clampCamera, fitDistance} from './camera/math';
 import type {Bounds, CameraState, View} from './camera/math';
 
 const MAX_PIXEL_RATIO = 2;
-const CLEAR_COLOR = 0x0f1216;
 const PITCH = (CAMERA.pitchDegrees * Math.PI) / 180;
 
 /** Board size in cells; the camera may pan anywhere over it. */
@@ -29,7 +29,7 @@ export interface SceneHandle {
 export function createScene(container: HTMLElement, board: Board): SceneHandle {
   const renderer = new WebGLRenderer({antialias: true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
-  renderer.setClearColor(CLEAR_COLOR);
+  renderer.setClearColor(PALETTE.clear);
   container.appendChild(renderer.domElement);
 
   const scene = new Scene();

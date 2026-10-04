@@ -71,7 +71,11 @@ export function createHud(app: App, slots: Slots): void {
 
   // --- stage: toast and overlay
   const toast = stage.appendChild(el('div', 'toast off'));
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
   const overlay = stage.appendChild(el('div', 'overlay'));
+  overlay.setAttribute('role', 'dialog');
+  overlay.setAttribute('aria-modal', 'true');
 
   // --- controls
   const pause = button('II', '', () => {
@@ -251,12 +255,17 @@ export function createHud(app: App, slots: Slots): void {
               const command = upgradeCommand(app.selection);
               if (command) app.submit(command);
             },
-            !model.upgrade?.affordable
+            !model.upgrade?.affordable || app.paused
           ),
-          button(`Sell · +${model.sell}`, 'sell', () => {
-            const command = sellCommand(app.selection);
-            if (command) app.submit(command);
-          })
+          button(
+            `Sell · +${model.sell}`,
+            'sell',
+            () => {
+              const command = sellCommand(app.selection);
+              if (command) app.submit(command);
+            },
+            app.paused
+          )
         )
       );
       info.style.setProperty('--tint', TINT[model.id]);
@@ -278,7 +287,10 @@ export function createHud(app: App, slots: Slots): void {
     setText(launch, model.launch.label);
     launch.disabled = !model.launch.enabled || app.paused;
     setText(pause, app.paused ? '▶' : 'II');
-    const key = JSON.stringify(model.panel);
+    pause.setAttribute('aria-label', app.paused ? 'Resume' : 'Pause');
+    // the start and game-over cards own the pause state
+    pause.disabled = mode === 'start' || mode === 'over';
+    const key = JSON.stringify(model.panel) + String(app.paused);
     if (key !== panelKey) {
       panelKey = key;
       renderPanel(model.panel);

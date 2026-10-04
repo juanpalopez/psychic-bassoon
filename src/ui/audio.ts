@@ -5,6 +5,7 @@ export type Sound = 'shot' | 'kill' | 'leak' | 'wave' | 'build' | 'reject';
 /** The few parts of `AudioContext` the game uses, so tests can fake it. */
 export interface AudioContextLike {
   readonly currentTime: number;
+  readonly state?: string;
   readonly destination: unknown;
   resume(): Promise<void>;
   createGain(): {
@@ -82,7 +83,13 @@ export function createAudio(
       return context !== undefined;
     },
     unlock() {
-      if (context || failed) return;
+      if (failed) return;
+      if (context) {
+        // browsers may leave it suspended after the first gesture: retry
+        if (context.state !== 'running')
+          void context.resume().catch(() => undefined);
+        return;
+      }
       try {
         context = makeContext();
         void context.resume().catch(() => undefined);

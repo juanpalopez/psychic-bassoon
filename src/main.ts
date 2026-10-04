@@ -17,7 +17,7 @@ if (!slots.top || !slots.stage || !slots.panel || !slots.controls) {
 function pickSeed(): number {
   const fromUrl = Number(new URLSearchParams(location.search).get('seed'));
   if (Number.isSafeInteger(fromUrl) && fromUrl > 0) return fromUrl;
-  return crypto.getRandomValues(new Uint32Array(1))[0] ?? 1;
+  return crypto.getRandomValues(new Uint32Array(1))[0] || 1;
 }
 
 const app = createApp(slots.stage, pickSeed());
@@ -33,7 +33,11 @@ const audio = createAudio(
   () => new AudioContext(),
   () => performance.now()
 );
-window.addEventListener('pointerdown', () => audio.unlock(), {once: true});
+// Touch only counts as a gesture on release, so unlock on pointerup, click
+// and keydown, and keep retrying until the context is running.
+for (const type of ['pointerup', 'click', 'keydown']) {
+  window.addEventListener(type, () => audio.unlock());
+}
 app.subscribe(() => {
   for (const event of app.frameEvents) {
     const sound = soundFor(event);

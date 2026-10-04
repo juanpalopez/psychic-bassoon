@@ -84,8 +84,14 @@ export function createApp(container: HTMLElement, seed: number): App {
   };
 
   // Built once: the frame loop must not allocate.
+  let captured = false;
   const frameOptions: FrameOptions = {
-    beforeTick: g => interpolator.capture(g),
+    beforeTick: g => {
+      // Once per frame, before its first tick, so the blend spans every tick
+      // the frame ran (at 2x and 3x too).
+      if (!captured) interpolator.capture(g);
+      captured = true;
+    },
     afterTick: g => {
       for (const event of g.events) {
         frameEvents.push(event);
@@ -105,6 +111,7 @@ export function createApp(container: HTMLElement, seed: number): App {
     const elapsed = lastMs === undefined ? 0 : (now - lastMs) / 1000;
     lastMs = now;
     frameEvents.length = 0;
+    captured = false;
     if (!paused && !game.over) {
       stepFrame(game, clock, elapsed, speed, frameOptions);
       alpha = Math.min(1, clock.accumulator / TICK_SECONDS);
@@ -150,6 +157,7 @@ export function createApp(container: HTMLElement, seed: number): App {
       game = createGame(nextSeed);
       clock = createClock();
       selection = {kind: 'none'};
+      effects.clear();
       towersDirty = true;
       alpha = 1;
       showMap();
