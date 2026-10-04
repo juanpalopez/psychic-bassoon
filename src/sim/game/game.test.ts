@@ -1,6 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {GRID, RULES, TOWERS} from '../../content';
 import type {Cell} from '../map';
+import {TICK_SECONDS} from './clock';
 import {createGame, submit, tick} from './game';
 import type {Command, GameState} from './game';
 
@@ -127,6 +128,7 @@ describe('build', () => {
         level: 0,
         ...cell,
         invested: TOWERS.welder.cost[0],
+        cooldown: -TICK_SECONDS,
       },
     ]);
     expect(events).toEqual([{type: 'towerBuilt', towerId: 0}]);

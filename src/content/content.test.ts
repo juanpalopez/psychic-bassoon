@@ -115,6 +115,8 @@ describe('grid and rules', () => {
     expect(RULES.rocketSpeed).toBe(5.5);
     expect(RULES.arcChainRadius).toBe(1.6);
     expect(RULES.arcChainFalloff).toBe(0.8);
+    expect(RULES.spawnOffset).toBe(0.45);
+    expect(RULES.cellCentre).toBe(0.5);
   });
 });
 

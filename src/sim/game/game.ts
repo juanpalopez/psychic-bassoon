@@ -1,7 +1,8 @@
 import {GRID, RULES, TOWERS} from '../../content';
-import type {TowerId} from '../../content';
-import {generateMap} from '../map';
-import type {GameMap} from '../map';
+import type {EnemyId, TowerId} from '../../content';
+import {stepCombat} from '../combat';
+import {buildRoute, generateMap} from '../map';
+import type {GameMap, Route} from '../map';
 
 /** A tower on a plate. `level` counts from 0 (level 1) to 2 (level 3). */
 export interface Tower {
@@ -12,6 +13,42 @@ export interface Tower {
   readonly row: number;
   /** Credits spent so far; a sale refunds a share of it. */
   invested: number;
+  /** Seconds until it may fire again. Runs below zero while idle. */
+  cooldown: number;
+}
+
+/** A robot walking the route. Removed from the game when `alive` is false. */
+export interface Enemy {
+  readonly id: number;
+  readonly type: EnemyId;
+  hp: number;
+  readonly maxHp: number;
+  /** Cells per second before any slow. */
+  speed: number;
+  readonly reward: number;
+  armor: number;
+  readonly radius: number;
+  readonly leak: number;
+  /** Cells walked from the spawn point. */
+  distance: number;
+  x: number;
+  y: number;
+  /** Share of speed lost, 0..1, while `slowTimer` runs. */
+  slow: number;
+  slowTimer: number;
+  alive: boolean;
+}
+
+/** A Rivet Mortar shell in flight. */
+export interface Shot {
+  x: number;
+  y: number;
+  readonly targetId: number;
+  /** Where the target was last seen; the shell keeps going there. */
+  targetX: number;
+  targetY: number;
+  readonly damage: number;
+  readonly splash: number;
 }
 
 /**
@@ -56,6 +93,17 @@ export type GameEvent =
       readonly earlyBonus: number;
     }
   | {
+      readonly type: 'enemyKilled';
+      readonly enemyId: number;
+      readonly reward: number;
+    }
+  | {
+      readonly type: 'enemyLeaked';
+      readonly enemyId: number;
+      readonly leak: number;
+    }
+  | {readonly type: 'gameOver'; readonly wave: number}
+  | {
       readonly type: 'commandRejected';
       readonly command: Command;
       readonly reason: RejectReason;
@@ -68,6 +116,8 @@ export type GameEvent =
 export interface GameState {
   readonly seed: number;
   readonly map: GameMap;
+  /** The line robots walk, built once from the map. */
+  readonly route: Route;
   tick: number;
   credits: number;
   lives: number;
@@ -76,6 +126,8 @@ export interface GameState {
   running: boolean;
   over: boolean;
   towers: Tower[];
+  enemies: Enemy[];
+  shots: Shot[];
   nextId: number;
   /** Commands waiting for the next tick, in submission order. */
   pending: Command[];
@@ -84,9 +136,11 @@ export interface GameState {
 }
 
 export function createGame(seed: number): GameState {
+  const map = generateMap(seed);
   return {
     seed,
-    map: generateMap(seed),
+    map,
+    route: buildRoute(map.path),
     tick: 0,
     credits: RULES.startCredits,
     lives: RULES.startLives,
@@ -94,6 +148,8 @@ export function createGame(seed: number): GameState {
     running: false,
     over: false,
     towers: [],
+    enemies: [],
+    shots: [],
     nextId: 0,
     pending: [],
     events: [],
@@ -131,7 +187,15 @@ function build(game: GameState, command: Extract<Command, {type: 'build'}>) {
   if (game.credits < cost) return reject(game, command, 'notEnoughCredits');
   game.credits -= cost;
   const id = game.nextId++;
-  game.towers.push({id, type: tower, level: 0, col, row, invested: cost});
+  game.towers.push({
+    id,
+    type: tower,
+    level: 0,
+    col,
+    row,
+    invested: cost,
+    cooldown: 0,
+  });
   game.events.push({type: 'towerBuilt', towerId: id});
 }
 
@@ -196,5 +260,6 @@ export function tick(game: GameState): void {
   const commands = game.pending;
   game.pending = [];
   for (const command of commands) apply(game, command);
+  if (!game.over) stepCombat(game);
   game.tick++;
 }

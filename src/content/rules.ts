@@ -37,6 +37,10 @@ export const RULES = {
   quenchSlowSeconds: 1.4,
   /** Rivet Mortar shell speed, cells per second. */
   rocketSpeed: 5.5,
+  /** Spawn point sits this far above the top row, in cells. */
+  spawnOffset: 0.45,
+  /** Cell centre offset: a cell's centre is at col + 0.5. */
+  cellCentre: 0.5,
   /** Mainline Arc: reach to the next target and damage kept per jump. */
   arcChainRadius: 1.6,
   arcChainFalloff: 0.8,
