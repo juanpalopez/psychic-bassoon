@@ -14,7 +14,8 @@ pnpm dev          # Vite dev server; add --host to test on a phone over LAN
 pnpm build        # static build to dist/
 pnpm test         # Vitest (simulation)
 pnpm test:e2e     # Playwright smoke test
-pnpm lint         # ESLint + tsc --noEmit
+pnpm lint         # Prettier check + ESLint + tsc --noEmit
+pnpm format       # Prettier --write (run before committing)
 ```
 
 ## Working rules
@@ -75,6 +76,12 @@ src/
 ## Code style
 
 - TypeScript strict mode, no `any`. Prefer plain functions and data over class hierarchies.
+- **Code style: the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html), enforced by tools, not by review.** Prettier formats (`.prettierrc.json`: 2 spaces, single quotes, no bracket spacing, 80 columns, `es5` trailing commas, no parens around a single arrow parameter). ESLint (typescript-eslint `strict` and `stylistic`) enforces the rest. Run `pnpm format` before committing; `pnpm lint` fails on unformatted code, and so does `ci`. Don't hand-format and don't disable a rule to get around it.
+  - Naming: `UpperCamelCase` for types, classes and interfaces; `lowerCamelCase` for variables, functions, parameters and properties; `CONSTANT_CASE` for module-level constants and enum members. No `I` prefix on interfaces.
+  - Named exports only (no `export default`), except tool config files such as `vite.config.ts`.
+  - Always `===`, always braces for multi-line blocks, `const` by default, never `var`.
+  - Comments explain why, not what. Use JSDoc (`/** … */`) on exported APIs.
+  - We don't use `gts` itself: it pins ESLint 9 and we run ESLint 10. We follow its style with Prettier and ESLint directly.
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.

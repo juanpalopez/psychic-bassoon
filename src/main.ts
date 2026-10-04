@@ -1,4 +1,4 @@
-import { createScene } from './render/scene';
+import {createScene} from './render/scene';
 
 const container = document.getElementById('app');
 if (!container) {
