@@ -2,14 +2,42 @@ name: Release
 
 on:
   push:
-    tags: ['v[0-9]+.[0-9]+.[0-9]+*']
+    tags: ['v*']
 
 permissions:
   contents: read
 
 jobs:
+  guard:
+    name: guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      TAG: ${{ github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: false
+
+      - name: Require a semantic version tag
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::Tag '$TAG' is not vMAJOR.MINOR.PATCH or vMAJOR.MINOR.PATCH-suffix."
+            exit 1
+          fi
+
+      - name: Require the tag to be on main
+        run: |
+          git fetch origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::Tag $TAG is not on main. Tag a commit that has been merged."
+            exit 1
+          fi
+
   ci:
     name: ci
+    needs: guard
     uses: ./.github/workflows/ci.yml
 
   release:
@@ -25,16 +53,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           lfs: false
-
-      - name: Require the tag to be on main
-        run: |
-          git fetch origin main
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::Tag $TAG is not on main. Tag a commit that has been merged."
-            exit 1
-          fi
 
       - uses: pnpm/action-setup@v4
 
