@@ -1,4 +1,5 @@
 import {createApp} from './app';
+import {createAudio, soundFor} from './ui/audio';
 import {createHud} from './ui/hud';
 
 const slots = {
@@ -24,6 +25,19 @@ createHud(app, {
   stage: slots.stage,
   panel: slots.panel,
   controls: slots.controls,
+});
+
+// Sound starts on the first tap and never before.
+const audio = createAudio(
+  () => new AudioContext(),
+  () => performance.now()
+);
+window.addEventListener('pointerdown', () => audio.unlock(), {once: true});
+app.subscribe(() => {
+  for (const event of app.frameEvents) {
+    const sound = soundFor(event);
+    if (sound) audio.play(sound);
+  }
 });
 
 // `?debug` exposes the app for the end-to-end and performance checks.

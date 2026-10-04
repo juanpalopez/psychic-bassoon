@@ -118,7 +118,10 @@ describe('damageEnemy', () => {
     expect(game.events).toContainEqual({
       type: 'enemyKilled',
       enemyId: skitter.id,
+      robot: 'skitter',
       reward: ENEMIES.skitter.reward,
+      x: skitter.x,
+      y: skitter.y,
     });
   });
 });
@@ -401,5 +404,78 @@ describe('range boundary', () => {
     if (tower) tower.cooldown = 0;
     tick(game);
     expect(enemy.slow).toBe(TOWERS.quenchCoil.slow?.[1]);
+  });
+});
+
+describe('events for effects', () => {
+  const fired = (game: GameState) =>
+    game.events.filter(e => e.type === 'towerFired');
+
+  it('reports a Welder beam from the tower to its target', () => {
+    const {game, tower} = setup('welder');
+    const target = put(game, 'hauler');
+    tick(game);
+    expect(fired(game)).toEqual([
+      {
+        type: 'towerFired',
+        towerId: tower.id,
+        tower: 'welder',
+        level: 0,
+        x: tower.col + 0.5,
+        y: tower.row + 0.5,
+        path: [{x: target.x, y: target.y}],
+      },
+    ]);
+  });
+
+  it('reports a Quench Coil pulse with no path', () => {
+    const {game} = setup('quenchCoil');
+    put(game, 'hauler');
+    tick(game);
+    expect(fired(game)).toHaveLength(1);
+    expect(fired(game)[0]).toMatchObject({tower: 'quenchCoil', path: []});
+  });
+
+  it('reports every jump of a Mainline Arc in order', () => {
+    const {game} = setup('mainlineArc');
+    const a = put(game, 'overseer', DISTANCE + 1);
+    const b = put(game, 'overseer', DISTANCE + 0.5);
+    tick(game);
+    const event = fired(game)[0];
+    if (event?.type !== 'towerFired') throw new Error('no arc event');
+    expect(event.path[0]).toEqual({x: a.x, y: a.y});
+    expect(event.path[1]).toEqual({x: b.x, y: b.y});
+  });
+
+  it('reports a Rivet Mortar launch and where the shell lands', () => {
+    const {game} = setup('rivetMortar');
+    const target = put(game, 'overseer');
+    tick(game);
+    expect(fired(game)).toHaveLength(1);
+    let landed;
+    for (let i = 0; i < 60 && !landed; i++) {
+      tick(game);
+      landed = game.events.find(e => e.type === 'shellLanded');
+    }
+    expect(landed).toEqual({
+      type: 'shellLanded',
+      x: target.x,
+      y: target.y,
+      splash: TOWERS.rivetMortar.splash?.[0],
+    });
+  });
+
+  it('says where and what a robot was when it died', () => {
+    const game = createGame(SEED);
+    const boss = spawnEnemy(game, 'overseer', 1);
+    damageEnemy(game, boss, 1e6);
+    expect(game.events).toContainEqual(
+      expect.objectContaining({
+        type: 'enemyKilled',
+        robot: 'overseer',
+        x: boss.x,
+        y: boss.y,
+      })
+    );
   });
 });
