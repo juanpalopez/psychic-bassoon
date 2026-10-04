@@ -19,7 +19,7 @@ importers:
         specifier: 1.63.0
         version: 1.63.0
       '@types/node':
-        specifier: ^22.20.5
+        specifier: 22.20.5
         version: 22.20.5
       '@types/three':
         specifier: 0.186.0

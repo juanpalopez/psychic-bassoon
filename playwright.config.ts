@@ -6,7 +6,7 @@ export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: `http://localhost:${PORT}`,
@@ -18,6 +18,7 @@ export default defineConfig({
       use: {
         ...devices['Pixel 7'],
         launchOptions: {
+          // Software GL so headless Linux CI can create a WebGL context.
           args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'],
         },
       },
@@ -26,7 +27,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm build && pnpm preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120_000,
   },
 });
