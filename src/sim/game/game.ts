@@ -126,7 +126,27 @@ export type GameEvent =
   | {
       readonly type: 'enemyKilled';
       readonly enemyId: number;
+      readonly robot: EnemyId;
       readonly reward: number;
+      readonly x: number;
+      readonly y: number;
+    }
+  | {
+      /** A tower fired. `path` is where its shot or bolt went, in order. */
+      readonly type: 'towerFired';
+      readonly towerId: number;
+      readonly tower: TowerId;
+      readonly level: number;
+      /** The tower's centre. */
+      readonly x: number;
+      readonly y: number;
+      readonly path: readonly {readonly x: number; readonly y: number}[];
+    }
+  | {
+      readonly type: 'shellLanded';
+      readonly x: number;
+      readonly y: number;
+      readonly splash: number;
     }
   | {
       readonly type: 'enemyLeaked';

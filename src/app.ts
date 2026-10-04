@@ -1,5 +1,6 @@
 import {GRID} from './content';
 import {createInterpolator} from './render/interpolation';
+import {createEffectsLayer} from './render/effects/layer';
 import {createMapView} from './render/map';
 import type {MapView} from './render/map';
 import {pickCell} from './render/picking';
@@ -34,12 +35,14 @@ export function createApp(container: HTMLElement, seed: number): App {
   const scene = createScene(container, GRID);
   const robots = createRobotLayer();
   const towers = createTowerLayer();
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+  const effects = createEffectsLayer(() => reduced.matches);
   const interpolator = createInterpolator();
   const robotPoses: RobotPose[] = [];
   const towerPoses: TowerPose[] = [];
   const listeners: (() => void)[] = [];
   const frameEvents: GameEvent[] = [];
-  scene.scene.add(robots.group, towers.group);
+  scene.scene.add(robots.group, towers.group, effects.group);
 
   let game = createGame(seed);
   let clock: Clock = createClock();
@@ -106,6 +109,9 @@ export function createApp(container: HTMLElement, seed: number): App {
     }
     selection = reconcileSelection(game, selection);
     if (towersDirty) syncTowers();
+    for (const event of frameEvents) effects.spawn(event);
+    effects.setShells(game.shots);
+    effects.update(paused ? 0 : elapsed * speed);
     interpolator.poses(game, alpha, robotPoses);
     robots.update(robotPoses);
     for (const listener of listeners) listener();

@@ -56,7 +56,10 @@ export function damageEnemy(
     game.events.push({
       type: 'enemyKilled',
       enemyId: enemy.id,
+      robot: enemy.type,
       reward: enemy.reward,
+      x: enemy.x,
+      y: enemy.y,
     });
   }
 }
@@ -108,6 +111,16 @@ function frontmost(enemies: readonly Enemy[]): Enemy | undefined {
 function pulse(game: GameState, tower: Tower, targets: Enemy[]): void {
   const def = TOWERS.quenchCoil;
   const slow = def.slow?.[tower.level] ?? 0;
+  const centre = centreOf(tower);
+  game.events.push({
+    type: 'towerFired',
+    towerId: tower.id,
+    tower: tower.type,
+    level: tower.level,
+    x: centre.x,
+    y: centre.y,
+    path: [],
+  });
   for (const e of targets) {
     e.slow = Math.max(e.slow, slow);
     e.slowTimer = RULES.quenchSlowSeconds;
@@ -121,7 +134,9 @@ function chainLightning(game: GameState, tower: Tower, first: Enemy): void {
   let damage = def.damage[tower.level] ?? 0;
   let current = first;
   const hit = new Set<Enemy>([current]);
+  const path: Point[] = [];
   for (let i = 0; i < jumps; i++) {
+    path.push({x: current.x, y: current.y});
     damageEnemy(game, current, damage);
     damage *= RULES.arcChainFalloff;
     let next: Enemy | undefined;
@@ -140,6 +155,16 @@ function chainLightning(game: GameState, tower: Tower, first: Enemy): void {
     current = next;
     hit.add(current);
   }
+  const centre = centreOf(tower);
+  game.events.push({
+    type: 'towerFired',
+    towerId: tower.id,
+    tower: tower.type,
+    level: tower.level,
+    x: centre.x,
+    y: centre.y,
+    path,
+  });
 }
 
 function fireTowers(game: GameState): void {
@@ -159,6 +184,17 @@ function fireTowers(game: GameState): void {
     const target = frontmost(targets);
     if (!target || tower.cooldown > 0) continue;
     tower.cooldown = 1 / (def.rate[level] ?? 1);
+    if (tower.type === 'welder' || tower.type === 'rivetMortar') {
+      game.events.push({
+        type: 'towerFired',
+        towerId: tower.id,
+        tower: tower.type,
+        level,
+        x: centre.x,
+        y: centre.y,
+        path: [{x: target.x, y: target.y}],
+      });
+    }
     if (tower.type === 'welder') {
       damageEnemy(game, target, def.damage[level] ?? 0);
     } else if (tower.type === 'rivetMortar') {
@@ -188,6 +224,12 @@ function moveShots(game: GameState): void {
     const to = {x: shot.targetX, y: shot.targetY};
     const dist = distance(shot, to);
     if (dist <= step) {
+      game.events.push({
+        type: 'shellLanded',
+        x: to.x,
+        y: to.y,
+        splash: shot.splash,
+      });
       for (const e of inRange(game, to, shot.splash)) {
         damageEnemy(game, e, shot.damage);
       }

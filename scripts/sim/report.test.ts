@@ -118,7 +118,17 @@ describe('summarizeWaves', () => {
           tick: 2,
           event: {type: 'enemySpawned', enemyId: 6, robot: 'hauler', wave: 1},
         },
-        {tick: 3, event: {type: 'enemyKilled', enemyId: 5, reward: 6}},
+        {
+          tick: 3,
+          event: {
+            type: 'enemyKilled',
+            enemyId: 5,
+            robot: 'hauler',
+            reward: 6,
+            x: 0,
+            y: 0,
+          },
+        },
         {tick: 4, event: {type: 'enemyLeaked', enemyId: 6, leak: 1}},
         {tick: 5, event: {type: 'waveCleared', wave: 1, bonus: 17}},
       ],
