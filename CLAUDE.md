@@ -84,10 +84,13 @@ src/
 
 ### Reviews
 
-- Every PR gets a Copilot review as an adversarial second reviewer of generated code. Request it as soon as the PR is open: `gh pr edit <N> --add-reviewer @copilot`. For a stack, request it on every PR in the stack.
-- Read the findings before merging. Fix real problems, and reply on the thread to say why when you decline one. Never dismiss a finding without a reason.
-- If Copilot cannot review (for example the quota limit is reached), say so in the PR and run `/code-review` instead. A PR with no review from either does not merge.
-- Review is a second opinion, not a gate in place of CI: `ci` and `PR checks` must still pass.
+- Every PR gets an adversarial review by a Claude agent before it merges. Use the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`), launched as a fresh subagent so it does not share the author's context. Never self-review inline.
+- Give it the PR number, the base branch and the ticket number. For a stack, review each PR against its own diff.
+- It hunts for bugs, regressions, mismatches with the ticket's "Done when" list, violations of this file, weak tests, inconsistencies, and CI/CD or security problems. It is read-only and returns a report.
+- Post the report on the PR as a comment headed `Adversarial review (Claude)`.
+- Fix every `blocker` and `major` finding, or reply on the PR with the reason for declining. Never dismiss a finding without a reason. Re-run the reviewer after fixes that touch the findings.
+- A PR with unresolved blockers does not merge. Review is not a substitute for CI: `ci` and `PR checks` must still pass.
+- Other reviewers (a human, or Copilot when quota allows) are welcome extras, never the only review.
 
 ### Stacked PRs
 
