@@ -8,12 +8,13 @@ updates:
     commit-message:
       prefix: "build(deps)"
     groups:
+      # Majors arrive as separate PRs so one breaking release cannot block the rest.
       dev-dependencies:
         dependency-type: development
-      production-dependencies:
-        dependency-type: production
+        update-types: ["minor", "patch"]
     ignore:
       # Three.js is pinned and upgraded by hand with a performance check.
+      # Ignoring it also skips its security updates, so check Three.js advisories by hand.
       - dependency-name: three
       - dependency-name: "@types/three"
       # typescript-eslint does not support TypeScript 7 yet.
@@ -29,3 +30,4 @@ updates:
     groups:
       actions:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
