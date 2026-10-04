@@ -7,7 +7,7 @@ import {createScene} from './render/scene';
 import {createRobotLayer, createTowerLayer} from './render/units';
 import type {RobotPose, TowerPose} from './render/units';
 import {createClock, createGame, stepFrame, TICK_SECONDS} from './sim';
-import type {Clock, Command, FrameOptions, GameState} from './sim';
+import type {Clock, Command, FrameOptions, GameEvent, GameState} from './sim';
 import {reconcileSelection, selectAt} from './ui/selection';
 import type {Selection} from './ui/selection';
 
@@ -23,6 +23,8 @@ export interface App {
   setPaused(paused: boolean): void;
   /** Starts a fresh game from `seed`. */
   restart(seed: number): void;
+  /** Events from every tick run this frame, for toasts and effects. */
+  readonly frameEvents: readonly GameEvent[];
   /** Called once a frame, after the sim and the scene are up to date. */
   subscribe(listener: () => void): void;
 }
@@ -36,6 +38,7 @@ export function createApp(container: HTMLElement, seed: number): App {
   const robotPoses: RobotPose[] = [];
   const towerPoses: TowerPose[] = [];
   const listeners: (() => void)[] = [];
+  const frameEvents: GameEvent[] = [];
   scene.scene.add(robots.group, towers.group);
 
   let game = createGame(seed);
@@ -43,7 +46,7 @@ export function createApp(container: HTMLElement, seed: number): App {
   let mapView: MapView | undefined;
   let selection: Selection = {kind: 'none'};
   let speed = 1;
-  let paused = false;
+  let paused = true; // the start screen unpauses
   let lastMs: number | undefined;
   let towersDirty = true;
 
@@ -80,6 +83,7 @@ export function createApp(container: HTMLElement, seed: number): App {
     beforeTick: g => interpolator.capture(g),
     afterTick: g => {
       for (const event of g.events) {
+        frameEvents.push(event);
         if (
           event.type === 'towerBuilt' ||
           event.type === 'towerUpgraded' ||
@@ -95,6 +99,7 @@ export function createApp(container: HTMLElement, seed: number): App {
   scene.onFrame = now => {
     const elapsed = lastMs === undefined ? 0 : (now - lastMs) / 1000;
     lastMs = now;
+    frameEvents.length = 0;
     if (!paused && !game.over) {
       stepFrame(game, clock, elapsed, speed, frameOptions);
       alpha = Math.min(1, clock.accumulator / TICK_SECONDS);
@@ -116,6 +121,7 @@ export function createApp(container: HTMLElement, seed: number): App {
     get speed() {
       return speed;
     },
+    frameEvents,
     get paused() {
       return paused;
     },

@@ -9,7 +9,7 @@ export const CAMERA = {
   /** Free space around the board when it is fitted to the screen, in cells. */
   fitMarginCells: 0.5,
   /** The near edge of a tilted board is wider on screen than its centre. */
-  fitPerspectiveSlack: 1.25,
+  fitPerspectiveSlack: 1.08,
 } as const;
 
 /** Where the camera looks (on the ground plane) and how far away it is. */
@@ -54,7 +54,8 @@ export function fitDistance(view: View, bounds: Bounds): number {
   const depth = bounds.maxZ - bounds.minZ + CAMERA.fitMarginCells * 2;
   const forWidth =
     (width * CAMERA.fitPerspectiveSlack) / (2 * HALF_FOV_TAN * aspect);
-  const forDepth = (depth * SIN_PITCH) / (2 * HALF_FOV_TAN);
+  const forDepth =
+    (depth * SIN_PITCH * CAMERA.fitPerspectiveSlack) / (2 * HALF_FOV_TAN);
   return Math.max(forWidth, forDepth);
 }
 
@@ -64,7 +65,13 @@ export function clampCamera(
   view: View,
   bounds: Bounds
 ): CameraState {
-  const far = Math.max(CAMERA.minDistance, maxDistance(view));
+  // A screen too small to show the whole board at the pixel limit may still
+  // zoom out to the fitted view: seeing the Core matters more than 40 px.
+  const far = Math.max(
+    CAMERA.minDistance,
+    maxDistance(view),
+    fitDistance(view, bounds)
+  );
   return {
     targetX: Math.min(bounds.maxX, Math.max(bounds.minX, state.targetX)),
     targetZ: Math.min(bounds.maxZ, Math.max(bounds.minZ, state.targetZ)),
