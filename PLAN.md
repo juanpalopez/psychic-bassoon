@@ -118,6 +118,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Randomness | Seeded PRNG (mulberry32) | Maps and waves replay exactly from a seed |
 | Tests | Vitest for the simulation, one Playwright smoke test | Balance and map generation stay verifiable |
 | Audio | Howler.js or Web Audio, started on first tap | Browsers block sound before a user gesture |
+| CI/CD | GitHub Actions: PR checks, CI, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
 - **Camera.** Perspective camera pitched about 55° down with a ~35° field of view, close to the LoL angle. Pinch to zoom and drag to pan within clamped limits.
 - **Simulation.** Fixed 30 Hz tick owns all state. Rendering interpolates between ticks. 2×/3× speed = extra ticks per frame.
@@ -181,7 +182,9 @@ scrapline/
   tests/          # Vitest for sim, one Playwright smoke test
   docs/           # PLAN.md, LORE.md, design notes
   docs/art/       # reference sheets, GAPS.md (CC0 pack coverage and gaps)
-  .github/workflows/ci.yml
+  .github/
+    workflows/    # pr-checks.yml, ci.yml, deploy.yml, release.yml
+    ISSUE_TEMPLATE/, pull_request_template.md, dependabot.yml
 ```
 
 - `src/sim` never imports from `render` or `ui` (ESLint import rule).
@@ -189,6 +192,30 @@ scrapline/
 - Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
 - Git LFS for binary sources; only compressed GLBs ship.
 - MIT for code; art keeps each pack's CC0 terms.
+
+## CI/CD pipeline
+
+| Workflow | Trigger | What it does |
+| --- | --- | --- |
+| `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
+| `ci` | PR and push to `main` | `pnpm install --frozen-lockfile`, then lint (ESLint + `tsc`), Vitest (includes the seeded replay test), build, bundle-size budget, and the Playwright smoke test against the built `dist/`. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes `dist/` to GitHub Pages. A red `main` never reaches the public site. |
+| `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached. |
+
+**Versions follow phase gates** (semantic versioning, 0.x until launch): Phase 1 gate → `v0.1.0`, Phase 2 → `v0.2.0`, Phase 3 → `v0.3.0`, Phase 4 → `v0.4.0`, Phase 5 → `v1.0.0`. Fixes between gates bump the patch. Notes come from Conventional Commits, so commit messages are the changelog.
+
+**What CI can and can't prove**
+- CI checks: lint, types, determinism (replay), sim rules, bundle size (under 1 MB gzipped JS), and, from Phase 3, asset size (under 6 MB) and `assets/CREDITS.md` coverage for every GLB.
+- The smoke test also reads `renderer.info` on a fixed scene to catch draw-call and triangle regressions (under 120 and about 150k). Headless Chromium has no real GPU, so fps is not measured in CI.
+- 60 fps with 80 robots on a mid-range phone stays a manual check at the Phase 2 gate. Record device, fps and seed in the PR.
+
+**Hygiene**
+- Pin the Node version (`.nvmrc` and the `packageManager` field) so local, CI and deploy match; keep the pnpm store cached.
+- Dependabot for npm and GitHub Actions, grouped and weekly. Three.js stays pinned and is upgraded by hand with a perf check.
+- Least-privilege `permissions` on every workflow, `concurrency` to cancel superseded runs, no secrets in the repo.
+- Skip Git LFS in CI (`assets-src/` is source only; only compressed GLBs ship), which keeps runs fast and avoids LFS bandwidth quota.
+
+**Repository settings** (not code, set once in GitHub): protect `main` with required checks (`Conventional Commits`, `ci`), squash merge only, linear history, delete branches on merge, no direct pushes.
 
 ## Gameplay changes
 
@@ -226,8 +253,10 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 - pnpm + Vite + TypeScript (strict, no `any`) + Three.js (version pinned), with the `src/{sim,render,ui,content}` layout.
 - ESLint and `tsc --noEmit` behind `pnpm lint`, including the rule that `src/sim` cannot import `render`, `ui`, `three` or the DOM.
 - Vitest (`pnpm test`) and one Playwright smoke test (`pnpm test:e2e`).
-- CI running `pnpm lint && pnpm test && pnpm build` plus the Playwright smoke test; GitHub Pages deploy from `main` with the correct Vite `base`.
-- Release workflow: a `vMAJOR.MINOR.PATCH` tag re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached.
+- `ci` workflow: frozen-lockfile install, `pnpm lint && pnpm test && pnpm build`, a bundle-size check and the Playwright smoke test, with pnpm caching and a pinned Node version.
+- `deploy` workflow: GitHub Pages from `main`, only after `ci` passes, with the correct Vite `base`.
+- `release` workflow: a `vMAJOR.MINOR.PATCH` tag re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached.
+- Dependabot config, and the `main` branch protection from the CI/CD pipeline section.
 - Repo tidy: `docs/PLAN.md`, `prototype/scrapline.html` in place, codename recorded.
 
 **Out of scope:** any gameplay, art or HUD.
@@ -235,6 +264,8 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 **Gate checklist**
 - [ ] An empty Three.js scene is live on GitHub Pages from `main`.
 - [ ] CI is green; a deliberate bad import in `src/sim` fails lint.
+- [ ] `main` is protected: a PR with a failing check or a non-conforming title cannot merge.
+- [ ] A test tag produces a GitHub Release (then delete the test release and tag).
 - [ ] Every path mentioned in `CLAUDE.md` exists.
 
 ### Phase 1 · Simulation port (tickets #7–#13)
@@ -347,6 +378,8 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 | New robots, hybrids and upgrade parts have no pack match | Kitbash from pack parts or build from primitives; tracked in `docs/art/GAPS.md`. New robots ship only once their model exists. |
 | The angled camera hides robots behind towers | Short towers, enemy outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells ≥ 40 px |
+| Playwright can't render WebGL in headless CI | Use software GL (SwiftShader) in Chromium; if still flaky, the smoke test checks the page loads and the canvas exists, and render stats move to a Vitest check on the scene graph |
+| A broken `main` reaches GitHub Pages | `deploy` depends on `ci` passing; protected `main`; roll back by redeploying the last good tag |
 | Scope creep from lore and features | Phase gates: nothing new until the 3D port matches the prototype |
 | New enemies and branches break prototype balance | Add them behind content data flags in Phase 4; the Phase 1–2 sim stays prototype-identical and keeps its replay tests |
 
@@ -354,3 +387,5 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 - [ ] Embed the game in the personal site, or link out
 - [ ] Portrait only, or landscape too
 - [ ] Music: commission, CC0 tracks, or skip for v1
+- [ ] Pages: is `main` the live "latest" build, or does the public link only update on tagged releases
+- [ ] Testing on a phone before merge: LAN dev server only, or also upload `dist/` as a PR artifact (Pages can't preview PRs)
