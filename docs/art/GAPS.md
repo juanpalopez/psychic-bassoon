@@ -13,30 +13,37 @@ Shortlist of CC0 sources and what each unit still needs. Two packs were **downlo
 
 **Not found / not checked:** Quaternius Ultimate Space Kit (not on itch under that name; not downloaded), LowPoly Robot (FBX only, one humanoid, not downloaded).
 
-## Consequence for the plan
+## Direction: medieval (owner decision)
 
-The free packs cover little: three alien-looking drones and no towers. Towers, the Overseer and most level parts will be primitives or kitbashed unless a better CC0 source turns up. A shared palette texture on improved primitives (the Phase 2 greybox, refined) is a valid fallback and costs nothing in licences or size.
+The lore is now medieval (see `docs/PLAN.md` → Lore), which makes the Kenney Tower Defense Kit the **primary** source instead of a poor fit:
+
+- **Towers:** stone tower pieces, ballista, catapult and cannon weapons, and crystals cover the Ballista, Catapult, Frost Spire and Storm Spire. Recolour crystals to violet and yellow.
+- **Terrain:** grass and dirt road tiles, spawn and end tiles, trees, rocks, fences and snow variants for later chapters replace the primitive plates and belt.
+- **Heartstone (the Core):** crystal pieces.
+
+**Foes are still the gap.** Kenney's kit only has UFO enemies, and the Quaternius free kit has alien drones, neither of which is medieval. Foes need a second CC0 source (candidates to check: Quaternius fantasy and monster packs, Kenney Castle Kit, Fantasy Town Kit and Mini Dungeon). None is chosen or downloaded. Until then, foes stay as refined primitives, with the Warlord as the only skinned unit.
+
+The Quaternius Sci-Fi Essentials Kit is no longer a source; it stays here only as a record of what was checked.
 
 ## Gaps per unit
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Skitter | Eye Drone from the free Sci-Fi Essentials Kit | Strip skin, decimate to about 1k triangles, recolour. Fallback: the greybox primitive. |
-| Hauler | Quad Shell or Trilobite from the free kit (or a primitive) | Static pose, decimate, add a cargo frame. Fallback: primitive. |
-| Smelter | None in the free kit (tracked vehicles are Pro only) | Keep the primitive crawler and add emissive vents. |
-| Overseer | Trilobite (largest) as a kitbash base, or primitive | Add a red sensor core and crown. Only unit allowed skinning. Fallback: primitive. |
-| Welder, Rivet Mortar, Mainline Arc | Free-kit guns (Rifle, Sniper) as barrels; Kenney cannon and turret parts | Primitive bases tinted from the palette; pack parts only as barrels. |
-| Quench Coil | None expected | Primitive rings on a pack pole. |
+| Scamp, Raider, Ironclad | A fantasy or monster pack (to be found) | Recolour and decimate. Fallback: the greybox primitives, refined. |
+| Warlord | Same pack, a large champion | Add a red glowing core and an iron crown. Only unit allowed skinning. Fallback: primitive. |
+| Ballista, Catapult | Kenney `weapon-ballista`, `weapon-catapult` on a tower base | Recolour; add level add-ons (extra bolts, bigger arm). |
+| Frost Spire, Storm Spire | Kenney `tower-round-crystals` and crystal details | Violet and yellow crystals; add rings or prongs per level. |
+| Terrain and road | Kenney tiles | Needs a tile picker from the sim map; a decorative layer only. |
 | Level 2 and 3 parts, level lights | None | Small add-on parts from primitives; emissive pips. |
 
 ## Rules
 
 - A unit that is not distinct at zoomed-out view after recolouring gets a different model, not weaker readability.
 - Each unit keeps its primitive builder as the fallback behind `src/render/models/index.ts`.
-- Check polygon counts against the budget (about 150k triangles with 80 robots and every tower at level 3); decimate in Blender if needed.
+- Check polygon counts against the budget (about 150k triangles with 80 foes and every tower at level 3); decimate if needed.
 
 ## Next
 
-1. Decide the direction (see ticket #90): kitbash the three free drones, or refine the primitives with a shared palette texture.
-2. If kitbashing: build the conversion step (strip skin, decimate, compress) in the GLB pipeline ticket and record each file in `assets/CREDITS.md`.
-3. Final reference sheets (Claude Design) follow the chosen direction.
+1. Find and verify a CC0 source for foes (download, open the licence file, count triangles and skins).
+2. Build the conversion step (strip skin, decimate, compress) in the GLB pipeline ticket (#92); record each file in `assets/CREDITS.md`.
+3. Rename units in code to the medieval names (separate PR), then swap models one at a time.
