@@ -1,27 +1,31 @@
 # Asset gaps (Phase 3)
 
-Shortlist of CC0 sources and what each unit still needs. Coverage is an expectation from the pack pages, **not verified**: the models have not been downloaded or opened yet, and licences are taken from the pack pages. Before any asset enters `public/assets/` or `assets-src/`, download the pack, open its licence file and confirm CC0, then add it to `assets/CREDITS.md`.
+Shortlist of CC0 sources and what each unit still needs. Two packs were **downloaded and opened** (see Verified); the rest is still an expectation from pack pages. Before any asset enters `public/assets/`, record it in `assets/CREDITS.md` with its source and licence.
 
-## Shortlist
+## Verified (downloaded and opened)
 
-| Pack | Author | Why it is on the list | Licence on the pack page | Status |
-| --- | --- | --- | --- | --- |
-| [Sci-Fi Essentials Kit](https://quaternius.com/packs/scifiessentialskit.html) | Quaternius | Animated robot enemies, textured turrets and guns, tracked vehicles, 65 models, glTF | CC0 | Primary candidate for robots, the Smelter base and tower bases. Download and confirm the licence file. |
-| [Ultimate Space Kit](https://sketchfab.com/3d-models/ultimate-space-kit-84c108ff2bcf4d4cbf2adff74a942822) | Quaternius | 90+ models including animated characters and mechs; a source for the Overseer | CC0 | Check the mech models and polygon counts. |
-| [LowPoly Robot](https://quaternius.itch.io/lowpoly-robot) | Quaternius | One animated robot (FBX only, 14 animations) | CC0 | Fallback for the Hauler body; needs conversion to glTF. |
-| [Tower Defense Kit](https://kenney.nl/assets/tower-defense-kit) | Kenney | Tower and structure pieces, about 160 files | CC0 | Source for tower bases and props. Format list not shown on the page; check after download. |
+| Pack | Licence file | What is really in it | Verdict |
+| --- | --- | --- | --- |
+| Quaternius **Sci-Fi Essentials Kit, free "Standard" version** (itch.io, 159 MB zip) | `License_Standard.txt`: CC0 1.0 Universal | Only 3 enemies (Eye Drone 3.5k triangles, Quad Shell 7.5k, Trilobite 8.3k; all skinned, 6 to 9 animations each, 1 to 3 MB PBR textures), 8 guns, about 40 props (crates, shelves, satellite dish, planets). **No turrets and no tracked vehicles**: the page's "turrets and tracked vehicles" belong to the paid Pro version, which is not CC0-free. | Usable as kitbash and reference. Eye Drone is a possible Skitter; Quad Shell and Trilobite could become Hauler or Smelter bases. Far over budget as shipped (about 6k triangles each against about 1k per robot at 80 robots), skinned (rule: no skinning except the Overseer), so each must be stripped to a static pose, decimated and re-textured first. |
+| Kenney **Tower Defense Kit 2.1** (160 GLB files) | `License.txt`: CC0 | Fantasy towers (stone, round and square, with crystals), catapult, ballista, cannon, turret weapon parts, UFO enemies, terrain tiles. Single colour-swatch material, about 40 to 60 KB per model. | Style clashes with a robot factory. Useful only as turret weapon parts (cannon, turret) after recolour. Not a base for the towers. |
 
-**Rejected:** [Sci-Fi Turrets Pack](https://sasvel.itch.io/sci-fi-turrets-pack) (sasvel). It ships glb and rigged turrets, but the page states CC BY 4.0, not CC0. Rule: CC0 only unless asked otherwise.
+**Rejected:** [Sci-Fi Turrets Pack](https://sasvel.itch.io/sci-fi-turrets-pack) (sasvel). Rigged turrets in glb, but the page states CC BY 4.0, not CC0. Rule: CC0 only unless asked otherwise.
+
+**Not found / not checked:** Quaternius Ultimate Space Kit (not on itch under that name; not downloaded), LowPoly Robot (FBX only, one humanoid, not downloaded).
+
+## Consequence for the plan
+
+The free packs cover little: three alien-looking drones and no towers. Towers, the Overseer and most level parts will be primitives or kitbashed unless a better CC0 source turns up. A shared palette texture on improved primitives (the Phase 2 greybox, refined) is a valid fallback and costs nothing in licences or size.
 
 ## Gaps per unit
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Skitter | Small robot or drone from Sci-Fi Essentials Kit | Recolour; keep it spindly and small so it reads as the fastest unit. Fallback: the greybox primitive. |
-| Hauler | Robot from Sci-Fi Essentials Kit, or LowPoly Robot | Add a cargo frame as a kitbash part. Fallback: primitive. |
-| Smelter | Tracked vehicle from Sci-Fi Essentials Kit | Add glowing vents (emissive parts). Fallback: primitive. |
-| Overseer | Large mech from Ultimate Space Kit | Add a red sensor core and crown. Only unit allowed skinning. Fallback: primitive. |
-| Welder, Rivet Mortar, Mainline Arc | Turret and gun models from Sci-Fi Essentials Kit and Tower Defense Kit | Tint from the palette; Mainline Arc prongs and Quench Coil rings likely built from primitives. |
+| Skitter | Eye Drone from the free Sci-Fi Essentials Kit | Strip skin, decimate to about 1k triangles, recolour. Fallback: the greybox primitive. |
+| Hauler | Quad Shell or Trilobite from the free kit (or a primitive) | Static pose, decimate, add a cargo frame. Fallback: primitive. |
+| Smelter | None in the free kit (tracked vehicles are Pro only) | Keep the primitive crawler and add emissive vents. |
+| Overseer | Trilobite (largest) as a kitbash base, or primitive | Add a red sensor core and crown. Only unit allowed skinning. Fallback: primitive. |
+| Welder, Rivet Mortar, Mainline Arc | Free-kit guns (Rifle, Sniper) as barrels; Kenney cannon and turret parts | Primitive bases tinted from the palette; pack parts only as barrels. |
 | Quench Coil | None expected | Primitive rings on a pack pole. |
 | Level 2 and 3 parts, level lights | None | Small add-on parts from primitives; emissive pips. |
 
@@ -33,6 +37,6 @@ Shortlist of CC0 sources and what each unit still needs. Coverage is an expectat
 
 ## Next
 
-1. Download the three Quaternius packs and the Kenney kit; confirm each licence file; note exact model names for each unit.
-2. Update this file with the chosen model per unit and its polygon count.
-3. Final reference sheets (Claude Design) follow this list.
+1. Decide the direction (see ticket #90): kitbash the three free drones, or refine the primitives with a shared palette texture.
+2. If kitbashing: build the conversion step (strip skin, decimate, compress) in the GLB pipeline ticket and record each file in `assets/CREDITS.md`.
+3. Final reference sheets (Claude Design) follow the chosen direction.
