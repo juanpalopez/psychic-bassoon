@@ -1,13 +1,8 @@
-import {
-  Group,
-  InstancedMesh,
-  Matrix4,
-  MeshLambertMaterial,
-  Object3D,
-} from 'three';
+import {Group, InstancedMesh, Matrix4, Object3D} from 'three';
 import {ENEMY_IDS, GRID, RULES, TOWER_IDS} from '../content';
 import type {EnemyId, TowerId} from '../content';
-import {FOE_MODELS, TOWER_MODELS} from './models';
+import type {UnitModel} from './models/glb';
+import type {ModelLibrary} from './models/library';
 
 /** Most foes of one type drawn at once; the plan budgets about 80 in all. */
 const FOE_CAPACITY = 128;
@@ -38,8 +33,7 @@ export interface UnitLayer<T> {
 
 function makeMesh(
   name: string,
-  geometry: ConstructorParameters<typeof InstancedMesh>[0],
-  material: MeshLambertMaterial,
+  {geometry, material}: UnitModel,
   capacity: number
 ): InstancedMesh {
   const mesh = new InstancedMesh(geometry, material, capacity);
@@ -50,12 +44,11 @@ function makeMesh(
 }
 
 /** One `InstancedMesh` per foe type, so 80 foes cost four draw calls. */
-export function createFoeLayer(): UnitLayer<FoePose> {
+export function createFoeLayer(models: ModelLibrary): UnitLayer<FoePose> {
   const group = new Group();
-  const material = new MeshLambertMaterial({vertexColors: true});
   const meshes = new Map<EnemyId, InstancedMesh>();
   for (const id of ENEMY_IDS) {
-    const mesh = makeMesh(id, FOE_MODELS[id](), material, FOE_CAPACITY);
+    const mesh = makeMesh(id, models.foe(id), FOE_CAPACITY);
     meshes.set(id, mesh);
     group.add(mesh);
   }
@@ -76,22 +69,21 @@ export function createFoeLayer(): UnitLayer<FoePose> {
         mesh.instanceMatrix.needsUpdate = true;
     },
     dispose() {
-      for (const mesh of meshes.values()) mesh.geometry.dispose();
-      material.dispose();
+      // geometries and materials belong to the model library
+      for (const mesh of meshes.values()) mesh.dispose();
     },
   };
 }
 
 /** One `InstancedMesh` per tower type and level: 12 draw calls at most. */
-export function createTowerLayer(): UnitLayer<TowerPose> {
+export function createTowerLayer(models: ModelLibrary): UnitLayer<TowerPose> {
   const group = new Group();
-  const material = new MeshLambertMaterial({vertexColors: true});
   const meshes = new Map<string, InstancedMesh>();
   const capacity = GRID.cols * GRID.rows;
   for (const id of TOWER_IDS) {
     for (let level = 0; level < LEVELS; level++) {
       const key = `${id}:${level}`;
-      const mesh = makeMesh(key, TOWER_MODELS[id](level), material, capacity);
+      const mesh = makeMesh(key, models.tower(id, level), capacity);
       meshes.set(key, mesh);
       group.add(mesh);
     }
@@ -115,8 +107,8 @@ export function createTowerLayer(): UnitLayer<TowerPose> {
         mesh.instanceMatrix.needsUpdate = true;
     },
     dispose() {
-      for (const mesh of meshes.values()) mesh.geometry.dispose();
-      material.dispose();
+      // geometries and materials belong to the model library
+      for (const mesh of meshes.values()) mesh.dispose();
     },
   };
 }

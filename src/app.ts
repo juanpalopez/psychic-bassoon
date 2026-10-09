@@ -6,6 +6,7 @@ import {createSelectionMarker} from './render/selection-marker';
 import type {MapView} from './render/map';
 import {pickCell} from './render/picking';
 import {createScene} from './render/scene';
+import type {ModelLibrary} from './render/models/library';
 import {createFoeLayer, createTowerLayer} from './render/units';
 import type {FoePose, TowerPose} from './render/units';
 import {createClock, createGame, stepFrame, TICK_SECONDS} from './sim';
@@ -38,10 +39,14 @@ export interface App {
 }
 
 /** Wires the sim, the 3D scene and the UI together. The only place that does. */
-export function createApp(container: HTMLElement, seed: number): App {
+export function createApp(
+  container: HTMLElement,
+  seed: number,
+  models: ModelLibrary
+): App {
   const scene = createScene(container, GRID);
-  const foes = createFoeLayer();
-  const towers = createTowerLayer();
+  const foes = createFoeLayer(models);
+  const towers = createTowerLayer(models);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const effects = createEffectsLayer(() => reduced.matches);
   const interpolator = createInterpolator();

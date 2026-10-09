@@ -1,4 +1,5 @@
 import {createApp} from './app';
+import {glbSceneLoader, loadModelLibrary} from './render/models/library';
 import {positionAt, spawnEnemy} from './sim';
 import {createAudio, soundFor} from './ui/audio';
 import {createHud} from './ui/hud';
@@ -20,7 +21,11 @@ function pickSeed(): number {
   return crypto.getRandomValues(new Uint32Array(1))[0] || 1;
 }
 
-const app = createApp(slots.stage, pickSeed());
+// Models load first (a few small GLBs); any that fail fall back to primitives.
+const models = await loadModelLibrary(
+  glbSceneLoader(`${import.meta.env.BASE_URL}assets/models/`)
+);
+const app = createApp(slots.stage, pickSeed(), models);
 createHud(app, {
   top: slots.top,
   stage: slots.stage,

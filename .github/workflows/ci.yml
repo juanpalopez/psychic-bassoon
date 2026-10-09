@@ -66,6 +66,9 @@ jobs:
       - name: Bundle size budget
         run: pnpm check:size
 
+      - name: Asset budget and credits
+        run: pnpm check:assets
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
