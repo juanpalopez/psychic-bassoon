@@ -23,8 +23,8 @@ export interface GlbUnit {
  */
 export const FOE_GLB: Readonly<Partial<Record<EnemyId, GlbUnit>>> = {
   // Kenney Mini Dungeon characters: about 0.8 tall and facing +z already.
-  scamp: {parts: [{file: 'mini-dungeon/character-orc.glb', scale: 0.7}]},
-  raider: {parts: [{file: 'mini-dungeon/character-human.glb', scale: 0.95}]},
+  scamp: {parts: [{file: 'mini-dungeon/character-orc.glb', scale: 0.55}]},
+  raider: {parts: [{file: 'mini-dungeon/character-human.glb', scale: 1.1}]},
   // Kenney siege tower, the tallest foe: it is 2.9 tall at scale 1.
   warlord: {
     parts: [
