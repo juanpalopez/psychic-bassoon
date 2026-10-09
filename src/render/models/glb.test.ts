@@ -120,4 +120,14 @@ describe('buildGlbUnit', () => {
     ).rejects.toThrow('could not merge');
     warn.mockRestore();
   });
+
+  it('tints the material so one palette can serve several units', async () => {
+    const unit = await buildGlbUnit(
+      {parts: [{file: 'a'}], tint: 0xffe08a},
+      async () => longBox()
+    );
+    expect(
+      (unit.material as unknown as {color: {getHex(): number}}).color.getHex()
+    ).toBe(0xffe08a);
+  });
 });

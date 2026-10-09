@@ -82,10 +82,11 @@ export async function buildGlbUnit(
     );
   }
   // Kenney's materials are double sided (open wheels, flat shields).
-  const material = new MeshLambertMaterial(
-    texture
-      ? {map: texture, side: DoubleSide}
-      : {color: 0xcccccc, side: DoubleSide}
-  );
+  // `color` multiplies the texture, so a tint recolours a whole kit unit.
+  const material = new MeshLambertMaterial({
+    map: texture ?? null,
+    color: unit.tint ?? (texture ? 0xffffff : 0xcccccc),
+    side: DoubleSide,
+  });
   return {geometry, material};
 }

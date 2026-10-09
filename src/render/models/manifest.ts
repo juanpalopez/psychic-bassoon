@@ -12,6 +12,8 @@ export interface GlbPart {
 
 export interface GlbUnit {
   readonly parts: readonly GlbPart[];
+  /** Multiplies the kit's colours, so one palette can serve many units. */
+  readonly tint?: number;
 }
 
 /**
