@@ -113,7 +113,12 @@ export function createMapView(map: GameMap): MapView {
       group.add(marker);
     };
     pad('spawn', PALETTE.spawn, first.col, -RULES.spawnOffset);
-    pad('core', PALETTE.core, last.col, last.row + RULES.cellCentre);
+    pad(
+      'heartstone',
+      PALETTE.heartstone,
+      last.col,
+      last.row + RULES.cellCentre
+    );
   }
 
   const key = new DirectionalLight(0xffffff, 2.2);

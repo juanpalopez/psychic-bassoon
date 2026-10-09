@@ -9,7 +9,7 @@ export interface Cell {
   readonly row: number;
 }
 
-/** `plot` cells accept a tower; `path` cells carry the foes. */
+/** `plot` cells accept a tower; `road` cells carry the foes. */
 export type Tile = 'road' | 'plot';
 
 /** The generated board: the foes' route and the grid it sits on. */

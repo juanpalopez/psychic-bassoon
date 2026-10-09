@@ -63,7 +63,7 @@ export function createHud(app: App, slots: Slots): void {
     return value;
   };
   const gold = stat('gold', 'Gold');
-  const livesBox = top.appendChild(el('div', 'stat core'));
+  const livesBox = top.appendChild(el('div', 'stat heart'));
   const lives = el('b', '', '0');
   livesBox.append(el('span', '', 'Heart'), lives);
   const wave = stat('', 'Wave');

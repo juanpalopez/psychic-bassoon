@@ -48,15 +48,15 @@ describe('createMapView', () => {
     expect(get(again, 'plots')).toEqual(get(view, 'plots'));
   });
 
-  it('puts the spawn marker above the first path cell and the core on the last', () => {
+  it('puts the spawn marker above the first path cell and the Heartstone on the last', () => {
     const first = map.path[0];
     const last = map.path.at(-1);
     const spawn = view.group.getObjectByName('spawn');
-    const core = view.group.getObjectByName('core');
+    const heartstone = view.group.getObjectByName('heartstone');
     expect(spawn?.position.x).toBe((first?.col ?? 0) + 0.5);
     expect(spawn?.position.z).toBeLessThan(0.5);
-    expect(core?.position.x).toBe((last?.col ?? 0) + 0.5);
-    expect(core?.position.z).toBe((last?.row ?? 0) + 0.5);
+    expect(heartstone?.position.x).toBe((last?.col ?? 0) + 0.5);
+    expect(heartstone?.position.z).toBe((last?.row ?? 0) + 0.5);
   });
 
   it('frees its geometry and materials on dispose', () => {

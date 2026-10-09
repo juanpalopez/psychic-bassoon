@@ -71,7 +71,7 @@ export function parseArgs(argv: readonly string[]): Args {
   return args;
 }
 
-/** Draws the board: S spawn, C core, # road, . plot. */
+/** Draws the board: S spawn, C heartstone, # road, . plot. */
 export function formatMap(map: GameMap): string {
   const first = map.path[0];
   const last = map.path.at(-1);
@@ -188,7 +188,7 @@ export function buildReport({seed, waves, speed}: Args): string {
   return [
     `Scrapline sim · seed ${seed} · ${waves} waves · speed ${speed}`,
     '',
-    'Map (S spawn, C core, # road, . plot)',
+    'Map (S spawn, C heartstone, # road, . plot)',
     formatMap(game.map),
     '',
     formatTable(summarizeWaves(driven.events, clears)),

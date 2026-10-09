@@ -10,7 +10,7 @@ export const PALETTE = {
   roadStripe: 0xf2b134,
   selection: 0xf2b134, // the accent colour
   spawn: 0xff8a3d,
-  core: 0x5fd38a,
+  heartstone: 0x5fd38a,
   towers: {
     ballista: 0x3ddbd9,
     catapult: 0xff8a3d,

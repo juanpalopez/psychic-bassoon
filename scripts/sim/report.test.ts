@@ -25,7 +25,7 @@ const MAP: GameMap = {
 };
 
 describe('formatMap', () => {
-  it('draws road, spawn, core and plots', () => {
+  it('draws road, spawn, heartstone and plots', () => {
     expect(formatMap(MAP)).toBe(['.S.', '.##', '..C'].join('\n'));
   });
 });

@@ -13,7 +13,7 @@ if (!slots.top || !slots.stage || !slots.panel || !slots.controls) {
   throw new Error('Missing HUD containers in index.html');
 }
 
-/** `?seed=123` replays a map; otherwise every visit is a new factory. */
+/** `?seed=123` replays a map; otherwise every visit is a new road. */
 function pickSeed(): number {
   const fromUrl = Number(new URLSearchParams(location.search).get('seed'));
   if (Number.isSafeInteger(fromUrl) && fromUrl > 0) return fromUrl;
