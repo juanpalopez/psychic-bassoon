@@ -9,13 +9,13 @@ export interface Cell {
   readonly row: number;
 }
 
-/** `plate` cells accept a tower; `path` cells carry the robots. */
-export type Tile = 'path' | 'plate';
+/** `plot` cells accept a tower; `road` cells carry the foes. */
+export type Tile = 'road' | 'plot';
 
-/** The generated board: the robots' route and the grid it sits on. */
+/** The generated board: the foes' route and the grid it sits on. */
 export interface GameMap {
   readonly seed: number;
-  /** Route cells in walking order, from the spawn row to the Core. */
+  /** Route cells in walking order, from the spawn row to the Heartstone. */
   readonly path: readonly Cell[];
   readonly tiles: readonly (readonly Tile[])[];
 }
@@ -57,11 +57,11 @@ export function generateMap(seed: number): GameMap {
     const path = tryPath(rng);
     if (path) {
       const tiles: Tile[][] = Array.from({length: GRID.rows}, () =>
-        new Array<Tile>(GRID.cols).fill('plate')
+        new Array<Tile>(GRID.cols).fill('plot')
       );
       for (const {col, row} of path) {
         const line = tiles[row];
-        if (line) line[col] = 'path';
+        if (line) line[col] = 'road';
       }
       return {seed, path, tiles};
     }

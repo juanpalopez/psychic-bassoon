@@ -28,26 +28,26 @@ const PROTOTYPE_DEF = literal('DEF');
 const PROTOTYPE_EN = literal('EN');
 
 const TOWER_TO_PROTOTYPE = {
-  welder: 'laser',
-  rivetMortar: 'rocket',
-  quenchCoil: 'emp',
-  mainlineArc: 'tesla',
+  ballista: 'laser',
+  catapult: 'rocket',
+  frostSpire: 'emp',
+  stormSpire: 'tesla',
 } as const;
 
 const ENEMY_TO_PROTOTYPE = {
-  skitter: 'scout',
-  hauler: 'walker',
-  smelter: 'tank',
-  overseer: 'boss',
+  scamp: 'scout',
+  raider: 'walker',
+  ironclad: 'tank',
+  warlord: 'boss',
 } as const;
 
 describe('towers', () => {
   it('lists the four lore names in prototype order', () => {
     expect(TOWER_IDS).toEqual([
-      'welder',
-      'rivetMortar',
-      'quenchCoil',
-      'mainlineArc',
+      'ballista',
+      'catapult',
+      'frostSpire',
+      'stormSpire',
     ]);
   });
 
@@ -75,7 +75,7 @@ describe('towers', () => {
 
 describe('enemies', () => {
   it('lists the four lore names in prototype order', () => {
-    expect(ENEMY_IDS).toEqual(['skitter', 'hauler', 'smelter', 'overseer']);
+    expect(ENEMY_IDS).toEqual(['scamp', 'raider', 'ironclad', 'warlord']);
   });
 
   it.each(ENEMY_IDS)('%s matches the prototype numbers', id => {
@@ -93,7 +93,7 @@ describe('enemies', () => {
 describe('grid and rules', () => {
   it('matches the prototype board and starting state', () => {
     expect(GRID).toEqual({cols: 9, rows: 13});
-    expect(RULES.startCredits).toBe(180);
+    expect(RULES.startGold).toBe(180);
     expect(RULES.startLives).toBe(20);
     expect(RULES.sellRefund).toBe(0.7);
     expect(RULES.minDamageFraction).toBe(0.25);
@@ -116,7 +116,7 @@ describe('grid and rules', () => {
   });
 
   it('matches the prototype tower mechanics', () => {
-    expect(RULES.quenchSlowSeconds).toBe(1.4);
+    expect(RULES.frostSlowSeconds).toBe(1.4);
     expect(RULES.rocketSpeed).toBe(5.5);
     expect(RULES.arcChainRadius).toBe(1.6);
     expect(RULES.arcChainFalloff).toBe(0.8);
@@ -152,23 +152,23 @@ describe('wave tables', () => {
     expect(WAVES.gapPerWave).toBe(0.025);
     expect(WAVES.gapMin).toBe(0.32);
     expect(WAVES.gapMultiplier).toEqual({
-      smelter: 1.4,
-      skitter: 0.6,
-      skitterSwarm: 0.45,
-      hauler: 1,
+      ironclad: 1.4,
+      scamp: 0.6,
+      scampSwarm: 0.45,
+      raider: 1,
       bossEscort: 2,
     });
-    expect(WAVES.overseerGap).toBe(1);
+    expect(WAVES.warlordGap).toBe(1);
   });
 
   it('matches the prototype enemy mix', () => {
-    expect(WAVES.swarmSkitterChance).toBe(0.75);
-    expect(WAVES.skitterFromWave).toBe(2);
-    expect(WAVES.skitterChance).toBe(0.3);
-    expect(WAVES.smelterFromWave).toBe(4);
-    expect(WAVES.smelterBaseThreshold).toBe(0.82);
-    expect(WAVES.smelterThresholdPerWave).toBe(0.01);
-    expect(WAVES.smelterThresholdCap).toBe(0.2);
+    expect(WAVES.swarmScampChance).toBe(0.75);
+    expect(WAVES.scampFromWave).toBe(2);
+    expect(WAVES.scampChance).toBe(0.3);
+    expect(WAVES.ironcladFromWave).toBe(4);
+    expect(WAVES.ironcladBaseThreshold).toBe(0.82);
+    expect(WAVES.ironcladThresholdPerWave).toBe(0.01);
+    expect(WAVES.ironcladThresholdCap).toBe(0.2);
   });
 
   it('matches the prototype per-wave scaling', () => {

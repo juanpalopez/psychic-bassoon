@@ -3,8 +3,8 @@ import {compose, cylinder, ring, sphere} from './parts';
 import {TOWER_TINT, towerBase} from './tower-base';
 
 /** Pole wound with rings; every level adds a ring. */
-export function buildQuenchCoil(level: number): BufferGeometry {
-  const tint = TOWER_TINT.quenchCoil;
+export function buildFrostSpire(level: number): BufferGeometry {
+  const tint = TOWER_TINT.frostSpire;
   const rings = Array.from({length: level + 2}, (_, i) => ({
     geometry: ring(0.24 - i * 0.03, 0.04),
     color: tint,

@@ -5,8 +5,8 @@ import {box, compose, cylinder} from './parts';
 const SIDE = Math.PI / 2;
 
 /** Spindly courier drone on three wheels. Faces +z. */
-export function buildSkitter(): BufferGeometry {
-  const body = PALETTE.robots.skitter;
+export function buildScamp(): BufferGeometry {
+  const body = PALETTE.foes.scamp;
   const dark = 0x39424f;
   return compose([
     {geometry: box(0.28, 0.14, 0.36), color: body, position: [0, 0.18, 0]},

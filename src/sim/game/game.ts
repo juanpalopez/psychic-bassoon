@@ -8,20 +8,20 @@ import type {Rng} from '../rng';
 import {RNG_STREAMS} from '../streams';
 import {settleWave, startWave, stepSpawners} from '../waves';
 
-/** A tower on a plate. `level` counts from 0 (level 1) to 2 (level 3). */
+/** A tower on a plot. `level` counts from 0 (level 1) to 2 (level 3). */
 export interface Tower {
   readonly id: number;
   readonly type: TowerId;
   level: number;
   readonly col: number;
   readonly row: number;
-  /** Credits spent so far; a sale refunds a share of it. */
+  /** Gold spent so far; a sale refunds a share of it. */
   invested: number;
   /** Seconds until it may fire again. Runs below zero while idle. */
   cooldown: number;
 }
 
-/** A robot walking the route. Removed from the game when `alive` is false. */
+/** A foe walking the route. Removed from the game when `alive` is false. */
 export interface Enemy {
   readonly id: number;
   readonly type: EnemyId;
@@ -43,13 +43,13 @@ export interface Enemy {
   alive: boolean;
 }
 
-/** One robot a wave will release, and the pause before the next one. */
+/** One foe a wave will release, and the pause before the next one. */
 export interface SpawnOrder {
   readonly type: EnemyId;
   readonly gap: number;
 }
 
-/** A wave releasing its robots over time. */
+/** A wave releasing its foes over time. */
 export interface Spawner {
   queue: SpawnOrder[];
   /** Seconds until the next release. */
@@ -57,7 +57,7 @@ export interface Spawner {
   readonly wave: number;
 }
 
-/** A Rivet Mortar shell in flight. */
+/** A Catapult shell in flight. */
 export interface Shot {
   x: number;
   y: number;
@@ -86,10 +86,10 @@ export type Command =
 
 export type RejectReason =
   | 'gameOver'
-  | 'notAPlate'
+  | 'notAPlot'
   | 'unknownTower'
   | 'occupied'
-  | 'notEnoughCredits'
+  | 'notEnoughGold'
   | 'maxLevel'
   | 'noSuchTower'
   | 'waveInProgress';
@@ -120,13 +120,13 @@ export type GameEvent =
   | {
       readonly type: 'enemySpawned';
       readonly enemyId: number;
-      readonly robot: EnemyId;
+      readonly foe: EnemyId;
       readonly wave: number;
     }
   | {
       readonly type: 'enemyKilled';
       readonly enemyId: number;
-      readonly robot: EnemyId;
+      readonly foe: EnemyId;
       readonly reward: number;
       readonly x: number;
       readonly y: number;
@@ -167,10 +167,10 @@ export type GameEvent =
 export interface GameState {
   readonly seed: number;
   readonly map: GameMap;
-  /** The line robots walk, built once from the map. */
+  /** The line foes walk, built once from the map. */
   readonly route: Route;
   tick: number;
-  credits: number;
+  gold: number;
   lives: number;
   /** Number of the wave most recently launched; 0 before the first. */
   wave: number;
@@ -196,7 +196,7 @@ export function createGame(seed: number): GameState {
     map,
     route: buildRoute(map.path),
     tick: 0,
-    credits: RULES.startCredits,
+    gold: RULES.startGold,
     lives: RULES.startLives,
     wave: 0,
     running: false,
@@ -221,7 +221,7 @@ function reject(game: GameState, command: Command, reason: RejectReason) {
   game.events.push({type: 'commandRejected', command, reason});
 }
 
-function isPlate(game: GameState, col: number, row: number): boolean {
+function isPlot(game: GameState, col: number, row: number): boolean {
   return (
     Number.isInteger(col) &&
     Number.isInteger(row) &&
@@ -229,7 +229,7 @@ function isPlate(game: GameState, col: number, row: number): boolean {
     col < GRID.cols &&
     row >= 0 &&
     row < GRID.rows &&
-    game.map.tiles[row]?.[col] === 'plate'
+    game.map.tiles[row]?.[col] === 'plot'
   );
 }
 
@@ -237,13 +237,13 @@ function build(game: GameState, command: Extract<Command, {type: 'build'}>) {
   const {tower, col, row} = command;
   if (!Object.hasOwn(TOWERS, tower))
     return reject(game, command, 'unknownTower');
-  if (!isPlate(game, col, row)) return reject(game, command, 'notAPlate');
+  if (!isPlot(game, col, row)) return reject(game, command, 'notAPlot');
   if (game.towers.some(t => t.col === col && t.row === row)) {
     return reject(game, command, 'occupied');
   }
   const cost = TOWERS[tower].cost[0];
-  if (game.credits < cost) return reject(game, command, 'notEnoughCredits');
-  game.credits -= cost;
+  if (game.gold < cost) return reject(game, command, 'notEnoughGold');
+  game.gold -= cost;
   const id = game.nextId++;
   game.towers.push({
     id,
@@ -265,8 +265,8 @@ function upgrade(
   if (!tower) return reject(game, command, 'noSuchTower');
   const cost = TOWERS[tower.type].cost[tower.level + 1];
   if (cost === undefined) return reject(game, command, 'maxLevel');
-  if (game.credits < cost) return reject(game, command, 'notEnoughCredits');
-  game.credits -= cost;
+  if (game.gold < cost) return reject(game, command, 'notEnoughGold');
+  game.gold -= cost;
   tower.invested += cost;
   tower.level++;
   game.events.push({
@@ -280,7 +280,7 @@ function sell(game: GameState, command: Extract<Command, {type: 'sell'}>) {
   const tower = game.towers.find(t => t.id === command.towerId);
   if (!tower) return reject(game, command, 'noSuchTower');
   const refund = Math.floor(tower.invested * RULES.sellRefund);
-  game.credits += refund;
+  game.gold += refund;
   game.towers = game.towers.filter(t => t !== tower);
   game.events.push({type: 'towerSold', towerId: tower.id, refund});
 }
@@ -292,7 +292,7 @@ function launchWave(game: GameState, command: Command) {
   const earlyBonus = game.running
     ? RULES.earlyCallBase + game.wave * RULES.earlyCallPerWave
     : 0;
-  game.credits += earlyBonus;
+  game.gold += earlyBonus;
   game.wave++;
   game.running = true;
   startWave(game);

@@ -6,7 +6,7 @@ import {distance, positionAt} from '../map';
 import type {Point} from '../map';
 import {enemyStatsForWave} from './scaling';
 
-/** Puts a robot of `wave`'s strength on the spawn point. */
+/** Puts a foe of `wave`'s strength on the spawn point. */
 export function spawnEnemy(
   game: GameState,
   type: EnemyId,
@@ -36,7 +36,7 @@ export function spawnEnemy(
   game.events.push({
     type: 'enemySpawned',
     enemyId: enemy.id,
-    robot: type,
+    foe: type,
     wave,
   });
   return enemy;
@@ -52,11 +52,11 @@ export function damageEnemy(
   enemy.hp -= Math.max(amount * RULES.minDamageFraction, amount - enemy.armor);
   if (enemy.hp <= 0) {
     enemy.alive = false;
-    game.credits += enemy.reward;
+    game.gold += enemy.reward;
     game.events.push({
       type: 'enemyKilled',
       enemyId: enemy.id,
-      robot: enemy.type,
+      foe: enemy.type,
       reward: enemy.reward,
       x: enemy.x,
       y: enemy.y,
@@ -101,7 +101,7 @@ function centreOf(tower: Tower): Point {
   };
 }
 
-/** The robot furthest along the route; the first one wins a tie. */
+/** The foe furthest along the route; the first one wins a tie. */
 function frontmost(enemies: readonly Enemy[]): Enemy | undefined {
   let best = enemies[0];
   for (const e of enemies) if (best && e.distance > best.distance) best = e;
@@ -109,7 +109,7 @@ function frontmost(enemies: readonly Enemy[]): Enemy | undefined {
 }
 
 function pulse(game: GameState, tower: Tower, targets: Enemy[]): void {
-  const def = TOWERS.quenchCoil;
+  const def = TOWERS.frostSpire;
   const slow = def.slow?.[tower.level] ?? 0;
   const centre = centreOf(tower);
   game.events.push({
@@ -123,13 +123,13 @@ function pulse(game: GameState, tower: Tower, targets: Enemy[]): void {
   });
   for (const e of targets) {
     e.slow = Math.max(e.slow, slow);
-    e.slowTimer = RULES.quenchSlowSeconds;
+    e.slowTimer = RULES.frostSlowSeconds;
     damageEnemy(game, e, def.damage[tower.level] ?? 0);
   }
 }
 
 function chainLightning(game: GameState, tower: Tower, first: Enemy): void {
-  const def = TOWERS.mainlineArc;
+  const def = TOWERS.stormSpire;
   const jumps = def.chain?.[tower.level] ?? 0;
   let damage = def.damage[tower.level] ?? 0;
   let current = first;
@@ -174,7 +174,7 @@ function fireTowers(game: GameState): void {
     tower.cooldown -= TICK_SECONDS;
     const centre = centreOf(tower);
     const targets = inRange(game, centre, def.range[level] ?? 0);
-    if (tower.type === 'quenchCoil') {
+    if (tower.type === 'frostSpire') {
       if (tower.cooldown <= 0 && targets.length > 0) {
         pulse(game, tower, targets);
         tower.cooldown = 1 / (def.rate[level] ?? 1);
@@ -184,7 +184,7 @@ function fireTowers(game: GameState): void {
     const target = frontmost(targets);
     if (!target || tower.cooldown > 0) continue;
     tower.cooldown = 1 / (def.rate[level] ?? 1);
-    if (tower.type === 'welder' || tower.type === 'rivetMortar') {
+    if (tower.type === 'ballista' || tower.type === 'catapult') {
       game.events.push({
         type: 'towerFired',
         towerId: tower.id,
@@ -195,9 +195,9 @@ function fireTowers(game: GameState): void {
         path: [{x: target.x, y: target.y}],
       });
     }
-    if (tower.type === 'welder') {
+    if (tower.type === 'ballista') {
       damageEnemy(game, target, def.damage[level] ?? 0);
-    } else if (tower.type === 'rivetMortar') {
+    } else if (tower.type === 'catapult') {
       game.shots.push({
         x: centre.x,
         y: centre.y,
@@ -241,7 +241,7 @@ function moveShots(game: GameState): void {
   });
 }
 
-/** One tick of the fight: robots walk, towers fire, shells fly. */
+/** One tick of the fight: foes walk, towers fire, shells fly. */
 export function stepCombat(game: GameState): void {
   moveEnemies(game);
   fireTowers(game);

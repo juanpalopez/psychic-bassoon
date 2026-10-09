@@ -7,14 +7,14 @@ import {
 } from 'three';
 import {ENEMY_IDS, GRID, RULES, TOWER_IDS} from '../content';
 import type {EnemyId, TowerId} from '../content';
-import {ROBOT_MODELS, TOWER_MODELS} from './models';
+import {FOE_MODELS, TOWER_MODELS} from './models';
 
-/** Most robots of one type drawn at once; the plan budgets about 80 in all. */
-const ROBOT_CAPACITY = 128;
+/** Most foes of one type drawn at once; the plan budgets about 80 in all. */
+const FOE_CAPACITY = 128;
 const LEVELS = RULES.towerLevels;
 
-/** A robot as the layer draws it: where it is and which way it faces. */
-export interface RobotPose {
+/** A foe as the layer draws it: where it is and which way it faces. */
+export interface FoePose {
   readonly type: EnemyId;
   readonly x: number;
   readonly y: number;
@@ -49,13 +49,13 @@ function makeMesh(
   return mesh;
 }
 
-/** One `InstancedMesh` per robot type, so 80 robots cost four draw calls. */
-export function createRobotLayer(): UnitLayer<RobotPose> {
+/** One `InstancedMesh` per foe type, so 80 foes cost four draw calls. */
+export function createFoeLayer(): UnitLayer<FoePose> {
   const group = new Group();
   const material = new MeshLambertMaterial({vertexColors: true});
   const meshes = new Map<EnemyId, InstancedMesh>();
   for (const id of ENEMY_IDS) {
-    const mesh = makeMesh(id, ROBOT_MODELS[id](), material, ROBOT_CAPACITY);
+    const mesh = makeMesh(id, FOE_MODELS[id](), material, FOE_CAPACITY);
     meshes.set(id, mesh);
     group.add(mesh);
   }
@@ -66,7 +66,7 @@ export function createRobotLayer(): UnitLayer<RobotPose> {
       for (const mesh of meshes.values()) mesh.count = 0;
       for (const pose of poses) {
         const mesh = meshes.get(pose.type);
-        if (!mesh || mesh.count >= ROBOT_CAPACITY) continue;
+        if (!mesh || mesh.count >= FOE_CAPACITY) continue;
         dummy.position.set(pose.x, 0.05, pose.y);
         dummy.rotation.y = pose.heading;
         dummy.updateMatrix();

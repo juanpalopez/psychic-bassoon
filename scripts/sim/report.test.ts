@@ -18,14 +18,14 @@ const MAP: GameMap = {
     {col: 2, row: 2},
   ],
   tiles: [
-    ['plate', 'path', 'plate'],
-    ['plate', 'path', 'path'],
-    ['plate', 'plate', 'path'],
+    ['plot', 'road', 'plot'],
+    ['plot', 'road', 'road'],
+    ['plot', 'plot', 'road'],
   ],
 };
 
 describe('formatMap', () => {
-  it('draws belt, spawn, core and plates', () => {
+  it('draws road, spawn, heartstone and plots', () => {
     expect(formatMap(MAP)).toBe(['.S.', '.##', '..C'].join('\n'));
   });
 });
@@ -38,7 +38,7 @@ describe('formatTable', () => {
       killed: 7,
       leaked: 0,
       lives: 20,
-      credits: 135,
+      gold: 135,
       towers: 3,
     },
     {
@@ -47,7 +47,7 @@ describe('formatTable', () => {
       killed: 20,
       leaked: 2,
       lives: 17,
-      credits: 1042,
+      gold: 1042,
       towers: 12,
     },
   ];
@@ -55,9 +55,9 @@ describe('formatTable', () => {
   it('right-aligns every column under its header', () => {
     expect(formatTable(rows)).toBe(
       [
-        'Wave  Spawned  Killed  Leaked  Lives  Credits  Towers',
-        '   1        7       7       0     20      135       3',
-        '  10       22      20       2     17     1042      12',
+        'Wave  Spawned  Killed  Leaked  Lives  Gold  Towers',
+        '   1        7       7       0     20   135       3',
+        '  10       22      20       2     17  1042      12',
       ].join('\n')
     );
   });
@@ -69,11 +69,11 @@ describe('formatTable', () => {
       killed: 4,
       leaked: 0,
       lives: undefined,
-      credits: undefined,
+      gold: undefined,
       towers: undefined,
     };
     expect(formatTable([open]).split('\n')[1]).toBe(
-      '   3        9       4       0      -        -       -'
+      '   3        9       4       0      -     -       -'
     );
   });
 });
@@ -112,18 +112,18 @@ describe('summarizeWaves', () => {
         {tick: 1, event: {type: 'waveLaunched', wave: 1, earlyBonus: 0}},
         {
           tick: 2,
-          event: {type: 'enemySpawned', enemyId: 5, robot: 'hauler', wave: 1},
+          event: {type: 'enemySpawned', enemyId: 5, foe: 'raider', wave: 1},
         },
         {
           tick: 2,
-          event: {type: 'enemySpawned', enemyId: 6, robot: 'hauler', wave: 1},
+          event: {type: 'enemySpawned', enemyId: 6, foe: 'raider', wave: 1},
         },
         {
           tick: 3,
           event: {
             type: 'enemyKilled',
             enemyId: 5,
-            robot: 'hauler',
+            foe: 'raider',
             reward: 6,
             x: 0,
             y: 0,
@@ -132,7 +132,7 @@ describe('summarizeWaves', () => {
         {tick: 4, event: {type: 'enemyLeaked', enemyId: 6, leak: 1}},
         {tick: 5, event: {type: 'waveCleared', wave: 1, bonus: 17}},
       ],
-      new Map([[1, {lives: 19, credits: 200, towers: 3}]])
+      new Map([[1, {lives: 19, gold: 200, towers: 3}]])
     );
     expect(rows).toEqual([
       {
@@ -141,7 +141,7 @@ describe('summarizeWaves', () => {
         killed: 1,
         leaked: 1,
         lives: 19,
-        credits: 200,
+        gold: 200,
         towers: 3,
       },
     ]);

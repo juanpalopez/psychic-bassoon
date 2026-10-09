@@ -3,8 +3,8 @@ import {compose, cylinder, box} from './parts';
 import {TOWER_TINT, towerBase} from './tower-base';
 
 /** Round turret; every level adds a barrel. */
-export function buildWelder(level: number): BufferGeometry {
-  const tint = TOWER_TINT.welder;
+export function buildBallista(level: number): BufferGeometry {
+  const tint = TOWER_TINT.ballista;
   const barrels = Array.from({length: level + 1}, (_, i) => ({
     geometry: box(0.06, 0.06, 0.4),
     color: 0xc9d2dc,

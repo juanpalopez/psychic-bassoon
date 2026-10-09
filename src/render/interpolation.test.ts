@@ -1,13 +1,13 @@
 import {describe, expect, it} from 'vitest';
 import {createGame, spawnEnemy, tick} from '../sim';
 import {createInterpolator} from './interpolation';
-import type {RobotPose} from './units';
+import type {FoePose} from './units';
 
 function setup() {
   const game = createGame(42);
-  const enemy = spawnEnemy(game, 'hauler', 1);
+  const enemy = spawnEnemy(game, 'raider', 1);
   const interp = createInterpolator();
-  const out: RobotPose[] = [];
+  const out: FoePose[] = [];
   return {game, enemy, interp, out};
 }
 
@@ -26,13 +26,13 @@ describe('interpolator', () => {
     expect(out[0]?.x).toBeCloseTo(enemy.x, 9);
   });
 
-  it('draws a robot that has no history where it is', () => {
+  it('draws a foe that has no history where it is', () => {
     const {game, enemy, interp, out} = setup();
     interp.poses(game, 0.5, out);
     expect([out[0]?.x, out[0]?.y]).toEqual([enemy.x, enemy.y]);
   });
 
-  it('forgets robots that are gone', () => {
+  it('forgets foes that are gone', () => {
     const {game, interp, out} = setup();
     interp.capture(game);
     game.enemies = [];
@@ -40,7 +40,7 @@ describe('interpolator', () => {
     expect(out).toHaveLength(0);
   });
 
-  it('faces the way the robot walks (0 faces +z, down the board)', () => {
+  it('faces the way the foe walks (0 faces +z, down the board)', () => {
     const {game, enemy, interp, out} = setup();
     interp.capture(game);
     enemy.y += 1;
@@ -52,7 +52,7 @@ describe('interpolator', () => {
     expect(out[0]?.heading).toBeCloseTo(Math.PI / 2, 9);
   });
 
-  it('keeps its heading while the robot stands still', () => {
+  it('keeps its heading while the foe stands still', () => {
     const {game, enemy, interp, out} = setup();
     interp.capture(game);
     enemy.x += 1;

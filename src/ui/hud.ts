@@ -13,10 +13,10 @@ const SPEEDS = [1, 2, 3] as const;
 
 /** CSS token for each tower's tint (see tokens.css). */
 const TINT: Readonly<Record<TowerId, string>> = {
-  welder: 'var(--welder)',
-  rivetMortar: 'var(--rivet-mortar)',
-  quenchCoil: 'var(--quench-coil)',
-  mainlineArc: 'var(--mainline-arc)',
+  ballista: 'var(--ballista)',
+  catapult: 'var(--catapult)',
+  frostSpire: 'var(--frost-spire)',
+  stormSpire: 'var(--storm-spire)',
 };
 
 type Child = Node | string;
@@ -62,10 +62,10 @@ export function createHud(app: App, slots: Slots): void {
     top.append(el('div', `stat ${className}`, el('span', '', label), value));
     return value;
   };
-  const credits = stat('credits', 'Credits');
-  const livesBox = top.appendChild(el('div', 'stat core'));
+  const gold = stat('gold', 'Gold');
+  const livesBox = top.appendChild(el('div', 'stat heart'));
   const lives = el('b', '', '0');
-  livesBox.append(el('span', '', 'Core'), lives);
+  livesBox.append(el('span', '', 'Heart'), lives);
   const wave = stat('', 'Wave');
   const bestValue = stat('', 'Best');
 
@@ -149,22 +149,22 @@ export function createHud(app: App, slots: Slots): void {
       el(
         'div',
         'card',
-        el('div', 'eyebrow', 'Foundry Nine · night shift'),
+        el('div', 'eyebrow', 'Greyhold Keep · first watch'),
         el('h1', '', 'Scrap', el('em', '', 'line')),
         el(
           'p',
           '',
-          'FOREMAN is sending its workforce down the scraplines to tear out your Core. Every map is a new factory.'
+          "The Hollow King is sending his warband down the King's Road to claim the Heartstone as tithe. Every night the road runs differently."
         ),
         el(
           'ul',
           '',
-          el('li', '', 'Tap a plate beside the belt to build a tower.'),
+          el('li', '', 'Tap a build plot beside the road to build a tower.'),
           el('li', '', 'Tap a tower to upgrade it (3 levels) or sell it.'),
           el(
             'li',
             '',
-            'Hold the Core as long as you can. An Overseer arrives every 10th wave.'
+            'Hold the Heartstone as long as you can. A Warlord arrives every 10th wave.'
           )
         ),
         el(
@@ -211,7 +211,7 @@ export function createHud(app: App, slots: Slots): void {
       el(
         'div',
         'card',
-        el('div', 'eyebrow', 'Core breached'),
+        el('div', 'eyebrow', 'Heartstone fallen'),
         el('div', 'big', String(survived)),
         el('p', '', `waves survived · best ${best}`),
         el('div', 'row', button('New map', 'primary', newMap))
@@ -249,7 +249,7 @@ export function createHud(app: App, slots: Slots): void {
           el(
             'p',
             '',
-            el('b', '', 'Tap a metal plate'),
+            el('b', '', 'Tap a build plot'),
             ' to build. Tap a tower to upgrade or sell it.'
           )
         )
@@ -306,7 +306,7 @@ export function createHud(app: App, slots: Slots): void {
     if (node.textContent !== value) node.textContent = value;
   };
   const refresh = (model: HudModel): void => {
-    setText(credits, String(model.credits));
+    setText(gold, String(model.gold));
     setText(lives, String(model.lives));
     livesBox.classList.toggle('low', model.lowLives);
     setText(wave, String(model.wave));

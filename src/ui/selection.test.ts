@@ -18,33 +18,33 @@ function withTower(): {game: GameState; col: number; row: number} {
   let spot = {col: 0, row: 0};
   game.map.tiles.forEach((line, row) =>
     line.forEach((tile, col) => {
-      if (tile === 'plate' && spot.col === 0 && spot.row === 0)
+      if (tile === 'plot' && spot.col === 0 && spot.row === 0)
         spot = {col, row};
     })
   );
-  submit(game, {type: 'build', tower: 'welder', ...spot});
+  submit(game, {type: 'build', tower: 'ballista', ...spot});
   tick(game);
   return {game, ...spot};
 }
 
 describe('selectAt', () => {
-  it('selects a free plate', () => {
+  it('selects a free plot', () => {
     const game = createGame(42);
     const spot = game.map.tiles.flatMap((l, row) =>
-      l.flatMap((t, col) => (t === 'plate' ? [{col, row}] : []))
+      l.flatMap((t, col) => (t === 'plot' ? [{col, row}] : []))
     )[0];
-    expect(selectAt(game, spot)).toEqual({kind: 'plate', ...spot});
+    expect(selectAt(game, spot)).toEqual({kind: 'plot', ...spot});
   });
 
-  it('selects the tower standing on a plate', () => {
+  it('selects the tower standing on a plot', () => {
     const {game, col, row} = withTower();
     expect(selectAt(game, {col, row})).toEqual({kind: 'tower', id: 0});
   });
 
-  it('selects nothing on the belt, off the board, or with no tap', () => {
+  it('selects nothing on the road, off the board, or with no tap', () => {
     const game = createGame(42);
-    const belt = game.map.path[2];
-    expect(selectAt(game, belt)).toEqual(NONE);
+    const road = game.map.path[2];
+    expect(selectAt(game, road)).toEqual(NONE);
     expect(selectAt(game, undefined)).toEqual(NONE);
   });
 });
@@ -63,9 +63,9 @@ describe('reconcileSelection', () => {
     expect(reconcileSelection(game, {kind: 'tower', id: 0})).toEqual(NONE);
   });
 
-  it('turns a selected plate into the tower built on it', () => {
+  it('turns a selected plot into the tower built on it', () => {
     const {game, col, row} = withTower();
-    expect(reconcileSelection(game, {kind: 'plate', col, row})).toEqual({
+    expect(reconcileSelection(game, {kind: 'plot', col, row})).toEqual({
       kind: 'tower',
       id: 0,
     });
@@ -73,15 +73,15 @@ describe('reconcileSelection', () => {
 });
 
 describe('commands from a selection', () => {
-  it('builds on the selected plate only', () => {
-    expect(buildCommand({kind: 'plate', col: 3, row: 4}, 'welder')).toEqual({
+  it('builds on the selected plot only', () => {
+    expect(buildCommand({kind: 'plot', col: 3, row: 4}, 'ballista')).toEqual({
       type: 'build',
-      tower: 'welder',
+      tower: 'ballista',
       col: 3,
       row: 4,
     });
-    expect(buildCommand(NONE, 'welder')).toBeUndefined();
-    expect(buildCommand({kind: 'tower', id: 1}, 'welder')).toBeUndefined();
+    expect(buildCommand(NONE, 'ballista')).toBeUndefined();
+    expect(buildCommand({kind: 'tower', id: 1}, 'ballista')).toBeUndefined();
   });
 
   it('upgrades and sells the selected tower only', () => {
@@ -94,14 +94,14 @@ describe('commands from a selection', () => {
       towerId: 7,
     });
     expect(upgradeCommand(NONE)).toBeUndefined();
-    expect(sellCommand({kind: 'plate', col: 1, row: 1})).toBeUndefined();
+    expect(sellCommand({kind: 'plot', col: 1, row: 1})).toBeUndefined();
   });
 });
 
 describe('highlightFor', () => {
-  it('highlights a selected plate with no range', () => {
+  it('highlights a selected plot with no range', () => {
     const game = createGame(42);
-    expect(highlightFor(game, {kind: 'plate', col: 2, row: 3})).toEqual({
+    expect(highlightFor(game, {kind: 'plot', col: 2, row: 3})).toEqual({
       col: 2,
       row: 3,
     });
@@ -114,7 +114,7 @@ describe('highlightFor', () => {
       row,
       range: 2.3,
     });
-    game.credits = 1000;
+    game.gold = 1000;
     submit(game, {type: 'upgrade', towerId: 0});
     tick(game);
     expect(highlightFor(game, {kind: 'tower', id: 0})?.range).toBe(2.6);

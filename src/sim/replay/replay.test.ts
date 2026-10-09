@@ -51,7 +51,7 @@ describe('headless run', () => {
   it('ends in the pinned final state', () => {
     // Pinned on purpose: any change to the sim's rules or numbers changes
     // this value. Update it deliberately, in the PR that changes the rules.
-    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"f150f8ed"`);
+    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"18f0ac49"`);
   });
 
   it('survives a JSON save and load in the middle of the run', () => {
@@ -94,7 +94,7 @@ describe('seeds', () => {
 
 describe('runReplay', () => {
   it('stops at game over', () => {
-    // no towers at all: the robots leak until the Core falls
+    // no towers at all: the foes leak until the Heartstone falls
     const limit = 30 * 60 * 60;
     const result = play(SEED, limit, game =>
       game.running ? [] : [{type: 'launchWave'}]

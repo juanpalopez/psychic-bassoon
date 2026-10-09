@@ -7,7 +7,7 @@ export interface Point {
   readonly y: number;
 }
 
-/** The line robots walk: spawn point, then every path cell centre. */
+/** The line foes walk: spawn point, then every path cell centre. */
 export interface Route {
   readonly points: readonly Point[];
   /** Distance from the spawn point to each point. */

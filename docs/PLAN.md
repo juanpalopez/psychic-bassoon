@@ -14,7 +14,7 @@ Scrapline becomes a 3D low-poly tower defense for mobile browsers. The camera is
 
 - **One-thumb play.** Every action works with a single tap in portrait. The game holds 60 fps on a mid-range phone.
 - **Readable at a glance.** Silhouette and colour tell you each foe's type and each tower's level, even zoomed out.
-- **Every run is a new factory.** Seeded procedural maps that you can replay and share by seed.
+- **Every run is a new road.** Seeded procedural maps that you can replay and share by seed.
 - **A world worth caring about.** Short lore beats between chapters give the waves a reason to exist without slowing play.
 
 Carried over from the prototype: grid placement, 4 tower types with 3 levels, endless waves, and the economy numbers as a starting point.

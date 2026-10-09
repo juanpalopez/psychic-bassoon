@@ -1,16 +1,16 @@
 import {Box3} from 'three';
 import {describe, expect, it} from 'vitest';
 import {ENEMIES, ENEMY_IDS, RULES, TOWER_IDS} from '../../content';
-import {ROBOT_MODELS, TOWER_MODELS} from './index';
+import {FOE_MODELS, TOWER_MODELS} from './index';
 
 const triangles = (g: {
   index: unknown;
   getAttribute: (n: string) => {count: number};
 }) => g.getAttribute('position').count / 3;
 
-describe('robot models', () => {
+describe('foe models', () => {
   it.each(ENEMY_IDS)('%s is one coloured geometry within budget', id => {
-    const geometry = ROBOT_MODELS[id]();
+    const geometry = FOE_MODELS[id]();
     expect(geometry.getAttribute('position').count).toBeGreaterThan(0);
     expect(geometry.getAttribute('color').count).toBe(
       geometry.getAttribute('position').count
@@ -23,7 +23,7 @@ describe('robot models', () => {
   it.each(ENEMY_IDS)(
     '%s stands on the ground and is as wide as its body radius',
     id => {
-      const geometry = ROBOT_MODELS[id]();
+      const geometry = FOE_MODELS[id]();
       geometry.computeBoundingBox();
       const box = geometry.boundingBox ?? new Box3();
       expect(box.min.y).toBeGreaterThanOrEqual(0);
@@ -35,9 +35,9 @@ describe('robot models', () => {
     }
   );
 
-  it('gets bigger from Skitter to Overseer, so type reads from the silhouette', () => {
+  it('gets bigger from Scamp to Warlord, so type reads from the silhouette', () => {
     const heights = ENEMY_IDS.map(id => {
-      const g = ROBOT_MODELS[id]();
+      const g = FOE_MODELS[id]();
       g.computeBoundingBox();
       return g.boundingBox?.max.y ?? 0;
     });
@@ -74,7 +74,7 @@ describe('tower models', () => {
 
   it('lights one more level pip per level', () => {
     const lit = (level: number) => {
-      const g = TOWER_MODELS.welder(level);
+      const g = TOWER_MODELS.ballista(level);
       const colors = g.getAttribute('color');
       let tinted = 0;
       for (let i = 0; i < colors.count; i++) {

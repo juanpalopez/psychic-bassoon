@@ -7,16 +7,16 @@ import type {Command, GameState} from './game';
 
 const SEED = 42;
 
-/** First plate cell that is not on the path, in reading order. */
-function plate(game: GameState, index = 0): Cell {
+/** First plot cell that is not on the path, in reading order. */
+function plot(game: GameState, index = 0): Cell {
   const cells: Cell[] = [];
   game.map.tiles.forEach((line, row) =>
     line.forEach((tile, col) => {
-      if (tile === 'plate') cells.push({col, row});
+      if (tile === 'plot') cells.push({col, row});
     })
   );
   const cell = cells[index];
-  if (!cell) throw new Error('no plate cell');
+  if (!cell) throw new Error('no plot cell');
   return cell;
 }
 
@@ -27,12 +27,12 @@ function run(game: GameState, ...commands: Command[]) {
 }
 
 describe('createGame', () => {
-  it('starts with the prototype credits and lives on tick 0', () => {
+  it('starts with the prototype gold and lives on tick 0', () => {
     const game = createGame(SEED);
     expect(game).toMatchObject({
       seed: SEED,
       tick: 0,
-      credits: RULES.startCredits,
+      gold: RULES.startGold,
       lives: RULES.startLives,
       wave: 0,
       running: false,
@@ -47,7 +47,7 @@ describe('createGame', () => {
 
   it('keeps all state as plain data that survives JSON', () => {
     const game = createGame(SEED);
-    run(game, {type: 'build', tower: 'welder', ...plate(game)});
+    run(game, {type: 'build', tower: 'ballista', ...plot(game)});
     expect(JSON.parse(JSON.stringify(game))).toEqual(game);
   });
 });
@@ -69,14 +69,14 @@ describe('tick', () => {
 
   it('applies commands in the order they were submitted', () => {
     const game = createGame(SEED);
-    const cell = plate(game);
+    const cell = plot(game);
     run(
       game,
-      {type: 'build', tower: 'welder', ...cell},
-      {type: 'build', tower: 'rivetMortar', ...cell}
+      {type: 'build', tower: 'ballista', ...cell},
+      {type: 'build', tower: 'catapult', ...cell}
     );
     expect(game.towers).toHaveLength(1);
-    expect(game.towers[0]?.type).toBe('welder');
+    expect(game.towers[0]?.type).toBe('ballista');
   });
 
   it('empties the queue after each tick', () => {
@@ -87,14 +87,14 @@ describe('tick', () => {
 
   it('does not run commands before the tick', () => {
     const game = createGame(SEED);
-    submit(game, {type: 'build', tower: 'welder', ...plate(game)});
+    submit(game, {type: 'build', tower: 'ballista', ...plot(game)});
     expect(game.towers).toEqual([]);
-    expect(game.credits).toBe(RULES.startCredits);
+    expect(game.gold).toBe(RULES.startGold);
   });
 
   it('keeps events from one tick only', () => {
     const game = createGame(SEED);
-    run(game, {type: 'build', tower: 'welder', ...plate(game)});
+    run(game, {type: 'build', tower: 'ballista', ...plot(game)});
     expect(game.events).toHaveLength(1);
     tick(game);
     expect(game.events).toEqual([]);
@@ -116,18 +116,18 @@ describe('tick', () => {
 });
 
 describe('build', () => {
-  it('places a level-1 tower on a plate and charges its cost', () => {
+  it('places a level-1 tower on a plot and charges its cost', () => {
     const game = createGame(SEED);
-    const cell = plate(game);
-    const events = run(game, {type: 'build', tower: 'welder', ...cell});
-    expect(game.credits).toBe(RULES.startCredits - TOWERS.welder.cost[0]);
+    const cell = plot(game);
+    const events = run(game, {type: 'build', tower: 'ballista', ...cell});
+    expect(game.gold).toBe(RULES.startGold - TOWERS.ballista.cost[0]);
     expect(game.towers).toEqual([
       {
         id: 0,
-        type: 'welder',
+        type: 'ballista',
         level: 0,
         ...cell,
-        invested: TOWERS.welder.cost[0],
+        invested: TOWERS.ballista.cost[0],
         cooldown: -TICK_SECONDS,
       },
     ]);
@@ -138,8 +138,8 @@ describe('build', () => {
     const game = createGame(SEED);
     run(
       game,
-      {type: 'build', tower: 'welder', ...plate(game, 0)},
-      {type: 'build', tower: 'welder', ...plate(game, 1)}
+      {type: 'build', tower: 'ballista', ...plot(game, 0)},
+      {type: 'build', tower: 'ballista', ...plot(game, 1)}
     );
     expect(game.towers.map(t => t.id)).toEqual([0, 1]);
   });
@@ -148,11 +148,11 @@ describe('build', () => {
     const game = createGame(SEED);
     const onPath = game.map.path[3];
     if (!onPath) throw new Error('no path');
-    const command: Command = {type: 'build', tower: 'welder', ...onPath};
+    const command: Command = {type: 'build', tower: 'ballista', ...onPath};
     expect(run(game, command)).toEqual([
-      {type: 'commandRejected', command, reason: 'notAPlate'},
+      {type: 'commandRejected', command, reason: 'notAPlot'},
     ]);
-    expect(game.credits).toBe(RULES.startCredits);
+    expect(game.gold).toBe(RULES.startGold);
   });
 
   it('rejects an unknown tower type instead of throwing', () => {
@@ -160,12 +160,12 @@ describe('build', () => {
     const command = {
       type: 'build',
       tower: 'laser',
-      ...plate(game),
+      ...plot(game),
     } as unknown as Command;
     expect(run(game, command)).toEqual([
       {type: 'commandRejected', command, reason: 'unknownTower'},
     ]);
-    expect(game.credits).toBe(RULES.startCredits);
+    expect(game.gold).toBe(RULES.startGold);
   });
 
   it('rejects a build off the board', () => {
@@ -176,18 +176,18 @@ describe('build', () => {
       {col: 0, row: GRID.rows},
       {col: 0.5, row: 0},
     ]) {
-      const command: Command = {type: 'build', tower: 'welder', ...cell};
+      const command: Command = {type: 'build', tower: 'ballista', ...cell};
       expect(run(game, command)).toEqual([
-        {type: 'commandRejected', command, reason: 'notAPlate'},
+        {type: 'commandRejected', command, reason: 'notAPlot'},
       ]);
     }
   });
 
-  it('rejects a build on an occupied plate', () => {
+  it('rejects a build on an occupied plot', () => {
     const game = createGame(SEED);
-    const cell = plate(game);
-    run(game, {type: 'build', tower: 'welder', ...cell});
-    const command: Command = {type: 'build', tower: 'welder', ...cell};
+    const cell = plot(game);
+    run(game, {type: 'build', tower: 'ballista', ...cell});
+    const command: Command = {type: 'build', tower: 'ballista', ...cell};
     expect(run(game, command)).toEqual([
       {type: 'commandRejected', command, reason: 'occupied'},
     ]);
@@ -196,37 +196,37 @@ describe('build', () => {
 
   it('rejects a build the player cannot afford, and allows an exact fit', () => {
     const game = createGame(SEED);
-    game.credits = TOWERS.mainlineArc.cost[0] - 1;
+    game.gold = TOWERS.stormSpire.cost[0] - 1;
     const command: Command = {
       type: 'build',
-      tower: 'mainlineArc',
-      ...plate(game),
+      tower: 'stormSpire',
+      ...plot(game),
     };
     expect(run(game, command)).toEqual([
-      {type: 'commandRejected', command, reason: 'notEnoughCredits'},
+      {type: 'commandRejected', command, reason: 'notEnoughGold'},
     ]);
-    game.credits = TOWERS.mainlineArc.cost[0];
+    game.gold = TOWERS.stormSpire.cost[0];
     run(game, command);
-    expect(game.credits).toBe(0);
+    expect(game.gold).toBe(0);
     expect(game.towers).toHaveLength(1);
   });
 });
 
 describe('upgrade', () => {
-  function withTower(type: 'welder' | 'rivetMortar' = 'welder') {
+  function withTower(type: 'ballista' | 'catapult' = 'ballista') {
     const game = createGame(SEED);
-    run(game, {type: 'build', tower: type, ...plate(game)});
-    game.credits = 1000;
+    run(game, {type: 'build', tower: type, ...plot(game)});
+    game.gold = 1000;
     return game;
   }
 
   it('raises the level, charges the next level cost and records it', () => {
     const game = withTower();
     const events = run(game, {type: 'upgrade', towerId: 0});
-    expect(game.credits).toBe(1000 - TOWERS.welder.cost[1]);
+    expect(game.gold).toBe(1000 - TOWERS.ballista.cost[1]);
     expect(game.towers[0]?.level).toBe(1);
     expect(game.towers[0]?.invested).toBe(
-      TOWERS.welder.cost[0] + TOWERS.welder.cost[1]
+      TOWERS.ballista.cost[0] + TOWERS.ballista.cost[1]
     );
     expect(events).toEqual([{type: 'towerUpgraded', towerId: 0, level: 1}]);
   });
@@ -244,10 +244,10 @@ describe('upgrade', () => {
 
   it('rejects an upgrade the player cannot afford', () => {
     const game = withTower();
-    game.credits = TOWERS.welder.cost[1] - 1;
+    game.gold = TOWERS.ballista.cost[1] - 1;
     const command: Command = {type: 'upgrade', towerId: 0};
     expect(run(game, command)).toEqual([
-      {type: 'commandRejected', command, reason: 'notEnoughCredits'},
+      {type: 'commandRejected', command, reason: 'notEnoughGold'},
     ]);
     expect(game.towers[0]?.level).toBe(0);
   });
@@ -262,19 +262,19 @@ describe('upgrade', () => {
 });
 
 describe('sell', () => {
-  it('refunds 70% of what was invested, rounded down, and frees the plate', () => {
+  it('refunds 70% of what was invested, rounded down, and frees the plot', () => {
     const game = createGame(SEED);
-    const cell = plate(game);
-    run(game, {type: 'build', tower: 'welder', ...cell});
-    game.credits = 1000;
+    const cell = plot(game);
+    run(game, {type: 'build', tower: 'ballista', ...cell});
+    game.gold = 1000;
     run(game, {type: 'upgrade', towerId: 0});
-    const invested = TOWERS.welder.cost[0] + TOWERS.welder.cost[1];
+    const invested = TOWERS.ballista.cost[0] + TOWERS.ballista.cost[1];
     const events = run(game, {type: 'sell', towerId: 0});
     const refund = Math.floor(invested * RULES.sellRefund);
-    expect(game.credits).toBe(1000 - TOWERS.welder.cost[1] + refund);
+    expect(game.gold).toBe(1000 - TOWERS.ballista.cost[1] + refund);
     expect(game.towers).toEqual([]);
     expect(events).toEqual([{type: 'towerSold', towerId: 0, refund}]);
-    run(game, {type: 'build', tower: 'rivetMortar', ...cell});
+    run(game, {type: 'build', tower: 'catapult', ...cell});
     expect(game.towers).toHaveLength(1);
   });
 
@@ -294,6 +294,6 @@ describe('launchWave', () => {
     expect(game.wave).toBe(1);
     expect(game.running).toBe(true);
     expect(events).toEqual([{type: 'waveLaunched', wave: 1, earlyBonus: 0}]);
-    expect(game.credits).toBe(RULES.startCredits);
+    expect(game.gold).toBe(RULES.startGold);
   });
 });

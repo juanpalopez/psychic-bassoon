@@ -24,10 +24,10 @@
   --ok: #5fd38a;
 
   /* towers (also the tint of their models) */
-  --welder: #3ddbd9;
-  --rivet-mortar: #ff8a3d;
-  --quench-coil: #9b8cff;
-  --mainline-arc: #e8f06a;
+  --ballista: #3ddbd9;
+  --catapult: #ff8a3d;
+  --frost-spire: #9b8cff;
+  --storm-spire: #e8f06a;
 
   /* type */
   --display: 'Chakra Petch', 'Rajdhani', system-ui, sans-serif;

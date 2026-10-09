@@ -120,8 +120,8 @@ describe('generateMap', () => {
         expect(line).toHaveLength(GRID.cols);
         line.forEach((tile, col) => {
           const onPath = path.some(c => c.col === col && c.row === row);
-          expect(tile).toBe(onPath ? 'path' : 'plate');
-          if (tile === 'path') count++;
+          expect(tile).toBe(onPath ? 'road' : 'plot');
+          if (tile === 'road') count++;
         });
       });
       expect(count).toBe(path.length);

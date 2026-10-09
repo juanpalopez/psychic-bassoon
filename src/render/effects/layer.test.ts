@@ -4,16 +4,16 @@ import {createEffectsLayer} from './layer';
 const kill = {
   type: 'enemyKilled',
   enemyId: 1,
-  robot: 'overseer',
+  foe: 'warlord',
   reward: 110,
   x: 2,
   y: 3,
 } as const;
 
-const welder = {
+const ballista = {
   type: 'towerFired',
   towerId: 1,
-  tower: 'welder',
+  tower: 'ballista',
   level: 0,
   x: 1,
   y: 1,
@@ -53,7 +53,7 @@ describe('effects layer', () => {
       () => false,
       () => 0.5
     );
-    layer.spawn(welder);
+    layer.spawn(ballista);
     layer.update(0.01);
     const lines = layer.group.children[0] as unknown as {
       geometry: {drawRange: {count: number}};

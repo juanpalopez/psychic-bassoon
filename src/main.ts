@@ -13,7 +13,7 @@ if (!slots.top || !slots.stage || !slots.panel || !slots.controls) {
   throw new Error('Missing HUD containers in index.html');
 }
 
-/** `?seed=123` replays a map; otherwise every visit is a new factory. */
+/** `?seed=123` replays a map; otherwise every visit is a new road. */
 function pickSeed(): number {
   const fromUrl = Number(new URLSearchParams(location.search).get('seed'));
   if (Number.isSafeInteger(fromUrl) && fromUrl > 0) return fromUrl;
@@ -49,20 +49,20 @@ app.subscribe(() => {
 if (new URLSearchParams(location.search).has('debug')) {
   const hook = {
     app,
-    /** Puts `count` robots on the route, for the performance check. */
+    /** Puts `count` foes on the route, for the performance check. */
     crowd(count: number): void {
-      const types = ['skitter', 'hauler', 'smelter', 'overseer'] as const;
+      const types = ['scamp', 'raider', 'ironclad', 'warlord'] as const;
       for (let i = 0; i < count; i++) {
-        const robot = spawnEnemy(
+        const foe = spawnEnemy(
           app.game,
-          types[i % types.length] ?? 'hauler',
+          types[i % types.length] ?? 'raider',
           1
         );
-        robot.speed = 0;
-        robot.distance = (i / count) * app.game.route.total;
-        const at = positionAt(app.game.route, robot.distance);
-        robot.x = at.x;
-        robot.y = at.y;
+        foe.speed = 0;
+        foe.distance = (i / count) * app.game.route.total;
+        const at = positionAt(app.game.route, foe.distance);
+        foe.x = at.x;
+        foe.y = at.y;
       }
     },
   };
