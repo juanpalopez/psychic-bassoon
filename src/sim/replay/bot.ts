@@ -13,15 +13,15 @@ const SELL_SECONDS = 7;
 const SELL_ABOVE_TOWERS = 20;
 
 /**
- * Plates ordered by how much of the route a level-1 Welder would cover, best
+ * Plots ordered by how much of the route a level-1 Ballista would cover, best
  * first, then reading order. Uses squared distances, so no rounding drift.
  */
-export function rankPlates(map: GameMap): Cell[] {
-  const reach = TOWERS.welder.range[0] ?? 0;
+export function rankPlots(map: GameMap): Cell[] {
+  const reach = TOWERS.ballista.range[0] ?? 0;
   const scored: {cell: Cell; covered: number}[] = [];
   map.tiles.forEach((line, row) =>
     line.forEach((tile, col) => {
-      if (tile !== 'plate') return;
+      if (tile !== 'plot') return;
       const covered = map.path.filter(p => {
         const dx = p.col - col;
         const dy = p.row - row;
@@ -42,15 +42,15 @@ export function rankPlates(map: GameMap): Cell[] {
 
 /**
  * A scripted player: once a second it launches the next wave when the field
- * is clear, otherwise builds the next tower type on the best free plate, or
+ * is clear, otherwise builds the next tower type on the best free plot, or
  * upgrades the lowest-level tower. It only reads the game, like a UI would.
  */
 export function createBot(map: GameMap): (game: GameState) => Command[] {
-  const plates = rankPlates(map);
+  const plots = rankPlots(map);
   return game => {
     if (game.tick % ACT_EVERY_TICKS !== 0) return [];
     if (!game.running) return [{type: 'launchWave'}];
-    // During every 4th wave, try to call the next one early every 5 s. While robots are still being
+    // During every 4th wave, try to call the next one early every 5 s. While foes are still being
     // released the sim rejects it, so replays also cover a rejected command.
     if (
       game.wave % EARLY_CALL_EVERY_WAVES === 0 &&
@@ -68,10 +68,10 @@ export function createBot(map: GameMap): (game: GameState) => Command[] {
       return [{type: 'sell', towerId: newest.id}];
     }
     const type = TOWER_IDS[game.towers.length % TOWER_IDS.length];
-    const free = plates.find(
+    const free = plots.find(
       c => !game.towers.some(t => t.col === c.col && t.row === c.row)
     );
-    if (type && free && game.credits >= TOWERS[type].cost[0]) {
+    if (type && free && game.gold >= TOWERS[type].cost[0]) {
       return [{type: 'build', tower: type, ...free}];
     }
     const weakest = [...game.towers]

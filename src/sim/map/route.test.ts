@@ -26,7 +26,7 @@ describe('route', () => {
     );
   });
 
-  it('measures its length from the spawn point to the Core', () => {
+  it('measures its length from the spawn point to the Heartstone', () => {
     const expected =
       RULES.spawnOffset + RULES.cellCentre + (map.path.length - 1);
     expect(route.total).toBeCloseTo(expected, 9);

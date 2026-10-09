@@ -2,7 +2,7 @@ import {expect, test} from '@playwright/test';
 
 interface Hook {
   app: {
-    game: {credits: number; enemies: unknown[]; map: {tiles: string[][]}};
+    game: {gold: number; enemies: unknown[]; map: {tiles: string[][]}};
     setPaused(paused: boolean): void;
     submit(command: unknown): void;
     stats(): {calls: number; triangles: number};
@@ -10,10 +10,10 @@ interface Hook {
   crowd(count: number): void;
 }
 
-// Plan budgets: under 120 draw calls and about 150k triangles with 80 robots.
+// Plan budgets: under 120 draw calls and about 150k triangles with 80 foes.
 // Headless Chromium has no real GPU, so this checks what is drawn, not fps;
 // the 60 fps check stays manual on a phone (ticket #27).
-test('stays inside the draw-call and triangle budget with 80 robots', async ({
+test('stays inside the draw-call and triangle budget with 80 foes', async ({
   page,
 }) => {
   await page.goto('/?seed=42&debug');
@@ -21,12 +21,12 @@ test('stays inside the draw-call and triangle budget with 80 robots', async ({
 
   await page.evaluate(() => {
     const {app} = (window as unknown as {scrapline: Hook}).scrapline;
-    app.game.credits = 100_000;
-    const towers = ['welder', 'rivetMortar', 'quenchCoil', 'mainlineArc'];
+    app.game.gold = 100_000;
+    const towers = ['ballista', 'catapult', 'frostSpire', 'stormSpire'];
     let built = 0;
     app.game.map.tiles.forEach((line, row) =>
       line.forEach((tile, col) => {
-        if (tile !== 'plate') return;
+        if (tile !== 'plot') return;
         const id = built++;
         app.submit({type: 'build', tower: towers[id % 4], col, row});
         // two upgrades each: every tower ends at level 3
@@ -36,7 +36,7 @@ test('stays inside the draw-call and triangle budget with 80 robots', async ({
     );
   });
 
-  // let the sim apply the builds, then freeze it with exactly 80 robots on the
+  // let the sim apply the builds, then freeze it with exactly 80 foes on the
   // field so the towers cannot thin the crowd before it is measured
   await page.waitForTimeout(500);
   await page.evaluate(() => {
@@ -45,11 +45,11 @@ test('stays inside the draw-call and triangle budget with 80 robots', async ({
     app.setPaused(true);
   });
   await page.waitForTimeout(1000); // the renderer keeps drawing while paused
-  const robots = await page.evaluate(
+  const foes = await page.evaluate(
     () =>
       (window as unknown as {scrapline: Hook}).scrapline.app.game.enemies.length
   );
-  expect(robots).toBe(80);
+  expect(foes).toBe(80);
   const stats = await page.evaluate(() =>
     (window as unknown as {scrapline: Hook}).scrapline.app.stats()
   );

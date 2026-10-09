@@ -1,7 +1,7 @@
 import {expect, test} from '@playwright/test';
 
-// Plays the first minute through the real UI: deploy, tap a plate, build,
-// launch a wave, and see robots walk. Seed 42 keeps the map fixed.
+// Plays the first minute through the real UI: deploy, tap a plot, build,
+// launch a wave, and see foes walk. Seed 42 keeps the map fixed.
 test('builds a tower and survives the start of a wave', async ({page}) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -14,7 +14,7 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
   await page.getByRole('button', {name: 'Deploy'}).click();
   await expect(page.locator('.overlay')).toBeHidden();
 
-  // Tap across the board until a plate opens the build sheet.
+  // Tap across the board until a plot opens the build sheet.
   const stage = await page.locator('#stage').boundingBox();
   if (!stage) throw new Error('no stage');
   let opened = false;
@@ -29,11 +29,11 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
   }
   expect(opened).toBe(true);
 
-  const credits = page.locator('.stat.credits b');
-  await expect(credits).toHaveText('180');
+  const gold = page.locator('.stat.gold b');
+  await expect(gold).toHaveText('180');
   await page.locator('#panel .bcard').first().click();
-  await expect(credits).toHaveText('130');
-  await expect(page.locator('#panel .info h3')).toContainText('Welder');
+  await expect(gold).toHaveText('130');
+  await expect(page.locator('#panel .info h3')).toContainText('Ballista');
 
   await page.getByRole('button', {name: /Launch wave 1/}).click();
   await expect(page.locator('.stat').nth(2).locator('b')).toHaveText('1');

@@ -23,17 +23,17 @@ describe('createMapView', () => {
     return found;
   };
 
-  it('draws one tile per cell: the same plates and belt as the sim map', () => {
-    const plates: string[] = [];
-    const belt: string[] = [];
+  it('draws one tile per cell: the same plots and road as the sim map', () => {
+    const plots: string[] = [];
+    const road: string[] = [];
     map.tiles.forEach((line, row) =>
       line.forEach((tile, col) =>
-        (tile === 'plate' ? plates : belt).push(`${col},${row}`)
+        (tile === 'plot' ? plots : road).push(`${col},${row}`)
       )
     );
-    expect(cellsOf(find('plates'))).toEqual(plates.sort());
-    expect(cellsOf(find('belt'))).toEqual(belt.sort());
-    expect(find('plates').count + find('belt').count).toBe(
+    expect(cellsOf(find('plots'))).toEqual(plots.sort());
+    expect(cellsOf(find('road'))).toEqual(road.sort());
+    expect(find('plots').count + find('road').count).toBe(
       GRID.cols * GRID.rows
     );
   });
@@ -44,8 +44,8 @@ describe('createMapView', () => {
       const mesh = v.group.getObjectByName(name);
       return mesh instanceof InstancedMesh ? cellsOf(mesh) : [];
     };
-    expect(get(again, 'belt')).toEqual(get(view, 'belt'));
-    expect(get(again, 'plates')).toEqual(get(view, 'plates'));
+    expect(get(again, 'road')).toEqual(get(view, 'road'));
+    expect(get(again, 'plots')).toEqual(get(view, 'plots'));
   });
 
   it('puts the spawn marker above the first path cell and the core on the last', () => {

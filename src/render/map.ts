@@ -48,7 +48,7 @@ function instanced(
 }
 
 /**
- * Builds the board from a sim map: ground, plates, belt, spawn pad and Core.
+ * Builds the board from a sim map: ground, plots, road, spawn pad and Heartstone.
  * Read-only: it only reads the map and never touches game state.
  */
 export function createMapView(map: GameMap): MapView {
@@ -60,11 +60,11 @@ export function createMapView(map: GameMap): MapView {
     return item;
   };
 
-  const plates: {col: number; row: number}[] = [];
-  const belt: {col: number; row: number}[] = [];
+  const plots: {col: number; row: number}[] = [];
+  const road: {col: number; row: number}[] = [];
   map.tiles.forEach((line, row) =>
     line.forEach((tile, col) =>
-      (tile === 'plate' ? plates : belt).push({col, row})
+      (tile === 'plot' ? plots : road).push({col, row})
     )
   );
 
@@ -79,17 +79,17 @@ export function createMapView(map: GameMap): MapView {
 
   group.add(
     instanced(
-      'plates',
+      'plots',
       own(new BoxGeometry(1 - TILE_GAP, PLATE_HEIGHT, 1 - TILE_GAP)),
-      own(new MeshLambertMaterial({color: PALETTE.plate})),
-      plates,
+      own(new MeshLambertMaterial({color: PALETTE.plot})),
+      plots,
       PLATE_HEIGHT / 2
     ),
     instanced(
-      'belt',
+      'road',
       own(new BoxGeometry(1, BELT_HEIGHT, 1)),
-      own(new MeshLambertMaterial({color: PALETTE.belt})),
-      belt,
+      own(new MeshLambertMaterial({color: PALETTE.road})),
+      road,
       BELT_HEIGHT / 2
     )
   );

@@ -8,50 +8,50 @@ export interface TowerDef {
   readonly range: PerLevel;
   /** Shots per second. */
   readonly rate: PerLevel;
-  /** Rivet Mortar blast radius, in cells. */
+  /** Catapult blast radius, in cells. */
   readonly splash?: PerLevel;
-  /** Quench Coil speed reduction, 0..1. */
+  /** Frost Spire speed reduction, 0..1. */
   readonly slow?: PerLevel;
-  /** Mainline Arc number of targets hit. */
+  /** Storm Spire number of targets hit. */
   readonly chain?: PerLevel;
 }
 
 export const TOWER_IDS = [
-  'welder',
-  'rivetMortar',
-  'quenchCoil',
-  'mainlineArc',
+  'ballista',
+  'catapult',
+  'frostSpire',
+  'stormSpire',
 ] as const;
 
 export type TowerId = (typeof TOWER_IDS)[number];
 
 /** Numbers ported from the 2D prototype's `DEF` table. */
 export const TOWERS: Readonly<Record<TowerId, TowerDef>> = {
-  welder: {
-    name: 'Welder',
+  ballista: {
+    name: 'Ballista',
     cost: [50, 60, 110],
     damage: [9, 15, 26],
     range: [2.3, 2.6, 3.0],
     rate: [3, 3.6, 4.5],
   },
-  rivetMortar: {
-    name: 'Rivet Mortar',
+  catapult: {
+    name: 'Catapult',
     cost: [90, 90, 160],
     damage: [32, 56, 96],
     range: [2.8, 3.1, 3.5],
     rate: [0.7, 0.8, 0.95],
     splash: [0.95, 1.15, 1.35],
   },
-  quenchCoil: {
-    name: 'Quench Coil',
+  frostSpire: {
+    name: 'Frost Spire',
     cost: [70, 70, 120],
     damage: [3, 5, 9],
     range: [1.7, 2.0, 2.4],
     rate: [1, 1.15, 1.35],
     slow: [0.35, 0.45, 0.55],
   },
-  mainlineArc: {
-    name: 'Mainline Arc',
+  stormSpire: {
+    name: 'Storm Spire',
     cost: [110, 100, 180],
     damage: [18, 30, 50],
     range: [2.3, 2.6, 2.9],

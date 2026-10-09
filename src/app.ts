@@ -6,8 +6,8 @@ import {createSelectionMarker} from './render/selection-marker';
 import type {MapView} from './render/map';
 import {pickCell} from './render/picking';
 import {createScene} from './render/scene';
-import {createRobotLayer, createTowerLayer} from './render/units';
-import type {RobotPose, TowerPose} from './render/units';
+import {createFoeLayer, createTowerLayer} from './render/units';
+import type {FoePose, TowerPose} from './render/units';
 import {createClock, createGame, stepFrame, TICK_SECONDS} from './sim';
 import type {Clock, Command, FrameOptions, GameEvent, GameState} from './sim';
 import {loadAutoStart, saveAutoStart, shouldAutoLaunch} from './ui/auto-wave';
@@ -40,17 +40,17 @@ export interface App {
 /** Wires the sim, the 3D scene and the UI together. The only place that does. */
 export function createApp(container: HTMLElement, seed: number): App {
   const scene = createScene(container, GRID);
-  const robots = createRobotLayer();
+  const foes = createFoeLayer();
   const towers = createTowerLayer();
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   const effects = createEffectsLayer(() => reduced.matches);
   const interpolator = createInterpolator();
-  const robotPoses: RobotPose[] = [];
+  const foePoses: FoePose[] = [];
   const towerPoses: TowerPose[] = [];
   const listeners: (() => void)[] = [];
   const frameEvents: GameEvent[] = [];
   const marker = createSelectionMarker();
-  scene.scene.add(robots.group, towers.group, effects.group, marker.group);
+  scene.scene.add(foes.group, towers.group, effects.group, marker.group);
 
   let game = createGame(seed);
   let clock: Clock = createClock();
@@ -132,8 +132,8 @@ export function createApp(container: HTMLElement, seed: number): App {
     for (const event of frameEvents) effects.spawn(event);
     effects.setShells(game.shots);
     effects.update(paused ? 0 : elapsed * speed);
-    interpolator.poses(game, alpha, robotPoses);
-    robots.update(robotPoses);
+    interpolator.poses(game, alpha, foePoses);
+    foes.update(foePoses);
     for (const listener of listeners) listener();
   };
 

@@ -3,8 +3,8 @@ import {PALETTE} from '../palette';
 import {box, cone, compose, sphere} from './parts';
 
 /** Tall boss with a command crown. Faces +z. */
-export function buildOverseer(): BufferGeometry {
-  const body = PALETTE.robots.overseer;
+export function buildWarlord(): BufferGeometry {
+  const body = PALETTE.foes.warlord;
   const dark = 0x39424f;
   const crown = Array.from({length: 5}, (_, i) => ({
     geometry: cone(0.07, 0.3, 5),

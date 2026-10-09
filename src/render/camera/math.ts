@@ -66,7 +66,7 @@ export function clampCamera(
   bounds: Bounds
 ): CameraState {
   // A screen too small to show the whole board at the pixel limit may still
-  // zoom out to the fitted view: seeing the Core matters more than 40 px.
+  // zoom out to the fitted view: seeing the Heartstone matters more than 40 px.
   const far = Math.max(
     CAMERA.minDistance,
     maxDistance(view),

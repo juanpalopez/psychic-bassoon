@@ -1,22 +1,22 @@
 import type {Enemy, GameState} from '../sim';
-import type {RobotPose} from './units';
+import type {FoePose} from './units';
 
 interface Track {
   prevX: number;
   prevY: number;
   heading: number;
   /** Poses are written into this object so a frame allocates nothing. */
-  pose: {-readonly [K in keyof RobotPose]: RobotPose[K]};
+  pose: {-readonly [K in keyof FoePose]: FoePose[K]};
 }
 
 export interface Interpolator {
-  /** Call before each sim tick: remembers where every robot is now. */
+  /** Call before each sim tick: remembers where every foe is now. */
   capture(game: GameState): void;
   /**
-   * Fills `out` with robot poses `alpha` (0..1) of the way from the last
+   * Fills `out` with foe poses `alpha` (0..1) of the way from the last
    * captured positions to the current ones.
    */
-  poses(game: GameState, alpha: number, out: RobotPose[]): void;
+  poses(game: GameState, alpha: number, out: FoePose[]): void;
 }
 
 function newTrack(tracks: Map<number, Track>, enemy: Enemy): Track {
@@ -31,7 +31,7 @@ function newTrack(tracks: Map<number, Track>, enemy: Enemy): Track {
 }
 
 /**
- * The sim ticks at 30 Hz but the screen draws at 60 Hz or more, so robots are
+ * The sim ticks at 30 Hz but the screen draws at 60 Hz or more, so foes are
  * drawn between their last two tick positions. Render-only; reads the game.
  */
 export function createInterpolator(): Interpolator {

@@ -10,20 +10,20 @@ import {damageEnemy, spawnEnemy} from './combat';
 const SEED = 42;
 const DISTANCE = 12;
 
-/** A game with one tower on a plate right next to the route. */
+/** A game with one tower on a plot right next to the route. */
 function setup(type: TowerId, level = 0) {
   const game = createGame(SEED);
   const onRoute = positionAt(game.route, DISTANCE);
   const cell = game.map.tiles
     .flatMap((line, row) => line.map((tile, col) => ({tile, col, row})))
-    .filter(c => c.tile === 'plate')
+    .filter(c => c.tile === 'plot')
     .map(c => ({
       ...c,
       d: (c.col + 0.5 - onRoute.x) ** 2 + (c.row + 0.5 - onRoute.y) ** 2,
     }))
     .sort((a, b) => a.d - b.d)[0];
-  if (!cell) throw new Error('no plate');
-  game.credits = 10_000;
+  if (!cell) throw new Error('no plot');
+  game.gold = 10_000;
   submit(game, {type: 'build', tower: type, col: cell.col, row: cell.row});
   tick(game);
   for (let i = 0; i < level; i++) {
@@ -33,7 +33,7 @@ function setup(type: TowerId, level = 0) {
   const tower = game.towers[0];
   if (!tower) throw new Error('no tower');
   tower.cooldown = 0;
-  game.credits = 0;
+  game.gold = 0;
   return {game, tower};
 }
 
@@ -56,13 +56,13 @@ function put(
 const alive = (game: GameState) => game.enemies.filter(e => e.alive);
 
 describe('spawnEnemy', () => {
-  it('puts a scaled robot on the spawn point with a fresh id', () => {
+  it('puts a scaled foe on the spawn point with a fresh id', () => {
     const game = createGame(SEED);
-    const a = spawnEnemy(game, 'hauler', 10);
-    const b = spawnEnemy(game, 'hauler', 10);
+    const a = spawnEnemy(game, 'raider', 10);
+    const b = spawnEnemy(game, 'raider', 10);
     expect(b.id).toBe(a.id + 1);
     expect(a).toMatchObject({
-      type: 'hauler',
+      type: 'raider',
       hp: Math.round(42 * 3.934),
       maxHp: Math.round(42 * 3.934),
       distance: 0,
@@ -71,13 +71,13 @@ describe('spawnEnemy', () => {
       slow: 0,
       slowTimer: 0,
       alive: true,
-      radius: ENEMIES.hauler.radius,
-      leak: ENEMIES.hauler.leak,
+      radius: ENEMIES.raider.radius,
+      leak: ENEMIES.raider.leak,
     });
     expect(game.enemies).toEqual([a, b]);
     expect(game.events).toEqual([
-      {type: 'enemySpawned', enemyId: a.id, robot: 'hauler', wave: 10},
-      {type: 'enemySpawned', enemyId: b.id, robot: 'hauler', wave: 10},
+      {type: 'enemySpawned', enemyId: a.id, foe: 'raider', wave: 10},
+      {type: 'enemySpawned', enemyId: b.id, foe: 'raider', wave: 10},
     ]);
   });
 });
@@ -85,43 +85,43 @@ describe('spawnEnemy', () => {
 describe('damageEnemy', () => {
   it('subtracts armor from a hit', () => {
     const game = createGame(SEED);
-    const smelter = spawnEnemy(game, 'smelter', 1);
-    damageEnemy(game, smelter, 10);
-    expect(smelter.hp).toBe(130 - (10 - 4));
+    const ironclad = spawnEnemy(game, 'ironclad', 1);
+    damageEnemy(game, ironclad, 10);
+    expect(ironclad.hp).toBe(130 - (10 - 4));
   });
 
   it('never cuts a hit below 25% of its damage', () => {
     const game = createGame(SEED);
-    const overseer = spawnEnemy(game, 'overseer', 1);
-    damageEnemy(game, overseer, 4); // armor 6 would leave nothing
-    expect(overseer.hp).toBe(850 - 1);
-    damageEnemy(game, overseer, 8); // 8 - 6 = 2 beats 8 * 0.25 = 2: equal
-    expect(overseer.hp).toBe(850 - 1 - 2);
-    damageEnemy(game, overseer, 9); // 9 - 6 = 3 beats 2.25
-    expect(overseer.hp).toBe(850 - 1 - 2 - 3);
+    const warlord = spawnEnemy(game, 'warlord', 1);
+    damageEnemy(game, warlord, 4); // armor 6 would leave nothing
+    expect(warlord.hp).toBe(850 - 1);
+    damageEnemy(game, warlord, 8); // 8 - 6 = 2 beats 8 * 0.25 = 2: equal
+    expect(warlord.hp).toBe(850 - 1 - 2);
+    damageEnemy(game, warlord, 9); // 9 - 6 = 3 beats 2.25
+    expect(warlord.hp).toBe(850 - 1 - 2 - 3);
   });
 
   it('pays the reward once and flags the kill', () => {
     const game = createGame(SEED);
-    game.credits = 0;
-    const skitter = spawnEnemy(game, 'skitter', 1);
-    damageEnemy(game, skitter, 1000);
-    damageEnemy(game, skitter, 1000);
-    expect(skitter.alive).toBe(false);
-    expect(game.credits).toBe(ENEMIES.skitter.reward);
+    game.gold = 0;
+    const scamp = spawnEnemy(game, 'scamp', 1);
+    damageEnemy(game, scamp, 1000);
+    damageEnemy(game, scamp, 1000);
+    expect(scamp.alive).toBe(false);
+    expect(game.gold).toBe(ENEMIES.scamp.reward);
   });
 
   it('records the kill as an event', () => {
     const game = createGame(SEED);
-    const skitter = spawnEnemy(game, 'skitter', 1);
-    damageEnemy(game, skitter, 1000);
+    const scamp = spawnEnemy(game, 'scamp', 1);
+    damageEnemy(game, scamp, 1000);
     expect(game.events).toContainEqual({
       type: 'enemyKilled',
-      enemyId: skitter.id,
-      robot: 'skitter',
-      reward: ENEMIES.skitter.reward,
-      x: skitter.x,
-      y: skitter.y,
+      enemyId: scamp.id,
+      foe: 'scamp',
+      reward: ENEMIES.scamp.reward,
+      x: scamp.x,
+      y: scamp.y,
     });
   });
 });
@@ -129,7 +129,7 @@ describe('damageEnemy', () => {
 describe('movement', () => {
   it('walks speed * tick along the route', () => {
     const game = createGame(SEED);
-    const enemy = spawnEnemy(game, 'hauler', 1);
+    const enemy = spawnEnemy(game, 'raider', 1);
     const speed = enemy.speed;
     tick(game);
     tick(game);
@@ -138,9 +138,9 @@ describe('movement', () => {
     expect([enemy.x, enemy.y]).toEqual([p.x, p.y]);
   });
 
-  it('moves a slowed robot at (1 - slow) of its speed', () => {
+  it('moves a slowed foe at (1 - slow) of its speed', () => {
     const game = createGame(SEED);
-    const enemy = spawnEnemy(game, 'hauler', 1);
+    const enemy = spawnEnemy(game, 'raider', 1);
     enemy.slow = 0.5;
     enemy.slowTimer = 1;
     const speed = enemy.speed;
@@ -150,7 +150,7 @@ describe('movement', () => {
 
   it('lets a slow wear off', () => {
     const game = createGame(SEED);
-    const enemy = spawnEnemy(game, 'hauler', 1);
+    const enemy = spawnEnemy(game, 'raider', 1);
     enemy.slow = 0.5;
     enemy.slowTimer = TICK_SECONDS * 2.5;
     for (let i = 0; i < 4; i++) tick(game);
@@ -158,24 +158,24 @@ describe('movement', () => {
     expect(enemy.slowTimer).toBeLessThanOrEqual(0);
   });
 
-  it('costs lives when a robot reaches the Core, and removes it', () => {
+  it('costs lives when a foe reaches the Heartstone, and removes it', () => {
     const game = createGame(SEED);
-    const enemy = put(game, 'smelter', game.route.total - 0.001);
+    const enemy = put(game, 'ironclad', game.route.total - 0.001);
     enemy.speed = 1;
     tick(game);
-    expect(game.lives).toBe(RULES.startLives - ENEMIES.smelter.leak);
+    expect(game.lives).toBe(RULES.startLives - ENEMIES.ironclad.leak);
     expect(game.enemies).toEqual([]);
     expect(game.events).toContainEqual({
       type: 'enemyLeaked',
       enemyId: enemy.id,
-      leak: ENEMIES.smelter.leak,
+      leak: ENEMIES.ironclad.leak,
     });
   });
 
   it('ends the game at zero lives and never goes below', () => {
     const game = createGame(SEED);
     game.lives = 3;
-    const enemy = put(game, 'overseer', game.route.total - 0.001);
+    const enemy = put(game, 'warlord', game.route.total - 0.001);
     enemy.speed = 1;
     tick(game);
     expect(game.lives).toBe(0);
@@ -184,19 +184,19 @@ describe('movement', () => {
   });
 });
 
-describe('Welder', () => {
-  it('shoots the robot furthest along the route', () => {
-    const {game} = setup('welder');
-    const back = put(game, 'hauler', DISTANCE - 0.5);
-    const front = put(game, 'hauler', DISTANCE + 0.5);
+describe('Ballista', () => {
+  it('shoots the foe furthest along the route', () => {
+    const {game} = setup('ballista');
+    const back = put(game, 'raider', DISTANCE - 0.5);
+    const front = put(game, 'raider', DISTANCE + 0.5);
     tick(game);
-    expect(front.hp).toBe(front.maxHp - TOWERS.welder.damage[0]);
+    expect(front.hp).toBe(front.maxHp - TOWERS.ballista.damage[0]);
     expect(back.hp).toBe(back.maxHp);
   });
 
   it('fires every 1/rate seconds', () => {
-    const {game, tower} = setup('welder');
-    const target = put(game, 'overseer');
+    const {game, tower} = setup('ballista');
+    const target = put(game, 'warlord');
     target.armor = 0;
     const ticks = Math.ceil(10 / TICK_SECONDS);
     let shots = 0;
@@ -209,83 +209,83 @@ describe('Welder', () => {
     // exact count is pinned; it can never beat the ideal rate.
     expect(shots).toBe(28);
     expect(shots).toBeLessThanOrEqual(
-      Math.floor(10 * TOWERS.welder.rate[0]) + 1
+      Math.floor(10 * TOWERS.ballista.rate[0]) + 1
     );
     expect(tower.cooldown).toBeGreaterThan(0);
   });
 
-  it('ignores robots out of range', () => {
-    const {game} = setup('welder');
-    const far = put(game, 'hauler', DISTANCE + 8);
+  it('ignores foes out of range', () => {
+    const {game} = setup('ballista');
+    const far = put(game, 'raider', DISTANCE + 8);
     tick(game);
     expect(far.hp).toBe(far.maxHp);
   });
 
   it('hits harder at higher levels', () => {
-    const {game} = setup('welder', 2);
-    const target = put(game, 'overseer');
+    const {game} = setup('ballista', 2);
+    const target = put(game, 'warlord');
     target.armor = 0;
     tick(game);
-    expect(target.hp).toBe(target.maxHp - TOWERS.welder.damage[2]);
+    expect(target.hp).toBe(target.maxHp - TOWERS.ballista.damage[2]);
   });
 });
 
-describe('Quench Coil', () => {
-  it('slows and damages every robot in range at once', () => {
-    const {game} = setup('quenchCoil');
-    const a = put(game, 'hauler', DISTANCE - 0.3);
-    const b = put(game, 'hauler', DISTANCE + 0.3);
+describe('Frost Spire', () => {
+  it('slows and damages every foe in range at once', () => {
+    const {game} = setup('frostSpire');
+    const a = put(game, 'raider', DISTANCE - 0.3);
+    const b = put(game, 'raider', DISTANCE + 0.3);
     tick(game);
     for (const e of [a, b]) {
-      expect(e.slow).toBe(TOWERS.quenchCoil.slow?.[0]);
-      expect(e.slowTimer).toBe(RULES.quenchSlowSeconds);
-      expect(e.hp).toBe(e.maxHp - TOWERS.quenchCoil.damage[0]);
+      expect(e.slow).toBe(TOWERS.frostSpire.slow?.[0]);
+      expect(e.slowTimer).toBe(RULES.frostSlowSeconds);
+      expect(e.hp).toBe(e.maxHp - TOWERS.frostSpire.damage[0]);
     }
   });
 
   it('keeps the stronger of two slows', () => {
-    const {game} = setup('quenchCoil');
-    const e = put(game, 'hauler');
+    const {game} = setup('frostSpire');
+    const e = put(game, 'raider');
     e.slow = 0.9;
     e.slowTimer = 1;
     tick(game);
     expect(e.slow).toBe(0.9);
   });
 
-  it('does nothing with no robot in range, and fires at once when one comes', () => {
-    const {game, tower} = setup('quenchCoil');
+  it('does nothing with no foe in range, and fires at once when one comes', () => {
+    const {game, tower} = setup('frostSpire');
     tick(game);
     tick(game);
-    const e = put(game, 'hauler');
+    const e = put(game, 'raider');
     tick(game);
-    expect(e.slow).toBe(TOWERS.quenchCoil.slow?.[0]);
+    expect(e.slow).toBe(TOWERS.frostSpire.slow?.[0]);
     expect(tower.cooldown).toBeGreaterThan(0);
   });
 });
 
-describe('Rivet Mortar', () => {
+describe('Catapult', () => {
   it('launches a shell that flies at the shell speed and then splashes', () => {
-    const {game} = setup('rivetMortar');
-    const target = put(game, 'overseer');
+    const {game} = setup('catapult');
+    const target = put(game, 'warlord');
     target.armor = 0;
-    const neighbour = put(game, 'overseer', DISTANCE + 0.5);
+    const neighbour = put(game, 'warlord', DISTANCE + 0.5);
     neighbour.armor = 0;
-    const far = put(game, 'overseer', DISTANCE + 4);
+    const far = put(game, 'warlord', DISTANCE + 4);
     far.armor = 0;
     tick(game);
     expect(game.shots).toHaveLength(1);
     expect(target.hp).toBe(target.maxHp);
     for (let i = 0; i < 60 && game.shots.length; i++) tick(game);
     expect(game.shots).toEqual([]);
-    const dmg = TOWERS.rivetMortar.damage[0];
+    const dmg = TOWERS.catapult.damage[0];
     expect(target.hp).toBe(target.maxHp - dmg);
     expect(neighbour.hp).toBe(neighbour.maxHp - dmg);
     expect(far.hp).toBe(far.maxHp);
   });
 
   it('flies on to the last known spot if the target dies first', () => {
-    const {game} = setup('rivetMortar');
-    const target = put(game, 'hauler');
+    const {game} = setup('catapult');
+    const target = put(game, 'raider');
     tick(game);
     expect(game.shots).toHaveLength(1);
     damageEnemy(game, target, 1e6);
@@ -295,8 +295,8 @@ describe('Rivet Mortar', () => {
   });
 
   it('moves a shell by exactly shell speed per second', () => {
-    const {game, tower} = setup('rivetMortar');
-    put(game, 'overseer');
+    const {game, tower} = setup('catapult');
+    put(game, 'warlord');
     tick(game);
     const shot = game.shots[0];
     if (!shot) throw new Error('no shot');
@@ -308,18 +308,18 @@ describe('Rivet Mortar', () => {
   });
 });
 
-describe('Mainline Arc', () => {
-  it('chains through nearby robots with 80% damage per jump', () => {
-    const {game} = setup('mainlineArc');
+describe('Storm Spire', () => {
+  it('chains through nearby foes with 80% damage per jump', () => {
+    const {game} = setup('stormSpire');
     const hits = [0, 0.5, 1, 1.5].map(o => {
-      const e = put(game, 'overseer', DISTANCE + o);
+      const e = put(game, 'warlord', DISTANCE + o);
       e.armor = 0;
       return e;
     });
     tick(game);
-    const dmg = TOWERS.mainlineArc.damage[0];
-    // targets the front-most robot first, then jumps to its nearest neighbour
-    const chain = TOWERS.mainlineArc.chain?.[0] ?? 0;
+    const dmg = TOWERS.stormSpire.damage[0];
+    // targets the front-most foe first, then jumps to its nearest neighbour
+    const chain = TOWERS.stormSpire.chain?.[0] ?? 0;
     const front = [...hits].reverse();
     front.forEach((e, i) => {
       const expected =
@@ -328,18 +328,18 @@ describe('Mainline Arc', () => {
     });
   });
 
-  it('never hits the same robot twice and stops when none is near', () => {
-    const {game} = setup('mainlineArc');
-    const lone = put(game, 'overseer');
+  it('never hits the same foe twice and stops when none is near', () => {
+    const {game} = setup('stormSpire');
+    const lone = put(game, 'warlord');
     lone.armor = 0;
     tick(game);
-    expect(lone.hp).toBe(lone.maxHp - TOWERS.mainlineArc.damage[0]);
+    expect(lone.hp).toBe(lone.maxHp - TOWERS.stormSpire.damage[0]);
   });
 
   it('does not jump further than the chain radius', () => {
-    const {game} = setup('mainlineArc');
-    const a = put(game, 'overseer', DISTANCE);
-    const b = put(game, 'overseer', DISTANCE - (RULES.arcChainRadius + 0.5));
+    const {game} = setup('stormSpire');
+    const a = put(game, 'warlord', DISTANCE);
+    const b = put(game, 'warlord', DISTANCE - (RULES.arcChainRadius + 0.5));
     a.armor = 0;
     b.armor = 0;
     // b is out of the tower's range or the radius; the first hit is a
@@ -352,8 +352,8 @@ describe('Mainline Arc', () => {
 describe('determinism', () => {
   it('replays a fight identically', () => {
     const run = () => {
-      const {game} = setup('mainlineArc', 1);
-      const enemy = spawnEnemy(game, 'hauler', 3);
+      const {game} = setup('stormSpire', 1);
+      const enemy = spawnEnemy(game, 'raider', 3);
       enemy.speed = 1;
       for (let i = 0; i < 600; i++) tick(game);
       return JSON.stringify(game);
@@ -361,20 +361,20 @@ describe('determinism', () => {
     expect(run()).toBe(run());
   });
 
-  it('keeps living robots when none were killed', () => {
-    const {game} = setup('welder');
-    put(game, 'overseer');
+  it('keeps living foes when none were killed', () => {
+    const {game} = setup('ballista');
+    put(game, 'warlord');
     tick(game);
     expect(alive(game)).toHaveLength(1);
   });
 });
 
 describe('range boundary', () => {
-  it('hits a robot exactly at range, as the prototype does (<=)', () => {
+  it('hits a foe exactly at range, as the prototype does (<=)', () => {
     const game = createGame(SEED);
     const spots = game.map.tiles.flatMap((line, row) =>
       line.flatMap((tile, col) =>
-        tile === 'plate'
+        tile === 'plot'
           ? game.map.path.flatMap((p, i) =>
               Math.abs(p.col - col) + Math.abs(p.row - row) === 2 &&
               (p.col === col || p.row === row)
@@ -385,25 +385,25 @@ describe('range boundary', () => {
       )
     );
     const spot = spots[0];
-    if (!spot) throw new Error('no plate exactly 2 cells from the path');
-    game.credits = 10_000;
+    if (!spot) throw new Error('no plot exactly 2 cells from the path');
+    game.gold = 10_000;
     submit(game, {
       type: 'build',
-      tower: 'quenchCoil',
+      tower: 'frostSpire',
       col: spot.col,
       row: spot.row,
     });
     tick(game);
     submit(game, {type: 'upgrade', towerId: 0}); // level 2 range is exactly 2.0
     tick(game);
-    const enemy = spawnEnemy(game, 'hauler', 1);
+    const enemy = spawnEnemy(game, 'raider', 1);
     enemy.speed = 0;
     // the route has one extra point at the front, so path cell i is point i + 1
     enemy.distance = game.route.cumulative[spot.index + 1] ?? 0;
     const tower = game.towers[0];
     if (tower) tower.cooldown = 0;
     tick(game);
-    expect(enemy.slow).toBe(TOWERS.quenchCoil.slow?.[1]);
+    expect(enemy.slow).toBe(TOWERS.frostSpire.slow?.[1]);
   });
 });
 
@@ -411,15 +411,15 @@ describe('events for effects', () => {
   const fired = (game: GameState) =>
     game.events.filter(e => e.type === 'towerFired');
 
-  it('reports a Welder beam from the tower to its target', () => {
-    const {game, tower} = setup('welder');
-    const target = put(game, 'hauler');
+  it('reports a Ballista beam from the tower to its target', () => {
+    const {game, tower} = setup('ballista');
+    const target = put(game, 'raider');
     tick(game);
     expect(fired(game)).toEqual([
       {
         type: 'towerFired',
         towerId: tower.id,
-        tower: 'welder',
+        tower: 'ballista',
         level: 0,
         x: tower.col + 0.5,
         y: tower.row + 0.5,
@@ -428,18 +428,18 @@ describe('events for effects', () => {
     ]);
   });
 
-  it('reports a Quench Coil pulse with no path', () => {
-    const {game} = setup('quenchCoil');
-    put(game, 'hauler');
+  it('reports a Frost Spire pulse with no path', () => {
+    const {game} = setup('frostSpire');
+    put(game, 'raider');
     tick(game);
     expect(fired(game)).toHaveLength(1);
-    expect(fired(game)[0]).toMatchObject({tower: 'quenchCoil', path: []});
+    expect(fired(game)[0]).toMatchObject({tower: 'frostSpire', path: []});
   });
 
-  it('reports every jump of a Mainline Arc in order', () => {
-    const {game} = setup('mainlineArc');
-    const a = put(game, 'overseer', DISTANCE + 1);
-    const b = put(game, 'overseer', DISTANCE + 0.5);
+  it('reports every jump of a Storm Spire in order', () => {
+    const {game} = setup('stormSpire');
+    const a = put(game, 'warlord', DISTANCE + 1);
+    const b = put(game, 'warlord', DISTANCE + 0.5);
     tick(game);
     const event = fired(game)[0];
     if (event?.type !== 'towerFired') throw new Error('no arc event');
@@ -447,9 +447,9 @@ describe('events for effects', () => {
     expect(event.path[1]).toEqual({x: b.x, y: b.y});
   });
 
-  it('reports a Rivet Mortar launch and where the shell lands', () => {
-    const {game} = setup('rivetMortar');
-    const target = put(game, 'overseer');
+  it('reports a Catapult launch and where the shell lands', () => {
+    const {game} = setup('catapult');
+    const target = put(game, 'warlord');
     tick(game);
     expect(fired(game)).toHaveLength(1);
     let landed;
@@ -461,18 +461,18 @@ describe('events for effects', () => {
       type: 'shellLanded',
       x: target.x,
       y: target.y,
-      splash: TOWERS.rivetMortar.splash?.[0],
+      splash: TOWERS.catapult.splash?.[0],
     });
   });
 
-  it('says where and what a robot was when it died', () => {
+  it('says where and what a foe was when it died', () => {
     const game = createGame(SEED);
-    const boss = spawnEnemy(game, 'overseer', 1);
+    const boss = spawnEnemy(game, 'warlord', 1);
     damageEnemy(game, boss, 1e6);
     expect(game.events).toContainEqual(
       expect.objectContaining({
         type: 'enemyKilled',
-        robot: 'overseer',
+        foe: 'warlord',
         x: boss.x,
         y: boss.y,
       })

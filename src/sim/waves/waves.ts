@@ -7,45 +7,45 @@ import {nextFloat} from '../rng';
 import type {Rng} from '../rng';
 
 /**
- * Lists the robots of wave `w` in spawn order, each with the pause before the
- * next one. Draws one float per robot from `rng`, in order.
+ * Lists the foes of wave `w` in spawn order, each with the pause before the
+ * next one. Draws one float per foe from `rng`, in order.
  */
 export function buildWave(w: number, rng: Rng): SpawnOrder[] {
   const boss = w % WAVES.bossEvery === 0;
   const swarm = w % WAVES.swarmEvery === 0 && !boss;
   const count = Math.round(WAVES.baseCount + w * WAVES.countPerWave);
   const gap = Math.max(WAVES.gapMin, WAVES.gapBase - w * WAVES.gapPerWave);
-  const smelterThreshold =
-    WAVES.smelterBaseThreshold -
-    Math.min(WAVES.smelterThresholdCap, w * WAVES.smelterThresholdPerWave);
+  const ironcladThreshold =
+    WAVES.ironcladBaseThreshold -
+    Math.min(WAVES.ironcladThresholdCap, w * WAVES.ironcladThresholdPerWave);
   const orders: SpawnOrder[] = [];
   for (let i = 0; i < count; i++) {
     const roll = nextFloat(rng);
-    let type: EnemyId = 'hauler';
+    let type: EnemyId = 'raider';
     if (swarm) {
-      type = roll < WAVES.swarmSkitterChance ? 'skitter' : 'hauler';
+      type = roll < WAVES.swarmScampChance ? 'scamp' : 'raider';
     } else {
-      if (w >= WAVES.skitterFromWave && roll < WAVES.skitterChance) {
-        type = 'skitter';
+      if (w >= WAVES.scampFromWave && roll < WAVES.scampChance) {
+        type = 'scamp';
       }
-      if (w >= WAVES.smelterFromWave && roll > smelterThreshold) {
-        type = 'smelter';
+      if (w >= WAVES.ironcladFromWave && roll > ironcladThreshold) {
+        type = 'ironclad';
       }
     }
     const multiplier =
-      type === 'smelter'
-        ? WAVES.gapMultiplier.smelter
-        : type === 'skitter'
+      type === 'ironclad'
+        ? WAVES.gapMultiplier.ironclad
+        : type === 'scamp'
           ? swarm
-            ? WAVES.gapMultiplier.skitterSwarm
-            : WAVES.gapMultiplier.skitter
-          : WAVES.gapMultiplier.hauler;
+            ? WAVES.gapMultiplier.scampSwarm
+            : WAVES.gapMultiplier.scamp
+          : WAVES.gapMultiplier.raider;
     orders.push({type, gap: gap * multiplier});
   }
   if (boss) {
-    orders.push({type: 'overseer', gap: WAVES.overseerGap});
+    orders.push({type: 'warlord', gap: WAVES.warlordGap});
     orders.unshift({
-      type: 'smelter',
+      type: 'ironclad',
       gap: gap * WAVES.gapMultiplier.bossEscort,
     });
   }
@@ -61,7 +61,7 @@ export function startWave(game: GameState): void {
   });
 }
 
-/** Releases queued robots as their timers run out. */
+/** Releases queued foes as their timers run out. */
 export function stepSpawners(game: GameState): void {
   for (const spawner of game.spawners) {
     spawner.timer -= TICK_SECONDS;
@@ -82,6 +82,6 @@ export function settleWave(game: GameState): void {
   }
   game.running = false;
   const bonus = RULES.waveClearBase + game.wave * RULES.waveClearPerWave;
-  game.credits += bonus;
+  game.gold += bonus;
   game.events.push({type: 'waveCleared', wave: game.wave, bonus});
 }

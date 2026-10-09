@@ -7,19 +7,19 @@ import type {Selection} from './selection';
 
 const NONE: Selection = {kind: 'none'};
 
-function plate(game: GameState) {
+function plot(game: GameState) {
   for (let row = 0; row < game.map.tiles.length; row++) {
-    const col = game.map.tiles[row]?.indexOf('plate') ?? -1;
+    const col = game.map.tiles[row]?.indexOf('plot') ?? -1;
     if (col >= 0) return {col, row};
   }
-  throw new Error('no plate');
+  throw new Error('no plot');
 }
 
 describe('hudModel top bar', () => {
-  it('shows credits, lives and wave, and warns at 5 lives or fewer', () => {
+  it('shows gold, lives and wave, and warns at 5 lives or fewer', () => {
     const game = createGame(1);
     const m = hudModel(game, NONE, 7);
-    expect([m.credits, m.lives, m.wave, m.best]).toEqual([180, 20, 0, 7]);
+    expect([m.gold, m.lives, m.wave, m.best]).toEqual([180, 20, 0, 7]);
     expect(m.lowLives).toBe(false);
     game.lives = 5;
     expect(hudModel(game, NONE, 0).lowLives).toBe(true);
@@ -61,26 +61,26 @@ describe('hudModel panel', () => {
 
   it('lists all four towers with cost and whether they are affordable', () => {
     const game = createGame(1);
-    game.credits = 60;
-    const sel: Selection = {kind: 'plate', ...plate(game)};
+    game.gold = 60;
+    const sel: Selection = {kind: 'plot', ...plot(game)};
     const panel = hudModel(game, sel, 0).panel;
     if (panel.kind !== 'build') throw new Error('expected build panel');
     expect(panel.options.map(o => [o.id, o.cost, o.affordable])).toEqual([
-      ['welder', 50, true],
-      ['rivetMortar', 90, false],
-      ['quenchCoil', 70, false],
-      ['mainlineArc', 110, false],
+      ['ballista', 50, true],
+      ['catapult', 90, false],
+      ['frostSpire', 70, false],
+      ['stormSpire', 110, false],
     ]);
   });
 
   it('shows a tower with its stats, the next level and the sale value', () => {
     const game = createGame(1);
-    submit(game, {type: 'build', tower: 'welder', ...plate(game)});
+    submit(game, {type: 'build', tower: 'ballista', ...plot(game)});
     tick(game);
-    game.credits = 1000;
+    game.gold = 1000;
     const panel = hudModel(game, {kind: 'tower', id: 0}, 0).panel;
     if (panel.kind !== 'tower') throw new Error('expected tower panel');
-    expect(panel.name).toBe('Welder');
+    expect(panel.name).toBe('Ballista');
     expect(panel.level).toBe(1);
     expect(panel.stats).toEqual([
       {label: 'Dmg', value: '9', next: '15'},
@@ -94,9 +94,9 @@ describe('hudModel panel', () => {
 
   it('shows the special stat of each tower and no upgrade at max level', () => {
     const game = createGame(1);
-    submit(game, {type: 'build', tower: 'quenchCoil', ...plate(game)});
+    submit(game, {type: 'build', tower: 'frostSpire', ...plot(game)});
     tick(game);
-    game.credits = 1000;
+    game.gold = 1000;
     for (let i = 0; i < 2; i++) {
       submit(game, {type: 'upgrade', towerId: 0});
       tick(game);
@@ -108,9 +108,9 @@ describe('hudModel panel', () => {
     expect(panel.stats[3]).toEqual({label: 'Slow', value: '55%'});
     expect(panel.sell).toBe(
       Math.floor(
-        (TOWERS.quenchCoil.cost[0] +
-          TOWERS.quenchCoil.cost[1] +
-          TOWERS.quenchCoil.cost[2]) *
+        (TOWERS.frostSpire.cost[0] +
+          TOWERS.frostSpire.cost[1] +
+          TOWERS.frostSpire.cost[2]) *
           RULES.sellRefund
       )
     );
@@ -118,9 +118,9 @@ describe('hudModel panel', () => {
 
   it('disables the upgrade when the player cannot pay', () => {
     const game = createGame(1);
-    submit(game, {type: 'build', tower: 'welder', ...plate(game)});
+    submit(game, {type: 'build', tower: 'ballista', ...plot(game)});
     tick(game);
-    game.credits = 59;
+    game.gold = 59;
     const panel = hudModel(game, {kind: 'tower', id: 0}, 0).panel;
     if (panel.kind !== 'tower') throw new Error('expected tower panel');
     expect(panel.upgrade).toEqual({cost: 60, affordable: false});
@@ -136,10 +136,10 @@ describe('toastFor', () => {
       'Early call +12'
     );
     expect(toastFor({type: 'waveLaunched', wave: 10, earlyBonus: 0})).toBe(
-      'Wave 10: Overseer incoming'
+      'Wave 10: Warlord incoming'
     );
     expect(toastFor({type: 'waveLaunched', wave: 5, earlyBonus: 0})).toBe(
-      'Wave 5: Skitter swarm'
+      'Wave 5: Scamp swarm'
     );
     expect(
       toastFor({type: 'waveLaunched', wave: 6, earlyBonus: 0})
@@ -148,9 +148,9 @@ describe('toastFor', () => {
       toastFor({
         type: 'commandRejected',
         command: {type: 'launchWave'},
-        reason: 'notEnoughCredits',
+        reason: 'notEnoughGold',
       })
-    ).toBe('Not enough credits');
+    ).toBe('Not enough gold');
     expect(toastFor({type: 'towerBuilt', towerId: 1})).toBeUndefined();
   });
 });

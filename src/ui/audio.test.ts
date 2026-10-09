@@ -134,7 +134,7 @@ describe('soundFor', () => {
       soundFor({
         type: 'enemyKilled',
         enemyId: 1,
-        robot: 'hauler',
+        foe: 'raider',
         reward: 1,
         x: 0,
         y: 0,
@@ -147,7 +147,7 @@ describe('soundFor', () => {
     );
     expect(soundFor({type: 'gameOver', wave: 3})).toBe('leak');
     expect(
-      soundFor({type: 'enemySpawned', enemyId: 1, robot: 'hauler', wave: 1})
+      soundFor({type: 'enemySpawned', enemyId: 1, foe: 'raider', wave: 1})
     ).toBeUndefined();
   });
 });

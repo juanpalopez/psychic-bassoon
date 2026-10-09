@@ -37,7 +37,7 @@ export type PanelModel =
 
 /** Everything the HUD shows, as plain data, so it can be tested. */
 export interface HudModel {
-  readonly credits: number;
+  readonly gold: number;
   readonly lives: number;
   readonly wave: number;
   readonly best: number;
@@ -50,10 +50,10 @@ export interface HudModel {
 const LOW_LIVES = 5;
 
 const DESCRIPTIONS: Readonly<Record<TowerId, string>> = {
-  welder: 'Fast single target',
-  rivetMortar: 'Splash damage',
-  quenchCoil: 'Slows all in range',
-  mainlineArc: 'Chain lightning',
+  ballista: 'Fast single target',
+  catapult: 'Splash damage',
+  frostSpire: 'Slows all in range',
+  stormSpire: 'Chain lightning',
 };
 
 const fixed = (digits: number) => (v: number) => v.toFixed(digits);
@@ -76,11 +76,11 @@ function stat(
 function towerStats(def: TowerDef, id: TowerId, level: number): Stat[] {
   const dps = def.damage.map((d, i) => d * (def.rate[i] ?? 0));
   const special =
-    id === 'rivetMortar'
+    id === 'catapult'
       ? stat('Splash', def.splash ?? [], level, fixed(1))
-      : id === 'quenchCoil'
+      : id === 'frostSpire'
         ? stat('Slow', def.slow ?? [], level, percent)
-        : id === 'mainlineArc'
+        : id === 'stormSpire'
           ? stat('Chain', def.chain ?? [], level, whole)
           : stat('DPS', dps, level, whole);
   return [
@@ -92,14 +92,14 @@ function towerStats(def: TowerDef, id: TowerId, level: number): Stat[] {
 }
 
 function panelModel(game: GameState, selection: Selection): PanelModel {
-  if (selection.kind === 'plate') {
+  if (selection.kind === 'plot') {
     return {
       kind: 'build',
       options: TOWER_IDS.map(id => ({
         id,
         name: TOWERS[id].name,
         cost: TOWERS[id].cost[0],
-        affordable: game.credits >= TOWERS[id].cost[0],
+        affordable: game.gold >= TOWERS[id].cost[0],
         description: DESCRIPTIONS[id],
       })),
     };
@@ -118,7 +118,7 @@ function panelModel(game: GameState, selection: Selection): PanelModel {
         upgrade:
           nextCost === undefined
             ? undefined
-            : {cost: nextCost, affordable: game.credits >= nextCost},
+            : {cost: nextCost, affordable: game.gold >= nextCost},
         sell: Math.floor(tower.invested * RULES.sellRefund),
       };
     }
@@ -127,7 +127,7 @@ function panelModel(game: GameState, selection: Selection): PanelModel {
 }
 
 function launchModel(game: GameState): HudModel['launch'] {
-  if (game.over) return {label: 'Core breached', enabled: false};
+  if (game.over) return {label: 'Heartstone fallen', enabled: false};
   if (!game.running) {
     return {label: `Launch wave ${game.wave + 1}`, enabled: true};
   }
@@ -144,7 +144,7 @@ export function hudModel(
   best: number
 ): HudModel {
   return {
-    credits: game.credits,
+    gold: game.gold,
     lives: game.lives,
     wave: game.wave,
     best,
@@ -156,9 +156,9 @@ export function hudModel(
 }
 
 const REJECTIONS: Readonly<Record<string, string>> = {
-  notEnoughCredits: 'Not enough credits',
-  occupied: 'Plate already in use',
-  notAPlate: 'Build on a metal plate',
+  notEnoughGold: 'Not enough gold',
+  occupied: 'Plot already in use',
+  notAPlot: 'Build on a plot',
   maxLevel: 'Already max level',
   waveInProgress: 'Wave still incoming',
 };
@@ -171,10 +171,10 @@ export function toastFor(event: GameEvent): string | undefined {
     case 'waveLaunched':
       if (event.earlyBonus > 0) return `Early call +${event.earlyBonus}`;
       if (event.wave % WAVES.bossEvery === 0) {
-        return `Wave ${event.wave}: Overseer incoming`;
+        return `Wave ${event.wave}: Warlord incoming`;
       }
       if (event.wave % WAVES.swarmEvery === 0) {
-        return `Wave ${event.wave}: Skitter swarm`;
+        return `Wave ${event.wave}: Scamp swarm`;
       }
       return undefined;
     case 'commandRejected':

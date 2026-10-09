@@ -36,10 +36,10 @@ function prototypeWave(w: number, random: () => number) {
 }
 
 const LORE = {
-  walker: 'hauler',
-  scout: 'skitter',
-  tank: 'smelter',
-  boss: 'overseer',
+  walker: 'raider',
+  scout: 'scamp',
+  tank: 'ironclad',
+  boss: 'warlord',
 } as const;
 
 describe('buildWave', () => {
@@ -61,7 +61,7 @@ describe('buildWave', () => {
     expect(a).toEqual(b);
   });
 
-  it('sends round(6 + 1.4w) robots, plus the escort and Overseer on boss waves', () => {
+  it('sends round(6 + 1.4w) foes, plus the escort and Warlord on boss waves', () => {
     const rng = deriveRng(SEED, RNG_STREAMS.waves);
     expect(buildWave(1, rng)).toHaveLength(7);
     expect(buildWave(2, rng)).toHaveLength(9);
@@ -70,14 +70,14 @@ describe('buildWave', () => {
     expect(buildWave(20, rng)).toHaveLength(34 + 2);
   });
 
-  it('sends only Haulers in wave 1', () => {
+  it('sends only Raiders in wave 1', () => {
     for (let seed = 0; seed < 50; seed++) {
       const wave = buildWave(1, deriveRng(seed, RNG_STREAMS.waves));
-      expect(wave.every(o => o.type === 'hauler')).toBe(true);
+      expect(wave.every(o => o.type === 'raider')).toBe(true);
     }
   });
 
-  it('adds Skitters from wave 2 and Smelters from wave 4', () => {
+  it('adds Scamps from wave 2 and Ironclads from wave 4', () => {
     const seen = (w: number) => {
       const types = new Set<string>();
       for (let seed = 0; seed < 200; seed++) {
@@ -87,49 +87,49 @@ describe('buildWave', () => {
       }
       return types;
     };
-    expect(seen(2)).toEqual(new Set(['hauler', 'skitter']));
-    expect(seen(3)).toEqual(new Set(['hauler', 'skitter']));
-    expect(seen(4)).toEqual(new Set(['hauler', 'skitter', 'smelter']));
+    expect(seen(2)).toEqual(new Set(['raider', 'scamp']));
+    expect(seen(3)).toEqual(new Set(['raider', 'scamp']));
+    expect(seen(4)).toEqual(new Set(['raider', 'scamp', 'ironclad']));
   });
 
-  it('makes every 5th wave a Skitter swarm with short gaps', () => {
+  it('makes every 5th wave a Scamp swarm with short gaps', () => {
     const wave = buildWave(15, deriveRng(SEED, RNG_STREAMS.waves));
     const gap = Math.max(WAVES.gapMin, WAVES.gapBase - 15 * WAVES.gapPerWave);
-    expect(wave.every(o => o.type === 'skitter' || o.type === 'hauler')).toBe(
+    expect(wave.every(o => o.type === 'scamp' || o.type === 'raider')).toBe(
       true
     );
-    expect(wave.filter(o => o.type === 'skitter').length).toBeGreaterThan(
+    expect(wave.filter(o => o.type === 'scamp').length).toBeGreaterThan(
       wave.length / 2
     );
-    for (const o of wave.filter(o => o.type === 'skitter')) {
-      expect(o.gap).toBe(gap * WAVES.gapMultiplier.skitterSwarm);
+    for (const o of wave.filter(o => o.type === 'scamp')) {
+      expect(o.gap).toBe(gap * WAVES.gapMultiplier.scampSwarm);
     }
   });
 
-  it('puts a Smelter escort first and the Overseer last on boss waves', () => {
+  it('puts an Ironclad escort first and the Warlord last on boss waves', () => {
     const wave = buildWave(10, deriveRng(SEED, RNG_STREAMS.waves));
     const gap = Math.max(WAVES.gapMin, WAVES.gapBase - 10 * WAVES.gapPerWave);
     expect(wave[0]).toEqual({
-      type: 'smelter',
+      type: 'ironclad',
       gap: gap * WAVES.gapMultiplier.bossEscort,
     });
-    expect(wave.at(-1)).toEqual({type: 'overseer', gap: WAVES.overseerGap});
-    expect(wave.filter(o => o.type === 'overseer')).toHaveLength(1);
+    expect(wave.at(-1)).toEqual({type: 'warlord', gap: WAVES.warlordGap});
+    expect(wave.filter(o => o.type === 'warlord')).toHaveLength(1);
   });
 
   it('shrinks the gap with the wave but never below the floor', () => {
-    const hauler = (w: number) => {
+    const raider = (w: number) => {
       for (let seed = 0; seed < 100; seed++) {
         const found = buildWave(w, deriveRng(seed, RNG_STREAMS.waves)).find(
-          o => o.type === 'hauler'
+          o => o.type === 'raider'
         );
         if (found) return found.gap;
       }
-      throw new Error('no hauler');
+      throw new Error('no raider');
     };
-    expect(hauler(1)).toBe(0.95 - 0.025);
-    expect(hauler(3)).toBe(0.95 - 0.075);
-    expect(hauler(100)).toBe(WAVES.gapMin);
+    expect(raider(1)).toBe(0.95 - 0.025);
+    expect(raider(3)).toBe(0.95 - 0.075);
+    expect(raider(100)).toBe(WAVES.gapMin);
   });
 });
 
@@ -139,7 +139,7 @@ function drain(game: GameState) {
 }
 
 describe('launching waves in a game', () => {
-  it('queues the wave and spawns robots over time, in order', () => {
+  it('queues the wave and spawns foes over time, in order', () => {
     const game = createGame(SEED);
     submit(game, {type: 'launchWave'});
     tick(game);
@@ -149,11 +149,11 @@ describe('launching waves in a game', () => {
     expect(planned).toBe(7);
     drain(game);
     expect(game.spawners).toEqual([]);
-    expect(game.enemies.every(e => e.type === 'hauler')).toBe(true);
+    expect(game.enemies.every(e => e.type === 'raider')).toBe(true);
     expect(game.enemies).toHaveLength(7);
   });
 
-  it('spawns the first robot after the first-spawn delay', () => {
+  it('spawns the first foe after the first-spawn delay', () => {
     const game = createGame(SEED);
     submit(game, {type: 'launchWave'});
     let ticks = 1;
@@ -186,17 +186,17 @@ describe('launching waves in a game', () => {
     ]);
   });
 
-  it('pays the early-call bonus once spawning is done but robots remain', () => {
+  it('pays the early-call bonus once spawning is done but foes remain', () => {
     const game = createGame(SEED);
     submit(game, {type: 'launchWave'});
     tick(game);
     drain(game);
-    const credits = game.credits;
+    const gold = game.gold;
     submit(game, {type: 'launchWave'});
     tick(game);
     const bonus = RULES.earlyCallBase + 1 * RULES.earlyCallPerWave;
     expect(game.wave).toBe(2);
-    expect(game.credits).toBe(credits + bonus);
+    expect(game.gold).toBe(gold + bonus);
     expect(game.events).toContainEqual({
       type: 'waveLaunched',
       wave: 2,
@@ -204,24 +204,24 @@ describe('launching waves in a game', () => {
     });
   });
 
-  it('pays the wave-clear bonus when every robot is gone', () => {
+  it('pays the wave-clear bonus when every foe is gone', () => {
     const game = createGame(SEED);
     submit(game, {type: 'launchWave'});
     tick(game);
     drain(game);
     for (const e of game.enemies) e.alive = false;
-    const credits = game.credits;
+    const gold = game.gold;
     tick(game);
     const bonus = RULES.waveClearBase + 1 * RULES.waveClearPerWave;
     expect(game.running).toBe(false);
-    expect(game.credits).toBe(credits + bonus);
+    expect(game.gold).toBe(gold + bonus);
     expect(game.events).toContainEqual({
       type: 'waveCleared',
       wave: 1,
       bonus,
     });
     tick(game);
-    expect(game.credits).toBe(credits + bonus);
+    expect(game.gold).toBe(gold + bonus);
   });
 
   it('gives no wave-clear bonus once the game is over', () => {
@@ -231,13 +231,13 @@ describe('launching waves in a game', () => {
     tick(game);
     drain(game);
     const first = game.enemies[0];
-    if (!first) throw new Error('no robot');
+    if (!first) throw new Error('no foe');
     first.distance = game.route.total;
     for (const e of game.enemies.slice(1)) e.alive = false;
-    const credits = game.credits;
+    const gold = game.gold;
     tick(game);
     expect(game.over).toBe(true);
-    expect(game.credits).toBe(credits);
+    expect(game.gold).toBe(gold);
     expect(game.events.some(e => e.type === 'waveCleared')).toBe(false);
   });
 
@@ -248,11 +248,11 @@ describe('launching waves in a game', () => {
     const built = createGame(SEED);
     const cell = built.map.tiles
       .flatMap((l, row) => l.map((t, col) => ({t, col, row})))
-      .find(c => c.t === 'plate');
-    if (!cell) throw new Error('no plate');
+      .find(c => c.t === 'plot');
+    if (!cell) throw new Error('no plot');
     submit(built, {
       type: 'build',
-      tower: 'welder',
+      tower: 'ballista',
       col: cell.col,
       row: cell.row,
     });

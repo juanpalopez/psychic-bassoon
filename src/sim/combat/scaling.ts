@@ -8,7 +8,7 @@ export interface ScaledStats {
   readonly armor: number;
 }
 
-/** Stats of a robot spawned in wave `wave`: the base numbers, scaled up. */
+/** Stats of a foe spawned in wave `wave`: the base numbers, scaled up. */
 export function enemyStatsForWave(id: EnemyId, wave: number): ScaledStats {
   const base = ENEMIES[id];
   const n = wave - 1;

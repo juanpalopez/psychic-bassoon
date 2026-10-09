@@ -28,7 +28,7 @@ const MAX_SHELLS = 64;
 const EFFECT_HEIGHT = 0.35;
 const RING_HEIGHT = 0.08;
 const SPARK_COLOR = 0xffd27a;
-/** Mid-point wobble of a Mainline Arc leg, in cells. */
+/** Mid-point wobble of a Storm Spire leg, in cells. */
 const ARC_JITTER = 0.14;
 
 export interface EffectsLayer {
@@ -113,7 +113,7 @@ export function createEffectsLayer(
   // mortar shells
   const shellGeometry = new SphereGeometry(0.09, 8, 6);
   const shellMaterial = new MeshBasicMaterial({
-    color: PALETTE.towers.rivetMortar,
+    color: PALETTE.towers.catapult,
   });
   const shells = new InstancedMesh(shellGeometry, shellMaterial, MAX_SHELLS);
   shells.count = 0;

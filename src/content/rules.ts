@@ -23,10 +23,10 @@ export const RULES = {
   maxFrameSeconds: 0.05,
   /** Fastest game speed the player can pick (1×, 2×, 3×). */
   maxGameSpeed: 3,
-  startCredits: 180,
+  startGold: 180,
   startLives: 20,
   towerLevels: 3,
-  /** Share of credits invested that a sale returns. */
+  /** Share of gold invested that a sale returns. */
   sellRefund: 0.7,
   /** Armor never cuts a hit below this share of its damage. */
   minDamageFraction: 0.25,
@@ -36,15 +36,15 @@ export const RULES = {
   /** Clearing a wave pays `waveClearBase + wave * waveClearPerWave`. */
   waveClearBase: 15,
   waveClearPerWave: 2,
-  /** Seconds a Quench Coil slow lasts after the last pulse. */
-  quenchSlowSeconds: 1.4,
-  /** Rivet Mortar shell speed, cells per second. */
+  /** Seconds a Frost Spire slow lasts after the last pulse. */
+  frostSlowSeconds: 1.4,
+  /** Catapult shell speed, cells per second. */
   rocketSpeed: 5.5,
   /** Spawn point sits this far above the top row, in cells. */
   spawnOffset: 0.45,
   /** Cell centre offset: a cell's centre is at col + 0.5. */
   cellCentre: 0.5,
-  /** Mainline Arc: reach to the next target and damage kept per jump. */
+  /** Storm Spire: reach to the next target and damage kept per jump. */
   arcChainRadius: 1.6,
   arcChainFalloff: 0.8,
 } as const;

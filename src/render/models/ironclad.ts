@@ -3,8 +3,8 @@ import {PALETTE} from '../palette';
 import {box, compose, cylinder} from './parts';
 
 /** Tracked furnace crawler with glowing vents. Faces +z. */
-export function buildSmelter(): BufferGeometry {
-  const hull = PALETTE.robots.smelter;
+export function buildIronclad(): BufferGeometry {
+  const hull = PALETTE.foes.ironclad;
   const track = 0x2b3440;
   return compose([
     {geometry: box(0.2, 0.22, 0.72), color: track, position: [0.3, 0.11, 0]},

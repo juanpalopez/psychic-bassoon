@@ -6,25 +6,25 @@ import type {Effect} from './model';
 const fixed = () => 0.5;
 
 describe('sparkCount', () => {
-  it('sends 10 sparks for a robot and 26 for the Overseer', () => {
-    expect(sparkCount('hauler', false)).toBe(10);
-    expect(sparkCount('overseer', false)).toBe(26);
+  it('sends 10 sparks for a foe and 26 for the Warlord', () => {
+    expect(sparkCount('raider', false)).toBe(10);
+    expect(sparkCount('warlord', false)).toBe(26);
   });
 
   it('cuts sparks to a quarter or less under reduced motion', () => {
-    expect(sparkCount('hauler', true)).toBeLessThanOrEqual(3);
-    expect(sparkCount('overseer', true)).toBeLessThanOrEqual(7);
-    expect(sparkCount('hauler', true)).toBeGreaterThan(0);
+    expect(sparkCount('raider', true)).toBeLessThanOrEqual(3);
+    expect(sparkCount('warlord', true)).toBeLessThanOrEqual(7);
+    expect(sparkCount('raider', true)).toBeGreaterThan(0);
   });
 });
 
 describe('effectsFromEvent', () => {
-  it('turns a Welder shot into a short beam in the Welder colour', () => {
+  it('turns a Ballista shot into a short beam in the Ballista colour', () => {
     const [beam, ...rest] = effectsFromEvent(
       {
         type: 'towerFired',
         towerId: 1,
-        tower: 'welder',
+        tower: 'ballista',
         level: 0,
         x: 1.5,
         y: 2.5,
@@ -38,17 +38,17 @@ describe('effectsFromEvent', () => {
       kind: 'beam',
       from: {x: 1.5, y: 2.5},
       to: {x: 4, y: 5},
-      color: PALETTE.towers.welder,
+      color: PALETTE.towers.ballista,
       life: 0.09,
     });
   });
 
-  it('turns a Mainline Arc into one polyline through every target', () => {
+  it('turns a Storm Spire into one polyline through every target', () => {
     const [arc] = effectsFromEvent(
       {
         type: 'towerFired',
         towerId: 1,
-        tower: 'mainlineArc',
+        tower: 'stormSpire',
         level: 1,
         x: 0,
         y: 0,
@@ -60,7 +60,7 @@ describe('effectsFromEvent', () => {
       false,
       fixed
     );
-    expect(arc).toMatchObject({kind: 'arc', color: PALETTE.towers.mainlineArc});
+    expect(arc).toMatchObject({kind: 'arc', color: PALETTE.towers.stormSpire});
     expect((arc as Extract<Effect, {kind: 'arc'}>).points).toEqual([
       {x: 0, y: 0},
       {x: 1, y: 1},
@@ -68,12 +68,12 @@ describe('effectsFromEvent', () => {
     ]);
   });
 
-  it('turns a Quench Coil pulse into a ring as wide as its range', () => {
+  it('turns a Frost Spire pulse into a ring as wide as its range', () => {
     const [ring] = effectsFromEvent(
       {
         type: 'towerFired',
         towerId: 1,
-        tower: 'quenchCoil',
+        tower: 'frostSpire',
         level: 1,
         x: 3,
         y: 3,
@@ -91,7 +91,7 @@ describe('effectsFromEvent', () => {
         {
           type: 'towerFired',
           towerId: 1,
-          tower: 'rivetMortar',
+          tower: 'catapult',
           level: 0,
           x: 0,
           y: 0,
@@ -115,11 +115,11 @@ describe('effectsFromEvent', () => {
     ]);
   });
 
-  it('turns a kill into sparks at the robot, fewer under reduced motion', () => {
+  it('turns a kill into sparks at the foe, fewer under reduced motion', () => {
     const event = {
       type: 'enemyKilled',
       enemyId: 1,
-      robot: 'hauler',
+      foe: 'raider',
       reward: 6,
       x: 4,
       y: 5,

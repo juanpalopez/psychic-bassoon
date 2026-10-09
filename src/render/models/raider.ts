@@ -3,8 +3,8 @@ import {PALETTE} from '../palette';
 import {box, compose} from './parts';
 
 /** Bipedal loader with a cargo frame on its back. Faces +z. */
-export function buildHauler(): BufferGeometry {
-  const body = PALETTE.robots.hauler;
+export function buildRaider(): BufferGeometry {
+  const body = PALETTE.foes.raider;
   const dark = 0x39424f;
   return compose([
     {geometry: box(0.1, 0.26, 0.12), color: dark, position: [0.12, 0.13, 0]},

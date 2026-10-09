@@ -17,14 +17,14 @@ export interface WaveRow {
   readonly killed: number;
   readonly leaked: number;
   readonly lives: number | undefined;
-  readonly credits: number | undefined;
+  readonly gold: number | undefined;
   readonly towers: number | undefined;
 }
 
 /** The state of the game when a wave was cleared. */
 export interface ClearSnapshot {
   readonly lives: number;
-  readonly credits: number;
+  readonly gold: number;
   readonly towers: number;
 }
 
@@ -71,7 +71,7 @@ export function parseArgs(argv: readonly string[]): Args {
   return args;
 }
 
-/** Draws the board: S spawn, C core, # belt, . plate. */
+/** Draws the board: S spawn, C core, # road, . plot. */
 export function formatMap(map: GameMap): string {
   const first = map.path[0];
   const last = map.path.at(-1);
@@ -81,7 +81,7 @@ export function formatMap(map: GameMap): string {
         .map((tile, col) => {
           if (first?.col === col && first.row === row) return 'S';
           if (last?.col === col && last.row === row) return 'C';
-          return tile === 'path' ? '#' : '.';
+          return tile === 'road' ? '#' : '.';
         })
         .join('')
     )
@@ -94,7 +94,7 @@ const COLUMNS: [string, (row: WaveRow) => number | undefined][] = [
   ['Killed', r => r.killed],
   ['Leaked', r => r.leaked],
   ['Lives', r => r.lives],
-  ['Credits', r => r.credits],
+  ['Gold', r => r.gold],
   ['Towers', r => r.towers],
 ];
 
@@ -141,7 +141,7 @@ export function summarizeWaves(
       wave,
       ...counts,
       lives: clear?.lives,
-      credits: clear?.credits,
+      gold: clear?.gold,
       towers: clear?.towers,
     };
   });
@@ -172,7 +172,7 @@ export function buildReport({seed, waves, speed}: Args): string {
         if (event.type === 'waveCleared') {
           clears.set(event.wave, {
             lives: game.lives,
-            credits: game.credits,
+            gold: game.gold,
             towers: game.towers.length,
           });
         }
@@ -180,20 +180,20 @@ export function buildReport({seed, waves, speed}: Args): string {
     }
   }
   const outcome = game.over
-    ? `Core fell in wave ${game.wave}`
+    ? `Heartstone fell in wave ${game.wave}`
     : game.wave >= waves
-      ? `Core held through wave ${game.wave}`
+      ? `Heartstone held through wave ${game.wave}`
       : `Stopped at the time limit in wave ${game.wave}`;
   const seconds = (game.tick * TICK_SECONDS).toFixed(1);
   return [
     `Scrapline sim · seed ${seed} · ${waves} waves · speed ${speed}`,
     '',
-    'Map (S spawn, C core, # belt, . plate)',
+    'Map (S spawn, C core, # road, . plot)',
     formatMap(game.map),
     '',
     formatTable(summarizeWaves(driven.events, clears)),
     '',
-    `Result: ${outcome} · lives ${game.lives} · credits ${game.credits} · ` +
+    `Result: ${outcome} · lives ${game.lives} · gold ${game.gold} · ` +
       `towers ${game.towers.length} · ${game.tick} ticks (${seconds} s) · ` +
       `fingerprint ${fingerprint(game)}`,
   ].join('\n');

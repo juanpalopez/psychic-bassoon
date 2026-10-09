@@ -49,14 +49,14 @@ export type Effect =
 
 /** Lifetimes in seconds, from the 2D prototype. */
 const LIFE = {beam: 0.09, arc: 0.14, ring: 0.45, boom: 0.35, spark: 0.5};
-const SPARKS = {robot: 10, overseer: 26};
+const SPARKS = {foe: 10, warlord: 26};
 /** Reduced motion keeps a few sparks so a kill still reads. */
 const REDUCED_SPARK_SHARE = 0.25;
 const SPARK_DRAG = 0.9;
-const BOOM_COLOR = PALETTE.towers.rivetMortar;
+const BOOM_COLOR = PALETTE.towers.catapult;
 
-export function sparkCount(robot: EnemyId, reducedMotion: boolean): number {
-  const full = robot === 'overseer' ? SPARKS.overseer : SPARKS.robot;
+export function sparkCount(foe: EnemyId, reducedMotion: boolean): number {
+  const full = foe === 'warlord' ? SPARKS.warlord : SPARKS.foe;
   return reducedMotion
     ? Math.max(1, Math.floor(full * REDUCED_SPARK_SHARE))
     : full;
@@ -75,7 +75,7 @@ export function effectsFromEvent(
     case 'towerFired': {
       const color = PALETTE.towers[event.tower];
       const from = {x: event.x, y: event.y};
-      if (event.tower === 'welder' && event.path[0]) {
+      if (event.tower === 'ballista' && event.path[0]) {
         return [
           {
             kind: 'beam',
@@ -87,7 +87,7 @@ export function effectsFromEvent(
           },
         ];
       }
-      if (event.tower === 'mainlineArc') {
+      if (event.tower === 'stormSpire') {
         return [
           {
             kind: 'arc',
@@ -98,13 +98,13 @@ export function effectsFromEvent(
           },
         ];
       }
-      if (event.tower === 'quenchCoil') {
+      if (event.tower === 'frostSpire') {
         return [
           {
             kind: 'ring',
             x: from.x,
             y: from.y,
-            radius: TOWERS.quenchCoil.range[event.level] ?? 1,
+            radius: TOWERS.frostSpire.range[event.level] ?? 1,
             color,
             life: LIFE.ring,
             max: LIFE.ring,
@@ -127,7 +127,7 @@ export function effectsFromEvent(
       ];
     case 'enemyKilled': {
       const sparks: Effect[] = [];
-      const count = sparkCount(event.robot, reducedMotion);
+      const count = sparkCount(event.foe, reducedMotion);
       for (let i = 0; i < count; i++) {
         const angle = random() * Math.PI * 2;
         const speed = 0.8 + random() * 2.4;

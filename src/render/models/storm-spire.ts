@@ -3,8 +3,8 @@ import {cone, compose, cylinder, sphere} from './parts';
 import {TOWER_TINT, towerBase} from './tower-base';
 
 /** Pylon crowned with prongs; every level adds two prongs. */
-export function buildMainlineArc(level: number): BufferGeometry {
-  const tint = TOWER_TINT.mainlineArc;
+export function buildStormSpire(level: number): BufferGeometry {
+  const tint = TOWER_TINT.stormSpire;
   const count = 4 + level * 2;
   const prongs = Array.from({length: count}, (_, i) => {
     const angle = (i / count) * Math.PI * 2;
