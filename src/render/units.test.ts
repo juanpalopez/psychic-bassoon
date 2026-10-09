@@ -1,7 +1,13 @@
 import {InstancedMesh} from 'three';
 import {describe, expect, it} from 'vitest';
+import {loadModelLibrary} from './models/library';
 import {createFoeLayer, createTowerLayer} from './units';
 import type {FoePose} from './units';
+
+// No files in unit tests: every unit falls back to its primitive builder.
+const models = await loadModelLibrary(() =>
+  Promise.reject(new Error('offline'))
+);
 
 const mesh = (
   group: {getObjectByName: (n: string) => unknown},
@@ -14,7 +20,7 @@ const mesh = (
 
 describe('foe layer', () => {
   it('draws 80 foes in four draw calls', () => {
-    const layer = createFoeLayer();
+    const layer = createFoeLayer(models);
     const types = ['scamp', 'raider', 'ironclad', 'warlord'] as const;
     const poses: FoePose[] = Array.from({length: 80}, (_, i) => ({
       type: types[i % 4] ?? 'raider',
@@ -34,7 +40,7 @@ describe('foe layer', () => {
   });
 
   it('drops foes that are gone on the next update', () => {
-    const layer = createFoeLayer();
+    const layer = createFoeLayer(models);
     layer.update([{type: 'raider', x: 1, y: 1, heading: 0}]);
     expect(mesh(layer.group, 'raider').count).toBe(1);
     layer.update([]);
@@ -43,7 +49,7 @@ describe('foe layer', () => {
   });
 
   it('places a foe at its position', () => {
-    const layer = createFoeLayer();
+    const layer = createFoeLayer(models);
     layer.update([{type: 'ironclad', x: 3.5, y: 6.25, heading: 0}]);
     const m = new Float32Array(16);
     mesh(layer.group, 'ironclad')
@@ -56,7 +62,7 @@ describe('foe layer', () => {
 
 describe('tower layer', () => {
   it('uses one mesh per type and level', () => {
-    const layer = createTowerLayer();
+    const layer = createTowerLayer(models);
     expect(layer.group.children).toHaveLength(12);
     layer.update([
       {type: 'ballista', level: 0, col: 1, row: 1},

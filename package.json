@@ -19,6 +19,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "check:size": "node scripts/check-size.mjs",
+    "check:assets": "node scripts/check-assets.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
