@@ -28,6 +28,8 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
         stage.x + stage.width * fx,
         stage.y + stage.height * fy
       );
+      // the panel follows the selection on the HUD's 10 Hz refresh
+      await page.waitForTimeout(150);
       opened = (await page.locator('#panel .build').count()) > 0;
     }
   }
@@ -89,8 +91,21 @@ test('offers the next wave after a clear and can auto-start the rest', async ({
     app.game.spawners = [];
     for (const enemy of app.game.enemies) enemy.alive = false;
   });
+  // the sim settles the wave on its next tick; the HUD refreshes at 10 Hz
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              scrapline: {app: {game: {running: boolean}}};
+            }
+          ).scrapline.app.game.running
+      )
+    )
+    .toBe(false);
   const popup = page.locator('.next-wave');
-  await expect(popup).toBeVisible();
+  await expect(popup).toBeVisible({timeout: 10_000});
   await expect(popup.getByRole('button')).toHaveText('Start wave 2');
 
   // turning auto-start on launches wave 2 by itself and hides the popup
