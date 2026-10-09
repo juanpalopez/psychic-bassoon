@@ -1,5 +1,6 @@
 import {InstancedMesh} from 'three';
 import {describe, expect, it} from 'vitest';
+import {GRID} from '../content';
 import {loadModelLibrary} from './models/library';
 import {createFoeLayer, createTowerLayer} from './units';
 import type {FoePose} from './units';
@@ -55,7 +56,8 @@ describe('foe layer', () => {
     mesh(layer.group, 'ironclad')
       .instanceMatrix.array.slice(0, 16)
       .forEach((v, i) => (m[i] = v));
-    expect([m[12], m[14]]).toEqual([3.5, 6.25]);
+    // sim (3.5, 6.25) is drawn turned: world x = y, world z = cols - x
+    expect([m[12], m[14]]).toEqual([6.25, GRID.cols - 3.5]);
     layer.dispose();
   });
 });

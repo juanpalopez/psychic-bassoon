@@ -55,7 +55,7 @@ src/
 
 - Target: 60 fps with 80 foes on a mid-range Android phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2.
 - One `InstancedMesh` per foe type. Don't create a mesh per enemy.
-- Camera: perspective, about 55° pitch, about 35° FOV, portrait framing; pinch zoom and pan are clamped so grid cells stay at least 40 px wide.
+- Camera: perspective, about 55° pitch, about 35° FOV, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, `src/render/space.ts` is the one place that knows); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit: on a small landscape screen the 40 px limit yields to the fitted view.
 - Models in two stages. Phase 2 greybox: foes and towers are built procedurally from primitives in `src/render/models/` (one file per unit), following the rough silhouette sheets in `docs/art/`. Phase 3 onward: CC0 GLB models (recoloured, kitbashed) replace the primitives one unit at a time; keep each unit's primitive builder as the fallback for any gap the packs don't cover. Use rigid-part animation; no skinning except for bosses.
 - Keep a unit's model behind one interface (`src/render/models/<unit>.ts`) so swapping primitives for a GLB never touches sim, UI or instancing code.
 - Reuse geometries and materials, dispose of anything removed, and avoid allocating objects inside the frame loop.
@@ -63,7 +63,7 @@ src/
 ## UI
 
 - The HUD is a DOM overlay. Never draw text or menus in the canvas.
-- Every action is one-thumb in portrait, with tap targets of at least 44 px.
+- The game is landscape only (owner decision). A phone held upright shows a "turn your phone" prompt and pauses. Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px.
 - Colours come from the CSS tokens in `src/ui/tokens.css`, which mirror the Claude Design system. Never hard-code colours in components.
 - Respect `prefers-reduced-motion`: no screen shake and reduced particle effects.
 - Start audio only after the first tap.

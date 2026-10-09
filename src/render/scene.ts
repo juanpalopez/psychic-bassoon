@@ -1,6 +1,7 @@
 import {Fog, PerspectiveCamera, Scene, WebGLRenderer} from 'three';
 import {attachCameraControls} from './camera/controls';
 import {PALETTE} from './palette';
+import {BOARD_WORLD} from './space';
 import {CAMERA, clampCamera, fitDistance} from './camera/math';
 import type {Bounds, CameraState, View} from './camera/math';
 
@@ -9,12 +10,6 @@ const MAX_PIXEL_RATIO = 2;
 const FOG_START_BEHIND = 9;
 const FOG_LENGTH = 22;
 const PITCH = (CAMERA.pitchDegrees * Math.PI) / 180;
-
-/** Board size in cells; the camera may pan anywhere over it. */
-export interface Board {
-  readonly cols: number;
-  readonly rows: number;
-}
 
 export interface SceneHandle {
   readonly renderer: WebGLRenderer;
@@ -29,7 +24,7 @@ export interface SceneHandle {
   dispose(): void;
 }
 
-export function createScene(container: HTMLElement, board: Board): SceneHandle {
+export function createScene(container: HTMLElement): SceneHandle {
   const renderer = new WebGLRenderer({antialias: true});
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
   renderer.setClearColor(PALETTE.clear);
@@ -40,10 +35,15 @@ export function createScene(container: HTMLElement, board: Board): SceneHandle {
   const fog = new Fog(PALETTE.clear, 1, 2);
   scene.fog = fog;
   const camera = new PerspectiveCamera(CAMERA.fovDegrees, 1, 0.1, 200);
-  const bounds: Bounds = {minX: 0, maxX: board.cols, minZ: 0, maxZ: board.rows};
+  const bounds: Bounds = {
+    minX: 0,
+    maxX: BOARD_WORLD.width,
+    minZ: 0,
+    maxZ: BOARD_WORLD.depth,
+  };
   const rig: CameraState = {
-    targetX: board.cols / 2,
-    targetZ: board.rows / 2,
+    targetX: BOARD_WORLD.width / 2,
+    targetZ: BOARD_WORLD.depth / 2,
     distance: 20,
   };
   const view = (): View => ({

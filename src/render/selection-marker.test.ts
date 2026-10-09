@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {createSelectionMarker} from './selection-marker';
+import {cellCentreWorld} from './space';
 
 describe('selection marker', () => {
   it('is hidden until something is selected', () => {
@@ -11,8 +12,10 @@ describe('selection marker', () => {
     const marker = createSelectionMarker();
     marker.show({col: 3, row: 5});
     expect(marker.group.visible).toBe(true);
+    const at = cellCentreWorld(3, 5);
     expect([marker.group.position.x, marker.group.position.z]).toEqual([
-      3.5, 5.5,
+      at.x,
+      at.z,
     ]);
   });
 

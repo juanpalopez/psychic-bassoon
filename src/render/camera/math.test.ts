@@ -147,3 +147,26 @@ describe('zoomBy', () => {
     expect(zoomBy(s, -1)).toEqual(s);
   });
 });
+
+describe('landscape phones', () => {
+  // The board is 13 cells wide by 9 deep; the stage is what is left beside
+  // the HUD column. The whole board must stay visible, even if cells end up
+  // under 40 px (CLAUDE.md: the pixel limit yields to the whole-board view).
+  const LANDSCAPE: Bounds = {minX: 0, maxX: 13, minZ: 0, maxZ: 9};
+  const cases: [string, View][] = [
+    ['844x390 phone, stage beside a 236 px column', {width: 560, height: 360}],
+    ['667x375 phone', {width: 440, height: 345}],
+  ];
+
+  it.each(cases)('fits the whole board on a %s', (_name, view) => {
+    const d = fitDistance(view, LANDSCAPE);
+    const clamped = clampCamera(
+      {targetX: 6.5, targetZ: 4.5, distance: d},
+      view,
+      LANDSCAPE
+    );
+    expect(clamped.distance).toBeCloseTo(d, 9);
+    // a cell is still at least about 30 px wide at the board's centre
+    expect(pixelsPerUnit(d, view)).toBeGreaterThan(28);
+  });
+});

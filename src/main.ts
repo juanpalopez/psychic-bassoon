@@ -2,6 +2,7 @@ import {createApp} from './app';
 import {glbSceneLoader, loadModelLibrary} from './render/models/library';
 import {positionAt, spawnEnemy} from './sim';
 import {createAudio, soundFor} from './ui/audio';
+import {UPRIGHT_QUERY} from './ui/orientation';
 import {createHud} from './ui/hud';
 
 const slots = {
@@ -32,6 +33,15 @@ createHud(app, {
   panel: slots.panel,
   controls: slots.controls,
 });
+
+// A phone held upright shows the 'turn your phone' prompt: pause behind it.
+// The query must match the CSS rule that shows #rotate in src/ui/hud.css.
+const upright = window.matchMedia(UPRIGHT_QUERY);
+const pauseWhenUpright = (): void => {
+  if (upright.matches) app.setPaused(true);
+};
+pauseWhenUpright(); // also when the page loads upright
+upright.addEventListener('change', pauseWhenUpright);
 
 // Sound starts on the first tap and never before.
 const audio = createAudio(

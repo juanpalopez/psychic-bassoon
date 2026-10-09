@@ -10,8 +10,11 @@ export const TERRAIN = {
   straight: 'tower-defense-kit/tile-straight.glb',
   corner: 'tower-defense-kit/tile-corner-square.glb',
   end: 'tower-defense-kit/tile-end.glb',
-  /** Cells of scenery around the board; more above, where the camera looks. */
-  margin: {top: 7, side: 3, bottom: 2},
+  /**
+   * Cells of scenery around the board (world sides, landscape): more on the
+   * far side, where the camera looks, little on the near side.
+   */
+  margin: {spawn: 4, heart: 4, near: 2, far: 6},
   /** Beyond this many cells from the board only cheap scenery is used. */
   nearCells: 2,
   /** The scenery stream (see `RNG_STREAMS`): render-only. */
@@ -128,10 +131,16 @@ export function grassPlacements(map: GameMap): Placement[] {
   return out;
 }
 
+/**
+ * Cells of scenery beyond each edge of the board. `spawn` is beyond the first
+ * row, `heart` beyond the last, `near` beyond column 0 (toward the camera) and
+ * `far` beyond the last column.
+ */
 export interface Margins {
-  readonly top: number;
-  readonly side: number;
-  readonly bottom: number;
+  readonly spawn: number;
+  readonly heart: number;
+  readonly near: number;
+  readonly far: number;
 }
 
 function pickWeighted(
@@ -154,8 +163,8 @@ export function sceneryPlacements(
 ): Placement[] {
   const rng = deriveRng(seed, TERRAIN.stream);
   const out: Placement[] = [];
-  for (let row = -margin.top; row < GRID.rows + margin.bottom; row++) {
-    for (let col = -margin.side; col < GRID.cols + margin.side; col++) {
+  for (let row = -margin.spawn; row < GRID.rows + margin.heart; row++) {
+    for (let col = -margin.near; col < GRID.cols + margin.far; col++) {
       if (col >= 0 && col < GRID.cols && row >= 0 && row < GRID.rows) continue;
       const away = Math.max(
         -col,

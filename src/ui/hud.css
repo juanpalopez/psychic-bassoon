@@ -18,17 +18,26 @@ body {
 }
 #app {
   height: 100%;
-  max-width: 560px;
-  margin: 0 auto;
-  padding: max(var(--space-3), env(safe-area-inset-top)) var(--space-5)
-    max(var(--space-3), env(safe-area-inset-bottom));
-  display: flex;
-  flex-direction: column;
+  margin: 0;
+  padding: max(var(--space-3), env(safe-area-inset-top))
+    max(var(--space-4), env(safe-area-inset-right))
+    max(var(--space-3), env(safe-area-inset-bottom))
+    max(var(--space-4), env(safe-area-inset-left));
+  /* landscape: the board takes the left; stats, the sheet and the controls
+     stack in a column on the right, reachable by the thumb holding the phone */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(224px, 28vw, 320px);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    'stage top'
+    'stage panel'
+    'stage controls';
   gap: var(--space-3);
 }
 .hud {
+  grid-area: top;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
 }
 .stat {
@@ -60,7 +69,7 @@ body {
   color: var(--danger);
 }
 #stage {
-  flex: 1;
+  grid-area: stage;
   min-height: 0;
   position: relative;
   overflow: hidden;
@@ -72,6 +81,9 @@ body {
   touch-action: none;
 }
 .toast {
+  max-width: calc(100% - 2 * var(--space-4));
+  overflow: hidden;
+  text-overflow: ellipsis;
   position: absolute;
   top: 10px;
   left: 50%;
@@ -153,13 +165,13 @@ body {
   flex: 1;
 }
 #panel {
-  height: 152px;
-  flex: none;
+  grid-area: panel;
+  min-height: 0;
+  overflow: auto;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   padding: var(--space-3);
-  overflow: hidden;
 }
 .hint {
   height: 100%;
@@ -195,7 +207,8 @@ body {
 }
 .build {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(var(--tap), 1fr);
   gap: var(--space-2);
   height: 100%;
 }
@@ -259,9 +272,9 @@ body {
 }
 .stats {
   display: grid;
-  grid-template-columns: repeat(4, auto);
+  grid-template-columns: repeat(2, auto);
   justify-content: start;
-  column-gap: 14px;
+  gap: 2px 14px;
   font-family: var(--mono);
   font-size: var(--text-sm);
   margin-top: 4px;
@@ -284,15 +297,15 @@ body {
 }
 .info-buttons {
   display: grid;
-  grid-template-columns: 1.4fr 1fr;
+  grid-template-columns: 1.2fr 1fr;
   gap: var(--space-2);
   margin-top: auto;
 }
 .controls {
+  grid-area: controls;
   display: grid;
-  grid-template-columns: 52px 56px 64px 1fr;
+  grid-template-columns: 44px 44px 48px 1fr;
   gap: var(--space-2);
-  flex: none;
 }
 button {
   font-family: var(--display);
@@ -386,4 +399,55 @@ button.toggle.on {
   width: 22px;
   height: 22px;
   accent-color: var(--accent);
+}
+
+/* The game is landscape only: a phone held upright is asked to turn. */
+#rotate {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-4);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: var(--text-lg);
+  text-align: center;
+  padding: var(--space-5);
+}
+#rotate b {
+  font-size: 40px;
+  color: var(--accent);
+}
+@media (orientation: portrait) and (max-width: 700px) {
+  #rotate {
+    display: flex;
+  }
+  #app {
+    visibility: hidden;
+  }
+}
+
+.controls button {
+  padding: 0 var(--space-2);
+  font-size: 12px;
+  letter-spacing: 0.03em;
+}
+
+/* Short landscape phones: tighten the column so the board keeps the room. */
+@media (max-height: 400px) {
+  #app {
+    gap: var(--space-2);
+  }
+  .stat {
+    padding: 2px var(--space-2);
+  }
+  .stat b {
+    font-size: var(--text-md);
+  }
+  .bcard .desc {
+    display: none;
+  }
 }

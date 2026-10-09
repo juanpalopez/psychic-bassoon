@@ -16,7 +16,7 @@ export default defineConfig({
     {
       name: 'chromium',
       use: {
-        ...devices['Pixel 7'],
+        ...devices['Pixel 7 landscape'],
         launchOptions: {
           // Software GL so headless Linux CI can create a WebGL context.
           args: [

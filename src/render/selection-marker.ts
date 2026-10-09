@@ -6,9 +6,9 @@ import {
   PlaneGeometry,
   RingGeometry,
 } from 'three';
-import {RULES} from '../content';
 import type {Highlight} from '../ui/selection';
 import {GROUND_HEIGHT} from './heights';
+import {cellCentreWorld} from './space';
 import {PALETTE} from './palette';
 
 const MARKER_HEIGHT = GROUND_HEIGHT + 0.02;
@@ -66,11 +66,8 @@ export function createSelectionMarker(): SelectionMarker {
         return;
       }
       group.visible = true;
-      group.position.set(
-        highlight.col + RULES.cellCentre,
-        MARKER_HEIGHT,
-        highlight.row + RULES.cellCentre
-      );
+      const at = cellCentreWorld(highlight.col, highlight.row);
+      group.position.set(at.x, MARKER_HEIGHT, at.z);
       range.visible = highlight.range !== undefined;
       if (highlight.range !== undefined) range.scale.setScalar(highlight.range);
     },
