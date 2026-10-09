@@ -44,6 +44,8 @@ export const FOE_GLB: Readonly<Partial<Record<EnemyId, GlbUnit>>> = {
   },
 };
 
+const KIT = 'tower-defense-kit/';
+
 /** Mixes a colour halfway to white, so the kit's texture still shows. */
 function pastel(hex: number): number {
   const channel = (shift: number) =>
@@ -51,24 +53,85 @@ function pastel(hex: number): number {
   return (channel(16) << 16) | (channel(8) << 8) | channel(0);
 }
 
-/**
- * Our own towers, built in Blender by `assets-src/blender/towers.py`: one
- * file per tower and level, already facing +z with the base at the origin.
- * Each level is a taller model, so the level reads from the height alone.
- */
-const ownTower =
-  (name: string) =>
-  (level: number): GlbUnit => ({
-    parts: [{file: `scrapline/${name}-${level}.glb`}],
-  });
+/** A piece and the height (before scaling) its origin sits at. */
+type Piece = readonly [file: string, y: number, x?: number, z?: number];
 
+/** Stacks Tower Defense Kit pieces, scaled together so a tower fits a cell. */
+function stack(
+  scale: number,
+  pieces: readonly Piece[],
+  tower: TowerId
+): GlbUnit {
+  return {
+    // The kit has one palette, so each tower is tinted toward its colour.
+    tint: pastel(PALETTE.towers[tower]),
+    parts: pieces.map(([file, y, x = 0, z = 0]) => ({
+      file: `${KIT}${file}.glb`,
+      position: [x * scale, y * scale, z * scale] as const,
+      scale,
+    })),
+  };
+}
+
+// Each level adds a section, so the level reads from the height alone.
+// Piece heights (scale 1): base 0.21, bottom 0.6, top 0.5, weapons about 0.44.
 export const TOWER_GLB: Readonly<
   Partial<Record<TowerId, (level: number) => GlbUnit>>
 > = {
-  ballista: ownTower('ballista'),
-  catapult: ownTower('catapult'),
-  frostSpire: ownTower('frost-spire'),
-  stormSpire: ownTower('storm-spire'),
+  ballista: level =>
+    stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-a', 0],
+        ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
+        ['weapon-ballista', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'ballista'
+    ),
+  catapult: level =>
+    stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
+        ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
+        ['weapon-catapult', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'catapult'
+    ),
+  frostSpire: level => {
+    const top = [0.21, 0.6, 1.1][level] ?? 0.21;
+    return stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
+        ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
+        ['detail-crystal-large', top],
+        ...(level >= 1
+          ? ([
+              ['detail-crystal', top, 0.3, 0.2],
+              ['detail-crystal', top, -0.3, 0.2],
+            ] as Piece[])
+          : []),
+        ...(level === 2
+          ? ([
+              ['detail-crystal', top, 0.2, -0.3],
+              ['detail-crystal', top, -0.2, -0.3],
+            ] as Piece[])
+          : []),
+      ],
+      'frostSpire'
+    );
+  },
+  stormSpire: level =>
+    stack(
+      0.7,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-c', 0],
+        ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
+        ['tower-round-roof-c', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'stormSpire'
+    ),
 };
 
 /** Scenery pieces outside the unit tables: the spawn pad and the Heartstone. */

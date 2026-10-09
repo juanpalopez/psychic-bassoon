@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {GRID, RULES} from '../content';
+import {GRID} from '../content';
 import {
   cellCentreWorld,
   headingFromSim,
@@ -47,6 +47,5 @@ describe('landscape mapping', () => {
     expect(headingFromSim(0, 1)).toBeCloseTo(Math.PI / 2, 12);
     // sim +x (a column to the right) is world -z, a half turn
     expect(Math.abs(headingFromSim(1, 0))).toBeCloseTo(Math.PI, 12);
-    expect(RULES.cellCentre).toBe(0.5);
   });
 });

@@ -80,6 +80,7 @@ describe('pickCell', () => {
 
   it('picks every cell of the board from its projected centre', () => {
     const camera = threeCamera(RIG, VIEW);
+    let checked = 0;
     for (let row = 0; row < GRID.rows; row++) {
       for (let col = 0; col < GRID.cols; col++) {
         const at = cellCentreWorld(col, row);
@@ -87,9 +88,12 @@ describe('pickCell', () => {
         const px = ((v.x + 1) / 2) * VIEW.width;
         const py = ((1 - v.y) / 2) * VIEW.height;
         if (px < 0 || px > VIEW.width || py < 0 || py > VIEW.height) continue;
+        checked++;
         expect(pickCell(px, py, VIEW, RIG)).toEqual({col, row});
       }
     }
+    // most of the board is on screen, so this cannot pass vacuously
+    expect(checked).toBeGreaterThan(GRID.cols * GRID.rows * 0.6);
   });
 
   it('returns nothing off the board', () => {
