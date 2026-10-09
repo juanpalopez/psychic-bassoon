@@ -8,3 +8,7 @@ Every third-party file in `public/assets/` is listed here with its source and li
 | --- | --- | --- | --- |
 | `models/castle-kit/siege-ram.glb` | [Kenney Castle Kit 2.0](https://kenney.nl/assets/castle-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; scaled and turned in code (`src/render/models/manifest.ts`) |
 | `models/castle-kit/Textures/colormap.png` | [Kenney Castle Kit 2.0](https://kenney.nl/assets/castle-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; the colour palette texture the kit's GLB files point to |
+| `models/castle-kit/siege-tower.glb` | [Kenney Castle Kit 2.0](https://kenney.nl/assets/castle-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; scaled in code |
+| `models/mini-dungeon/character-orc.glb` | [Kenney Mini Dungeon 2.0](https://kenney.nl/assets/mini-dungeon) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; frozen in its rest pose and scaled in code |
+| `models/mini-dungeon/character-human.glb` | [Kenney Mini Dungeon 2.0](https://kenney.nl/assets/mini-dungeon) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; frozen in its rest pose and scaled in code |
+| `models/mini-dungeon/Textures/colormap.png` | [Kenney Mini Dungeon 2.0](https://kenney.nl/assets/mini-dungeon) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; the colour palette texture the kit's GLB files point to |
