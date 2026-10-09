@@ -25,10 +25,17 @@ import bpy  # first: it registers bmesh and mathutils
 import bmesh
 from mathutils import Euler, Matrix, Vector
 
-ROOT = os.environ.get(
-    'SCRAPLINE_ROOT',
-    '/Users/juanlopezguzman/Documents/projects/psychic-bassoon',
-)
+def _repo_root():
+    """The repo root: $SCRAPLINE_ROOT, else two folders above this script
+    (or above the .blend when run from Blender's text editor)."""
+    env = os.environ.get('SCRAPLINE_ROOT')
+    if env:
+        return env
+    here = globals().get('__file__') or bpy.data.filepath
+    return os.path.abspath(os.path.join(os.path.dirname(here), '..', '..'))
+
+
+ROOT = _repo_root()
 SRC = os.path.join(ROOT, 'assets-src', 'blender')
 EXPORT = os.path.join(SRC, 'export')
 LOG = os.path.join(SRC, 'run.log')

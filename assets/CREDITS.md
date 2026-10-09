@@ -4,6 +4,8 @@ Every third-party file in `public/assets/` is listed here with its source and li
 
 ## Models
 
+The `scrapline/` towers are original work: the owner generated them with Claude and Blender (`assets-src/blender/towers.py`) and dedicates them to the public domain under CC0 1.0.
+
 | File | Source | Licence | Edits |
 | --- | --- | --- | --- |
 | `models/castle-kit/siege-ram.glb` | [Kenney Castle Kit 2.0](https://kenney.nl/assets/castle-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; scaled and turned in code (`src/render/models/manifest.ts`) |

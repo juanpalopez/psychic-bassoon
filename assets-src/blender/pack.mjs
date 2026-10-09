@@ -1,3 +1,9 @@
+// How to run (from the repo root; Blender 5.2 LTS built the GLBs in `export/`):
+//   1. blender --background assets-src/blender/towers.blend --python assets-src/blender/towers.py
+//   2. npm i --no-save @gltf-transform/core @gltf-transform/extensions \
+//        @gltf-transform/functions meshoptimizer
+//   3. node assets-src/blender/pack.mjs assets-src/blender/export public/assets/models/scrapline
+// The packages are not repo dependencies: this runs only when a model changes.
 // Meshopt-compress GLBs WITHOUT quantization: the game bakes node
 // transforms into the vertex data (glb.ts), which would clamp normalized
 // int16 positions, so attributes stay float and only the buffers are packed.
@@ -22,5 +28,5 @@ for (const f of readdirSync(src).filter(f => f.endsWith('.glb'))) {
   const box = p => { const pos = p.getAttribute('POSITION'); return [pos.getMin([]), pos.getMax([]), pos.getComponentType()]; };
   const tris = p => (p.getIndices()?.getCount() ?? p.getAttribute('POSITION').getCount()) / 3;
   console.log(f, JSON.stringify(box(a)) === JSON.stringify(box(b)) ? 'bounds ok' : 'BOUNDS DIFFER', tris(a), tris(b),
-    b.getAttribute('POSITION').getComponentType(), Object.keys(b.listSemantics ? {} : {}).length, b.listSemantics().join(','));
+    b.getAttribute('POSITION').getComponentType(), b.listSemantics().join(','));
 }
