@@ -1,6 +1,6 @@
 # Scrapline
 
-A robot tower defense for mobile browsers. You are Engineer Quell, the last night-shift worker at Foundry Nine, and FOREMAN, the factory's scheduling AI, is sending its robots down the scrapline to tear out the Core. Place Welders, Rivet Mortars, Quench Coils and Mainline Arcs on a procedurally generated conveyor and hold the line.
+A medieval tower defense for mobile browsers. You are Castellan Quell, last warden of Greyhold Keep, and the Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to claim the Heartstone as tithe. Place Ballistae, Catapults, Frost Spires and Storm Spires along a procedurally generated road and hold the line.
 
 It is a 3D low-poly remake of a 2D canvas prototype, built with Three.js and TypeScript, and it plays in portrait with one thumb.
 

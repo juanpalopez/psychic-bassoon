@@ -1,9 +1,9 @@
 # Scrapline
 
-Robot tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. Three.js + TypeScript + Vite, deployed to GitHub Pages.
+Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. Three.js + TypeScript + Vite, deployed to GitHub Pages.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–5, each closed by a gate)
-- Lore and naming: `docs/PLAN.md` → Lore (Foundry Nine, FOREMAN, Engineer Quell)
+- Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell)
 - Original prototype (rules and balance reference): `prototype/scrapline.html`
 
 > Paths named in this file that do not exist yet are created in the phase that needs them: `src/sim/rng.ts` (Phase 1), `src/render/models/`, `src/ui/tokens.css` and `docs/art/` (Phase 2), `assets/CREDITS.md` and `assets-src/` (with the first third-party asset).
@@ -47,16 +47,16 @@ src/
 ### Domain-driven design
 
 - `src/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public `index.ts`. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
-- Use the ubiquitous language from the lore table in names, types and tests (Skitter, Welder, Quench Coil, Core, wave, quota). No synonyms for the same concept.
+- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
 ## Rendering and performance
 
-- Target: 60 fps with 80 robots on a mid-range Android phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2.
-- One `InstancedMesh` per robot type. Don't create a mesh per enemy.
+- Target: 60 fps with 80 foes on a mid-range Android phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2.
+- One `InstancedMesh` per foe type. Don't create a mesh per enemy.
 - Camera: perspective, about 55° pitch, about 35° FOV, portrait framing; pinch zoom and pan are clamped so grid cells stay at least 40 px wide.
-- Models in two stages. Phase 2 greybox: robots and towers are built procedurally from primitives in `src/render/models/` (one file per unit), following the rough silhouette sheets in `docs/art/`. Phase 3 onward: CC0 GLB models (recoloured, kitbashed) replace the primitives one unit at a time; keep each unit's primitive builder as the fallback for any gap the packs don't cover. Use rigid-part animation; no skinning except for bosses.
+- Models in two stages. Phase 2 greybox: foes and towers are built procedurally from primitives in `src/render/models/` (one file per unit), following the rough silhouette sheets in `docs/art/`. Phase 3 onward: CC0 GLB models (recoloured, kitbashed) replace the primitives one unit at a time; keep each unit's primitive builder as the fallback for any gap the packs don't cover. Use rigid-part animation; no skinning except for bosses.
 - Keep a unit's model behind one interface (`src/render/models/<unit>.ts`) so swapping primitives for a GLB never touches sim, UI or instancing code.
 - Reuse geometries and materials, dispose of anything removed, and avoid allocating objects inside the frame loop.
 
@@ -161,5 +161,5 @@ Use the lore names in code-facing content and the UI:
 
 | Prototype | Remake |
 | --- | --- |
-| scout / walker / tank / boss | Skitter / Hauler / Smelter / Overseer |
-| laser / rocket / emp / tesla | Welder / Rivet Mortar / Quench Coil / Mainline Arc |
+| scout / walker / tank / boss | Scamp / Raider / Ironclad / Warlord |
+| laser / rocket / emp / tesla | Ballista / Catapult / Frost Spire / Storm Spire |
