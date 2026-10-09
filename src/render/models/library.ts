@@ -8,7 +8,8 @@ import {buildGlbUnit} from './glb';
 import type {UnitModel} from './glb';
 import type {GlbUnit} from './manifest';
 import {FOE_MODELS, TOWER_MODELS} from './index';
-import {FOE_GLB, TOWER_GLB} from './manifest';
+import {EXTRA_GLB, FOE_GLB, TOWER_GLB} from './manifest';
+import {TERRAIN_FILES} from '../terrain/layout';
 
 /**
  * Every unit's model, resolved once at start-up: the CC0 GLB when there is
@@ -17,6 +18,12 @@ import {FOE_GLB, TOWER_GLB} from './manifest';
 export interface ModelLibrary {
   foe(id: EnemyId): UnitModel;
   tower(id: TowerId, level: number): UnitModel;
+  /** A single scenery tile, or undefined if it failed to load. */
+  prop(file: string): UnitModel | undefined;
+  /** The spawn pad and the Heartstone crystal, if they loaded. */
+  extra(name: 'spawn' | 'heartstone'): UnitModel | undefined;
+  /** True when every terrain tile loaded, so the rich map can be drawn. */
+  readonly terrainReady: boolean;
   /** Where each unit's model came from, for tests and the console. */
   readonly sources: Readonly<Record<string, 'glb' | 'primitive'>>;
   dispose(): void;
@@ -57,6 +64,26 @@ export async function loadModelLibrary(
   const foes = new Map<EnemyId, UnitModel>();
   const towers = new Map<string, UnitModel>();
   const sources: Record<string, 'glb' | 'primitive'> = {};
+  const props = new Map<string, UnitModel>();
+  const extras = new Map<string, UnitModel>();
+
+  /** Loads a GLB unit that has no primitive; undefined on any failure. */
+  const loadOptional = async (
+    key: string,
+    unit: GlbUnit
+  ): Promise<UnitModel | undefined> => {
+    try {
+      const model = await withTimeout(buildGlbUnit(unit, loadScene));
+      disposables.push(model.geometry, model.material);
+      const map = (model.material as {map?: Texture | null}).map;
+      if (map) disposables.push(map);
+      sources[key] = 'glb';
+      return model;
+    } catch (error) {
+      console.warn(`model ${key} failed to load, skipping it`, error);
+      return undefined;
+    }
+  };
 
   const withTimeout = <T>(promise: Promise<T>): Promise<T> =>
     new Promise<T>((resolve, reject) => {
@@ -101,6 +128,14 @@ export async function loadModelLibrary(
 
   // all units load in parallel, so the slowest one sets the wait
   await Promise.all([
+    ...TERRAIN_FILES.map(async file => {
+      const model = await loadOptional(`terrain:${file}`, {parts: [{file}]});
+      if (model) props.set(file, model);
+    }),
+    ...(['spawn', 'heartstone'] as const).map(async name => {
+      const model = await loadOptional(`extra:${name}`, EXTRA_GLB[name]);
+      if (model) extras.set(name, model);
+    }),
     ...ENEMY_IDS.map(async id => {
       foes.set(id, await resolve(id, FOE_GLB[id], FOE_MODELS[id]));
     }),
@@ -127,6 +162,9 @@ export async function loadModelLibrary(
       if (!model) throw new Error(`no model for ${id} level ${level}`);
       return model;
     },
+    prop: file => props.get(file),
+    extra: name => extras.get(name),
+    terrainReady: TERRAIN_FILES.every(f => props.has(f)),
     sources,
     dispose() {
       for (const item of disposables) item.dispose();

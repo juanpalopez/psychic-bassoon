@@ -1,10 +1,12 @@
-import {PerspectiveCamera, Scene, WebGLRenderer} from 'three';
+import {Fog, PerspectiveCamera, Scene, WebGLRenderer} from 'three';
 import {attachCameraControls} from './camera/controls';
 import {PALETTE} from './palette';
 import {CAMERA, clampCamera, fitDistance} from './camera/math';
 import type {Bounds, CameraState, View} from './camera/math';
 
 const MAX_PIXEL_RATIO = 2;
+const FOG_NEAR = 18;
+const FOG_FAR = 44;
 const PITCH = (CAMERA.pitchDegrees * Math.PI) / 180;
 
 /** Board size in cells; the camera may pan anywhere over it. */
@@ -33,6 +35,8 @@ export function createScene(container: HTMLElement, board: Board): SceneHandle {
   container.appendChild(renderer.domElement);
 
   const scene = new Scene();
+  // edge mist: the scenery ring fades into the dusk sky
+  scene.fog = new Fog(PALETTE.clear, FOG_NEAR, FOG_FAR);
   const camera = new PerspectiveCamera(CAMERA.fovDegrees, 1, 0.1, 200);
   const bounds: Bounds = {minX: 0, maxX: board.cols, minZ: 0, maxZ: board.rows};
   const rig: CameraState = {

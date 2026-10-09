@@ -56,15 +56,25 @@ if (new URLSearchParams(location.search).has('debug')) {
     app,
     /** Where each unit's model came from ('glb' or 'primitive'). */
     modelSources: models.sources,
-    /** Puts `count` foes on the route, for the performance check. */
+    /**
+     * Puts `count` foes on the route, for the performance check, in a mix like
+     * a real wave: mostly Raiders and Scamps, a few Ironclads, a Warlord.
+     */
     crowd(count: number): void {
-      const types = ['scamp', 'raider', 'ironclad', 'warlord'] as const;
+      const mix = [
+        'raider',
+        'scamp',
+        'raider',
+        'ironclad',
+        'raider',
+        'scamp',
+        'raider',
+        'raider',
+        'scamp',
+        'warlord',
+      ] as const;
       for (let i = 0; i < count; i++) {
-        const foe = spawnEnemy(
-          app.game,
-          types[i % types.length] ?? 'raider',
-          1
-        );
+        const foe = spawnEnemy(app.game, mix[i % mix.length] ?? 'raider', 1);
         foe.speed = 0;
         foe.distance = (i / count) * app.game.route.total;
         const at = positionAt(app.game.route, foe.distance);

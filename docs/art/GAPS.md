@@ -33,7 +33,7 @@ The Quaternius Sci-Fi Essentials Kit is no longer a source; it stays here only a
 | Warlord | Same pack, a large champion | Add a red glowing core and an iron crown. Only unit allowed skinning. Fallback: primitive. |
 | Ballista, Catapult | Kenney `weapon-ballista`, `weapon-catapult` on a tower base | Recolour; add level add-ons (extra bolts, bigger arm). |
 | Frost Spire, Storm Spire | Kenney `tower-round-crystals` and crystal details | Violet and yellow crystals; add rings or prongs per level. |
-| Terrain and road | Kenney tiles | Needs a tile picker from the sim map; a decorative layer only. |
+| Terrain and road | Kenney Tower Defense Kit tiles | **Done** (#108): grass under every plot, road tiles turned to follow the route, a seeded scenery ring, a spawn pad and a crystal for the Heartstone. Still to do: cliffs, water and bridges, torches, and a gate at the spawn. |
 | Level 2 and 3 parts, level lights | None | Small add-on parts from primitives; emissive pips. |
 
 ## Rules

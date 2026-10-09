@@ -133,3 +133,28 @@ export const TOWER_GLB: Readonly<
       'stormSpire'
     ),
 };
+
+/** Scenery pieces outside the unit tables: the spawn pad and the Heartstone. */
+export const EXTRA_GLB: Readonly<Record<'spawn' | 'heartstone', GlbUnit>> = {
+  // a portal pad on the first road tile
+  spawn: {
+    parts: [
+      {
+        file: 'tower-defense-kit/spawn-round.glb',
+        scale: 1.4,
+        position: [0, 0.1, 0],
+      },
+    ],
+  },
+  // a large crystal on the last road tile, tinted Heartstone green
+  heartstone: {
+    parts: [
+      {
+        file: 'tower-defense-kit/detail-crystal-large.glb',
+        scale: 1.5,
+        position: [0, 0.1, 0],
+      },
+    ],
+    tint: pastel(PALETTE.heartstone),
+  },
+};

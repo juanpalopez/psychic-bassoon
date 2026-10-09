@@ -1,9 +1,7 @@
 import {
   BoxGeometry,
   CylinderGeometry,
-  DirectionalLight,
   Group,
-  HemisphereLight,
   InstancedMesh,
   Matrix4,
   Mesh,
@@ -13,11 +11,13 @@ import {
 import type {BufferGeometry, Material} from 'three';
 import {GRID, RULES} from '../content';
 import type {GameMap, Point} from '../sim';
+import {GROUND_HEIGHT, ROAD_HEIGHT} from './heights';
+import {addLights} from './lights';
 import {PALETTE} from './palette';
 
 const TILE_GAP = 0.06;
-const PLATE_HEIGHT = 0.14;
-const BELT_HEIGHT = 0.05;
+const PLATE_HEIGHT = GROUND_HEIGHT;
+const BELT_HEIGHT = ROAD_HEIGHT;
 
 /** Sim board coordinates (x right, y down) to world (x right, z toward you). */
 export function toWorld(p: Point): {x: number; y: number; z: number} {
@@ -121,9 +121,7 @@ export function createMapView(map: GameMap): MapView {
     );
   }
 
-  const key = new DirectionalLight(0xffffff, 2.2);
-  key.position.set(GRID.cols * 0.3, 14, GRID.rows + 6);
-  group.add(key, new HemisphereLight(0x9fb4c8, 0x1a2029, 1.4));
+  addLights(group);
 
   return {
     group,

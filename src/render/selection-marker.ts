@@ -8,9 +8,10 @@ import {
 } from 'three';
 import {RULES} from '../content';
 import type {Highlight} from '../ui/selection';
+import {GROUND_HEIGHT} from './heights';
 import {PALETTE} from './palette';
 
-const MARKER_HEIGHT = 0.16;
+const MARKER_HEIGHT = GROUND_HEIGHT + 0.02;
 
 export interface SelectionMarker {
   readonly group: Group;

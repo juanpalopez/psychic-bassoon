@@ -10,6 +10,10 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
   });
 
   await page.goto('/?seed=42&debug');
+  // the app starts after the models have loaded
+  await page.waitForFunction(
+    () => (window as unknown as {scrapline?: unknown}).scrapline !== undefined
+  );
   await expect(page.locator('.overlay .card h1')).toContainText('Scrap');
   await page.getByRole('button', {name: 'Deploy'}).click();
   await expect(page.locator('.overlay')).toBeHidden();

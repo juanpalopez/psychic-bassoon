@@ -1,6 +1,7 @@
 import {Group, InstancedMesh, Matrix4, Object3D} from 'three';
 import {ENEMY_IDS, GRID, RULES, TOWER_IDS} from '../content';
 import type {EnemyId, TowerId} from '../content';
+import {GROUND_HEIGHT, ROAD_HEIGHT} from './heights';
 import type {UnitModel} from './models/glb';
 import type {ModelLibrary} from './models/library';
 
@@ -60,7 +61,7 @@ export function createFoeLayer(models: ModelLibrary): UnitLayer<FoePose> {
       for (const pose of poses) {
         const mesh = meshes.get(pose.type);
         if (!mesh || mesh.count >= FOE_CAPACITY) continue;
-        dummy.position.set(pose.x, 0.05, pose.y);
+        dummy.position.set(pose.x, ROAD_HEIGHT, pose.y);
         dummy.rotation.y = pose.heading;
         dummy.updateMatrix();
         mesh.setMatrixAt(mesh.count++, dummy.matrix);
@@ -98,7 +99,7 @@ export function createTowerLayer(models: ModelLibrary): UnitLayer<TowerPose> {
         if (!mesh || mesh.count >= capacity) continue;
         matrix.makeTranslation(
           pose.col + RULES.cellCentre,
-          0.14,
+          GROUND_HEIGHT,
           pose.row + RULES.cellCentre
         );
         mesh.setMatrixAt(mesh.count++, matrix);
