@@ -8,6 +8,33 @@ import type {GlbUnit} from './manifest';
 const MODELS = 'public/assets/models';
 const credits = readFileSync('assets/CREDITS.md', 'utf8');
 
+/** Highest point of a GLB, from the POSITION bounds in its JSON chunk. */
+function glbTop(file: string): number {
+  const glb = readFileSync(join(MODELS, file));
+  const json = JSON.parse(
+    glb.subarray(20, 20 + glb.readUInt32LE(12)).toString('utf8')
+  ) as {
+    accessors: {max?: number[]}[];
+    meshes: {primitives: {attributes: {POSITION: number}}[]}[];
+  };
+  return Math.max(
+    ...json.meshes.flatMap(mesh =>
+      mesh.primitives.map(
+        p => json.accessors[p.attributes.POSITION]?.max?.[1] ?? 0
+      )
+    )
+  );
+}
+
+/** Height of a whole unit: every part's own top, scaled and offset. */
+function unitTop(unit: GlbUnit): number {
+  return Math.max(
+    ...unit.parts.map(
+      p => (p.position?.[1] ?? 0) + glbTop(p.file) * (p.scale ?? 1)
+    )
+  );
+}
+
 const units: [string, GlbUnit][] = [
   ...ENEMY_IDS.flatMap(id =>
     FOE_GLB[id] ? [[id, FOE_GLB[id]] as [string, GlbUnit]] : []
@@ -42,7 +69,7 @@ describe('model manifest', () => {
       const factory = TOWER_GLB[id];
       if (!factory) continue;
       const tops = Array.from({length: RULES.towerLevels}, (_, level) =>
-        Math.max(...factory(level).parts.map(p => p.position?.[1] ?? 0))
+        unitTop(factory(level))
       );
       expect(tops[1]).toBeGreaterThan(tops[0] ?? 0);
       expect(tops[2]).toBeGreaterThan(tops[1] ?? 0);

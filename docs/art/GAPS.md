@@ -31,8 +31,9 @@ The Quaternius Sci-Fi Essentials Kit is no longer a source; it stays here only a
 | --- | --- | --- |
 | Scamp, Raider, Ironclad | A fantasy or monster pack (to be found) | Recolour and decimate. Fallback: the greybox primitives, refined. |
 | Warlord | Same pack, a large champion | Add a red glowing core and an iron crown. Only unit allowed skinning. Fallback: primitive. |
-| Ballista, Catapult | Kenney `weapon-ballista`, `weapon-catapult` on a tower base | Recolour; add level add-ons (extra bolts, bigger arm). |
-| Frost Spire, Storm Spire | Kenney `tower-round-crystals` and crystal details | Violet and yellow crystals; add rings or prongs per level. |
+| Ballista, Catapult, Frost Spire, Storm Spire | **Done**: original models built in Blender by the owner (`assets-src/blender/`), 3 levels each, meshopt-compressed | Done. |
+| Scamp, Raider, Ironclad, Warlord | Owner is generating these | In progress; the Kenney characters and siege units are the placeholders. |
+| Ambient props (trees, rocks, torches, cliffs) | Owner is generating these | In progress; the Kenney tiles are the placeholders. |
 | Terrain and road | Kenney Tower Defense Kit tiles | **Done** (#108): grass under every plot, road tiles turned to follow the route, a seeded scenery ring, a spawn pad and a crystal for the Heartstone. Still to do: cliffs, water and bridges, torches, and a gate at the spawn. |
 | Level 2 and 3 parts, level lights | None | Small add-on parts from primitives; emissive pips. |
 
