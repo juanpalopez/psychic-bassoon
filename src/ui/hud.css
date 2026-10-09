@@ -20,7 +20,6 @@ body {
   /* pinned to the visible area: Safari's toolbars change the height */
   position: fixed;
   inset: 0;
-  height: 100%;
   margin: 0;
   padding: max(var(--space-3), env(safe-area-inset-top))
     max(var(--space-4), env(safe-area-inset-right))
@@ -36,11 +35,6 @@ body {
     'stage panel'
     'stage controls';
   gap: var(--space-3);
-}
-@supports (height: 100dvh) {
-  #app {
-    height: 100dvh;
-  }
 }
 .hud {
   grid-area: top;

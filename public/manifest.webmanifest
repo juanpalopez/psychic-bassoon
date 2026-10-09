@@ -2,6 +2,7 @@
   "name": "Scrapline",
   "short_name": "Scrapline",
   "start_url": ".",
+  "scope": ".",
   "display": "fullscreen",
   "orientation": "landscape",
   "background_color": "#11151b",
