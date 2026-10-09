@@ -17,7 +17,9 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 #app {
-  height: 100%;
+  /* pinned to the visible area: Safari's toolbars change the height */
+  position: fixed;
+  inset: 0;
   margin: 0;
   padding: max(var(--space-3), env(safe-area-inset-top))
     max(var(--space-4), env(safe-area-inset-right))

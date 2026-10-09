@@ -4,6 +4,8 @@ const PORT = 4173;
 
 export default defineConfig({
   testDir: 'e2e',
+  // CI renders with software GL and is slow: give assertions room
+  expect: {timeout: 10_000},
   fullyParallel: true,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
