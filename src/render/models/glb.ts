@@ -1,5 +1,5 @@
 import type {BufferGeometry, Material, Object3D, Texture} from 'three';
-import {Euler, Matrix4, Mesh, MeshLambertMaterial} from 'three';
+import {DoubleSide, Euler, Matrix4, Mesh, MeshLambertMaterial} from 'three';
 import {mergeGeometries} from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import type {GlbPart, GlbUnit} from './manifest';
 
@@ -74,8 +74,18 @@ export async function buildGlbUnit(
   }
   const geometry = mergeGeometries(geometries, false);
   for (const g of geometries) g.dispose();
+  // mergeGeometries logs and returns null (it does not throw) when parts
+  // have different attributes, for example one without uv.
+  if (!geometry) {
+    throw new Error(
+      `could not merge the parts of ${unit.parts[0]?.file ?? 'a unit'}`
+    );
+  }
+  // Kenney's materials are double sided (open wheels, flat shields).
   const material = new MeshLambertMaterial(
-    texture ? {map: texture} : {color: 0xcccccc}
+    texture
+      ? {map: texture, side: DoubleSide}
+      : {color: 0xcccccc, side: DoubleSide}
   );
   return {geometry, material};
 }

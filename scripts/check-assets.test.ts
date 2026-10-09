@@ -1,6 +1,12 @@
 import {spawnSync} from 'node:child_process';
 import {randomFillSync} from 'node:crypto';
-import {mkdirSync, mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
@@ -70,5 +76,37 @@ describe('check-assets script', () => {
 
   it('fails when the credits file is missing', () => {
     expect(run().status).toBe(1);
+  });
+
+  it('ignores .DS_Store', () => {
+    writeFileSync(join(assets, 'models', '.DS_Store'), 'junk');
+    writeFileSync(credits, '# Credits\n');
+    expect(run().status).toBe(0);
+  });
+
+  it('rejects a symlink, which could hide size', () => {
+    writeFileSync(
+      join(root, 'big.bin'),
+      randomFillSync(Buffer.alloc(7_000_000))
+    );
+    symlinkSync(
+      join(root, 'big.bin'),
+      join(assets, 'models', 'kit', 'big.glb')
+    );
+    writeFileSync(credits, '| `models/kit/big.glb` | Kenney | CC0 | none |\n');
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('not a regular file');
+  });
+
+  it('fails a credit that does not name the CC0 licence', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `models/kit/a.glb` | Someone | CC BY 4.0 | none |\n'
+    );
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
   });
 });

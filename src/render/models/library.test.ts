@@ -47,4 +47,14 @@ describe('loadModelLibrary', () => {
     }
     lib.dispose();
   });
+
+  it('falls back to primitives for a file that never arrives', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const lib = await loadModelLibrary(() => new Promise(() => undefined), {
+      timeoutMs: 20,
+    });
+    expect(Object.values(lib.sources).every(s => s === 'primitive')).toBe(true);
+    warn.mockRestore();
+    lib.dispose();
+  });
 });

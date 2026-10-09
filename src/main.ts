@@ -54,6 +54,8 @@ app.subscribe(() => {
 if (new URLSearchParams(location.search).has('debug')) {
   const hook = {
     app,
+    /** Where each unit's model came from ('glb' or 'primitive'). */
+    modelSources: models.sources,
     /** Puts `count` foes on the route, for the performance check. */
     crowd(count: number): void {
       const types = ['scamp', 'raider', 'ironclad', 'warlord'] as const;

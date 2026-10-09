@@ -1,5 +1,5 @@
 import {BoxGeometry, Group, Mesh, MeshStandardMaterial, Texture} from 'three';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it, vi} from 'vitest';
 import {bakeGeometries, buildGlbUnit, findTexture} from './glb';
 
 /** A 2 x 1 x 1 box standing on the ground, like a long siege engine. */
@@ -106,5 +106,18 @@ describe('buildGlbUnit', () => {
         Promise.reject(new Error('404'))
       )
     ).rejects.toThrow('404');
+  });
+
+  it('rejects when parts cannot be merged (one has no uv), so the fallback runs', async () => {
+    const withUv = longBox();
+    const noUv = longBox();
+    (noUv.children[0] as Mesh).geometry.deleteAttribute('uv');
+    const warn = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    await expect(
+      buildGlbUnit({parts: [{file: 'a'}, {file: 'b'}]}, async file =>
+        file === 'a' ? withUv : noUv
+      )
+    ).rejects.toThrow('could not merge');
+    warn.mockRestore();
   });
 });

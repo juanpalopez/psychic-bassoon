@@ -94,3 +94,15 @@ test('offers the next wave after a clear and can auto-start the rest', async ({
   await expect(popup).toBeHidden();
   await expect(page.locator('.stat').nth(2).locator('b')).toHaveText('2');
 });
+
+test('loads the real GLB models, not the primitive fallbacks', async ({
+  page,
+}) => {
+  await page.goto('/?seed=42&debug');
+  const sources = await page.evaluate(
+    () =>
+      (window as unknown as {scrapline: {modelSources: Record<string, string>}})
+        .scrapline.modelSources
+  );
+  expect(sources.ironclad).toBe('glb');
+});
