@@ -99,6 +99,10 @@ test('loads the real GLB models, not the primitive fallbacks', async ({
   page,
 }) => {
   await page.goto('/?seed=42&debug');
+  // the app starts after the models have loaded
+  await page.waitForFunction(
+    () => (window as unknown as {scrapline?: unknown}).scrapline !== undefined
+  );
   const sources = await page.evaluate(
     () =>
       (window as unknown as {scrapline: {modelSources: Record<string, string>}})
