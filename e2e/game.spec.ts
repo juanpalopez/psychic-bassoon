@@ -109,4 +109,5 @@ test('loads the real GLB models, not the primitive fallbacks', async ({
         .scrapline.modelSources
   );
   expect(sources.ironclad).toBe('glb');
+  expect(Object.values(sources).filter(s => s === 'primitive')).toEqual([]);
 });

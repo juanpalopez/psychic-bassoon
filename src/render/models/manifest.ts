@@ -1,4 +1,5 @@
 import type {EnemyId, TowerId} from '../../content';
+import {PALETTE} from '../palette';
 
 /** One GLB file placed inside a unit. All parts of a unit share one kit. */
 export interface GlbPart {
@@ -45,12 +46,25 @@ export const FOE_GLB: Readonly<Partial<Record<EnemyId, GlbUnit>>> = {
 
 const KIT = 'tower-defense-kit/';
 
+/** Mixes a colour halfway to white, so the kit's texture still shows. */
+function pastel(hex: number): number {
+  const channel = (shift: number) =>
+    Math.round((((hex >> shift) & 255) + 255) / 2);
+  return (channel(16) << 16) | (channel(8) << 8) | channel(0);
+}
+
 /** A piece and the height (before scaling) its origin sits at. */
 type Piece = readonly [file: string, y: number, x?: number, z?: number];
 
 /** Stacks Tower Defense Kit pieces, scaled together so a tower fits a cell. */
-function stack(scale: number, pieces: readonly Piece[]): GlbUnit {
+function stack(
+  scale: number,
+  pieces: readonly Piece[],
+  tower: TowerId
+): GlbUnit {
   return {
+    // The kit has one palette, so each tower is tinted toward its colour.
+    tint: pastel(PALETTE.towers[tower]),
     parts: pieces.map(([file, y, x = 0, z = 0]) => ({
       file: `${KIT}${file}.glb`,
       position: [x * scale, y * scale, z * scale] as const,
@@ -65,41 +79,57 @@ export const TOWER_GLB: Readonly<
   Partial<Record<TowerId, (level: number) => GlbUnit>>
 > = {
   ballista: level =>
-    stack(0.85, [
-      level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-a', 0],
-      ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
-      ['weapon-ballista', [0.21, 0.6, 1.1][level] ?? 0.21],
-    ]),
+    stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-a', 0],
+        ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
+        ['weapon-ballista', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'ballista'
+    ),
   catapult: level =>
-    stack(0.85, [
-      level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
-      ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
-      ['weapon-catapult', [0.21, 0.6, 1.1][level] ?? 0.21],
-    ]),
+    stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
+        ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
+        ['weapon-catapult', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'catapult'
+    ),
   frostSpire: level => {
     const top = [0.21, 0.6, 1.1][level] ?? 0.21;
-    return stack(0.85, [
-      level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
-      ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
-      ['detail-crystal-large', top],
-      ...(level >= 1
-        ? ([
-            ['detail-crystal', top, 0.3, 0.2],
-            ['detail-crystal', top, -0.3, 0.2],
-          ] as Piece[])
-        : []),
-      ...(level === 2
-        ? ([
-            ['detail-crystal', top, 0.2, -0.3],
-            ['detail-crystal', top, -0.2, -0.3],
-          ] as Piece[])
-        : []),
-    ]);
+    return stack(
+      0.85,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-b', 0],
+        ...(level === 2 ? ([['tower-round-top-b', 0.6]] as Piece[]) : []),
+        ['detail-crystal-large', top],
+        ...(level >= 1
+          ? ([
+              ['detail-crystal', top, 0.3, 0.2],
+              ['detail-crystal', top, -0.3, 0.2],
+            ] as Piece[])
+          : []),
+        ...(level === 2
+          ? ([
+              ['detail-crystal', top, 0.2, -0.3],
+              ['detail-crystal', top, -0.2, -0.3],
+            ] as Piece[])
+          : []),
+      ],
+      'frostSpire'
+    );
   },
   stormSpire: level =>
-    stack(0.7, [
-      level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-c', 0],
-      ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
-      ['tower-round-roof-c', [0.21, 0.6, 1.1][level] ?? 0.21],
-    ]),
+    stack(
+      0.7,
+      [
+        level === 0 ? ['tower-round-base', 0] : ['tower-round-bottom-c', 0],
+        ...(level === 2 ? ([['tower-round-top-a', 0.6]] as Piece[]) : []),
+        ['tower-round-roof-c', [0.21, 0.6, 1.1][level] ?? 0.21],
+      ],
+      'stormSpire'
+    ),
 };
