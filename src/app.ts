@@ -2,6 +2,7 @@ import {GRID} from './content';
 import {createInterpolator} from './render/interpolation';
 import {createEffectsLayer} from './render/effects/layer';
 import {createMapView} from './render/map';
+import {createSelectionMarker} from './render/selection-marker';
 import type {MapView} from './render/map';
 import {pickCell} from './render/picking';
 import {createScene} from './render/scene';
@@ -9,7 +10,8 @@ import {createRobotLayer, createTowerLayer} from './render/units';
 import type {RobotPose, TowerPose} from './render/units';
 import {createClock, createGame, stepFrame, TICK_SECONDS} from './sim';
 import type {Clock, Command, FrameOptions, GameEvent, GameState} from './sim';
-import {reconcileSelection, selectAt} from './ui/selection';
+import {loadAutoStart, saveAutoStart, shouldAutoLaunch} from './ui/auto-wave';
+import {highlightFor, reconcileSelection, selectAt} from './ui/selection';
 import type {Selection} from './ui/selection';
 
 export interface App {
@@ -18,6 +20,9 @@ export interface App {
   readonly selection: Selection;
   readonly speed: number;
   readonly paused: boolean;
+  /** Launch each next wave by itself once the last one is cleared. */
+  readonly autoStart: boolean;
+  setAutoStart(on: boolean): void;
   /** Queues a command for the next tick. */
   submit(command: Command): void;
   setSpeed(speed: number): void;
@@ -44,13 +49,15 @@ export function createApp(container: HTMLElement, seed: number): App {
   const towerPoses: TowerPose[] = [];
   const listeners: (() => void)[] = [];
   const frameEvents: GameEvent[] = [];
-  scene.scene.add(robots.group, towers.group, effects.group);
+  const marker = createSelectionMarker();
+  scene.scene.add(robots.group, towers.group, effects.group, marker.group);
 
   let game = createGame(seed);
   let clock: Clock = createClock();
   let mapView: MapView | undefined;
   let selection: Selection = {kind: 'none'};
   let speed = 1;
+  let autoStart = loadAutoStart(localStorage);
   let paused = true; // the start screen unpauses
   let lastMs: number | undefined;
   let towersDirty = true;
@@ -117,6 +124,10 @@ export function createApp(container: HTMLElement, seed: number): App {
       alpha = Math.min(1, clock.accumulator / TICK_SECONDS);
     }
     selection = reconcileSelection(game, selection);
+    marker.show(highlightFor(game, selection));
+    if (shouldAutoLaunch(game, autoStart, paused)) {
+      game.pending.push({type: 'launchWave'});
+    }
     if (towersDirty) syncTowers();
     for (const event of frameEvents) effects.spawn(event);
     effects.setShells(game.shots);
@@ -140,6 +151,13 @@ export function createApp(container: HTMLElement, seed: number): App {
     stats() {
       const {calls, triangles} = scene.renderer.info.render;
       return {calls, triangles};
+    },
+    get autoStart() {
+      return autoStart;
+    },
+    setAutoStart(on) {
+      autoStart = on;
+      saveAutoStart(localStorage, on);
     },
     get paused() {
       return paused;

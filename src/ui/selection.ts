@@ -1,3 +1,4 @@
+import {TOWERS} from '../content';
 import type {TowerId} from '../content';
 import type {Command, GameState} from '../sim';
 
@@ -59,4 +60,30 @@ export function upgradeCommand(selection: Selection): Command | undefined {
 export function sellCommand(selection: Selection): Command | undefined {
   if (selection.kind !== 'tower') return undefined;
   return {type: 'sell', towerId: selection.id};
+}
+
+/** The cell to mark on the board, and a tower's range in cells. */
+export interface Highlight {
+  readonly col: number;
+  readonly row: number;
+  readonly range?: number;
+}
+
+export function highlightFor(
+  game: GameState,
+  selection: Selection
+): Highlight | undefined {
+  if (selection.kind === 'plate') {
+    return {col: selection.col, row: selection.row};
+  }
+  if (selection.kind === 'tower') {
+    const tower = game.towers.find(t => t.id === selection.id);
+    if (!tower) return undefined;
+    return {
+      col: tower.col,
+      row: tower.row,
+      range: TOWERS[tower.type].range[tower.level],
+    };
+  }
+  return undefined;
 }

@@ -92,7 +92,37 @@ export function createHud(app: App, slots: Slots): void {
   const launch = button('Launch wave 1', 'primary', () =>
     app.submit({type: 'launchWave'})
   );
-  controls.append(pause, speedButton, launch);
+  const autoButton = button('Auto', 'toggle', () => setAuto(!app.autoStart));
+  autoButton.setAttribute('aria-label', 'Auto-start next waves');
+  controls.append(pause, speedButton, autoButton, launch);
+
+  // --- next-wave popup, shown when a wave is cleared
+  const nextTitle = el('div', 'eyebrow');
+  const nextButton = button('Start next wave', 'primary', () => {
+    app.submit({type: 'launchWave'});
+    hideNext();
+  });
+  const autoBox = el('input');
+  autoBox.type = 'checkbox';
+  autoBox.id = 'auto-start';
+  autoBox.addEventListener('change', () => setAuto(autoBox.checked));
+  const autoLabel = el('label', 'auto-row', autoBox, 'Auto-start next waves');
+  autoLabel.htmlFor = 'auto-start';
+  const next = stage.appendChild(
+    el('div', 'next-wave', nextTitle, nextButton, autoLabel)
+  );
+  next.hidden = true;
+  const hideNext = (): void => {
+    next.hidden = true;
+  };
+  const setAuto = (on: boolean): void => {
+    app.setAutoStart(on);
+    autoBox.checked = on;
+    autoButton.setAttribute('aria-pressed', String(on));
+    autoButton.classList.toggle('on', on);
+    if (on) hideNext();
+  };
+  setAuto(app.autoStart);
 
   let best = loadBest(localStorage);
   let toastTimer: number | undefined;
@@ -112,7 +142,8 @@ export function createHud(app: App, slots: Slots): void {
     overlay.replaceChildren(...(content ? [content] : []));
   };
   const newMap = (): void => {
-    app.restart(crypto.getRandomValues(new Uint32Array(1))[0] ?? 1);
+    app.restart(crypto.getRandomValues(new Uint32Array(1))[0] || 1);
+    hideNext();
     app.setPaused(false);
     show('none');
   };
@@ -301,6 +332,14 @@ export function createHud(app: App, slots: Slots): void {
     for (const event of app.frameEvents) {
       const message = toastFor(event);
       if (message) say(message);
+      if (event.type === 'waveCleared' && !app.autoStart && !app.game.over) {
+        nextTitle.textContent = `Wave ${event.wave} cleared · +${event.bonus}`;
+        nextButton.textContent = `Start wave ${event.wave + 1}`;
+        next.hidden = false;
+      }
+      if (event.type === 'waveLaunched' || event.type === 'gameOver') {
+        hideNext();
+      }
       if (event.type === 'waveCleared')
         best = saveBest(localStorage, best, event.wave);
     }
