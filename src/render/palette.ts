@@ -3,7 +3,7 @@
  * mirror `src/ui/tokens.css`; keep the two in step.
  */
 export const PALETTE = {
-  clear: 0x0f1216,
+  clear: 0x0b1220,
   ground: 0x11151b,
   plot: 0x1f2630,
   road: 0x4d5a6c,

@@ -2,6 +2,7 @@ import {GRID} from './content';
 import {createInterpolator} from './render/interpolation';
 import {createEffectsLayer} from './render/effects/layer';
 import {createMapView} from './render/map';
+import {createTerrainView} from './render/terrain/view';
 import {createSelectionMarker} from './render/selection-marker';
 import type {MapView} from './render/map';
 import {pickCell} from './render/picking';
@@ -72,7 +73,7 @@ export function createApp(
       scene.scene.remove(mapView.group);
       mapView.dispose();
     }
-    mapView = createMapView(game.map);
+    mapView = createTerrainView(game.map, models) ?? createMapView(game.map);
     scene.scene.add(mapView.group);
   };
   showMap();

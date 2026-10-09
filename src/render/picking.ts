@@ -1,5 +1,6 @@
 import {GRID} from '../content';
 import {CAMERA} from './camera/math';
+import {GROUND_HEIGHT} from './heights';
 import type {CameraState, View} from './camera/math';
 
 const RAD = Math.PI / 180;
@@ -27,7 +28,8 @@ export function groundPointAt(
   const dirY = -SIN_PITCH + up * COS_PITCH;
   if (dirY >= 0) return undefined;
   const dirZ = -COS_PITCH - up * SIN_PITCH;
-  const eyeY = SIN_PITCH * rig.distance;
+  // the ground is GROUND_HEIGHT above y = 0, so the ray ends there
+  const eyeY = SIN_PITCH * rig.distance - GROUND_HEIGHT;
   const eyeZ = rig.targetZ + COS_PITCH * rig.distance;
   const t = -eyeY / dirY;
   return {x: rig.targetX + right * t, z: eyeZ + dirZ * t};

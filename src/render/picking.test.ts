@@ -2,6 +2,7 @@ import {PerspectiveCamera, Plane, Raycaster, Vector2, Vector3} from 'three';
 import {describe, expect, it} from 'vitest';
 import {GRID} from '../content';
 import {CAMERA} from './camera/math';
+import {GROUND_HEIGHT} from './heights';
 import type {CameraState, View} from './camera/math';
 import {groundPointAt, pickCell} from './picking';
 
@@ -28,10 +29,12 @@ function threeCamera(rig: CameraState, view: View): PerspectiveCamera {
 }
 
 describe('groundPointAt', () => {
-  it('maps the screen centre to the view target', () => {
+  it('maps the screen centre to the view target, lifted to the ground height', () => {
     const p = groundPointAt(195, 390, VIEW, RIG);
     expect(p?.x).toBeCloseTo(4.5, 9);
-    expect(p?.z).toBeCloseTo(6.5, 9);
+    // the centre ray crosses the ground (y = 0.2) a little before the target
+    const pitch = (CAMERA.pitchDegrees * Math.PI) / 180;
+    expect(p?.z).toBeCloseTo(6.5 + GROUND_HEIGHT / Math.tan(pitch), 9);
   });
 
   it('agrees with a three.js raycast against the ground plane', () => {
@@ -45,7 +48,7 @@ describe('groundPointAt', () => {
           camera
         );
         const point = raycaster.ray.intersectPlane(
-          new Plane(new Vector3(0, 1, 0), 0),
+          new Plane(new Vector3(0, 1, 0), -GROUND_HEIGHT),
           hit
         );
         const ours = groundPointAt(px, py, VIEW, RIG);
