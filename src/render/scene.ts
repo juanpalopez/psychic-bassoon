@@ -77,6 +77,7 @@ export function createScene(container: HTMLElement): SceneHandle {
     onTap: undefined,
     dispose(): void {
       window.removeEventListener('resize', resize);
+      window.visualViewport?.removeEventListener('resize', resize);
       detach();
       renderer.setAnimationLoop(null);
       renderer.dispose();
@@ -99,6 +100,8 @@ export function createScene(container: HTMLElement): SceneHandle {
     distance: fitDistance(view(), bounds),
   });
   window.addEventListener('resize', resize);
+  // iOS Safari changes the visual viewport as its toolbars come and go
+  window.visualViewport?.addEventListener('resize', resize);
 
   const detach = attachCameraControls({
     element: renderer.domElement,
