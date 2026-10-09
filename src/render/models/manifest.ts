@@ -22,6 +22,19 @@ export interface GlbUnit {
  * game. Every file named here must be recorded in `assets/CREDITS.md`.
  */
 export const FOE_GLB: Readonly<Partial<Record<EnemyId, GlbUnit>>> = {
+  // Kenney Mini Dungeon characters: about 0.8 tall and facing +z already.
+  scamp: {parts: [{file: 'mini-dungeon/character-orc.glb', scale: 0.55}]},
+  raider: {parts: [{file: 'mini-dungeon/character-human.glb', scale: 1.1}]},
+  // Kenney siege tower, the tallest foe: it is 2.9 tall at scale 1.
+  warlord: {
+    parts: [
+      {
+        file: 'castle-kit/siege-tower.glb',
+        rotationY: -Math.PI / 2,
+        scale: 0.42,
+      },
+    ],
+  },
   // Kenney siege ram; its long axis is x, so turn it to face +z.
   ironclad: {
     parts: [
