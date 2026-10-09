@@ -357,7 +357,13 @@ button.toggle.on {
   border-radius: var(--radius-lg);
 }
 .next-wave .eyebrow {
-  display: none; /* the toast already says it; kept for screen readers */
+  /* visually hidden, still read by screen readers (the toast shows it) */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .next-wave button {
   flex: 1;

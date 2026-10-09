@@ -8,7 +8,7 @@ export const PALETTE = {
   plate: 0x1f2630,
   belt: 0x4d5a6c,
   beltStripe: 0xf2b134,
-  selection: 0xf2b134,
+  selection: 0xf2b134, // the accent colour
   spawn: 0xff8a3d,
   core: 0x5fd38a,
   towers: {

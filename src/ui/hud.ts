@@ -100,7 +100,6 @@ export function createHud(app: App, slots: Slots): void {
   const nextTitle = el('div', 'eyebrow');
   const nextButton = button('Start next wave', 'primary', () => {
     app.submit({type: 'launchWave'});
-    hideNext();
   });
   const autoBox = el('input');
   autoBox.type = 'checkbox';
@@ -111,16 +110,14 @@ export function createHud(app: App, slots: Slots): void {
   const next = stage.appendChild(
     el('div', 'next-wave', nextTitle, nextButton, autoLabel)
   );
+  next.setAttribute('role', 'status');
   next.hidden = true;
-  const hideNext = (): void => {
-    next.hidden = true;
-  };
+  let clearBonus = 0;
   const setAuto = (on: boolean): void => {
     app.setAutoStart(on);
     autoBox.checked = on;
     autoButton.setAttribute('aria-pressed', String(on));
     autoButton.classList.toggle('on', on);
-    if (on) hideNext();
   };
   setAuto(app.autoStart);
 
@@ -143,7 +140,6 @@ export function createHud(app: App, slots: Slots): void {
   };
   const newMap = (): void => {
     app.restart(crypto.getRandomValues(new Uint32Array(1))[0] || 1);
-    hideNext();
     app.setPaused(false);
     show('none');
   };
@@ -317,6 +313,18 @@ export function createHud(app: App, slots: Slots): void {
     setText(bestValue, String(best));
     setText(launch, model.launch.label);
     launch.disabled = !model.launch.enabled || app.paused;
+    // The popup follows the game state, so it can never go stale: it shows
+    // between waves, and never over a card, while paused, or with auto on.
+    const {game} = app;
+    const between = !game.running && game.wave >= 1 && !game.over;
+    next.hidden = !(
+      between &&
+      !app.autoStart &&
+      !app.paused &&
+      mode === 'none'
+    );
+    setText(nextTitle, `Wave ${game.wave} cleared · +${clearBonus}`);
+    setText(nextButton, `Start wave ${game.wave + 1}`);
     setText(pause, app.paused ? '▶' : 'II');
     pause.setAttribute('aria-label', app.paused ? 'Resume' : 'Pause');
     // the start and game-over cards own the pause state
@@ -332,14 +340,7 @@ export function createHud(app: App, slots: Slots): void {
     for (const event of app.frameEvents) {
       const message = toastFor(event);
       if (message) say(message);
-      if (event.type === 'waveCleared' && !app.autoStart && !app.game.over) {
-        nextTitle.textContent = `Wave ${event.wave} cleared · +${event.bonus}`;
-        nextButton.textContent = `Start wave ${event.wave + 1}`;
-        next.hidden = false;
-      }
-      if (event.type === 'waveLaunched' || event.type === 'gameOver') {
-        hideNext();
-      }
+      if (event.type === 'waveCleared') clearBonus = event.bonus;
       if (event.type === 'waveCleared')
         best = saveBest(localStorage, best, event.wave);
     }
