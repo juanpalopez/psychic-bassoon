@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {GRID} from '../../content';
-import {deriveRng, generateMap} from '../../sim';
+import {deriveRng, generateMap, RNG_STREAMS} from '../../sim';
 import type {GameMap} from '../../sim';
 import {
   grassPlacements,
@@ -63,6 +63,21 @@ describe('roadPlacements', () => {
       TERRAIN.corner,
       TERRAIN.straight,
       TERRAIN.end,
+    ]);
+  });
+
+  it('turns tiles as hand-checked for a small bend (not derived from openSides)', () => {
+    // (1,0) down to (1,1), then east to (2,1)
+    const map = mapOf([
+      [1, 0],
+      [1, 1],
+      [2, 1],
+    ]);
+    const quarter = Math.PI / 2;
+    expect(roadPlacements(map).map(p => [p.file, p.rotationY])).toEqual([
+      [TERRAIN.end, 0], // end opens S, toward (1,1)
+      [TERRAIN.corner, quarter], // N and E
+      [TERRAIN.end, 3 * quarter], // end opens W, toward (1,1)
     ]);
   });
 
@@ -173,10 +188,19 @@ describe('sceneryPlacements', () => {
     }
   });
 
+  it('keeps the cells it is told to avoid as plain grass', () => {
+    const avoid = [{col: 3, row: -1}];
+    const items = sceneryPlacements(11, TERRAIN.margin, avoid);
+    const cell = items.find(p => p.col === 3 && p.row === -1);
+    expect(cell?.file).toBe(TERRAIN.grass);
+    expect(items).toHaveLength(sceneryPlacements(11, TERRAIN.margin).length);
+  });
+
   it('draws from its own random stream, not the map or wave streams', () => {
     // a render-only stream: using the sim's map stream would tie scenery to
     // the map and break if map generation changed
-    expect(TERRAIN.stream).toBeGreaterThan(10);
+    const used = Object.values(RNG_STREAMS);
+    expect(used.filter(n => n === TERRAIN.stream)).toHaveLength(1);
     expect(deriveRng(1, TERRAIN.stream).state).not.toBe(deriveRng(1, 0).state);
   });
 });

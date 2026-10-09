@@ -5,8 +5,9 @@ import {CAMERA, clampCamera, fitDistance} from './camera/math';
 import type {Bounds, CameraState, View} from './camera/math';
 
 const MAX_PIXEL_RATIO = 2;
-const FOG_NEAR = 18;
-const FOG_FAR = 44;
+/** Fog starts this far behind the board's centre and thickens over the next stretch. */
+const FOG_START_BEHIND = 9;
+const FOG_LENGTH = 22;
 const PITCH = (CAMERA.pitchDegrees * Math.PI) / 180;
 
 /** Board size in cells; the camera may pan anywhere over it. */
@@ -36,7 +37,8 @@ export function createScene(container: HTMLElement, board: Board): SceneHandle {
 
   const scene = new Scene();
   // edge mist: the scenery ring fades into the dusk sky
-  scene.fog = new Fog(PALETTE.clear, FOG_NEAR, FOG_FAR);
+  const fog = new Fog(PALETTE.clear, 1, 2);
+  scene.fog = fog;
   const camera = new PerspectiveCamera(CAMERA.fovDegrees, 1, 0.1, 200);
   const bounds: Bounds = {minX: 0, maxX: board.cols, minZ: 0, maxZ: board.rows};
   const rig: CameraState = {
@@ -60,6 +62,9 @@ export function createScene(container: HTMLElement, board: Board): SceneHandle {
       rig.targetZ + Math.cos(PITCH) * rig.distance
     );
     camera.lookAt(rig.targetX, 0, rig.targetZ);
+    // keep the playfield clear of fog at any zoom: only the far scenery fades
+    fog.near = rig.distance + FOG_START_BEHIND;
+    fog.far = fog.near + FOG_LENGTH;
   };
 
   const handle: SceneHandle = {

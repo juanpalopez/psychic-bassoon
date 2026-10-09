@@ -29,7 +29,11 @@ export function createTerrainView(
   const placements: Placement[] = [
     ...grassPlacements(map),
     ...roadPlacements(map),
-    ...sceneryPlacements(map.seed, TERRAIN.margin),
+    ...sceneryPlacements(
+      map.seed,
+      TERRAIN.margin,
+      map.path[0] ? [{col: map.path[0].col, row: -1}] : []
+    ),
   ];
   const byFile = new Map<string, Placement[]>();
   for (const p of placements) {

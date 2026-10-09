@@ -1,5 +1,5 @@
 import {GRID} from '../../content';
-import {deriveRng, nextInt} from '../../sim';
+import {deriveRng, nextInt, RNG_STREAMS} from '../../sim';
 import type {GameMap} from '../../sim';
 
 export type Side = 'N' | 'E' | 'S' | 'W';
@@ -14,8 +14,8 @@ export const TERRAIN = {
   margin: {top: 7, side: 3, bottom: 2},
   /** Beyond this many cells from the board only cheap scenery is used. */
   nearCells: 2,
-  /** A render-only random stream: the sim uses streams 0 and 1. */
-  stream: 100,
+  /** The scenery stream (see `RNG_STREAMS`): render-only. */
+  stream: RNG_STREAMS.scenery,
   /** Cheap, sparse scenery for the far field (triangle budget). */
   farScenery: [
     {file: 'tower-defense-kit/tile.glb', weight: 80},
@@ -147,7 +147,11 @@ function pickWeighted(
 }
 
 /** Trees, rocks and hills around the board, from the map's seed. */
-export function sceneryPlacements(seed: number, margin: Margins): Placement[] {
+export function sceneryPlacements(
+  seed: number,
+  margin: Margins,
+  avoid: readonly {col: number; row: number}[] = []
+): Placement[] {
   const rng = deriveRng(seed, TERRAIN.stream);
   const out: Placement[] = [];
   for (let row = -margin.top; row < GRID.rows + margin.bottom; row++) {
@@ -163,7 +167,10 @@ export function sceneryPlacements(seed: number, margin: Margins): Placement[] {
         away > TERRAIN.nearCells ? TERRAIN.farScenery : TERRAIN.scenery;
       const total = table.reduce((sum, item) => sum + item.weight, 0);
       const file = pickWeighted(table, nextInt(rng, total));
-      out.push({file, col, row, rotationY: nextInt(rng, 4) * QUARTER});
+      const rotationY = nextInt(rng, 4) * QUARTER;
+      // keep the cell above the spawn plain grass: foes walk in through it
+      const clear = avoid.some(a => a.col === col && a.row === row);
+      out.push({file: clear ? TERRAIN.grass : file, col, row, rotationY});
     }
   }
   return out;

@@ -10,9 +10,11 @@ interface Hook {
   crowd(count: number): void;
 }
 
-// A late game rarely fills the board: 30 level-3 towers is the budget case.
-// (Every plot built, 117 towers, draws about 205k triangles with the Kenney
-// models, over the plan's 150k; see the note on ticket #94.)
+// A late game rarely fills the board, so the budget case is 30 level-3 towers
+// and 80 foes in a wave-like mix (mostly Raiders and Scamps). Measured with the
+// Kenney terrain: 136,992 triangles, 22 draw calls. For comparison, before the
+// terrain: 133,786 with 40 towers and an equal mix; with the terrain that
+// older case would be about 185k, which is over the plan's 150k.
 const MAX_TOWERS = 30;
 
 // Plan budgets: under 120 draw calls and about 150k triangles with 80 foes.
