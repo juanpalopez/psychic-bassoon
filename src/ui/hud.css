@@ -153,7 +153,7 @@ body {
   flex: 1;
 }
 #panel {
-  height: 128px;
+  height: 152px;
   flex: none;
   background: var(--panel);
   border: 1px solid var(--line);
@@ -290,7 +290,7 @@ body {
 }
 .controls {
   display: grid;
-  grid-template-columns: 52px 56px 1fr;
+  grid-template-columns: 52px 56px 64px 1fr;
   gap: var(--space-2);
   flex: none;
 }
@@ -332,4 +332,58 @@ button.sell {
   .toast {
     transition: none;
   }
+}
+
+button.toggle {
+  padding: 0;
+  color: var(--dim);
+}
+button.toggle.on {
+  color: var(--accent-ink);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.next-wave {
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-lg);
+}
+.next-wave .eyebrow {
+  /* visually hidden, still read by screen readers (the toast shows it) */
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.next-wave button {
+  flex: 1;
+}
+.next-wave[hidden] {
+  display: none;
+}
+.auto-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  font-size: var(--text-sm);
+  color: var(--dim);
+  flex: none;
+  max-width: 38%;
+  line-height: 1.2;
+}
+.auto-row input {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--accent);
 }

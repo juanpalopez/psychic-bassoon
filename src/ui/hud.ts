@@ -92,7 +92,34 @@ export function createHud(app: App, slots: Slots): void {
   const launch = button('Launch wave 1', 'primary', () =>
     app.submit({type: 'launchWave'})
   );
-  controls.append(pause, speedButton, launch);
+  const autoButton = button('Auto', 'toggle', () => setAuto(!app.autoStart));
+  autoButton.setAttribute('aria-label', 'Auto-start next waves');
+  controls.append(pause, speedButton, autoButton, launch);
+
+  // --- next-wave popup, shown when a wave is cleared
+  const nextTitle = el('div', 'eyebrow');
+  const nextButton = button('Start next wave', 'primary', () => {
+    app.submit({type: 'launchWave'});
+  });
+  const autoBox = el('input');
+  autoBox.type = 'checkbox';
+  autoBox.id = 'auto-start';
+  autoBox.addEventListener('change', () => setAuto(autoBox.checked));
+  const autoLabel = el('label', 'auto-row', autoBox, 'Auto-start next waves');
+  autoLabel.htmlFor = 'auto-start';
+  const next = stage.appendChild(
+    el('div', 'next-wave', nextTitle, nextButton, autoLabel)
+  );
+  next.setAttribute('role', 'status');
+  next.hidden = true;
+  let clearBonus = 0;
+  const setAuto = (on: boolean): void => {
+    app.setAutoStart(on);
+    autoBox.checked = on;
+    autoButton.setAttribute('aria-pressed', String(on));
+    autoButton.classList.toggle('on', on);
+  };
+  setAuto(app.autoStart);
 
   let best = loadBest(localStorage);
   let toastTimer: number | undefined;
@@ -112,7 +139,7 @@ export function createHud(app: App, slots: Slots): void {
     overlay.replaceChildren(...(content ? [content] : []));
   };
   const newMap = (): void => {
-    app.restart(crypto.getRandomValues(new Uint32Array(1))[0] ?? 1);
+    app.restart(crypto.getRandomValues(new Uint32Array(1))[0] || 1);
     app.setPaused(false);
     show('none');
   };
@@ -286,6 +313,18 @@ export function createHud(app: App, slots: Slots): void {
     setText(bestValue, String(best));
     setText(launch, model.launch.label);
     launch.disabled = !model.launch.enabled || app.paused;
+    // The popup follows the game state, so it can never go stale: it shows
+    // between waves, and never over a card, while paused, or with auto on.
+    const {game} = app;
+    const between = !game.running && game.wave >= 1 && !game.over;
+    next.hidden = !(
+      between &&
+      !app.autoStart &&
+      !app.paused &&
+      mode === 'none'
+    );
+    setText(nextTitle, `Wave ${game.wave} cleared · +${clearBonus}`);
+    setText(nextButton, `Start wave ${game.wave + 1}`);
     setText(pause, app.paused ? '▶' : 'II');
     pause.setAttribute('aria-label', app.paused ? 'Resume' : 'Pause');
     // the start and game-over cards own the pause state
@@ -301,6 +340,7 @@ export function createHud(app: App, slots: Slots): void {
     for (const event of app.frameEvents) {
       const message = toastFor(event);
       if (message) say(message);
+      if (event.type === 'waveCleared') clearBonus = event.bonus;
       if (event.type === 'waveCleared')
         best = saveBest(localStorage, best, event.wave);
     }

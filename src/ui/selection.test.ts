@@ -3,6 +3,7 @@ import {createGame, submit, tick} from '../sim';
 import type {GameState} from '../sim';
 import {
   buildCommand,
+  highlightFor,
   reconcileSelection,
   sellCommand,
   selectAt,
@@ -94,5 +95,34 @@ describe('commands from a selection', () => {
     });
     expect(upgradeCommand(NONE)).toBeUndefined();
     expect(sellCommand({kind: 'plate', col: 1, row: 1})).toBeUndefined();
+  });
+});
+
+describe('highlightFor', () => {
+  it('highlights a selected plate with no range', () => {
+    const game = createGame(42);
+    expect(highlightFor(game, {kind: 'plate', col: 2, row: 3})).toEqual({
+      col: 2,
+      row: 3,
+    });
+  });
+
+  it('highlights a selected tower with its current range', () => {
+    const {game, col, row} = withTower();
+    expect(highlightFor(game, {kind: 'tower', id: 0})).toEqual({
+      col,
+      row,
+      range: 2.3,
+    });
+    game.credits = 1000;
+    submit(game, {type: 'upgrade', towerId: 0});
+    tick(game);
+    expect(highlightFor(game, {kind: 'tower', id: 0})?.range).toBe(2.6);
+  });
+
+  it('highlights nothing with no selection or a gone tower', () => {
+    const game = createGame(42);
+    expect(highlightFor(game, NONE)).toBeUndefined();
+    expect(highlightFor(game, {kind: 'tower', id: 9})).toBeUndefined();
   });
 });

@@ -52,3 +52,45 @@ test('builds a tower and survives the start of a wave', async ({page}) => {
     .toBeGreaterThan(0);
   expect(errors).toEqual([]);
 });
+
+test('offers the next wave after a clear and can auto-start the rest', async ({
+  page,
+}) => {
+  await page.goto('/?seed=42&debug');
+  await page.getByRole('button', {name: 'Deploy'}).click();
+  await page.getByRole('button', {name: /Launch wave 1/}).click();
+  await expect(page.locator('.stat').nth(2).locator('b')).toHaveText('1');
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (
+            window as unknown as {
+              scrapline: {app: {game: {spawners: unknown[]}}};
+            }
+          ).scrapline.app.game.spawners.length
+      )
+    )
+    .toBeGreaterThan(0);
+
+  // clear the wave through the game itself
+  await page.evaluate(() => {
+    const {app} = (
+      window as unknown as {
+        scrapline: {
+          app: {game: {spawners: unknown[]; enemies: {alive: boolean}[]}};
+        };
+      }
+    ).scrapline;
+    app.game.spawners = [];
+    for (const enemy of app.game.enemies) enemy.alive = false;
+  });
+  const popup = page.locator('.next-wave');
+  await expect(popup).toBeVisible();
+  await expect(popup.getByRole('button')).toHaveText('Start wave 2');
+
+  // turning auto-start on launches wave 2 by itself and hides the popup
+  await popup.getByLabel('Auto-start next waves').check();
+  await expect(popup).toBeHidden();
+  await expect(page.locator('.stat').nth(2).locator('b')).toHaveText('2');
+});
