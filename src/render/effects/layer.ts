@@ -16,6 +16,7 @@ import {
   RingGeometry,
   SphereGeometry,
 } from 'three';
+import {GRID} from '../../content';
 import type {GameEvent, Shot} from '../../sim';
 import {PALETTE} from '../palette';
 import {effectsFromEvent, stepEffects} from './model';
@@ -139,12 +140,13 @@ export function createEffectsLayer(
     const g = rgb.g * fade;
     const b = rgb.b * fade;
     // written by index: no temporary arrays in the frame loop
-    linePositions[o] = ax;
+    // sim (x, y) is drawn turned a quarter: world x = y, world z = cols - x
+    linePositions[o] = az;
     linePositions[o + 1] = EFFECT_HEIGHT;
-    linePositions[o + 2] = az;
-    linePositions[o + 3] = bx;
+    linePositions[o + 2] = GRID.cols - ax;
+    linePositions[o + 3] = bz;
     linePositions[o + 4] = EFFECT_HEIGHT;
-    linePositions[o + 5] = bz;
+    linePositions[o + 5] = GRID.cols - bx;
     lineColors[o] = r;
     lineColors[o + 1] = g;
     lineColors[o + 2] = b;
@@ -171,7 +173,7 @@ export function createEffectsLayer(
       for (let i = 0; i < count; i++) {
         const shot = list[i];
         if (!shot) continue;
-        matrix.makeTranslation(shot.x, EFFECT_HEIGHT, shot.y);
+        matrix.makeTranslation(shot.y, EFFECT_HEIGHT, GRID.cols - shot.x);
         shells.setMatrixAt(i, matrix);
       }
       shells.count = count;
@@ -211,10 +213,10 @@ export function createEffectsLayer(
             writeSegment(segments++, mx, mz, b.x, b.y, color, fade);
           }
         } else if (effect.kind === 'spark' && sparkCount < MAX_SPARKS) {
-          sparkPositions.set(
-            [effect.x, EFFECT_HEIGHT, effect.y],
-            sparkCount * 3
-          );
+          const at = sparkCount * 3;
+          sparkPositions[at] = effect.y;
+          sparkPositions[at + 1] = EFFECT_HEIGHT;
+          sparkPositions[at + 2] = GRID.cols - effect.x;
           sparkCount++;
         } else if (
           (effect.kind === 'ring' || effect.kind === 'boom') &&
@@ -222,7 +224,7 @@ export function createEffectsLayer(
         ) {
           // rings widen as they age; blasts start at full size and fade
           const grow = effect.kind === 'ring' ? 1 - fade : 1;
-          dummy.position.set(effect.x, RING_HEIGHT, effect.y);
+          dummy.position.set(effect.y, RING_HEIGHT, GRID.cols - effect.x);
           dummy.scale.setScalar(Math.max(0.05, effect.radius * grow));
           dummy.updateMatrix();
           rings.setMatrixAt(ringCount, dummy.matrix);

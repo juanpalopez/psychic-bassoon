@@ -2,7 +2,7 @@
 
 A medieval tower defense for mobile browsers. You are Castellan Quell, last warden of Greyhold Keep, and the Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to claim the Heartstone as tithe. Place Ballistae, Catapults, Frost Spires and Storm Spires along a procedurally generated road and hold the line.
 
-It is a 3D low-poly remake of a 2D canvas prototype, built with Three.js and TypeScript, and it plays in portrait with one thumb.
+It is a 3D low-poly remake of a 2D canvas prototype, built with Three.js and TypeScript, and it plays in landscape on a phone.
 
 - **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–5, each closed by a gate)
@@ -85,7 +85,7 @@ A few rules shape the code. The full list is in [`CLAUDE.md`](CLAUDE.md).
 - `src/sim` is pure and deterministic: it never imports `render`, `ui`, `three` or the DOM, and all randomness goes through a seeded PRNG. The same seed plus the same commands replays identically.
 - The sim runs at a fixed 30 Hz tick and owns all state. Render and UI only read snapshots. Player actions reach the sim as commands (`build`, `upgrade`, `sell`, `launchWave`).
 - All balance numbers live in `src/content`, not in logic.
-- The HUD is DOM, not canvas, and every action works with one thumb in portrait.
+- The HUD is DOM, not canvas, and every action is reachable by the thumbs holding the phone sideways (landscape only).
 
 ## Contributing
 

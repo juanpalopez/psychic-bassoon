@@ -9,19 +9,21 @@ import {
   PlaneGeometry,
 } from 'three';
 import type {BufferGeometry, Material} from 'three';
-import {GRID, RULES} from '../content';
+import {RULES} from '../content';
 import type {GameMap, Point} from '../sim';
 import {GROUND_HEIGHT, ROAD_HEIGHT} from './heights';
 import {addLights} from './lights';
+import {BOARD_WORLD, cellCentreWorld, worldFromSim} from './space';
 import {PALETTE} from './palette';
 
 const TILE_GAP = 0.06;
 const PLATE_HEIGHT = GROUND_HEIGHT;
 const BELT_HEIGHT = ROAD_HEIGHT;
 
-/** Sim board coordinates (x right, y down) to world (x right, z toward you). */
+/** Sim board coordinates to world (the board is drawn turned a quarter). */
 export function toWorld(p: Point): {x: number; y: number; z: number} {
-  return {x: p.x, y: 0, z: p.y};
+  const w = worldFromSim(p.x, p.y);
+  return {x: w.x, y: 0, z: w.z};
 }
 
 export interface MapView {
@@ -40,7 +42,8 @@ function instanced(
   mesh.name = name;
   const m = new Matrix4();
   cells.forEach(({col, row}, i) => {
-    m.makeTranslation(col + RULES.cellCentre, y, row + RULES.cellCentre);
+    const at = cellCentreWorld(col, row);
+    m.makeTranslation(at.x, y, at.z);
     mesh.setMatrixAt(i, m);
   });
   mesh.instanceMatrix.needsUpdate = true;
@@ -69,12 +72,12 @@ export function createMapView(map: GameMap): MapView {
   );
 
   const ground = new Mesh(
-    own(new PlaneGeometry(GRID.cols + 12, GRID.rows + 12)),
+    own(new PlaneGeometry(BOARD_WORLD.width + 12, BOARD_WORLD.depth + 12)),
     own(new MeshLambertMaterial({color: PALETTE.ground}))
   );
   ground.name = 'ground';
   ground.rotation.x = -Math.PI / 2;
-  ground.position.set(GRID.cols / 2, -0.01, GRID.rows / 2);
+  ground.position.set(BOARD_WORLD.width / 2, -0.01, BOARD_WORLD.depth / 2);
   group.add(ground);
 
   group.add(
@@ -97,7 +100,7 @@ export function createMapView(map: GameMap): MapView {
   const first = map.path[0];
   const last = map.path.at(-1);
   if (first && last) {
-    const pad = (name: string, color: number, col: number, z: number) => {
+    const pad = (name: string, color: number, simX: number, simY: number) => {
       const marker = new Mesh(
         own(new CylinderGeometry(0.42, 0.42, 0.18, 20)),
         own(
@@ -109,14 +112,20 @@ export function createMapView(map: GameMap): MapView {
         )
       );
       marker.name = name;
-      marker.position.set(col + RULES.cellCentre, 0.09, z);
+      const at = worldFromSim(simX, simY);
+      marker.position.set(at.x, 0.09, at.z);
       group.add(marker);
     };
-    pad('spawn', PALETTE.spawn, first.col, -RULES.spawnOffset);
+    pad(
+      'spawn',
+      PALETTE.spawn,
+      first.col + RULES.cellCentre,
+      -RULES.spawnOffset
+    );
     pad(
       'heartstone',
       PALETTE.heartstone,
-      last.col,
+      last.col + RULES.cellCentre,
       last.row + RULES.cellCentre
     );
   }

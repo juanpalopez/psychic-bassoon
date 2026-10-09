@@ -135,7 +135,7 @@ describe('grassPlacements', () => {
 
 describe('sceneryPlacements', () => {
   const ring = (m: Margins) =>
-    (GRID.cols + 2 * m.side) * (GRID.rows + m.top + m.bottom) -
+    (GRID.cols + m.near + m.far) * (GRID.rows + m.spawn + m.heart) -
     GRID.cols * GRID.rows;
 
   it('fills the ring around the board and never the board itself', () => {
@@ -145,8 +145,8 @@ describe('sceneryPlacements', () => {
       const inside =
         it.col >= 0 && it.col < GRID.cols && it.row >= 0 && it.row < GRID.rows;
       expect(inside).toBe(false);
-      expect(it.col).toBeGreaterThanOrEqual(-TERRAIN.margin.side);
-      expect(it.row).toBeGreaterThanOrEqual(-TERRAIN.margin.top);
+      expect(it.col).toBeGreaterThanOrEqual(-TERRAIN.margin.near);
+      expect(it.row).toBeGreaterThanOrEqual(-TERRAIN.margin.spawn);
     }
   });
 

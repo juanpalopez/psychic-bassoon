@@ -3,6 +3,8 @@ import {describe, expect, it} from 'vitest';
 import {GRID} from '../content';
 import {generateMap} from '../sim';
 import {createMapView, toWorld} from './map';
+import {cellCentreWorld, worldFromSim} from './space';
+import {simCellAt} from './space';
 
 function cellsOf(mesh: InstancedMesh): string[] {
   const m = new Matrix4();
@@ -10,7 +12,8 @@ function cellsOf(mesh: InstancedMesh): string[] {
   return Array.from({length: mesh.count}, (_, i) => {
     mesh.getMatrixAt(i, m);
     p.setFromMatrixPosition(m);
-    return `${p.x - 0.5},${p.z - 0.5}`;
+    const {col, row} = simCellAt(p.x, p.z);
+    return `${col},${row}`;
   }).sort();
 }
 
@@ -53,10 +56,16 @@ describe('createMapView', () => {
     const last = map.path.at(-1);
     const spawn = view.group.getObjectByName('spawn');
     const heartstone = view.group.getObjectByName('heartstone');
-    expect(spawn?.position.x).toBe((first?.col ?? 0) + 0.5);
-    expect(spawn?.position.z).toBeLessThan(0.5);
-    expect(heartstone?.position.x).toBe((last?.col ?? 0) + 0.5);
-    expect(heartstone?.position.z).toBe((last?.row ?? 0) + 0.5);
+    // the road runs left to right: the spawn is left of the board, the
+    // Heartstone sits on the last cell
+    const firstAt = cellCentreWorld(first?.col ?? 0, 0);
+    expect(spawn?.position.z).toBe(firstAt.z);
+    expect(spawn?.position.x).toBeLessThan(0.5);
+    const lastAt = cellCentreWorld(last?.col ?? 0, last?.row ?? 0);
+    expect([heartstone?.position.x, heartstone?.position.z]).toEqual([
+      lastAt.x,
+      lastAt.z,
+    ]);
   });
 
   it('frees its geometry and materials on dispose', () => {
@@ -71,7 +80,9 @@ describe('createMapView', () => {
 });
 
 describe('toWorld', () => {
-  it('maps sim x to world x and sim y to world z, on the ground', () => {
-    expect(toWorld({x: 2.5, y: 7.5})).toEqual({x: 2.5, y: 0, z: 7.5});
+  it('maps a sim point to the turned world, on the ground', () => {
+    const w = worldFromSim(2.5, 7.5);
+    expect(toWorld({x: 2.5, y: 7.5})).toEqual({x: w.x, y: 0, z: w.z});
+    expect(w).toEqual({x: 7.5, z: GRID.cols - 2.5});
   });
 });

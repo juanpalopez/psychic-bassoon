@@ -40,22 +40,22 @@ describe('interpolator', () => {
     expect(out).toHaveLength(0);
   });
 
-  it('faces the way the foe walks (0 faces +z, down the board)', () => {
+  it('faces the way the foe walks (0 faces +z; the board is drawn turned)', () => {
     const {game, enemy, interp, out} = setup();
     interp.capture(game);
-    enemy.y += 1;
-    interp.poses(game, 1, out);
-    expect(out[0]?.heading).toBeCloseTo(0, 9);
-    interp.capture(game);
-    enemy.x += 1;
+    enemy.y += 1; // along the road: world +x, a quarter turn from +z
     interp.poses(game, 1, out);
     expect(out[0]?.heading).toBeCloseTo(Math.PI / 2, 9);
+    interp.capture(game);
+    enemy.x += 1; // across the road: world -z, a half turn
+    interp.poses(game, 1, out);
+    expect(Math.abs(out[0]?.heading ?? 0)).toBeCloseTo(Math.PI, 9);
   });
 
   it('keeps its heading while the foe stands still', () => {
     const {game, enemy, interp, out} = setup();
     interp.capture(game);
-    enemy.x += 1;
+    enemy.y += 1;
     interp.poses(game, 1, out);
     interp.capture(game);
     interp.poses(game, 1, out);

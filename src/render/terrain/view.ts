@@ -1,7 +1,7 @@
 import {Group, InstancedMesh, Mesh, Object3D} from 'three';
-import {RULES} from '../../content';
 import type {GameMap} from '../../sim';
 import {addLights} from '../lights';
+import {cellCentreWorld, WORLD_TURN} from '../space';
 import type {MapView} from '../map';
 import type {ModelLibrary} from '../models/library';
 import {
@@ -50,8 +50,10 @@ export function createTerrainView(
     const mesh = new InstancedMesh(model.geometry, model.material, list.length);
     mesh.name = file;
     list.forEach((p, i) => {
-      dummy.position.set(p.col + RULES.cellCentre, 0, p.row + RULES.cellCentre);
-      dummy.rotation.y = p.rotationY;
+      const at = cellCentreWorld(p.col, p.row);
+      dummy.position.set(at.x, 0, at.z);
+      // tiles are laid out in sim space, then the whole board is turned
+      dummy.rotation.y = p.rotationY + WORLD_TURN;
       dummy.updateMatrix();
       mesh.setMatrixAt(i, dummy.matrix);
     });
@@ -67,11 +69,9 @@ export function createTerrainView(
     if (!model || !cell) return;
     const mesh = new Mesh(model.geometry, model.material);
     mesh.name = name;
-    mesh.position.set(
-      cell.col + RULES.cellCentre,
-      0,
-      cell.row + RULES.cellCentre
-    );
+    const at = cellCentreWorld(cell.col, cell.row);
+    mesh.position.set(at.x, 0, at.z);
+    mesh.rotation.y = WORLD_TURN;
     group.add(mesh);
   };
   place('spawn', first);

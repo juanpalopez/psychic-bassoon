@@ -12,7 +12,7 @@ Scrapline becomes a 3D low-poly tower defense for mobile browsers. The camera is
 
 **Pillars**
 
-- **One-thumb play.** Every action works with a single tap in portrait. The game holds 60 fps on a mid-range phone.
+- **One-thumb play.** Every action works with a single tap, in landscape. The game holds 60 fps on a mid-range phone.
 - **Readable at a glance.** Silhouette and colour tell you each foe's type and each tower's level, even zoomed out.
 - **Every run is a new road.** Seeded procedural maps that you can replay and share by seed.
 - **A world worth caring about.** Short lore beats between chapters give the waves a reason to exist without slowing play.
@@ -303,7 +303,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 **Goal:** the prototype's game, playable in 3D on a real phone, with primitive models and a plain HUD.
 
 **Work breakdown**
-1. Renderer and camera: perspective, about 55° pitch, about 35° FOV, portrait framing; pinch zoom and pan clamped so cells stay at least 40 px wide.
+1. Renderer and camera: perspective, about 55° pitch, about 35° FOV, landscape framing; pinch zoom and pan clamped so cells stay at least 40 px wide.
 2. Map and path rendering from the sim grid; a ground plane and path markers.
 3. Input: tap raycasts to a grid cell and sends `build`, `upgrade`, `sell` or `launchWave` commands. No direct state changes.
 4. Primitive models in `src/render/models/` (one file per unit), based on rough silhouette sheets. One `InstancedMesh` per foe type; towers as regular meshes with level lights.
@@ -316,7 +316,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 
 **Gate checklist**
 - [ ] Plays as well as the 2D prototype at 60 fps on your phone with 80 foes.
-- [ ] Every action is one-thumb in portrait.
+- [ ] Every action is a single tap in landscape.
 - [x] Draw-call and triangle budgets met (e2e: 15 draw calls, about 39k triangles with 80 foes and every tower at level 3).
 
 ### Phase 3 · Art and UI
@@ -368,7 +368,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 2. Performance and loading pass on real devices; 30 fps fallback with reduced effects.
 3. README with key art and a short play guide; link from the personal site.
 4. Final licence check: `assets/CREDITS.md` complete, MIT for code, CC0 terms for art.
-5. Decide portrait-only versus landscape, and embed versus link out (open questions).
+5. Embed versus link out (open question). Orientation is decided: landscape only.
 
 **Gate checklist**
 - [ ] Public build runs on GitHub Pages on at least two real phones.
@@ -390,7 +390,7 @@ The table above is the summary. Each phase below lists its scope, out-of-scope i
 
 - [x] Repo name and whether it is public from day one: public from day one, repo `psychic-bassoon`, codename Project Slag.
 - [x] Embed the game in the personal site, or link out: link out. The game has its own project Pages site, and the personal site (another repo) links to it.
-- [ ] Portrait only, or landscape too
+- [x] Landscape only (owner decision, Phase 3)
 - [ ] Music: commission, CC0 tracks, or skip for v1
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN dev server only, or also upload `dist/` as a PR artifact (Pages can't preview PRs)

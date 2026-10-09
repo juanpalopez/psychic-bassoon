@@ -1,3 +1,4 @@
+import {headingFromSim} from './space';
 import type {Enemy, GameState} from '../sim';
 import type {FoePose} from './units';
 
@@ -56,7 +57,7 @@ export function createInterpolator(): Interpolator {
         const track = tracks.get(enemy.id) ?? newTrack(tracks, enemy);
         const dx = enemy.x - track.prevX;
         const dy = enemy.y - track.prevY;
-        if (dx !== 0 || dy !== 0) track.heading = Math.atan2(dx, dy);
+        if (dx !== 0 || dy !== 0) track.heading = headingFromSim(dx, dy);
         track.pose.x = track.prevX + dx * alpha;
         track.pose.y = track.prevY + dy * alpha;
         track.pose.heading = track.heading;

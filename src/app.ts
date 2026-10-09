@@ -1,4 +1,3 @@
-import {GRID} from './content';
 import {createInterpolator} from './render/interpolation';
 import {createEffectsLayer} from './render/effects/layer';
 import {createMapView} from './render/map';
@@ -45,7 +44,7 @@ export function createApp(
   seed: number,
   models: ModelLibrary
 ): App {
-  const scene = createScene(container, GRID);
+  const scene = createScene(container);
   const foes = createFoeLayer(models);
   const towers = createTowerLayer(models);
   const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');

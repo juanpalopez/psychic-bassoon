@@ -33,6 +33,15 @@ createHud(app, {
   controls: slots.controls,
 });
 
+// A phone held upright shows the 'turn your phone' prompt: pause behind it.
+const upright = window.matchMedia(
+  '(orientation: portrait) and (max-width: 700px)'
+);
+const pauseWhenUpright = (): void => {
+  if (upright.matches) app.setPaused(true);
+};
+upright.addEventListener('change', pauseWhenUpright);
+
 // Sound starts on the first tap and never before.
 const audio = createAudio(
   () => new AudioContext(),

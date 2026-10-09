@@ -1,6 +1,7 @@
 import {GRID} from '../content';
 import {CAMERA} from './camera/math';
 import {GROUND_HEIGHT} from './heights';
+import {simCellAt} from './space';
 import type {CameraState, View} from './camera/math';
 
 const RAD = Math.PI / 180;
@@ -44,8 +45,7 @@ export function pickCell(
 ): {col: number; row: number} | undefined {
   const point = groundPointAt(px, py, view, rig);
   if (!point) return undefined;
-  const col = Math.floor(point.x);
-  const row = Math.floor(point.z);
+  const {col, row} = simCellAt(point.x, point.z);
   if (col < 0 || col >= GRID.cols || row < 0 || row >= GRID.rows) {
     return undefined;
   }
