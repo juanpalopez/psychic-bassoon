@@ -12,6 +12,12 @@ test('the Godot export starts and renders a canvas', async ({page}) => {
 
   await page.goto('/index.html');
   await expect(page.locator('#status')).toBeHidden({timeout: 60_000});
+  // set by main.gd once the scene is built, so the engine really ran
+  await page.waitForFunction(
+    () => (window as unknown as {scraplineReady?: boolean}).scraplineReady,
+    undefined,
+    {timeout: 60_000}
+  );
 
   const state = await page.evaluate(() => {
     const canvas = document.querySelector<HTMLCanvasElement>('#canvas');
@@ -26,6 +32,7 @@ test('the Godot export starts and renders a canvas', async ({page}) => {
   expect(state).not.toBeNull();
   expect(state?.width).toBeGreaterThan(0);
   expect(state?.height).toBeGreaterThan(0);
+  expect(state?.webgl2).toBe(true);
   expect(errors).toEqual([]);
 });
 

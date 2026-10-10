@@ -24,6 +24,9 @@ func _ready() -> void:
 	_build_ground()
 	_build_foes()
 	_build_overlay()
+	# the browser smoke test waits for this flag
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.scraplineReady = true")
 
 
 func _process(delta: float) -> void:

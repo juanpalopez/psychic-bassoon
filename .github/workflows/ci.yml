@@ -109,7 +109,7 @@ jobs:
           path: |
             ~/godot-bin
             ~/.local/share/godot/export_templates
-          key: godot-${{ steps.version.outputs.version }}
+          key: godot-${{ steps.version.outputs.version }}-web_nothreads-v1
 
       - name: Download Godot and the web templates (verified)
         if: steps.cache.outputs.cache-hit != 'true'
@@ -121,12 +121,14 @@ jobs:
           binary="Godot_v${VERSION}_linux.x86_64.zip"
           tpz="Godot_v${VERSION}_export_templates.tpz"
           curl -sSfL --retry 3 -O "${base}/SHA512-SUMS.txt" -O "${base}/${binary}" -O "${base}/${tpz}"
-          grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt | sha512sum -c -
+          grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt > wanted.txt
+          test "$(wc -l < wanted.txt)" -eq 2
+          sha512sum -c wanted.txt
           mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/"${TEMPLATES}"
           unzip -q "${binary}" -d ~/godot-bin
           unzip -q -j "${tpz}" templates/version.txt templates/web_nothreads_release.zip templates/web_nothreads_debug.zip \
             -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
-          rm -f "${binary}" "${tpz}"
+          rm -f "${binary}" "${tpz}" wanted.txt SHA512-SUMS.txt
 
       - name: Install gdtoolkit
         run: pip install --user gdtoolkit==4.5.0
@@ -135,8 +137,11 @@ jobs:
         working-directory: godot
         run: |
           export PATH="$HOME/.local/bin:$PATH"
-          gdformat --check main.gd tests sim content render ui
-          gdlint main.gd tests sim content render ui
+          files=$(find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*')
+          # shellcheck disable=SC2086
+          gdformat --check $files
+          # shellcheck disable=SC2086
+          gdlint $files
 
       - uses: pnpm/action-setup@v6
 
@@ -159,7 +164,12 @@ jobs:
 
       - name: Import the project
         run: |
-          "$GODOT" --headless --path godot --import
+          # --import exits 0 even when a script fails to parse, so scan the log
+          "$GODOT" --headless --path godot --import 2>&1 | tee import.log
+          if grep -E "SCRIPT ERROR|Parse Error|ERROR: Failed to load script" import.log; then
+            echo "::error::GDScript errors found while importing"
+            exit 1
+          fi
 
       - name: GUT tests
         run: |
