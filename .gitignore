@@ -6,3 +6,6 @@ dist
 playwright-report
 test-results
 .claude/worktrees
+godot/.godot/
+build/
+*.translation
