@@ -2,6 +2,8 @@
 class_name GameEvent
 extends RefCounted
 
+## The order of both enums is load-bearing once events are serialised: add new
+## members at the end, and map to the TypeScript strings at the snapshot edge.
 enum Kind { TOWER_BUILT, TOWER_UPGRADED, TOWER_SOLD, WAVE_LAUNCHED, COMMAND_REJECTED }
 
 ## Why a command did nothing. A rejection is an event, never an error.

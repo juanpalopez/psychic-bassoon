@@ -156,6 +156,21 @@ func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 	assert_eq(game.towers.size(), 1)
 
 
+func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
+	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so the refund is 62, not 63
+	var game := Game.create(SEED)
+	GameTestKit.run(game, [GameTestKit.build_at("catapult", GameTestKit.plot(game))])
+	game.gold = 0
+	GameTestKit.run(game, [Command.sell(0)])
+	assert_eq(game.gold, 62)
+
+
+func test_build_checks_the_tower_before_the_cell() -> void:
+	var game := Game.create(SEED)
+	var command := Command.build("laser", -1, 0)
+	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.UNKNOWN_TOWER)
+
+
 func test_sell_of_an_unknown_tower_is_rejected() -> void:
 	var game := Game.create(SEED)
 	var command := Command.sell(3)

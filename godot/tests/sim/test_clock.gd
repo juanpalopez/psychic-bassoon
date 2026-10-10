@@ -37,12 +37,16 @@ func test_a_slow_frame_is_clamped() -> void:
 	assert_eq(Clock.new().advance(5.0, 1), 1)
 
 
-func test_negative_and_non_finite_time_runs_nothing() -> void:
+func test_negative_and_nan_time_runs_nothing() -> void:
 	var clock := Clock.new()
 	assert_eq(clock.advance(-1.0, 1), 0)
 	assert_eq(clock.advance(NAN, 1), 0)
-	assert_eq(clock.advance(INF, 1), 0)
 	assert_eq(clock.accumulator, 0.0)
+
+
+func test_infinite_time_is_clamped_like_any_long_frame() -> void:
+	# the same as the TypeScript clock: one tick, not zero
+	assert_eq(Clock.new().advance(INF, 1), 1)
 
 
 func test_invalid_speed_is_reported_and_runs_nothing() -> void:

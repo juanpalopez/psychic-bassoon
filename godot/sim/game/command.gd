@@ -1,5 +1,7 @@
 ## Player actions. They are the only way in: state changes through commands
 ## and ticks, nothing else.
+## Treat a command as immutable once submitted: the queue and any rejection
+## event keep a reference to it.
 class_name Command
 extends RefCounted
 

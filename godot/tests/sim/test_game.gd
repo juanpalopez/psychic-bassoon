@@ -48,9 +48,22 @@ func test_create_uses_the_waves_and_routes_streams_from_the_fixture() -> void:
 func test_same_seed_gives_the_same_game() -> void:
 	var a := Game.create(SEED)
 	var b := Game.create(SEED)
-	assert_eq(a.map.routes, b.map.routes)
-	assert_eq(a.rng.state, b.rng.state)
-	assert_eq(a.gold, b.gold)
+	assert_eq(GameTestKit.snapshot(a), GameTestKit.snapshot(b))
+	var other := Game.create(SEED + 1)
+	assert_ne(GameTestKit.snapshot(a), GameTestKit.snapshot(other))
+
+
+func test_state_survives_json() -> void:
+	var game := Game.create(SEED)
+	GameTestKit.run(
+		game, [Command.build("ballista", GameTestKit.plot(game).x, GameTestKit.plot(game).y)]
+	)
+	var snapshot := GameTestKit.snapshot(game)
+	var parsed: Dictionary = JSON.parse_string(JSON.stringify(snapshot))
+	assert_eq(parsed.towers[0][1], "ballista")
+	assert_eq(int(parsed.gold), game.gold)
+	assert_eq(int(parsed.rngState), game.rng.state)
+	assert_eq(parsed.routes.size(), game.map.routes.size())
 
 
 func test_tick_advances_the_counter_by_one() -> void:

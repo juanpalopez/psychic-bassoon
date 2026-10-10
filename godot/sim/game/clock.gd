@@ -13,13 +13,15 @@ var accumulator: float = 0.0
 
 
 ## Ticks to run for `elapsed_seconds` of real time at `speed` (1 to
-## `MAX_GAME_SPEED`). An invalid speed is reported and runs nothing; a
-## negative or non-finite elapsed time runs nothing.
+## `MAX_GAME_SPEED`). An invalid speed is reported with `push_error` and runs
+## nothing (TypeScript throws a RangeError; GDScript has no exceptions). A
+## negative or NaN elapsed time runs nothing; an infinite one is clamped like
+## any long frame.
 func advance(elapsed_seconds: float, speed: int) -> int:
 	if speed < 1 or speed > RULES.MAX_GAME_SPEED:
 		push_error("game speed must be 1 to %d" % RULES.MAX_GAME_SPEED)
 		return 0
-	if not (elapsed_seconds > 0.0) or is_inf(elapsed_seconds):
+	if not (elapsed_seconds > 0.0):
 		return 0
 	accumulator += minf(elapsed_seconds, RULES.MAX_FRAME_SECONDS)
 	var ticks := int(floor(accumulator / Game.TICK_SECONDS))
