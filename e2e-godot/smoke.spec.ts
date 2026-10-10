@@ -41,3 +41,23 @@ test('an upright phone is asked to turn', async ({page}) => {
   await page.goto('/index.html');
   await expect(page.locator('#rotate')).toBeVisible();
 });
+
+test('the shell offers full screen and links an installable manifest', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/index.html');
+  const button = page.locator('#fullscreen');
+  await expect(button).toBeVisible();
+  const box = await button.boundingBox();
+  expect(box?.width).toBeGreaterThanOrEqual(44);
+  expect(box?.height).toBeGreaterThanOrEqual(44);
+
+  const href = await page.locator('link[rel="manifest"]').getAttribute('href');
+  expect(href).toBe('manifest.webmanifest');
+  const response = await request.get('/manifest.webmanifest');
+  expect(response.ok()).toBe(true);
+  const manifest = await response.json();
+  expect(manifest.display).toBe('fullscreen');
+  expect(manifest.orientation).toBe('landscape');
+});
