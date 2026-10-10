@@ -41,3 +41,66 @@ test('an upright phone is asked to turn', async ({page}) => {
   await page.goto('/index.html');
   await expect(page.locator('#rotate')).toBeVisible();
 });
+
+test('the shell offers full screen and links a manifest', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/index.html');
+  const button = page.locator('#fullscreen');
+  await expect(button).toBeVisible();
+  const box = await button.boundingBox();
+  expect(box?.width).toBeGreaterThanOrEqual(44);
+  expect(box?.height).toBeGreaterThanOrEqual(44);
+
+  const href = await page.locator('link[rel="manifest"]').getAttribute('href');
+  expect(href).toBe('manifest.webmanifest');
+  const response = await request.get('/manifest.webmanifest');
+  expect(response.ok()).toBe(true);
+  const manifest = await response.json();
+  expect(manifest.display).toBe('fullscreen');
+  expect(manifest.orientation).toBe('landscape');
+});
+
+test('full screen can be entered and left', async ({page}) => {
+  await page.goto('/index.html');
+  const button = page.locator('#fullscreen');
+  await button.click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement !== null))
+    .toBe(true);
+  await expect(button).toHaveText('Exit full screen');
+  await button.click();
+  await expect
+    .poll(() => page.evaluate(() => document.fullscreenElement === null))
+    .toBe(true);
+});
+
+test('without the Fullscreen API the button shows the install hint', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(Element.prototype, 'requestFullscreen', {
+      value: undefined,
+    });
+    Object.defineProperty(Element.prototype, 'webkitRequestFullscreen', {
+      value: undefined,
+    });
+  });
+  await page.goto('/index.html');
+  await expect(page.locator('#installHint')).toBeHidden();
+  await page.locator('#fullscreen').click();
+  await expect(page.locator('#installHint')).toBeVisible();
+});
+
+test('an installed app shows no full screen button', async ({page}) => {
+  await page.addInitScript(() => {
+    const original = window.matchMedia.bind(window);
+    window.matchMedia = (query: string) =>
+      query.includes('display-mode')
+        ? ({...original(query), matches: true} as MediaQueryList)
+        : original(query);
+  });
+  await page.goto('/index.html');
+  await expect(page.locator('#fullscreen')).toBeHidden();
+});

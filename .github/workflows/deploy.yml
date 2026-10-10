@@ -89,6 +89,7 @@ jobs:
           test -s dist/godot/index.html
           test -s dist/godot/index.wasm
           test -s dist/godot/index.pck
+          test -s dist/godot/manifest.webmanifest
           # the TypeScript game must still own the root
           grep -qF "${BASE_PATH}assets/" dist/index.html
           # the CI run keeps its export for 7 days; a re-run after that fails here
