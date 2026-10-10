@@ -172,6 +172,8 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 4. Export GLB (meshopt compression is optional in Godot; the importer handles plain GLB).
 5. Record source, licence and edits in `assets/CREDITS.md`.
 
+**Reference image.** `docs/art/reference-wide-road.jpg` (see `docs/art/REFERENCES.md`) is the owner's target for the look: a wide, curved road with worn edges, towers on round stone bases, dusk light, crystals and torches. The road is drawn as a ribbon over the unchanged grid (Phase 5); a wider road in the sim itself stays an option for the post-parity map version 2.
+
 **Models.** The Three.js build used procedural primitives and then Kenney CC0 GLBs while the owner generated original models with Claude and Blender (`assets-src/blender/`). In Godot the GLBs are imported as scenes; the owner's Blender models are the preferred source (towers done; foes, terrain and ambient props in progress), with Kenney pieces as placeholders.
 
 **Claude Design:** design system (tokens, type, panels) first; then mobile screens (title, HUD, build sheet, upgrade sheet, pause, game over, story card); key art for the README and personal site; reference sheets per foe and tower level. Claude Design covers 2D screens and reference art, not 3D models.
@@ -251,7 +253,7 @@ scrapline/
 
 | Area | Prototype | Remake |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded, shareable map with several routes from spawn to Heartstone (a main road and a detour at first; forks and loops after parity); procedural terrain with decorative props off the road. Drawn in landscape. |
+| Map | Random path on a 9×13 grid | Seeded, shareable map drawn with a wide, smooth road (a ribbon over the same grid), with several routes from spawn to Heartstone (a main road and a detour at first; forks and loops after parity); procedural terrain with decorative props off the road. Drawn in landscape. |
 | Towers | 4 types, 3 levels | Same, plus targeting mode per tower (first, strongest, closest) and a level 3 branch choice (two per tower) |
 | Enemies | 4 types | Same 4, animated (walk, hit, death); Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
 | Waves | Endless, boss every 10 | Chapters 1–4 with story cards, then endless |
@@ -326,7 +328,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Goal:** the game playable on the phone in Godot, at least as good as the web build.
 
 **Work breakdown**
-1. Procedural terrain built from the map: GLB tiles (straight, corner, end, T, junction), Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
+1. Procedural terrain built from the map, with the road drawn as a wide, smooth ribbon: a curve through each route's cell centres with rounded corners, 1.2 to 1.5 cells wide, a dirt shader with worn, grassy edges, and a plot cell kept between the two roads of a detour. The sim polyline stays the truth for movement, range and hits; foes walk the smoothed centreline with a small sideways offset. Tiles: GLB tiles (straight, corner, end, T, junction), Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
 2. `MultiMesh` foes with interpolation and baked vertex animation (spike it on the phone first), towers with levels and idle/fire animation, selection highlight and range ring.
 3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell.
 4. Control-node HUD: gold, lives, wave, build sheet, tower sheet, speed, pause, next-wave popup, auto-start, game over, landscape prompt.
@@ -400,6 +402,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
+| The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The ribbon stays inside the cell band (at most 1.5 cells wide, corner radius under half a cell); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
 | Godot web export cannot be tested headless in CI | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
