@@ -32,11 +32,11 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 ## What to check
 
 1. **Ticket.** Compare the diff with the ticket's "Done when". List unmet or unverified items and any work from a later phase.
-2. **Sim rules.** No imports from `render`, `ui`, `three` or the DOM, including dynamic `import()` and `globalThis`. No `Math.random()` or clock reads. Player actions only as commands. Game speed is more ticks, never a bigger tick.
+2. **Sim rules.** TypeScript: no imports from `render`, `ui`, `three` or the DOM, including dynamic `import()` and `globalThis`. GDScript (`godot/sim`): no `Node`, `get_tree`, `Engine`, `Time` or `OS`, no `randf`/`randi`; integer division, 32-bit masking and rounding follow the parity rules in `CLAUDE.md`. No `Math.random()` or clock reads. Player actions only as commands. Game speed is more ticks, never a bigger tick.
 3. **Content.** Balance numbers live in `src/content`; no magic numbers in logic. Lore names are used.
 4. **Tests.** Sim and content changes have tests written first, with a fixed seed and no timing. A test that cannot fail is a finding.
 5. **Render and UI.** No `any`. No hard-coded colours (tokens only). Dispose geometry and materials; no allocation in the frame loop. Tap targets of at least 44 px. Respect `prefers-reduced-motion`.
-6. **Assets.** CC0 only, recorded in `assets/CREDITS.md`, compressed GLB only.
+6. **Assets.** CC0, the owner's own, or Meshy-generated (with the plan and licence terms recorded); each recorded in `assets/CREDITS.md`; GLB only, within the triangle budget.
 7. **Workflows.** Least-privilege `permissions`; no untrusted input (PR title, body, branch) in `run:` steps; deploy and release cannot skip `ci`; tag and branch guards are enforced.
 8. **Consistency.** Docs, scripts, ticket numbers and paths agree with each other and with the code.
 
