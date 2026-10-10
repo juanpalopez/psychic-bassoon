@@ -36,7 +36,11 @@ func test_stub_scene_builds_80_foes_in_one_multimesh() -> void:
 
 
 func test_engine_matches_pinned_version() -> void:
-	var pinned := FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://") + "../.godot-version").strip_edges()
+	var pinned := (
+		FileAccess
+		. get_file_as_string(ProjectSettings.globalize_path("res://") + "../.godot-version")
+		. strip_edges()
+	)
 	var info := Engine.get_version_info()
 	var running := "%d.%d.%d-%s" % [info.major, info.minor, info.patch, info.status]
 	assert_eq(running, pinned)
