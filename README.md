@@ -2,7 +2,7 @@
 
 A medieval tower defense for mobile browsers. You are Castellan Quell, last warden of Greyhold Keep, and the Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to claim the Heartstone as tithe. Place Ballistae, Catapults, Frost Spires and Storm Spires along a procedurally generated road and hold the line.
 
-It is a 3D low-poly remake of a 2D canvas prototype, built with Three.js and TypeScript, and it plays in landscape on a phone.
+It is a 3D low-poly remake of a 2D canvas prototype, and it plays in landscape on a phone. It is moving from Three.js and TypeScript to the Godot engine (see `docs/PLAN.md`); the TypeScript web build is still the live version and the reference for the port.
 
 - **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–5, each closed by a gate)

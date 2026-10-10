@@ -1,14 +1,27 @@
 # Scrapline
 
-Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. Three.js + TypeScript + Vite, deployed to GitHub Pages.
+Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS and Android later. The TypeScript and Three.js game that shipped Phases 0 to 2 is the reference (oracle) until the Godot build replaces it.
 
-- Plan and roadmap: `docs/PLAN.md` (phases 0–5, each closed by a gate)
+- Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
 - Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell)
 - Original prototype (rules and balance reference): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `src/sim/rng.ts` (Phase 1), `src/render/models/`, `src/ui/tokens.css` and `docs/art/` (Phase 2), `assets/CREDITS.md` and `assets-src/` (with the first third-party asset).
+> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` and `docs/art/` (Phase 6). The TypeScript game lives in `src/` and moves to `legacy/` after the Phase 5 gate.
 
 ## Commands
+
+Godot (from Phase 3; versions pinned in `.godot-version`):
+
+```bash
+godot --path godot                                   # open or run the project
+godot --headless --path godot --import                # once per fresh checkout, so class_name scripts resolve
+godot --headless --path godot -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit   # GUT tests
+(cd godot && gdformat . && gdlint .)                 # gdtoolkit: format and lint (config in godot/)
+mkdir -p build/web && godot --headless --path godot --export-release "Web" ../build/web/index.html   # web export
+python3 -m http.server -d build/web                  # serve the export; open on a phone over LAN
+```
+
+TypeScript reference game (until it moves to `legacy/`):
 
 ```bash
 pnpm install
@@ -18,72 +31,73 @@ pnpm test         # Vitest (simulation)
 pnpm test:e2e     # Playwright smoke test
 pnpm lint         # Prettier check + ESLint + tsc --noEmit
 pnpm format       # Prettier --write (run before committing)
+pnpm sim -- --seed 42   # headless run: map and wave log
 ```
 
 ## Working rules
 
 - **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases.
-- **Port before inventing.** Until Phase 2's gate passes, gameplay must match the prototype: same rules, same numbers. Read `prototype/scrapline.html` instead of guessing.
-- **Keep `main` deployable.** Run `pnpm lint && pnpm test && pnpm build` before every commit.
+- **The TypeScript game is the oracle.** During the Godot migration, gameplay must match it: same rules, same numbers, same results for the same seed. Don't change the TypeScript sim except to fix a bug, and when you do, regenerate `fixtures/` and say so in the PR. `prototype/scrapline.html` is the original reference.
+- **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test && pnpm build` for TypeScript (today), and from Phase 3 also `gdformat`, `gdlint`, GUT and the export for Godot.
 
 ## Architecture
 
 ```
-src/
-  sim/       pure TypeScript game logic: grid, mapgen, waves, towers, enemies, economy
-  render/    Three.js scene, camera, instanced meshes, effects
-  ui/        DOM HUD, panels, overlays
-  content/   data only: tower/enemy defs, wave tables, lore strings
-  main.ts    wires sim + render + ui
+godot/
+  sim/       pure GDScript game logic: grid, mapgen, routes, waves, towers, foes, economy
+  content/   data only: tower/foe defs, wave tables, lore strings
+  render/    scenes and scripts: terrain, foes (MultiMesh), towers, camera, effects
+  ui/        HUD scenes (Control nodes) and the Theme
+  tests/     GUT tests and the fixtures from the TypeScript sim
+fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 ```
 
-- `src/sim` must never import from `render`, `ui`, `three` or the DOM. ESLint enforces this; don't disable the rule.
+- `godot/sim` must never touch the scene tree or engine singletons: no `Node`, no `get_tree`, no `Engine`, `Time` or `OS` calls, no `randf`/`randi`/`randomize`. A lint script enforces it; don't disable it.
 - The sim runs on a fixed 30 Hz tick and owns all game state. Render and UI only read state snapshots and events.
 - Player actions reach the sim only as commands (`build`, `upgrade`, `sell`, `launchWave`), never by mutating state directly.
-- All randomness goes through the seeded PRNG in `src/sim/rng.ts`. Never call `Math.random()` in the sim. The same seed plus the same commands must replay identically.
-- All balance numbers (cost, damage, range, rate, hp, speed, rewards, wave scaling) live in `src/content`. Logic files contain no magic numbers.
+- All randomness goes through the seeded PRNG in `godot/sim/rng.gd` (mulberry32 on 32-bit integers). The same seed plus the same commands must replay identically, and must give values equal to the TypeScript fixtures.
+- All balance numbers (cost, damage, range, rate, hp, speed, rewards, wave scaling) live in `godot/content`. Logic files contain no magic numbers.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
+- For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures keep large integers and fingerprints as hex strings and are compared with exact `==`.
+- While `src/sim` exists it keeps its own rules: no imports from render or ui (ESLint), no `Math.random`, no magic numbers outside `src/content`.
 
 ### Domain-driven design
 
-- `src/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public `index.ts`. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
+- `godot/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public entry class. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
 - Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
 ## Rendering and performance
 
-- Target: 60 fps with 80 foes on a mid-range Android phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2.
-- One `InstancedMesh` per foe type. Don't create a mesh per enemy.
-- Camera: perspective, about 55° pitch, about 35° FOV, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, `src/render/space.ts` is the one place that knows); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit: on a small landscape screen the 40 px limit yields to the fitted view.
-- Models in two stages. Phase 2 greybox: foes and towers are built procedurally from primitives in `src/render/models/` (one file per unit), following the rough silhouette sheets in `docs/art/`. Phase 3 onward: CC0 GLB models (recoloured, kitbashed) replace the primitives one unit at a time; keep each unit's primitive builder as the fallback for any gap the packs don't cover. Use rigid-part animation; no skinning except for bosses.
-- Keep a unit's model behind one interface (`src/render/models/<unit>.ts`) so swapping primitives for a GLB never touches sim, UI or instancing code.
-- Reuse geometries and materials, dispose of anything removed, and avoid allocating objects inside the frame loop.
+- Target: 60 fps with 80 foes on a mid-range phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2. The web export uses the Compatibility renderer (WebGL2) and the single-threaded build.
+- One `MultiMeshInstance3D` per foe type. Don't create a node per foe.
+- Camera: perspective, about 55° pitch, about 35° FOV, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, one script converts sim cells to world positions); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit.
+- Models come from glTF/GLB, preferably the owner's Blender models (`assets-src/blender/`), with CC0 packs as placeholders; keep a simple fallback mesh for any unit whose file is missing. Use part animation; skeletons only for bosses.
+- Reuse meshes and materials, free nodes you remove, and avoid allocating objects every frame.
 
 ## UI
 
-- The HUD is a DOM overlay. Never draw text or menus in the canvas.
-- The game is landscape only (owner decision). A phone held upright shows a "turn your phone" prompt and pauses. Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px.
-- Colours come from the CSS tokens in `src/ui/tokens.css`, which mirror the Claude Design system. Never hard-code colours in components.
-- Respect `prefers-reduced-motion`: no screen shake and reduced particle effects.
-- Start audio only after the first tap.
+- The HUD is built from Godot `Control` nodes with one Theme resource that mirrors the Claude Design tokens. Never hard-code colours in scenes or scripts.
+- The game is landscape only (owner decision). A phone held upright shows a "turn your phone" prompt (in the web export's HTML shell) and the game pauses. Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px.
+- Respect reduced motion: on the web, read `prefers-reduced-motion` through the HTML shell (`JavaScriptBridge`) and turn off screen shake and reduce particle effects.
+- Start audio only after the first tap (browsers block it before).
 
 ## Testing
 
-- Every sim module gets Vitest tests: map generation (path valid, never self-adjacent, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed.
+- Every sim module gets GUT tests: map generation (road valid, routes valid, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed. Compare against `fixtures/` produced by the TypeScript sim; a mismatch is a bug in the GDScript.
 - Fix the seed in tests; never depend on timing.
-- **TDD where possible.** For `src/sim` and `src/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
+- **TDD where possible.** For `godot/sim` and `godot/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
 - Test the domain through its public commands and snapshots, not internals, so refactors don't break tests.
+- The TypeScript Vitest suite keeps running until the code moves to `legacy/`.
 
 ## Code style
 
-- TypeScript strict mode, no `any`. Prefer plain functions and data over class hierarchies.
-- **Code style: the [Google TypeScript Style Guide](https://google.github.io/styleguide/tsguide.html), enforced by tools, not by review.** Prettier formats (`.prettierrc.json`: 2 spaces, single quotes, no bracket spacing, 80 columns, `es5` trailing commas, no parens around a single arrow parameter). ESLint (typescript-eslint `strict` and `stylistic`) enforces the rest. Run `pnpm format` before committing; `pnpm lint` fails on unformatted code, and so does `ci`. Don't hand-format and don't disable a rule to get around it.
-  - Naming: `UpperCamelCase` for types, classes and interfaces; `lowerCamelCase` for variables, functions, parameters and properties; `CONSTANT_CASE` for module-level constants and enum members. No `I` prefix on interfaces.
-  - Named exports only (no `export default`), except tool config files such as `vite.config.ts`.
-  - Always `===`, always braces for multi-line blocks, `const` by default, never `var`.
-  - Comments explain why, not what. Use JSDoc (`/** … */`) on exported APIs.
-  - We don't use `gts` itself: it pins ESLint 9 and we run ESLint 10. We follow its style with Prettier and ESLint directly.
+- GDScript with static typing everywhere (`var x: int`, typed arrays, typed returns). Prefer plain data and small functions over deep class hierarchies.
+- **Code style: the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html), enforced by tools, not by review.** `gdformat` formats and `gdlint` checks (gdtoolkit, pinned version; run from `godot/`, where `.gdlintrc` lives). CI fails on unformatted or unlinted code. Don't hand-format and don't disable a rule to get around it.
+  - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members.
+  - Comments explain why, not what. Use `##` doc comments on public APIs.
+- TypeScript code (until it moves to `legacy/`) keeps the Google TypeScript Style Guide with Prettier and ESLint as before.
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.
@@ -98,7 +112,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
 - **Tiers:**
   - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
-  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic `src/sim` modules (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
+  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic sim modules (`godot/sim`, and `src/sim` while it exists) (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
   - **Deep** (`opus`, pass `model: opus`): workflows, determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling), secrets, permissions, deploy or release, rule changes in this file. When unsure, take the higher tier.
 - **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
 - **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
@@ -115,14 +129,14 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
 - Open each PR with `gh pr create` using a conforming title (`gh stack submit --auto` generates titles that fail `PR checks`), then run `gh stack submit` to link them.
 - Merge from the bottom of the stack up, and run `gh stack sync` afterwards.
-- Assets: only compressed GLB in `public/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Use CC0 assets only unless asked otherwise.
+- Assets: only GLB (meshopt-compressed where it helps) in `godot/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Use CC0 assets only unless asked otherwise. Original models made by the owner are credited as such.
 - Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets follow what the packs can supply; gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it.
 
 ## CI/CD and releases
 
-- CI runs on every pull request and push to `main`: `pnpm lint`, `pnpm test`, `pnpm build`, and the Playwright smoke test. A red CI blocks merging.
-- CD: every push to `main` deploys `dist/` to GitHub Pages.
-- Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, builds, and creates a GitHub Release with generated notes from the Conventional Commits and the built `dist/` attached.
+- Until Phase 3 lands, CI is the TypeScript pipeline only. **From Phase 3** CI runs on every pull request and push to `main`: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export. Until the TypeScript game moves to `legacy/`, its checks (`pnpm lint`, `pnpm test`, `pnpm build`, Playwright) run too. A red CI blocks merging.
+- CD: every push to `main` deploys to GitHub Pages. Until the Phase 5 gate the TypeScript build is served at the root and the Godot export under `/godot/`; at the gate the Godot export takes the root.
+- Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, exports, and creates a GitHub Release with generated notes from the Conventional Commits and the build attached.
 - Keep workflows in `.github/workflows/`. Pin action versions and never commit secrets.
 
 ## Tickets

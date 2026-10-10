@@ -7,7 +7,7 @@ What the `adversarial-reviewer` agent reads instead of the full `CLAUDE.md` and 
 | Tier | When | Model | Depth |
 | --- | --- | --- | --- |
 | Skip | Dependabot bump with green CI, typo or wording-only docs, generated files | none | Check CI is green and the title conforms, then merge |
-| Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic `src/sim` modules (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
+| Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic sim modules (`godot/sim`, and `src/sim` while it exists) (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
 | Deep | `.github/workflows/`, determinism-critical sim code (the PRNG, the tick and command loop, the replay test and seed or snapshot handling), anything touching secrets, permissions, deploy or release, a rule change in `CLAUDE.md` | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
 
 When unsure, take the higher tier.
