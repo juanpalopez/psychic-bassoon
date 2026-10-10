@@ -13,6 +13,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "sim": "tsx scripts/sim/cli.ts",
+    "fixtures": "tsx scripts/export-fixtures.ts",
     "lint": "prettier --check . && eslint . && tsc --noEmit && tsc -p tsconfig.sim.json --noEmit",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
