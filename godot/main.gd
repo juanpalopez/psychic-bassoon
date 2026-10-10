@@ -29,11 +29,14 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_time += delta
 	_move_foes()
-	_label.text = "Scrapline stub  |  Godot %s  |  %d fps  |  %d foes" % [
-		Engine.get_version_info().string,
-		Engine.get_frames_per_second(),
-		FOE_COUNT,
-	]
+	_label.text = (
+		"Scrapline stub  |  Godot %s  |  %d fps  |  %d foes"
+		% [
+			Engine.get_version_info().string,
+			Engine.get_frames_per_second(),
+			FOE_COUNT,
+		]
+	)
 
 
 func _build_environment() -> void:

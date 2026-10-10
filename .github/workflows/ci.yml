@@ -84,3 +84,96 @@ jobs:
             playwright-report
             test-results
           retention-days: 7
+
+  godot:
+    name: godot
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: false
+          persist-credentials: false
+
+      - name: Read the pinned Godot version
+        id: version
+        run: |
+          version="$(tr -d '[:space:]' < .godot-version)"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "templates=${version/-/.}" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Godot and the web export templates
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/godot-bin
+            ~/.local/share/godot/export_templates
+          key: godot-${{ steps.version.outputs.version }}
+
+      - name: Download Godot and the web templates (verified)
+        if: steps.cache.outputs.cache-hit != 'true'
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          TEMPLATES: ${{ steps.version.outputs.templates }}
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${VERSION}"
+          binary="Godot_v${VERSION}_linux.x86_64.zip"
+          tpz="Godot_v${VERSION}_export_templates.tpz"
+          curl -sSfL --retry 3 -O "${base}/SHA512-SUMS.txt" -O "${base}/${binary}" -O "${base}/${tpz}"
+          grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt | sha512sum -c -
+          mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/"${TEMPLATES}"
+          unzip -q "${binary}" -d ~/godot-bin
+          unzip -q -j "${tpz}" templates/version.txt templates/web_nothreads_release.zip templates/web_nothreads_debug.zip \
+            -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
+          rm -f "${binary}" "${tpz}"
+
+      - name: Install gdtoolkit
+        run: pip install --user gdtoolkit==4.5.0
+
+      - name: Format and lint (gdformat, gdlint)
+        working-directory: godot
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"
+          gdformat --check main.gd tests sim content render ui
+          gdlint main.gd tests sim content render ui
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Sim purity
+        run: pnpm check:sim-purity
+
+      - name: Import the project
+        run: ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot --import
+
+      - name: GUT tests
+        run: ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
+
+      - name: Web export
+        run: |
+          mkdir -p build/web
+          ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot --export-release "Web" ../build/web/index.html
+
+      - name: Download budget
+        run: pnpm check:godot-size
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke test of the export
+        run: pnpm test:e2e:godot
+
+      - name: Upload the web export
+        uses: actions/upload-artifact@v7
+        with:
+          name: godot-web
+          path: build/web
+          retention-days: 7
