@@ -31,6 +31,25 @@ Ids: foes `scamp raider ironclad warlord`; towers `ballista catapult
 frostSpire stormSpire`; commands `build`, `upgrade`, `sell`, `launchWave` as in
 `src/sim/game/game.ts`.
 
+## Exact floats
+
+Godot's JSON parser (and `String.to_float`) can misround the last bit of a
+decimal float, so the port never compares parsed floats with `==`. Every
+fixture that holds floats also carries a `bits` copy of the same shape in which
+each number is the 16 hex digits of its IEEE-754 bits (big-endian):
+
+| File | Plain data | Bits copy |
+| --- | --- | --- |
+| `prng.json` | `floats`, `ranges` | `floatBits` for `floats`; `ranges` come from the same draws |
+| `routes.json` | (bits only) | all values |
+| `waves.json` | `waves` | `bits` |
+| `scaling.json` | `waves` | `bits` |
+| `damage.json` | `towerHits`, `armorFloor`, `kill` | `bits` (an object with the same keys) |
+| `replays.json` | `checkpoints`, `final` | `checkpointsBits`, `finalBits` |
+
+Decode a bits string with `PackedByteArray.decode_double` (see `_from_bits` in
+`godot/tests/sim/test_rng.gd`) and compare the bits of the result.
+
 ## Notes for the port
 
 - **Checkpoint timing.** A replay checkpoint at tick N is the state at the *start* of tick N: before the commands logged at tick N are submitted and before tick N runs. Snapshot at the same moment in GDScript.
