@@ -33,3 +33,10 @@ func test_stub_scene_builds_80_foes_in_one_multimesh() -> void:
 			multimeshes.append(child)
 	assert_eq(multimeshes.size(), 1, "one MultiMesh for all foes")
 	assert_eq((multimeshes[0] as MultiMeshInstance3D).multimesh.instance_count, 80)
+
+
+func test_engine_matches_pinned_version() -> void:
+	var pinned := FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://") + "../.godot-version").strip_edges()
+	var info := Engine.get_version_info()
+	var running := "%d.%d.%d-%s" % [info.major, info.minor, info.patch, info.status]
+	assert_eq(running, pinned)
