@@ -28,7 +28,7 @@ You are Castellan Quell, last warden of Greyhold Keep, the final stronghold of a
 - **The Hollow King.** A dead king who speaks only in royal edicts, tithes and ledgers. He never threatens you; he enters you in the ledger of the fallen as arrears.
 - **You.** Castellan Quell, alone on the night watch with a ballista, a few catapults and a handful of cut crystals.
 
-> **Design status:** everything marked _(Phase 6–7)_ below is design only. Per the phase gates, none of it enters the sim until the 3D greybox matches the prototype.
+> **Design status:** everything marked _(Phase 6–7)_ below is design only. Per the phase gates, none of it enters the sim until the Godot port reproduces the base game exactly (Phase 4).
 
 ### Why the Hollow King rides
 
@@ -68,7 +68,7 @@ Design guardrails: at most one new foe type is introduced per chapter, new types
 
 ### Upgrade branches _(Phase 6–7)_
 
-Levels 1 and 2 stay linear, as in the prototype. At level 3 the player picks one of two branches per tower. The choice is permanent for that tower (sell and rebuild to change), and each branch adds a different visible part to the model so it reads at a glance. Sell value follows the same rules as the prototype. Final stats live in `src/content`.
+Levels 1 and 2 stay linear, as in the prototype. At level 3 the player picks one of two branches per tower. The choice is permanent for that tower (sell and rebuild to change), and each branch adds a different visible part to the model so it reads at a glance. Sell value follows the same rules as the prototype. Final stats live in the content data.
 
 | Tower | Branch A | Branch B |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ Design goals: every branch has a clear job and a clear weakness, none is strictl
 
 ### Tower adjustments for the new foes _(Phase 7)_
 
-The new foes only work as counters if every tower has a sensible answer to each of them. These adjustments ship with the new foes and apply only when their content flags are on, so the prototype-identical sim from Phases 1–2 is untouched. All numbers live in `src/content` and are tuned with headless runs.
+The new foes only work as counters if every tower has a sensible answer to each of them. These adjustments ship with the new foes and apply only when their content flags are on, so the base game as ported in Phase 4 is untouched. All numbers live in the content data and are tuned with headless runs.
 
 | New foe | Ballista | Catapult | Frost Spire | Storm Spire |
 | --- | --- | --- | --- | --- |
@@ -115,10 +115,10 @@ Supporting changes:
 **How the port stays correct:** the TypeScript sim is the oracle. It exports JSON fixtures (maps, routes, wave lists, damage cases, replay fingerprints for many seeds). The GDScript sim must reproduce them exactly (GUT tests). Same seed, same commands, same result: the Phase 1 replay gate is repeated, not skipped.
 
 **Known costs and risks, accepted:**
-- **Web export is heavier.** The Godot engine is a WebAssembly download of several MB (measure in Phase 3 and set a budget), against about 150 kB for the Three.js bundle. Startup is slower; show a loading screen.
+- **Web export is heavier.** The standard Godot 4 web engine is tens of MB uncompressed and several MB compressed (not yet measured here), against about 150 kB for the Three.js bundle. Startup is slower; show a loading screen. Measuring it on the owner's iPhone is a go/no-go gate in Phase 3.
 - **iOS Safari.** Use the single-threaded web export (no `SharedArrayBuffer`, so GitHub Pages works without special headers) and the Compatibility renderer (WebGL2). Audio must start after the first tap. Memory limits are tight: test on the real phone early.
-- **No GDScript in the browser at C# speed.** C# cannot export to web in Godot 4, so the sim is GDScript. At 30 ticks per second with about 100 entities this is fine; check it in Phase 4.
-- **Determinism.** GDScript floats are 64-bit like JavaScript's, so the maths matches if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, `round` on halves or trig). The PRNG uses integer maths masked to 32 bits.
+- **GDScript only for the web.** As of the pinned 4.x, C# does not export to web and GDExtension is not an option for the web build, so the sim is GDScript. At 30 ticks per second with about 100 entities this is fine; check it in Phase 4.
+- **Determinism (value parity, not byte parity).** GDScript floats are 64-bit like JavaScript's, so results match if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, trig or engine `round`). Traps to port deliberately: `/` between two integers is integer division in GDScript (divide by a float such as `4294967296.0`); JavaScript's `Math.imul` and `>>>` need every value kept in [0, 2^32) and masked after each `*`, `+` and `^`; `Math.round` becomes `int(floor(x + 0.5))`. Fixtures store integers above 2^53 and fingerprints as hex strings and are compared with exact `==` (Godot's `JSON.parse` returns every number as a float).
 - **Different tooling.** gdtoolkit for lint and format, GUT for tests, the Godot CLI for export. CI must download a pinned Godot and its export templates (cache them).
 
 **Native later:** the same project exports to iOS and Android once the web build is solid; it needs signing, store accounts and review, so it is its own phase.
@@ -135,7 +135,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Layer | Choice | Why |
 | --- | --- | --- |
 | Engine | Godot 4.x (version pinned at setup), Compatibility renderer, single-threaded Web export | WebGL2 and no special server headers, so it runs from GitHub Pages and iOS Safari |
-| Language | GDScript, typed everywhere | The only first-class script language that exports to web |
+| Language | GDScript, typed everywhere | The script language that exports to web in the pinned 4.x |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
 | Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, a terrain scene built from the road tiles | Few draw calls on a phone |
 | Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the web build |
@@ -203,7 +203,8 @@ scrapline/
     ui/                  # HUD scenes and the Theme resource
     assets/              # imported GLB models, audio, textures
     tests/               # GUT tests, including fixtures from the TypeScript sim
-    export/              # web export preset and the custom HTML shell
+    export_presets.cfg   # web export preset (Godot reads it from the project root)
+    web/                 # the custom HTML shell (landscape prompt, meta tags, loader)
   fixtures/              # JSON from the TypeScript sim: maps, waves, replays (the oracle)
   legacy/                # the TypeScript and Three.js game, until Godot replaces it
   assets-src/            # .blend sources and raw packs (Git LFS)
@@ -225,10 +226,10 @@ scrapline/
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
 | `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. During the migration it also runs the legacy TypeScript checks. |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes the web export to GitHub Pages. A red `main` never reaches the public site. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes to GitHub Pages. **Layout until the Phase 5 gate:** the TypeScript web build stays at the root URL and the Godot export is served under `/godot/`; at the gate the Godot export takes the root and the TypeScript build moves to `/legacy/` (or is dropped). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
 
-**Versions follow phase gates** (semantic versioning, 0.x until launch). The TypeScript phases shipped `v0.1.0` and `v0.2.0`; each Godot phase gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
+**Versions follow phase gates** (semantic versioning, 0.x until launch). No release tags exist yet (the TypeScript phases were never tagged): the first tag, `v0.1.0`, is cut at the Phase 3 gate and each later gate bumps the minor version. The tag `web-three-final` marks the last Three.js web build and is created at the Phase 3 gate, before any Godot content is deployed to the root. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
 - CI checks: lint, formatting, determinism (replay against the TypeScript fixtures), sim rules, export size, `assets/CREDITS.md` coverage for every GLB.
@@ -255,6 +256,8 @@ scrapline/
 | Progress | Best wave in local storage | Best wave per seed, plus a run summary |
 
 ## Milestones
+
+**Ticket labels.** The board's old labels `phase-3` (Art and UI), `phase-4` (Lore and chapters) and `phase-5` (Polish and launch) map to the new phases 6, 7 and 8; new labels `phase-6` to `phase-8` are added and the old art tickets (#89 to #97) are relabelled `phase-6`. The Three.js terrain ticket #108 is closed as done in TypeScript; the Godot terrain is part of Phase 5. New Godot tickets use `phase-3` onward with the new meaning from the day the move is merged.
 
 Each phase ends with a gate that must pass before the next starts. Phases 0 to 2 were built in TypeScript and Three.js and are complete; the Godot track starts at Phase 3.
 
@@ -283,7 +286,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Work breakdown**
 1. Add `godot/` with a pinned Godot 4 version, the Compatibility renderer and a single-threaded Web export preset; a custom HTML shell (landscape prompt, meta tags, loading screen).
 2. CI: install the pinned Godot and templates (cached), `gdformat --check`, `gdlint`, GUT, the sim-purity lint, export, size budget, Playwright smoke on the export.
-3. Deploy the export to GitHub Pages from `main`; keep the TypeScript build reachable until Phase 5.
+3. Deploy the export to GitHub Pages from `main` under `/godot/`; the TypeScript build stays at the root until the Phase 5 gate (see the Pages layout in CI/CD). Tag `web-three-final`.
 4. Export fixtures from the TypeScript sim into `fixtures/` (maps and routes for many seeds, wave lists, damage cases, replay fingerprints) with a script and a test that regenerates and compares them.
 5. Measure on the iPhone: download size, start time, a stub scene with 80 animated instances; set the budgets.
 
@@ -293,6 +296,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 - [ ] An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari.
 - [ ] CI runs lint, GUT and the export, and a red check blocks the deploy.
 - [ ] Fixtures exist and the TypeScript tests regenerate them identically.
+- [ ] **Go/no-go:** on the owner's iPhone Safari the export's download size, start time, memory and an 80-instance stub scene are within the budget set here. If not, stop and take the fallback in Risks (keep Three.js for web, Godot for native only) before any Phase 4 work.
 
 ### Phase 4 · Sim port to GDScript
 
@@ -383,8 +387,11 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | --- | --- |
 | The Godot web build is too heavy or slow to start on a phone | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
 | iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; keep the TypeScript web build live until Phase 5 passes |
-| The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the oracle is never edited during the port |
-| Floating-point or integer differences (rounding, 32-bit wrap) | Use only `+ - * /`, `sqrt`, `floor`; mask integers to 32 bits; avoid `round`, trig and engine random |
+| The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the TypeScript sim is frozen once the fixtures exist; it changes only for a bug, with the fixtures regenerated and the Godot sim updated in the same PR |
+| Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
+| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through a small `JavaScriptBridge` call in the web shell; accept the accessibility loss and record it |
+| Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
+| The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | Skinned animation for many foes is too slow on phones | Part animation on `MultiMesh` instances; skeletons only for bosses |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
