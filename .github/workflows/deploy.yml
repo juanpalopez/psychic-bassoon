@@ -45,6 +45,11 @@ jobs:
     if: needs.check-tip.outputs.is_tip == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      actions: read # to download the Godot export built by the CI run
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -69,6 +74,25 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      # The Godot export is built and tested once, by the CI run being deployed.
+      - name: Fetch the Godot export from the CI run
+        uses: actions/download-artifact@v8
+        with:
+          name: godot-web
+          path: dist/godot
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Check the Godot export is complete
+        run: |
+          test -s dist/godot/index.html
+          test -s dist/godot/index.wasm
+          test -s dist/godot/index.pck
+          # the TypeScript game must still own the root
+          grep -qF "${BASE_PATH}assets/" dist/index.html
+          # the CI run keeps its export for 7 days; a re-run after that fails here
+          sha256sum dist/godot/index.pck dist/godot/index.wasm
 
       - uses: actions/configure-pages@v6
 
@@ -100,4 +124,27 @@ jobs:
             sleep 10
           done
           echo "::error::The live page at ${PAGE_URL} did not serve this build (${want}). The site may already be published; re-run the deploy or check Pages."
+          exit 1
+
+      - name: Check the Godot export is served under /godot/
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          want_pck=$(sha256sum < dist/godot/index.pck)
+          want_wasm=$(sha256sum < dist/godot/index.wasm)
+          for attempt in 1 2 3 4 5 6; do
+            code=$(curl -sS --max-time 20 -o godot.html -w '%{http_code}' "${PAGE_URL}godot/index.html?ci=${HEAD_SHA}" || true)
+            curl -sS --max-time 60 -o live.pck "${PAGE_URL}godot/index.pck?ci=${HEAD_SHA}" || true
+            curl -sS --max-time 120 -o live.wasm "${PAGE_URL}godot/index.wasm?ci=${HEAD_SHA}" || true
+            got_pck=$(sha256sum < live.pck)
+            got_wasm=$(sha256sum < live.wasm)
+            if [ "$code" = "200" ] && [ "$got_pck" = "$want_pck" ] && [ "$got_wasm" = "$want_wasm" ] && grep -q 'GODOT_CONFIG' godot.html; then
+              echo "Godot export is live under /godot/"
+              exit 0
+            fi
+            echo "Attempt ${attempt}: index ${code}, pck/wasm digests differ or are missing"
+            sleep 10
+          done
+          echo "::error::The Godot export is not served under ${PAGE_URL}godot/."
           exit 1

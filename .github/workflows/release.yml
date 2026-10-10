@@ -66,6 +66,7 @@ jobs:
       - name: Build
         run: pnpm build
 
+      # TypeScript build only. The Godot export joins releases at the Phase 5 swap.
       - name: Package the build
         run: |
           cd dist
