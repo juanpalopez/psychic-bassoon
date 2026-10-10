@@ -2,13 +2,13 @@
 
 Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its tracker board use Scrapline and Project Slag.
 
-_As of 2026-10-04. Living version: the Claude doc of the same name._
+_Updated 2026-10-10: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 and 1 are complete. Phase 2 (3D greybox) is built and live at https://juanpalopez.github.io/psychic-bassoon/; its gate waits on a manual check on a real phone (60 fps with 80 foes, one-thumb play, touch gestures; ticket #27). `pnpm sim -- --seed 42` shows the headless simulation. Use `prototype/scrapline.html` as the reference for rules and numbers.
+> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation. Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
 
 ## Vision
 
-Scrapline becomes a 3D low-poly tower defense for mobile browsers. The camera is angled like League of Legends, and foes march along a procedurally generated road. It lives in this repo, deploys to GitHub Pages, and doubles as a portfolio piece.
+Scrapline becomes a 3D low-poly tower defense for mobile browsers, built with Godot. The camera is angled like League of Legends, and foes march along procedurally generated roads, which can branch. It lives in this repo, deploys to GitHub Pages first and to native apps later, and doubles as a portfolio piece.
 
 **Pillars**
 
@@ -28,7 +28,7 @@ You are Castellan Quell, last warden of Greyhold Keep, the final stronghold of a
 - **The Hollow King.** A dead king who speaks only in royal edicts, tithes and ledgers. He never threatens you; he enters you in the ledger of the fallen as arrears.
 - **You.** Castellan Quell, alone on the night watch with a ballista, a few catapults and a handful of cut crystals.
 
-> **Design status:** everything marked _(Phase 3–4)_ below is design only. Per the phase gates, none of it enters the sim until the 3D greybox matches the prototype.
+> **Design status:** everything marked _(Phase 6–7)_ below is design only. Per the phase gates, none of it enters the sim until the 3D greybox matches the prototype.
 
 ### Why the Hollow King rides
 
@@ -47,7 +47,7 @@ The Hollow King ruled a kingdom whose treasury ran dry, and rather than admit it
 | Ironclad | Tank | Slow, armoured | Heavy knight in black plate, glowing eye slits | "The vanguard advances. Delays will be absorbed." |
 | Warlord | Boss | Boss every 10th wave | Towering champion with a crown of iron spikes and a red-glowing core | "The Warlord is present. Audit in progress." |
 
-**New foes _(Phase 4, chapters 2–3)_.** Working names; each forces the player to change targeting or tower mix, not just add more damage.
+**New foes _(Phase 7, chapters 2–3)_.** Working names; each forces the player to change targeting or tower mix, not just add more damage.
 
 | Unit | Gameplay role | Look | Counter and pressure | The herald's proclamation |
 | --- | --- | --- | --- | --- |
@@ -66,7 +66,7 @@ Design guardrails: at most one new foe type is introduced per chapter, new types
 | Frost Spire | EMP | A cut violet crystal on a stone spire that freezes everything near it |
 | Storm Spire | Tesla | A yellow crystal tapped from the Heartstone's vein that throws lightning |
 
-### Upgrade branches _(Phase 3–4)_
+### Upgrade branches _(Phase 6–7)_
 
 Levels 1 and 2 stay linear, as in the prototype. At level 3 the player picks one of two branches per tower. The choice is permanent for that tower (sell and rebuild to change), and each branch adds a different visible part to the model so it reads at a glance. Sell value follows the same rules as the prototype. Final stats live in `src/content`.
 
@@ -79,7 +79,7 @@ Levels 1 and 2 stay linear, as in the prototype. At level 3 the player picks one
 
 Design goals: every branch has a clear job and a clear weakness, none is strictly better, and the choice should depend on what the current chapter throws at you.
 
-### Tower adjustments for the new foes _(Phase 4)_
+### Tower adjustments for the new foes _(Phase 7)_
 
 The new foes only work as counters if every tower has a sensible answer to each of them. These adjustments ship with the new foes and apply only when their content flags are on, so the prototype-identical sim from Phases 1–2 is untouched. All numbers live in `src/content` and are tuned with headless runs.
 
@@ -104,32 +104,54 @@ Supporting changes:
 4. **Final Tithe (31–40).** The Hollow King addresses Quell by name and offers a pardon. The Chronicle's last page reveals what happened to its author. Boss: the Hollow King's champion.
 5. **Long Night (41+).** Endless mode. Every 10 waves the herald reads a new, increasingly absurd edict.
 
+## Engine decision: Godot
+
+**Decision (owner, 2026-10-10):** build the game in Godot 4 instead of Three.js, for more freedom: a real editor for scenes, terrain, lighting and particles; animation and skeleton tools for foes; a UI toolkit; and a path to native iOS and Android apps. Web in a phone browser comes first, native later.
+
+**What carries over:** the lore, naming, balance numbers, map and wave algorithms, all GLB assets and textures (including the owner's Blender models), the docs, tickets and review process.
+
+**What is rewritten:** the simulation (TypeScript to GDScript), the renderer, the HUD, the tests and the build pipeline. The TypeScript game stays in the repo (tag `web-three-final`, folder `legacy/` once Godot replaces it) until the Godot build passes the same gates.
+
+**How the port stays correct:** the TypeScript sim is the oracle. It exports JSON fixtures (maps, routes, wave lists, damage cases, replay fingerprints for many seeds). The GDScript sim must reproduce them exactly (GUT tests). Same seed, same commands, same result: the Phase 1 replay gate is repeated, not skipped.
+
+**Known costs and risks, accepted:**
+- **Web export is heavier.** The Godot engine is a WebAssembly download of several MB (measure in Phase 3 and set a budget), against about 150 kB for the Three.js bundle. Startup is slower; show a loading screen.
+- **iOS Safari.** Use the single-threaded web export (no `SharedArrayBuffer`, so GitHub Pages works without special headers) and the Compatibility renderer (WebGL2). Audio must start after the first tap. Memory limits are tight: test on the real phone early.
+- **No GDScript in the browser at C# speed.** C# cannot export to web in Godot 4, so the sim is GDScript. At 30 ticks per second with about 100 entities this is fine; check it in Phase 4.
+- **Determinism.** GDScript floats are 64-bit like JavaScript's, so the maths matches if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, `round` on halves or trig). The PRNG uses integer maths masked to 32 bits.
+- **Different tooling.** gdtoolkit for lint and format, GUT for tests, the Godot CLI for export. CI must download a pinned Godot and its export templates (cache them).
+
+**Native later:** the same project exports to iOS and Android once the web build is solid; it needs signing, store accounts and review, so it is its own phase.
+
 ## Tech stack and architecture
 
-The simulation is plain TypeScript with no Three.js imports: deterministic, unit-testable, and able to run headless for balance testing. Rendering and the HUD only read its state.
+The simulation is plain GDScript with no Node, scene or engine-singleton dependencies: deterministic, unit-testable, and able to run headless (`godot --headless`) for balance testing. Rendering and the HUD only read its state.
 
 ```
-Content data ──defs──▶ Simulation (30 Hz, seeded) ──state──▶ Three.js renderer
-Input / HUD taps ──commands──▶          │           ──events──▶ HUD overlay (DOM)
+Content data ──defs──▶ Simulation (30 Hz, seeded) ──state──▶ Godot 3D scene (MultiMesh, camera)
+Input / HUD taps ──commands──▶          │           ──events──▶ HUD (Control nodes)
 ```
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Language and build | TypeScript (strict), Vite, pnpm | Fast dev server; static output for GitHub Pages |
-| Rendering | Three.js (version pinned at setup) | Light, full control over the camera and batching |
-| Models | glTF/GLB via GLTFLoader, compressed with gltf-transform (meshopt) | Small downloads on mobile data |
-| HUD and menus | HTML/CSS overlay; Preact if components get complex | Crisp text and native tap targets |
-| Randomness | Seeded PRNG (mulberry32) | Maps and waves replay exactly from a seed |
-| Tests | Vitest for the simulation, one Playwright smoke test | Balance and map generation stay verifiable |
-| Audio | Howler.js or Web Audio, started on first tap | Browsers block sound before a user gesture |
-| CI/CD | GitHub Actions: PR checks, CI, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
+| Engine | Godot 4.x (version pinned at setup), Compatibility renderer, single-threaded Web export | WebGL2 and no special server headers, so it runs from GitHub Pages and iOS Safari |
+| Language | GDScript, typed everywhere | The only first-class script language that exports to web |
+| Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
+| Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, a terrain scene built from the road tiles | Few draw calls on a phone |
+| Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the web build |
+| HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens |
+| Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed, and match the TypeScript fixtures |
+| Tests | GUT (Godot Unit Test) run headless; fixtures exported from the TypeScript sim; one Playwright smoke test on the exported build | Balance, maps and replays stay verifiable |
+| Audio | Godot `AudioStreamPlayer`, started after the first tap on web | Browsers block sound before a user gesture |
+| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, Godot web export, size budget, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
-- **Camera.** Perspective camera pitched about 55° down with a ~35° field of view, close to the LoL angle. Pinch to zoom and drag to pan within clamped limits.
-- **Simulation.** Fixed 30 Hz tick owns all state. Rendering interpolates between ticks. 2×/3× speed = extra ticks per frame.
-- **Rendering.** One InstancedMesh per foe type; regular meshes for towers. One directional light plus ambient; blob shadows for foes.
-- **Input.** Tap raycasts the ground plane to a grid cell; the prototype's build/select logic carries over.
+- **Camera.** Perspective `Camera3D` pitched about 55° down with a ~35° field of view, landscape framing. Pinch to zoom and drag to pan within clamped limits.
+- **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
+- **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Dusk lighting, fog for the edges.
+- **Input.** A tap ray-casts the ground plane to a grid cell and sends a command. No direct state changes.
+- **Orientation.** Landscape only: the web page shows a "turn your phone" prompt when upright (custom HTML shell).
 
-**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and ~150k triangles per frame; DPR capped at 2; under 1 MB gzipped JS and under 6 MB of assets on first load.
+**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
 
 ## Art direction and Claude Design
 
@@ -143,18 +165,18 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 
 1. Shortlist CC0 low-poly packs: Kenney (Tower Defense Kit, Castle Kit, Fantasy Town Kit, Mini Dungeon) and Quaternius (fantasy, monsters and medieval packs). Check each licence file; anything not clearly CC0 is out.
 2. Map every unit to a pack model and write the gaps in `docs/art/GAPS.md` (see the gap plan below).
-3. In Blender, remap faces to one shared 256 px palette texture; kitbash gap units from pack parts.
-4. Export GLB, compress with gltf-transform.
+3. In Blender, build or remap faces to one shared palette texture; kitbash gap units from pack parts.
+4. Export GLB (meshopt compression is optional in Godot; the importer handles plain GLB).
 5. Record source, licence and edits in `assets/CREDITS.md`.
 
-**Models in two stages.** Phase 2 uses procedural primitives so the greybox never waits on art. Phase 3 swaps in CC0 GLBs one unit at a time behind the same model interface; the primitive builder stays as the fallback for any unit the packs can't cover.
+**Models.** The Three.js build used procedural primitives and then Kenney CC0 GLBs while the owner generated original models with Claude and Blender (`assets-src/blender/`). In Godot the GLBs are imported as scenes; the owner's Blender models are the preferred source (towers done; foes, terrain and ambient props in progress), with Kenney pieces as placeholders.
 
 **Claude Design:** design system (tokens, type, panels) first; then mobile screens (title, HUD, build sheet, upgrade sheet, pause, game over, story card); key art for the README and personal site; reference sheets per foe and tower level. Claude Design covers 2D screens and reference art, not 3D models.
 
-- **Rough silhouette sheets** (shape and colour only) for the 4 base foes and 4 towers come first and feed the Phase 2 primitives.
+- **Rough silhouette sheets** (shape and colour only) for the 4 base foes and 4 towers come first and brief the models.
 - **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced.
 
-### Asset gap plan _(Phase 3)_
+### Asset gap plan _(Phase 6)_
 
 Which units a CC0 pack can plausibly cover, and what has to be built. Coverage is an expectation to confirm during the shortlist, not a verified fact; `docs/art/GAPS.md` holds the result.
 
@@ -174,24 +196,25 @@ Rule: if a unit's silhouette is not distinct at zoomed-out view after recolourin
 
 ```
 scrapline/
-  src/
-    sim/          # pure TS: grid, mapgen, waves, towers, enemies, economy
-    render/       # Three.js: scene, camera, instancing, effects
-    ui/           # HUD, panels, overlays (DOM)
-    content/      # data: tower and enemy defs, wave tables, lore text
-    main.ts       # wires sim, render and UI together
-  public/assets/  # compressed GLB models, audio, palette texture
-  assets-src/     # .blend sources and raw packs (Git LFS)
-  tests/          # Vitest for sim, one Playwright smoke test
-  docs/           # PLAN.md, LORE.md, design notes
-  docs/art/       # reference sheets, GAPS.md (CC0 pack coverage and gaps)
+  godot/                 # the Godot project (project.godot at its root)
+    sim/                 # pure GDScript: grid, mapgen, routes, waves, towers, foes, economy
+    content/             # data: tower and foe defs, wave tables, lore text (JSON or Resources)
+    render/              # scenes and scripts: terrain, foes (MultiMesh), towers, camera, effects
+    ui/                  # HUD scenes and the Theme resource
+    assets/              # imported GLB models, audio, textures
+    tests/               # GUT tests, including fixtures from the TypeScript sim
+    export/              # web export preset and the custom HTML shell
+  fixtures/              # JSON from the TypeScript sim: maps, waves, replays (the oracle)
+  legacy/                # the TypeScript and Three.js game, until Godot replaces it
+  assets-src/            # .blend sources and raw packs (Git LFS)
+  docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
-    workflows/    # pr-checks.yml, ci.yml, deploy.yml, release.yml
+    workflows/           # pr-checks.yml, ci.yml, deploy.yml, release.yml
     ISSUE_TEMPLATE/, pull_request_template.md, dependabot.yml
 ```
 
-- `src/sim` never imports from `render` or `ui` (ESLint import rule).
-- All balance numbers live in `src/content`.
+- `godot/sim` never touches the scene tree: no `Node`, no `get_tree`, no `Engine` or `Time` singletons, no `randf`/`randi`. A lint script enforces it.
+- All balance numbers live in `godot/content`.
 - Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
 - Git LFS for binary sources; only compressed GLBs ship.
 - MIT for code; art keeps each pack's CC0 terms.
@@ -201,22 +224,22 @@ scrapline/
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
-| `ci` | PR and push to `main` | `pnpm install --frozen-lockfile`, then lint (ESLint + `tsc`), Vitest (includes the seeded replay test), build, bundle-size budget, and the Playwright smoke test against the built `dist/`. |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes `dist/` to GitHub Pages. A red `main` never reaches the public site. |
-| `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached. |
+| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. During the migration it also runs the legacy TypeScript checks. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes the web export to GitHub Pages. A red `main` never reaches the public site. |
+| `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
 
-**Versions follow phase gates** (semantic versioning, 0.x until launch): Phase 1 gate → `v0.1.0`, Phase 2 → `v0.2.0`, Phase 3 → `v0.3.0`, Phase 4 → `v0.4.0`, Phase 5 → `v1.0.0`. Fixes between gates bump the patch. Notes come from Conventional Commits, so commit messages are the changelog.
+**Versions follow phase gates** (semantic versioning, 0.x until launch). The TypeScript phases shipped `v0.1.0` and `v0.2.0`; each Godot phase gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
-- CI checks: lint, types, determinism (replay), sim rules, bundle size (under 1 MB gzipped JS), and, from Phase 3, asset size (under 6 MB) and `assets/CREDITS.md` coverage for every GLB.
-- The smoke test also reads `renderer.info` on a fixed scene to catch draw-call and triangle regressions (under 120 and about 150k). Headless Chromium has no real GPU, so fps is not measured in CI.
-- 60 fps with 80 foes on a mid-range phone stays a manual check at the Phase 2 gate. Record device, fps and seed in the PR.
+- CI checks: lint, formatting, determinism (replay against the TypeScript fixtures), sim rules, export size, `assets/CREDITS.md` coverage for every GLB.
+- Headless Chromium has no real GPU, so fps is not measured in CI. The Godot web build can report draw calls and frame time through a debug overlay that the smoke test reads on a fixed scene.
+- 60 fps with 80 foes on a mid-range phone stays a manual check at the Phase 5 gate. Record device, fps and seed in the PR.
 
 **Hygiene**
-- Pin the Node version (`.nvmrc` and the `packageManager` field) so local, CI and deploy match; keep the pnpm store cached.
-- Dependabot for npm and GitHub Actions, grouped and weekly. Three.js stays pinned and is upgraded by hand with a perf check.
+- Pin the Godot version and export templates (`.godot-version`), so local, CI and deploy match; cache the templates.
+- Dependabot for GitHub Actions. Godot is upgraded by hand with a perf check.
 - Least-privilege `permissions` on every workflow, `concurrency` to cancel superseded runs, no secrets in the repo.
-- Skip Git LFS in CI (`assets-src/` is source only; only compressed GLBs ship), which keeps runs fast and avoids LFS bandwidth quota.
+- Skip Git LFS in CI (`assets-src/` is source only; only compressed GLBs ship).
 
 **Repository settings** (not code, set once in GitHub): protect `main` with required checks (`Conventional Commits`, `ci`), squash merge only, linear history, delete branches on merge, no direct pushes. These are two repository rulesets, one for `main` and one for `v*` tags. Repository admins can bypass the `main` rules only through a pull request, and are the only ones who can create release tags.
 
@@ -224,7 +247,7 @@ scrapline/
 
 | Area | Prototype | Remake |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded, shareable path; decorative props off the path |
+| Map | Random path on a 9×13 grid | Seeded, shareable map with one main road and often a detour (two routes from spawn to Heartstone); decorative props off the road. Drawn in landscape. |
 | Towers | 4 types, 3 levels | Same, plus targeting mode per tower (first, strongest, closest) and a level 3 branch choice (two per tower) |
 | Enemies | 4 types | Same 4, animated; Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
 | Waves | Endless, boss every 10 | Chapters 1–4 with story cards, then endless |
@@ -233,164 +256,150 @@ scrapline/
 
 ## Milestones
 
-Each phase ends with a gate that must pass before the next starts.
+Each phase ends with a gate that must pass before the next starts. Phases 0 to 2 were built in TypeScript and Three.js and are complete; the Godot track starts at Phase 3.
 
 | Phase | Work | Gate |
 | --- | --- | --- |
-| 0 · Repo and pipeline | Vite + TS + Three.js scaffold, CI, Pages deploy; prototype split into sim/render/ui | An empty scene deploys from `main` |
-| 1 · Simulation port | Rules in `src/sim`, seeded RNG, 30 Hz tick; Vitest coverage | A headless run replays exactly from its seed |
-| 2 · 3D greybox | Angled camera, pinch zoom, raycast input, primitive models from rough silhouette sheets; DOM HUD | **Plays as well as the 2D prototype at 60 fps on your phone** |
-| 3 · Art and UI | CC0 pack shortlist and `docs/art/GAPS.md` first; then Claude Design screens and final sheets; CC0 models recoloured and kitbashed; lighting and effects | All foes and towers (3 levels) use final models, and every gap has a kitbash or primitive fallback |
-| 4 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 upgrade branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new enemy and branch still replays exactly from its seed |
-| 5 · Polish and launch | Audio, performance pass, README with key art; linked from personal site | — |
+| 0 · Repo and pipeline (done) | Vite + TS + Three.js scaffold, CI, Pages deploy | An empty scene deploys from `main` |
+| 1 · Simulation port, TypeScript (done) | Rules in `src/sim`, seeded RNG, 30 Hz tick; Vitest coverage | A headless run replays exactly from its seed |
+| 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
+| 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
+| 4 · Sim port to GDScript | PRNG, map generation with routes, game, commands, tick, combat, waves, economy, headless run | **The GDScript sim reproduces every TypeScript fixture exactly** (maps, routes, waves, replays) |
+| 5 · Play in Godot | Terrain from GLB tiles, MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
+| 6 · Art and ambience | The owner's Blender foes, towers, terrain and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
+| 7 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new foe and branch replays exactly from its seed |
+| 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS and Android export | Public web build on two real phones; native builds on one device each |
 
 ## Phase details
 
-The table above is the summary. Each phase below lists its scope, out-of-scope items, work breakdown, tests and gate checklist. Work one phase at a time: finish and report the gate before starting the next. Tickets are on the Project Slag board for Phases 0–2 only; Phases 3–5 stay as roadmap here until they are next up. Ticket titles use `[Phase N] …` and carry a `phase-N` label (format in `CLAUDE.md`).
+### Phases 0 to 2 · TypeScript and Three.js: complete
 
-### Phase 0 · Repo and pipeline (tickets #1–#6, #18, #29–#30, #42, #48–#49): complete
+Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, deterministic simulation with maps, branching routes, waves, combat, economy and a replay test (Phase 1); the 3D greybox with camera, picking, models, effects, HUD, landscape layout, GLB pipeline, Kenney and Blender models (Phase 2 and early Phase 3 work). Their tickets are closed on the board. The code is the reference for the port.
 
-**Goal:** a deployable skeleton, so every later change ships through the same path.
+### Phase 3 · Godot foundation
 
-**In scope**
-- pnpm + Vite + TypeScript (strict, no `any`) + Three.js (version pinned), with the `src/{sim,render,ui,content}` layout.
-- ESLint and `tsc --noEmit` behind `pnpm lint`, including the rule that `src/sim` cannot import `render`, `ui`, `three` or the DOM (static or dynamic) and a DOM-free `tsconfig.sim.json`.
-- Code style: the Google TypeScript Style Guide, enforced by Prettier and ESLint (`pnpm format`, `pnpm lint`).
-- Vitest (`pnpm test`) and one Playwright smoke test (`pnpm test:e2e`).
-- `ci` workflow: frozen-lockfile install, `pnpm lint && pnpm test && pnpm build`, a bundle-size check and the Playwright smoke test, with pnpm caching and a pinned Node version.
-- `deploy` workflow: GitHub Pages from `main`, only after `ci` passes, with the correct Vite `base`.
-- `release` workflow: a `vMAJOR.MINOR.PATCH` tag re-runs the checks, builds, and publishes a GitHub Release with generated notes and `dist/` attached.
-- Dependabot config, and the `main` branch protection from the CI/CD pipeline section.
-- A README for setup, run, test and contributing.
-- Repo tidy: `docs/PLAN.md`, `prototype/scrapline.html` in place, codename recorded.
-
-**Out of scope:** any gameplay, art or HUD.
-
-**Gate checklist**
-- [x] An empty Three.js scene is live on GitHub Pages from `main` (verified in headless Chromium: WebGL2 canvas, no console errors).
-- [x] CI is green; a deliberate bad import in `src/sim` fails lint.
-- [x] `main` is protected: a PR with a failing check or a non-conforming title cannot merge (a probe PR with a bad title was `BLOCKED`; the probe was closed, not merged).
-- [x] A test tag produces a GitHub Release (then delete the test release and tag). Also checked: a malformed tag and an off-`main` tag both fail the `guard` job.
-- [x] Every path that `CLAUDE.md` and the docs reference as existing exists. Paths for later phases are marked in `CLAUDE.md` as created in that phase. `docs/PLAN.md` and `prototype/scrapline.html` landed with ticket #6.
-
-### Phase 1 · Simulation port (tickets #7–#13)
-
-**Goal:** the prototype's rules running headless and deterministic in `src/sim`, with no rendering.
+**Goal:** an empty Godot project that builds, tests and deploys through the same checked pipeline, and proves the web export runs on the owner's iPhone.
 
 **Work breakdown**
-1. `rng.ts`: mulberry32; the only source of randomness.
-2. Grid and mapgen: 9×13 grid, seeded path, never self-adjacent.
-3. `src/content`: every balance number from the prototype, using the lore names. Logic files hold no magic numbers.
-4. Tick loop: fixed 30 Hz; commands `build`, `upgrade`, `sell`, `launchWave` are the only way in; speed multiplies ticks per frame.
-5. Enemies and towers: movement, targeting, damage and armor, level 1–3 upgrades.
-6. Economy and waves: costs, sell value, rewards, wave scaling, swarm every 5th wave, boss every 10th.
-7. Snapshots and events for render and UI to read later (read-only).
+1. Add `godot/` with a pinned Godot 4 version, the Compatibility renderer and a single-threaded Web export preset; a custom HTML shell (landscape prompt, meta tags, loading screen).
+2. CI: install the pinned Godot and templates (cached), `gdformat --check`, `gdlint`, GUT, the sim-purity lint, export, size budget, Playwright smoke on the export.
+3. Deploy the export to GitHub Pages from `main`; keep the TypeScript build reachable until Phase 5.
+4. Export fixtures from the TypeScript sim into `fixtures/` (maps and routes for many seeds, wave lists, damage cases, replay fingerprints) with a script and a test that regenerates and compares them.
+5. Measure on the iPhone: download size, start time, a stub scene with 80 animated instances; set the budgets.
 
-**Tests (fixed seed, no timing)**
-- Mapgen: path valid, never self-adjacent, identical from the same seed.
-- Damage and armor cases, economy numbers, wave composition per wave.
-- Full-run replay: seed plus a command list gives identical state at the end.
-
-**Out of scope:** new enemies, upgrade branches, targeting modes beyond the prototype, anything visual.
+**Out of scope:** any gameplay.
 
 **Gate checklist**
-- [x] The headless replay test passes.
-- [x] Numbers in `src/content` match the prototype; any difference is a bug.
-- [x] `src/sim` has no imports from `render`, `ui`, `three` or the DOM.
+- [ ] An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari.
+- [ ] CI runs lint, GUT and the export, and a red check blocks the deploy.
+- [ ] Fixtures exist and the TypeScript tests regenerate them identically.
 
-### Phase 2 · 3D greybox (epic #14, tickets #19–#27)
+### Phase 4 · Sim port to GDScript
 
-**Goal:** the prototype's game, playable in 3D on a real phone, with primitive models and a plain HUD.
+**Goal:** the whole simulation in GDScript, byte-for-byte equal to the TypeScript oracle.
 
-**Work breakdown**
-1. Renderer and camera: perspective, about 55° pitch, about 35° FOV, landscape framing; pinch zoom and pan clamped so cells stay at least 40 px wide.
-2. Map and path rendering from the sim grid; a ground plane and path markers.
-3. Input: tap raycasts to a grid cell and sends `build`, `upgrade`, `sell` or `launchWave` commands. No direct state changes.
-4. Primitive models in `src/render/models/` (one file per unit), based on rough silhouette sheets. One `InstancedMesh` per foe type; towers as regular meshes with level lights.
-5. Render loop: interpolate between 30 Hz ticks; 1×/2×/3× speed; no allocation in the frame loop.
-6. DOM HUD: money, lives, wave, build and upgrade sheets, speed and pause. Tokens from `src/ui/tokens.css`, tap targets at least 44 px.
-7. Performance pass: measure on a mid-range Android phone with 80 foes; track draw calls (under 120), triangles (about 150k), DPR cap 2.
-8. Basic effects, respecting `prefers-reduced-motion`. Audio only after the first tap, and only if cheap.
-
-**Out of scope:** final art, story cards, new content.
+**Work breakdown** (test-first, one context at a time)
+1. PRNG (mulberry32 and `deriveRng`) on masked 32-bit integers; golden values from the fixtures.
+2. Map generation with the main road, the detour and tile data; routes and positions.
+3. Game state, commands and the 30 Hz tick; the command queue and rejection events.
+4. Combat: movement, targeting across routes, damage and armor, the four towers' behaviour, shells.
+5. Waves and economy: composition, spawning, route choice, bonuses.
+6. Replay: the scripted bot and the fingerprint, compared with the TypeScript fingerprints for many seeds; a headless CLI (`godot --headless`) that prints the map and wave log.
 
 **Gate checklist**
-- [ ] Plays as well as the 2D prototype at 60 fps on your phone with 80 foes.
-- [ ] Every action is a single tap in landscape.
-- [x] Draw-call and triangle budgets met (e2e: 15 draw calls, about 39k triangles with 80 foes and every tower at level 3).
+- [ ] Every fixture matches exactly (maps, routes, waves, replay fingerprints).
+- [ ] The sim imports nothing from the scene tree (lint).
+- [ ] A 12-minute headless run finishes within a time budget on CI.
 
-### Phase 3 · Art and UI
+### Phase 5 · Play in Godot
 
-**Goal:** replace the greybox with the final look, without changing gameplay.
+**Goal:** the game playable on the phone in Godot, at least as good as the web build.
 
 **Work breakdown**
-1. Shortlist CC0 packs, check licences, write `docs/art/GAPS.md` (see the asset gap plan).
-2. Claude Design: system and tokens first, then mobile screens (title, HUD, build sheet, upgrade sheet, pause, game over, story card); final reference sheets after the shortlist.
-3. Models: recolour to the shared palette texture, kitbash gap units, export compressed GLB, record every asset in `assets/CREDITS.md`.
-4. Swap models in unit by unit behind the model interface; keep primitive fallbacks.
-5. Lighting and effects: amber torch pools along the road, edge mist, glowing eyes and crystals, muzzle flashes, sparks, boss-hit shake (off under reduced motion).
-6. UI rebuild from the Claude Design screens.
-7. Budget re-check: under 1 MB gzipped JS, under 6 MB assets on first load.
+1. Terrain and road from the GLB tiles (straight, corner, end, T), scenery ring, spawn and Heartstone, dusk lighting and fog.
+2. `MultiMesh` foes with interpolation, towers with levels, selection highlight and range ring.
+3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell.
+4. Control-node HUD: gold, lives, wave, build sheet, tower sheet, speed, pause, next-wave popup, auto-start, game over, landscape prompt.
+5. Effects (beams, arcs, rings, sparks, shells), reduced motion, audio after the first tap.
+6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget.
 
-**Out of scope:** new enemies, upgrade branches, story content.
+**Gate checklist**
+- [ ] Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes.
+- [ ] Every action is reachable in landscape; tap targets at least 44 px.
+- [ ] The replay gate still passes. The Three.js code moves to `legacy/`.
+
+### Phase 6 · Art and ambience
+
+**Goal:** the final look, without changing gameplay.
+
+**Work breakdown**
+1. The owner's Blender models: towers (done), foes, terrain and ambient props; record each in `assets/CREDITS.md`.
+2. Claude Design: system and tokens first, then mobile screens; build the Godot Theme from them.
+3. Foe animation (skeletons or part animation); torches, mist, glow, crystals, particles.
+4. Budget re-check.
 
 **Gate checklist**
 - [ ] All foes and towers (3 levels) use final models, each distinct at zoomed-out view.
-- [ ] Every gap in `docs/art/GAPS.md` has a kitbash or primitive fallback.
-- [ ] Performance budget still met; the greybox replay test still passes.
+- [ ] Every gap in `docs/art/GAPS.md` has a fallback.
+- [ ] Performance budget still met; the replay gate still passes.
 
-### Phase 4 · Lore and chapters
+### Phase 7 · Lore and chapters
 
 **Goal:** the story, chapters and new content on top of the finished port, all behind content flags.
 
 **Work breakdown**
-1. Chapter structure: chapters 1–4, then endless; story cards between chapters; herald proclamations and Chronicle pages as lore strings in `src/content`.
+1. Chapter structure: chapters 1–4, then endless; story cards; herald proclamations and Chronicle pages as lore strings in `godot/content`.
 2. New foes: Mender, Shieldbearer, Saboteur, one per chapter, none before wave 11.
 3. Hybrids in chapter 3: a base body plus a second unit's role.
-4. Level 3 upgrade branches (2 per tower) and the tower adjustments for the new foes (dimmed state, "support" targeting mode).
+4. Level 3 upgrade branches (2 per tower) and the tower adjustments for the new foes (dimmed state, "support" targeting).
 5. Targeting modes (first, strongest, closest, support) per tower.
 6. Seed sharing and best wave per seed, plus a run summary.
 7. Balance: headless runs for each new foe; each needs at least two tower answers at base level and a third through a branch.
 
-**Out of scope:** audio polish, launch work.
-
 **Gate checklist**
 - [ ] A new player finishes chapter 1 without help.
-- [ ] A headless run with every new enemy and branch replays exactly from its seed.
-- [ ] With content flags off, the sim is still prototype-identical.
+- [ ] A headless run with every new foe and branch replays exactly from its seed.
+- [ ] With content flags off, the sim is still identical to the Phase 4 fixtures.
 
-### Phase 5 · Polish and launch
+### Phase 8 · Polish, launch, native
 
-**Goal:** ship it.
+**Goal:** ship it, then take it native.
 
 **Work breakdown**
-1. Audio: Howler.js or Web Audio, started on the first tap; music decision from the open questions.
+1. Audio and music (decision from the open questions).
 2. Performance and loading pass on real devices; 30 fps fallback with reduced effects.
 3. README with key art and a short play guide; link from the personal site.
 4. Final licence check: `assets/CREDITS.md` complete, MIT for code, CC0 terms for art.
-5. Embed versus link out (open question). Orientation is decided: landscape only.
+5. iOS and Android export: signing, store accounts, input and safe areas, store listing.
 
 **Gate checklist**
-- [ ] Public build runs on GitHub Pages on at least two real phones.
+- [ ] Public web build runs on GitHub Pages on at least two real phones.
 - [ ] README and credits complete.
+- [ ] Native builds run on one iPhone and one Android phone.
 
 ## Risks and open questions
 
 | Risk | Fallback |
 | --- | --- |
-| Skinned animation for many foes is too slow on phones | Rigid-part animation on instanced meshes; skinning only for bosses |
-| CC0 packs don't share a consistent style | Palette-texture recolour; drop models that still clash |
-| New foes, hybrids and upgrade parts have no pack match | Kitbash from pack parts or build from primitives; tracked in `docs/art/GAPS.md`. New foes ship only once their model exists. |
-| The angled camera hides foes behind towers | Short towers, enemy outlines, slight camera rotation |
-| Tap targets get small at full zoom-out | Minimum zoom keeps cells ≥ 40 px |
-| Playwright can't render WebGL in headless CI | Use software GL (SwiftShader) in Chromium; if still flaky, the smoke test checks the page loads and the canvas exists, and render stats move to a Vitest check on the scene graph |
+| The Godot web build is too heavy or slow to start on a phone | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
+| iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; keep the TypeScript web build live until Phase 5 passes |
+| The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the oracle is never edited during the port |
+| Floating-point or integer differences (rounding, 32-bit wrap) | Use only `+ - * /`, `sqrt`, `floor`; mask integers to 32 bits; avoid `round`, trig and engine random |
+| Skinned animation for many foes is too slow on phones | Part animation on `MultiMesh` instances; skeletons only for bosses |
+| CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
+| The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
+| Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
+| Godot web export cannot be tested headless in CI | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
 | A broken `main` reaches GitHub Pages | `deploy` depends on `ci` passing; protected `main`; roll back by redeploying the last good tag |
-| Scope creep from lore and features | Phase gates: nothing new until the 3D port matches the prototype |
-| New enemies and branches break prototype balance | Add them behind content data flags in Phase 4; the Phase 1–2 sim stays prototype-identical and keeps its replay tests |
+| Scope creep from lore and features | Phase gates: nothing new until the Godot build matches the web build |
+| New foes and branches break the balance | Content flags; the Phase 4 fixtures keep the base game identical |
 
 - [x] Repo name and whether it is public from day one: public from day one, repo `psychic-bassoon`, codename Project Slag.
-- [x] Embed the game in the personal site, or link out: link out. The game has its own project Pages site, and the personal site (another repo) links to it.
-- [x] Landscape only (owner decision, Phase 3)
+- [x] Embed the game in the personal site, or link out: link out.
+- [x] Landscape only (owner decision).
+- [x] Engine: Godot 4 (owner decision, 2026-10-10); web first, native later.
 - [ ] Music: commission, CC0 tracks, or skip for v1
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
-- [ ] Testing on a phone before merge: LAN dev server only, or also upload `dist/` as a PR artifact (Pages can't preview PRs)
+- [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
+- [ ] Download budget for the Godot web build (set after the Phase 3 measurement)
+- [ ] Rename the game: Scrapline no longer fits the medieval setting
