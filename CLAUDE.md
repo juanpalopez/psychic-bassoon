@@ -65,7 +65,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 ### Domain-driven design
 
 - `godot/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public entry class. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
-- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept. Ids stay as listed under Lore and naming; if the lore rewrite renames a concept, change the ubiquitous term in one PR across sim, content and tests.
+- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept. The one exception: the lore rewrite may rename what the player sees. Code terms and ids stay frozen as listed under Lore and naming, and only display strings in `godot/content` and the Naming table change.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
@@ -174,7 +174,7 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
 
 ## Naming
 
-Use the lore names in code-facing content and the UI (provisional: the fantasy medieval lore rewrite may rename any of them; change them in one place):
+Use the lore names in code-facing content and the UI (provisional: the fantasy medieval lore rewrite may rename the display names; ids and code terms stay frozen):
 
 | Prototype | Remake |
 | --- | --- |

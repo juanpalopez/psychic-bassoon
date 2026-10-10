@@ -185,7 +185,7 @@ Which units a CC0 pack can plausibly cover, and what has to be built. Coverage i
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, attack, hit and death clips (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: record the Meshy plan in `assets/CREDITS.md`. |
+| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: record the Meshy plan in `assets/CREDITS.md`. |
 | Mender, Shieldbearer, Saboteur | Probably no exact match | Kitbash: a base body plus an added part (censer and floating tray; door-sized shield; smoking fuse). Fall back to primitives if kitbashing clashes. |
 | Hybrids (chapter 3) | None | Compose a base body with a second unit's part; no new full models. |
 | Towers (4) | Kenney Tower Defense Kit | Stone tower pieces, ballista, catapult and cannon weapons, and crystal pieces cover all four; recolour crystals to violet and yellow. |
@@ -221,7 +221,7 @@ scrapline/
 - All balance numbers live in `godot/content`.
 - Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
 - Git LFS for binary sources; only compressed GLBs ship.
-- MIT for code; art keeps each pack's CC0 terms.
+- MIT for code; each art source keeps its terms (CC0 packs, the owner's own models, Meshy plan terms).
 
 ## CI/CD pipeline
 
@@ -312,7 +312,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 4. Combat: movement, targeting across routes, damage and armor, the four towers' behaviour, shells.
 5. Waves and economy: composition, spawning, route choice, bonuses.
 6. Replay: the scripted bot and the fingerprint, compared with the TypeScript fingerprints for many seeds; a headless CLI (`godot --headless`) that prints the map and wave log.
-7. After parity, map version 2: more routes (forks, loops) behind a content flag. Validity is per route: each route is a simple path from spawn to Heartstone, not adjacent to itself except at consecutive cells; routes may share cells only at junctions. The GDScript sim exports the new fixtures.
+7. After parity, map version 2: more routes (forks, loops) behind a content flag. Validity is per route: each route is a simple path from spawn to Heartstone, not adjacent to itself except at consecutive cells; a junction is any cell on two or more routes, routes may share runs of cells (a trunk) between junctions, and outside shared runs two routes are not adjacent. The GDScript sim exports the new fixtures.
 
 **Gate checklist**
 - [ ] Every fixture matches exactly (maps, routes, waves, replay fingerprints).
@@ -394,7 +394,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; keep the TypeScript web build live until Phase 5 passes |
 | The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the TypeScript sim is frozen once the fixtures exist; it changes only for a bug, with the fixtures regenerated and the Godot sim updated in the same PR |
 | Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
-| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through a small `JavaScriptBridge` call in the web shell; accept the accessibility loss and record it |
+| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
