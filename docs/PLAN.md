@@ -172,7 +172,7 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 4. Export GLB (meshopt compression is optional in Godot; the importer handles plain GLB).
 5. Record source, licence and edits in `assets/CREDITS.md`.
 
-**Reference image.** `docs/art/reference-wide-road.jpg` (see `docs/art/REFERENCES.md`) is the owner's target for the look: a wide, curved road with worn edges, towers on round stone bases, dusk light, crystals and torches. The road is drawn as a ribbon over the unchanged grid (Phase 5); a wider road in the sim itself stays an option for the post-parity map version 2.
+**Reference image.** `docs/art/reference-wide-road.jpg` (see `docs/art/REFERENCES.md`) is the owner's target for the look: a wide, curved road with worn edges, towers on round stone bases, dusk light, crystals and torches. The road is drawn as a ribbon over the unchanged grid (Phase 5); a wider road in the sim itself (a finer grid with 2-cell roads and 2×2 plots, which changes every balance number) stays an option for the post-parity map version 2.
 
 **Models.** The Three.js build used procedural primitives and then Kenney CC0 GLBs while the owner generated original models with Claude and Blender (`assets-src/blender/`). In Godot the GLBs are imported as scenes; the owner's Blender models are the preferred source (towers done; foes, terrain and ambient props in progress), with Kenney pieces as placeholders.
 
@@ -328,9 +328,9 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Goal:** the game playable on the phone in Godot, at least as good as the web build.
 
 **Work breakdown**
-1. Procedural terrain built from the map, with the road drawn as a wide, smooth ribbon: a curve through each route's cell centres with rounded corners, 1.2 to 1.5 cells wide, a dirt shader with worn, grassy edges, and a plot cell kept between the two roads of a detour. The sim polyline stays the truth for movement, range and hits; foes walk the smoothed centreline with a small sideways offset. Tiles: GLB tiles (straight, corner, end, T, junction), Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
+1. Procedural terrain built from the map, with the road drawn as a smooth ribbon: a curve through each route's cell centres (corner radius 0.5 cell on the centreline; the inner edge radius is `max(0, r - w/2)`, so a sharp inner corner is fine), up to 1.25 cells wide (`w`), with a dirt shader and worn, grassy edges. Two roads two cells apart (a detour) leave 0.75 of a plot cell visible between them, and a ribbon covers at most 0.125 of a neighbouring plot cell, so stone bases are at most 0.75 cell wide. Junctions are where ribbons meet and blend. The sim polyline stays the truth for movement, range and hits. Foes walk the smoothed centreline: their progress maps onto the curve by arc-length fraction per segment, and a render-only sideways offset, stable per foe (derived from the foe id, never random per frame) and bounded by `(w - foe width) / 2`, spreads a crowd. GLB tiles are used for ground, edge dressing and scenery, not for road pieces. Also: Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
 2. `MultiMesh` foes with interpolation and baked vertex animation (spike it on the phone first), towers with levels and idle/fire animation, selection highlight and range ring.
-3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell.
+3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell (the cell decides, not the visible dirt; the plot highlight shows the whole cell over the ribbon edge).
 4. Control-node HUD: gold, lives, wave, build sheet, tower sheet, speed, pause, next-wave popup, auto-start, game over, landscape prompt.
 5. Effects (beams, arcs, rings, sparks, shells), reduced motion, audio after the first tap.
 6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget.
@@ -338,6 +338,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Gate checklist**
 - [ ] Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes.
 - [ ] Every action is reachable in landscape; tap targets at least 44 px.
+- [ ] The road ribbon matches the sim routes by eye on the phone: foes stay on the dirt, hits land on visible foes at corners, and plot bases are not covered by the road.
 - [ ] The replay gate still passes. The Three.js code moves to `legacy/`.
 
 ### Phase 6 · Art and ambience
@@ -402,7 +403,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
-| The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The ribbon stays inside the cell band (at most 1.5 cells wide, corner radius under half a cell); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
+| The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The centreline stays inside its cell band (corner radius 0.5 cell, ribbon at most 1.25 cells wide); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
 | Godot web export cannot be tested headless in CI | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
