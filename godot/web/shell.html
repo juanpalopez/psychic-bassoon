@@ -1,158 +1,71 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
-    />
-    <meta name="theme-color" content="#11151b" />
-    <!-- Installed from the Home Screen the game runs full screen, no browser bars -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta
-      name="apple-mobile-web-app-status-bar-style"
-      content="black-translucent"
-    />
-    <meta name="apple-mobile-web-app-title" content="Scrapline" />
-    <title>$GODOT_PROJECT_NAME</title>
-    <style>
-      html,
-      body {
-        margin: 0;
-        height: 100%;
-        overflow: hidden;
-        background: #11151b;
-        color: #e3e8ee;
-        font-family: system-ui, sans-serif;
-        overscroll-behavior: none;
-        touch-action: none;
-      }
-      @supports (height: 100dvh) {
-        html,
-        body {
-          height: 100dvh;
-        }
-      }
-      #canvas {
-        display: block;
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-      }
-      #status {
-        position: fixed;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 16px;
-        background: #11151b;
-        z-index: 5;
-        text-align: center;
-        padding: 24px;
-      }
-      #status[hidden] {
-        display: none;
-      }
-      #bar {
-        width: min(60vw, 320px);
-        height: 8px;
-        background: #232b36;
-        border-radius: 4px;
-        overflow: hidden;
-      }
-      #bar > div {
-        height: 100%;
-        width: 0;
-        background: #f2b134;
-        transition: width 0.15s;
-      }
-      #message {
-        font-size: 17px;
-      }
-      /* The game is landscape only: a phone held upright is asked to turn. */
-      #rotate {
-        display: none;
-        position: fixed;
-        inset: 0;
-        z-index: 10;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 16px;
-        background: #11151b;
-        font-size: 18px;
-        text-align: center;
-        padding: 24px;
-      }
-      #rotate b {
-        font-size: 40px;
-        color: #f2b134;
-      }
-      @media (orientation: portrait) and (max-width: 700px) {
-        #rotate {
-          display: flex;
-        }
-      }
-    </style>
-    $GODOT_HEAD_INCLUDE
-  </head>
-  <body>
-    <canvas id="canvas"
-      >Your browser does not support the canvas element.</canvas
-    >
-    <div id="rotate" role="status">
-      <b aria-hidden="true">&#10227;</b
-      ><span>Turn your phone sideways to play</span>
-    </div>
-    <div id="status">
-      <div id="message">Loading Scrapline&hellip;</div>
-      <div id="bar"><div></div></div>
-    </div>
-    <noscript>Scrapline needs JavaScript.</noscript>
-    <script src="$GODOT_URL"></script>
-    <script>
-      const GODOT_CONFIG = $GODOT_CONFIG;
-      const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
-      const engine = new Engine(GODOT_CONFIG);
-      const status = document.getElementById('status');
-      const message = document.getElementById('message');
-      const bar = document.querySelector('#bar > div');
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+		<meta name="theme-color" content="#11151b">
+		<!-- Installed from the Home Screen the game runs full screen, no browser bars -->
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+		<meta name="apple-mobile-web-app-title" content="Scrapline">
+		<title>$GODOT_PROJECT_NAME</title>
+		<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: #11151b; color: #e3e8ee; font-family: system-ui, sans-serif; overscroll-behavior: none; touch-action: none; }
+@supports (height: 100dvh) { html, body { height: 100dvh; } }
+#canvas { display: block; position: fixed; inset: 0; width: 100%; height: 100%; }
+#status { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; background: #11151b; z-index: 5; text-align: center; padding: 24px; }
+#status[hidden] { display: none; }
+#bar { width: min(60vw, 320px); height: 8px; background: #232b36; border-radius: 4px; overflow: hidden; }
+#bar > div { height: 100%; width: 0; background: #f2b134; transition: width 0.15s; }
+#message { font-size: 17px; }
+/* The game is landscape only: a phone held upright is asked to turn. */
+#rotate { display: none; position: fixed; inset: 0; z-index: 10; align-items: center; justify-content: center; flex-direction: column; gap: 16px; background: #11151b; font-size: 18px; text-align: center; padding: 24px; }
+#rotate b { font-size: 40px; color: #f2b134; }
+@media (orientation: portrait) and (max-width: 700px) { #rotate { display: flex; } }
+		</style>
+		$GODOT_HEAD_INCLUDE
+	</head>
+	<body>
+		<canvas id="canvas">Your browser does not support the canvas element.</canvas>
+		<div id="rotate" role="status"><b aria-hidden="true">&#10227;</b><span>Turn your phone sideways to play</span></div>
+		<div id="status">
+			<div id="message">Loading Scrapline&hellip;</div>
+			<div id="bar"><div></div></div>
+		</div>
+		<noscript>Scrapline needs JavaScript.</noscript>
+		<script src="$GODOT_URL"></script>
+		<script>
+const GODOT_CONFIG = $GODOT_CONFIG;
+const GODOT_THREADS_ENABLED = $GODOT_THREADS_ENABLED;
+const engine = new Engine(GODOT_CONFIG);
+const status = document.getElementById('status');
+const message = document.getElementById('message');
+const bar = document.querySelector('#bar > div');
 
-      function fail(text) {
-        message.textContent = text;
-        document.getElementById('bar').hidden = true;
-      }
+function fail(text) {
+	message.textContent = text;
+	document.getElementById('bar').hidden = true;
+}
 
-      const missing = Engine.getMissingFeatures({
-        threads: GODOT_THREADS_ENABLED,
-      });
-      if (missing.length > 0) {
-        fail('This browser cannot run the game: ' + missing.join(', '));
-      } else {
-        engine
-          .startGame({
-            onProgress: function (current, total) {
-              if (total > 0) {
-                bar.style.width = Math.round((current / total) * 100) + '%';
-              } else {
-                message.textContent =
-                  'Loading Scrapline… ' + Math.round(current / 1048576) + ' MB';
-              }
-            },
-          })
-          .then(
-            function () {
-              status.hidden = true;
-            },
-            function (err) {
-              fail('The game failed to start: ' + err.message);
-            }
-          );
-      }
-    </script>
-  </body>
+const missing = Engine.getMissingFeatures({threads: GODOT_THREADS_ENABLED});
+if (missing.length > 0) {
+	fail('This browser cannot run the game: ' + missing.join(', '));
+} else {
+	engine.startGame({
+		onProgress: function (current, total) {
+			if (total > 0) {
+				bar.style.width = Math.round((current / total) * 100) + '%';
+			} else {
+				message.textContent = 'Loading Scrapline… ' + Math.round(current / 1048576) + ' MB';
+			}
+		},
+	}).then(function () {
+		status.hidden = true;
+	}, function (err) {
+		fail('The game failed to start: ' + err.message);
+	});
+}
+		</script>
+	</body>
 </html>
