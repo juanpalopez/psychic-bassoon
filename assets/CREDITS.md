@@ -1,6 +1,10 @@
 # Asset credits
 
-Every third-party file in `public/assets/` is listed here with its source and licence. CI (`pnpm check:assets`) fails when a shipped file is missing from this list. Only CC0 assets are allowed unless the owner agrees otherwise. Each licence was confirmed from the licence file inside the downloaded pack.
+Every third-party file in `public/assets/` is listed here with its source and licence. CI (`pnpm check:assets`) fails when a shipped file is missing from this list. Allowed sources: CC0 packs (the licence was confirmed from the licence file inside the downloaded pack), the owner's own models, and Meshy-generated models.
+
+### Meshy-generated models
+
+The owner generates on Meshy's paid premium plan. Under Meshy's terms a paid customer owns the assets, provided the inputs do not violate anyone's copyright. A model made on the free plan is CC BY 4.0 instead and needs the line "Model created with Meshy – CC BY 4.0 License" here and in the README. Each Meshy model gets a table row with the plan, the date and the prompt or reference used, with `Meshy (paid plan, YYYY-MM-DD)` as its source.
 
 ## Models
 
