@@ -151,16 +151,24 @@ jobs:
       - name: Sim purity
         run: pnpm check:sim-purity
 
+      - name: Locate Godot
+        run: |
+          binary=("$HOME"/godot-bin/Godot_v*_linux.x86_64)
+          chmod +x "${binary[0]}"
+          echo "GODOT=${binary[0]}" >> "$GITHUB_ENV"
+
       - name: Import the project
-        run: ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot --import
+        run: |
+          "$GODOT" --headless --path godot --import
 
       - name: GUT tests
-        run: ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
+        run: |
+          "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
 
       - name: Web export
         run: |
           mkdir -p build/web
-          ~/godot-bin/Godot_v*_linux.x86_64 --headless --path godot --export-release "Web" ../build/web/index.html
+          "$GODOT" --headless --path godot --export-release "Web" ../build/web/index.html
 
       - name: Download budget
         run: pnpm check:godot-size
