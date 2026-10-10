@@ -14,6 +14,7 @@ parsing them gives the same double; there are no `NaN` or `-0` values.
 | --- | --- |
 | `prng.json` | per seed: 16 `nextFloat`, 16 `nextInt(6)`, 8 `nextRange(0.8, 3.2)`, and the `deriveRng` state for streams 0, 1, 2 and 100 |
 | `maps.json` | 120 seeds: main `path`, all `routes` (cells as `[col, row]`), and `tiles` (one string per row, `#` road, `.` plot) |
+| `routes.json` | the first 12 map seeds: per route the point coordinates, cumulative distances and total as float bits, and 24 `positionAt` samples as `[along, x, y]` bits (including one before the start and one past the end) |
 | `waves.json` | 8 seeds, waves 1 to 40: `[foe, gap]` per spawn, drawn in wave order from the waves stream (`deriveRng(seed, 1)`) |
 | `scaling.json` | per foe, waves 1 to 60: `[hp, speed, reward, armor]` |
 | `damage.json` | hp lost per tower level, foe and wave; the armor floor; the kill rule |
