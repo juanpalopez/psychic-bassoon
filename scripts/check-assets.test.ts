@@ -109,4 +109,24 @@ describe('check-assets script', () => {
     expect(result.status).toBe(1);
     expect(result.output).toContain('does not say CC0');
   });
+
+  it('accepts a Meshy output owned by the owner on the paid plan', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `models/kit/a.glb` | Meshy (paid plan, 2026-10-10) | Owned by the owner (Meshy paid plan) | prompt: a goblin |\n'
+    );
+    expect(run().status).toBe(0);
+  });
+
+  it('rejects a Meshy free-plan CC BY output', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `models/kit/a.glb` | Meshy (free plan) | CC BY 4.0 | prompt: a goblin |\n'
+    );
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
+  });
 });

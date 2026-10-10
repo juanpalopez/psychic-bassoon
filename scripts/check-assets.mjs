@@ -52,9 +52,14 @@ for (const path of listed) {
   }
 }
 
+// CC0 (packs and the owner's dedications) or a Meshy output owned by the
+// owner under the paid plan. CC BY outputs (Meshy free plan) are not used.
+const OWNED_MESHY = /Owned by the owner \(Meshy paid plan\)/i;
 for (const [, path, rest] of rows) {
-  if (!/CC0/i.test(rest ?? '')) {
-    errors.push(`${path}: the credits row does not say CC0`);
+  if (!/CC0/i.test(rest ?? '') && !OWNED_MESHY.test(rest ?? '')) {
+    errors.push(
+      `${path}: the credits row does not say CC0 or 'Owned by the owner (Meshy paid plan)'`
+    );
   }
 }
 

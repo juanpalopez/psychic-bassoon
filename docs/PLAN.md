@@ -140,7 +140,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Language | GDScript, typed everywhere | The script language that exports to web in the pinned 4.x |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
 | Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, a terrain scene built from the road tiles | Few draw calls on a phone |
-| Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the web build |
+| Models | glTF/GLB (the owner's Blender models, Meshy-generated foes, CC0 packs); the Godot importer | Assets carry over from the web build |
 | HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens |
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed, and match the TypeScript fixtures |
 | Tests | GUT (Godot Unit Test) run headless; fixtures exported from the TypeScript sim; one Playwright smoke test on the exported build | Balance, maps and replays stay verifiable |
@@ -165,7 +165,7 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 
 **Asset pipeline**
 
-0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, shared palette texture, rig, clips). Record the Meshy plan and its licence terms.
+0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, shared palette texture, rig, clips). Record the Meshy plan, date and prompt or reference (see Open questions).
 1. Shortlist CC0 low-poly packs: Kenney (Tower Defense Kit, Castle Kit, Fantasy Town Kit, Mini Dungeon) and Quaternius (fantasy, monsters and medieval packs). Check each licence file; anything not clearly CC0 is out.
 2. Map every unit to a pack model and write the gaps in `docs/art/GAPS.md` (see the gap plan below).
 3. In Blender, build or remap faces to one shared palette texture; kitbash gap units from pack parts.
@@ -185,7 +185,7 @@ Which units a CC0 pack can plausibly cover, and what has to be built. Coverage i
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: record the Meshy plan in `assets/CREDITS.md`. |
+| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: owned under the paid plan; record the plan, date and prompt in `assets/CREDITS.md`. |
 | Mender, Shieldbearer, Saboteur | Probably no exact match | Kitbash: a base body plus an added part (censer and floating tray; door-sized shield; smoking fuse). Fall back to primitives if kitbashing clashes. |
 | Hybrids (chapter 3) | None | Compose a base body with a second unit's part; no new full models. |
 | Towers (4) | Kenney Tower Defense Kit | Stone tower pieces, ballista, catapult and cannon weapons, and crystal pieces cover all four; recolour crystals to violet and yellow. |
@@ -343,7 +343,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Goal:** the final look, without changing gameplay.
 
 **Work breakdown**
-1. Final models: the owner's Blender towers (done); foes from Meshy cleaned up in Blender; Blender terrain tiles and ambient props. Record each in `assets/CREDITS.md`, with the Meshy plan for generated models.
+1. Final models: the owner's Blender towers (done); foes from Meshy cleaned up in Blender; Blender terrain tiles and ambient props. Record each in `assets/CREDITS.md`, with the Meshy plan, date and prompt for generated models.
 2. Claude Design: system and tokens first, then mobile screens; build the Godot Theme from them.
 3. Foe and tower animation (rigged clips baked for `MultiMesh`, `AnimationPlayer` for towers and bosses); torches, mist, glow, crystals, particles.
 4. Budget re-check.
@@ -416,5 +416,5 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 - [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
 - [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows.
 - [ ] Rename the game: Scrapline no longer fits the medieval setting, and the lore is being rewritten as fantasy medieval. Decide the name and which lore names stay before Phase 6 art and Phase 7 text.
-- [x] Meshy: the owner is on the paid premium plan (3,000 credits a month). Under Meshy's terms a paid customer owns the assets, provided the inputs do not violate anyone's copyright; free-plan outputs are CC BY 4.0 and need the credit "Model created with Meshy – CC BY 4.0 License". Rules: generate only while on the paid plan; never prompt with or upload copyrighted characters, brands or third-party images; record plan, date and prompt or reference per model in `assets/CREDITS.md`. Terms quoted from Meshy's FAQ on 2026-10-10; re-check them if the plan changes.
+- [x] Meshy: the owner is on the paid premium plan (3,000 credits a month). Per Meshy's FAQ (checked 2026-10-10, not the full Terms of Service) a paid customer owns the assets, provided the inputs do not violate anyone's copyright; free-plan outputs are CC BY 4.0, so they are not used. Rules: generate only on the paid plan (the plan at generation time is what counts; the FAQ does not say what happens if the subscription lapses, so keep the source files); never prompt with or upload copyrighted characters, third-party images, brands or real people's likeness (our policy); record the source, licence, date and prompt or reference per model in `assets/CREDITS.md`. Re-check the terms if the plan changes.
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Spike in Phase 5; fallback is part animation and fewer animated instances.
