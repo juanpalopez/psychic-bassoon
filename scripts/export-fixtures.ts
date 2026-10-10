@@ -257,14 +257,15 @@ function replays(): Json {
       }
       return bot(game);
     });
+    const final = snapshot(result.game);
     return {
       seed,
       ticks: result.game.tick,
       commands: result.log.map(c => [c.tick, c.command]),
       checkpoints,
       checkpointsBits: toBits(checkpoints),
-      final: snapshot(result.game),
-      finalBits: toBits(snapshot(result.game)),
+      final,
+      finalBits: toBits(final),
       // for reference only: the TypeScript fingerprint cannot be reproduced in
       // GDScript, the checkpoints above are the comparison
       fingerprint: fingerprint(result.game),

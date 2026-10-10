@@ -36,11 +36,11 @@ frostSpire stormSpire`; commands `build`, `upgrade`, `sell`, `launchWave` as in
 Godot's JSON parser (and `String.to_float`) can misround the last bit of a
 decimal float, so the port never compares parsed floats with `==`. Every
 fixture that holds floats also carries a `bits` copy of the same shape in which
-each number is the 16 hex digits of its IEEE-754 bits (big-endian):
+each number (integers too) is the 16 hex digits of its IEEE-754 bits (big-endian); strings and booleans are kept:
 
 | File | Plain data | Bits copy |
 | --- | --- | --- |
-| `prng.json` | `floats`, `ranges` | `floatBits` for `floats`; `ranges` come from the same draws |
+| `prng.json` | `floats`, `ranges` | `floatBits` for `floats`; `ranges` have no bits: recompute them from the `floatBits` draws (`min + float * (max - min)`) and compare bits |
 | `routes.json` | (bits only) | all values |
 | `waves.json` | `waves` | `bits` |
 | `scaling.json` | `waves` | `bits` |
