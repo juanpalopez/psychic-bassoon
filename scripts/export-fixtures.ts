@@ -43,6 +43,23 @@ function bitsOf(value: number): string {
   return view.getBigUint64(0).toString(16).padStart(16, '0');
 }
 
+/**
+ * The same shape as `value`, with every number replaced by the 16 hex digits
+ * of its IEEE-754 bits. Godot's JSON parser can misround a decimal float, so
+ * the port compares the `bits` copies exactly and keeps the plain numbers for
+ * reading. Strings and booleans are left as they are.
+ */
+export function toBits(value: Json): Json {
+  if (typeof value === 'number') return bitsOf(value);
+  if (Array.isArray(value)) return value.map(toBits);
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, toBits(item)])
+    );
+  }
+  return value;
+}
+
 function prng(): Json {
   return SEEDS.map(seed => {
     const a = createRng(seed);
@@ -112,23 +129,21 @@ function routes(): Json {
 function waves(): Json {
   return WAVE_SEEDS.map(seed => {
     const rng = deriveRng(seed, 1); // RNG_STREAMS.waves, drawn in wave order
-    return {
-      seed,
-      waves: Array.from({length: MAX_WAVE}, (_, i) =>
-        buildWave(i + 1, rng).map(o => [o.type, o.gap])
-      ),
-    };
+    const list = Array.from({length: MAX_WAVE}, (_, i) =>
+      buildWave(i + 1, rng).map(o => [o.type, o.gap])
+    );
+    return {seed, waves: list, bits: toBits(list)};
   });
 }
 
 function scaling(): Json {
-  return ENEMY_IDS.map(id => ({
-    id,
-    waves: Array.from({length: 60}, (_, i) => {
+  return ENEMY_IDS.map(id => {
+    const list = Array.from({length: 60}, (_, i) => {
       const s = enemyStatsForWave(id, i + 1);
       return [s.hp, s.speed, s.reward, s.armor];
-    }),
-  }));
+    });
+    return {id, waves: list, bits: toBits(list)};
+  });
 }
 
 /** hp lost by a foe of a wave that takes one hit of each tower and level. */
@@ -151,7 +166,7 @@ function damage(): Json {
       reward: e.reward,
     };
   };
-  return {
+  const cases = {
     // every tower level against every foe at three waves
     towerHits: hits.flatMap(h =>
       ENEMY_IDS.flatMap(foe =>
@@ -186,6 +201,7 @@ function damage(): Json {
       return {goldGained: game.gold - gold, alive: e.alive};
     })(),
   };
+  return {...cases, bits: toBits(cases)};
 }
 
 /** The values of a state that must match exactly at a checkpoint. */
@@ -241,12 +257,15 @@ function replays(): Json {
       }
       return bot(game);
     });
+    const final = snapshot(result.game);
     return {
       seed,
       ticks: result.game.tick,
       commands: result.log.map(c => [c.tick, c.command]),
       checkpoints,
-      final: snapshot(result.game),
+      checkpointsBits: toBits(checkpoints),
+      final,
+      finalBits: toBits(final),
       // for reference only: the TypeScript fingerprint cannot be reproduced in
       // GDScript, the checkpoints above are the comparison
       fingerprint: fingerprint(result.game),

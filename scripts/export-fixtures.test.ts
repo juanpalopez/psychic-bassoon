@@ -1,7 +1,7 @@
 import {readFileSync} from 'node:fs';
 import {join} from 'node:path';
 import {describe, expect, it} from 'vitest';
-import {buildFixtures} from './export-fixtures';
+import {buildFixtures, toBits} from './export-fixtures';
 
 const files = buildFixtures();
 
@@ -50,6 +50,43 @@ describe('fixtures for the Godot port', () => {
     const waves = files['waves.json'] ?? '';
     for (const foe of ['scamp', 'raider', 'ironclad', 'warlord']) {
       expect(waves).toContain(`"${foe}"`);
+    }
+  });
+
+  it('writes numbers as IEEE-754 bits and keeps other values', () => {
+    expect(toBits(1.5)).toBe('3ff8000000000000');
+    expect(toBits(0)).toBe('0000000000000000');
+    expect(toBits([1, 'scamp', true, {a: 2}])).toEqual([
+      '3ff0000000000000',
+      'scamp',
+      true,
+      {a: '4000000000000000'},
+    ]);
+  });
+
+  it('gives every float-carrying fixture a bits copy of the same shape', () => {
+    const parse = (name: string): unknown => JSON.parse(files[name] ?? 'null');
+    const same = (plain: unknown, bits: unknown) =>
+      expect(bits).toEqual(toBits(plain));
+    for (const e of parse('waves.json') as {waves: unknown; bits: unknown}[]) {
+      same(e.waves, e.bits);
+    }
+    for (const e of parse('scaling.json') as {
+      waves: unknown;
+      bits: unknown;
+    }[]) {
+      same(e.waves, e.bits);
+    }
+    const {bits, ...cases} = parse('damage.json') as Record<string, unknown>;
+    same(cases, bits);
+    for (const e of parse('replays.json') as {
+      checkpoints: unknown;
+      checkpointsBits: unknown;
+      final: unknown;
+      finalBits: unknown;
+    }[]) {
+      same(e.checkpoints, e.checkpointsBits);
+      same(e.final, e.finalBits);
     }
   });
 });
