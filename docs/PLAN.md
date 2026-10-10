@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _Updated 2026-10-10: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation, then Phase 4 starts with procedural map generation (several routes to the Heartstone). The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
+> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation, then Phase 4 (PRNG first, then procedural map generation with several routes to the Heartstone). The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
 
 ## Vision
 
@@ -21,7 +21,7 @@ Carried over from the prototype: grid placement, 4 tower types with 3 levels, en
 
 ## Lore
 
-> **Under revision:** the owner is moving the setting to fantasy medieval. The text below is the current draft; names (Greyhold Keep, the Hollow King, Castellan Quell, the unit and tower names) may change. Nothing in code depends on them except `godot/content` and the Naming table in `CLAUDE.md`.
+> **Under revision:** the owner is moving the setting to fantasy medieval. The text below is the current draft; names (Greyhold Keep, the Hollow King, Castellan Quell, the unit and tower names) may change. Ids (`scamp`, `ballista`…) are stable keys in the fixtures and code; display names and lore strings live in `godot/content` and the Naming table in `CLAUDE.md`, so a rename does not touch logic or fixtures.
 
 You are Castellan Quell, last warden of Greyhold Keep, the final stronghold of a kingdom that fell long ago. Beneath the keep burns the Heartstone, the last crystal of the old realm. While it shines, the gates hold and the Hollow cannot cross into the living lands. The Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to collect the Heartstone as unpaid tithe.
 
@@ -177,7 +177,7 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 **Claude Design:** design system (tokens, type, panels) first; then mobile screens (title, HUD, build sheet, upgrade sheet, pause, game over, story card); key art for the README and personal site; reference sheets per foe and tower level. Claude Design covers 2D screens and reference art, not 3D models.
 
 - **Rough silhouette sheets** (shape and colour only) for the 4 base foes and 4 towers come first and brief the models.
-- **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced.
+- **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced. Meshy foes are briefed from the silhouette sheets.
 
 ### Asset gap plan _(Phase 6)_
 
@@ -253,7 +253,7 @@ scrapline/
 | --- | --- | --- |
 | Map | Random path on a 9×13 grid | Seeded, shareable map with several routes from spawn to Heartstone (a main road and a detour at first; forks and loops after parity); procedural terrain with decorative props off the road. Drawn in landscape. |
 | Towers | 4 types, 3 levels | Same, plus targeting mode per tower (first, strongest, closest) and a level 3 branch choice (two per tower) |
-| Enemies | 4 types | Same 4, animated (walk, attack, hit, death); Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
+| Enemies | 4 types | Same 4, animated (walk, hit, death); Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
 | Waves | Endless, boss every 10 | Chapters 1–4 with story cards, then endless |
 | Feedback | Flat 2D effects | Muzzle flashes, sparks, screen shake on boss hits (respects reduced motion) |
 | Progress | Best wave in local storage | Best wave per seed, plus a run summary |
@@ -271,8 +271,8 @@ Each phase ends with a gate that must pass before the next starts. Phases 0 to 2
 | 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
 | 4 · Sim port to GDScript | PRNG, map generation with routes, game, commands, tick, combat, waves, economy, headless run | **The GDScript sim reproduces every TypeScript fixture exactly** (maps, routes, waves, replays) |
-| 5 · Play in Godot | Terrain from GLB tiles, MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
-| 6 · Art and ambience | The owner's Blender foes, towers, terrain and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
+| 5 · Play in Godot | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
+| 6 · Art and ambience | Meshy foes cleaned up in Blender, the owner's Blender towers, terrain tiles and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
 | 7 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new foe and branch replays exactly from its seed |
 | 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
 
@@ -312,12 +312,13 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 4. Combat: movement, targeting across routes, damage and armor, the four towers' behaviour, shells.
 5. Waves and economy: composition, spawning, route choice, bonuses.
 6. Replay: the scripted bot and the fingerprint, compared with the TypeScript fingerprints for many seeds; a headless CLI (`godot --headless`) that prints the map and wave log.
+7. After parity, map version 2: more routes (forks, loops) behind a content flag. Validity is per route: each route is a simple path from spawn to Heartstone, not adjacent to itself except at consecutive cells; routes may share cells only at junctions. The GDScript sim exports the new fixtures.
 
 **Gate checklist**
 - [ ] Every fixture matches exactly (maps, routes, waves, replay fingerprints).
 - [ ] The sim imports nothing from the scene tree (lint).
 - [ ] A 12-minute headless run finishes within a time budget on CI.
-- [ ] After parity: maps support more than two routes (forks, loops) as a new map version behind a content flag, with GUT tests for validity (every route reaches the Heartstone, no self-adjacent road) and new fixtures exported from the GDScript sim.
+- [ ] After parity (step 7): maps support more than two routes as a new map version behind a content flag, with GUT tests for validity and new fixtures exported from the GDScript sim.
 
 ### Phase 5 · Play in Godot
 
@@ -377,7 +378,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 1. Audio and music (decision from the open questions).
 2. Performance and loading pass on real devices; 30 fps fallback with reduced effects.
 3. README with key art and a short play guide; link from the personal site.
-4. Final licence check: `assets/CREDITS.md` complete, MIT for code, CC0 terms for art.
+4. Final licence check: `assets/CREDITS.md` complete, MIT for code; each art source keeps its terms (CC0 packs, the owner's own models, Meshy plan terms).
 5. iOS export: Apple Developer account, signing, input and safe areas, store listing. Android only if the owner asks.
 
 **Gate checklist**
@@ -396,7 +397,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through a small `JavaScriptBridge` call in the web shell; accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
-| Skinned animation for many foes is too slow on phones | Part animation on `MultiMesh` instances; skeletons only for bosses |
+| Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
