@@ -1,11 +1,12 @@
 import {mkdirSync, writeFileSync} from 'node:fs';
 import {join} from 'node:path';
-import {ENEMY_IDS} from '../src/content';
+import {ENEMY_IDS, TOWER_IDS, TOWERS} from '../src/content';
 import {
   buildWave,
   createBot,
-  createRng,
   createGame,
+  createRng,
+  damageEnemy,
   deriveRng,
   enemyStatsForWave,
   fingerprint,
@@ -14,6 +15,7 @@ import {
   nextInt,
   nextRange,
   run,
+  spawnEnemy,
 } from '../src/sim';
 import type {GameState} from '../src/sim';
 
@@ -33,6 +35,12 @@ const CHECKPOINT_EVERY = 600;
 
 type Json = unknown;
 
+function bitsOf(value: number): string {
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, value);
+  return view.getBigUint64(0).toString(16).padStart(16, '0');
+}
+
 function prng(): Json {
   return SEEDS.map(seed => {
     const a = createRng(seed);
@@ -44,6 +52,10 @@ function prng(): Json {
     return {
       seed,
       floats,
+      // the same 16 floats as 16 hex digits of their IEEE-754 bits: Godot's
+      // JSON parser is not guaranteed to round correctly, so Phase 4 checks
+      // that parsing the decimal text gives exactly these bits
+      floatBits: floats.map(bitsOf),
       ints6: ints,
       ranges,
       derived: [0, 1, 2, 100].map(stream => ({
@@ -91,6 +103,63 @@ function scaling(): Json {
   }));
 }
 
+/** hp lost by a foe of a wave that takes one hit of each tower and level. */
+function damage(): Json {
+  const hits = TOWER_IDS.flatMap(tower =>
+    TOWERS[tower].damage.map((amount, level) => ({tower, level, amount}))
+  );
+  const lost = (
+    foe: (typeof ENEMY_IDS)[number],
+    wave: number,
+    amount: number
+  ) => {
+    const game = createGame(1);
+    const e = spawnEnemy(game, foe, wave, 0);
+    damageEnemy(game, e, amount);
+    return {
+      hp: e.maxHp - e.hp,
+      armor: e.armor,
+      alive: e.alive,
+      reward: e.reward,
+    };
+  };
+  return {
+    // every tower level against every foe at three waves
+    towerHits: hits.flatMap(h =>
+      ENEMY_IDS.flatMap(foe =>
+        [1, 12, 24].map(wave => ({
+          tower: h.tower,
+          level: h.level,
+          foe,
+          wave,
+          amount: h.amount,
+          ...lost(foe, wave, h.amount),
+        }))
+      )
+    ),
+    // both sides of the armor floor (a hit never falls below 25% of its damage)
+    armorFloor: [0, 3, 4, 5, 6, 7, 11].flatMap(armor =>
+      [1, 3, 4, 5, 8, 9, 12, 50].map(amount => {
+        const game = createGame(1);
+        const e = spawnEnemy(game, 'warlord', 1, 0);
+        e.armor = armor;
+        const before = e.hp;
+        damageEnemy(game, e, amount);
+        return {armor, amount, lost: before - e.hp};
+      })
+    ),
+    // a kill pays the reward once and a dead foe takes no more damage
+    kill: (() => {
+      const game = createGame(1);
+      const e = spawnEnemy(game, 'scamp', 1, 0);
+      const gold = game.gold;
+      damageEnemy(game, e, 1000);
+      damageEnemy(game, e, 1000);
+      return {goldGained: game.gold - gold, alive: e.alive};
+    })(),
+  };
+}
+
 /** The values of a state that must match exactly at a checkpoint. */
 function snapshot(game: GameState): Json {
   return {
@@ -121,7 +190,11 @@ function snapshot(game: GameState): Json {
       e.slowTimer,
     ]),
     shots: game.shots.map(s => [s.x, s.y, s.targetId, s.damage]),
-    spawners: game.spawners.map(s => [s.wave, s.timer, s.queue.length]),
+    spawners: game.spawners.map(s => [
+      s.wave,
+      s.timer,
+      s.queue.map(o => [o.type, o.gap]),
+    ]),
     rngState: game.rng.state,
     routeRngState: game.routeRng.state,
     nextId: game.nextId,
@@ -130,7 +203,8 @@ function snapshot(game: GameState): Json {
 
 function replays(): Json {
   return REPLAY_SEEDS.map(seed => {
-    // the scripted bot plays; checkpoints are taken by re-running to each tick
+    // The scripted bot plays. A checkpoint is the state at the START of tick N:
+    // before the commands logged at tick N are submitted and before tick N runs.
     const checkpoints: Json[] = [];
     const bot = createBot(createGame(seed).map);
     const result = run(seed, REPLAY_TICKS, game => {
@@ -159,6 +233,7 @@ export function buildFixtures(): Record<string, string> {
     'maps.json': maps(),
     'waves.json': waves(),
     'scaling.json': scaling(),
+    'damage.json': damage(),
     'replays.json': replays(),
   };
   return Object.fromEntries(

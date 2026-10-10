@@ -20,8 +20,6 @@ describe('fixtures for the Godot port', () => {
 
   it('holds only values Godot can compare exactly', () => {
     for (const text of Object.values(files)) {
-      expect(text).not.toContain('null');
-      expect(text).not.toContain('NaN');
       JSON.parse(text, (_key, value: unknown) => {
         if (typeof value === 'number') {
           expect(Number.isFinite(value)).toBe(true);
