@@ -36,7 +36,7 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 3. **Content.** Balance numbers live in `godot/content` (or `src/content` for the TypeScript game); no magic numbers in logic. Lore names are used.
 4. **Tests.** Sim and content changes have tests written first, with a fixed seed and no timing. A test that cannot fail is a finding.
 5. **Render and UI.** No `any`. No hard-coded colours (tokens only). Dispose geometry and materials; no allocation in the frame loop. Tap targets of at least 44 px. Respect `prefers-reduced-motion`.
-6. **Assets.** CC0, the owner's own, or Meshy-generated (with the plan and licence terms recorded); each recorded in `assets/CREDITS.md`; GLB only, within the triangle budget.
+6. **Assets.** CC0, the owner's own, or Meshy-generated (paid plan only; the row says `Owned by the owner (Meshy paid plan)` with the date and the prompt or reference; flag any third-party IP, brand or likeness in the prompt; free-plan CC BY outputs are a blocker); each recorded in `assets/CREDITS.md`; GLB only, within the triangle budget.
 7. **Workflows.** Least-privilege `permissions`; no untrusted input (PR title, body, branch) in `run:` steps; deploy and release cannot skip `ci`; tag and branch guards are enforced.
 8. **Consistency.** Docs, scripts, ticket numbers and paths agree with each other and with the code.
 

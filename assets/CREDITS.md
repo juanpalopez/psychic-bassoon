@@ -1,6 +1,10 @@
 # Asset credits
 
-Every third-party file in `public/assets/` is listed here with its source and licence. CI (`pnpm check:assets`) fails when a shipped file is missing from this list. Only CC0 assets are allowed unless the owner agrees otherwise. Each licence was confirmed from the licence file inside the downloaded pack.
+Every third-party file in `public/assets/` (TypeScript build) and `godot/assets/` (Godot build) is listed here with its source and licence. CI (`pnpm check:assets`) fails when a file in `public/assets/` is missing from this list; the `godot/assets/` check is ticket #144. Allowed sources: CC0 packs (the licence was confirmed from the licence file inside the downloaded pack), the owner's own models, and Meshy-generated models.
+
+### Meshy-generated models
+
+The owner generates on Meshy's paid premium plan. Per Meshy's FAQ (checked 2026-10-10) a paid customer owns the assets, provided the inputs do not violate anyone's copyright. Free-plan outputs are CC BY 4.0 and are not used. Each Meshy model gets a table row with the source `Meshy (paid plan, YYYY-MM-DD)`, the licence `Owned by the owner (Meshy paid plan)` and the prompt or reference in the Edits column. `pnpm check:assets` accepts that licence text.
 
 ## Models
 
