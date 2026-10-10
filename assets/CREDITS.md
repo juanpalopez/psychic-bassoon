@@ -39,3 +39,4 @@ The `scrapline/` towers are original work: the owner generated them with Claude 
 | `models/tower-defense-kit/tile-hill.glb` | [Kenney Tower Defense Kit 2.1](https://kenney.nl/assets/tower-defense-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; placed and turned in code |
 | `models/tower-defense-kit/tile-crystal.glb` | [Kenney Tower Defense Kit 2.1](https://kenney.nl/assets/tower-defense-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; placed and turned in code |
 | `models/tower-defense-kit/spawn-round.glb` | [Kenney Tower Defense Kit 2.1](https://kenney.nl/assets/tower-defense-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; placed and turned in code |
+| `models/tower-defense-kit/tile-split.glb` | [Kenney Tower Defense Kit 2.1](https://kenney.nl/assets/tower-defense-kit) by Kenney (kenney.nl) | CC0 1.0 (`License.txt` in the pack) | none; placed and turned in code |

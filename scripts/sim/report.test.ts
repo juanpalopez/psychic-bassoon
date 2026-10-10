@@ -9,14 +9,17 @@ import {
 } from './report';
 import type {WaveRow} from './report';
 
+const ROUTE = [
+  {col: 1, row: 0},
+  {col: 1, row: 1},
+  {col: 2, row: 1},
+  {col: 2, row: 2},
+];
+
 const MAP: GameMap = {
   seed: 1,
-  path: [
-    {col: 1, row: 0},
-    {col: 1, row: 1},
-    {col: 2, row: 1},
-    {col: 2, row: 2},
-  ],
+  path: ROUTE,
+  routes: [ROUTE],
   tiles: [
     ['plot', 'road', 'plot'],
     ['plot', 'road', 'road'],

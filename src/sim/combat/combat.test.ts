@@ -44,7 +44,7 @@ function put(
   distance = DISTANCE,
   wave = 1
 ): Enemy {
-  const enemy = spawnEnemy(game, type, wave);
+  const enemy = spawnEnemy(game, type, wave, 0);
   enemy.speed = 0;
   enemy.distance = distance;
   const p = positionAt(game.route, distance);
@@ -477,5 +477,47 @@ describe('events for effects', () => {
         y: boss.y,
       })
     );
+  });
+});
+
+describe('more than one route', () => {
+  const twoRoutes = () => {
+    for (let seed = 1; seed < 200; seed++) {
+      const game = createGame(seed);
+      if (game.routes.length === 2) return game;
+    }
+    throw new Error('no map with a detour');
+  };
+
+  it('sends foes down both routes, each from the same spawn point', () => {
+    const game = twoRoutes();
+    const lanes = new Set<number>();
+    for (let i = 0; i < 40; i++) lanes.add(spawnEnemy(game, 'raider', 1).route);
+    expect(lanes).toEqual(new Set([0, 1]));
+    const start = positionAt(game.routes[0] ?? game.route, 0);
+    for (const e of game.enemies)
+      expect([e.x, e.y]).toEqual([start.x, start.y]);
+  });
+
+  it('is reproducible: the same seed picks the same routes', () => {
+    const pick = () => {
+      const game = twoRoutes();
+      return Array.from(
+        {length: 20},
+        () => spawnEnemy(game, 'raider', 1).route
+      );
+    };
+    expect(pick()).toEqual(pick());
+  });
+
+  it('walks each foe along its own route to the end', () => {
+    const game = twoRoutes();
+    const alt = spawnEnemy(game, 'raider', 1, 1);
+    alt.speed = 0;
+    const route = game.routes[1] ?? game.route;
+    alt.distance = route.total - 0.001;
+    alt.speed = 1;
+    tick(game);
+    expect(game.lives).toBe(RULES.startLives - ENEMIES.raider.leak);
   });
 });

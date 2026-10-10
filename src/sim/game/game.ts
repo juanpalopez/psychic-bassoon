@@ -33,6 +33,8 @@ export interface Enemy {
   armor: number;
   readonly radius: number;
   readonly leak: number;
+  /** Index into `GameState.routes` of the route this foe walks. */
+  readonly route: number;
   /** Cells walked from the spawn point. */
   distance: number;
   x: number;
@@ -168,7 +170,10 @@ export interface GameState {
   readonly seed: number;
   readonly map: GameMap;
   /** The line foes walk, built once from the map. */
+  /** The main route (`routes[0]`). */
   readonly route: Route;
+  /** Every route from the spawn to the Heartstone; foes pick one. */
+  readonly routes: readonly Route[];
   tick: number;
   gold: number;
   lives: number;
@@ -182,6 +187,8 @@ export interface GameState {
   spawners: Spawner[];
   /** Random stream for wave composition, separate from the map's. */
   rng: Rng;
+  /** Random stream that picks which route each foe takes. */
+  routeRng: Rng;
   nextId: number;
   /** Commands waiting for the next tick, in submission order. */
   pending: Command[];
@@ -195,6 +202,7 @@ export function createGame(seed: number): GameState {
     seed,
     map,
     route: buildRoute(map.path),
+    routes: map.routes.map(cells => buildRoute(cells)),
     tick: 0,
     gold: RULES.startGold,
     lives: RULES.startLives,
@@ -206,6 +214,7 @@ export function createGame(seed: number): GameState {
     shots: [],
     spawners: [],
     rng: deriveRng(seed, RNG_STREAMS.waves),
+    routeRng: deriveRng(seed, RNG_STREAMS.routes),
     nextId: 0,
     pending: [],
     events: [],

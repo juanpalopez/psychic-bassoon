@@ -84,7 +84,8 @@ if (new URLSearchParams(location.search).has('debug')) {
         'warlord',
       ] as const;
       for (let i = 0; i < count; i++) {
-        const foe = spawnEnemy(app.game, mix[i % mix.length] ?? 'raider', 1);
+        // on the main route, so the crowd is spread along one road
+        const foe = spawnEnemy(app.game, mix[i % mix.length] ?? 'raider', 1, 0);
         foe.speed = 0;
         foe.distance = (i / count) * app.game.route.total;
         const at = positionAt(app.game.route, foe.distance);

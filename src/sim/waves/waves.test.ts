@@ -232,7 +232,7 @@ describe('launching waves in a game', () => {
     drain(game);
     const first = game.enemies[0];
     if (!first) throw new Error('no foe');
-    first.distance = game.route.total;
+    first.distance = (game.routes[first.route] ?? game.route).total;
     for (const e of game.enemies.slice(1)) e.alive = false;
     const gold = game.gold;
     tick(game);

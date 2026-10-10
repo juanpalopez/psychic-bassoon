@@ -10,6 +10,8 @@ export const TERRAIN = {
   straight: 'tower-defense-kit/tile-straight.glb',
   corner: 'tower-defense-kit/tile-corner-square.glb',
   end: 'tower-defense-kit/tile-end.glb',
+  /** A T junction, where a detour leaves or rejoins the main road. */
+  split: 'tower-defense-kit/tile-split.glb',
   /**
    * Cells of scenery around the board (world sides, landscape): more on the
    * far side, where the camera looks, little on the near side.
@@ -44,6 +46,7 @@ export const TERRAIN_FILES: readonly string[] = [
     TERRAIN.straight,
     TERRAIN.corner,
     TERRAIN.end,
+    TERRAIN.split,
     ...TERRAIN.scenery.map(s => s.file),
     ...TERRAIN.farScenery.map(s => s.file),
   ]),
@@ -61,12 +64,13 @@ const QUARTER = Math.PI / 2;
 
 /**
  * The sides each Kenney road tile opens at when not turned (read from the
- * recessed road in the models): straight N-S, corner E-S, end S.
+ * recessed road in the models): straight N-S, corner E-S, end S, split E-S-W.
  */
 const BASE_SIDES: Readonly<Record<string, readonly Side[]>> = {
   [TERRAIN.straight]: ['N', 'S'],
   [TERRAIN.corner]: ['E', 'S'],
   [TERRAIN.end]: ['S'],
+  [TERRAIN.split]: ['E', 'S', 'W'],
 };
 
 // Turning by a quarter (about Y, counter-clockwise from above) takes
@@ -85,15 +89,6 @@ export function openSides(file: string, rotationY: number): Side[] {
 
 const key = (cell: {col: number; row: number}) => `${cell.col},${cell.row}`;
 
-function sideTo(
-  from: {col: number; row: number},
-  to: {col: number; row: number}
-): Side {
-  if (to.col > from.col) return 'E';
-  if (to.col < from.col) return 'W';
-  return to.row > from.row ? 'S' : 'N';
-}
-
 /** Finds the tile and quarter turn that opens at exactly these sides. */
 function fit(wanted: readonly Side[]): {file: string; rotationY: number} {
   const target = [...wanted].sort().join('');
@@ -106,15 +101,36 @@ function fit(wanted: readonly Side[]): {file: string; rotationY: number} {
   throw new Error(`no road tile opens at ${target}`);
 }
 
-/** One road tile per route cell, turned to meet its neighbours. */
+/**
+ * One road tile per road cell, turned to meet its road neighbours: a bend, a
+ * straight, an end, or a T where a detour leaves or rejoins the main road.
+ */
 export function roadPlacements(map: GameMap): Placement[] {
-  return map.path.map((cell, i) => {
-    const neighbours = [map.path[i - 1], map.path[i + 1]].filter(
-      (c): c is {col: number; row: number} => c !== undefined
-    );
-    const {file, rotationY} = fit(neighbours.map(n => sideTo(cell, n)));
-    return {file, col: cell.col, row: cell.row, rotationY};
-  });
+  const roads = new Set<string>();
+  map.tiles.forEach((line, row) =>
+    line.forEach((tile, col) => {
+      if (tile === 'road') roads.add(key({col, row}));
+    })
+  );
+  const out: Placement[] = [];
+  map.tiles.forEach((line, row) =>
+    line.forEach((tile, col) => {
+      if (tile !== 'road') return;
+      const wanted = (
+        [
+          [{col, row: row - 1}, 'N'],
+          [{col: col + 1, row}, 'E'],
+          [{col, row: row + 1}, 'S'],
+          [{col: col - 1, row}, 'W'],
+        ] as const
+      )
+        .filter(([cell]) => roads.has(key(cell)))
+        .map(([, side]) => side);
+      const {file, rotationY} = fit(wanted);
+      out.push({file, col, row, rotationY});
+    })
+  );
+  return out;
 }
 
 /** Grass under every plot. Flat, so a tower always stands level. */

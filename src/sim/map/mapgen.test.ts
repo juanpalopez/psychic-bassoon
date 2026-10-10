@@ -119,12 +119,97 @@ describe('generateMap', () => {
       tiles.forEach((line, row) => {
         expect(line).toHaveLength(GRID.cols);
         line.forEach((tile, col) => {
-          const onPath = path.some(c => c.col === col && c.row === row);
+          const onPath = generateMap(seed)
+            .routes.flat()
+            .some(c => c.col === col && c.row === row);
           expect(tile).toBe(onPath ? 'road' : 'plot');
           if (tile === 'road') count++;
         });
       });
-      expect(count).toBe(path.length);
+      expect(count).toBe(
+        new Set(
+          generateMap(seed)
+            .routes.flat()
+            .map(c => `${c.col},${c.row}`)
+        ).size
+      );
     });
+  });
+});
+
+describe('detours (more than one route)', () => {
+  const keyOf = (c: {col: number; row: number}) => `${c.col},${c.row}`;
+  const manhattan = (
+    a: {col: number; row: number},
+    b: {col: number; row: number}
+  ) => Math.abs(a.col - b.col) + Math.abs(a.row - b.row);
+
+  it('keeps the main road first, unchanged by the detour', () => {
+    for (const seed of SEEDS.slice(0, 50)) {
+      const map = generateMap(seed);
+      expect(map.routes[0]).toBe(map.path);
+    }
+  });
+
+  describe.each(SEEDS.slice(0, 120))('seed %i', seed => {
+    const map = generateMap(seed);
+    const start = map.path[0];
+    const end = map.path.at(-1);
+
+    it('gives every route the same start and end, one orthogonal step at a time', () => {
+      for (const route of map.routes) {
+        expect(route[0]).toEqual(start);
+        expect(route.at(-1)).toEqual(end);
+        for (let i = 1; i < route.length; i++) {
+          const a = route[i - 1];
+          const b = route[i];
+          expect(a && b && manhattan(a, b)).toBe(1);
+        }
+        expect(new Set(route.map(keyOf)).size).toBe(route.length);
+      }
+    });
+
+    it('marks exactly the cells of all routes as road', () => {
+      const roads = new Set(map.routes.flat().map(keyOf));
+      let count = 0;
+      map.tiles.forEach((line, row) =>
+        line.forEach((tile, col) => {
+          expect(tile === 'road').toBe(roads.has(keyOf({col, row})));
+          if (tile === 'road') count++;
+        })
+      );
+      expect(count).toBe(roads.size);
+    });
+
+    it('keeps a detour apart from the main road except where it leaves and rejoins', () => {
+      const main = new Set(map.path.map(keyOf));
+      for (const route of map.routes.slice(1)) {
+        const own = route.filter(c => !main.has(keyOf(c)));
+        expect(own.length).toBeGreaterThan(0);
+        own.forEach((cell, i) => {
+          for (const m of map.path) {
+            const gap = manhattan(cell, m);
+            const joins = (i === 0 || i === own.length - 1) && gap === 1;
+            expect(gap >= 2 || joins).toBe(true);
+          }
+        });
+        // it leaves the main road once and rejoins it once
+        const shared = route.map(c => main.has(keyOf(c)));
+        const changes = shared.filter((v, i) => i > 0 && v !== shared[i - 1]);
+        expect(changes).toHaveLength(2);
+      }
+    });
+  });
+
+  it('adds a detour to most maps, and never more than one', () => {
+    const counts = SEEDS.map(s => generateMap(s).routes.length);
+    expect(Math.max(...counts)).toBe(2);
+    expect(counts.filter(n => n === 2).length).toBeGreaterThan(
+      SEEDS.length * 0.6
+    );
+  });
+
+  it('is reproducible', () => {
+    expect(generateMap(77).routes).toEqual(generateMap(77).routes);
   });
 });

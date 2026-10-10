@@ -3,6 +3,7 @@ import type {EnemyId} from '../../content';
 import type {Enemy, GameState, Tower} from '../game';
 import {TICK_SECONDS} from '../time';
 import {distance, positionAt} from '../map';
+import {nextInt} from '../rng';
 import type {Point} from '../map';
 import {enemyStatsForWave} from './scaling';
 
@@ -10,11 +11,16 @@ import {enemyStatsForWave} from './scaling';
 export function spawnEnemy(
   game: GameState,
   type: EnemyId,
-  wave: number
+  wave: number,
+  route?: number
 ): Enemy {
   const base = ENEMIES[type];
   const stats = enemyStatsForWave(type, wave);
-  const start = positionAt(game.route, 0);
+  // each foe takes one route; with several, the map's own stream picks
+  const lane =
+    route ??
+    (game.routes.length > 1 ? nextInt(game.routeRng, game.routes.length) : 0);
+  const start = positionAt(game.routes[lane] ?? game.route, 0);
   const enemy: Enemy = {
     id: game.nextId++,
     type,
@@ -25,6 +31,7 @@ export function spawnEnemy(
     armor: stats.armor,
     radius: base.radius,
     leak: base.leak,
+    route: lane,
     distance: 0,
     x: start.x,
     y: start.y,
@@ -78,7 +85,8 @@ function moveEnemies(game: GameState): void {
     if (enemy.slowTimer > 0) enemy.slowTimer -= TICK_SECONDS;
     else enemy.slow = 0;
     enemy.distance += enemy.speed * (1 - enemy.slow) * TICK_SECONDS;
-    if (enemy.distance >= game.route.total) {
+    const route = game.routes[enemy.route] ?? game.route;
+    if (enemy.distance >= route.total) {
       enemy.alive = false;
       game.lives -= enemy.leak;
       game.events.push({
@@ -88,7 +96,7 @@ function moveEnemies(game: GameState): void {
       });
       continue;
     }
-    const p = positionAt(game.route, enemy.distance);
+    const p = positionAt(route, enemy.distance);
     enemy.x = p.x;
     enemy.y = p.y;
   }
@@ -101,10 +109,18 @@ function centreOf(tower: Tower): Point {
   };
 }
 
-/** The foe furthest along the route; the first one wins a tie. */
-function frontmost(enemies: readonly Enemy[]): Enemy | undefined {
+/**
+ * The foe closest to the Heartstone, across routes (routes differ in length,
+ * so distance walked is not comparable); the first one wins a tie.
+ */
+function frontmost(
+  game: GameState,
+  enemies: readonly Enemy[]
+): Enemy | undefined {
+  const left = (e: Enemy): number =>
+    (game.routes[e.route] ?? game.route).total - e.distance;
   let best = enemies[0];
-  for (const e of enemies) if (best && e.distance > best.distance) best = e;
+  for (const e of enemies) if (best && left(e) < left(best)) best = e;
   return best;
 }
 
@@ -181,7 +197,7 @@ function fireTowers(game: GameState): void {
       }
       continue;
     }
-    const target = frontmost(targets);
+    const target = frontmost(game, targets);
     if (!target || tower.cooldown > 0) continue;
     tower.cooldown = 1 / (def.rate[level] ?? 1);
     if (tower.type === 'ballista' || tower.type === 'catapult') {
