@@ -13,6 +13,11 @@ export const MAP = {
   minTurnColumns: 3,
   /** The path starts at least this many columns in from either edge. */
   startMargin: 1,
+  /** A straight run this long (cells, corners included) can grow a detour
+   * beside it; the two joins must be at least two cells apart. */
+  detourMinRun: 5,
+  /** The detour runs this many cells beside the main road. */
+  detourOffset: 2,
 } as const;
 
 /** Economy and combat constants ported from the 2D prototype. */

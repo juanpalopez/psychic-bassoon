@@ -44,7 +44,7 @@ function put(
   distance = DISTANCE,
   wave = 1
 ): Enemy {
-  const enemy = spawnEnemy(game, type, wave);
+  const enemy = spawnEnemy(game, type, wave, 0);
   enemy.speed = 0;
   enemy.distance = distance;
   const p = positionAt(game.route, distance);
@@ -477,5 +477,106 @@ describe('events for effects', () => {
         y: boss.y,
       })
     );
+  });
+});
+
+describe('more than one route', () => {
+  const twoRoutes = () => {
+    for (let seed = 1; seed < 200; seed++) {
+      const game = createGame(seed);
+      if (game.routes.length === 2) return game;
+    }
+    throw new Error('no map with a detour');
+  };
+
+  it('sends foes down both routes, each from the same spawn point', () => {
+    const game = twoRoutes();
+    const lanes = new Set<number>();
+    for (let i = 0; i < 40; i++) lanes.add(spawnEnemy(game, 'raider', 1).route);
+    expect(lanes).toEqual(new Set([0, 1]));
+    const start = positionAt(game.routes[0] ?? game.route, 0);
+    for (const e of game.enemies)
+      expect([e.x, e.y]).toEqual([start.x, start.y]);
+  });
+
+  it('is reproducible: the same seed picks the same routes', () => {
+    const pick = () => {
+      const game = twoRoutes();
+      return Array.from(
+        {length: 20},
+        () => spawnEnemy(game, 'raider', 1).route
+      );
+    };
+    expect(pick()).toEqual(pick());
+  });
+
+  it('walks each foe along its own route, not the main one', () => {
+    const game = twoRoutes();
+    const main = game.routes[0] ?? game.route;
+    const alt = game.routes[1] ?? game.route;
+    const foe = spawnEnemy(game, 'raider', 1, 1);
+    foe.speed = 0;
+    // past the end of the main route, but still on the longer detour
+    foe.distance = (main.total + alt.total) / 2;
+    tick(game);
+    expect(game.lives).toBe(RULES.startLives);
+    const at = positionAt(alt, foe.distance);
+    expect([foe.x, foe.y]).toEqual([at.x, at.y]);
+    foe.speed = 1;
+    foe.distance = alt.total - 0.001;
+    tick(game);
+    expect(game.lives).toBe(RULES.startLives - ENEMIES.raider.leak);
+  });
+
+  it('shoots the foe with the least distance left, not the one that walked furthest', () => {
+    const game = twoRoutes();
+    const main = game.routes[0] ?? game.route;
+    const alt = game.routes[1] ?? game.route;
+    const first = game.map.path[0];
+    const second = game.map.path[1];
+    if (!first || !second) throw new Error('short path');
+    // a Ballista on a plot beside the shared first cells
+    const plot = game.map.tiles
+      .flatMap((line, row) => line.map((tile, col) => ({tile, col, row})))
+      .filter(c => c.tile === 'plot')
+      .sort(
+        (a, b) =>
+          Math.abs(a.col - first.col) +
+          Math.abs(a.row - first.row) -
+          (Math.abs(b.col - first.col) + Math.abs(b.row - first.row))
+      )[0];
+    if (!plot) throw new Error('no plot');
+    game.gold = 1000;
+    submit(game, {
+      type: 'build',
+      tower: 'ballista',
+      col: plot.col,
+      row: plot.row,
+    });
+    tick(game);
+    const onMain = spawnEnemy(game, 'ironclad', 1, 0);
+    const onAlt = spawnEnemy(game, 'ironclad', 1, 1);
+    for (const e of [onMain, onAlt]) {
+      e.speed = 0;
+      e.armor = 0;
+    }
+    // both stand on the shared start; the detour foe has walked further, but
+    // its route is longer, so it has more road left
+    onMain.distance = main.cumulative[1] ?? 0;
+    onAlt.distance = alt.cumulative[2] ?? 0;
+    const tower = game.towers[0];
+    if (tower) tower.cooldown = 0;
+    const leftMain = main.total - onMain.distance;
+    const leftAlt = alt.total - onAlt.distance;
+    expect(leftMain).toBeLessThan(leftAlt);
+    expect(onAlt.distance).toBeGreaterThan(onMain.distance);
+    tick(game);
+    expect(onMain.hp).toBeLessThan(onMain.maxHp);
+    expect(onAlt.hp).toBe(onAlt.maxHp);
+  });
+
+  it('refuses a route index the map does not have', () => {
+    const game = twoRoutes();
+    expect(() => spawnEnemy(game, 'raider', 1, 5)).toThrow(RangeError);
   });
 });

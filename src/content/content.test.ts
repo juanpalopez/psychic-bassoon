@@ -134,6 +134,8 @@ describe('map generation', () => {
       runDownVariance: 2,
       minTurnColumns: 3,
       startMargin: 1,
+      detourMinRun: 5,
+      detourOffset: 2,
     });
   });
 });

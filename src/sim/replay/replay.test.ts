@@ -51,7 +51,7 @@ describe('headless run', () => {
   it('ends in the pinned final state', () => {
     // Pinned on purpose: any change to the sim's rules or numbers changes
     // this value. Update it deliberately, in the PR that changes the rules.
-    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"18f0ac49"`);
+    expect(fingerprint(run.game)).toMatchInlineSnapshot(`"c10652a3"`);
   });
 
   it('survives a JSON save and load in the middle of the run', () => {

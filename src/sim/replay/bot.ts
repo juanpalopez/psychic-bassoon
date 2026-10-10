@@ -17,12 +17,16 @@ const SELL_ABOVE_TOWERS = 20;
  * first, then reading order. Uses squared distances, so no rounding drift.
  */
 export function rankPlots(map: GameMap): Cell[] {
+  // every road cell of every route, once
+  const roadCells = [
+    ...new Map(map.routes.flat().map(c => [`${c.col},${c.row}`, c])).values(),
+  ];
   const reach = TOWERS.ballista.range[0] ?? 0;
   const scored: {cell: Cell; covered: number}[] = [];
   map.tiles.forEach((line, row) =>
     line.forEach((tile, col) => {
       if (tile !== 'plot') return;
-      const covered = map.path.filter(p => {
+      const covered = roadCells.filter(p => {
         const dx = p.col - col;
         const dy = p.row - row;
         return dx * dx + dy * dy <= reach * reach;

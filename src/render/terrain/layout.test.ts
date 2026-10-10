@@ -16,6 +16,7 @@ function mapOf(path: [number, number][], cols = 5, rows = 5): GameMap {
   return {
     seed: 0,
     path: cells,
+    routes: [cells],
     tiles: Array.from({length: rows}, (_, row) =>
       Array.from({length: cols}, (_, col) =>
         cells.some(c => c.col === col && c.row === row) ? 'road' : 'plot'
@@ -98,24 +99,24 @@ describe('roadPlacements', () => {
     for (let seed = 1; seed <= 200; seed++) {
       const map = generateMap(seed * 7919);
       const placements = roadPlacements(map);
-      expect(placements).toHaveLength(map.path.length);
-      placements.forEach((p, i) => {
-        const prev = map.path[i - 1];
-        const next = map.path[i + 1];
-        const neighbours = [prev, next].filter(
-          (c): c is {col: number; row: number} => c !== undefined
-        );
-        const want = neighbours.map(n =>
-          n.col > p.col ? 'E' : n.col < p.col ? 'W' : n.row > p.row ? 'S' : 'N'
-        ) as Side[];
-        const have = openSides(p.file, p.rotationY);
-        if (neighbours.length === 1) {
-          // an end opens toward its one neighbour
-          expect(have).toEqual(want);
-        } else {
-          expect(sides(have)).toEqual(sides(want));
-        }
-      });
+      const roads = new Set(map.routes.flat().map(c => `${c.col},${c.row}`));
+      expect(placements).toHaveLength(roads.size);
+      for (const p of placements) {
+        const want: Side[] = [];
+        if (roads.has(`${p.col},${p.row - 1}`)) want.push('N');
+        if (roads.has(`${p.col + 1},${p.row}`)) want.push('E');
+        if (roads.has(`${p.col},${p.row + 1}`)) want.push('S');
+        if (roads.has(`${p.col - 1},${p.row}`)) want.push('W');
+        expect(sides(openSides(p.file, p.rotationY))).toEqual(sides(want));
+      }
+    }
+  });
+
+  it('draws a T tile at each end of a detour, and only there', () => {
+    for (let seed = 1; seed <= 100; seed++) {
+      const map = generateMap(seed * 104729);
+      const tees = roadPlacements(map).filter(p => p.file === TERRAIN.split);
+      expect(tees).toHaveLength(map.routes.length > 1 ? 2 : 0);
     }
   });
 });
