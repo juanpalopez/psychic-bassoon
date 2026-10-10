@@ -24,16 +24,22 @@ func _ready() -> void:
 	_build_ground()
 	_build_foes()
 	_build_overlay()
+	# the browser smoke test waits for this flag
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.scraplineReady = true")
 
 
 func _process(delta: float) -> void:
 	_time += delta
 	_move_foes()
-	_label.text = "Scrapline stub  |  Godot %s  |  %d fps  |  %d foes" % [
-		Engine.get_version_info().string,
-		Engine.get_frames_per_second(),
-		FOE_COUNT,
-	]
+	_label.text = (
+		"Scrapline stub  |  Godot %s  |  %d fps  |  %d foes"
+		% [
+			Engine.get_version_info().string,
+			Engine.get_frames_per_second(),
+			FOE_COUNT,
+		]
+	)
 
 
 func _build_environment() -> void:

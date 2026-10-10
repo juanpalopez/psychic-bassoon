@@ -19,8 +19,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:godot": "playwright test -c playwright.godot.config.ts",
     "check:size": "node scripts/check-size.mjs",
     "check:assets": "node scripts/check-assets.mjs",
+    "check:sim-purity": "node scripts/check-sim-purity.mjs",
+    "check:godot-size": "node scripts/check-godot-size.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },
