@@ -1,9 +1,9 @@
 # Scrapline
 
-Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS and Android later. The TypeScript and Three.js game that shipped Phases 0 to 2 is the reference (oracle) until the Godot build replaces it.
+Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS next (Android only if wanted later). The TypeScript and Three.js game that shipped Phases 0 to 2 is the reference (oracle) until the Godot build replaces it.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
-- Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell)
+- Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell). The setting is moving to fantasy medieval and the lore will be rewritten, so the game name and these names are provisional. Foe and tower ids (`scamp`, `raider`, `ironclad`, `warlord`, `ballista`, `catapult`, `frostSpire`, `stormSpire`) are stable keys shared by the fixtures, the TypeScript sim and GDScript; they do not change with the lore. Display names and lore strings live only in `godot/content`, so a rename touches content and the Naming table, not logic or fixtures.
 - Original prototype (rules and balance reference): `prototype/scrapline.html`
 
 > Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` and `docs/art/` (Phase 6). The TypeScript game lives in `src/` and moves to `legacy/` after the Phase 5 gate.
@@ -57,6 +57,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - Player actions reach the sim only as commands (`build`, `upgrade`, `sell`, `launchWave`), never by mutating state directly.
 - All randomness goes through the seeded PRNG in `godot/sim/rng.gd` (mulberry32 on 32-bit integers). The same seed plus the same commands must replay identically, and must give values equal to the TypeScript fixtures.
 - All balance numbers (cost, damage, range, rate, hp, speed, rewards, wave scaling) live in `godot/content`. Logic files contain no magic numbers.
+- A map is a grid, the Heartstone (the base) and one or more routes from spawn to it. Foes pick a route; towers target across routes. Phase 4 matches the TypeScript maps (a main road and a detour). More routes (forks, loops) come after parity as a new map version behind a content flag, and from then on the GDScript sim owns those fixtures.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
 - For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures keep large integers and fingerprints as hex strings and are compared with exact `==`.
 - While `src/sim` exists it keeps its own rules: no imports from render or ui (ESLint), no `Math.random`, no magic numbers outside `src/content`.
@@ -64,7 +65,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 ### Domain-driven design
 
 - `godot/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public entry class. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
-- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept.
+- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept. The one exception: the lore rewrite may rename what the player sees. Code terms and ids stay frozen as listed under Lore and naming, and only display strings in `godot/content` and the Naming table change.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
@@ -73,14 +74,16 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - Target: 60 fps with 80 foes on a mid-range phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2. The web export uses the Compatibility renderer (WebGL2) and the single-threaded build.
 - One `MultiMeshInstance3D` per foe type. Don't create a node per foe.
 - Camera: perspective, about 55° pitch, about 35° FOV, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, one script converts sim cells to world positions); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit.
-- Models come from glTF/GLB, preferably the owner's Blender models (`assets-src/blender/`), with CC0 packs as placeholders; keep a simple fallback mesh for any unit whose file is missing. Use part animation; skeletons only for bosses.
+- Models come from glTF/GLB. Sources, in order of preference: the owner's Blender models (`assets-src/blender/`, some made with Claude), AI-generated models from Meshy cleaned up in Blender (foes especially), and CC0 packs as placeholders. Keep a simple fallback mesh for any unit whose file is missing.
+- Foes and towers are animated: foes walk, get hit and die (an attack clip only if the sim gains a foe attack, such as the Saboteur in Phase 7); towers idle and fire. `MultiMeshInstance3D` cannot skin, so foes with many instances play baked vertex animation in a shader, with the clip index and start time per instance in instance custom data. Render keeps a dying instance alive until its death clip ends, driven by the death event. Bosses and towers use `AnimationPlayer` with a skeleton or part animation. Spike this on the phone in Phase 5 before committing every foe to it, and count draw calls and triangles with animation on, towers included.
+- Terrain is procedural: the sim map becomes terrain at load time from tiles plus Godot textures and shaders (ground blend, road edge, water, fog). Tiles and props that need a hand-made look come from Blender. Terrain code reads the map snapshot only.
 - Reuse meshes and materials, free nodes you remove, and avoid allocating objects every frame.
 
 ## UI
 
 - The HUD is built from Godot `Control` nodes with one Theme resource that mirrors the Claude Design tokens. Never hard-code colours in scenes or scripts.
 - The game is landscape only (owner decision). A phone held upright shows a "turn your phone" prompt (in the web export's HTML shell) and the game pauses. Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px.
-- Respect reduced motion: on the web, read `prefers-reduced-motion` through the HTML shell (`JavaScriptBridge`) and turn off screen shake and reduce particle effects.
+- Respect reduced motion: read the setting through one platform adapter (on the web, `prefers-reduced-motion` via the HTML shell and `JavaScriptBridge`; on iOS Godot may have no API for Reduce Motion, so plan an in-game setting or a small native plugin) and turn off screen shake and reduce particle effects. The landscape prompt and fullscreen button live in the web shell only.
 - Start audio only after the first tap (browsers block it before).
 
 ## Testing
@@ -129,8 +132,8 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
 - Open each PR with `gh pr create` using a conforming title (`gh stack submit --auto` generates titles that fail `PR checks`), then run `gh stack submit` to link them.
 - Merge from the bottom of the stack up, and run `gh stack sync` afterwards.
-- Assets: only GLB (meshopt-compressed where it helps) in `godot/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Use CC0 assets only unless asked otherwise. Original models made by the owner are credited as such.
-- Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets follow what the packs can supply; gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it.
+- Assets: only GLB (meshopt-compressed where it helps) in `godot/assets/`; sources go in `assets-src/` (Git LFS). Record every third-party asset in `assets/CREDITS.md` with its source and licence. Allowed sources: CC0 packs, the owner's original models, and Meshy-generated models. For a Meshy model record the plan it was generated under and keep its licence terms (commercial use, ownership) in `assets/CREDITS.md`; do not use a Meshy output made on a plan whose terms forbid shipping it. Anything else needs the owner's say-so.
+- Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets for pack-sourced units follow what the packs can supply (Meshy foes are briefed from the silhouette sheets instead); gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it. Generated models (Meshy) are retopologised and decimated to the unit's triangle budget in Blender, recoloured to the shared palette texture, and checked for a distinct zoomed-out silhouette before they replace a placeholder.
 
 ## CI/CD and releases
 
@@ -171,7 +174,7 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
 
 ## Naming
 
-Use the lore names in code-facing content and the UI:
+Use the lore names in code-facing content and the UI (provisional: the fantasy medieval lore rewrite may rename the display names; ids and code terms stay frozen):
 
 | Prototype | Remake |
 | --- | --- |
