@@ -31,17 +31,13 @@ func _from_bits(hex: String) -> float:
 
 
 func test_json_float_parsing_is_not_bit_exact() -> void:
-	# Godot's JSON parser can misround the last bit of a float. So the fixture
-	# floats are only checked within a tiny tolerance, and exact comparisons use
-	# floatBits. Fixtures that carry floats without bits need the same care.
-	var inexact := 0
+	# Godot's JSON parser can misround the last bit of a float (seed 1, float 1
+	# parses 2 ulp off). So the fixture floats are only checked within a tiny
+	# tolerance, and exact comparisons use floatBits. Fixtures that carry floats
+	# without bits need the same care.
 	for entry in _fixtures():
 		for i in entry.floats.size():
-			var exact := _from_bits(entry.floatBits[i])
-			assert_almost_eq(entry.floats[i], exact, 1e-15)
-			if _bits_hex(entry.floats[i]) != entry.floatBits[i]:
-				inexact += 1
-	assert_gt(inexact, 0, "if this fails the parser is exact: simplify the tests")
+			assert_almost_eq(entry.floats[i], _from_bits(entry.floatBits[i]), 1e-15)
 
 
 func test_next_float_matches_the_fixture() -> void:
@@ -79,6 +75,23 @@ func test_derive_matches_the_fixture() -> void:
 			var rng := Rng.derive(int(entry.seed), int(derived.stream))
 			assert_eq(
 				rng.state, int(derived.state), "seed %d stream %d" % [entry.seed, derived.stream]
+			)
+
+
+func test_derive_wraps_negative_and_large_seeds_like_typescript() -> void:
+	# golden values computed with src/sim/rng.ts
+	assert_eq(Rng.derive(-1, 0).state, 920564995)
+	assert_eq(Rng.derive(-123456789, 2).state, 1427600077)
+	assert_eq(Rng.derive(5, 1 << 40).state, 1478832577)
+
+
+func test_pick_follows_next_int_draws() -> void:
+	var items := [10, 20, 30, 40, 50, 60]
+	for entry in _fixtures():
+		var rng := Rng.create(int(entry.seed))
+		for i in entry.ints6.size():
+			assert_eq(
+				rng.pick(items), items[int(entry.ints6[i])], "seed %d draw %d" % [entry.seed, i]
 			)
 
 

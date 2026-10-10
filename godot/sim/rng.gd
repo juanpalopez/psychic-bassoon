@@ -65,7 +65,7 @@ func next_float() -> float:
 
 ## Next integer in [0, max_exclusive). `max_exclusive` is from 1 to 2^32.
 func next_int(max_exclusive: int) -> int:
-	assert(max_exclusive >= 1 and max_exclusive <= 4294967296, "bound out of range")
+	assert(max_exclusive >= 1 and max_exclusive <= int(UINT32_RANGE), "bound out of range")
 	return int(floor(next_float() * float(max_exclusive)))
 
 
