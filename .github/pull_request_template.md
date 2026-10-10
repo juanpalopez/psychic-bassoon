@@ -13,9 +13,9 @@ Closes #
 - [ ] Tests written first for sim/content changes (TDD), and they pass
 - [ ] `pnpm lint && pnpm test && pnpm build` pass locally
 - [ ] `src/sim` has no imports from `render`, `ui`, `three` or the DOM
-- [ ] Balance numbers live in `src/content`; no magic numbers in logic
-- [ ] No hard-coded colours (CSS tokens only) and no `Math.random()` in the sim
-- [ ] New third-party assets are CC0 and recorded in `assets/CREDITS.md`
+- [ ] Balance numbers live in `godot/content` (or `src/content`); no magic numbers in logic
+- [ ] No hard-coded colours (CSS tokens or the Godot Theme only) and no `Math.random()` or `randf`/`randi` in the sim
+- [ ] New third-party or generated assets (CC0, Meshy) are recorded in `assets/CREDITS.md` with source and licence
 - [ ] Docs updated if behaviour or rules changed
 - [ ] Adversarial review done at the right tier (see `docs/REVIEW-CHECKLIST.md`) and posted, or skipped by rule; blockers and majors fixed or answered
 

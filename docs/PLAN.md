@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _Updated 2026-10-10: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation. Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
+> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation, then Phase 4 (PRNG first, then procedural map generation with several routes to the Heartstone). The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
 
 ## Vision
 
@@ -20,6 +20,8 @@ Scrapline becomes a 3D low-poly tower defense for mobile browsers, built with Go
 Carried over from the prototype: grid placement, 4 tower types with 3 levels, endless waves, and the economy numbers as a starting point.
 
 ## Lore
+
+> **Under revision:** the owner is moving the setting to fantasy medieval. The text below is the current draft; names (Greyhold Keep, the Hollow King, Castellan Quell, the unit and tower names) may change. Ids (`scamp`, `ballista`…) are stable keys in the fixtures and code; display names and lore strings live in `godot/content` and the Naming table in `CLAUDE.md`, so a rename does not touch logic or fixtures.
 
 You are Castellan Quell, last warden of Greyhold Keep, the final stronghold of a kingdom that fell long ago. Beneath the keep burns the Heartstone, the last crystal of the old realm. While it shines, the gates hold and the Hollow cannot cross into the living lands. The Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to collect the Heartstone as unpaid tithe.
 
@@ -106,7 +108,7 @@ Supporting changes:
 
 ## Engine decision: Godot
 
-**Decision (owner, 2026-10-10):** build the game in Godot 4 instead of Three.js, for more freedom: a real editor for scenes, terrain, lighting and particles; animation and skeleton tools for foes; a UI toolkit; and a path to native iOS and Android apps. Web in a phone browser comes first, native later.
+**Decision (owner, 2026-10-10):** build the game in Godot 4 instead of Three.js, for more freedom: a real editor for scenes, terrain, lighting and particles; animation and skeleton tools for foes; a UI toolkit; and a path to a native iOS app. Web in a phone browser comes first, native iOS later; Android is optional and not planned.
 
 **What carries over:** the lore, naming, balance numbers, map and wave algorithms, all GLB assets and textures (including the owner's Blender models), the docs, tickets and review process.
 
@@ -121,7 +123,7 @@ Supporting changes:
 - **Determinism (value parity, not byte parity).** GDScript floats are 64-bit like JavaScript's, so results match if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, trig or engine `round`). Traps to port deliberately: `/` between two integers is integer division in GDScript (divide by a float such as `4294967296.0`); JavaScript's `Math.imul` and `>>>` need every value kept in [0, 2^32) and masked after each `*`, `+` and `^`; `Math.round` becomes `int(floor(x + 0.5))`. Fixtures store integers above 2^53 and fingerprints as hex strings and are compared with exact `==` (Godot's `JSON.parse` returns every number as a float).
 - **Different tooling.** gdtoolkit for lint and format, GUT for tests, the Godot CLI for export. CI must download a pinned Godot and its export templates (cache them).
 
-**Native later:** the same project exports to iOS and Android once the web build is solid; it needs signing, store accounts and review, so it is its own phase.
+**Native later:** the same project exports to iOS once the web build is solid (Android only if wanted); it needs an Apple Developer account, signing, App Store review and safe-area and input checks, so it is its own phase. Keep game code free of browser-only calls: the web shell (landscape prompt, reduced-motion read) stays outside `godot/sim`, `render` and `ui` logic behind one small adapter, so the iOS build swaps the adapter.
 
 ## Tech stack and architecture
 
@@ -163,6 +165,7 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 
 **Asset pipeline**
 
+0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, shared palette texture, rig, clips). Record the Meshy plan and its licence terms.
 1. Shortlist CC0 low-poly packs: Kenney (Tower Defense Kit, Castle Kit, Fantasy Town Kit, Mini Dungeon) and Quaternius (fantasy, monsters and medieval packs). Check each licence file; anything not clearly CC0 is out.
 2. Map every unit to a pack model and write the gaps in `docs/art/GAPS.md` (see the gap plan below).
 3. In Blender, build or remap faces to one shared palette texture; kitbash gap units from pack parts.
@@ -174,7 +177,7 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 **Claude Design:** design system (tokens, type, panels) first; then mobile screens (title, HUD, build sheet, upgrade sheet, pause, game over, story card); key art for the README and personal site; reference sheets per foe and tower level. Claude Design covers 2D screens and reference art, not 3D models.
 
 - **Rough silhouette sheets** (shape and colour only) for the 4 base foes and 4 towers come first and brief the models.
-- **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced.
+- **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced. Meshy foes are briefed from the silhouette sheets.
 
 ### Asset gap plan _(Phase 6)_
 
@@ -182,11 +185,11 @@ Which units a CC0 pack can plausibly cover, and what has to be built. Coverage i
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Scamp, Raider, Ironclad, Warlord | Goblin, footman, knight and champion models from a fantasy or monster pack | Kenney's Tower Defense Kit only has UFO enemies, so foes need a second CC0 source; none is chosen yet. Recolour; Warlord needs a red glowing core and is the only unit allowed skinning. |
+| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: record the Meshy plan in `assets/CREDITS.md`. |
 | Mender, Shieldbearer, Saboteur | Probably no exact match | Kitbash: a base body plus an added part (censer and floating tray; door-sized shield; smoking fuse). Fall back to primitives if kitbashing clashes. |
 | Hybrids (chapter 3) | None | Compose a base body with a second unit's part; no new full models. |
 | Towers (4) | Kenney Tower Defense Kit | Stone tower pieces, ballista, catapult and cannon weapons, and crystal pieces cover all four; recolour crystals to violet and yellow. |
-| Terrain and road | Kenney Tower Defense Kit | Grass and dirt road tiles, spawn and end tiles, trees, rocks and crystals; snow variants for later chapters. |
+| Terrain and road | Procedural in Godot (textures and shaders), plus Blender-made tiles and props (some built with Claude); Kenney tiles as placeholders | Ground blend, road edge and fog are shader work. Tiles for corners, junctions (for forked routes), spawn and Heartstone, trees, rocks, crystals; snow variants for later chapters. |
 | Level 2 and 3 parts, plus the 8 branch parts | None | Small add-on parts (barrels, coils, plates) built from primitives or pack props, attached to the base. Level lights are emissive primitives. |
 | Dimmed state (disabled tower) | None | Emissive flicker and a small spark effect; no new model. |
 
@@ -218,7 +221,7 @@ scrapline/
 - All balance numbers live in `godot/content`.
 - Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
 - Git LFS for binary sources; only compressed GLBs ship.
-- MIT for code; art keeps each pack's CC0 terms.
+- MIT for code; each art source keeps its terms (CC0 packs, the owner's own models, Meshy plan terms).
 
 ## CI/CD pipeline
 
@@ -248,9 +251,9 @@ scrapline/
 
 | Area | Prototype | Remake |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded, shareable map with one main road and often a detour (two routes from spawn to Heartstone); decorative props off the road. Drawn in landscape. |
+| Map | Random path on a 9×13 grid | Seeded, shareable map with several routes from spawn to Heartstone (a main road and a detour at first; forks and loops after parity); procedural terrain with decorative props off the road. Drawn in landscape. |
 | Towers | 4 types, 3 levels | Same, plus targeting mode per tower (first, strongest, closest) and a level 3 branch choice (two per tower) |
-| Enemies | 4 types | Same 4, animated; Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
+| Enemies | 4 types | Same 4, animated (walk, hit, death); Mender, Shieldbearer and Saboteur added in chapters 2–3; hybrids in chapter 3 |
 | Waves | Endless, boss every 10 | Chapters 1–4 with story cards, then endless |
 | Feedback | Flat 2D effects | Muzzle flashes, sparks, screen shake on boss hits (respects reduced motion) |
 | Progress | Best wave in local storage | Best wave per seed, plus a run summary |
@@ -268,10 +271,10 @@ Each phase ends with a gate that must pass before the next starts. Phases 0 to 2
 | 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
 | 4 · Sim port to GDScript | PRNG, map generation with routes, game, commands, tick, combat, waves, economy, headless run | **The GDScript sim reproduces every TypeScript fixture exactly** (maps, routes, waves, replays) |
-| 5 · Play in Godot | Terrain from GLB tiles, MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
-| 6 · Art and ambience | The owner's Blender foes, towers, terrain and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
+| 5 · Play in Godot | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
+| 6 · Art and ambience | Meshy foes cleaned up in Blender, the owner's Blender towers, terrain tiles and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
 | 7 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new foe and branch replays exactly from its seed |
-| 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS and Android export | Public web build on two real phones; native builds on one device each |
+| 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
 
 ## Phase details
 
@@ -304,24 +307,26 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 
 **Work breakdown** (test-first, one context at a time)
 1. PRNG (mulberry32 and `deriveRng`) on masked 32-bit integers; golden values from the fixtures.
-2. Map generation with the main road, the detour and tile data; routes and positions.
+2. Map generation with the main road, the detour and tile data; routes and positions. This is the first sim work after the PRNG, so the map and terrain can be looked at early.
 3. Game state, commands and the 30 Hz tick; the command queue and rejection events.
 4. Combat: movement, targeting across routes, damage and armor, the four towers' behaviour, shells.
 5. Waves and economy: composition, spawning, route choice, bonuses.
 6. Replay: the scripted bot and the fingerprint, compared with the TypeScript fingerprints for many seeds; a headless CLI (`godot --headless`) that prints the map and wave log.
+7. After parity, map version 2: more routes (forks, loops) behind a content flag. Validity is per route: each route is a simple path from spawn to Heartstone, not adjacent to itself except at consecutive cells; a junction is any cell on two or more routes, routes may share runs of cells (a trunk) between junctions, and outside shared runs two routes are not adjacent. The GDScript sim exports the new fixtures.
 
 **Gate checklist**
 - [ ] Every fixture matches exactly (maps, routes, waves, replay fingerprints).
 - [ ] The sim imports nothing from the scene tree (lint).
 - [ ] A 12-minute headless run finishes within a time budget on CI.
+- [ ] After parity (step 7): maps support more than two routes as a new map version behind a content flag, with GUT tests for validity and new fixtures exported from the GDScript sim.
 
 ### Phase 5 · Play in Godot
 
 **Goal:** the game playable on the phone in Godot, at least as good as the web build.
 
 **Work breakdown**
-1. Terrain and road from the GLB tiles (straight, corner, end, T), scenery ring, spawn and Heartstone, dusk lighting and fog.
-2. `MultiMesh` foes with interpolation, towers with levels, selection highlight and range ring.
+1. Procedural terrain built from the map: GLB tiles (straight, corner, end, T, junction), Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
+2. `MultiMesh` foes with interpolation and baked vertex animation (spike it on the phone first), towers with levels and idle/fire animation, selection highlight and range ring.
 3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell.
 4. Control-node HUD: gold, lives, wave, build sheet, tower sheet, speed, pause, next-wave popup, auto-start, game over, landscape prompt.
 5. Effects (beams, arcs, rings, sparks, shells), reduced motion, audio after the first tap.
@@ -337,9 +342,9 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Goal:** the final look, without changing gameplay.
 
 **Work breakdown**
-1. The owner's Blender models: towers (done), foes, terrain and ambient props; record each in `assets/CREDITS.md`.
+1. Final models: the owner's Blender towers (done); foes from Meshy cleaned up in Blender; Blender terrain tiles and ambient props. Record each in `assets/CREDITS.md`, with the Meshy plan for generated models.
 2. Claude Design: system and tokens first, then mobile screens; build the Godot Theme from them.
-3. Foe animation (skeletons or part animation); torches, mist, glow, crystals, particles.
+3. Foe and tower animation (rigged clips baked for `MultiMesh`, `AnimationPlayer` for towers and bosses); torches, mist, glow, crystals, particles.
 4. Budget re-check.
 
 **Gate checklist**
@@ -373,13 +378,13 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 1. Audio and music (decision from the open questions).
 2. Performance and loading pass on real devices; 30 fps fallback with reduced effects.
 3. README with key art and a short play guide; link from the personal site.
-4. Final licence check: `assets/CREDITS.md` complete, MIT for code, CC0 terms for art.
-5. iOS and Android export: signing, store accounts, input and safe areas, store listing.
+4. Final licence check: `assets/CREDITS.md` complete, MIT for code; each art source keeps its terms (CC0 packs, the owner's own models, Meshy plan terms).
+5. iOS export: Apple Developer account, signing, input and safe areas, store listing. Android only if the owner asks.
 
 **Gate checklist**
 - [ ] Public web build runs on GitHub Pages on at least two real phones.
 - [ ] README and credits complete.
-- [ ] Native builds run on one iPhone and one Android phone.
+- [ ] The native iOS build runs on one iPhone.
 
 ## Risks and open questions
 
@@ -389,10 +394,10 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; keep the TypeScript web build live until Phase 5 passes |
 | The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the TypeScript sim is frozen once the fixtures exist; it changes only for a bug, with the fixtures regenerated and the Godot sim updated in the same PR |
 | Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
-| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through a small `JavaScriptBridge` call in the web shell; accept the accessibility loss and record it |
+| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
-| Skinned animation for many foes is too slow on phones | Part animation on `MultiMesh` instances; skeletons only for bosses |
+| Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
@@ -409,4 +414,6 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
 - [ ] Download budget for the Godot web build (set after the Phase 3 measurement)
-- [ ] Rename the game: Scrapline no longer fits the medieval setting
+- [ ] Rename the game: Scrapline no longer fits the medieval setting, and the lore is being rewritten as fantasy medieval. Decide the name and which lore names stay before Phase 6 art and Phase 7 text.
+- [ ] Meshy: which plan the owner generates on, and whether its terms allow shipping the models (record in `assets/CREDITS.md`).
+- [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Spike in Phase 5; fallback is part animation and fewer animated instances.
