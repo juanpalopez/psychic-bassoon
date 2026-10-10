@@ -296,10 +296,11 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Out of scope:** any gameplay.
 
 **Gate checklist**
-- [ ] An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari.
-- [ ] CI runs lint, GUT and the export, and a red check blocks the deploy.
-- [ ] Fixtures exist and the TypeScript tests regenerate them identically.
+- [x] An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari (iPhone 15 Pro, 60 Hz).
+- [x] CI runs lint, GUT and the export, and a red check blocks the deploy.
+- [x] Fixtures exist and the TypeScript tests regenerate them identically.
 - [ ] **Go/no-go:** on the owner's iPhone Safari the export's download size, start time, memory and an 80-instance stub scene are within the budget set here. If not, stop and take the fallback in Risks (keep Three.js for web, Godot for native only) before any Phase 4 work.
+  - **Result (2026-10-10): go.** The stub runs on the owner's iPhone 15 Pro (60 Hz). The export is 11.67 MB gzipped (`index.wasm` 10.15 MB, `index.pck` 1.40 MB). Download budget: 14 MB gzipped, as CI enforces. Not measured: start time and memory in numbers, frame rate beyond "works", and any mid-range phone; the iPhone 15 Pro is a flagship, so the 60 fps target on a mid-range phone stays open for the Phase 5 gate. Phase 4 started before this was recorded, on the owner's instruction.
 
 ### Phase 4 · Sim port to GDScript
 
@@ -413,7 +414,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 - [ ] Music: commission, CC0 tracks, or skip for v1
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
-- [ ] Download budget for the Godot web build (set after the Phase 3 measurement)
+- [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows.
 - [ ] Rename the game: Scrapline no longer fits the medieval setting, and the lore is being rewritten as fantasy medieval. Decide the name and which lore names stay before Phase 6 art and Phase 7 text.
 - [ ] Meshy: which plan the owner generates on, and whether its terms allow shipping the models (record in `assets/CREDITS.md`).
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Spike in Phase 5; fallback is part animation and fewer animated instances.
