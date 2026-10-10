@@ -84,6 +84,12 @@ func test_routes_are_valid_for_every_fixture_seed() -> void:
 					assert_eq(
 						absi(step.x) + absi(step.y), 1, "one orthogonal step, seed %d" % entry.seed
 					)
+				# a route never touches itself: no earlier cell but the previous one is adjacent
+				for j in range(0, i - 1):
+					var apart: Vector2i = cell - route[j]
+					assert_ne(
+						absi(apart.x) + absi(apart.y), 1, "touches itself, seed %d" % entry.seed
+					)
 
 
 func test_road_tiles_are_exactly_the_route_cells() -> void:

@@ -3,6 +3,7 @@ extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
 const EPSILON := 1e-9
+const FIXTURE := "res://../fixtures/routes.json"
 
 
 func _straight_down(length: int) -> Array[Vector2i]:
@@ -53,3 +54,49 @@ func test_route_needs_at_least_one_cell() -> void:
 	var route := Route.build([] as Array[Vector2i])
 	assert_null(route)
 	assert_push_error("a route needs at least one cell")
+
+
+func _bits_hex(value: float) -> String:
+	var bytes := PackedByteArray()
+	bytes.resize(8)
+	bytes.encode_double(0, value)
+	var hex := ""
+	for i in range(7, -1, -1):
+		hex += "%02x" % bytes[i]
+	return hex
+
+
+func _from_bits(hex: String) -> float:
+	var bytes := PackedByteArray()
+	bytes.resize(8)
+	for i in 8:
+		bytes[7 - i] = ("0x" + hex.substr(i * 2, 2)).hex_to_int()
+	return bytes.decode_double(0)
+
+
+func _bits_of(values: PackedFloat64Array) -> Array:
+	var out := []
+	for value in values:
+		out.append(_bits_hex(value))
+	return out
+
+
+func test_routes_match_the_typescript_bits() -> void:
+	var text := FileAccess.get_file_as_string(ProjectSettings.globalize_path(FIXTURE))
+	var entries: Array = JSON.parse_string(text)
+	assert_eq(entries.size(), 12)
+	for entry in entries:
+		var map := MapGen.generate(int(entry.seed))
+		assert_eq(map.routes.size(), entry.routes.size(), "route count, seed %d" % entry.seed)
+		for r in entry.routes.size():
+			var want: Dictionary = entry.routes[r]
+			var route := Route.build(map.routes[r])
+			var label := "seed %d route %d" % [entry.seed, r]
+			assert_eq(_bits_of(route.xs), want.xs, "xs, " + label)
+			assert_eq(_bits_of(route.ys), want.ys, "ys, " + label)
+			assert_eq(_bits_of(route.cumulative), want.cumulative, "cumulative, " + label)
+			assert_eq(_bits_hex(route.total), want.total, "total, " + label)
+			for sample in want.samples:
+				var at := route.position_at(_from_bits(sample[0]))
+				assert_eq(_bits_hex(at.x), sample[1], "x at %s, %s" % [sample[0], label])
+				assert_eq(_bits_hex(at.y), sample[2], "y at %s, %s" % [sample[0], label])

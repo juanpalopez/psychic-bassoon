@@ -9,8 +9,10 @@ import {
   damageEnemy,
   deriveRng,
   enemyStatsForWave,
+  buildRoute,
   fingerprint,
   generateMap,
+  positionAt,
   nextFloat,
   nextInt,
   nextRange,
@@ -79,6 +81,32 @@ function maps(): Json {
       ),
     };
   });
+}
+
+const ROUTE_SEEDS = MAP_SEEDS.slice(0, 12);
+const ROUTE_SAMPLES = 24;
+
+/** Route points, distances and `positionAt` samples, all as float bits. */
+function routes(): Json {
+  return ROUTE_SEEDS.map(seed => ({
+    seed,
+    routes: generateMap(seed).routes.map(cells => {
+      const route = buildRoute(cells);
+      return {
+        xs: route.points.map(p => bitsOf(p.x)),
+        ys: route.points.map(p => bitsOf(p.y)),
+        cumulative: route.cumulative.map(bitsOf),
+        total: bitsOf(route.total),
+        // `along` is stored too, so the port needs no float arithmetic to
+        // reproduce the sample positions; it also samples before and after
+        samples: Array.from({length: ROUTE_SAMPLES}, (_, k) => {
+          const along = ((k - 1) * route.total) / (ROUTE_SAMPLES - 3);
+          const at = positionAt(route, along);
+          return [bitsOf(along), bitsOf(at.x), bitsOf(at.y)];
+        }),
+      };
+    }),
+  }));
 }
 
 function waves(): Json {
@@ -231,6 +259,7 @@ export function buildFixtures(): Record<string, string> {
   const files: Record<string, Json> = {
     'prng.json': prng(),
     'maps.json': maps(),
+    'routes.json': routes(),
     'waves.json': waves(),
     'scaling.json': scaling(),
     'damage.json': damage(),
