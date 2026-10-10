@@ -70,6 +70,8 @@ function updateFullscreenButton() {
 if (!installed) {
 	fullscreenButton.hidden = false;
 	fullscreenButton.addEventListener('click', function () {
+		// keep keyboard input on the canvas, not on the button
+		fullscreenButton.blur();
 		if (!requestFullscreen) {
 			installHint.hidden = !installHint.hidden;
 		} else if (isFullscreen()) {

@@ -1,5 +1,6 @@
 {
-  "name": "Scrapline",
+  "id": "godot-web",
+  "name": "Scrapline (Godot)",
   "short_name": "Scrapline",
   "start_url": ".",
   "scope": ".",
