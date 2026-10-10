@@ -20,7 +20,9 @@ export function spawnEnemy(
   const lane =
     route ??
     (game.routes.length > 1 ? nextInt(game.routeRng, game.routes.length) : 0);
-  const start = positionAt(game.routes[lane] ?? game.route, 0);
+  const laneRoute = game.routes[lane];
+  if (!laneRoute) throw new RangeError(`no route ${lane}`);
+  const start = positionAt(laneRoute, 0);
   const enemy: Enemy = {
     id: game.nextId++,
     type,

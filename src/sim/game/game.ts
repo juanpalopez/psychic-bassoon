@@ -169,8 +169,7 @@ export type GameEvent =
 export interface GameState {
   readonly seed: number;
   readonly map: GameMap;
-  /** The line foes walk, built once from the map. */
-  /** The main route (`routes[0]`). */
+  /** The main route (`routes[0]`), built once from the map. */
   readonly route: Route;
   /** Every route from the spawn to the Heartstone; foes pick one. */
   readonly routes: readonly Route[];
