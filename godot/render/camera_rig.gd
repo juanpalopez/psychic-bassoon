@@ -42,12 +42,18 @@ static func fit_distance(
 	return distance
 
 
-## Places the camera for a screen of this aspect ratio.
-func frame(aspect: float) -> void:
-	aspect = maxf(aspect, MIN_ASPECT)
+## The camera this rig places.
+func camera() -> Camera3D:
 	if _camera == null:
 		_camera = Camera3D.new()
 		add_child(_camera)
+	return _camera
+
+
+## Places the camera for a screen of this aspect ratio.
+func frame(aspect: float) -> void:
+	aspect = maxf(aspect, MIN_ASPECT)
+	camera()
 	var pitch := deg_to_rad(pitch_degrees)
 	var distance := fit_distance(BoardSpace.corners(), pitch_degrees, fov_degrees, aspect, margin)
 	_camera.fov = fov_degrees

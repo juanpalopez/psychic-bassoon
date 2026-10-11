@@ -14,6 +14,9 @@ extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
 
+## What `world_to_cell` and the cell picker return for a point off the board.
+const NO_CELL := Vector2i(-1, -1)
+
 
 ## The centre of a cell, on the ground.
 static func cell_to_world(col: int, row: int) -> Vector3:
@@ -39,3 +42,24 @@ static func corners() -> Array[Vector3]:
 		Vector3(half.x, 0.0, half.y),
 		Vector3(-half.x, 0.0, half.y),
 	]
+
+
+## The cell under a point on the ground, or `NO_CELL` when it is off the board.
+## The inverse of `cell_to_world` (any point inside a cell gives that cell).
+static func world_to_cell(point: Vector3) -> Vector2i:
+	var row := int(floor(point.x + float(RULES.GRID_ROWS) / 2.0))
+	var col := int(floor(float(RULES.GRID_COLS) / 2.0 - point.z))
+	if row < 0 or row >= RULES.GRID_ROWS or col < 0 or col >= RULES.GRID_COLS:
+		return NO_CELL
+	return Vector2i(col, row)
+
+
+## Where a ray meets the ground plane (y = 0), or null when it points up or
+## along the ground, or the ground is behind it.
+static func ground_hit(origin: Vector3, direction: Vector3) -> Variant:
+	if direction.y >= -1e-9:
+		return null
+	var distance := -origin.y / direction.y
+	if distance < 0.0:
+		return null
+	return origin + direction * distance

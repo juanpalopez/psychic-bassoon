@@ -1,35 +1,131 @@
-## The greybox scene (Phase 5, step A1): the real map on flat tiles.
+## The greybox scene (Phase 5, steps A1 and A2): the real map, and building on it.
 ##
-## Tap "Next seed" to look at another map; on the web, open the page with
-## `?seed=42` to start on a given seed. It only reads the map: no game logic
-## lives here, and render code never touches the sim's state.
+## It owns one game (`Game.create`), ticks it at 30 Hz through the clock, turns a
+## tap into a board cell, and sends build commands with `Game.submit`. It only
+## reads the game's state and its events; it never changes them directly.
+##
+## Tap "Next seed" to look at another map (a new game); on the web, open the
+## page with `?seed=42` to start on a given seed.
 extends Node3D
 
+const MESSAGE_SECONDS := 2.0
+const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
+const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
+const GAME_SPEED := 1
+
+var _game: GameState
+var _clock := Clock.new()
+var _selected := BoardSpace.NO_CELL
+var _message_left := 0.0
+
 @onready var _board: Board = $Board
+@onready var _camera: Camera3D = ($CameraRig as CameraRig).camera()
+@onready var _highlight: CellHighlight = $Highlight
+@onready var _towers: TowersView = $Towers
 @onready var _info: Label = $Hud/Info
+@onready var _message: Label = $Hud/Message
+@onready var _menu: BuildMenu = $Hud/BuildMenu
 @onready var _next_seed: Button = $Hud/NextSeed
 
 
 func _ready() -> void:
 	var from_url: Variant = _seed_from_url()
-	if from_url is int:
-		_board.map_seed = from_url
-	_next_seed.pressed.connect(func() -> void: _board.map_seed += 1)
+	_start(from_url if from_url is int else _board.map_seed)
+	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
+	_menu.tower_chosen.connect(_on_tower_chosen)
 	# the browser smoke test waits for this flag
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.scraplineReady = true")
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	Frame.step(_game, _clock, delta, GAME_SPEED, Callable(), _after_tick)
+	_towers.sync(_game.towers)
+	_menu.set_gold(_game.gold)
+	_message_left = maxf(0.0, _message_left - delta)
+	_message.visible = _message_left > 0.0
 	_info.text = (
-		"Seed %d  |  %d routes  |  Godot %s  |  %d fps"
-		% [
-			_board.map_seed,
-			_board.map.routes.size(),
-			Engine.get_version_info().string,
-			Engine.get_frames_per_second(),
-		]
+		"Seed %d  |  Gold %d  |  %d routes  |  %d fps"
+		% [_game.seed, _game.gold, _game.map.routes.size(), Engine.get_frames_per_second()]
 	)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		var cell := CellPicker.cell_at(_camera, event.position)
+		select_cell(cell)
+		if cell == BoardSpace.NO_CELL:
+			_show_message("Tap a green plot")
+
+
+## The game being played (read it; change it only with commands).
+func game() -> GameState:
+	return _game
+
+
+## The selected cell, or `BoardSpace.NO_CELL`.
+func selected_cell() -> Vector2i:
+	return _selected
+
+
+## Selects a cell: highlights it and, for a free plot, opens the build menu.
+## `BoardSpace.NO_CELL` clears the selection.
+func select_cell(cell: Vector2i) -> void:
+	_selected = cell
+	_menu.close()
+	if cell == BoardSpace.NO_CELL:
+		_highlight.hide_cell()
+		return
+	var height := _board.surface_height(cell)
+	if _game.map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
+		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_show_message("That is road: build on the green")
+		return
+	var tower := _tower_on(cell)
+	if tower != null:
+		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_show_message("%s here" % tower.type)
+		return
+	if _game.over:
+		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_show_message(RejectText.of(GameEvent.RejectReason.GAME_OVER))
+		return
+	_highlight.show_cell(cell, height, FREE_COLOUR)
+	_menu.open_for(cell, _game.gold)
+
+
+## Starts a fresh game on a map seed.
+func _start(map_seed: int) -> void:
+	_board.map_seed = map_seed
+	_game = Game.create(map_seed)
+	_clock = Clock.new()
+	select_cell(BoardSpace.NO_CELL)
+	_towers.sync(_game.towers)
+
+
+func _tower_on(cell: Vector2i) -> Tower:
+	for tower in _game.towers:
+		if tower.col == cell.x and tower.row == cell.y:
+			return tower
+	return null
+
+
+func _on_tower_chosen(tower: String) -> void:
+	Game.submit(_game, Command.build(tower, _selected.x, _selected.y))
+	select_cell(BoardSpace.NO_CELL)
+
+
+## Reads what the tick reported: a refused command becomes a short message.
+func _after_tick(game: GameState) -> void:
+	for event in game.events:
+		if event.kind == GameEvent.Kind.COMMAND_REJECTED:
+			_show_message(RejectText.of(event.reason))
+
+
+func _show_message(text: String) -> void:
+	_message.text = text
+	_message_left = MESSAGE_SECONDS
+	_message.visible = true
 
 
 ## The `seed` query parameter of the page as an int, or null when there is none
