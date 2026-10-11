@@ -101,9 +101,13 @@ func test_speed_and_frame_rate_never_change_the_game() -> void:
 	for setup in [[1, 1.0 / 60.0], [2, 1.0 / 60.0], [3, 1.0 / 30.0], [3, 1.0 / 20.0]]:
 		var game := _play(setup[1], setup[0], ticks)
 		assert_eq(game.tick_count, ticks)
-		assert_eq(game.buttons, reference.buttons, "buttons at speed %d" % setup[0])
-		assert_eq(game.wave, reference.wave)
-		assert_eq(game.towers.size(), reference.towers.size())
+		assert_eq(
+			GameTestKit.snapshot(game),
+			GameTestKit.snapshot(reference),
+			"the whole game at speed %d, frame %f" % [setup[0], setup[1]]
+		)
+	# foes really are on the board in this run (otherwise the check proves little)
+	assert_gt(reference.foes.size(), 0)
 
 
 ## A scripted player: builds, upgrades and launches on fixed ticks.

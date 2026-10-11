@@ -26,6 +26,13 @@ static func step_spawners(game: GameState) -> void:
 			var order: SpawnOrder = spawner.queue.pop_front()
 			FoeSpawner.spawn(game, order.type, spawner.wave)
 			spawner.timer += order.gap
+	var finished := false
+	for spawner in game.spawners:
+		if spawner.queue.is_empty():
+			finished = true
+			break
+	if not finished:
+		return
 	var remaining: Array[Spawner] = []
 	for spawner in game.spawners:
 		if not spawner.queue.is_empty():

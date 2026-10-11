@@ -8,16 +8,28 @@ extends RefCounted
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
 	_move_foes(game)
-	var alive: Array[Foe] = []
-	for foe in game.foes:
-		if foe.alive:
-			alive.append(foe)
-	game.foes = alive
+	_remove_the_fallen(game)
 	if game.kingdom_health <= 0 and not game.over:
 		game.over = true
 		var event := GameEvent.of(GameEvent.Kind.GAME_OVER)
 		event.wave = game.wave
 		game.events.append(event)
+
+
+## Drops foes that are no longer alive; leaves the array alone when nobody is.
+static func _remove_the_fallen(game: GameState) -> void:
+	var any_fallen := false
+	for foe in game.foes:
+		if not foe.alive:
+			any_fallen = true
+			break
+	if not any_fallen:
+		return
+	var alive: Array[Foe] = []
+	for foe in game.foes:
+		if foe.alive:
+			alive.append(foe)
+	game.foes = alive
 
 
 static func _move_foes(game: GameState) -> void:
@@ -34,6 +46,7 @@ static func _move_foes(game: GameState) -> void:
 			var event := GameEvent.of(GameEvent.Kind.FOE_LEAKED)
 			event.foe_id = foe.id
 			event.foe_type = foe.type
+			# the foe's own leak, even if the health was already gone this tick
 			event.leak = foe.leak
 			game.events.append(event)
 			continue

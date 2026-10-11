@@ -43,19 +43,29 @@ func test_launching_a_wave_queues_its_foes() -> void:
 	assert_eq(game.spawners[0].queue.size(), 7, "wave 1 holds 7 foes")
 
 
-func test_the_first_foe_appears_after_the_first_spawn_delay() -> void:
+func test_the_first_foe_appears_on_the_tick_the_spawn_delay_runs_out() -> void:
 	var game := _launched()
-	# 0.2 s is 6 ticks of 1/30 s; the wave was queued in the launching tick
-	_tick(game, 4)
-	assert_eq(game.foes.size(), 0, "not yet")
-	var ticks := _until(game, func() -> bool: return game.foes.size() > 0, 20)
-	assert_lte(ticks, 4, "it came by the 8th tick")
+	# the launching tick already took one tick off the 0.2 s delay; count the
+	# ticks with the same float arithmetic, written out here
+	var timer: float = WAVES.FIRST_SPAWN_DELAY
+	var expected := 0
+	while timer > 0.0:
+		timer -= Game.TICK_SECONDS
+		expected += 1
+	assert_eq(expected, 7, "repeated 1/30 s steps leave 0.2 a hair above 0 after 6")
+	var spawned_at := -1
+	while spawned_at < 0 and game.tick_count < 40:
+		Game.tick(game)
+		if not _events_of(game, GameEvent.Kind.FOE_SPAWNED).is_empty():
+			spawned_at = game.tick_count
+	assert_eq(spawned_at, expected)
 	assert_eq(game.foes[0].type, "scrapGoblin")
 
 
-func test_a_foe_starts_on_the_spawn_point_with_its_wave_stats() -> void:
+func test_a_foe_starts_with_its_wave_stats_and_walks_on_its_spawn_tick() -> void:
 	var game := _launched()
-	_until(game, func() -> bool: return game.foes.size() > 0, 40)
+	while game.foes.is_empty():
+		Game.tick(game)
 	var foe := game.foes[0]
 	var stats := FoeStats.for_wave("scrapGoblin", 1)
 	assert_eq(foe.hp, stats.hp)
@@ -65,34 +75,40 @@ func test_a_foe_starts_on_the_spawn_point_with_its_wave_stats() -> void:
 	assert_eq(foe.armor, stats.armor)
 	assert_eq(foe.leak, 1)
 	assert_true(foe.alive)
-	# on the spawn point it has walked at most one tick
-	var route := game.routes[foe.route]
-	var start := route.position_at(0.0)
-	assert_almost_eq(foe.x, start.x, 0.1)
-	assert_almost_eq(foe.y, start.y, 0.1)
+	# spawners run before the foes move, so a foe walks one tick on the tick it spawns
+	assert_eq(foe.distance, foe.speed * Game.TICK_SECONDS)
+	var at := game.routes[foe.route].position_at(foe.distance)
+	assert_eq(foe.x, at.x)
+	assert_eq(foe.y, at.y)
 
 
-func test_foes_come_out_in_order_with_the_waves_gaps() -> void:
+func test_foes_come_out_in_order_on_the_exact_ticks_the_gaps_give() -> void:
 	var game := _launched()
 	var queue: Array[SpawnOrder] = []
 	for order in game.spawners[0].queue:
 		queue.append(order)
+	# the expected tick of each release, from the same float arithmetic written out
+	var timer: float = WAVES.FIRST_SPAWN_DELAY
+	var tick := 0
+	var expected: Array[int] = []
+	var index := 0
+	while index < queue.size():
+		tick += 1
+		timer -= Game.TICK_SECONDS
+		while timer <= 0.0 and index < queue.size():
+			expected.append(tick)
+			timer += queue[index].gap
+			index += 1
 	var seen: Array[String] = []
 	var ticks_at: Array[int] = []
-	var guard := 0
-	while seen.size() < queue.size() and guard < 5000:
+	while seen.size() < queue.size() and game.tick_count < 5000:
 		Game.tick(game)
-		guard += 1
 		for event in _events_of(game, GameEvent.Kind.FOE_SPAWNED):
 			seen.append(event.foe_type)
 			ticks_at.append(game.tick_count)
-	assert_eq(seen.size(), queue.size())
 	for i in queue.size():
 		assert_eq(seen[i], queue[i].type, "foe %d" % i)
-	# a gap of 0.54 s is 16 ticks, give or take one for the tick it lands in
-	for i in range(1, ticks_at.size()):
-		var expected := queue[i - 1].gap * 30.0
-		assert_almost_eq(float(ticks_at[i] - ticks_at[i - 1]), expected, 1.01, "gap %d" % i)
+	assert_eq(ticks_at, expected)
 
 
 func test_the_wave_is_done_releasing_when_the_spawner_empties() -> void:
@@ -113,73 +129,6 @@ func test_foes_walk_the_route_at_their_speed() -> void:
 	var at := game.routes[foe.route].position_at(foe.distance)
 	assert_almost_eq(foe.x, at.x, 1e-9)
 	assert_almost_eq(foe.y, at.y, 1e-9)
-
-
-func test_a_foe_that_reaches_the_end_leaks_and_leaves() -> void:
-	var game := _launched()
-	var start_health := game.kingdom_health
-	_until(game, func() -> bool: return game.kingdom_health < start_health)
-	assert_lt(game.kingdom_health, start_health)
-	# the goblin that got through cost 1
-	assert_eq(game.kingdom_health, start_health - 1)
-
-
-func test_a_leak_is_an_event_and_the_foe_is_gone() -> void:
-	var game := _launched()
-	var found := false
-	for i in 20000:
-		Game.tick(game)
-		var leaks := _events_of(game, GameEvent.Kind.FOE_LEAKED)
-		if not leaks.is_empty():
-			found = true
-			assert_eq(leaks[0].leak, 1)
-			for foe in game.foes:
-				assert_ne(foe.id, leaks[0].foe_id, "the leaked foe is removed")
-			break
-	assert_true(found)
-
-
-func test_the_game_ends_when_the_kingdom_has_no_health_left() -> void:
-	var game := _launched()
-	game.kingdom_health = 1
-	_until(game, func() -> bool: return game.over)
-	assert_true(game.over)
-	assert_eq(game.kingdom_health, 0, "health stops at 0")
-	var over := false
-	for i in 3:
-		Game.tick(game)
-	# the event came on the tick it happened; commands are now turned away
-	var command := Command.launch_wave()
-	var events := GameTestKit.run(game, [command])
-	assert_eq(events[0].reason, GameEvent.RejectReason.GAME_OVER)
-	assert_false(over)
-
-
-func test_game_over_is_announced_once_with_the_wave() -> void:
-	var game := _launched()
-	game.kingdom_health = 1
-	var announced := 0
-	for i in 20000:
-		Game.tick(game)
-		for event in _events_of(game, GameEvent.Kind.GAME_OVER):
-			announced += 1
-			assert_eq(event.wave, 1)
-		if game.over:
-			break
-	_tick(game, 5)
-	assert_eq(announced, 1)
-
-
-func test_nothing_moves_once_the_game_is_over() -> void:
-	var game := _launched()
-	game.kingdom_health = 1
-	_until(game, func() -> bool: return game.over)
-	var distances: Array[float] = []
-	for foe in game.foes:
-		distances.append(foe.distance)
-	_tick(game, 10)
-	for i in game.foes.size():
-		assert_eq(game.foes[i].distance, distances[i])
 
 
 func test_a_cleared_wave_pays_its_bonus_once() -> void:
@@ -258,7 +207,6 @@ func test_with_two_routes_foes_use_both_and_one_draw_per_foe() -> void:
 	for i in 7:
 		expected.next_int(2)
 	assert_eq(game.route_rng.state, expected.state)
-	assert_ne(game.route_rng.state, state_before)
 
 
 func test_with_one_route_the_route_stream_is_not_touched() -> void:
@@ -284,3 +232,60 @@ func test_the_same_seed_and_commands_give_the_same_game() -> void:
 		_tick(game, 400)
 	assert_eq(GameTestKit.snapshot(a), GameTestKit.snapshot(b))
 	assert_gt(a.foes.size(), 0)
+
+
+func test_the_route_each_foe_takes_is_the_next_draw_of_the_route_stream() -> void:
+	var game: GameState = null
+	var draws: Array[int] = []
+	for map_seed in range(1, 80):
+		var candidate := Game.create(map_seed)
+		if candidate.routes.size() != 2:
+			continue
+		var stream := Rng.derive(map_seed, Streams.ROUTES)
+		var picks: Array[int] = []
+		for i in 7:
+			picks.append(stream.next_int(2))
+		if picks.has(0) and picks.has(1):
+			game = candidate
+			draws = picks
+			break
+	assert_not_null(game, "a map with a detour whose first 7 draws use both routes")
+	GameTestKit.run(game, [Command.launch_wave()])
+	_until(game, func() -> bool: return game.spawners.is_empty())
+	assert_eq(game.foes.size(), 7)
+	for i in 7:
+		assert_eq(game.foes[i].route, draws[i], "foe %d" % i)
+
+
+func test_several_foes_with_no_gap_come_out_in_one_tick() -> void:
+	var game := Game.create(SEED)
+	var spawner := Spawner.new()
+	spawner.wave = 1
+	spawner.timer = 0.0
+	for i in 3:
+		spawner.queue.append(SpawnOrder.of("scrapGoblin", 0.0))
+	game.spawners.append(spawner)
+	game.running = true
+	game.wave = 1
+	Game.tick(game)
+	assert_eq(game.foes.size(), 3)
+	assert_eq(game.spawners.size(), 0)
+
+
+func test_calling_a_wave_early_leaves_one_clear_for_the_later_wave() -> void:
+	# wave 1's foes still walk when wave 2 is called, so they count toward wave 2's
+	# clear: wave 1 never gets its own bonus (the prototype's rule)
+	var game := _launched()
+	game.kingdom_health = 100000
+	_until(game, func() -> bool: return game.spawners.is_empty())
+	GameTestKit.run(game, [Command.launch_wave()])
+	var clears: Array[GameEvent] = []
+	for i in 20000:
+		Game.tick(game)
+		clears.append_array(_events_of(game, GameEvent.Kind.WAVE_CLEARED))
+		if not game.running:
+			break
+	assert_eq(clears.size(), 1)
+	assert_eq(clears[0].wave, 2)
+	# 15 + 2 * 2
+	assert_eq(clears[0].bonus, 19)

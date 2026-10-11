@@ -38,10 +38,27 @@ static func snapshot(game: GameState) -> Dictionary:
 		)
 	var foes := []
 	for foe in game.foes:
-		foes.append([foe.id, foe.type, foe.route, foe.hp, foe.distance, foe.x, foe.y])
+		foes.append(
+			[
+				foe.id,
+				foe.type,
+				foe.route,
+				foe.hp,
+				foe.speed,
+				foe.reward,
+				foe.armor,
+				foe.slow,
+				foe.distance,
+				foe.x,
+				foe.y
+			]
+		)
 	var spawners := []
 	for spawner in game.spawners:
-		spawners.append([spawner.wave, spawner.timer, spawner.queue.size()])
+		var queue := []
+		for order in spawner.queue:
+			queue.append([order.type, order.gap])
+		spawners.append([spawner.wave, spawner.timer, queue])
 	var routes := []
 	for route in game.map.routes:
 		var cells := []
