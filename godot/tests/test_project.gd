@@ -62,7 +62,7 @@ func test_engine_matches_pinned_version() -> void:
 
 
 ## A tap on a free plot opens the build menu, choosing a tower sends a build
-## command, and after a tick the tower stands there and the gold is spent.
+## command, and after a tick the tower stands there and the Buttons are spent.
 func test_a_tap_and_a_choice_builds_a_tower() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
@@ -72,13 +72,13 @@ func test_a_tap_and_a_choice_builds_a_tower() -> void:
 	main.select_cell(plot)
 	var menu := main.get_node("Hud/BuildMenu") as BuildMenu
 	assert_true(menu.visible)
-	var start_gold := game.gold
-	menu.buttons()[0].pressed.emit()
+	var start_buttons := game.buttons
+	menu.tower_buttons()[0].pressed.emit()
 	assert_false(menu.visible)
 	main._process(0.05)  # long enough for one 30 Hz tick
 	assert_eq(game.towers.size(), 1)
 	assert_eq(Vector2i(game.towers[0].col, game.towers[0].row), plot)
-	assert_lt(game.gold, start_gold)
+	assert_lt(game.buttons, start_buttons)
 	assert_eq(main.get_node("Towers").get_child_count(), 1)
 	assert_false(
 		(main.get_node("Highlight") as CellHighlight).visible, "selection clears after a build"
@@ -121,7 +121,7 @@ func test_a_built_tower_stands_on_its_socket() -> void:
 	var game: GameState = main.game()
 	var socket := _first_socket(game)
 	main.select_cell(socket)
-	(main.get_node("Hud/BuildMenu") as BuildMenu).buttons()[0].pressed.emit()
+	(main.get_node("Hud/BuildMenu") as BuildMenu).tower_buttons()[0].pressed.emit()
 	main._process(0.05)
 	var marker := main.get_node("Towers").get_child(0) as MeshInstance3D
 	var top := (main.get_node("Board") as Board).surface_height(socket)
@@ -140,13 +140,13 @@ func test_a_tap_off_the_board_clears_the_selection() -> void:
 	assert_false((main.get_node("Highlight") as CellHighlight).visible)
 
 
-func test_building_without_the_gold_shows_the_rejection() -> void:
+func test_building_without_the_buttons_shows_the_rejection() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var game: GameState = main.game()
 	main.select_cell(_first_socket(game))
-	game.gold = 0
+	game.buttons = 0
 	# the menu disables the buttons itself, so send the command the way a stale
 	# menu could
 	Game.submit(game, Command.build("ballista", main.selected_cell().x, main.selected_cell().y))
@@ -154,7 +154,7 @@ func test_building_without_the_gold_shows_the_rejection() -> void:
 	assert_eq(game.towers.size(), 0)
 	assert_string_contains(
 		(main.get_node("Hud/Message") as Label).text,
-		RejectText.of(GameEvent.RejectReason.NOT_ENOUGH_GOLD)
+		RejectText.of(GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
 	)
 
 
@@ -163,7 +163,7 @@ func test_a_new_seed_starts_a_fresh_game() -> void:
 	add_child_autofree(main)
 	await get_tree().process_frame
 	main.select_cell(_first_socket(main.game()))
-	(main.get_node("Hud/BuildMenu") as BuildMenu).buttons()[0].pressed.emit()
+	(main.get_node("Hud/BuildMenu") as BuildMenu).tower_buttons()[0].pressed.emit()
 	main._process(0.05)
 	(main.get_node("Hud/NextSeed") as Button).pressed.emit()
 	assert_eq(main.game().seed, 2)

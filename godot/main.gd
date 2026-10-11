@@ -49,12 +49,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	Frame.step(_game, _clock, delta, GAME_SPEED, Callable(), _after_tick)
 	_towers.sync(_game.towers, _board.surface_height)
-	_menu.set_gold(_game.gold)
+	_menu.set_buttons(_game.buttons)
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_info.text = (
-		"Seed %d  |  Gold %d  |  %d routes  |  %d fps"
-		% [_game.seed, _game.gold, _game.map.routes.size(), Engine.get_frames_per_second()]
+		"Seed %d  |  Buttons %d  |  %d routes  |  %d fps"
+		% [_game.seed, _game.buttons, _game.map.routes.size(), Engine.get_frames_per_second()]
 	)
 
 
@@ -153,7 +153,7 @@ func select_cell(cell: Vector2i) -> void:
 		_show_message(RejectText.of(GameEvent.RejectReason.GAME_OVER))
 		return
 	_highlight.show_cell(cell, height, FREE_COLOUR)
-	_menu.open_for(cell, _game.gold)
+	_menu.open_for(cell, _game.buttons)
 
 
 ## Starts a fresh game on a map seed.

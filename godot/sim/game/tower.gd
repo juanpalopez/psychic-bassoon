@@ -8,7 +8,7 @@ var type: String = ""
 var level: int = 0
 var col: int = 0
 var row: int = 0
-## Gold spent so far; a sale refunds a share of it.
+## Buttons spent so far; a sale refunds a share of it.
 var invested: int = 0
 ## Seconds until it may fire again. Runs below zero while idle.
 var cooldown: float = 0.0

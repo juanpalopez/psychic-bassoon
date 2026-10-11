@@ -16,7 +16,7 @@ import {join} from 'node:path';
 
 // Every field of GameState and of the map and towers it holds.
 const FIELDS =
-  'seed|map|route|routes|tick_count|gold|lives|wave|running|over|towers|spawners|rng|route_rng|next_id|pending|events|path|tiles|tower_id|invested|cooldown|level';
+  'seed|map|route|routes|tick_count|buttons|kingdom_health|wave|running|over|towers|spawners|rng|route_rng|next_id|pending|events|path|tiles|tower_id|invested|cooldown|level';
 const MUTATORS =
   'append|append_array|push_back|push_front|erase|clear|insert|remove_at|remove|pop_back|pop_front|pop_at|resize|assign|sort|sort_custom|shuffle|reverse|fill|set|merge|erase_at';
 // An assignment operator, plain or compound (`=`, `+=`, `**=`, `<<=`, `|=`...),
@@ -24,8 +24,8 @@ const MUTATORS =
 const ASSIGN = '(?<![=!<>])(?:\\*\\*|<<|>>|[-+*/%&|^])?=(?!=)';
 // A receiver that holds the game state: `game`, `state`, `my_game`, `old_state`.
 const STATE = '\\b(?:\\w+_)?(?:game|state)\\b';
-// A field name written as a literal: "gold", &"gold", StringName("gold"),
-// NodePath("gold").
+// A field name written as a literal: "buttons", &"buttons", StringName("buttons"),
+// NodePath("buttons").
 const NAME = `(?:&|StringName\\(|NodePath\\()?\\s*["'](?:${FIELDS})["']`;
 
 // Checked on the code with strings and comments removed.
@@ -34,7 +34,7 @@ const FORBIDDEN = [
   [/\.pending\b/, 'the command queue belongs to the sim: use Game.submit'],
   [
     // an assignment whose left side passes through a state field, however
-    // deep: game.gold = 1, game.towers[0].level += 1, game.map.tiles[0][1] = 2
+    // deep: game.buttons = 1, game.towers[0].level += 1, game.map.tiles[0][1] = 2
     new RegExp(
       `${STATE}[\\w.\\[\\]]*\\.(?:${FIELDS})\\b[\\w.\\[\\]]*\\s*${ASSIGN}`
     ),

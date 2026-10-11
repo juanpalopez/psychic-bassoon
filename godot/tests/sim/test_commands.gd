@@ -21,7 +21,7 @@ func test_build_places_a_level_1_tower_and_charges_its_cost() -> void:
 	var cell := GameTestKit.socket(game)
 	var events := GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
 	var cost: int = TOWERS.DEFS.ballista.cost[0]
-	assert_eq(game.gold, RULES.START_GOLD - cost)
+	assert_eq(game.buttons, RULES.START_BUTTONS - cost)
 	assert_eq(game.towers.size(), 1)
 	var tower := game.towers[0]
 	assert_eq(tower.id, 0)
@@ -50,14 +50,14 @@ func test_build_on_the_path_is_rejected() -> void:
 	var game := Game.create(SEED)
 	var command := GameTestKit.build_at("ballista", game.map.path[3])
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
-	assert_eq(game.gold, RULES.START_GOLD)
+	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_unknown_tower_is_rejected_not_thrown() -> void:
 	var game := Game.create(SEED)
 	var command := GameTestKit.build_at("laser", GameTestKit.socket(game))
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.UNKNOWN_TOWER)
-	assert_eq(game.gold, RULES.START_GOLD)
+	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_build_off_the_board_is_rejected() -> void:
@@ -81,22 +81,22 @@ func test_build_on_an_occupied_plot_is_rejected() -> void:
 	assert_eq(game.towers.size(), 1)
 
 
-func test_build_needs_the_gold_and_allows_an_exact_fit() -> void:
+func test_build_needs_the_buttons_and_allows_an_exact_fit() -> void:
 	var game := Game.create(SEED)
 	var cost: int = TOWERS.DEFS.stormSpire.cost[0]
-	game.gold = cost - 1
+	game.buttons = cost - 1
 	var command := GameTestKit.build_at("stormSpire", GameTestKit.socket(game))
-	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_GOLD)
-	game.gold = cost
+	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_BUTTONS)
+	game.buttons = cost
 	GameTestKit.run(game, [command])
-	assert_eq(game.gold, 0)
+	assert_eq(game.buttons, 0)
 	assert_eq(game.towers.size(), 1)
 
 
 func _with_tower(type: String) -> GameState:
 	var game := Game.create(SEED)
 	GameTestKit.run(game, [GameTestKit.build_at(type, GameTestKit.socket(game))])
-	game.gold = 1000
+	game.buttons = 1000
 	return game
 
 
@@ -104,7 +104,7 @@ func test_upgrade_raises_the_level_and_charges_the_next_cost() -> void:
 	var game := _with_tower("ballista")
 	var events := GameTestKit.run(game, [Command.upgrade(0)])
 	var costs: Array = TOWERS.DEFS.ballista.cost
-	assert_eq(game.gold, 1000 - int(costs[1]))
+	assert_eq(game.buttons, 1000 - int(costs[1]))
 	assert_eq(game.towers[0].level, 1)
 	assert_eq(game.towers[0].invested, int(costs[0]) + int(costs[1]))
 	assert_eq(events.size(), 1)
@@ -121,12 +121,12 @@ func test_upgrade_stops_at_level_3() -> void:
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.MAX_LEVEL)
 
 
-func test_upgrade_needs_the_gold() -> void:
+func test_upgrade_needs_the_buttons() -> void:
 	var game := _with_tower("ballista")
 	var costs: Array = TOWERS.DEFS.ballista.cost
-	game.gold = int(costs[1]) - 1
+	game.buttons = int(costs[1]) - 1
 	var command := Command.upgrade(0)
-	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_GOLD)
+	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_BUTTONS)
 	assert_eq(game.towers[0].level, 0)
 
 
@@ -140,14 +140,14 @@ func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 	var game := Game.create(SEED)
 	var cell := GameTestKit.socket(game)
 	GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
-	game.gold = 1000
+	game.buttons = 1000
 	GameTestKit.run(game, [Command.upgrade(0)])
 	var costs: Array = TOWERS.DEFS.ballista.cost
 	var invested := int(costs[0]) + int(costs[1])
 	var events := GameTestKit.run(game, [Command.sell(0)])
-	var refund := 77  # 70% of 50 + 60 gold, written out so the rate is checked too
+	var refund := 77  # 70% of 50 + 60 Buttons, written out so the rate is checked too
 	assert_eq(invested, 110)
-	assert_eq(game.gold, 1000 - int(costs[1]) + refund)
+	assert_eq(game.buttons, 1000 - int(costs[1]) + refund)
 	assert_eq(game.towers.size(), 0)
 	assert_eq(events.size(), 1)
 	assert_eq(events[0].kind, KIND.TOWER_SOLD)
@@ -160,9 +160,9 @@ func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
 	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so the refund is 62, not 63
 	var game := Game.create(SEED)
 	GameTestKit.run(game, [GameTestKit.build_at("catapult", GameTestKit.socket(game))])
-	game.gold = 0
+	game.buttons = 0
 	GameTestKit.run(game, [Command.sell(0)])
-	assert_eq(game.gold, 62)
+	assert_eq(game.buttons, 62)
 
 
 func test_build_checks_the_tower_before_the_cell() -> void:
@@ -185,7 +185,7 @@ func test_launch_wave_starts_wave_1_with_no_bonus() -> void:
 	assert_eq(events.size(), 1)
 	assert_eq(events[0].kind, KIND.WAVE_LAUNCHED)
 	assert_eq([events[0].wave, events[0].early_bonus], [1, 0])
-	assert_eq(game.gold, RULES.START_GOLD)
+	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_calling_a_wave_early_pays_the_bonus() -> void:
@@ -195,7 +195,7 @@ func test_calling_a_wave_early_pays_the_bonus() -> void:
 	var events := GameTestKit.run(game, [Command.launch_wave()])
 	var bonus: int = RULES.EARLY_CALL_BASE + 1 * RULES.EARLY_CALL_PER_WAVE
 	assert_eq(events[0].early_bonus, bonus)
-	assert_eq(game.gold, RULES.START_GOLD + bonus)
+	assert_eq(game.buttons, RULES.START_BUTTONS + bonus)
 	assert_eq(game.wave, 2)
 
 
