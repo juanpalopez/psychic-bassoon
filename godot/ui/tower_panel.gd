@@ -12,6 +12,8 @@ const FONT_SIZE := 30
 
 var _tower: Tower
 var _buttons := 0
+## Range to show in cells, or -1 for the level's base range.
+var _reach := -1.0
 var _title := Label.new()
 var _stats := Label.new()
 var _upgrade := Button.new()
@@ -33,10 +35,12 @@ func _ready() -> void:
 	_sell.pressed.connect(func() -> void: sell_pressed.emit(_tower.id))
 
 
-## Opens the panel for a tower, with the Buttons the player has now.
-func show_tower(tower: Tower, buttons: int) -> void:
+## Opens the panel for a tower, with the Buttons the player has now and the
+## range it really reaches (its cell's elevation bonus included).
+func show_tower(tower: Tower, buttons: int, reach: float = -1.0) -> void:
 	_tower = tower
 	_buttons = buttons
+	_reach = reach
 	refresh()
 	visible = true
 
@@ -56,6 +60,12 @@ func set_buttons(buttons: int) -> void:
 	refresh()
 
 
+## Sets the range shown, in cells.
+func set_reach(reach: float) -> void:
+	_reach = reach
+	refresh()
+
+
 ## Re-reads the tower (it may have been upgraded) and the Buttons.
 func refresh() -> void:
 	if _tower == null:
@@ -63,9 +73,8 @@ func refresh() -> void:
 	var def: Dictionary = TOWERS.DEFS[_tower.type]
 	var level := _tower.level
 	_title.text = "%s  Level %d" % [def.name, level + 1]
-	_stats.text = (
-		"Damage %d  Range %s  Rate %s/s" % [def.damage[level], def.range[level], def.rate[level]]
-	)
+	var reach: float = def.range[level] if _reach < 0.0 else _reach
+	_stats.text = "Damage %d  Range %s  Rate %s/s" % [def.damage[level], reach, def.rate[level]]
 	var cost := TowerInfo.next_cost(_tower)
 	if cost < 0:
 		_upgrade.text = "Max level"

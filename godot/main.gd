@@ -166,7 +166,7 @@ func select_cell(cell: Vector2i) -> void:
 	var tower := _tower_on(cell)
 	if tower != null:
 		_highlight.show_cell(cell, height, FREE_COLOUR)
-		_panel.show_tower(tower, _game.buttons)
+		_panel.show_tower(tower, _game.buttons, TowerInfo.effective_range(_game.map, tower))
 		_show_ring(tower)
 		return
 	if _game.over:
@@ -212,6 +212,7 @@ func _refresh_panel() -> void:
 	if not _game.towers.has(open):
 		select_cell(BoardSpace.NO_CELL)
 		return
+	_panel.set_reach(TowerInfo.effective_range(_game.map, open))
 	_panel.set_buttons(_game.buttons)
 	_show_ring(open)
 

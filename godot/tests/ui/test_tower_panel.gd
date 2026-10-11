@@ -42,6 +42,14 @@ func test_it_shows_the_levels_stats_from_the_content() -> void:
 	assert_string_contains(panel.stats_text(), "3.6")
 
 
+func test_the_range_shown_is_the_one_given_so_it_matches_the_ring() -> void:
+	var panel := _panel()
+	panel.show_tower(_tower("ballista", 1, 110), 0, 2.99)
+	assert_string_contains(panel.stats_text(), "Range 2.99")
+	panel.set_reach(3.45)
+	assert_string_contains(panel.stats_text(), "Range 3.45")
+
+
 func test_upgrade_shows_its_cost_and_needs_the_buttons() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("ballista", 0, 50), 59)
