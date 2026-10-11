@@ -33,6 +33,7 @@ godot --headless --path godot --import   # once, so class_name scripts resolve
 godot --path godot                                                   # open or run the project
 mkdir -p build/web && godot --headless --path godot --export-release "Web" ../build/web/index.html
 cp godot/web/manifest.webmanifest build/web/
+mkdir -p build/web/godot && cp godot/web/godot-redirect.html build/web/godot/index.html
 pnpm serve                                                           # serve the export on your LAN, port 8080
 ```
 
@@ -55,7 +56,7 @@ pnpm test:e2e:godot      # Playwright smoke test against build/web
 ### Lint and format
 
 ```bash
-(cd godot && gdformat sim content tests main.gd && gdlint sim content tests main.gd)   # not addons/
+(cd godot && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdformat && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdlint)
 pnpm lint                # Prettier, ESLint and TypeScript type checks
 pnpm format              # Prettier --write
 pnpm check:sim-purity    # the GDScript sim must stay free of the scene tree and random numbers

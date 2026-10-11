@@ -23,15 +23,18 @@ const port = Number(process.argv[3] ?? 4174);
 const host = process.argv[4] ?? '127.0.0.1';
 
 const server = createServer((request, response) => {
-  const url = new URL(request.url ?? '/', 'http://localhost');
-  const name = normalize(decodeURIComponent(url.pathname)).replace(/^\/+/, '');
-  let file = join(root, name === '' ? 'index.html' : name);
-  // never serve anything outside the export directory
-  if (file !== root && !file.startsWith(root + sep)) {
-    response.writeHead(403).end();
-    return;
-  }
   try {
+    const url = new URL(request.url ?? '/', 'http://localhost');
+    const name = normalize(decodeURIComponent(url.pathname)).replace(
+      /^\/+/,
+      ''
+    );
+    let file = join(root, name === '' ? 'index.html' : name);
+    // never serve anything outside the export directory
+    if (file !== root && !file.startsWith(root + sep)) {
+      response.writeHead(403).end();
+      return;
+    }
     if (statSync(file).isDirectory()) file = join(file, 'index.html');
     const {size} = statSync(file);
     response.writeHead(200, {
@@ -39,9 +42,12 @@ const server = createServer((request, response) => {
       'content-length': size,
       'cache-control': 'no-store',
     });
-    createReadStream(file).pipe(response);
-  } catch {
-    response.writeHead(404).end('not found');
+    const stream = createReadStream(file);
+    stream.on('error', () => response.destroy());
+    stream.pipe(response);
+  } catch (error) {
+    // a malformed URL is the client's fault; anything else is a missing file
+    response.writeHead(error instanceof URIError ? 400 : 404).end();
   }
 });
 

@@ -159,6 +159,9 @@ jobs:
           "$GODOT" --headless --path godot --export-release "Web" ../build/web/index.html
           # Godot does not copy extra files; the shell links this manifest
           cp godot/web/manifest.webmanifest build/web/
+          # the Godot build used to live at /godot/: send old links and icons to the root
+          mkdir -p build/web/godot
+          cp godot/web/godot-redirect.html build/web/godot/index.html
 
       - name: Download budget
         run: pnpm check:godot-size
