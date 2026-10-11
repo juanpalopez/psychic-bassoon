@@ -8,7 +8,7 @@ It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in th
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
-> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets with three elevation levels are done too. Foes, combat and waves are next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 to A3): the live page shows the real map with sockets, where you can tap a socket and build, and start waves of foes that walk the road. It is not the game yet.
+> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets with three elevation levels are done too. Foes and waves are done too; the towers shooting at them (combat) is next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 to A3): the live page shows the real map with sockets, where you can tap a socket and build, and start waves of foes that walk the road. It is not the game yet.
 
 ## Getting started
 

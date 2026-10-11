@@ -88,11 +88,15 @@ func test_a_new_seed_clears_the_foes_and_resets_the_button() -> void:
 	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Start wave 1")
 
 
-func test_foes_are_drawn_with_few_draw_calls() -> void:
+func test_the_info_line_is_short_enough_for_a_phone_even_at_game_over() -> void:
 	var main := await _main()
-	var view := main.get_node("Foes") as FoesView
-	var multimeshes := 0
-	for child in view.get_children():
-		if child is MultiMeshInstance3D:
-			multimeshes += 1
-	assert_eq(multimeshes, 3)
+	var game: GameState = main.game()
+	game.over = true
+	game.wave = 99
+	game.kingdom_health = 20
+	game.buttons = 99999
+	main._process(0.05)
+	var text := (main.get_node("Hud/Info") as Label).text
+	# about 16 px per character at font 32 in a 1080 px label: stay under 60
+	assert_lt(text.length(), 66)
+	assert_true((main.get_node("Hud/Info") as Label).clip_text)

@@ -164,3 +164,45 @@ func test_reset_forgets_old_positions() -> void:
 	var expected := BoardSpace.point_to_world(2.5, 8.0)
 	assert_almost_eq(_at(view, "scrapGoblin", 0).x, expected.x, 1e-5)
 	assert_almost_eq(_at(view, "scrapGoblin", 0).z, expected.z, 1e-5)
+
+
+func test_the_multimeshes_carry_colours_and_3d_transforms() -> void:
+	var view := _view()
+	for type in FOES.FOE_IDS:
+		var multimesh := _multimesh(view, type)
+		assert_true(multimesh.use_colors, type)
+		assert_eq(multimesh.transform_format, MultiMesh.TRANSFORM_3D, type)
+
+
+func test_two_ticks_between_updates_blend_over_the_two_tick_walk() -> void:
+	var view := _view()
+	var foe := _foe(0, "scrapGoblin", 4.5, 3.0)
+	view.update(_game_with([foe] as Array[Foe], 1), 1.0)
+	foe.y = 5.0
+	var game := _game_with([foe] as Array[Foe], 3)
+	view.update(game, 0.5)
+	assert_almost_eq(_at(view, "scrapGoblin", 0).x, BoardSpace.point_to_world(4.5, 4.0).x, 1e-5)
+
+
+func test_updating_twice_on_the_same_tick_does_not_move_the_foe() -> void:
+	var view := _view()
+	var foe := _foe(0, "scrapGoblin", 4.5, 3.0)
+	view.update(_game_with([foe] as Array[Foe], 1), 1.0)
+	foe.y = 4.0
+	var game := _game_with([foe] as Array[Foe], 2)
+	view.update(game, 0.25)
+	var first := _at(view, "scrapGoblin", 0)
+	view.update(game, 0.25)
+	assert_eq(_at(view, "scrapGoblin", 0), first)
+
+
+func test_a_foe_that_appears_mid_run_starts_in_place_beside_a_walking_one() -> void:
+	var view := _view()
+	var walker := _foe(0, "scrapGoblin", 4.5, 3.0)
+	view.update(_game_with([walker] as Array[Foe], 1), 1.0)
+	walker.y = 4.0
+	var newcomer := _foe(1, "scrapGoblin", 2.5, 0.5)
+	view.update(_game_with([walker, newcomer] as Array[Foe], 2), 0.0)
+	assert_almost_eq(_at(view, "scrapGoblin", 0).x, BoardSpace.point_to_world(4.5, 3.0).x, 1e-5)
+	assert_almost_eq(_at(view, "scrapGoblin", 1).x, BoardSpace.point_to_world(2.5, 0.5).x, 1e-5)
+	assert_almost_eq(_at(view, "scrapGoblin", 1).z, BoardSpace.point_to_world(2.5, 0.5).z, 1e-5)

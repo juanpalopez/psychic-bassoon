@@ -60,14 +60,13 @@ func _process(delta: float) -> void:
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_info.text = (
-		"%sSeed %d  |  Wave %d  |  Kingdom %d  |  Buttons %d  |  %d fps"
+		"%sSeed %d  |  Wave %d  |  Kingdom %d  |  Buttons %d"
 		% [
 			"GAME OVER  |  " if _game.over else "",
 			_game.seed,
 			_game.wave,
 			_game.kingdom_health,
 			_game.buttons,
-			Engine.get_frames_per_second(),
 		]
 	)
 
