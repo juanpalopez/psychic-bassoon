@@ -10,7 +10,7 @@ import {join, relative, sep} from 'node:path';
 const MAX_ASSET_BYTES = 6_000_000;
 // Placeholders and OS junk that is never shipped on purpose.
 const IGNORED = new Set(['.gitkeep', '.DS_Store', 'Thumbs.db']);
-const assetsDir = process.argv[2] ?? 'public/assets';
+const assetsDir = process.argv[2] ?? 'godot/assets';
 const creditsFile = process.argv[3] ?? 'assets/CREDITS.md';
 
 if (!statSync(assetsDir, {throwIfNoEntry: false})?.isDirectory()) {

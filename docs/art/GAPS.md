@@ -40,7 +40,7 @@ The Quaternius Sci-Fi Essentials Kit is no longer a source; it stays here only a
 ## Rules
 
 - A unit that is not distinct at zoomed-out view after recolouring gets a different model, not weaker readability.
-- Each unit keeps its primitive builder as the fallback behind `src/render/models/index.ts`.
+- Each unit keeps its primitive builder as the fallback behind `godot/render/models/`.
 - Check polygon counts against the budget (about 150k triangles with 80 foes and every tower at level 3); decimate if needed.
 
 ## Next

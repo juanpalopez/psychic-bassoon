@@ -53,20 +53,13 @@ jobs:
           lfs: false
           persist-credentials: false
 
-      - uses: pnpm/action-setup@v6
-
-      - uses: actions/setup-node@v7
+      # The Godot export is built and tested once, by the ci job above.
+      - name: Fetch the Godot export from the ci job
+        uses: actions/download-artifact@v8
         with:
-          node-version-file: .nvmrc
-          cache: pnpm
+          name: godot-web
+          path: dist
 
-      - name: Install
-        run: pnpm install --frozen-lockfile
-
-      - name: Build
-        run: pnpm build
-
-      # TypeScript build only. The Godot export joins releases at the Phase 5 swap.
       - name: Package the build
         run: |
           cd dist

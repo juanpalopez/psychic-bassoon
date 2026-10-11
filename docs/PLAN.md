@@ -2,9 +2,9 @@
 
 Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its tracker board use Scrapline and Project Slag.
 
-_Updated 2026-10-10: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
+_Updated 2026-10-11: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 to 2 are complete in TypeScript and Three.js, and the web build is live at https://juanpalopez.github.io/psychic-bassoon/ (owner-tested on iPhone). On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Next: Phase 3, the Godot foundation, then Phase 4 (PRNG first, then procedural map generation with several routes to the Heartstone). The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
+> **Status:** Phases 0 to 3 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired and its last build is the tag `web-three-final` (the site root now serves the Godot stub scene). Phase 3 (the Godot foundation) passed its go/no-go on the owner's iPhone 15 Pro. On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Phase 4 is in progress: the PRNG, map generation with routes, and the game state, commands and tick are ported; foes, combat and waves are next. The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
 
 ## Vision
 
@@ -112,7 +112,7 @@ Supporting changes:
 
 **What carries over:** the lore, naming, balance numbers, map and wave algorithms, all GLB assets and textures (including the owner's Blender models), the docs, tickets and review process.
 
-**What is rewritten:** the simulation (TypeScript to GDScript), the renderer, the HUD, the tests and the build pipeline. The TypeScript game stays in the repo (tag `web-three-final`, folder `legacy/` once Godot replaces it) until the Godot build passes the same gates.
+**What is rewritten:** the simulation (TypeScript to GDScript), the renderer, the HUD, the tests and the build pipeline. The Three.js game was removed from the tree (tag `web-three-final` keeps it); the TypeScript simulation, content and fixtures stay as the oracle until the Godot sim passes parity, then move to `legacy/` or go.
 
 **How the port stays correct:** the TypeScript sim is the oracle. It exports JSON fixtures (maps, routes, wave lists, damage cases, replay fingerprints for many seeds). The GDScript sim must reproduce them exactly (GUT tests). Same seed, same commands, same result: the Phase 1 replay gate is repeated, not skipped.
 
@@ -211,7 +211,7 @@ scrapline/
     export_presets.cfg   # web export preset (Godot reads it from the project root)
     web/                 # the custom HTML shell (landscape prompt, meta tags, loader)
   fixtures/              # JSON from the TypeScript sim: maps, waves, replays (the oracle)
-  legacy/                # the TypeScript and Three.js game, until Godot replaces it
+  src/                   # the TypeScript sim and content: the oracle (to `legacy/` or removed after parity)
   assets-src/            # .blend sources and raw packs (Git LFS)
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
@@ -231,10 +231,10 @@ scrapline/
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
 | `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. During the migration it also runs the legacy TypeScript checks. |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes to GitHub Pages. **Layout until the Phase 5 gate:** the TypeScript web build stays at the root URL and the Godot export is served under `/godot/`; at the gate the Godot export takes the root and the TypeScript build moves to `/legacy/` (or is dropped). A red `main` never reaches the public site. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes to GitHub Pages. The Godot export is served at the root URL. Until the game exists that is the Phase 3 stub scene; the Three.js build is no longer served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
 
-**Versions follow phase gates** (semantic versioning, 0.x until launch). No release tags exist yet (the TypeScript phases were never tagged): the first tag, `v0.1.0`, is cut at the Phase 3 gate and each later gate bumps the minor version. The tag `web-three-final` marks the last Three.js web build and is created at the Phase 3 gate, before any Godot content is deployed to the root. Notes come from Conventional Commits, so commit messages are the changelog.
+**Versions follow phase gates** (semantic versioning, 0.x until launch). The only tag so far is `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
 - CI checks: lint, formatting, determinism (replay against the TypeScript fixtures), sim rules, export size, `assets/CREDITS.md` coverage for every GLB.
@@ -273,7 +273,7 @@ Each phase ends with a gate that must pass before the next starts. Phases 0 to 2
 | 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
 | 4 · Sim port to GDScript | PRNG, map generation with routes, game, commands, tick, combat, waves, economy, headless run | **The GDScript sim reproduces every TypeScript fixture exactly** (maps, routes, waves, replays) |
-| 5 · Play in Godot | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes**; then the Three.js code moves to `legacy/` |
+| 5 · Play in Godot | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the Three.js build (tag `web-three-final`, run locally) at 60 fps on the owner's phone with 80 foes** |
 | 6 · Art and ambience | Meshy foes cleaned up in Blender, the owner's Blender towers, terrain tiles and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
 | 7 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new foe and branch replays exactly from its seed |
 | 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
@@ -291,7 +291,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 **Work breakdown**
 1. Add `godot/` with a pinned Godot 4 version, the Compatibility renderer and a single-threaded Web export preset; a custom HTML shell (landscape prompt, meta tags, loading screen).
 2. CI: install the pinned Godot and templates (cached), `gdformat --check`, `gdlint`, GUT, the sim-purity lint, export, size budget, Playwright smoke on the export.
-3. Deploy the export to GitHub Pages from `main` under `/godot/`; the TypeScript build stays at the root until the Phase 5 gate (see the Pages layout in CI/CD). Tag `web-three-final`.
+3. Deploy the export to GitHub Pages from `main` (at the site root since the Three.js game was retired). Tag `web-three-final`.
 4. Export fixtures from the TypeScript sim into `fixtures/` (maps and routes for many seeds, wave lists, damage cases, replay fingerprints) with a script and a test that regenerates and compares them.
 5. Measure on the iPhone: download size, start time, a stub scene with 80 animated instances; set the budgets.
 
@@ -336,10 +336,10 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget.
 
 **Gate checklist**
-- [ ] Plays as well as the TypeScript web build at 60 fps on the owner's phone with 80 foes.
+- [ ] Plays as well as the Three.js build (tag `web-three-final`, run locally) at 60 fps on the owner's phone with 80 foes.
 - [ ] Every action is reachable in landscape; tap targets at least 44 px.
 - [ ] The road ribbon matches the sim routes by eye on the phone: foes stay on the dirt, hits land on visible foes at corners, and plot bases are not covered by the road.
-- [ ] The replay gate still passes. The Three.js code moves to `legacy/`.
+- [ ] The replay gate still passes.
 
 ### Phase 6 · Art and ambience
 
@@ -395,12 +395,12 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | Risk | Fallback |
 | --- | --- |
 | The Godot web build is too heavy or slow to start on a phone | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
-| iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; keep the TypeScript web build live until Phase 5 passes |
+| iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; the Three.js build can be redeployed from the tag `web-three-final` if the Godot web build fails on a target phone |
 | The GDScript sim drifts from the TypeScript oracle | Fixtures from the TypeScript sim and exact-match GUT tests; the TypeScript sim is frozen once the fixtures exist; it changes only for a bug, with the fixtures regenerated and the Godot sim updated in the same PR |
 | Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
 | The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
-| The TypeScript tests and smoke test are forgotten after `legacy/` | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
+| The TypeScript oracle and its tests are forgotten | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The centreline stays inside its cell band (corner radius 0.5 cell, ribbon at most 1.25 cells wide); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
