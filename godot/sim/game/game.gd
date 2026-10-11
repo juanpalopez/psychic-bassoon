@@ -41,6 +41,11 @@ static func tick(game: GameState) -> void:
 	game.pending = []
 	for command in commands:
 		_apply(game, command)
+	if not game.over:
+		WaveRunner.step_spawners(game)
+		Combat.step(game)
+		if not game.over:
+			WaveRunner.settle(game)
 	game.tick_count += 1
 
 
@@ -126,7 +131,7 @@ static func _launch_wave(game: GameState, command: Command) -> void:
 	game.buttons += early_bonus
 	game.wave += 1
 	game.running = true
-	# the wave's spawner is created by the waves context (Phase 4, step 5)
+	WaveRunner.start(game)
 	var event := GameEvent.of(GameEvent.Kind.WAVE_LAUNCHED)
 	event.wave = game.wave
 	event.early_bonus = early_bonus
