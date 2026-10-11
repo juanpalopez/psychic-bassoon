@@ -128,3 +128,81 @@ func test_waves_grow_in_size() -> void:
 		var count := _build(wave).size()
 		assert_gte(count + 2, previous, "wave %d" % wave)
 		previous = count
+
+
+## `count_for(wave)` rolls, all with the same value.
+func _rolls(wave: int, value: float) -> Array[float]:
+	var rolls: Array[float] = []
+	for i in WaveBuilder.count_for(wave):
+		rolls.append(value)
+	return rolls
+
+
+## The rolls of a wave with the first one set.
+func _first_roll(wave: int, value: float) -> Array[float]:
+	var rolls := _rolls(wave, 0.0)
+	rolls[0] = value
+	return rolls
+
+
+func test_the_count_is_6_plus_1_point_4_per_wave_rounded() -> void:
+	assert_eq(WaveBuilder.count_for(1), 7)
+	assert_eq(WaveBuilder.count_for(2), 9)
+	assert_eq(WaveBuilder.count_for(5), 13)
+	assert_eq(WaveBuilder.count_for(10), 20)
+	assert_eq(WaveBuilder.count_for(15), 27)
+
+
+func test_a_roll_above_the_threshold_makes_an_orc_and_an_orc_waits_longer() -> void:
+	# wave 8: threshold 0.82 - 0.08 = 0.74; gap 0.95 - 0.2 = 0.75; orc multiplier 1.4
+	var orders := WaveBuilder.compose(8, _rolls(8, 0.9))
+	assert_eq(orders.size(), 17)
+	for order in orders:
+		assert_eq(order.type, "corrugatedOrc")
+		assert_almost_eq(order.gap, 0.75 * 1.4, 1e-12)
+
+
+func test_the_orc_decision_at_the_threshold_boundary() -> void:
+	# wave 4: threshold 0.82 - 0.04 = 0.78 (a hair under it in 64-bit floats, so test
+	# either side of it, not the exact value)
+	assert_eq(WaveBuilder.compose(4, _first_roll(4, 0.781))[0].type, "corrugatedOrc")
+	assert_eq(WaveBuilder.compose(4, _first_roll(4, 0.779))[0].type, "scrapGoblin")
+	assert_eq(WaveBuilder.compose(4, _first_roll(4, 0.5))[0].type, "scrapGoblin")
+
+
+func test_no_roll_makes_an_orc_before_wave_4() -> void:
+	for wave in [1, 2, 3]:
+		for order in WaveBuilder.compose(wave, _rolls(wave, 0.99)):
+			assert_eq(order.type, "scrapGoblin", "wave %d" % wave)
+	for order in WaveBuilder.compose(4, _rolls(4, 0.99)):
+		assert_eq(order.type, "corrugatedOrc")
+
+
+func test_the_orc_threshold_stops_falling_at_wave_20() -> void:
+	# 0.82 - min(0.2, 0.01 * w): 0.62 from wave 20 on, so waves 21, 23 and 31 agree
+	for wave in [21, 23, 31]:
+		for order in WaveBuilder.compose(wave, _rolls(wave, 0.63)):
+			assert_eq(order.type, "corrugatedOrc", "wave %d at 0.63" % wave)
+		for order in WaveBuilder.compose(wave, _rolls(wave, 0.61)):
+			assert_eq(order.type, "scrapGoblin", "wave %d at 0.61" % wave)
+
+
+func test_a_swarm_wave_ignores_the_rolls() -> void:
+	for wave in [5, 15]:
+		for order in WaveBuilder.compose(wave, _rolls(wave, 0.99)):
+			assert_eq(order.type, "scrapGoblin")
+
+
+func test_a_boss_wave_holds_the_rolled_foes_between_the_escort_and_the_golem() -> void:
+	var rolls := _rolls(10, 0.1)
+	rolls[3] = 0.9
+	var orders := WaveBuilder.compose(10, rolls)
+	assert_eq(orders.size(), 22)
+	for i in orders.size():
+		var expected := "scrapGoblin"
+		# the escort comes first, so the roll at index 3 lands at order 4
+		if i == 0 or i == 4:
+			expected = "corrugatedOrc"
+		if i == 21:
+			expected = "cardboardGolem"
+		assert_eq(orders[i].type, expected, "order %d" % i)

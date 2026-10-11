@@ -24,12 +24,8 @@ static func for_wave(id: String, wave: int) -> FoeStats:
 	var hp_scale: float = 1.0 + WAVES.HP_LINEAR * n + WAVES.HP_QUADRATIC * n * n
 	var speed_bonus: float = minf(WAVES.SPEED_CAP, float(wave) * WAVES.SPEED_PER_WAVE)
 	var stats := FoeStats.new()
-	stats.hp = _round(float(base.hp) * hp_scale)
+	stats.hp = Rounding.half_up(float(base.hp) * hp_scale)
 	stats.speed = float(base.speed) * (1.0 + speed_bonus)
-	stats.reward = _round(float(base.reward) * (1.0 + WAVES.REWARD_PER_WAVE * n))
+	stats.reward = Rounding.half_up(float(base.reward) * (1.0 + WAVES.REWARD_PER_WAVE * n))
 	stats.armor = int(base.armor) + int(floor(float(wave) / float(WAVES.ARMOR_EVERY_WAVES)))
 	return stats
-
-
-static func _round(value: float) -> int:
-	return int(floor(value + 0.5))

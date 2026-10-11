@@ -11,26 +11,40 @@ extends RefCounted
 const WAVES := preload("res://content/waves.gd")
 
 
+## The number of foes in a wave (not counting the boss escort and the boss).
+static func count_for(wave: int) -> int:
+	return Rounding.half_up(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE)
+
+
+## Draws one float per foe from the waves stream and lists the wave.
 static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
+	var rolls: Array[float] = []
+	for i in count_for(wave):
+		rolls.append(rng.next_float())
+	return compose(wave, rolls)
+
+
+## Lists a wave from the rolls of its foes (`count_for(wave)` of them, one per
+## foe, each from 0 up to 1): a roll above the orc threshold makes a heavy foe in
+## a normal wave from `ORC_FROM_WAVE` on; swarm waves ignore the rolls.
+static func compose(wave: int, rolls: Array[float]) -> Array[SpawnOrder]:
 	var boss := wave % WAVES.BOSS_EVERY == 0
 	var swarm := wave % WAVES.SWARM_EVERY == 0 and not boss
-	var count := int(floor(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE + 0.5))
 	var gap := maxf(WAVES.GAP_MIN, WAVES.GAP_BASE - float(wave) * WAVES.GAP_PER_WAVE)
 	var orc_threshold: float = (
 		WAVES.ORC_BASE_THRESHOLD
 		- minf(WAVES.ORC_THRESHOLD_CAP, float(wave) * WAVES.ORC_THRESHOLD_PER_WAVE)
 	)
 	var orders: Array[SpawnOrder] = []
-	for i in count:
-		var roll := rng.next_float()
-		var type := "scrapGoblin"
+	for roll in rolls:
+		var type: String = WAVES.FILLER_FOE
 		if not swarm and wave >= WAVES.ORC_FROM_WAVE and roll > orc_threshold:
-			type = "corrugatedOrc"
+			type = WAVES.HEAVY_FOE
 		var multiplier: float = WAVES.GAP_ORC
-		if type == "scrapGoblin":
+		if type == WAVES.FILLER_FOE:
 			multiplier = WAVES.GAP_GOBLIN_SWARM if swarm else WAVES.GAP_GOBLIN
 		orders.append(SpawnOrder.of(type, gap * multiplier))
 	if boss:
-		orders.append(SpawnOrder.of("cardboardGolem", WAVES.GOLEM_GAP))
-		orders.push_front(SpawnOrder.of("corrugatedOrc", gap * WAVES.GAP_BOSS_ESCORT))
+		orders.append(SpawnOrder.of(WAVES.BOSS_FOE, WAVES.GOLEM_GAP))
+		orders.push_front(SpawnOrder.of(WAVES.HEAVY_FOE, gap * WAVES.GAP_BOSS_ESCORT))
 	return orders

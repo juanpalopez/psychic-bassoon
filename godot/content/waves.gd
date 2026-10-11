@@ -2,6 +2,12 @@
 ## (`src/content/waves.ts`) adapted to the GDD's three ground foes. Data only.
 extends RefCounted
 
+## The foes a wave is made of: the filler, the heavy foe (also the boss escort)
+## and the boss (see `content/foes.gd`).
+const FILLER_FOE := "scrapGoblin"
+const HEAVY_FOE := "corrugatedOrc"
+const BOSS_FOE := "cardboardGolem"
+
 ## A boss wave every this many waves (it wins over a swarm wave).
 const BOSS_EVERY := 10
 ## A goblin swarm wave every this many waves.
