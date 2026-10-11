@@ -1,9 +1,11 @@
-# Fixtures: the oracle for the Godot port
+# Fixtures: the frozen reference for the ported core
 
-JSON produced by the TypeScript sim (`pnpm fixtures`). The GDScript sim must
-reproduce every value here **exactly** (Phase 4 gate). Do not edit these files
-by hand: change the TypeScript sim (only for a bug, see CLAUDE.md), run
-`pnpm fixtures`, and commit the result. A Vitest check fails if they are stale.
+> **Status (2026-10-11):** the game design is now `docs/GDD.md`, and parity with the TypeScript prototype is no longer the goal for new content. Only `prng.json`, `maps.json` and `routes.json` stay as regression tests for the ported core (PRNG, road generator, routes); they are **frozen: never regenerate them and add no new cases**. `waves.json`, `scaling.json`, `damage.json` and `replays.json` describe prototype rules that the GDScript sim will not reproduce; they are deleted in Phase 4 step 8 together with `src/` and the exporter, and a committed hash check keeps the frozen three from changing. New regression data after the combat port is GDScript replay goldens, written by the GDScript sim.
+
+JSON produced by the TypeScript sim (`pnpm fixtures`). The GDScript ported core
+must reproduce every value in the frozen three **exactly**. Do not edit these files
+by hand. A Vitest check fails if they differ from what the TypeScript sim writes
+(until Phase 4 step 8 replaces it with the hash check).
 
 Format rules (so Godot's `JSON.parse`, which reads every number as a float,
 can compare them with `==`): all integers here are below 2^53; fingerprints are

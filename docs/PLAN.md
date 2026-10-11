@@ -55,7 +55,7 @@ The ids in the code are stable keys; the GDD renames what the player sees and ad
 | --- | --- |
 | Ballista (`ballista`) | The Spool Guard |
 | Catapult (`catapult`) | The Thimble Mortar |
-| Frost Spire, Storm Spire | Prism Spire (specs Cryo-Origami and Blot Singularity cover the slow and the chain-lightning roles) |
+| Frost Spire, Storm Spire | The Prism Spire: a magic beam tower (the GDD has no chain lightning); the slow comes with its Cryo-Origami spec (tier 4) and the Blot specs, and from glue and hazards |
 | (none) | The Guard Tent: new, needs foes that stop and fight |
 | Scamp | Scrap Goblin |
 | Raider, Ironclad | Corrugated Orc (one armored foe; speed and armor tiers by wave) |
@@ -81,6 +81,10 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 10. **Story presentation.** The GDD has lore but no chapters, story cards or voice. The old chapter plan is dropped until the owner asks for it.
 11. **Persistence.** The tech tree needs saved progress (local storage on the web, a file on iOS) behind one adapter.
 12. **Landscape.** The GDD says phones and tablets and does not mention orientation; the owner's rule stays: landscape only.
+13. **Damage types and beams.** The GDD relies on physical, magic and true damage (the Orc "requires magic", Frostbite boosts "physical towers", Precision Snipe is "true damage") and on a continuous beam (the Prism Spire). The ported model has one armor floor. Define the types, how armor and resistances apply to each, and beam versus projectile attacks before the combat core (Phase 4 step 6).
+14. **Meta-progression and determinism.** Golden Staples upgrade permanent skills and base stats, so the same seed and commands give different runs for different tech trees. A run's input must be the seed, the commands and a frozen meta-loadout (the tech-tree state at the start of the run), stored with replays, shared seeds and best-wave records.
+15. **Smaller mechanics.** Line-of-sight blockers (level 2 towers bypass them), harvesting drop-scraps (a tap command?), the wave timer that starts a wave when it expires, and the Golem spawning Scrap Goblins when destroyed (needed for the Phase 5 gate "to the boss").
+16. **Asset pipeline.** The GDD's section 7 is titled "asset pipeline" but has no pipeline content; the plan's Meshy, Blender and Godot pipeline stands until the owner adds one.
 
 ## Engine decision: Godot
 
@@ -131,7 +135,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 - **Input.** A tap ray-casts the ground plane to a cell, a socket or a tower, and sends a command. No direct state changes.
 - **Orientation.** Landscape only: the web page shows a "turn your phone" prompt when upright (custom HTML shell).
 
-**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit (the whole model at that level, not an increment): a foe 800 to 1,200 triangles with its own baked 512 px map; a tower 1,500 to 3,000 triangles on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. These ranges only fit together under worst-case caps for the 150k frame: foes at most 80k in total (80 foes average at most 1,000, so the Scrap Goblin swarm sits at the low end and only a few foes reach 1,200), towers at most 45k in total (20 towers at level 3 average 2,250, so top-of-range towers must be few), terrain, scenery and effects at most 20k, one boss at most 5k. A tower is at most 3 mesh parts, so 20 towers are at most 60 of the 120 draw calls, and shadows stay off in the Compatibility renderer. The Phase 5 performance pass checks the caps with the real counts. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
+**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit (the whole model at that level, not an increment): a foe 800 to 1,200 triangles with its own baked 512 px map; a tower 1,500 to 3,000 triangles on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. These ranges only fit together under worst-case caps for the 150k frame: foes at most 80k in total (80 foes average at most 1,000, so the Scrap Goblin swarm sits at the low end and only a few foes reach 1,200), towers at most 45k in total (22 towers, the most sockets a map has, at the top tier average about 2,050, so top-of-range towers must be few), terrain, scenery and effects at most 20k, one boss at most 5k. A tower is at most 3 mesh parts, so 22 towers are at most 66 of the 120 draw calls, and shadows stay off in the Compatibility renderer. The Phase 5 performance pass checks the caps with the real counts. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
 
 ## Art direction and Claude Design
 
@@ -141,7 +145,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 - **Palette.** Cutting-mat green and kraft brown for the board and the defenders, white pencil outlines for sockets, saturated purple for everything the Blot touches, one accent colour per tower.
 - **Animation.** Characters and projectiles step at 12 fps like stop-motion (stepped keyframes, no continuous interpolation) while the camera renders at 60.
 - **Readability.** Silhouette and material tell the foe type (newsprint goblin, tissue-and-wire moth, cardboard orc, filter-paper shaman, shipping-box golem); each tier adds a visible part; tier 4 shows its specialisation.
-- **Reference.** `docs/art/reference-wide-road.jpg` was a reference for the earlier fantasy look and is superseded: keep it only for HUD placement (lives, gold, wave counter, tower buttons). The road ribbon decision (#149) is open again: on a cutting mat the path is printed gridlines or tape, so it may become a drawn line instead of a dirt ribbon. Decide it when Phase 5 reaches terrain, with the papercraft materials in hand.
+- **Reference.** `docs/art/reference-wide-road.jpg` was a reference for the earlier fantasy look and is superseded: keep it only for HUD placement (lives, gold, wave counter, tower buttons). The road ribbon decision (the Phase 5 ticket #147) is open again: on a cutting mat the path is printed gridlines or tape, so it may become a drawn line instead of a dirt ribbon. Decide it when Phase 5 reaches terrain, with the papercraft materials in hand.
 
 **Asset pipeline**
 
@@ -173,7 +177,7 @@ If the Scrap Goblin cannot reach 60 fps with vertex animation, the fallback is p
 
 **Claude Design:** design system (tokens, type, panels) first, in the papercraft style; then mobile screens (title, HUD, radial menu, Toolbox Tray, workshop tech tree, pause, game over); key art for the README and personal site; reference sheets per foe and tower tier. Claude Design covers 2D screens and reference art, not 3D models.
 
-- **Rough silhouette sheets** (shape and colour only) for the 4 base foes and 4 towers come first and brief the models.
+- **Rough silhouette sheets** (shape and colour only) for the 5 foes and 4 towers come first and brief the models.
 - **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced. Meshy foes are briefed from the silhouette sheets.
 
 ### Asset gap plan _(Phase 6)_
@@ -194,7 +198,7 @@ Rule: if a unit's silhouette is not distinct at zoomed-out view, change the mode
 ## Repo setup
 
 ```
-scrapline/
+papercraft-kingdom-defense/   # the repo is still psychic-bassoon
   godot/                 # the Godot project (project.godot at its root)
     sim/                 # pure GDScript: grid, mapgen, routes, waves, towers, foes, economy
     content/             # data: tower and foe defs, wave tables, lore text (JSON or Resources)
@@ -261,7 +265,7 @@ From the 2D prototype (the ported base) to the GDD design.
 
 ## Milestones
 
-**Ticket labels.** The board's old labels `phase-3` (Art and UI), `phase-4` (Lore and chapters) and `phase-5` (Polish and launch) map to the new phases 6, 7 and 8; new labels `phase-6` to `phase-8` are added and the old art tickets (#89 to #97) are relabelled `phase-6`. The Three.js terrain ticket #108 is closed as done in TypeScript; the Godot terrain is part of Phase 5. New Godot tickets use `phase-3` onward with the new meaning from the day the move is merged.
+**Ticket labels.** The board's old labels `phase-3` (Art and UI), `phase-4` (Lore and chapters) and `phase-5` (Polish and launch) map to the new phases 6, 7 and 8 (the old `phase-4` 'Lore and chapters' is now 'Depth', since chapters are dropped); new labels `phase-6` to `phase-8` are added and the old art tickets (#89 to #97) are relabelled `phase-6`. The Three.js terrain ticket #108 is closed as done in TypeScript; the Godot terrain is part of Phase 5. New Godot tickets use `phase-3` onward with the new meaning from the day the move is merged.
 
 Each phase ends with a gate that must pass before the next starts (exception: the Phase 5 greybox runs in parallel with Phase 4, see Phase 5; the Phase 5 gate itself still waits for the Phase 4 gate). Phases 0 to 2 were built in TypeScript and Three.js and are complete; the Godot track starts at Phase 3.
 
@@ -274,7 +278,7 @@ Each phase ends with a gate that must pass before the next starts (exception: th
 | 4 · Sim in GDScript, designed from the GDD | PRNG, road generator and routes, game core (done); sockets and elevation, foes and waves, combat core and economy for the first towers and foes, replay goldens, headless run | **The same seed and commands replay to the same result** (goldens), the ported core still matches its fixtures, and `src/` is gone |
 | 5 · Play in Godot (greybox started in parallel with Phase 4, 2026-10-11) | Greybox board, picking, foes, towers, HUD and loop (steps A1 to A6); papercraft terrain tiles, camera pan, pinch and tilt, the radial menu | **A full run to the boss at 60 fps on the owner's phone with 80 foes**, every action reachable in landscape |
 | 6 · Art and ambience (papercraft) | Materials and shaders (kraft, cardboard, mat, foil, tape, the Blot), the Scrap Goblin through the pipeline first, then the other foes, the four towers, board tiles, stop-motion stepping at 12 fps, Claude Design HUD and Theme | All foes and towers use final models, each distinct at zoomed-out view; performance budget met |
-| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, drawbridges and hazards, targeting priorities | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
+| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, drawbridges and hazards | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
 | 8 · Meta, polish, launch, native | Golden Staples tech tree and saved progress, audio, performance pass, README with key art; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
 
 ## Phase details
@@ -313,9 +317,9 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 3. Done: game state, commands, the command queue and rejection events, the 30 Hz tick, the clock and the frame stepper.
 4. Sockets and elevation: 12 to 22 sockets on non-road cells, the three levels and the +15% range bonus on level 2; `build` only on a socket; new goldens written by the GDScript sim, with float bits.
 5. Foes, waves and economy: content for the Scrap Goblin, Corrugated Orc and Cardboard Golem (ground foes first), movement along routes, wave composition and scaling (from the prototype's numbers), kingdom health, Buttons, early-call and wave-clear bonuses, game over.
-6. Combat core: targeting priorities, damage and armor, tiers 1 to 3 of the Spool Guard, Thimble Mortar and Prism Spire (the old Ballista, Catapult and Frost and Storm Spire roles), and one shared status model starting with slow. Tower and foe ids change to the GDD's here.
+6. Combat core: targeting priorities, damage and armor, tiers 1 to 3 of the Spool Guard (fast single target, physical), Thimble Mortar (splash) and Prism Spire (a continuous magic beam; the Corrugated Orc's armor makes it the counter), with damage types (physical, magic, true) and how armor applies to each, and one shared status model starting with slow (used later by rivers, tape and the specialisations). Tower and foe ids change to the GDD's here.
 7. Determinism: a scripted bot, replay goldens for several seeds, and a headless CLI (`godot --headless`) that prints the map and the wave log.
-8. Cleanup: remove `src/` and the fixtures nobody uses (damage, waves, scaling, replays) once step 6 no longer needs the TypeScript formulas; keep `prng.json`, `maps.json` and `routes.json`.
+8. Cleanup, once step 6 no longer needs the TypeScript formulas: remove `src/`, the fixture exporter (`scripts/export-fixtures.ts` and its staleness test), the TypeScript sim CLI (`pnpm sim`, replaced by the `godot --headless` CLI of step 7), the `tsconfig.sim.json` lint step, the `src/**` blocks in `eslint.config.js`, the Vitest `src` include, and the fixtures nobody uses (`damage.json`, `waves.json`, `scaling.json`, `replays.json`). Keep `prng.json`, `maps.json` and `routes.json` frozen, and replace the staleness test with a committed SHA-256 of those three files checked in CI, so "never regenerated" is enforced. Update `CLAUDE.md`, the README and `fixtures/README.md` in the same PR.
 
 Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells, drawbridges and hazards are Phase 7. Their content flags and commands are added then.
 
@@ -330,7 +334,7 @@ Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells
 
 **Goal:** the game playable on the phone in Godot: a full run to the boss, in the GDD's interaction model.
 
-**Rescope (owner decision, 2026-10-11): greybox first, in parallel with Phase 4.** Phase 5 starts now as a greybox while the rest of the sim port continues. This is a deliberate exception to "work one phase at a time". The risk is low because the greybox only reads sim snapshots and sends commands, so it cannot break parity; if a sim change breaks a greybox scene, the greybox adapts. The Three.js renderer and HUD are already gone; `src/sim` and the fixture export script stay until the Phase 4 gate, because the combat port may need new fixture cases. Track C (terrain art) is parked at the proof of concept (Blender tiles plus world-space Godot shaders and scatter) and returns as the art pass over A1, with the terrain code reading the real map and the smooth road ribbon below.
+**Rescope (owner decision, 2026-10-11): greybox first, in parallel with Phase 4.** Phase 5 starts now as a greybox while the rest of the sim port continues. This is a deliberate exception to "work one phase at a time". The risk is low because the greybox only reads sim snapshots and sends commands, so it cannot change the sim's results; if a sim change breaks a greybox scene, the greybox adapts. The Three.js renderer and HUD are already gone; `src/sim` and the fixture exporter stay as a read-only reference until Phase 4 step 8. Track C (terrain art) is parked at the proof of concept (Blender tiles plus world-space Godot shaders and scatter) and returns as the art pass over A1, with the terrain code reading the real map; how the path is drawn is decided in Phase 5.
 
 | Step | You get | What it teaches |
 | --- | --- | --- |
@@ -338,7 +342,7 @@ Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells
 | A2 Picking | Tap a cell: highlight it, open a build menu, send a build command | Input events, a raycast onto the board, signals |
 | A3 Foes | Capsules walking the routes, one `MultiMesh` per foe type, smooth movement between ticks | `_process` against the fixed tick, interpolation, `MultiMesh` |
 | A4 Towers | A tower scene with its look (mesh, colours, range-ring style) in a `.tres` resource and its stats read from `godot/content` (never a second copy of the numbers), a range ring, shots | `PackedScene`, custom resources, the Inspector |
-| A5 HUD (the lives, wave and game-over parts wait for the combat and wave ports) | Gold, lives, wave, speed and pause, game over, landscape layout | `Control` nodes, containers, anchors, Theme |
+| A5 HUD (the kingdom-health, wave and game-over parts wait for the combat and wave ports) | Buttons, kingdom health, wave, speed and pause, game over, landscape layout | `Control` nodes, containers, anchors, Theme |
 | A6 Loop (waits for the wave and economy ports) | Waves, a win and lose screen, 1×/2×/3× speed | Game flow, scene switching |
 
 A1 and A2 can start now (map generation, game state and commands are ported); A3 onward lands as the combat and wave ports merge. **Limits of the exception:** the greybox only calls `Game.create`, `Game.submit` and `Game.tick`, reads state through read-only accessors, and drains events; it never touches `rng`, `route_rng` or `pending`, never assigns to or calls a mutating method on a field of the state (plain reads are allowed until the read-only accessors exist), and it never edits `godot/sim`, `godot/content` numbers or `fixtures/`. Any sim API the greybox needs (a read-only snapshot, the previous foe positions for A3 interpolation, event draining) is added by a Phase 4 sim ticket with GUT tests and deep review, never inside a greybox PR. A CI check rejects `godot/render` and `godot/ui` code that reaches into those fields (added with A1). Each step is built by Claude and read by the owner with the Remote scene tree open, then tweaked in the Inspector. A Godot MCP server that can launch the project, read its output and take screenshots (checked with Godot 4.7) lets Claude see the result without copying logs by hand.
@@ -349,7 +353,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 3. Camera: landscape framing, one-finger pan with rubber-band edges, two-finger pinch that zooms and tilts between 30° and 65°; tap picking to a socket, a tower or a cell (the cell decides, not the visible art).
 4. Control-node HUD: Buttons, kingdom health, wave, the radial context menu (48 pt targets, offset above the finger), speed, pause, next-wave popup, game over, landscape prompt.
 5. Effects (shots, splash, slows), reduced motion, audio after the first tap.
-6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget. The tower caps assume 20 towers at the top tier, which nothing enforces (the sim has no tower limit; sockets cap it at 12 to 22): measure the real late-game tower count from a seeded replay, and if it is higher, batch towers with one `MultiMesh` per tower type, tier and part so draw calls scale with types, or decide a tower cap as a design change.
+6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget. The tower caps assume 22 towers at the top tier, the most sockets a map has; the GDD's guards, paper planes and hero are not in the tower cap: guards and planes count in the 20k terrain and effects cap, the hero like a boss: measure the real late-game tower count from a seeded replay, and if it is higher, batch towers with one `MultiMesh` per tower type, tier and part so draw calls scale with types, or decide a tower cap as a design change.
 
 **Gate checklist**
 - [ ] A full run to the boss at 60 fps on the owner's phone with 80 foes.
@@ -382,7 +386,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Work breakdown**
 1. Flying: the Razor Moth, its line to the kingdom, an anti-air flag on towers.
-2. Support: the Ink Shaman (healing and speed buffs), targeting priorities.
+2. Support: the Ink Shaman (healing and speed buffs) and a support-first targeting priority.
 3. Blocking and melee: foes attack and units have health; the Guard Tent and its guards.
 4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability.
 5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl).
@@ -425,7 +429,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript reference outlives its use | Phase 4 step 8 removes `src/` and the unused fixtures once the GDScript combat lands |
-| The greybox (Phase 5) builds on a sim that is still being ported | The greybox only reads snapshots and sends commands; sim API changes are caught by its tests and by CI; parity fixtures decide any disagreement |
+| The greybox (Phase 5) builds on a sim that is still being ported | The greybox only reads snapshots and sends commands; sim API changes are caught by its tests and by CI; the replay goldens decide any disagreement |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses (towers use part animation, counted in the draw-call budget) |
 | Meshy output does not read as paper | Prompt for flat cut-out shapes with fold lines and paper grain, bake onto one paper texture, and if that fails build the foes from layered flat shapes in Blender |
 | The path drawing drifts from the sim polyline (foes look off the path or hits look wrong at corners) | The sim polyline decides hits, range and distance; the Phase 5 gate checks the path by eye on the phone |

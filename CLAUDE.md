@@ -3,10 +3,10 @@
 A papercraft stop-motion tower defense for phones and tablets, in the browser first and as a native iOS app next (Android only if wanted later). **Godot 4 + GDScript**, web export first (GitHub Pages). The design is the GDD in `docs/GDD.md` (adopted by the owner on 2026-10-11); the old Scrapline medieval design and the 2D prototype are no longer the rules target. The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as a read-only reference for formulas until the GDScript combat lands (Phase 4, step 8). The game is renamed Papercraft Kingdom Defense; the repo stays `psychic-bassoon`, and the code still says Scrapline until the rename ticket.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
-- Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes, game state) has fixtures, the tower and foe ids do not and change to the GDD's with the combat port. Display names and lore strings live only in `godot/content`.
+- Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes) has fixtures, the tower and foe ids do not and change to the GDD's with the combat port. Display names and lore strings live only in `godot/content`.
 - Original prototype (a starting point for numbers, not the rules target): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content (the oracle), and moves to `legacy/` or goes once the Godot sim passes parity.
+> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content, a read-only reference for formulas that is removed in Phase 4 step 8.
 
 ## Commands
 
@@ -21,7 +21,7 @@ mkdir -p build/web && godot --headless --path godot --export-release "Web" ../bu
 python3 -m http.server -d build/web                  # serve the export; open on a phone over LAN
 ```
 
-TypeScript oracle (the sim, the fixtures and the repo's checks):
+TypeScript reference (the old sim, the frozen fixtures and the repo's checks; removed or reduced in Phase 4 step 8):
 
 ```bash
 pnpm install
@@ -37,7 +37,7 @@ pnpm sim -- --seed 42   # headless run: map and wave log
 ## Working rules
 
 - **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases. **Exception (owner, 2026-10-11):** Phase 5 starts now as a greybox, in parallel with the rest of Phase 4. The greybox only reads sim snapshots and sends commands, so it cannot change parity; it never edits `godot/sim` or `fixtures/`. Art, lore and everything else from Phases 6 to 8 still wait, except Track B: ticket #157, the Scrap Goblin (the old Scamp) through the asset pipeline. Sim API the greybox needs (a read-only snapshot, previous foe positions, event draining) is added by Phase 4 sim tickets with tests and deep review, never inside a greybox PR; `godot/render` and `godot/ui` use only `Game.create`, `Game.submit`, `Game.tick`, read-only accessors and drained events, and never `rng`, `route_rng`, `pending` or field assignments on the state (a CI check enforces it from greybox step A1, ticket #156; it scans `godot/render`, `godot/ui` and `godot/main.gd`; plain reads of state fields are allowed until read-only accessors exist).
-- **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes, game state, commands, tick), which stays equal to its TypeScript fixtures; those fixtures are never regenerated. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check. Don't change the TypeScript sim; it is removed in Phase 4 step 8.
+- **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes), which stays equal to its TypeScript fixtures; those fixtures are frozen and never regenerated, and the game state, commands and tick are covered by GUT tests. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check. Don't change the TypeScript sim; it is removed in Phase 4 step 8.
 - **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for TypeScript, and `gdformat`, `gdlint`, GUT and the web export for Godot.
 
 ## Architecture
@@ -55,7 +55,7 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 - `godot/sim` must never touch the scene tree or engine singletons: no `Node`, no `get_tree`, no `Engine`, `Time` or `OS` calls, no `randf`/`randi`/`randomize`. A lint script enforces it; don't disable it.
 - The sim runs on a fixed 30 Hz tick and owns all game state. Render and UI only read state snapshots and events.
 - Player actions reach the sim only as commands (`build`, `upgrade`, `sell`, `launchWave`), never by mutating state directly.
-- All randomness goes through the seeded PRNG in `godot/sim/rng.gd` (mulberry32 on 32-bit integers). The same seed plus the same commands must replay identically, and must give values equal to the TypeScript fixtures.
+- All randomness goes through the seeded PRNG in `godot/sim/rng.gd` (mulberry32 on 32-bit integers). The same seed plus the same commands (plus, from Phase 8, the run's frozen meta-loadout: the tech-tree state at the start of the run) must replay identically; the ported core must give values equal to the TypeScript fixtures. Sockets, elevation and other new map layers draw from their own derived streams (`deriveRng`), never the map stream, so the frozen fixtures keep matching.
 - All balance numbers (cost, damage, range, rate, hp, speed, rewards, wave scaling) live in `godot/content`. Logic files contain no magic numbers.
 - A map is a grid with routes from the spawn to the kingdom, 12 to 22 sockets for towers, and three elevation levels (the GDD). The road generator and routes are ported (a main road and a detour); sockets and elevation are new map layers on top of it. Foes pick a route; towers target across routes. The sim keeps the grid, the polyline routes and the sockets as plain data; Godot nodes (`GridMap`, `Path3D`) only draw them.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
@@ -100,7 +100,7 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 - **Code style: the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html), enforced by tools, not by review.** `gdformat` formats and `gdlint` checks (gdtoolkit, pinned version; run from `godot/`, where `.gdlintrc` lives). CI fails on unformatted or unlinted code. Don't hand-format and don't disable a rule to get around it.
   - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members.
   - Comments explain why, not what. Use `##` doc comments on public APIs.
-- TypeScript code (the oracle and the repo's scripts) keeps the Google TypeScript Style Guide with Prettier and ESLint.
+- TypeScript code (the reference sim and the repo's scripts) keeps the Google TypeScript Style Guide with Prettier and ESLint.
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.

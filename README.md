@@ -15,7 +15,7 @@ It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in th
 ### Prerequisites
 
 - [Godot](https://godotengine.org/) with the exact version in `.godot-version` (the web export templates must match it)
-- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the TypeScript oracle, the fixtures and the smoke test
+- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the TypeScript reference sim, the frozen fixtures and the smoke test
 - [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit) 4.5.0 (`pip install gdtoolkit==4.5.0`) for `gdformat` and `gdlint`
 
 ### Install
@@ -48,7 +48,7 @@ pnpm sim -- --seed 7 --waves 25     # more waves
 
 ```bash
 godot --headless --path godot -s addons/gut/gut_cmdln.gd -gexit     # GUT tests for the GDScript sim
-pnpm test                # Vitest: the TypeScript oracle, the fixtures and the repo's scripts
+pnpm test                # Vitest: the TypeScript reference sim, the fixtures and the repo's scripts
 pnpm exec playwright install chromium   # once
 pnpm test:e2e:godot      # Playwright smoke test against build/web
 ```
@@ -77,7 +77,7 @@ godot/
   ui/        HUD scenes and the Theme (Phase 5)
   web/       the custom HTML shell and manifest for the web export
   tests/     GUT tests
-src/         the TypeScript simulation and content: the oracle for the port
+src/         the TypeScript simulation and content: a read-only reference, removed in Phase 4 step 8
 fixtures/    JSON exported from the TypeScript sim: what the GDScript sim must reproduce
 scripts/     fixtures export, sim CLI, CI checks (purity, assets, size)
 e2e-godot/   Playwright smoke test of the web export
