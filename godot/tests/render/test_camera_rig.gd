@@ -1,7 +1,7 @@
 ## The camera rig must fit the whole board for any landscape screen.
 extends GutTest
 
-const PITCH := 55.0
+const PITCH := 65.0  # the whole-board view is the most top-down one
 const FOV := 35.0
 const MARGIN := 1.05
 
@@ -71,10 +71,126 @@ func test_the_rig_aims_the_camera_down_at_the_board() -> void:
 	var rig := CameraRig.new()
 	add_child_autofree(rig)
 	rig.frame(16.0 / 9.0)
-	var camera := rig.get_child(0) as Camera3D
+	var camera := rig.camera()
 	assert_not_null(camera)
 	assert_almost_eq(camera.rotation_degrees.x, -PITCH, 1e-4)
 	assert_almost_eq(camera.fov, FOV, 1e-4)
 	# the camera is behind the board (positive z) and above it
 	assert_gt(camera.position.z, 0.0)
 	assert_gt(camera.position.y, 0.0)
+
+
+func test_pitch_runs_from_65_degrees_zoomed_out_to_30_zoomed_in() -> void:
+	assert_eq(CameraRig.pitch_for(0.0), 65.0)
+	assert_eq(CameraRig.pitch_for(1.0), 30.0)
+	assert_almost_eq(CameraRig.pitch_for(0.5), 47.5, 1e-9)
+	assert_eq(CameraRig.pitch_for(-3.0), 65.0)
+	assert_eq(CameraRig.pitch_for(9.0), 30.0)
+
+
+func test_the_closest_view_is_never_further_than_the_fit_and_shows_big_cells() -> void:
+	var fit := 20.0
+	# a tall canvas: cells reach the target size before the fit distance
+	var close := CameraRig.closest_distance(FOV, 720.0, fit)
+	assert_lt(close, fit)
+	# 120 px per cell on a 720 px canvas
+	assert_almost_eq(720.0 / (2.0 * close * tan(deg_to_rad(FOV) / 2.0)), 120.0, 1e-6)
+	# a canvas so tall that cells are already bigger than that when the board
+	# fits: there is nothing to zoom into, so the limit yields to the fit
+	assert_eq(CameraRig.closest_distance(FOV, 100000.0, fit), fit)
+
+
+func _phone_rig() -> CameraRig:
+	var rig := CameraRig.new()
+	rig.canvas_height = 720.0
+	add_child_autofree(rig)
+	rig.frame(16.0 / 9.0)
+	return rig
+
+
+func test_zoom_in_moves_the_camera_closer_and_lower() -> void:
+	var rig := _phone_rig()
+	var camera := rig.camera()
+	var far := camera.position.length()
+	var far_pitch := camera.rotation_degrees.x
+	rig.set_zoom(1.0)
+	assert_lt(camera.position.length(), far)
+	assert_gt(camera.rotation_degrees.x, far_pitch, "less negative: a lower angle")
+	assert_almost_eq(camera.rotation_degrees.x, -30.0, 1e-4)
+
+
+func test_zoom_is_clamped_to_the_range() -> void:
+	var rig := _phone_rig()
+	rig.zoom_by(1000.0)
+	assert_eq(rig.zoom, 1.0)
+	rig.zoom_by(0.0001)
+	assert_eq(rig.zoom, 0.0)
+	rig.zoom_steps(3.0)
+	assert_almost_eq(rig.zoom, 3.0 * CameraRig.WHEEL_STEP, 1e-9)
+	rig.zoom_steps(-100.0)
+	assert_eq(rig.zoom, 0.0)
+
+
+func test_a_pinch_that_spreads_zooms_in() -> void:
+	var rig := _phone_rig()
+	rig.zoom_by(1.5)
+	assert_gt(rig.zoom, 0.0)
+	var in_zoom := rig.zoom
+	rig.zoom_by(1.0 / 1.5)
+	assert_almost_eq(rig.zoom, 0.0, 1e-9)
+	assert_gt(in_zoom, rig.zoom)
+
+
+func test_there_is_nothing_to_pan_when_the_whole_board_is_in_view() -> void:
+	assert_eq(CameraRig.pan_limit(0.0), Vector2.ZERO)
+	var wide := CameraRig.pan_limit(1.0)
+	assert_gt(wide.x, 0.0)
+	assert_gt(wide.y, 0.0)
+	assert_lte(wide.x, BoardSpace.size().x / 2.0)
+	assert_lte(wide.y, BoardSpace.size().y / 2.0)
+
+
+func test_rubber_band_lets_you_overscroll_a_little() -> void:
+	assert_eq(CameraRig.rubber(2.0, 5.0), 2.0)
+	assert_eq(CameraRig.rubber(-5.0, 5.0), -5.0)
+	assert_almost_eq(CameraRig.rubber(9.0, 5.0), 5.0 + 4.0 * CameraRig.RUBBER, 1e-9)
+	assert_almost_eq(CameraRig.rubber(-9.0, 5.0), -(5.0 + 4.0 * CameraRig.RUBBER), 1e-9)
+
+
+func test_dragging_moves_the_scene_with_the_finger() -> void:
+	var rig := _phone_rig()
+	rig.set_zoom(1.0)
+	rig.pan_by_pixels(Vector2(100.0, 0.0))
+	# the scene follows the finger to the right, so the camera target moves to -x
+	assert_lt(rig.pan.x, 0.0)
+	assert_eq(rig.pan.y, 0.0)
+	rig.release_pan()
+	rig.pan_by_pixels(Vector2(0.0, 100.0))
+	# dragging down pushes the scene toward the viewer: the target moves away (-z)
+	assert_lt(rig.pan.y, 0.0)
+
+
+func test_a_pan_stays_near_the_board_and_springs_back_after_release() -> void:
+	var rig := _phone_rig()
+	rig.set_zoom(1.0)
+	rig.pan_by_pixels(Vector2(-2000.0, 0.0))
+	var limit := CameraRig.pan_limit(1.0)
+	# held: overscroll is damped, not unlimited
+	assert_gt(rig.pan.x, limit.x)
+	assert_lt(rig.pan.x, limit.x * 3.0)
+	rig.release_pan()
+	for i in 120:
+		rig._process(1.0 / 60.0)
+	assert_almost_eq(rig.pan.x, limit.x, 1e-3)
+
+
+func test_zooming_out_pulls_a_panned_view_back_to_the_middle() -> void:
+	var rig := _phone_rig()
+	rig.set_zoom(1.0)
+	rig.pan_by_pixels(Vector2(-300.0, 0.0))
+	rig.release_pan()
+	rig.set_zoom(0.0)
+	for i in 240:
+		rig._process(1.0 / 60.0)
+	assert_almost_eq(rig.pan.x, 0.0, 1e-3)
+	assert_almost_eq(rig.pan.y, 0.0, 1e-3)
