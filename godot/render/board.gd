@@ -32,6 +32,8 @@ var plot_count: int = 0
 var road_count: int = 0
 var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
+# what rebuild() made, so it never frees a node someone else put under the board
+var _built: Array[Node] = []
 
 
 func _ready() -> void:
@@ -40,9 +42,10 @@ func _ready() -> void:
 
 ## Draws the map for `map_seed` again from scratch.
 func rebuild() -> void:
-	for child in get_children():
+	for child in _built:
 		remove_child(child)
 		child.queue_free()
+	_built.clear()
 	map = MapGen.generate(map_seed)
 	_add_ground()
 	_add_tiles()
@@ -57,7 +60,7 @@ func _add_ground() -> void:
 	ground.mesh = plane
 	ground.position.y = -0.01
 	ground.material_override = _material(GROUND_COLOUR)
-	add_child(ground)
+	_add(ground)
 
 
 func _add_tiles() -> void:
@@ -78,13 +81,13 @@ func _add_tiles() -> void:
 	var plot_colours: Array[Color] = []
 	plot_colours.resize(plots.size())
 	plot_colours.fill(PLOT_COLOUR)
-	add_child(_tiles("Plots", plots, plot_colours, PLOT_SIZE))
+	_add(_tiles("Plots", plots, plot_colours, PLOT_SIZE))
 	var road_cells: Array[Vector2i] = []
 	var road_colours: Array[Color] = []
 	for cell in road:
 		road_cells.append(cell)
 		road_colours.append(MAIN_ROAD_COLOUR if road[cell] else DETOUR_ROAD_COLOUR)
-	add_child(_tiles("Road", road_cells, road_colours, ROAD_SIZE))
+	_add(_tiles("Road", road_cells, road_colours, ROAD_SIZE))
 
 
 ## One MultiMesh holding a box per cell, each with its own colour.
@@ -127,8 +130,13 @@ func _marker(node_name: String, cell: Vector2i, colour: Color, size: Vector3) ->
 	marker.mesh = box
 	marker.position = BoardSpace.cell_to_world(cell.x, cell.y) + Vector3(0.0, size.y / 2.0, 0.0)
 	marker.material_override = _material(colour)
-	add_child(marker)
+	_add(marker)
 	return marker
+
+
+func _add(node: Node) -> void:
+	add_child(node)
+	_built.append(node)
 
 
 func _material(colour: Color) -> StandardMaterial3D:

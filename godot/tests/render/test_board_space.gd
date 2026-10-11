@@ -28,8 +28,23 @@ func test_neighbouring_cells_are_one_unit_apart() -> void:
 
 
 func test_a_higher_column_is_further_from_the_camera() -> void:
-	# the camera looks along -z, so a larger sim column is nearer (larger z)
-	assert_gt(BoardSpace.cell_to_world(8, 0).z, BoardSpace.cell_to_world(0, 0).z)
+	# the camera sits at +z and looks along -z: a larger sim column has a smaller z
+	assert_lt(BoardSpace.cell_to_world(8, 0).z, BoardSpace.cell_to_world(0, 0).z)
+
+
+func test_the_turn_is_a_rotation_not_a_mirror() -> void:
+	# the sim's axes are (column across, row down). Turned a quarter, a row step
+	# must go to +x and a column step to -z, so (row step) x (column step) points
+	# the same way as the sim's own across-down pair would (a rotation keeps the
+	# handedness, a mirror flips it)
+	var origin := BoardSpace.cell_to_world(3, 3)
+	var row_step := BoardSpace.cell_to_world(3, 4) - origin
+	var col_step := BoardSpace.cell_to_world(4, 3) - origin
+	assert_eq(row_step, Vector3(1, 0, 0))
+	assert_eq(col_step, Vector3(0, 0, -1))
+	# column step x row step points down (-y) for the rotation the Three.js build
+	# used; a mirror (z rising with the column) would make it point up (+y)
+	assert_lt(col_step.cross(row_step).y, 0.0)
 
 
 func test_size_is_rows_across_and_columns_deep() -> void:

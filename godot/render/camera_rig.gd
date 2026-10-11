@@ -6,6 +6,9 @@
 class_name CameraRig
 extends Node3D
 
+## The narrowest screen the rig frames for (a hidden canvas reports no size).
+const MIN_ASPECT := 0.5
+
 @export var pitch_degrees: float = 55.0
 @export var fov_degrees: float = 35.0
 ## Room left around the board, as a share of its size.
@@ -41,6 +44,7 @@ static func fit_distance(
 
 ## Places the camera for a screen of this aspect ratio.
 func frame(aspect: float) -> void:
+	aspect = maxf(aspect, MIN_ASPECT)
 	if _camera == null:
 		_camera = Camera3D.new()
 		add_child(_camera)
@@ -53,4 +57,5 @@ func frame(aspect: float) -> void:
 
 func _aspect() -> float:
 	var size := get_viewport().get_visible_rect().size
-	return size.x / maxf(size.y, 1.0)
+	# a hidden or minimised canvas has no size: keep a sane shape, never 0
+	return maxf(size.x / maxf(size.y, 1.0), MIN_ASPECT)

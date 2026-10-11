@@ -59,6 +59,17 @@ func test_spawn_and_heartstone_markers_sit_on_the_ends_of_the_road() -> void:
 	assert_lt(board.spawn_marker.position.x, board.heartstone_marker.position.x)
 
 
+func test_rebuilding_leaves_no_stale_children_and_keeps_foreign_ones() -> void:
+	var board := _board(1)
+	var foreign := Node3D.new()
+	board.add_child(foreign)
+	var before := board.get_child_count()
+	for map_seed in [2, 3, 4]:
+		board.map_seed = map_seed
+	assert_eq(board.get_child_count(), before)
+	assert_true(foreign.get_parent() == board, "a node someone else added is kept")
+
+
 func test_tiles_are_drawn_with_few_draw_calls() -> void:
 	# one MultiMesh for plots and one for road, not a node per cell
 	var board := _board(1)

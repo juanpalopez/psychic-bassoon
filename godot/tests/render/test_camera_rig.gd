@@ -57,6 +57,16 @@ func test_the_margin_leaves_room_on_every_screen_shape() -> void:
 		assert_gt(roomy, tight, "aspect %f" % aspect)
 
 
+func test_a_zero_or_negative_aspect_never_puts_the_camera_at_infinity() -> void:
+	var rig := CameraRig.new()
+	add_child_autofree(rig)
+	for aspect in [0.0, -1.0]:
+		rig.frame(aspect)
+		var camera := rig.get_child(0) as Camera3D
+		assert_true(is_finite(camera.position.y), "aspect %f" % aspect)
+		assert_true(is_finite(camera.position.z), "aspect %f" % aspect)
+
+
 func test_the_rig_aims_the_camera_down_at_the_board() -> void:
 	var rig := CameraRig.new()
 	add_child_autofree(rig)

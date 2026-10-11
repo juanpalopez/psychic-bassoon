@@ -11,8 +11,8 @@ extends Node3D
 
 
 func _ready() -> void:
-	var from_url := _seed_from_url()
-	if from_url >= 0:
+	var from_url: Variant = _seed_from_url()
+	if from_url is int:
 		_board.map_seed = from_url
 	_next_seed.pressed.connect(func() -> void: _board.map_seed += 1)
 	# the browser smoke test waits for this flag
@@ -32,11 +32,12 @@ func _process(_delta: float) -> void:
 	)
 
 
-## The `seed` query parameter of the page, or -1 when there is none.
-func _seed_from_url() -> int:
+## The `seed` query parameter of the page as an int, or null when there is none
+## (or it is not a whole number of at most 16 characters).
+func _seed_from_url() -> Variant:
 	if not OS.has_feature("web"):
-		return -1
+		return null
 	var value: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('seed')")
-	if value is String and (value as String).is_valid_int():
+	if value is String and (value as String).length() <= 16 and (value as String).is_valid_int():
 		return int(value)
-	return -1
+	return null

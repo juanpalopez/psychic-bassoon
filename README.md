@@ -4,11 +4,11 @@ A medieval tower defense for mobile browsers. You are Castellan Quell, last ward
 
 It is a 3D low-poly remake of a 2D canvas prototype, built with **Godot 4** (GDScript). It plays in landscape on a phone, in the browser first and as a native iOS app later. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
-- **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/ (for now a Godot stub scene, not the game)
+- **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/ (for now the greybox board: the real map on flat tiles, not the game; add `?seed=42` to pick a map)
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
-> **Status:** Phase 4 (simulation port to GDScript). The PRNG, map generation with routes, and the game state, commands and 30 Hz tick are ported and tested. Foes, combat and waves are next. The game is not playable yet; the live page is a stub that proves the web export runs on a phone.
+> **Status:** Phase 4 (simulation port to GDScript). The PRNG, map generation with routes, and the game state, commands and 30 Hz tick are ported and tested. Foes, combat and waves are next. The game is not playable yet; the live page is the Phase 5 greybox board (step A1), built in parallel with the port.
 
 ## Getting started
 
