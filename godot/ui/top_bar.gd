@@ -2,13 +2,10 @@
 class_name TopBar
 extends HBoxContainer
 
-const GAP := 32
-
 var _labels: Array[Label] = []
 
 
 func _ready() -> void:
-	add_theme_constant_override("separation", GAP)
 	for i in 4:
 		var label := Label.new()
 		add_child(label)

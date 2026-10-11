@@ -97,6 +97,6 @@ func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
 	game.buttons = 99999
 	main._process(0.05)
 	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
-	# the bar has 1280 - 20 - 480 px before it would run under the speed buttons
+	# the bar has 1280 - 20 - 500 px before it would run under the speed buttons
 	var bar := main.get_node("Hud/TopBar") as TopBar
-	assert_lt(bar.get_combined_minimum_size().x, 780.0, text)
+	assert_lt(bar.get_combined_minimum_size().x, 760.0, text)

@@ -188,6 +188,7 @@ func _start(map_seed: int) -> void:
 	_foes.reset()
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
+	_speed = GameSpeed.new()
 	_towers.sync(_game.towers, _board.surface_height)
 	_update_launch_button()
 
