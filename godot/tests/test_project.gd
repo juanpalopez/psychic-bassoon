@@ -123,10 +123,9 @@ func test_a_built_tower_stands_on_its_socket() -> void:
 	main.select_cell(socket)
 	(main.get_node("Hud/BuildMenu") as BuildMenu).tower_buttons()[0].pressed.emit()
 	main._process(0.05)
-	var marker := main.get_node("Towers").get_child(0) as MeshInstance3D
+	var view := main.get_node("Towers").get_child(0) as TowerView
 	var top := (main.get_node("Board") as Board).surface_height(socket)
-	var height := (marker.mesh as BoxMesh).size.y
-	assert_almost_eq(marker.position.y, top + height / 2.0, 1e-5)
+	assert_almost_eq(view.position.y, top, 1e-5)
 
 
 func test_a_tap_off_the_board_clears_the_selection() -> void:
