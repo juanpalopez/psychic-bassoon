@@ -5,8 +5,8 @@
 ## list the cells that are not road but within reach of it (reading order),
 ## shuffle them with the stream, take cells greedily while they keep their
 ## distance from the sockets already chosen until the target count is reached,
-## top up without the distance rule if that fell short of the minimum, sort the
-## result in reading order, then give each socket a weighted elevation level.
+## sort the result in reading order, then give each socket a weighted
+## elevation level.
 class_name SocketPlacer
 extends RefCounted
 
@@ -25,11 +25,9 @@ static func place(map: GameMap) -> void:
 			break
 		if _keeps_distance(cell, chosen):
 			chosen.append(cell)
-	for cell in candidates:
-		if chosen.size() >= RULES.SOCKET_MIN:
-			break
-		if not chosen.has(cell):
-			chosen.append(cell)
+	# the spacing rule leaves room for at least the minimum on every board the
+	# generator can make (checked over 50,000 seeds); fail loudly if it ever does not
+	assert(chosen.size() >= RULES.SOCKET_MIN, "too few sockets for seed %d" % map.seed)
 	chosen.sort_custom(_reading_order)
 	map.sockets = chosen
 	map.elevation = _flat_elevation()

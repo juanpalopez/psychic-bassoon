@@ -52,7 +52,7 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var cell := CellPicker.cell_at(_camera, event.position)
+		var cell := CellPicker.cell_at(_camera, event.position, _board.surface_height)
 		select_cell(cell)
 		if cell == BoardSpace.NO_CELL:
 			_show_message("Tap a socket")

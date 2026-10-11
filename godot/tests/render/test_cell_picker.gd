@@ -35,3 +35,56 @@ func test_tapping_the_sky_picks_nothing() -> void:
 	add_child_autofree(tilted)
 	assert_eq(CellPicker.cell_at(tilted, Vector2(576.0, 324.0)), BoardSpace.NO_CELL)
 	assert_not_null(camera)
+
+
+## A board and a camera, as the scene has them.
+func _scene(map_seed: int) -> Dictionary:
+	var board := Board.new()
+	board.map_seed = map_seed
+	add_child_autofree(board)
+	var rig := CameraRig.new()
+	add_child_autofree(rig)
+	rig.frame(16.0 / 9.0)
+	return {"board": board, "camera": rig.camera()}
+
+
+func test_a_tap_on_the_top_of_a_raised_tile_picks_that_tile() -> void:
+	# a level 2 socket stands 0.74 high: cutting the ray with the ground alone
+	# would pick the cell behind it
+	var scene := _scene(7920)
+	var board: Board = scene.board
+	var camera: Camera3D = scene.camera
+	var checked := {}
+	for cell in board.map.sockets:
+		var top := board.surface_height(cell)
+		var centre := BoardSpace.cell_to_world(cell.x, cell.y)
+		for dx in [-0.3, 0.0, 0.3]:
+			for dz in [-0.3, 0.0, 0.3]:
+				var point := centre + Vector3(dx, top, dz)
+				var screen := camera.unproject_position(point)
+				var picked := CellPicker.cell_at(camera, screen, board.surface_height)
+				assert_eq(picked, cell, "socket %s level %d" % [cell, board.map.elevation_at(cell)])
+		checked[board.map.elevation_at(cell)] = true
+	assert_true(checked.has(0) and checked.has(1) and checked.has(2), "all three levels checked")
+
+
+func test_a_tap_on_road_and_ground_still_picks_them() -> void:
+	var scene := _scene(1)
+	var board: Board = scene.board
+	var camera: Camera3D = scene.camera
+	for cell in [board.map.path[3], board.map.path[10]]:
+		var top := board.surface_height(cell)
+		var point := BoardSpace.cell_to_world(cell.x, cell.y) + Vector3(0.0, top, 0.0)
+		assert_eq(
+			CellPicker.cell_at(camera, camera.unproject_position(point), board.surface_height), cell
+		)
+
+
+func test_a_tap_off_the_board_still_picks_nothing_with_heights() -> void:
+	var scene := _scene(1)
+	var board: Board = scene.board
+	var camera: Camera3D = scene.camera
+	assert_eq(
+		CellPicker.cell_at(camera, Vector2(-500.0, -500.0), board.surface_height),
+		BoardSpace.NO_CELL
+	)

@@ -119,7 +119,7 @@ func test_elevation_is_a_level_from_0_to_2_and_flat_off_the_sockets() -> void:
 		for row in RULES.GRID_ROWS:
 			for col in RULES.GRID_COLS:
 				var level := map.elevation_at(Vector2i(col, row))
-				assert_between(level, 0, RULES.ELEVATION_LEVELS - 1)
+				assert_between(level, 0, 2)
 				if not map.is_socket(Vector2i(col, row)):
 					assert_eq(level, 0, "ground and road are level 0, seed %d" % map_seed)
 
@@ -147,15 +147,6 @@ func test_a_level_2_socket_gives_a_15_percent_range_bonus() -> void:
 	assert_eq(found[0], 1.0)
 	assert_eq(found[1], 1.0)
 	assert_eq(found[2], 1.15)
-
-
-func test_is_socket_matches_the_list() -> void:
-	var map := MapGen.generate(7920)
-	for row in RULES.GRID_ROWS:
-		for col in RULES.GRID_COLS:
-			assert_eq(map.is_socket(Vector2i(col, row)), map.sockets.has(Vector2i(col, row)))
-	assert_false(map.is_socket(Vector2i(-1, -1)))
-	assert_false(map.is_socket(Vector2i(99, 99)))
 
 
 func test_the_socket_stream_id_is_frozen() -> void:

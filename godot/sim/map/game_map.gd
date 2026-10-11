@@ -37,6 +37,5 @@ func elevation_at(cell: Vector2i) -> int:
 
 ## How much further a tower on this cell reaches: 1.0, or 1.15 on level 2.
 func range_multiplier(cell: Vector2i) -> float:
-	if not is_socket(cell):
-		return 1.0
+	# off the sockets the level is 0, which has no bonus
 	return 1.0 + RULES.ELEVATION_RANGE_BONUS[elevation_at(cell)]

@@ -20,6 +20,10 @@ func _init() -> void:
 			levels.append(map.elevation_at(cell))
 		out.append({"seed": map_seed, "sockets": cells, "levels": levels})
 	var file := FileAccess.open(PATH, FileAccess.WRITE)
+	if file == null:
+		push_error("cannot write %s" % PATH)
+		quit(1)
+		return
 	file.store_string(JSON.stringify(out) + "\n")
 	file.close()
 	print("wrote %s for %d seeds" % [PATH, SEEDS.size()])

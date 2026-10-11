@@ -171,6 +171,24 @@ func test_a_new_seed_starts_a_fresh_game() -> void:
 	assert_eq(main.get_node("Towers").get_child_count(), 0)
 
 
+func test_a_tap_on_a_raised_socket_selects_that_socket() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	var board := main.get_node("Board") as Board
+	var camera := (main.get_node("CameraRig") as CameraRig).camera()
+	for socket in game.map.sockets:
+		var top := BoardSpace.cell_to_world(socket.x, socket.y)
+		top.y = board.surface_height(socket)
+		var tap := InputEventMouseButton.new()
+		tap.button_index = MOUSE_BUTTON_LEFT
+		tap.pressed = true
+		tap.position = camera.unproject_position(top)
+		main._unhandled_input(tap)
+		assert_eq(main.selected_cell(), socket, "level %d" % game.map.elevation_at(socket))
+
+
 func test_a_tap_off_the_board_says_where_to_tap() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
