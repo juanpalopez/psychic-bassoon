@@ -1,6 +1,47 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
+[ext_resource type="Script" path="res://render/board.gd" id="2_board"]
+[ext_resource type="Script" path="res://render/camera_rig.gd" id="3_rig"]
+
+[sub_resource type="Environment" id="Environment_dusk"]
+background_mode = 1
+background_color = Color(0.043, 0.071, 0.125, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.435, 0.51, 0.753, 1)
+ambient_light_energy = 0.8
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dusk")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-55, -30, 0)
+light_color = Color(1, 0.79, 0.54, 1)
+
+[node name="Board" type="Node3D" parent="."]
+script = ExtResource("2_board")
+map_seed = 1
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = ExtResource("3_rig")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+
+[node name="Info" type="Label" parent="Hud"]
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 1100.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 32
+
+[node name="NextSeed" type="Button" parent="Hud"]
+custom_minimum_size = Vector2(240, 96)
+offset_left = 20.0
+offset_top = 76.0
+offset_right = 260.0
+offset_bottom = 172.0
+theme_override_font_sizes/font_size = 32
+text = "Next seed"

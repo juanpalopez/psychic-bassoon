@@ -134,6 +134,9 @@ jobs:
       - name: Sim purity
         run: pnpm check:sim-purity
 
+      - name: Render boundary
+        run: pnpm check:render-boundary
+
       - name: Locate Godot
         run: |
           binary=("$HOME"/godot-bin/Godot_v*_linux.x86_64)
