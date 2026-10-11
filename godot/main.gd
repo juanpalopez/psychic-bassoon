@@ -1,4 +1,5 @@
-## The greybox scene (Phase 5, steps A1 and A2): the real map, and building on it.
+## The greybox scene (Phase 5, steps A1 to A3): the real map, building on it, and
+## waves of foes walking it.
 ##
 ## It owns one game (`Game.create`), ticks it at 30 Hz through the clock, turns a
 ## tap into a board cell, and sends build commands with `Game.submit`. It only
@@ -8,6 +9,7 @@
 ## page with `?seed=42` to start on a given seed.
 extends Node3D
 
+const EARLY_RULES := preload("res://content/game_rules.gd")
 const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
@@ -26,6 +28,8 @@ var _gestures := Gestures.new()
 @onready var _camera: Camera3D = _rig.camera()
 @onready var _highlight: CellHighlight = $Highlight
 @onready var _towers: TowersView = $Towers
+@onready var _foes: FoesView = $Foes
+@onready var _launch: Button = $Hud/LaunchWave
 @onready var _info: Label = $Hud/Info
 @onready var _message: Label = $Hud/Message
 @onready var _menu: BuildMenu = $Hud/BuildMenu
@@ -37,6 +41,7 @@ func _ready() -> void:
 	_start(from_url if from_url is int else _board.map_seed)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
+	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
 	_gestures.tapped.connect(_on_tap)
 	_gestures.panned.connect(_rig.pan_by_pixels)
 	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
@@ -49,12 +54,20 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	Frame.step(_game, _clock, delta, GAME_SPEED, Callable(), _after_tick)
 	_towers.sync(_game.towers, _board.surface_height)
+	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
+	_update_launch_button()
 	_menu.set_buttons(_game.buttons)
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_info.text = (
-		"Seed %d  |  Buttons %d  |  %d routes  |  %d fps"
-		% [_game.seed, _game.buttons, _game.map.routes.size(), Engine.get_frames_per_second()]
+		"%sSeed %d  |  Wave %d  |  Kingdom %d  |  Buttons %d"
+		% [
+			"GAME OVER  |  " if _game.over else "",
+			_game.seed,
+			_game.wave,
+			_game.kingdom_health,
+			_game.buttons,
+		]
 	)
 
 
@@ -161,8 +174,10 @@ func _start(map_seed: int) -> void:
 	_board.map_seed = map_seed
 	_game = Game.create(map_seed)
 	_clock = Clock.new()
+	_foes.reset()
 	select_cell(BoardSpace.NO_CELL)
 	_towers.sync(_game.towers, _board.surface_height)
+	_update_launch_button()
 
 
 func _tower_on(cell: Vector2i) -> Tower:
@@ -199,3 +214,21 @@ func _seed_from_url() -> Variant:
 	if value is String and (value as String).length() <= 16 and (value as String).is_valid_int():
 		return int(value)
 	return null
+
+
+## The launch button says what a press would do, and rests while it cannot.
+func _update_launch_button() -> void:
+	var next := _game.wave + 1
+	if _game.over:
+		_launch.text = "Game over"
+		_launch.disabled = true
+	elif not _game.spawners.is_empty():
+		_launch.text = "Wave %d is coming..." % _game.wave
+		_launch.disabled = true
+	elif _game.running:
+		var bonus: int = EARLY_RULES.EARLY_CALL_BASE + _game.wave * EARLY_RULES.EARLY_CALL_PER_WAVE
+		_launch.text = "Call wave %d early (+%d)" % [next, bonus]
+		_launch.disabled = false
+	else:
+		_launch.text = "Start wave %d" % next
+		_launch.disabled = false

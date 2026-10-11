@@ -44,6 +44,14 @@ static func corners() -> Array[Vector3]:
 	]
 
 
+## Where a sim position goes in the world. Sim positions are in cells, with x
+## across (a cell's centre is column + 0.5) and y down (row + 0.5); the spawn
+## point sits a little above the top row (negative y). At a cell centre this
+## agrees with `cell_to_world`.
+static func point_to_world(sim_x: float, sim_y: float) -> Vector3:
+	return Vector3(sim_y - float(RULES.GRID_ROWS) / 2.0, 0.0, float(RULES.GRID_COLS) / 2.0 - sim_x)
+
+
 ## The cell under a point on the ground, or `NO_CELL` when it is off the board.
 ## The inverse of `cell_to_world` (any point inside a cell gives that cell).
 static func world_to_cell(point: Vector3) -> Vector2i:
