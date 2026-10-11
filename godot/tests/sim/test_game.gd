@@ -56,7 +56,7 @@ func test_same_seed_gives_the_same_game() -> void:
 func test_state_survives_json() -> void:
 	var game := Game.create(SEED)
 	GameTestKit.run(
-		game, [Command.build("ballista", GameTestKit.plot(game).x, GameTestKit.plot(game).y)]
+		game, [Command.build("ballista", GameTestKit.socket(game).x, GameTestKit.socket(game).y)]
 	)
 	var snapshot := GameTestKit.snapshot(game)
 	var parsed: Dictionary = JSON.parse_string(JSON.stringify(snapshot))
@@ -86,7 +86,7 @@ func test_tick_changes_nothing_else_without_commands() -> void:
 
 func test_commands_run_in_submission_order() -> void:
 	var game := Game.create(SEED)
-	var cell := GameTestKit.plot(game)
+	var cell := GameTestKit.socket(game)
 	GameTestKit.run(
 		game, [GameTestKit.build_at("ballista", cell), GameTestKit.build_at("catapult", cell)]
 	)
@@ -102,14 +102,14 @@ func test_queue_is_empty_after_each_tick() -> void:
 
 func test_commands_do_not_run_before_the_tick() -> void:
 	var game := Game.create(SEED)
-	Game.submit(game, GameTestKit.build_at("ballista", GameTestKit.plot(game)))
+	Game.submit(game, GameTestKit.build_at("ballista", GameTestKit.socket(game)))
 	assert_eq(game.towers.size(), 0)
 	assert_eq(game.gold, RULES.START_GOLD)
 
 
 func test_events_last_one_tick_only() -> void:
 	var game := Game.create(SEED)
-	GameTestKit.run(game, [GameTestKit.build_at("ballista", GameTestKit.plot(game))])
+	GameTestKit.run(game, [GameTestKit.build_at("ballista", GameTestKit.socket(game))])
 	assert_eq(game.events.size(), 1)
 	Game.tick(game)
 	assert_eq(game.events.size(), 0)

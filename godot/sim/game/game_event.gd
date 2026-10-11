@@ -9,7 +9,7 @@ enum Kind { TOWER_BUILT, TOWER_UPGRADED, TOWER_SOLD, WAVE_LAUNCHED, COMMAND_REJE
 ## Why a command did nothing. A rejection is an event, never an error.
 enum RejectReason {
 	GAME_OVER,
-	NOT_A_PLOT,
+	NOT_A_SOCKET,
 	UNKNOWN_TOWER,
 	OCCUPIED,
 	NOT_ENOUGH_GOLD,

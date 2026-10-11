@@ -110,11 +110,7 @@ func test_speed_and_frame_rate_never_change_the_game() -> void:
 func _play(frame_seconds: float, speed: int, ticks: int) -> GameState:
 	var game := Game.create(SEED)
 	var clock := Clock.new()
-	var cells: Array[Vector2i] = []
-	for row in game.map.tiles.size():
-		for col in game.map.tiles[row].size():
-			if game.map.tiles[row][col] == GameMap.Tile.PLOT:
-				cells.append(Vector2i(col, row))
+	var cells := game.map.sockets
 	var script := {
 		0: Command.build("ballista", cells[0].x, cells[0].y),
 		30: Command.build("catapult", cells[5].x, cells[5].y),

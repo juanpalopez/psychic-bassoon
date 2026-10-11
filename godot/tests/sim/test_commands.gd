@@ -18,7 +18,7 @@ func assert_rejected_by(events: Array[GameEvent], command: Command, reason: REAS
 
 func test_build_places_a_level_1_tower_and_charges_its_cost() -> void:
 	var game := Game.create(SEED)
-	var cell := GameTestKit.plot(game)
+	var cell := GameTestKit.socket(game)
 	var events := GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
 	var cost: int = TOWERS.DEFS.ballista.cost[0]
 	assert_eq(game.gold, RULES.START_GOLD - cost)
@@ -39,8 +39,8 @@ func test_each_tower_gets_its_own_id() -> void:
 	GameTestKit.run(
 		game,
 		[
-			GameTestKit.build_at("ballista", GameTestKit.plot(game, 0)),
-			GameTestKit.build_at("ballista", GameTestKit.plot(game, 1))
+			GameTestKit.build_at("ballista", GameTestKit.socket(game, 0)),
+			GameTestKit.build_at("ballista", GameTestKit.socket(game, 1))
 		]
 	)
 	assert_eq([game.towers[0].id, game.towers[1].id], [0, 1])
@@ -49,13 +49,13 @@ func test_each_tower_gets_its_own_id() -> void:
 func test_build_on_the_path_is_rejected() -> void:
 	var game := Game.create(SEED)
 	var command := GameTestKit.build_at("ballista", game.map.path[3])
-	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_PLOT)
+	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
 	assert_eq(game.gold, RULES.START_GOLD)
 
 
 func test_unknown_tower_is_rejected_not_thrown() -> void:
 	var game := Game.create(SEED)
-	var command := GameTestKit.build_at("laser", GameTestKit.plot(game))
+	var command := GameTestKit.build_at("laser", GameTestKit.socket(game))
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.UNKNOWN_TOWER)
 	assert_eq(game.gold, RULES.START_GOLD)
 
@@ -69,12 +69,12 @@ func test_build_off_the_board_is_rejected() -> void:
 		Vector2i(0, -1)
 	]:
 		var command := GameTestKit.build_at("ballista", cell)
-		assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_PLOT)
+		assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
 
 
 func test_build_on_an_occupied_plot_is_rejected() -> void:
 	var game := Game.create(SEED)
-	var cell := GameTestKit.plot(game)
+	var cell := GameTestKit.socket(game)
 	GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
 	var command := GameTestKit.build_at("ballista", cell)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.OCCUPIED)
@@ -85,7 +85,7 @@ func test_build_needs_the_gold_and_allows_an_exact_fit() -> void:
 	var game := Game.create(SEED)
 	var cost: int = TOWERS.DEFS.stormSpire.cost[0]
 	game.gold = cost - 1
-	var command := GameTestKit.build_at("stormSpire", GameTestKit.plot(game))
+	var command := GameTestKit.build_at("stormSpire", GameTestKit.socket(game))
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_GOLD)
 	game.gold = cost
 	GameTestKit.run(game, [command])
@@ -95,7 +95,7 @@ func test_build_needs_the_gold_and_allows_an_exact_fit() -> void:
 
 func _with_tower(type: String) -> GameState:
 	var game := Game.create(SEED)
-	GameTestKit.run(game, [GameTestKit.build_at(type, GameTestKit.plot(game))])
+	GameTestKit.run(game, [GameTestKit.build_at(type, GameTestKit.socket(game))])
 	game.gold = 1000
 	return game
 
@@ -138,7 +138,7 @@ func test_upgrade_of_an_unknown_tower_is_rejected() -> void:
 
 func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 	var game := Game.create(SEED)
-	var cell := GameTestKit.plot(game)
+	var cell := GameTestKit.socket(game)
 	GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
 	game.gold = 1000
 	GameTestKit.run(game, [Command.upgrade(0)])
@@ -159,7 +159,7 @@ func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
 	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so the refund is 62, not 63
 	var game := Game.create(SEED)
-	GameTestKit.run(game, [GameTestKit.build_at("catapult", GameTestKit.plot(game))])
+	GameTestKit.run(game, [GameTestKit.build_at("catapult", GameTestKit.socket(game))])
 	game.gold = 0
 	GameTestKit.run(game, [Command.sell(0)])
 	assert_eq(game.gold, 62)

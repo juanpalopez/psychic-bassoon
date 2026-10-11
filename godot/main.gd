@@ -40,7 +40,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	Frame.step(_game, _clock, delta, GAME_SPEED, Callable(), _after_tick)
-	_towers.sync(_game.towers)
+	_towers.sync(_game.towers, _board.surface_height)
 	_menu.set_gold(_game.gold)
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
@@ -55,7 +55,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		var cell := CellPicker.cell_at(_camera, event.position)
 		select_cell(cell)
 		if cell == BoardSpace.NO_CELL:
-			_show_message("Tap a green plot")
+			_show_message("Tap a socket")
 
 
 ## The game being played (read it; change it only with commands).
@@ -68,7 +68,7 @@ func selected_cell() -> Vector2i:
 	return _selected
 
 
-## Selects a cell: highlights it and, for a free plot, opens the build menu.
+## Selects a cell: highlights it and, for a free socket, opens the build menu.
 ## `BoardSpace.NO_CELL` clears the selection.
 func select_cell(cell: Vector2i) -> void:
 	_selected = cell
@@ -79,7 +79,11 @@ func select_cell(cell: Vector2i) -> void:
 	var height := _board.surface_height(cell)
 	if _game.map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
 		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
-		_show_message("That is road: build on the green")
+		_show_message("That is road: build on a socket")
+		return
+	if not _game.map.is_socket(cell):
+		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_show_message(RejectText.of(GameEvent.RejectReason.NOT_A_SOCKET))
 		return
 	var tower := _tower_on(cell)
 	if tower != null:
@@ -100,7 +104,7 @@ func _start(map_seed: int) -> void:
 	_game = Game.create(map_seed)
 	_clock = Clock.new()
 	select_cell(BoardSpace.NO_CELL)
-	_towers.sync(_game.towers)
+	_towers.sync(_game.towers, _board.surface_height)
 
 
 func _tower_on(cell: Vector2i) -> Tower:

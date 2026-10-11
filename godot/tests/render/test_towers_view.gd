@@ -49,3 +49,13 @@ func test_syncing_the_same_towers_again_keeps_the_same_nodes() -> void:
 	var node := view.get_child(0)
 	view.sync(towers)
 	assert_eq(view.get_child(0), node)
+
+
+func test_a_marker_stands_on_the_surface_it_is_given() -> void:
+	var view := TowersView.new()
+	add_child_autofree(view)
+	var surface := func(_cell: Vector2i) -> float: return 1.5
+	view.sync([_tower(0, "ballista", 1, 2, 0)] as Array[Tower], surface)
+	var marker := view.get_child(0) as MeshInstance3D
+	var height := (marker.mesh as BoxMesh).size.y
+	assert_almost_eq(marker.position.y, 1.5 + height / 2.0, 1e-6)

@@ -18,10 +18,13 @@ func test_the_board_holds_the_map_for_its_seed() -> void:
 	assert_eq(board.map.routes.size(), map.routes.size())
 
 
-func test_every_cell_is_either_a_road_tile_or_a_plot() -> void:
+func test_every_cell_is_a_road_tile_a_socket_or_ground() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
-		assert_eq(board.road_count + board.plot_count, RULES.GRID_COLS * RULES.GRID_ROWS)
+		assert_eq(
+			board.road_count + board.ground_count + board.socket_count,
+			RULES.GRID_COLS * RULES.GRID_ROWS
+		)
 		var road := {}
 		for route in board.map.routes:
 			for cell in route:
@@ -35,14 +38,18 @@ func test_changing_the_seed_rebuilds_the_board() -> void:
 	board.map_seed = 7920
 	assert_ne(board.map.path, before)
 	assert_eq(board.map.path, MapGen.generate(7920).path)
-	assert_eq(board.road_count + board.plot_count, RULES.GRID_COLS * RULES.GRID_ROWS)
+	assert_eq(
+		board.road_count + board.ground_count + board.socket_count,
+		RULES.GRID_COLS * RULES.GRID_ROWS
+	)
 
 
 func test_the_same_seed_gives_the_same_tiles() -> void:
 	var a := _board(42)
 	var b := _board(42)
 	assert_eq(a.road_count, b.road_count)
-	assert_eq(a.plot_count, b.plot_count)
+	assert_eq(a.socket_count, b.socket_count)
+	assert_eq(a.ground_count, b.ground_count)
 
 
 func test_spawn_and_heartstone_markers_sit_on_the_ends_of_the_road() -> void:
@@ -71,10 +78,27 @@ func test_rebuilding_leaves_no_stale_children_and_keeps_foreign_ones() -> void:
 
 
 func test_tiles_are_drawn_with_few_draw_calls() -> void:
-	# one MultiMesh for plots and one for road, not a node per cell
+	# one MultiMesh each for road, ground and sockets, not a node per cell
 	var board := _board(1)
 	var multimeshes := 0
 	for child in board.get_children():
 		if child is MultiMeshInstance3D:
 			multimeshes += 1
-	assert_eq(multimeshes, 2)
+	assert_eq(multimeshes, 3)
+
+
+func test_the_board_draws_one_socket_tile_per_socket() -> void:
+	for map_seed in [1, 7920, 15839]:
+		var board := _board(map_seed)
+		assert_eq(board.socket_count, board.map.sockets.size(), "seed %d" % map_seed)
+
+
+func test_a_higher_socket_stands_taller_than_the_road_and_the_ground() -> void:
+	var board := _board(7920)
+	var heights := {}
+	for cell in board.map.sockets:
+		heights[board.map.elevation_at(cell)] = board.surface_height(cell)
+	assert_true(heights.has(0) and heights.has(1) and heights.has(2))
+	assert_lt(heights[0], heights[1])
+	assert_lt(heights[1], heights[2])
+	assert_lt(board.surface_height(board.map.path[3]), board.surface_height(board.map.sockets[0]))

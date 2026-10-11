@@ -32,7 +32,7 @@ func test_main_scene_draws_the_board_with_a_camera() -> void:
 	var board := main.get_node("Board") as Board
 	assert_not_null(board)
 	assert_gt(board.road_count, 0)
-	assert_gt(board.plot_count, 0)
+	assert_gt(board.socket_count, 0)
 	var rig := main.get_node("CameraRig") as CameraRig
 	assert_not_null(rig)
 	assert_not_null(rig.get_child(0) as Camera3D)
@@ -68,7 +68,7 @@ func test_a_tap_and_a_choice_builds_a_tower() -> void:
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var game: GameState = main.game()
-	var plot := _first_plot(game)
+	var plot := _first_socket(game)
 	main.select_cell(plot)
 	var menu := main.get_node("Hud/BuildMenu") as BuildMenu
 	assert_true(menu.visible)
@@ -95,12 +95,46 @@ func test_a_tap_on_the_road_shows_a_message_and_no_menu() -> void:
 	assert_ne((main.get_node("Hud/Message") as Label).text, "")
 
 
+func test_a_tap_on_plain_ground_says_to_use_a_socket() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	var ground := Vector2i(-1, -1)
+	for row in game.map.tiles.size():
+		for col in game.map.tiles[row].size():
+			var cell := Vector2i(col, row)
+			if game.map.tiles[row][col] == GameMap.Tile.PLOT and not game.map.is_socket(cell):
+				ground = cell
+	main.select_cell(ground)
+	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
+	assert_eq(
+		(main.get_node("Hud/Message") as Label).text,
+		RejectText.of(GameEvent.RejectReason.NOT_A_SOCKET)
+	)
+
+
+func test_a_built_tower_stands_on_its_socket() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	var socket := _first_socket(game)
+	main.select_cell(socket)
+	(main.get_node("Hud/BuildMenu") as BuildMenu).buttons()[0].pressed.emit()
+	main._process(0.05)
+	var marker := main.get_node("Towers").get_child(0) as MeshInstance3D
+	var top := (main.get_node("Board") as Board).surface_height(socket)
+	var height := (marker.mesh as BoxMesh).size.y
+	assert_almost_eq(marker.position.y, top + height / 2.0, 1e-5)
+
+
 func test_a_tap_off_the_board_clears_the_selection() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var game: GameState = main.game()
-	main.select_cell(_first_plot(game))
+	main.select_cell(_first_socket(game))
 	main.select_cell(BoardSpace.NO_CELL)
 	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
 	assert_false((main.get_node("Highlight") as CellHighlight).visible)
@@ -111,7 +145,7 @@ func test_building_without_the_gold_shows_the_rejection() -> void:
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var game: GameState = main.game()
-	main.select_cell(_first_plot(game))
+	main.select_cell(_first_socket(game))
 	game.gold = 0
 	# the menu disables the buttons itself, so send the command the way a stale
 	# menu could
@@ -128,7 +162,7 @@ func test_a_new_seed_starts_a_fresh_game() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
 	await get_tree().process_frame
-	main.select_cell(_first_plot(main.game()))
+	main.select_cell(_first_socket(main.game()))
 	(main.get_node("Hud/BuildMenu") as BuildMenu).buttons()[0].pressed.emit()
 	main._process(0.05)
 	(main.get_node("Hud/NextSeed") as Button).pressed.emit()
@@ -146,7 +180,7 @@ func test_a_tap_off_the_board_says_where_to_tap() -> void:
 	tap.pressed = true
 	tap.position = Vector2(-500.0, -500.0)
 	main._unhandled_input(tap)
-	assert_eq((main.get_node("Hud/Message") as Label).text, "Tap a green plot")
+	assert_eq((main.get_node("Hud/Message") as Label).text, "Tap a socket")
 	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
 
 
@@ -156,7 +190,7 @@ func test_after_game_over_a_plot_does_not_open_the_menu() -> void:
 	await get_tree().process_frame
 	var game: GameState = main.game()
 	game.over = true
-	main.select_cell(_first_plot(game))
+	main.select_cell(_first_socket(game))
 	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
 	assert_eq(
 		(main.get_node("Hud/Message") as Label).text,
@@ -164,9 +198,5 @@ func test_after_game_over_a_plot_does_not_open_the_menu() -> void:
 	)
 
 
-func _first_plot(game: GameState) -> Vector2i:
-	for row in game.map.tiles.size():
-		for col in game.map.tiles[row].size():
-			if game.map.tiles[row][col] == GameMap.Tile.PLOT:
-				return Vector2i(col, row)
-	return BoardSpace.NO_CELL
+func _first_socket(game: GameState) -> Vector2i:
+	return game.map.sockets[0]
