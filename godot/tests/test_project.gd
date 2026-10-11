@@ -137,6 +137,33 @@ func test_a_new_seed_starts_a_fresh_game() -> void:
 	assert_eq(main.get_node("Towers").get_child_count(), 0)
 
 
+func test_a_tap_off_the_board_says_where_to_tap() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var tap := InputEventMouseButton.new()
+	tap.button_index = MOUSE_BUTTON_LEFT
+	tap.pressed = true
+	tap.position = Vector2(-500.0, -500.0)
+	main._unhandled_input(tap)
+	assert_eq((main.get_node("Hud/Message") as Label).text, "Tap a green plot")
+	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
+
+
+func test_after_game_over_a_plot_does_not_open_the_menu() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	game.over = true
+	main.select_cell(_first_plot(game))
+	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
+	assert_eq(
+		(main.get_node("Hud/Message") as Label).text,
+		RejectText.of(GameEvent.RejectReason.GAME_OVER)
+	)
+
+
 func _first_plot(game: GameState) -> Vector2i:
 	for row in game.map.tiles.size():
 		for col in game.map.tiles[row].size():

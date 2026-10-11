@@ -52,7 +52,10 @@ func _process(delta: float) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		select_cell(CellPicker.cell_at(_camera, event.position))
+		var cell := CellPicker.cell_at(_camera, event.position)
+		select_cell(cell)
+		if cell == BoardSpace.NO_CELL:
+			_show_message("Tap a green plot")
 
 
 ## The game being played (read it; change it only with commands).
@@ -82,6 +85,10 @@ func select_cell(cell: Vector2i) -> void:
 	if tower != null:
 		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
 		_show_message("%s here" % tower.type)
+		return
+	if _game.over:
+		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_show_message(RejectText.of(GameEvent.RejectReason.GAME_OVER))
 		return
 	_highlight.show_cell(cell, height, FREE_COLOUR)
 	_menu.open_for(cell, _game.gold)
