@@ -101,3 +101,28 @@ func test_a_ray_that_points_up_or_along_the_ground_misses() -> void:
 	assert_null(BoardSpace.ground_hit(Vector3(0.0, 5.0, 0.0), Vector3(1.0, 0.0, 0.0)))
 	# a ray that starts below the ground and points down is behind it
 	assert_null(BoardSpace.ground_hit(Vector3(0.0, -1.0, 0.0), Vector3(0.0, -1.0, 0.0)))
+
+
+func test_a_sim_point_at_a_cell_centre_is_that_cells_world_position() -> void:
+	# sim positions are in cells: x across (column + 0.5), y down (row + 0.5)
+	for row in RULES.GRID_ROWS:
+		for col in RULES.GRID_COLS:
+			var from_point := BoardSpace.point_to_world(float(col) + 0.5, float(row) + 0.5)
+			var from_cell := BoardSpace.cell_to_world(col, row)
+			assert_almost_eq(from_point.x, from_cell.x, 1e-9)
+			assert_almost_eq(from_point.z, from_cell.z, 1e-9)
+			assert_eq(from_point.y, 0.0)
+
+
+func test_a_point_between_two_cells_lies_between_them() -> void:
+	var a := BoardSpace.cell_to_world(3, 4)
+	var b := BoardSpace.cell_to_world(3, 5)
+	var middle := BoardSpace.point_to_world(3.5, 5.0)
+	assert_almost_eq(middle.x, (a.x + b.x) / 2.0, 1e-9)
+	assert_almost_eq(middle.z, (a.z + b.z) / 2.0, 1e-9)
+
+
+func test_the_spawn_point_above_the_top_row_is_left_of_the_board() -> void:
+	# foes start 0.45 cells above row 0, which is off the left edge once turned
+	var spawn := BoardSpace.point_to_world(4.5, -0.45)
+	assert_lt(spawn.x, BoardSpace.corners()[0].x)
