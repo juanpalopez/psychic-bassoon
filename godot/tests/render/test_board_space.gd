@@ -60,3 +60,44 @@ func test_corners_are_the_outer_edge_of_the_board() -> void:
 		assert_almost_eq(absf(corner.x), float(RULES.GRID_ROWS) / 2.0, 1e-9)
 		assert_almost_eq(absf(corner.z), float(RULES.GRID_COLS) / 2.0, 1e-9)
 		assert_eq(corner.y, 0.0)
+
+
+func test_world_to_cell_inverts_cell_to_world_for_every_cell() -> void:
+	for row in RULES.GRID_ROWS:
+		for col in RULES.GRID_COLS:
+			var centre := BoardSpace.cell_to_world(col, row)
+			assert_eq(BoardSpace.world_to_cell(centre), Vector2i(col, row))
+			# anywhere inside the cell is the same cell
+			assert_eq(
+				BoardSpace.world_to_cell(centre + Vector3(0.49, 0.0, -0.49)), Vector2i(col, row)
+			)
+			assert_eq(
+				BoardSpace.world_to_cell(centre + Vector3(-0.49, 0.0, 0.49)), Vector2i(col, row)
+			)
+
+
+func test_a_point_off_the_board_is_no_cell() -> void:
+	var half := BoardSpace.size() / 2.0
+	for point in [
+		Vector3(-half.x - 0.01, 0.0, 0.0),
+		Vector3(half.x + 0.01, 0.0, 0.0),
+		Vector3(0.0, 0.0, half.y + 0.01),
+		Vector3(0.0, 0.0, -half.y - 0.01),
+	]:
+		assert_eq(BoardSpace.world_to_cell(point), BoardSpace.NO_CELL, str(point))
+
+
+func test_a_ray_that_points_down_hits_the_ground() -> void:
+	var hit: Variant = BoardSpace.ground_hit(Vector3(1.0, 10.0, 2.0), Vector3(0.0, -1.0, 0.0))
+	assert_not_null(hit)
+	assert_eq(hit, Vector3(1.0, 0.0, 2.0))
+	var slanted: Variant = BoardSpace.ground_hit(Vector3(0.0, 4.0, 0.0), Vector3(0.0, -1.0, -1.0))
+	assert_almost_eq((slanted as Vector3).z, -4.0, 1e-9)
+	assert_eq((slanted as Vector3).y, 0.0)
+
+
+func test_a_ray_that_points_up_or_along_the_ground_misses() -> void:
+	assert_null(BoardSpace.ground_hit(Vector3(0.0, 5.0, 0.0), Vector3(0.0, 1.0, 0.0)))
+	assert_null(BoardSpace.ground_hit(Vector3(0.0, 5.0, 0.0), Vector3(1.0, 0.0, 0.0)))
+	# a ray that starts below the ground and points down is behind it
+	assert_null(BoardSpace.ground_hit(Vector3(0.0, -1.0, 0.0), Vector3(0.0, -1.0, 0.0)))

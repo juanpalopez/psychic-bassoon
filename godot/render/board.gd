@@ -52,6 +52,13 @@ func rebuild() -> void:
 	_add_markers()
 
 
+## The height of the tile on a cell: a plot stands taller than the road.
+func surface_height(cell: Vector2i) -> float:
+	if map != null and map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
+		return ROAD_SIZE.y
+	return PLOT_SIZE.y
+
+
 func _add_ground() -> void:
 	var ground := MeshInstance3D.new()
 	var plane := PlaneMesh.new()
