@@ -1,5 +1,7 @@
-## Phase 3 checks: the project is set up the way the plan says.
+## Project checks: the project is set up the way the plan says.
 extends GutTest
+
+const MAIN_SCENE := preload("res://main.tscn")
 
 
 func test_renderer_is_compatibility_for_web() -> void:
@@ -23,16 +25,29 @@ func test_main_scene_is_set_and_loads() -> void:
 	assert_not_null(scene)
 
 
-func test_stub_scene_builds_80_foes_in_one_multimesh() -> void:
-	var main := (load("res://main.tscn") as PackedScene).instantiate()
+func test_main_scene_draws_the_board_with_a_camera() -> void:
+	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
 	await get_tree().process_frame
-	var multimeshes: Array = []
-	for child in main.get_children():
-		if child is MultiMeshInstance3D:
-			multimeshes.append(child)
-	assert_eq(multimeshes.size(), 1, "one MultiMesh for all foes")
-	assert_eq((multimeshes[0] as MultiMeshInstance3D).multimesh.instance_count, 80)
+	var board := main.get_node("Board") as Board
+	assert_not_null(board)
+	assert_gt(board.road_count, 0)
+	assert_gt(board.plot_count, 0)
+	var rig := main.get_node("CameraRig") as CameraRig
+	assert_not_null(rig)
+	assert_not_null(rig.get_child(0) as Camera3D)
+	assert_eq(main.get_node("Hud/NextSeed").get("text"), "Next seed")
+
+
+func test_next_seed_button_rebuilds_the_board() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var board := main.get_node("Board") as Board
+	var before := board.map.path
+	(main.get_node("Hud/NextSeed") as Button).pressed.emit()
+	assert_eq(board.map_seed, 2)
+	assert_ne(board.map.path, before)
 
 
 func test_engine_matches_pinned_version() -> void:

@@ -21,7 +21,8 @@
     "check:godot-size": "node scripts/check-godot-size.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "serve": "node scripts/serve-static.mjs build/web 8080 0.0.0.0"
+    "serve": "node scripts/serve-static.mjs build/web 8080 0.0.0.0",
+    "check:render-boundary": "node scripts/check-render-boundary.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
