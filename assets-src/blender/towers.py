@@ -8,7 +8,7 @@ Run inside Blender (Scripting tab):
 or headless:
     SCRAPLINE_ROOT=<repo> blender -b -P towers.py
 
-Conventions the game relies on (see src/render/models/glb.ts):
+Conventions the game relies on (the Three.js loader in tag web-three-final; Godot imports the GLBs as scenes):
 - origin at the centre of the base, one grid cell is 1 unit, footprint
   about 0.84 across;
 - the weapon faces glTF +z, which is Blender -Y;

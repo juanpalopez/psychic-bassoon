@@ -104,3 +104,9 @@ test('an installed app shows no full screen button', async ({page}) => {
   await page.goto('/index.html');
   await expect(page.locator('#fullscreen')).toBeHidden();
 });
+
+test('the old /godot/ address sends visitors to the root', async ({page}) => {
+  await page.goto('/godot/');
+  await page.waitForURL(url => !url.pathname.includes('/godot'));
+  expect(new URL(page.url()).pathname).toBe('/');
+});

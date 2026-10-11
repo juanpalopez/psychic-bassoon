@@ -1,6 +1,6 @@
 # Asset gaps (Phase 3)
 
-Shortlist of CC0 sources and what each unit still needs. Two packs were **downloaded and opened** (see Verified); the rest is still an expectation from pack pages. Before any asset enters `public/assets/`, record it in `assets/CREDITS.md` with its source and licence.
+Shortlist of CC0 sources and what each unit still needs. Two packs were **downloaded and opened** (see Verified); the rest is still an expectation from pack pages. Before any asset enters `godot/assets/`, record it in `assets/CREDITS.md` with its source and licence.
 
 ## Verified (downloaded and opened)
 
@@ -40,7 +40,7 @@ The Quaternius Sci-Fi Essentials Kit is no longer a source; it stays here only a
 ## Rules
 
 - A unit that is not distinct at zoomed-out view after recolouring gets a different model, not weaker readability.
-- Each unit keeps its primitive builder as the fallback behind `src/render/models/index.ts`.
+- Each unit keeps its primitive builder as the fallback behind `godot/render/models/`.
 - Check polygon counts against the budget (about 150k triangles with 80 foes and every tower at level 3); decimate if needed.
 
 ## Next

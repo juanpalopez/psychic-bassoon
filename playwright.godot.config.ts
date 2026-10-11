@@ -25,8 +25,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    // vite preview is only a static file server here (it serves build/web as is)
-    command: `pnpm exec vite preview --outDir build/web --port ${PORT} --host 127.0.0.1 --strictPort`,
+    command: `node scripts/serve-static.mjs build/web ${PORT} 127.0.0.1`,
     url: `http://127.0.0.1:${PORT}/index.html`,
     reuseExistingServer: false,
     timeout: 30_000,

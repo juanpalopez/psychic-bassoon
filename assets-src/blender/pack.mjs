@@ -2,7 +2,7 @@
 //   1. blender --background assets-src/blender/towers.blend --python assets-src/blender/towers.py
 //   2. npm i --no-save @gltf-transform/core @gltf-transform/extensions \
 //        @gltf-transform/functions meshoptimizer
-//   3. node assets-src/blender/pack.mjs assets-src/blender/export public/assets/models/scrapline
+//   3. node assets-src/blender/pack.mjs assets-src/blender/export godot/assets/models/scrapline
 // The packages are not repo dependencies: this runs only when a model changes.
 // Meshopt-compress GLBs WITHOUT quantization: the game bakes node
 // transforms into the vertex data (glb.ts), which would clamp normalized

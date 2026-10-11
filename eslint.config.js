@@ -73,7 +73,7 @@ export default tseslint.config(
     // Named exports only. Tool config files need a default export.
     files: [
       'src/**/*.ts',
-      'e2e/**/*.ts',
+      'e2e-godot/**/*.ts',
       'scripts/**/*.mjs',
       'scripts/**/*.ts',
     ],

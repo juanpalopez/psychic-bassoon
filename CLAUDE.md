@@ -1,12 +1,12 @@
 # Scrapline
 
-Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS next (Android only if wanted later). The TypeScript and Three.js game that shipped Phases 0 to 2 is the reference (oracle) until the Godot build replaces it.
+Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS next (Android only if wanted later). The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as the oracle until the Godot sim reproduces it exactly.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
 - Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell). The setting is moving to fantasy medieval and the lore will be rewritten, so the game name and these names are provisional. Foe and tower ids (`scamp`, `raider`, `ironclad`, `warlord`, `ballista`, `catapult`, `frostSpire`, `stormSpire`) are stable keys shared by the fixtures, the TypeScript sim and GDScript; they do not change with the lore. Display names and lore strings live only in `godot/content`, so a rename touches content and the Naming table, not logic or fixtures.
 - Original prototype (rules and balance reference): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` and `docs/art/` (Phase 6). The TypeScript game lives in `src/` and moves to `legacy/` after the Phase 5 gate.
+> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content (the oracle), and moves to `legacy/` or goes once the Godot sim passes parity.
 
 ## Commands
 
@@ -21,14 +21,14 @@ mkdir -p build/web && godot --headless --path godot --export-release "Web" ../bu
 python3 -m http.server -d build/web                  # serve the export; open on a phone over LAN
 ```
 
-TypeScript reference game (until it moves to `legacy/`):
+TypeScript oracle (the sim, the fixtures and the repo's checks):
 
 ```bash
 pnpm install
-pnpm dev          # Vite dev server; add --host to test on a phone over LAN
-pnpm build        # static build to dist/
-pnpm test         # Vitest (simulation)
-pnpm test:e2e     # Playwright smoke test
+pnpm test         # Vitest (sim, content, fixtures, repo scripts)
+pnpm test:e2e:godot   # Playwright smoke test of the web export in build/web
+pnpm serve        # serve build/web on your LAN (port 8080), to open on a phone
+pnpm check:assets # godot/assets against assets/CREDITS.md
 pnpm lint         # Prettier check + ESLint + tsc --noEmit
 pnpm format       # Prettier --write (run before committing)
 pnpm sim -- --seed 42   # headless run: map and wave log
@@ -37,8 +37,8 @@ pnpm sim -- --seed 42   # headless run: map and wave log
 ## Working rules
 
 - **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases.
-- **The TypeScript game is the oracle.** During the Godot migration, gameplay must match it: same rules, same numbers, same results for the same seed. Don't change the TypeScript sim except to fix a bug, and when you do, regenerate `fixtures/` and say so in the PR. `prototype/scrapline.html` is the original reference.
-- **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test && pnpm build` for TypeScript (today), and from Phase 3 also `gdformat`, `gdlint`, GUT and the export for Godot.
+- **The TypeScript sim is the oracle.** During the Godot migration, gameplay must match it: same rules, same numbers, same results for the same seed. Don't change the TypeScript sim except to fix a bug, and when you do, regenerate `fixtures/` and say so in the PR. `prototype/scrapline.html` is the original reference.
+- **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for TypeScript, and `gdformat`, `gdlint`, GUT and the web export for Godot.
 
 ## Architecture
 
@@ -60,7 +60,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - A map is a grid, the Heartstone (the base) and one or more routes from spawn to it. Foes pick a route; towers target across routes. Phase 4 matches the TypeScript maps (a main road and a detour). More routes (forks, loops) come after parity as a new map version behind a content flag, and from then on the GDScript sim owns those fixtures.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
 - For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures keep large integers and fingerprints as hex strings and are compared with exact `==`.
-- While `src/sim` exists it keeps its own rules: no imports from render or ui (ESLint), no `Math.random`, no magic numbers outside `src/content`.
+- While `src/sim` exists it keeps its own rules: no DOM, `Math.random` or clock (ESLint), no magic numbers outside `src/content`.
 
 ### Domain-driven design
 
@@ -92,7 +92,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - Fix the seed in tests; never depend on timing.
 - **TDD where possible.** For `godot/sim` and `godot/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
 - Test the domain through its public commands and snapshots, not internals, so refactors don't break tests.
-- The TypeScript Vitest suite keeps running until the code moves to `legacy/`.
+- The TypeScript Vitest suite keeps running while `src/` exists.
 
 ## Code style
 
@@ -100,7 +100,7 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - **Code style: the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html), enforced by tools, not by review.** `gdformat` formats and `gdlint` checks (gdtoolkit, pinned version; run from `godot/`, where `.gdlintrc` lives). CI fails on unformatted or unlinted code. Don't hand-format and don't disable a rule to get around it.
   - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members.
   - Comments explain why, not what. Use `##` doc comments on public APIs.
-- TypeScript code (until it moves to `legacy/`) keeps the Google TypeScript Style Guide with Prettier and ESLint as before.
+- TypeScript code (the oracle and the repo's scripts) keeps the Google TypeScript Style Guide with Prettier and ESLint.
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.
@@ -137,8 +137,8 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 
 ## CI/CD and releases
 
-- Until Phase 3 lands, CI is the TypeScript pipeline only. **From Phase 3** CI runs on every pull request and push to `main`: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export. Until the TypeScript game moves to `legacy/`, its checks (`pnpm lint`, `pnpm test`, `pnpm build`, Playwright) run too. A red CI blocks merging.
-- CD: every push to `main` deploys to GitHub Pages. Until the Phase 5 gate the TypeScript build is served at the root and the Godot export under `/godot/`; at the gate the Godot export takes the root.
+- CI runs on every pull request and push to `main`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, and the Godot job: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export. A red CI blocks merging.
+- CD: every push to `main` deploys the Godot export to GitHub Pages at the site root (for now the Phase 3 stub scene, until the game exists). The Three.js game is not served any more.
 - Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, exports, and creates a GitHub Release with generated notes from the Conventional Commits and the build attached.
 - Keep workflows in `.github/workflows/`. Pin action versions and never commit secrets.
 

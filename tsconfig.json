@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["vite/client", "node"],
+    "types": ["node"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
@@ -17,11 +17,10 @@
   },
   "include": [
     "src",
-    "e2e",
+    "e2e-godot",
     "scripts",
-    "vite.config.ts",
     "vitest.config.ts",
-    "playwright.config.ts",
+    "playwright.godot.config.ts",
     "eslint.config.js"
   ]
 }

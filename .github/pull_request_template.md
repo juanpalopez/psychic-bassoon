@@ -11,8 +11,8 @@ Closes #
 ## Checklist
 
 - [ ] Tests written first for sim/content changes (TDD), and they pass
-- [ ] `pnpm lint && pnpm test && pnpm build` pass locally
-- [ ] `src/sim` has no imports from `render`, `ui`, `three` or the DOM
+- [ ] `pnpm lint && pnpm test` pass locally, and for Godot code `gdformat`, `gdlint`, GUT and the web export
+- [ ] `src/sim` has no DOM, `Math.random` or clock, and `godot/sim` passes `pnpm check:sim-purity`
 - [ ] Balance numbers live in `godot/content` (or `src/content`); no magic numbers in logic
 - [ ] No hard-coded colours (CSS tokens or the Godot Theme only) and no `Math.random()` or `randf`/`randi` in the sim
 - [ ] New third-party or generated assets (CC0, Meshy) are recorded in `assets/CREDITS.md` with source and licence
