@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=15 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://render/board.gd" id="2_board"]
@@ -9,6 +9,10 @@
 [ext_resource type="Script" path="res://ui/build_menu.gd" id="6_menu"]
 [ext_resource type="Script" path="res://render/range_ring.gd" id="8_ring"]
 [ext_resource type="Script" path="res://ui/tower_panel.gd" id="9_panel"]
+[ext_resource type="Theme" path="res://ui/hud_theme.tres" id="10_theme"]
+[ext_resource type="Script" path="res://ui/top_bar.gd" id="11_top"]
+[ext_resource type="Script" path="res://ui/speed_bar.gd" id="12_speed"]
+[ext_resource type="Script" path="res://ui/game_over_panel.gd" id="13_over"]
 
 [sub_resource type="Environment" id="Environment_dusk"]
 background_mode = 1
@@ -48,33 +52,26 @@ script = ExtResource("7_foes")
 
 [node name="Hud" type="CanvasLayer" parent="."]
 
-[node name="Info" type="Label" parent="Hud"]
-clip_text = true
-offset_left = 20.0
-offset_top = 16.0
-offset_right = 1100.0
-offset_bottom = 64.0
-theme_override_font_sizes/font_size = 32
-
 [node name="NextSeed" type="Button" parent="Hud"]
+theme = ExtResource("10_theme")
 custom_minimum_size = Vector2(240, 96)
 offset_left = 20.0
 offset_top = 76.0
 offset_right = 260.0
 offset_bottom = 172.0
-theme_override_font_sizes/font_size = 32
 text = "Next seed"
 
 [node name="LaunchWave" type="Button" parent="Hud"]
+theme = ExtResource("10_theme")
 custom_minimum_size = Vector2(420, 96)
 offset_left = 20.0
 offset_top = 184.0
 offset_right = 440.0
 offset_bottom = 280.0
-theme_override_font_sizes/font_size = 32
 text = "Start wave 1"
 
 [node name="Message" type="Label" parent="Hud"]
+theme = ExtResource("10_theme")
 visible = false
 anchor_left = 0.5
 anchor_top = 1.0
@@ -85,10 +82,10 @@ offset_top = -96.0
 offset_right = 400.0
 offset_bottom = -40.0
 grow_horizontal = 2
-theme_override_font_sizes/font_size = 32
 horizontal_alignment = 1
 
 [node name="BuildMenu" type="PanelContainer" parent="Hud"]
+theme = ExtResource("10_theme")
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -102,6 +99,7 @@ grow_vertical = 2
 script = ExtResource("6_menu")
 
 [node name="TowerPanel" type="PanelContainer" parent="Hud"]
+theme = ExtResource("10_theme")
 anchor_left = 1.0
 anchor_top = 0.5
 anchor_right = 1.0
@@ -113,3 +111,38 @@ offset_bottom = 210.0
 grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("9_panel")
+
+[node name="TopBar" type="HBoxContainer" parent="Hud"]
+theme = ExtResource("10_theme")
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 16.0
+offset_right = -480.0
+offset_bottom = 72.0
+script = ExtResource("11_top")
+
+[node name="SpeedBar" type="HBoxContainer" parent="Hud"]
+theme = ExtResource("10_theme")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -440.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = 112.0
+grow_horizontal = 0
+script = ExtResource("12_speed")
+
+[node name="GameOver" type="PanelContainer" parent="Hud"]
+visible = false
+theme = ExtResource("10_theme")
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -150.0
+offset_right = 260.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("13_over")

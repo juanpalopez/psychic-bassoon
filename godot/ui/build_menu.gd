@@ -8,7 +8,6 @@ signal tower_chosen(tower: String)
 
 const TOWERS := preload("res://content/towers.gd")
 const BUTTON_SIZE := Vector2(240.0, 96.0)
-const FONT_SIZE := 30
 
 ## The plot the menu was opened for.
 var cell := BoardSpace.NO_CELL
@@ -26,7 +25,6 @@ func _ready() -> void:
 		var def: Dictionary = TOWERS.DEFS[id]
 		button.text = "%s  %d" % [def.name, def.cost[0]]
 		button.custom_minimum_size = BUTTON_SIZE
-		button.add_theme_font_size_override("font_size", FONT_SIZE)
 		button.pressed.connect(_choose.bind(id))
 		box.add_child(button)
 		_tower_buttons.append(button)
