@@ -183,5 +183,5 @@ Use the GDD's names in code-facing content and the UI (display names only; ids a
 | `ballista`, `catapult` | The Spool Guard (`spoolGuard`), The Thimble Mortar (`thimbleMortar`) |
 | `frostSpire`, `stormSpire` | The Prism Spire (`prismSpire`), with specs Cryo-Origami Spire and Blot Singularity |
 | (new) | The Guard Tent (`guardTent`) |
-| gold / lives | Buttons / kingdom health; Golden Staples between runs |
+| gold / lives (`gold`, `lives`) | Buttons / kingdom health (`buttons`, `kingdom_health`, `START_BUTTONS`, `START_KINGDOM_HEALTH`); Golden Staples between runs |
 | Heartstone | the kingdom (the Heartstone is dropped) |

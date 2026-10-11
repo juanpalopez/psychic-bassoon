@@ -10,8 +10,8 @@ var route: Route = null
 ## Every route from the spawn to the Heartstone; foes pick one.
 var routes: Array[Route] = []
 var tick_count: int = 0
-var gold: int = 0
-var lives: int = 0
+var buttons: int = 0
+var kingdom_health: int = 0
 ## Number of the wave most recently launched; 0 before the first.
 var wave: int = 0
 var running: bool = false

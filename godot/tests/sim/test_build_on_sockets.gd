@@ -29,7 +29,7 @@ func test_build_on_plain_ground_is_rejected_only_sockets_take_towers() -> void:
 
 func test_every_socket_accepts_a_tower() -> void:
 	var game := Game.create(SEED)
-	game.gold = 100000
+	game.buttons = 100000
 	for cell in game.map.sockets:
 		GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
 	assert_eq(game.towers.size(), game.map.sockets.size())

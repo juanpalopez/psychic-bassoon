@@ -13,8 +13,8 @@ const FONT_SIZE := 30
 ## The plot the menu was opened for.
 var cell := BoardSpace.NO_CELL
 
-var _buttons: Array[Button] = []
-var _gold := 0
+var _tower_buttons: Array[Button] = []
+var _buttons := 0
 
 
 func _ready() -> void:
@@ -29,18 +29,18 @@ func _ready() -> void:
 		button.add_theme_font_size_override("font_size", FONT_SIZE)
 		button.pressed.connect(_choose.bind(id))
 		box.add_child(button)
-		_buttons.append(button)
+		_tower_buttons.append(button)
 
 
 ## The tower buttons, in the order of `TOWER_IDS`.
-func buttons() -> Array[Button]:
-	return _buttons
+func tower_buttons() -> Array[Button]:
+	return _tower_buttons
 
 
-## Opens the menu for a plot, with the gold the player has now.
-func open_for(plot: Vector2i, gold: int) -> void:
+## Opens the menu for a socket, with the Buttons the player has now.
+func open_for(plot: Vector2i, buttons: int) -> void:
 	cell = plot
-	set_gold(gold)
+	set_buttons(buttons)
 	visible = true
 
 
@@ -48,12 +48,12 @@ func close() -> void:
 	visible = false
 
 
-## Greys out the towers that cost more than `gold`.
-func set_gold(gold: int) -> void:
-	_gold = gold
-	for i in _buttons.size():
+## Greys out the towers that cost more than `buttons`.
+func set_buttons(buttons: int) -> void:
+	_buttons = buttons
+	for i in _tower_buttons.size():
 		var cost: int = TOWERS.DEFS[TOWERS.TOWER_IDS[i]].cost[0]
-		_buttons[i].disabled = cost > _gold
+		_tower_buttons[i].disabled = cost > _buttons
 
 
 func _choose(id: String) -> void:

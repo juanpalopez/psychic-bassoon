@@ -101,7 +101,7 @@ func test_speed_and_frame_rate_never_change_the_game() -> void:
 	for setup in [[1, 1.0 / 60.0], [2, 1.0 / 60.0], [3, 1.0 / 30.0], [3, 1.0 / 20.0]]:
 		var game := _play(setup[1], setup[0], ticks)
 		assert_eq(game.tick_count, ticks)
-		assert_eq(game.gold, reference.gold, "gold at speed %d" % setup[0])
+		assert_eq(game.buttons, reference.buttons, "buttons at speed %d" % setup[0])
 		assert_eq(game.wave, reference.wave)
 		assert_eq(game.towers.size(), reference.towers.size())
 

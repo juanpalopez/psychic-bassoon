@@ -12,7 +12,7 @@ enum RejectReason {
 	NOT_A_SOCKET,
 	UNKNOWN_TOWER,
 	OCCUPIED,
-	NOT_ENOUGH_GOLD,
+	NOT_ENOUGH_BUTTONS,
 	MAX_LEVEL,
 	NO_SUCH_TOWER,
 	WAVE_IN_PROGRESS,
@@ -22,9 +22,9 @@ var kind: Kind = Kind.TOWER_BUILT
 var tower_id: int = 0
 ## TOWER_UPGRADED: the new level (0 is level 1).
 var level: int = 0
-## TOWER_SOLD: gold paid back.
+## TOWER_SOLD: Buttons paid back.
 var refund: int = 0
-## WAVE_LAUNCHED: the wave number, and the gold paid for calling it early.
+## WAVE_LAUNCHED: the wave number, and the Buttons paid for calling it early.
 var wave: int = 0
 var early_bonus: int = 0
 ## COMMAND_REJECTED: the command and the reason.
