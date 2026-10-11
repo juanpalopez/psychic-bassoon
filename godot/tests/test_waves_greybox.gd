@@ -34,7 +34,7 @@ func test_the_hud_shows_the_wave_the_kingdoms_health_and_the_buttons() -> void:
 	var main := await _main()
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	_frames(main, 1.0)
-	var text := (main.get_node("Hud/Info") as Label).text
+	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
 	assert_string_contains(text, "Wave 1")
 	assert_string_contains(text, "Kingdom %d" % main.game().kingdom_health)
 	assert_string_contains(text, "Buttons %d" % main.game().buttons)
@@ -74,7 +74,7 @@ func test_game_over_is_shown_and_the_button_stops_working() -> void:
 		_frames(main, 1.0)
 	assert_true(game.over)
 	_frames(main, 0.2)
-	assert_string_contains((main.get_node("Hud/Info") as Label).text, "GAME OVER")
+	assert_true((main.get_node("Hud/GameOver") as GameOverPanel).visible)
 	assert_true((main.get_node("Hud/LaunchWave") as Button).disabled)
 
 
@@ -88,7 +88,7 @@ func test_a_new_seed_clears_the_foes_and_resets_the_button() -> void:
 	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Start wave 1")
 
 
-func test_the_info_line_is_short_enough_for_a_phone_even_at_game_over() -> void:
+func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
 	game.over = true
@@ -96,7 +96,7 @@ func test_the_info_line_is_short_enough_for_a_phone_even_at_game_over() -> void:
 	game.kingdom_health = 20
 	game.buttons = 99999
 	main._process(0.05)
-	var text := (main.get_node("Hud/Info") as Label).text
-	# about 16 px per character at font 32 in a 1080 px label: stay under 60
-	assert_lt(text.length(), 66)
-	assert_true((main.get_node("Hud/Info") as Label).clip_text)
+	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
+	# the bar has 1280 - 20 - 500 px before it would run under the speed buttons
+	var bar := main.get_node("Hud/TopBar") as TopBar
+	assert_lt(bar.get_combined_minimum_size().x, 760.0, text)

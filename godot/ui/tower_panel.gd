@@ -8,7 +8,6 @@ signal sell_pressed(tower_id: int)
 
 const TOWERS := preload("res://content/towers.gd")
 const BUTTON_SIZE := Vector2(240.0, 96.0)
-const FONT_SIZE := 30
 
 var _tower: Tower
 var _buttons := 0
@@ -25,11 +24,9 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	add_child(box)
 	for label in [_title, _stats]:
-		label.add_theme_font_size_override("font_size", FONT_SIZE)
 		box.add_child(label)
 	for button in [_upgrade, _sell]:
 		button.custom_minimum_size = BUTTON_SIZE
-		button.add_theme_font_size_override("font_size", FONT_SIZE)
 		box.add_child(button)
 	_upgrade.pressed.connect(func() -> void: upgrade_pressed.emit(_tower.id))
 	_sell.pressed.connect(func() -> void: sell_pressed.emit(_tower.id))

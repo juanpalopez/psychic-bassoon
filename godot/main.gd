@@ -13,7 +13,6 @@ const EARLY_RULES := preload("res://content/game_rules.gd")
 const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
-const GAME_SPEED := 1
 ## Pixels of drag that one unit of a trackpad pan gesture stands for.
 const PAN_GESTURE_PIXELS := 12.0
 
@@ -22,6 +21,7 @@ var _clock := Clock.new()
 var _selected := BoardSpace.NO_CELL
 var _message_left := 0.0
 var _gestures := Gestures.new()
+var _speed := GameSpeed.new()
 
 @onready var _board: Board = $Board
 @onready var _rig: CameraRig = $CameraRig
@@ -30,7 +30,9 @@ var _gestures := Gestures.new()
 @onready var _towers: TowersView = $Towers
 @onready var _foes: FoesView = $Foes
 @onready var _launch: Button = $Hud/LaunchWave
-@onready var _info: Label = $Hud/Info
+@onready var _top_bar: TopBar = $Hud/TopBar
+@onready var _speed_bar: SpeedBar = $Hud/SpeedBar
+@onready var _game_over: GameOverPanel = $Hud/GameOver
 @onready var _message: Label = $Hud/Message
 @onready var _menu: BuildMenu = $Hud/BuildMenu
 @onready var _panel: TowerPanel = $Hud/TowerPanel
@@ -43,6 +45,9 @@ func _ready() -> void:
 	_start(from_url if from_url is int else _board.map_seed)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
+	_speed_bar.speed_chosen.connect(_on_speed_chosen)
+	_speed_bar.pause_toggled.connect(_on_pause_toggled)
+	_game_over.play_again.connect(func() -> void: _start(_game.seed))
 	_panel.upgrade_pressed.connect(_on_upgrade)
 	_panel.sell_pressed.connect(_on_sell)
 	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
@@ -56,7 +61,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	Frame.step(_game, _clock, delta, GAME_SPEED, Callable(), _after_tick)
+	var ticks_speed := _speed.ticks_speed()
+	if ticks_speed > 0:
+		Frame.step(_game, _clock, delta, ticks_speed, Callable(), _after_tick)
 	_towers.sync(_game.towers, _board.surface_height)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
 	_update_launch_button()
@@ -64,16 +71,12 @@ func _process(delta: float) -> void:
 	_refresh_panel()
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
-	_info.text = (
-		"%sSeed %d  |  Wave %d  |  Kingdom %d  |  Buttons %d"
-		% [
-			"GAME OVER  |  " if _game.over else "",
-			_game.seed,
-			_game.wave,
-			_game.kingdom_health,
-			_game.buttons,
-		]
-	)
+	_top_bar.show_state(_game)
+	_speed_bar.show_speed(_speed)
+	if _game.over:
+		_game_over.show_for(_game.wave)
+	else:
+		_game_over.close()
 
 
 ## The first pointer is the mouse, or the first finger (Godot turns a touch into
@@ -184,6 +187,8 @@ func _start(map_seed: int) -> void:
 	_clock = Clock.new()
 	_foes.reset()
 	select_cell(BoardSpace.NO_CELL)
+	_game_over.close()
+	_speed = GameSpeed.new()
 	_towers.sync(_game.towers, _board.surface_height)
 	_update_launch_button()
 
@@ -217,16 +222,34 @@ func _refresh_panel() -> void:
 	_show_ring(open)
 
 
+## Orders are queued for the next tick, so while paused they wait for the
+## player to resume; say so instead of looking broken.
+func _note_if_paused() -> void:
+	if _speed.paused:
+		_show_message("Paused: orders run when you resume")
+
+
 func _on_upgrade(tower_id: int) -> void:
+	_note_if_paused()
 	Game.submit(_game, Command.upgrade(tower_id))
 
 
 func _on_sell(tower_id: int) -> void:
+	_note_if_paused()
 	Game.submit(_game, Command.sell(tower_id))
 	select_cell(BoardSpace.NO_CELL)
 
 
+func _on_speed_chosen(value: int) -> void:
+	_speed.choose(value)
+
+
+func _on_pause_toggled() -> void:
+	_speed.toggle_pause()
+
+
 func _on_tower_chosen(tower: String) -> void:
+	_note_if_paused()
 	Game.submit(_game, Command.build(tower, _selected.x, _selected.y))
 	select_cell(BoardSpace.NO_CELL)
 
