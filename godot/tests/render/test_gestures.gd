@@ -148,3 +148,36 @@ func test_ended_fires_when_the_last_finger_lifts() -> void:
 	assert_eq(ended.size(), 0)
 	g.release(0, Vector2(100, 100))
 	assert_eq(ended.size(), 1)
+
+
+func test_cancel_tells_the_camera_the_fingers_are_gone() -> void:
+	var g := _tracker()
+	var ended: Array[bool] = []
+	g.ended.connect(func() -> void: ended.append(true))
+	g.press(0, Vector2(100, 100))
+	g.move(0, Vector2(300, 100))
+	g.cancel()
+	assert_eq(ended.size(), 1)
+	g.cancel()
+	assert_eq(ended.size(), 1, "nothing was in progress the second time")
+
+
+func test_after_a_third_finger_lifts_the_pinch_starts_from_the_new_pair() -> void:
+	var g := _tracker()
+	g.press(0, Vector2(100, 100))
+	g.press(1, Vector2(200, 100))
+	g.press(2, Vector2(900, 900))
+	g.release(2, Vector2(900, 900))
+	var before := _zooms.size()
+	g.move(1, Vector2(200, 100))
+	# the pair did not change, so a move in place must not jump the zoom
+	assert_eq(_zooms.size(), before + 1)
+	assert_almost_eq(_zooms[_zooms.size() - 1], 1.0, 1e-6)
+
+
+func test_a_wobble_of_twenty_pixels_or_less_is_a_tap() -> void:
+	var g := _tracker()
+	g.press(0, Vector2(100, 100))
+	g.move(0, Vector2(118, 100))
+	g.release(0, Vector2(118, 100))
+	assert_eq(_taps.size(), 1)

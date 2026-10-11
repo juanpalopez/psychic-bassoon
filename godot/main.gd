@@ -12,6 +12,8 @@ const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
 const GAME_SPEED := 1
+## Pixels of drag that one unit of a trackpad pan gesture stands for.
+const PAN_GESTURE_PIXELS := 12.0
 
 var _game: GameState
 var _clock := Clock.new()
@@ -67,11 +69,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			_rig.zoom_steps(1.0)
 		elif button.button_index == MOUSE_BUTTON_WHEEL_DOWN and button.pressed:
 			_rig.zoom_steps(-1.0)
-		elif button.button_index == MOUSE_BUTTON_LEFT:
-			if button.pressed:
-				_gestures.press(0, button.position)
-			else:
-				_gestures.release(0, button.position)
+		elif button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+			_gestures.press(0, button.position)
 	elif event is InputEventMouseMotion:
 		var motion := event as InputEventMouseMotion
 		if motion.button_mask & MOUSE_BUTTON_MASK_LEFT:
@@ -80,13 +79,34 @@ func _unhandled_input(event: InputEvent) -> void:
 		var touch := event as InputEventScreenTouch
 		if touch.pressed:
 			_gestures.press(touch.index, touch.position)
-		else:
-			_gestures.release(touch.index, touch.position)
 	elif event is InputEventScreenDrag and (event as InputEventScreenDrag).index >= 1:
 		var drag := event as InputEventScreenDrag
 		_gestures.move(drag.index, drag.position)
 	elif event is InputEventMagnifyGesture:
 		_rig.zoom_by((event as InputEventMagnifyGesture).factor)
+	elif event is InputEventPanGesture:
+		# a two-finger trackpad swipe moves the scene; it springs back if it overshoots
+		_rig.pan_by_pixels((event as InputEventPanGesture).delta * PAN_GESTURE_PIXELS)
+		_rig.release_pan()
+
+
+## A release is safe for the tracker to see even when a button took it (it only
+## acts on a pointer it saw go down), so letting go over the menu cannot leave a
+## finger stuck in the tracker.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
+			_gestures.release(0, button.position)
+	elif event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if touch.index >= 1 and not touch.pressed:
+			_gestures.release(touch.index, touch.position)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_gestures.cancel()
 
 
 func _on_tap(position: Vector2) -> void:

@@ -16,7 +16,7 @@ signal pinched(factor: float, centre: Vector2)
 signal ended
 
 ## How far a finger may wander (in viewport pixels) and still be a tap.
-const DRAG_THRESHOLD := 14.0
+const DRAG_THRESHOLD := 20.0
 
 var _pointers := {}
 var _start := Vector2.ZERO
@@ -70,17 +70,25 @@ func release(id: int, position: Vector2) -> void:
 		# the finger left after a pinch keeps panning from where it is, never taps
 		_dragging = true
 		_tap_possible = false
+	elif _pointers.size() == 2:
+		# a third finger lifted: the pair may be a different one, so measure afresh
+		_last_distance = _distance()
+		_last_centre = _centre()
 	elif _pointers.is_empty():
 		_dragging = false
 		_tap_possible = false
 		ended.emit()
 
 
-## Forgets everything in progress (the window lost focus, a menu took the touch).
+## Forgets everything in progress (the window lost focus, a menu took the touch)
+## and tells the camera the fingers are gone.
 func cancel() -> void:
+	var was_active := not _pointers.is_empty()
 	_pointers.clear()
 	_dragging = false
 	_tap_possible = false
+	if was_active:
+		ended.emit()
 
 
 ## The two pointers with the lowest ids drive a pinch.

@@ -45,6 +45,8 @@ var canvas_height: float = 0.0
 
 var _camera: Camera3D
 var _aspect := 16.0 / 9.0
+# the whole-board distance for the current aspect, so a drag never recomputes it
+var _fit := 0.0
 var _pan_raw := Vector2.ZERO
 var _holding := false
 
@@ -125,6 +127,7 @@ func camera() -> Camera3D:
 ## Places the camera for a screen of this aspect ratio.
 func frame(aspect: float) -> void:
 	_aspect = maxf(aspect, MIN_ASPECT)
+	_fit = fit_distance(BoardSpace.corners(), MAX_PITCH, fov_degrees, _aspect, margin)
 	_place()
 
 
@@ -163,9 +166,10 @@ func release_pan() -> void:
 
 ## Camera distance from its target at the current zoom.
 func _distance() -> float:
-	var fit := fit_distance(BoardSpace.corners(), MAX_PITCH, fov_degrees, _aspect, margin)
-	var closest := closest_distance(fov_degrees, _viewport_height(), fit)
-	return lerpf(fit, closest, zoom)
+	if _fit <= 0.0:
+		_fit = fit_distance(BoardSpace.corners(), MAX_PITCH, fov_degrees, _aspect, margin)
+	var closest := closest_distance(fov_degrees, _viewport_height(), _fit)
+	return lerpf(_fit, closest, zoom)
 
 
 func _place() -> void:
