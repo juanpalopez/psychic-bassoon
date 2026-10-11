@@ -48,10 +48,9 @@ static func _reject(game: GameState, command: Command, reason: GameEvent.RejectR
 	game.events.append(GameEvent.rejected(command, reason))
 
 
-static func _is_plot(game: GameState, col: int, row: int) -> bool:
-	if col < 0 or col >= MAP_RULES.GRID_COLS or row < 0 or row >= MAP_RULES.GRID_ROWS:
-		return false
-	return game.map.tiles[row][col] == GameMap.Tile.PLOT
+## Towers go on sockets only.
+static func _is_socket(game: GameState, col: int, row: int) -> bool:
+	return game.map.is_socket(Vector2i(col, row))
 
 
 static func _find_tower(game: GameState, id: int) -> Tower:
@@ -64,8 +63,8 @@ static func _find_tower(game: GameState, id: int) -> Tower:
 static func _build(game: GameState, command: Command) -> void:
 	if not TOWERS.DEFS.has(command.tower):
 		return _reject(game, command, GameEvent.RejectReason.UNKNOWN_TOWER)
-	if not _is_plot(game, command.col, command.row):
-		return _reject(game, command, GameEvent.RejectReason.NOT_A_PLOT)
+	if not _is_socket(game, command.col, command.row):
+		return _reject(game, command, GameEvent.RejectReason.NOT_A_SOCKET)
 	for other in game.towers:
 		if other.col == command.col and other.row == command.row:
 			return _reject(game, command, GameEvent.RejectReason.OCCUPIED)

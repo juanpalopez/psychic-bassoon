@@ -2,17 +2,10 @@
 class_name GameTestKit
 extends RefCounted
 
-const MAP_RULES := preload("res://content/map_rules.gd")
 
-
-## The index-th plot cell in reading order.
-static func plot(game: GameState, index: int = 0) -> Vector2i:
-	var cells: Array[Vector2i] = []
-	for row in MAP_RULES.GRID_ROWS:
-		for col in MAP_RULES.GRID_COLS:
-			if game.map.tiles[row][col] == GameMap.Tile.PLOT:
-				cells.append(Vector2i(col, row))
-	return cells[index]
+## The index-th socket of the map (they are in reading order).
+static func socket(game: GameState, index: int = 0) -> Vector2i:
+	return game.map.sockets[index]
 
 
 static func run(game: GameState, commands: Array[Command]) -> Array[GameEvent]:

@@ -26,3 +26,19 @@ const DETOUR_OFFSET := 2
 const SPAWN_OFFSET := 0.45
 ## A cell's centre is at col + this.
 const CELL_CENTRE := 0.5
+
+## Sockets: the pre-etched circular sites where towers can be built (the GDD
+## replaces free building). A map gets this many, chosen among the cells that
+## are not road but lie within `SOCKET_REACH` cells of it (Chebyshev distance),
+## and no two sockets are closer than `SOCKET_SPACING` (Manhattan distance).
+const SOCKET_MIN := 12
+const SOCKET_MAX := 22
+const SOCKET_REACH := 2
+const SOCKET_SPACING := 2
+
+## Elevation levels: 0 the cutting mat, 1 a glued cardboard rise, 2 tiered
+## cliffs. Roads and plain ground are level 0; a socket gets a level by weight.
+const ELEVATION_LEVELS := 3
+const ELEVATION_WEIGHTS: Array[int] = [6, 3, 1]
+## Range multiplier bonus by level: a tower on level 2 reaches 15% further.
+const ELEVATION_RANGE_BONUS: Array[float] = [0.0, 0.0, 0.15]

@@ -1,18 +1,25 @@
 ## The board as flat greybox tiles, drawn from the real map.
 ##
-## A cube for every plot, a flat strip for every road cell (the main road
-## brown, a detour lighter), and a marker for the spawn and the Heartstone.
-## One MultiMesh for the plots and one for the road, so the board is a handful
-## of draw calls. Set `map_seed` (also in the editor: this is a `@tool` script)
-## and the board rebuilds from `MapGen.generate`. It only reads the map.
+## A flat strip for every road cell (the main road brown, a detour lighter), a
+## low dark tile for plain ground, a raised tile for every socket (the pre-etched
+## tower sites: higher on higher elevation levels, paler on the mat, browner on
+## cardboard), and a marker for the spawn and the kingdom. One MultiMesh each
+## for the road, the ground and the sockets, so the board is a handful of draw
+## calls. Set `map_seed` (also in the editor: this is a `@tool` script) and the
+## board rebuilds from `MapGen.generate`. It only reads the map.
 @tool
 class_name Board
 extends Node3D
 
 const RULES := preload("res://content/map_rules.gd")
-const PLOT_SIZE := Vector3(0.9, 0.35, 0.9)
-const ROAD_SIZE := Vector3(0.96, 0.06, 0.96)
-const PLOT_COLOUR := Color("3d6b45")
+const FOOTPRINT := 0.9
+const ROAD_FOOTPRINT := 0.96
+const ROAD_HEIGHT := 0.06
+const GROUND_HEIGHT := 0.12
+const SOCKET_BASE_HEIGHT := 0.3
+const SOCKET_LEVEL_STEP := 0.22
+const GROUND_TILE_COLOUR := Color("2f5a3a")
+const SOCKET_COLOURS: Array[Color] = [Color("e9e4d0"), Color("c9a46a"), Color("8d6e4a")]
 const MAIN_ROAD_COLOUR := Color("8a6a43")
 const DETOUR_ROAD_COLOUR := Color("b99a6b")
 const GROUND_COLOUR := Color("1c2b22")
@@ -28,8 +35,9 @@ const GROUND_MARGIN := 3.0
 			rebuild()
 
 var map: GameMap
-var plot_count: int = 0
 var road_count: int = 0
+var ground_count: int = 0
+var socket_count: int = 0
 var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
 # what rebuild() made, so it never frees a node someone else put under the board
@@ -52,11 +60,16 @@ func rebuild() -> void:
 	_add_markers()
 
 
-## The height of the tile on a cell: a plot stands taller than the road.
+## The height of the tile on a cell: the road is flat, plain ground is low, and
+## a socket stands higher with its elevation level.
 func surface_height(cell: Vector2i) -> float:
-	if map != null and map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
-		return ROAD_SIZE.y
-	return PLOT_SIZE.y
+	if map == null:
+		return GROUND_HEIGHT
+	if map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
+		return ROAD_HEIGHT
+	if map.is_socket(cell):
+		return SOCKET_BASE_HEIGHT + SOCKET_LEVEL_STEP * float(map.elevation_at(cell))
+	return GROUND_HEIGHT
 
 
 func _add_ground() -> void:
@@ -78,40 +91,50 @@ func _add_tiles() -> void:
 	for route in map.routes:
 		for cell in route:
 			road[cell] = main_cells.has(cell)
-	var plots: Array[Vector2i] = []
+	var ground: Array[Vector2i] = []
 	for row in RULES.GRID_ROWS:
 		for col in RULES.GRID_COLS:
-			if not road.has(Vector2i(col, row)):
-				plots.append(Vector2i(col, row))
-	plot_count = plots.size()
-	road_count = road.size()
-	var plot_colours: Array[Color] = []
-	plot_colours.resize(plots.size())
-	plot_colours.fill(PLOT_COLOUR)
-	_add(_tiles("Plots", plots, plot_colours, PLOT_SIZE))
+			var cell := Vector2i(col, row)
+			if not road.has(cell) and not map.is_socket(cell):
+				ground.append(cell)
 	var road_cells: Array[Vector2i] = []
 	var road_colours: Array[Color] = []
 	for cell in road:
 		road_cells.append(cell)
 		road_colours.append(MAIN_ROAD_COLOUR if road[cell] else DETOUR_ROAD_COLOUR)
-	_add(_tiles("Road", road_cells, road_colours, ROAD_SIZE))
+	var socket_colours: Array[Color] = []
+	for cell in map.sockets:
+		socket_colours.append(SOCKET_COLOURS[map.elevation_at(cell)])
+	var ground_colours: Array[Color] = []
+	ground_colours.resize(ground.size())
+	ground_colours.fill(GROUND_TILE_COLOUR)
+	road_count = road_cells.size()
+	ground_count = ground.size()
+	socket_count = map.sockets.size()
+	_add(_tiles("Road", road_cells, road_colours, ROAD_FOOTPRINT))
+	_add(_tiles("Ground", ground, ground_colours, FOOTPRINT))
+	_add(_tiles("Sockets", map.sockets, socket_colours, FOOTPRINT))
 
 
-## One MultiMesh holding a box per cell, each with its own colour.
+## One MultiMesh holding a box per cell, each with its own colour, as tall as
+## `surface_height` says.
 func _tiles(
-	node_name: String, cells: Array[Vector2i], colours: Array[Color], size: Vector3
+	node_name: String, cells: Array[Vector2i], colours: Array[Color], footprint: float
 ) -> MultiMeshInstance3D:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_colors = true
 	var box := BoxMesh.new()
-	box.size = size
+	box.size = Vector3(footprint, 1.0, footprint)
 	multimesh.mesh = box
 	multimesh.instance_count = cells.size()
 	for i in cells.size():
+		var height := surface_height(cells[i])
 		var at := BoardSpace.cell_to_world(cells[i].x, cells[i].y)
-		at.y = size.y / 2.0
-		multimesh.set_instance_transform(i, Transform3D(Basis(), at))
+		at.y = height / 2.0
+		multimesh.set_instance_transform(
+			i, Transform3D(Basis.from_scale(Vector3(1.0, height, 1.0)), at)
+		)
 		multimesh.set_instance_color(i, colours[i])
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name

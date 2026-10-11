@@ -7,8 +7,8 @@ static func of(reason: GameEvent.RejectReason) -> String:
 	match reason:
 		GameEvent.RejectReason.GAME_OVER:
 			return "The game is over"
-		GameEvent.RejectReason.NOT_A_PLOT:
-			return "You cannot build there"
+		GameEvent.RejectReason.NOT_A_SOCKET:
+			return "Build on a socket"
 		GameEvent.RejectReason.UNKNOWN_TOWER:
 			return "Unknown tower"
 		GameEvent.RejectReason.OCCUPIED:

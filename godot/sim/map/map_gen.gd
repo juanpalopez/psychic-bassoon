@@ -32,6 +32,7 @@ static func generate(seed: int) -> GameMap:
 		if not detour.is_empty():
 			map.routes.append(detour)
 		map.tiles = _tiles_for(map.routes)
+		SocketPlacer.place(map)
 		return map
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
 	return null
