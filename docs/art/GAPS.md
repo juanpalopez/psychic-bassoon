@@ -1,5 +1,7 @@
 # Asset gaps (Phase 3)
 
+> **Superseded (2026-10-11):** the owner adopted the papercraft GDD (`docs/GDD.md`). The medieval direction, the CC0 medieval pack shortlist and the unit rows below no longer apply. The asset gap plan in `docs/PLAN.md` replaces them. This file is kept for the licence checks of the packs it opened (Kenney and Quaternius).
+
 Shortlist of CC0 sources and what each unit still needs. Two packs were **downloaded and opened** (see Verified); the rest is still an expectation from pack pages. Before any asset enters `godot/assets/`, record it in `assets/CREDITS.md` with its source and licence.
 
 ## Verified (downloaded and opened)

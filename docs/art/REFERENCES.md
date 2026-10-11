@@ -1,5 +1,7 @@
 # Reference images
 
+> **Superseded (2026-10-11):** the image below shows the earlier fantasy look. The art direction is now the papercraft style in `docs/GDD.md` and `docs/PLAN.md`. Keep the image only for HUD placement.
+
 Mood and layout references for the art direction. They are never shipped in the game.
 
 | File | What it shows | Source |

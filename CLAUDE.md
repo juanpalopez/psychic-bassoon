@@ -1,12 +1,12 @@
-# Scrapline
+# Papercraft Kingdom Defense
 
-Medieval tower defense for mobile browsers: 3D low-poly remake of a 2D canvas prototype. **Godot 4 + GDScript**, web export first (GitHub Pages), native iOS next (Android only if wanted later). The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as the oracle until the Godot sim reproduces it exactly.
+A papercraft stop-motion tower defense for phones and tablets, in the browser first and as a native iOS app next (Android only if wanted later). **Godot 4 + GDScript**, web export first (GitHub Pages). The design is the GDD in `docs/GDD.md` (adopted by the owner on 2026-10-11); the old Scrapline medieval design and the 2D prototype are no longer the rules target. The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as a read-only reference for formulas until the GDScript combat lands (Phase 4, step 8). The game is renamed Papercraft Kingdom Defense; the repo stays `psychic-bassoon`, and the code still says Scrapline until the rename ticket.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
-- Lore and naming: `docs/PLAN.md` → Lore (Greyhold Keep, the Hollow King, Castellan Quell). The setting is moving to fantasy medieval and the lore will be rewritten, so the game name and these names are provisional. Foe and tower ids (`scamp`, `raider`, `ironclad`, `warlord`, `ballista`, `catapult`, `frostSpire`, `stormSpire`) are stable keys shared by the fixtures, the TypeScript sim and GDScript; they do not change with the lore. Display names and lore strings live only in `godot/content`, so a rename touches content and the Naming table, not logic or fixtures.
-- Original prototype (rules and balance reference): `prototype/scrapline.html`
+- Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes, game state) has fixtures, the tower and foe ids do not and change to the GDD's with the combat port. Display names and lore strings live only in `godot/content`.
+- Original prototype (a starting point for numbers, not the rules target): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scamp, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content (the oracle), and moves to `legacy/` or goes once the Godot sim passes parity.
+> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content (the oracle), and moves to `legacy/` or goes once the Godot sim passes parity.
 
 ## Commands
 
@@ -36,8 +36,8 @@ pnpm sim -- --seed 42   # headless run: map and wave log
 
 ## Working rules
 
-- **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases. **Exception (owner, 2026-10-11):** Phase 5 starts now as a greybox, in parallel with the rest of Phase 4. The greybox only reads sim snapshots and sends commands, so it cannot change parity; it never edits `godot/sim` or `fixtures/`. Art, lore and everything else from Phases 6 to 8 still wait, except Track B: ticket #157, the Scamp through the asset pipeline. Sim API the greybox needs (a read-only snapshot, previous foe positions, event draining) is added by Phase 4 sim tickets with tests and deep review, never inside a greybox PR; `godot/render` and `godot/ui` use only `Game.create`, `Game.submit`, `Game.tick`, read-only accessors and drained events, and never `rng`, `route_rng`, `pending` or field assignments on the state (a CI check enforces it from greybox step A1, ticket #156; it scans `godot/render`, `godot/ui` and `godot/main.gd`; plain reads of state fields are allowed until read-only accessors exist).
-- **The TypeScript sim is the oracle.** During the Godot migration, gameplay must match it: same rules, same numbers, same results for the same seed. Don't change the TypeScript sim except to fix a bug, and when you do, regenerate `fixtures/` and say so in the PR. `prototype/scrapline.html` is the original reference.
+- **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases. **Exception (owner, 2026-10-11):** Phase 5 starts now as a greybox, in parallel with the rest of Phase 4. The greybox only reads sim snapshots and sends commands, so it cannot change parity; it never edits `godot/sim` or `fixtures/`. Art, lore and everything else from Phases 6 to 8 still wait, except Track B: ticket #157, the Scrap Goblin (the old Scamp) through the asset pipeline. Sim API the greybox needs (a read-only snapshot, previous foe positions, event draining) is added by Phase 4 sim tickets with tests and deep review, never inside a greybox PR; `godot/render` and `godot/ui` use only `Game.create`, `Game.submit`, `Game.tick`, read-only accessors and drained events, and never `rng`, `route_rng`, `pending` or field assignments on the state (a CI check enforces it from greybox step A1, ticket #156; it scans `godot/render`, `godot/ui` and `godot/main.gd`; plain reads of state fields are allowed until read-only accessors exist).
+- **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes, game state, commands, tick), which stays equal to its TypeScript fixtures; those fixtures are never regenerated. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check. Don't change the TypeScript sim; it is removed in Phase 4 step 8.
 - **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for TypeScript, and `gdformat`, `gdlint`, GUT and the web export for Godot.
 
 ## Architecture
@@ -48,8 +48,8 @@ godot/
   content/   data only: tower/foe defs, wave tables, lore strings
   render/    scenes and scripts: terrain, foes (MultiMesh), towers, camera, effects
   ui/        HUD scenes (Control nodes) and the Theme
-  tests/     GUT tests and the fixtures from the TypeScript sim
-fixtures/    JSON exported from the TypeScript sim: the oracle for the port
+  tests/     GUT tests and the fixtures for the ported core
+fixtures/    JSON exported from the TypeScript sim for the ported core (prng, maps, routes), and later GDScript replay goldens
 ```
 
 - `godot/sim` must never touch the scene tree or engine singletons: no `Node`, no `get_tree`, no `Engine`, `Time` or `OS` calls, no `randf`/`randi`/`randomize`. A lint script enforces it; don't disable it.
@@ -57,15 +57,15 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 - Player actions reach the sim only as commands (`build`, `upgrade`, `sell`, `launchWave`), never by mutating state directly.
 - All randomness goes through the seeded PRNG in `godot/sim/rng.gd` (mulberry32 on 32-bit integers). The same seed plus the same commands must replay identically, and must give values equal to the TypeScript fixtures.
 - All balance numbers (cost, damage, range, rate, hp, speed, rewards, wave scaling) live in `godot/content`. Logic files contain no magic numbers.
-- A map is a grid, the Heartstone (the base) and one or more routes from spawn to it. Foes pick a route; towers target across routes. Phase 4 matches the TypeScript maps (a main road and a detour). More routes (forks, loops) come after parity as a new map version behind a content flag, and from then on the GDScript sim owns those fixtures.
+- A map is a grid with routes from the spawn to the kingdom, 12 to 22 sockets for towers, and three elevation levels (the GDD). The road generator and routes are ported (a main road and a detour); sockets and elevation are new map layers on top of it. Foes pick a route; towers target across routes. The sim keeps the grid, the polyline routes and the sockets as plain data; Godot nodes (`GridMap`, `Path3D`) only draw them.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
-- For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures keep large integers and fingerprints as hex strings and are compared with exact `==`.
+- For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures and goldens keep large integers and floats as hex bits and are compared with exact `==`.
 - While `src/sim` exists it keeps its own rules: no DOM, `Math.random` or clock (ESLint), no magic numbers outside `src/content`.
 
 ### Domain-driven design
 
 - `godot/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public entry class. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
-- Use the ubiquitous language from the lore table in names, types and tests (Scamp, Ballista, Frost Spire, Heartstone, wave, gold). No synonyms for the same concept. The one exception: the lore rewrite may rename what the player sees. Code terms and ids stay frozen as listed under Lore and naming, and only display strings in `godot/content` and the Naming table change.
+- Use the ubiquitous language from the lore table in names, types and tests (Scrap Goblin, Spool Guard, Prism Spire, kingdom health, wave, Buttons, Golden Staples). No synonyms for the same concept. Display names and lore strings live in `godot/content` and the Naming table; a rename changes those, not the logic.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
@@ -73,10 +73,10 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 
 - Target: 60 fps with 80 foes on a mid-range phone. Budget: under 120 draw calls, about 150k triangles, DPR capped at 2. The web export uses the Compatibility renderer (WebGL2) and the single-threaded build.
 - One `MultiMeshInstance3D` per foe type. Don't create a node per foe.
-- Camera: perspective, about 55° pitch, about 35° FOV, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, one script converts sim cells to world positions); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit.
+- Camera: perspective, about 35° FOV, pitched about 55° by default and tilting between 30° and 65° with the pinch, landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, one script converts sim cells to world positions); pinch zoom and pan are clamped so grid cells stay at least 40 px wide, except that the whole board must always fit.
 - Models come from glTF/GLB. Sources, in order of preference: the owner's Blender models (`assets-src/blender/`, some made with Claude), AI-generated models from Meshy cleaned up in Blender (foes especially), and CC0 packs as placeholders. Keep a simple fallback mesh for any unit whose file is missing.
-- Foes and towers are animated: foes walk, get hit and die (an attack clip only if the sim gains a foe attack, such as the Saboteur in Phase 7); towers idle and fire. `MultiMeshInstance3D` cannot skin, so foes with many instances play baked vertex animation in a shader, with the clip index and start time per instance in instance custom data. Render keeps a dying instance alive until its death clip ends, driven by the death event. Bosses are skinned glTF (`Skeleton3D` plus `AnimationPlayer`); towers animate separate parts in an `AnimationPlayer` with no skeleton. Triangle budgets (whole model per level): foe 800 to 1,200 with its own baked 512 px map, tower 1,500 to 3,000 on a shared atlas, boss 3,000 to 5,000 with a 1,024 px map, under frame caps of foes 80k, towers 45k, terrain and effects 20k and one boss 5k in total (see the plan; the tower cap assumes 20 towers, to be measured). One foe, the Scamp, goes through the whole Meshy and Blender pipeline first (gate: 80 animated Scamps at 60 fps on the owner's phone) before any other foe does. Count draw calls and triangles with animation on, towers included.
-- Terrain is procedural: the sim map becomes terrain at load time from ground tiles plus Godot textures and shaders (ground blend, road edge, water, fog). Tiles and props that need a hand-made look come from Blender. The road is drawn as a smooth ribbon (up to 1.25 cells wide, rounded corners, dirt shader) over the unchanged 1-cell grid, so GLB tiles are for ground, edges and scenery, not road pieces. The sim's polyline routes stay the truth for movement, range, hits and tap picking; foes walk the smoothed centreline with a render-only sideways offset that is stable per foe (from the foe id) and keeps them on the dirt (bounded by the ribbon half-width and below the corner radius). A road wider in the sim (finer grid, 2-cell roads) is an option only for the post-parity map version 2. Terrain code reads the map snapshot only.
+- Foes and towers are animated: foes walk, get hit and die (an attack clip only once foes attack, with the Guard Tent in Phase 7); towers idle and fire. `MultiMeshInstance3D` cannot skin, so foes with many instances play baked vertex animation in a shader, with the clip index and start time per instance in instance custom data. Render keeps a dying instance alive until its death clip ends, driven by the death event. Bosses are skinned glTF (`Skeleton3D` plus `AnimationPlayer`); towers animate separate parts in an `AnimationPlayer` with no skeleton. Triangle budgets (whole model per level): foe 800 to 1,200 with its own baked 512 px map, tower 1,500 to 3,000 on a shared atlas, boss 3,000 to 5,000 with a 1,024 px map, under frame caps of foes 80k, towers 45k, terrain and effects 20k and one boss 5k in total (see the plan; the tower cap assumes 20 towers, to be measured). One foe, the Scrap Goblin, goes through the whole Meshy and Blender pipeline first (gate: 80 animated Scrap Goblins at 60 fps on the owner's phone) before any other foe does. Count draw calls and triangles with animation on, towers included.
+- Terrain is built from the sim map at load time from modular 1 m tiles (a `GridMap` or a `MultiMesh` per tile type) with papercraft materials (kraft paper, cardboard, the cutting mat, foil, tape; see the plan). Sockets draw as etched circles. How the path is drawn (a printed line, tape or the earlier ribbon idea) is decided in Phase 5; the sim's polyline routes stay the truth for movement, range, hits and tap picking. Terrain code reads the map snapshot only.
 - Reuse meshes and materials, free nodes you remove, and avoid allocating objects every frame.
 
 ## UI
@@ -88,11 +88,11 @@ fixtures/    JSON exported from the TypeScript sim: the oracle for the port
 
 ## Testing
 
-- Every sim module gets GUT tests: map generation (road valid, routes valid, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed. Compare against `fixtures/` produced by the TypeScript sim; a mismatch is a bug in the GDScript.
+- Every sim module gets GUT tests: map generation (road valid, routes valid, sockets valid, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed. The ported core is compared with `fixtures/`; from the combat port on, replays are compared with goldens written by the GDScript sim, and a golden changes only by a reviewed balance change.
 - Fix the seed in tests; never depend on timing.
 - **TDD where possible.** For `godot/sim` and `godot/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
 - Test the domain through its public commands and snapshots, not internals, so refactors don't break tests.
-- The TypeScript Vitest suite keeps running while `src/` exists.
+- The TypeScript Vitest suite keeps running while `src/` exists (until Phase 4 step 8).
 
 ## Code style
 
@@ -144,7 +144,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 
 ## Tickets
 
-Work is tracked in the GitHub Project "Project Slag" (codename for Scrapline): <https://github.com/users/juanpalopez/projects/4> (owner `juanpalopez`, project number 4). The board is the source of truth for progress. Every ticket follows this format:
+Work is tracked in the GitHub Project "Project Slag" (codename for Papercraft Kingdom Defense, formerly Scrapline): <https://github.com/users/juanpalopez/projects/4> (owner `juanpalopez`, project number 4). The board is the source of truth for progress. Every ticket follows this format:
 
 - **Title:** `[Phase N] Imperative summary`, for example `[Phase 1] Seeded PRNG (mulberry32) with tests`. Epics read `[Phase N] Epic: name`.
 - **Labels:** exactly one `phase-N`, one area label (`sim`, `render`, `ui`, `content`, `infra`, `docs`), plus `epic` for epics.
@@ -174,9 +174,14 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
 
 ## Naming
 
-Use the lore names in code-facing content and the UI (provisional: the fantasy medieval lore rewrite may rename the display names; ids and code terms stay frozen):
+Use the GDD's names in code-facing content and the UI (display names only; ids are lowerCamelCase keys). The ported sim still has the old ids until the combat port renames them:
 
-| Prototype | Remake |
+| Prototype or ported id | Papercraft Kingdom Defense |
 | --- | --- |
-| scout / walker / tank / boss | Scamp / Raider / Ironclad / Warlord |
-| laser / rocket / emp / tesla | Ballista / Catapult / Frost Spire / Storm Spire |
+| scout / walker / tank / boss (`scamp`, `raider`, `ironclad`, `warlord`) | Scrap Goblin / Corrugated Orc / Corrugated Orc / Cardboard Golem (ids to become `scrapGoblin`, `corrugatedOrc`, `cardboardGolem`) |
+| (new) | Razor Moth (flying), Ink Shaman (support) |
+| `ballista`, `catapult` | The Spool Guard (`spoolGuard`), The Thimble Mortar (`thimbleMortar`) |
+| `frostSpire`, `stormSpire` | The Prism Spire (`prismSpire`), with specs Cryo-Origami Spire and Blot Singularity |
+| (new) | The Guard Tent (`guardTent`) |
+| gold / lives | Buttons / kingdom health; Golden Staples between runs |
+| Heartstone | the kingdom (the Heartstone is dropped) |

@@ -1,14 +1,14 @@
-# Scrapline
+# Papercraft Kingdom Defense
 
-A medieval tower defense for mobile browsers. You are Castellan Quell, last warden of Greyhold Keep, and the Hollow King, a dead monarch who still issues edicts, is sending his warband down the King's Road to claim the Heartstone as tithe. Place Ballistae, Catapults, Frost Spires and Storm Spires along a procedurally generated road and hold the line.
+A tactile, stop-motion papercraft tower defense for phones and tablets. In a forgotten corner of an old craft room, an abandoned cutting mat holds a tiny paper kingdom, until The Blot, a bottle of corrupted purple ink, twists scraps of stationery into monsters. You are the Grand Crafter: build spool guards, guard tents, prism spires and thimble mortars from office supplies, command a cardboard knight, cast glue and thumbtack spells, and hold the line. The design is in [`docs/GDD.md`](docs/GDD.md).
 
-It is a 3D low-poly remake of a 2D canvas prototype, built with **Godot 4** (GDScript). It plays in landscape on a phone, in the browser first and as a native iOS app later. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
+It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in the browser first and as a native iOS app later. The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code still says Scrapline until the rename ticket. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
 - **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/ (for now the greybox: the real map on flat tiles where you can tap a plot and build, not the game yet; add `?seed=42` to pick a map)
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
-> **Status:** Phase 4 (simulation port to GDScript). The PRNG, map generation with routes, and the game state, commands and 30 Hz tick are ported and tested. Foes, combat and waves are next. The game is not playable yet; the live page is the Phase 5 greybox (steps A1 and A2): the real map on flat tiles, where you can tap a plot and build a tower. It is built in parallel with the port.
+> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets, foes, combat and waves are next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 and A2): the live page shows the real map on flat tiles, where you can tap a plot and build. It is not the game yet.
 
 ## Getting started
 
