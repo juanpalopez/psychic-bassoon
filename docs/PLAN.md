@@ -4,7 +4,7 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game and its trac
 
 _Updated 2026-10-11: the game moves from Three.js to Godot. Living version: the Claude doc of the same name._
 
-> **Status:** Phases 0 to 3 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired and its last build is the tag `web-three-final` (the site root now serves the Godot stub scene). Phase 3 (the Godot foundation) passed its go/no-go on the owner's iPhone 15 Pro. On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Phase 4 is in progress: the PRNG, map generation with routes, and the game state, commands and tick are ported; foes, combat and waves are next. The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
+> **Status:** Phases 0 to 3 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired and its last build is the tag `web-three-final` (the site root now serves the Godot stub scene). Phase 3 (the Godot foundation) passed its go/no-go on the owner's iPhone 15 Pro. On 2026-10-10 the owner decided to move the game to the **Godot engine** for more freedom (see [Engine decision](#engine-decision-godot)). The TypeScript sim, tests and prototype are the reference until the Godot sim reproduces them exactly. Phase 5 (play in Godot) started on 2026-10-11 as a greybox, in parallel with the rest of Phase 4 (owner decision; see Phase 5). Phase 4 is in progress: the PRNG, map generation with routes, and the game state, commands and tick are ported; foes, combat and waves are next. The target is web first, then native iOS. The setting is moving to fantasy medieval, so the lore and the game name will change (see Open questions). Use `prototype/scrapline.html` and the TypeScript sim as the reference for rules and numbers.
 
 ## Vision
 
@@ -153,7 +153,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 - **Input.** A tap ray-casts the ground plane to a grid cell and sends a command. No direct state changes.
 - **Orientation.** Landscape only: the web page shows a "turn your phone" prompt when upright (custom HTML shell).
 
-**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
+**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit: a foe 800 to 1,200 triangles with one 512 px texture map; a tower 1,500 to 3,000 triangles per level on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. Foes decide the budget: 80 of them at 1,200 triangles is about 96k, so the Scamp (the swarm foe) aims for the low end. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
 
 ## Art direction and Claude Design
 
@@ -164,6 +164,23 @@ Low-poly storybook medieval: dark moss and slate ground, torch-amber light, ston
 - **Level readability.** Each upgrade adds a visible part plus coloured level lights on the base.
 
 **Asset pipeline**
+
+Track B, one asset end to end (owner rescope, 2026-10-11): the Scamp goes through the whole pipeline before any other foe does. Its gate is 80 animated Scamps at 60 fps on the owner's phone in the web export; the pipeline steps are then written down for the next foe. Meshy stays the source (polygon target set in Meshy, cleanup in Blender, driven through the Blender MCP with the owner watching the viewport):
+
+1. Clean up: fix scale, put the origin at the feet facing forward, reduce to the triangle budget, bake the texture onto one map.
+2. Armature: a small skeleton of about 15 to 20 bones (hips, spine, head, arms, legs, plus ears or a weapon if needed). Meshy's auto-rig for humanoid bipeds may save this step for the Scamp.
+3. Skinning: automatic weights, then fix armpits and crotch.
+4. Clips: walk, hit and die, each a short loop or one-shot.
+5. Export for the way the unit is drawn in Godot (below).
+
+| Unit | Godot setup | Why |
+| --- | --- | --- |
+| Foes (many) | Clips baked into a vertex-animation texture, played by a shader on a `MultiMesh` | `MultiMesh` cannot play skeletons |
+| Bosses | Skinned glTF as `Skeleton3D` plus `AnimationPlayer` | Few on screen, so skinning is affordable |
+| Towers | Separate parts animated in an `AnimationPlayer`, no skeleton | The head turns and the arm swings; nothing bends |
+
+If the Scamp cannot reach 60 fps with vertex animation, the fallback is part animation and fewer animated instances (see Risks).
+
 
 0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, shared palette texture, rig, clips). Record the Meshy plan, date and prompt or reference (see Open questions).
 1. Shortlist CC0 low-poly packs: Kenney (Tower Defense Kit, Castle Kit, Fantasy Town Kit, Mini Dungeon) and Quaternius (fantasy, monsters and medieval packs). Check each licence file; anything not clearly CC0 is out.
@@ -273,7 +290,7 @@ Each phase ends with a gate that must pass before the next starts. Phases 0 to 2
 | 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
 | 4 · Sim port to GDScript | PRNG, map generation with routes, game, commands, tick, combat, waves, economy, headless run | **The GDScript sim reproduces every TypeScript fixture exactly** (maps, routes, waves, replays) |
-| 5 · Play in Godot | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the Three.js build (tag `web-three-final`, run locally) at 60 fps on the owner's phone with 80 foes** |
+| 5 · Play in Godot (greybox started in parallel with Phase 4, 2026-10-11) | Procedural terrain (shaders plus Blender tiles), MultiMesh foes, towers, camera, picking, effects, Control-node HUD, landscape prompt, audio on first tap | **Plays as well as the Three.js build (tag `web-three-final`, run locally) at 60 fps on the owner's phone with 80 foes** |
 | 6 · Art and ambience | Meshy foes cleaned up in Blender, the owner's Blender towers, terrain tiles and ambient props; Claude Design screens and Theme; lighting, fog, torches, effects | All foes and towers (3 levels) use final models; every gap in `docs/art/GAPS.md` has a fallback |
 | 7 · Lore and chapters | Story cards, herald proclamations, Chronicle pages, chapters 1–4; Mender/Shieldbearer/Saboteur, hybrids, level 3 branches, targeting, seed sharing | A new player finishes chapter 1 without help, and a headless run with each new foe and branch replays exactly from its seed |
 | 8 · Polish, launch, native | Audio, performance pass, README with key art; linked from the personal site; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
@@ -326,6 +343,19 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 ### Phase 5 · Play in Godot
 
 **Goal:** the game playable on the phone in Godot, at least as good as the web build.
+
+**Rescope (owner decision, 2026-10-11): greybox first, in parallel with Phase 4.** Phase 5 starts now as a greybox while the rest of the sim port continues. This is a deliberate exception to "work one phase at a time". The risk is low because the greybox only reads sim snapshots and sends commands, so it cannot break parity; if a sim change breaks a greybox scene, the greybox adapts. The Three.js renderer and HUD are already gone; `src/sim` and the fixture export script stay until the Phase 4 gate, because the combat port may need new fixture cases. Track C (terrain art) is parked at the proof of concept (Blender tiles plus world-space Godot shaders and scatter) and returns as the art pass over A1, with the terrain code reading the real map and the smooth road ribbon below.
+
+| Step | You get | What it teaches |
+| --- | --- | --- |
+| A1 Board | The real `MapGen` map as flat tiles (cubes for plots, a strip for the road), a camera rig, a `@tool` preview with a seed field | Scenes, `Node3D` transforms, `@export`, `@tool` |
+| A2 Picking | Tap a cell: highlight it, open a build menu, send a build command | Input events, a raycast onto the board, signals |
+| A3 Foes | Capsules walking the routes, one `MultiMesh` per foe type, smooth movement between ticks | `_process` against the fixed tick, interpolation, `MultiMesh` |
+| A4 Towers | A tower scene with stats in a `.tres` resource, a range ring, shots | `PackedScene`, custom resources, the Inspector |
+| A5 HUD | Gold, lives, wave, speed and pause, game over, landscape layout | `Control` nodes, containers, anchors, Theme |
+| A6 Loop | Waves, a win and lose screen, 1×/2×/3× speed | Game flow, scene switching |
+
+A1 and A2 can start now (map generation, game state and commands are ported); A3 onward lands as the combat and wave ports merge. Each step is built by Claude and read by the owner with the Remote scene tree open, then tweaked in the Inspector. A Godot MCP server that can launch the project, read its output and take screenshots (checked with Godot 4.7) lets Claude see the result without copying logs by hand.
 
 **Work breakdown**
 1. Procedural terrain built from the map, with the road drawn as a smooth ribbon: a curve through each route's cell centres (corner radius 0.5 cell on the centreline; the inner edge radius is `max(0, r - w/2)`, so a sharp inner corner is fine), up to 1.25 cells wide (`w`), with a dirt shader and worn, grassy edges. Two roads two cells apart (a detour) leave 0.75 of a plot cell visible between them, and a ribbon covers at most 0.125 of a neighbouring plot cell, so stone bases are at most 0.75 cell wide. Junctions are where ribbons meet and blend. The sim polyline stays the truth for movement, range and hits. Foes walk the smoothed centreline: their progress maps onto the curve by arc-length fraction per segment, and a render-only sideways offset, stable per foe (derived from the foe id, never random per frame) and bounded by `min((w - foe width) / 2, r - ε)` (below the corner radius, so a foe never loops backwards at a corner), spreads a crowd. GLB tiles are used for ground, edge dressing and scenery, not for road pieces. Also: Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
@@ -401,6 +431,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript oracle and its tests are forgotten | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
+| The greybox (Phase 5) builds on a sim that is still being ported | The greybox only reads snapshots and sends commands; sim API changes are caught by its tests and by CI; parity fixtures decide any disagreement |
 | Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The centreline stays inside its cell band (corner radius 0.5 cell, ribbon at most 1.25 cells wide); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
