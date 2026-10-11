@@ -30,6 +30,24 @@ describe('render boundary check', () => {
     'game.map.tiles[0][1] = 2',
     'game.seed = 3',
     'game.call("set", "gold", 1)',
+    'game.gold %= 2',
+    'game.gold **= 2',
+    'game.gold |= 2',
+    'game.gold &= 2',
+    'game.gold ^= 2',
+    'game.gold <<= 1',
+    'game.gold >>= 1',
+    'game.towers[0].level <<= 1',
+    'game.set(&"gold", 1)',
+    'game.set(StringName("gold"), 1)',
+    'game.set_indexed("gold", 1)',
+    'game.set_indexed(NodePath("gold"), 1)',
+    'game.call_deferred("set", "gold", 1)',
+    'game.call(&"set", "gold", 1)',
+    'game.set_deferred(&"gold", 1)',
+    'for p in game.get_property_list(): game.set(p.name, 0)',
+    'my_game.towers.append(t)',
+    'old_state.gold = 3',
   ])('rejects %s', code => {
     expect(problems(code).length).toBeGreaterThan(0);
   });
@@ -51,8 +69,27 @@ describe('render boundary check', () => {
     'if game.towers.size() >= 3:',
     'var level_text := "level %d" % game.towers[0].level',
     'board.map_seed += 1',
+    'board.map = MapGen.generate(1)',
+    'self.map = m',
+    'noise.seed = 3',
+    'particles.seed = 7',
+    'agent.path = p',
+    'player.wave = 3',
+    'self.level = 2',
+    'node.set("level", 3)',
+    'foo.get("path")',
+    'config["seed"] = 1',
+    'stats["level"] += 1',
+    'var d := {"gold": 2}',
   ])('allows %s', code => {
     expect(problems(code)).toEqual([]);
+  });
+
+  it('sees a statement split inside an open bracket', () => {
+    expect(check('game.towers[\n  0] = t\n').length).toBeGreaterThan(0);
+    expect(check('game.map.tiles[\n  0][1] = 2\n').length).toBeGreaterThan(0);
+    expect(check('game.gold = (\n  5)\n').length).toBeGreaterThan(0);
+    expect(check('var ok := compute(\n  game.gold == 5)\n')).toEqual([]);
   });
 
   it('sees an assignment split with a line continuation', () => {

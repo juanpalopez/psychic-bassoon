@@ -6,12 +6,27 @@ import {join} from 'node:path';
 // reach into the game state: the random streams, the command queue, or any
 // field of the state. A render change that did would break replay parity
 // without touching a file in godot/sim.
+//
+// This is a line-based tripwire, not a guarantee. It cannot see through an
+// alias (`var t = game.towers` then `t.append(x)`); the real fix is for the
+// sim's snapshot to hand render read-only or duplicated data, which belongs to
+// a Phase 4 sim ticket. State fields are matched on a receiver named `game` or
+// `state` (or ending in `_game` or `_state`), so `board.map = x` is allowed;
+// the random streams and the queue are matched on any receiver.
 
 // Every field of GameState and of the map and towers it holds.
 const FIELDS =
   'seed|map|route|routes|tick_count|gold|lives|wave|running|over|towers|spawners|rng|route_rng|next_id|pending|events|path|tiles|tower_id|invested|cooldown|level';
 const MUTATORS =
   'append|append_array|push_back|push_front|erase|clear|insert|remove_at|remove|pop_back|pop_front|pop_at|resize|assign|sort|sort_custom|shuffle|reverse|fill|set|merge|erase_at';
+// An assignment operator, plain or compound (`=`, `+=`, `**=`, `<<=`, `|=`...),
+// but not a comparison (`==`, `!=`, `<=`, `>=`).
+const ASSIGN = '(?<![=!<>])(?:\\*\\*|<<|>>|[-+*/%&|^])?=(?!=)';
+// A receiver that holds the game state: `game`, `state`, `my_game`, `old_state`.
+const STATE = '\\b(?:\\w+_)?(?:game|state)\\b';
+// A field name written as a literal: "gold", &"gold", StringName("gold"),
+// NodePath("gold").
+const NAME = `(?:&|StringName\\(|NodePath\\()?\\s*["'](?:${FIELDS})["']`;
 
 // Checked on the code with strings and comments removed.
 const FORBIDDEN = [
@@ -21,15 +36,21 @@ const FORBIDDEN = [
     // an assignment whose left side passes through a state field, however
     // deep: game.gold = 1, game.towers[0].level += 1, game.map.tiles[0][1] = 2
     new RegExp(
-      `\\.(${FIELDS})\\b[\\w.\\[\\]]*\\s*(?<![=!<>])(=|\\+=|-=|\\*=|/=)(?!=)`
+      `${STATE}[\\w.\\[\\]]*\\.(?:${FIELDS})\\b[\\w.\\[\\]]*\\s*${ASSIGN}`
     ),
     'render and ui must not assign through the game state',
   ],
   [
     // a mutating call anywhere down a state field: game.towers.append(...),
     // game.map.routes[0].append(...)
-    new RegExp(`\\.(${FIELDS})\\b[\\w.\\[\\]]*\\.(${MUTATORS})\\(`),
+    new RegExp(
+      `${STATE}[\\w.\\[\\]]*\\.(?:${FIELDS})\\b[\\w.\\[\\]]*\\.(?:${MUTATORS})\\(`
+    ),
     'render and ui must not change the game state',
+  ],
+  [
+    /\b(get_property_list|set_indexed)\(/,
+    'render and ui must not enumerate or index-write properties of the game state',
   ],
 ];
 
@@ -37,18 +58,18 @@ const FORBIDDEN = [
 const RAW_FORBIDDEN = [
   [
     new RegExp(
-      `\\b(set|get|set_deferred|call|callv)\\(\\s*["'](${FIELDS})["']`
+      `${STATE}\\.(?:set|get|set_deferred|call|callv|call_deferred)\\(\\s*${NAME}`
     ),
     'render and ui must not reach into the game state by name',
   ],
   [
     new RegExp(
-      `\\.(call|callv)\\(\\s*["']set["']\\s*,\\s*\\[?\\s*["'](${FIELDS})["']`
+      `${STATE}\\.(?:call|callv|call_deferred)\\(\\s*(?:&|StringName\\()?\\s*["']set["']\\s*,\\s*\\[?\\s*${NAME}`
     ),
     'render and ui must not reach into the game state by name',
   ],
   [
-    new RegExp(`\\[\\s*["'](${FIELDS})["']\\s*\\]`),
+    new RegExp(`${STATE}\\[\\s*${NAME}\\s*\\]`),
     'render and ui must not reach into the game state by name',
   ],
 ];
@@ -75,6 +96,16 @@ export function codeOf(line) {
   return out;
 }
 
+/** How many brackets are still open at the end of this code. */
+function openBrackets(code) {
+  let depth = 0;
+  for (const c of code) {
+    if (c === '(' || c === '[' || c === '{') depth++;
+    if (c === ')' || c === ']' || c === '}') depth--;
+  }
+  return depth;
+}
+
 /** The problems in one file's source. */
 export function check(source, file = 'file.gd') {
   const errors = [];
@@ -83,8 +114,18 @@ export function check(source, file = 'file.gd') {
   for (let n = 0; n < lines.length; n++) {
     let line = lines[n] ?? '';
     const start = n;
-    while (line.endsWith('\\') && n + 1 < lines.length) {
-      line = line.slice(0, -1) + ' ' + (lines[++n] ?? '');
+    // join a statement that continues: a trailing backslash, or an open
+    // bracket (the lines inside a call or an index belong to one statement)
+    while (n + 1 < lines.length) {
+      if (line.endsWith('\\')) {
+        line = line.slice(0, -1) + ' ' + (lines[++n] ?? '');
+      } else if (openBrackets(codeOf(line)) > 0) {
+        // no space after an opener or a comma, so `a[\n 0]` reads as `a[0]`
+        const next = (lines[++n] ?? '').trim();
+        line = line + (/[([{,]$/.test(line) ? '' : ' ') + next;
+      } else {
+        break;
+      }
     }
     const code = codeOf(line);
     for (const [pattern, why] of FORBIDDEN) {
