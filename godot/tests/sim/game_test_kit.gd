@@ -36,6 +36,12 @@ static func snapshot(game: GameState) -> Dictionary:
 				tower.cooldown
 			]
 		)
+	var foes := []
+	for foe in game.foes:
+		foes.append([foe.id, foe.type, foe.route, foe.hp, foe.distance, foe.x, foe.y])
+	var spawners := []
+	for spawner in game.spawners:
+		spawners.append([spawner.wave, spawner.timer, spawner.queue.size()])
 	var routes := []
 	for route in game.map.routes:
 		var cells := []
@@ -52,6 +58,8 @@ static func snapshot(game: GameState) -> Dictionary:
 		"over": game.over,
 		"towers": towers,
 		"routes": routes,
+		"foes": foes,
+		"spawners": spawners,
 		"rngState": game.rng.state,
 		"routeRngState": game.route_rng.state,
 		"nextId": game.next_id,

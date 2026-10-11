@@ -17,8 +17,10 @@ var wave: int = 0
 var running: bool = false
 var over: bool = false
 var towers: Array[Tower] = []
-## Wave spawners still releasing foes (the waves context fills this in).
-var spawners: Array = []
+## Foes on the board, in the order they spawned.
+var foes: Array[Foe] = []
+## Waves still releasing foes.
+var spawners: Array[Spawner] = []
 ## Random stream for wave composition, separate from the map's.
 var rng: Rng = null
 ## Random stream that picks which route each foe takes.

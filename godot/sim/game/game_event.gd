@@ -4,7 +4,17 @@ extends RefCounted
 
 ## The order of both enums is load-bearing once events are serialised: add new
 ## members at the end, and map to the TypeScript strings at the snapshot edge.
-enum Kind { TOWER_BUILT, TOWER_UPGRADED, TOWER_SOLD, WAVE_LAUNCHED, COMMAND_REJECTED }
+enum Kind {
+	TOWER_BUILT,
+	TOWER_UPGRADED,
+	TOWER_SOLD,
+	WAVE_LAUNCHED,
+	COMMAND_REJECTED,
+	WAVE_CLEARED,
+	FOE_SPAWNED,
+	FOE_LEAKED,
+	GAME_OVER,
+}
 
 ## Why a command did nothing. A rejection is an event, never an error.
 enum RejectReason {
@@ -27,6 +37,12 @@ var refund: int = 0
 ## WAVE_LAUNCHED: the wave number, and the Buttons paid for calling it early.
 var wave: int = 0
 var early_bonus: int = 0
+## WAVE_CLEARED: the Buttons paid for clearing the wave (`wave` is the wave number).
+var bonus: int = 0
+## FOE_SPAWNED and FOE_LEAKED: which foe, its type, and how much health it took.
+var foe_id: int = 0
+var foe_type: String = ""
+var leak: int = 0
 ## COMMAND_REJECTED: the command and the reason.
 var command: Command = null
 var reason: RejectReason = RejectReason.GAME_OVER

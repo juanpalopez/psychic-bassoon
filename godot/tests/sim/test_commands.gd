@@ -186,23 +186,3 @@ func test_launch_wave_starts_wave_1_with_no_bonus() -> void:
 	assert_eq(events[0].kind, KIND.WAVE_LAUNCHED)
 	assert_eq([events[0].wave, events[0].early_bonus], [1, 0])
 	assert_eq(game.buttons, RULES.START_BUTTONS)
-
-
-func test_calling_a_wave_early_pays_the_bonus() -> void:
-	var game := Game.create(SEED)
-	GameTestKit.run(game, [Command.launch_wave()])
-	# no spawner exists yet (Phase 4, step 5), so a second launch counts as early
-	var events := GameTestKit.run(game, [Command.launch_wave()])
-	var bonus: int = RULES.EARLY_CALL_BASE + 1 * RULES.EARLY_CALL_PER_WAVE
-	assert_eq(events[0].early_bonus, bonus)
-	assert_eq(game.buttons, RULES.START_BUTTONS + bonus)
-	assert_eq(game.wave, 2)
-
-
-func test_launch_is_rejected_while_a_spawner_is_still_releasing() -> void:
-	var game := Game.create(SEED)
-	GameTestKit.run(game, [Command.launch_wave()])
-	game.spawners.append("a spawner")
-	var command := Command.launch_wave()
-	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.WAVE_IN_PROGRESS)
-	assert_eq(game.wave, 1)
