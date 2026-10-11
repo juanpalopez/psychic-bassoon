@@ -45,8 +45,8 @@ static func snapshot(game: GameState) -> Dictionary:
 	return {
 		"seed": game.seed,
 		"tick": game.tick_count,
-		"gold": game.gold,
-		"lives": game.lives,
+		"buttons": game.buttons,
+		"kingdom_health": game.kingdom_health,
 		"wave": game.wave,
 		"running": game.running,
 		"over": game.over,

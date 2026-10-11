@@ -21,8 +21,8 @@ static func create(seed: int) -> GameState:
 	for cells in game.map.routes:
 		game.routes.append(Route.build(cells))
 	game.route = game.routes[0]
-	game.gold = RULES.START_GOLD
-	game.lives = RULES.START_LIVES
+	game.buttons = RULES.START_BUTTONS
+	game.kingdom_health = RULES.START_KINGDOM_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)
 	game.route_rng = Rng.derive(seed, Streams.ROUTES)
 	return game
@@ -69,9 +69,9 @@ static func _build(game: GameState, command: Command) -> void:
 		if other.col == command.col and other.row == command.row:
 			return _reject(game, command, GameEvent.RejectReason.OCCUPIED)
 	var cost: int = TOWERS.DEFS[command.tower].cost[0]
-	if game.gold < cost:
-		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_GOLD)
-	game.gold -= cost
+	if game.buttons < cost:
+		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
+	game.buttons -= cost
 	var tower := Tower.new()
 	tower.id = game.next_id
 	game.next_id += 1
@@ -93,9 +93,9 @@ static func _upgrade(game: GameState, command: Command) -> void:
 	if tower.level + 1 >= costs.size():
 		return _reject(game, command, GameEvent.RejectReason.MAX_LEVEL)
 	var cost: int = costs[tower.level + 1]
-	if game.gold < cost:
-		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_GOLD)
-	game.gold -= cost
+	if game.buttons < cost:
+		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
+	game.buttons -= cost
 	tower.invested += cost
 	tower.level += 1
 	var event := GameEvent.of(GameEvent.Kind.TOWER_UPGRADED)
@@ -109,7 +109,7 @@ static func _sell(game: GameState, command: Command) -> void:
 	if tower == null:
 		return _reject(game, command, GameEvent.RejectReason.NO_SUCH_TOWER)
 	var refund := int(floor(float(tower.invested) * RULES.SELL_REFUND))
-	game.gold += refund
+	game.buttons += refund
 	game.towers.erase(tower)
 	var event := GameEvent.of(GameEvent.Kind.TOWER_SOLD)
 	event.tower_id = tower.id
@@ -123,7 +123,7 @@ static func _launch_wave(game: GameState, command: Command) -> void:
 	var early_bonus := 0
 	if game.running:
 		early_bonus = RULES.EARLY_CALL_BASE + game.wave * RULES.EARLY_CALL_PER_WAVE
-	game.gold += early_bonus
+	game.buttons += early_bonus
 	game.wave += 1
 	game.running = true
 	# the wave's spawner is created by the waves context (Phase 4, step 5)

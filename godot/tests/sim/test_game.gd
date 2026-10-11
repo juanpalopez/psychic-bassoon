@@ -11,12 +11,12 @@ const FIXTURE := "res://../fixtures/prng.json"
 const REASON := GameEvent.RejectReason
 
 
-func test_create_starts_with_prototype_gold_lives_and_tick_zero() -> void:
+func test_create_starts_with_prototype_buttons_kingdom_health_and_tick_zero() -> void:
 	var game := Game.create(SEED)
 	assert_eq(game.seed, SEED)
 	assert_eq(game.tick_count, 0)
-	assert_eq(game.gold, RULES.START_GOLD)
-	assert_eq(game.lives, RULES.START_LIVES)
+	assert_eq(game.buttons, RULES.START_BUTTONS)
+	assert_eq(game.kingdom_health, RULES.START_KINGDOM_HEALTH)
 	assert_eq(game.wave, 0)
 	assert_false(game.running)
 	assert_false(game.over)
@@ -61,7 +61,7 @@ func test_state_survives_json() -> void:
 	var snapshot := GameTestKit.snapshot(game)
 	var parsed: Dictionary = JSON.parse_string(JSON.stringify(snapshot))
 	assert_eq(parsed.towers[0][1], "ballista")
-	assert_eq(int(parsed.gold), game.gold)
+	assert_eq(int(parsed.buttons), game.buttons)
 	assert_eq(int(parsed.rngState), game.rng.state)
 	assert_eq(parsed.routes.size(), game.map.routes.size())
 
@@ -75,11 +75,11 @@ func test_tick_advances_the_counter_by_one() -> void:
 
 func test_tick_changes_nothing_else_without_commands() -> void:
 	var game := Game.create(SEED)
-	var gold := game.gold
-	var lives := game.lives
+	var buttons := game.buttons
+	var kingdom_health := game.kingdom_health
 	Game.tick(game)
-	assert_eq(game.gold, gold)
-	assert_eq(game.lives, lives)
+	assert_eq(game.buttons, buttons)
+	assert_eq(game.kingdom_health, kingdom_health)
 	assert_eq(game.towers.size(), 0)
 	assert_eq(game.events.size(), 0)
 
@@ -104,7 +104,7 @@ func test_commands_do_not_run_before_the_tick() -> void:
 	var game := Game.create(SEED)
 	Game.submit(game, GameTestKit.build_at("ballista", GameTestKit.socket(game)))
 	assert_eq(game.towers.size(), 0)
-	assert_eq(game.gold, RULES.START_GOLD)
+	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_events_last_one_tick_only() -> void:

@@ -13,8 +13,8 @@ static func of(reason: GameEvent.RejectReason) -> String:
 			return "Unknown tower"
 		GameEvent.RejectReason.OCCUPIED:
 			return "That plot is taken"
-		GameEvent.RejectReason.NOT_ENOUGH_GOLD:
-			return "Not enough gold"
+		GameEvent.RejectReason.NOT_ENOUGH_BUTTONS:
+			return "Not enough Buttons"
 		GameEvent.RejectReason.MAX_LEVEL:
 			return "Already at the top level"
 		GameEvent.RejectReason.NO_SUCH_TOWER:
