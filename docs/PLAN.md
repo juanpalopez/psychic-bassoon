@@ -153,7 +153,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 - **Input.** A tap ray-casts the ground plane to a grid cell and sends a command. No direct state changes.
 - **Orientation.** Landscape only: the web page shows a "turn your phone" prompt when upright (custom HTML shell).
 
-**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit: a foe 800 to 1,200 triangles with one 512 px texture map; a tower 1,500 to 3,000 triangles per level on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. Foes decide the budget: 80 of them at 1,200 triangles is about 96k, so the Scamp (the swarm foe) aims for the low end. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
+**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit (the whole model at that level, not an increment): a foe 800 to 1,200 triangles with its own baked 512 px map; a tower 1,500 to 3,000 triangles on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. These ranges only fit together under worst-case caps for the 150k frame: foes at most 80k in total (80 foes average at most 1,000, so the Scamp swarm sits at the low end and only a few foes reach 1,200), towers at most 45k in total (20 towers at level 3 average 2,250, so top-of-range towers must be few), terrain, scenery and effects at most 20k, one boss at most 5k. A tower is at most 3 mesh parts, so 20 towers are at most 60 of the 120 draw calls, and shadows stay off in the Compatibility renderer. The Phase 5 performance pass checks the caps with the real counts. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
 
 ## Art direction and Claude Design
 
@@ -182,7 +182,7 @@ Track B, one asset end to end (owner rescope, 2026-10-11): the Scamp goes throug
 If the Scamp cannot reach 60 fps with vertex animation, the fallback is part animation and fewer animated instances (see Risks).
 
 
-0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, shared palette texture, rig, clips). Record the Meshy plan, date and prompt or reference (see Open questions).
+0. Foes: generate in Meshy, then clean up in Blender (retopology, decimate, bake one 512 px map per foe with colours matched to the shared palette, rig, clips); this is the Track B list above. Record the Meshy plan, date and prompt or reference (see Open questions).
 1. Shortlist CC0 low-poly packs: Kenney (Tower Defense Kit, Castle Kit, Fantasy Town Kit, Mini Dungeon) and Quaternius (fantasy, monsters and medieval packs). Check each licence file; anything not clearly CC0 is out.
 2. Map every unit to a pack model and write the gaps in `docs/art/GAPS.md` (see the gap plan below).
 3. In Blender, build or remap faces to one shared palette texture; kitbash gap units from pack parts.
@@ -204,7 +204,7 @@ Which units a CC0 pack can plausibly cover, and what has to be built. Coverage i
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, recolour to the shared palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and can use a skeleton. Licence: owned under the paid plan; record the plan, date and prompt in `assets/CREDITS.md`. |
+| Scamp, Raider, Ironclad, Warlord | Meshy-generated models (owner's plan), cleaned up in Blender; CC0 fantasy or monster packs as placeholders | Kenney's Tower Defense Kit only has UFO enemies. Meshy output needs retopology and decimation to the triangle budget, a baked 512 px map per foe with colours matched to the palette, a rig and walk, hit and death clips (an attack clip only if the sim gains a foe attack, such as the Saboteur) (baked to vertex animation for `MultiMesh`). Warlord needs a red glowing core and is skinned (a skeleton, as bosses are). Licence: owned under the paid plan; record the plan, date and prompt in `assets/CREDITS.md`. |
 | Mender, Shieldbearer, Saboteur | Probably no exact match | Kitbash: a base body plus an added part (censer and floating tray; door-sized shield; smoking fuse). Fall back to primitives if kitbashing clashes. |
 | Hybrids (chapter 3) | None | Compose a base body with a second unit's part; no new full models. |
 | Towers (4) | Kenney Tower Defense Kit | Stone tower pieces, ballista, catapult and cannon weapons, and crystal pieces cover all four; recolour crystals to violet and yellow. |
@@ -281,7 +281,7 @@ scrapline/
 
 **Ticket labels.** The board's old labels `phase-3` (Art and UI), `phase-4` (Lore and chapters) and `phase-5` (Polish and launch) map to the new phases 6, 7 and 8; new labels `phase-6` to `phase-8` are added and the old art tickets (#89 to #97) are relabelled `phase-6`. The Three.js terrain ticket #108 is closed as done in TypeScript; the Godot terrain is part of Phase 5. New Godot tickets use `phase-3` onward with the new meaning from the day the move is merged.
 
-Each phase ends with a gate that must pass before the next starts. Phases 0 to 2 were built in TypeScript and Three.js and are complete; the Godot track starts at Phase 3.
+Each phase ends with a gate that must pass before the next starts (exception: the Phase 5 greybox runs in parallel with Phase 4, see Phase 5; the Phase 5 gate itself still waits for the Phase 4 gate). Phases 0 to 2 were built in TypeScript and Three.js and are complete; the Godot track starts at Phase 3.
 
 | Phase | Work | Gate |
 | --- | --- | --- |
@@ -351,15 +351,15 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 | A1 Board | The real `MapGen` map as flat tiles (cubes for plots, a strip for the road), a camera rig, a `@tool` preview with a seed field | Scenes, `Node3D` transforms, `@export`, `@tool` |
 | A2 Picking | Tap a cell: highlight it, open a build menu, send a build command | Input events, a raycast onto the board, signals |
 | A3 Foes | Capsules walking the routes, one `MultiMesh` per foe type, smooth movement between ticks | `_process` against the fixed tick, interpolation, `MultiMesh` |
-| A4 Towers | A tower scene with stats in a `.tres` resource, a range ring, shots | `PackedScene`, custom resources, the Inspector |
-| A5 HUD | Gold, lives, wave, speed and pause, game over, landscape layout | `Control` nodes, containers, anchors, Theme |
-| A6 Loop | Waves, a win and lose screen, 1×/2×/3× speed | Game flow, scene switching |
+| A4 Towers | A tower scene with its look (mesh, colours, range-ring style) in a `.tres` resource and its stats read from `godot/content` (never a second copy of the numbers), a range ring, shots | `PackedScene`, custom resources, the Inspector |
+| A5 HUD (the lives, wave and game-over parts wait for the combat and wave ports) | Gold, lives, wave, speed and pause, game over, landscape layout | `Control` nodes, containers, anchors, Theme |
+| A6 Loop (waits for the wave and economy ports) | Waves, a win and lose screen, 1×/2×/3× speed | Game flow, scene switching |
 
-A1 and A2 can start now (map generation, game state and commands are ported); A3 onward lands as the combat and wave ports merge. Each step is built by Claude and read by the owner with the Remote scene tree open, then tweaked in the Inspector. A Godot MCP server that can launch the project, read its output and take screenshots (checked with Godot 4.7) lets Claude see the result without copying logs by hand.
+A1 and A2 can start now (map generation, game state and commands are ported); A3 onward lands as the combat and wave ports merge. **Limits of the exception:** the greybox only calls `Game.create`, `Game.submit` and `Game.tick`, reads state through read-only accessors, and drains events; it never touches `rng`, `route_rng`, `pending` or fields of the state, and it never edits `godot/sim`, `godot/content` numbers or `fixtures/`. Any sim API the greybox needs (a read-only snapshot, the previous foe positions for A3 interpolation, event draining) is added by a Phase 4 sim ticket with GUT tests and deep review, never inside a greybox PR. A CI check rejects `godot/render` and `godot/ui` code that reaches into those fields (added with A1). Each step is built by Claude and read by the owner with the Remote scene tree open, then tweaked in the Inspector. A Godot MCP server that can launch the project, read its output and take screenshots (checked with Godot 4.7) lets Claude see the result without copying logs by hand.
 
 **Work breakdown**
 1. Procedural terrain built from the map, with the road drawn as a smooth ribbon: a curve through each route's cell centres (corner radius 0.5 cell on the centreline; the inner edge radius is `max(0, r - w/2)`, so a sharp inner corner is fine), up to 1.25 cells wide (`w`), with a dirt shader and worn, grassy edges. Two roads two cells apart (a detour) leave 0.75 of a plot cell visible between them, and a ribbon covers at most 0.125 of a neighbouring plot cell, so stone bases are at most 0.75 cell wide. Junctions are where ribbons meet and blend. The sim polyline stays the truth for movement, range and hits. Foes walk the smoothed centreline: their progress maps onto the curve by arc-length fraction per segment, and a render-only sideways offset, stable per foe (derived from the foe id, never random per frame) and bounded by `min((w - foe width) / 2, r - ε)` (below the corner radius, so a foe never loops backwards at a corner), spreads a crowd. GLB tiles are used for ground, edge dressing and scenery, not for road pieces. Also: Godot ground textures and shaders, scenery ring, spawn and Heartstone, dusk lighting and fog.
-2. `MultiMesh` foes with interpolation and baked vertex animation (spike it on the phone first), towers with levels and idle/fire animation, selection highlight and range ring.
+2. `MultiMesh` foes with interpolation and baked vertex animation (decided by the Scamp spike, #157), towers with levels and idle/fire animation, selection highlight and range ring.
 3. Camera: landscape framing, pinch, pan, clamps; tap picking to a cell (the cell decides, not the visible dirt; the plot highlight shows the whole cell over the ribbon edge).
 4. Control-node HUD: gold, lives, wave, build sheet, tower sheet, speed, pause, next-wave popup, auto-start, game over, landscape prompt.
 5. Effects (beams, arcs, rings, sparks, shells), reduced motion, audio after the first tap.
@@ -370,6 +370,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [ ] Every action is reachable in landscape; tap targets at least 44 px.
 - [ ] The road ribbon matches the sim routes by eye on the phone: foes stay on the dirt, hits land on visible foes at corners, and plot bases are not covered by the road.
 - [ ] The replay gate still passes.
+- [ ] (Interim, greybox) A1 to A6 play a full run in Godot with capsules and boxes, before any final art.
 
 ### Phase 6 · Art and ambience
 
@@ -432,7 +433,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript oracle and its tests are forgotten | The Vitest suite keeps running in CI while `src/` exists; fixtures stay in CI forever |
 | The greybox (Phase 5) builds on a sim that is still being ported | The greybox only reads snapshots and sends commands; sim API changes are caught by its tests and by CI; parity fixtures decide any disagreement |
-| Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses and towers, counted in the draw-call budget |
+| Animation for many foes is too slow on phones | Baked vertex animation on `MultiMesh` first; fall back to part animation and fewer animated instances; skeletons only for bosses (towers use part animation, counted in the draw-call budget) |
 | CC0 packs don't share a consistent style | Prefer the owner's Blender models; palette-texture recolour; drop models that still clash |
 | The smoothed road ribbon drifts from the sim polyline (foes look off the road or hits look wrong at corners) | The centreline stays inside its cell band (corner radius 0.5 cell, ribbon at most 1.25 cells wide); the sim polyline decides hits, range and distance; the Phase 5 gate checks it by eye on the phone |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
@@ -452,4 +453,4 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows.
 - [ ] Rename the game: Scrapline no longer fits the medieval setting, and the lore is being rewritten as fantasy medieval. Decide the name and which lore names stay before Phase 6 art and Phase 7 text.
 - [x] Meshy: the owner is on the paid premium plan (3,000 credits a month). Per Meshy's FAQ (checked 2026-10-10, not the full Terms of Service) a paid customer owns the assets, provided the inputs do not violate anyone's copyright; free-plan outputs are CC BY 4.0, so they are not used. Rules: generate only on the paid plan (the plan at generation time is what counts; the FAQ does not say what happens if the subscription lapses, so keep the source files); never prompt with or upload copyrighted characters, third-party images, brands or real people's likeness (our policy); record the source, licence, date and prompt or reference per model in `assets/CREDITS.md`. Re-check the terms if the plan changes.
-- [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Spike in Phase 5; fallback is part animation and fewer animated instances.
+- [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Decided by the Scamp spike (ticket #157); fallback is part animation and fewer animated instances.

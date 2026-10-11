@@ -31,12 +31,12 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 
 ## What to check
 
-1. **Ticket.** Compare the diff with the ticket's "Done when". List unmet or unverified items and any work from a later phase.
+1. **Ticket.** Compare the diff with the ticket's "Done when". List unmet or unverified items and any work from a later phase. The only allowed exceptions are the Phase 5 greybox (tickets under the Phase 5 epic) and Track B (the Scamp, #157); a greybox PR must not edit `godot/sim`, `fixtures/` or content numbers, and `godot/render` and `godot/ui` must not touch `rng`, `route_rng`, `pending` or fields of the game state.
 2. **Sim rules.** TypeScript (`src/sim`, the oracle): no DOM, `Math.random` or clock, including through `globalThis`. GDScript (`godot/sim`): no `Node`, `get_tree`, `Engine`, `Time` or `OS`, no `randf`/`randi`; integer division, 32-bit masking and rounding follow the parity rules in `CLAUDE.md`. No `Math.random()` or clock reads. Player actions only as commands. Game speed is more ticks, never a bigger tick.
 3. **Content.** Balance numbers live in `godot/content` (or `src/content` for the TypeScript game); no magic numbers in logic. Lore names are used.
 4. **Tests.** Sim and content changes have tests written first, with a fixed seed and no timing. A test that cannot fail is a finding.
 5. **Render and UI.** Typed GDScript. No hard-coded colours (the Theme only). Free nodes you remove; no allocation per frame; one `MultiMesh` per foe type. Tap targets of at least 44 px. Respect reduced motion.
-6. **Assets.** CC0, the owner's own, or Meshy-generated (paid plan only; the row says `Owned by the owner (Meshy paid plan)` with the date and the prompt or reference; flag any third-party IP, brand or likeness in the prompt; free-plan CC BY outputs are a blocker); each recorded in `assets/CREDITS.md`; GLB only, within the triangle budget.
+6. **Assets.** CC0, the owner's own, or Meshy-generated (paid plan only; the row says `Owned by the owner (Meshy paid plan)` with the date and the prompt or reference; flag any third-party IP, brand or likeness in the prompt; free-plan CC BY outputs are a blocker); each recorded in `assets/CREDITS.md`; GLB only, within the per-unit triangle budget (foe 800 to 1,200 with a baked 512 px map, tower 1,500 to 3,000, boss 3,000 to 5,000) and the frame caps in the plan.
 7. **Workflows.** Least-privilege `permissions`; no untrusted input (PR title, body, branch) in `run:` steps; deploy and release cannot skip `ci`; tag and branch guards are enforced.
 8. **Consistency.** Docs, scripts, ticket numbers and paths agree with each other and with the code.
 
