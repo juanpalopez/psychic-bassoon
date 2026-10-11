@@ -181,11 +181,7 @@ func test_a_tap_on_a_raised_socket_selects_that_socket() -> void:
 	for socket in game.map.sockets:
 		var top := BoardSpace.cell_to_world(socket.x, socket.y)
 		top.y = board.surface_height(socket)
-		var tap := InputEventMouseButton.new()
-		tap.button_index = MOUSE_BUTTON_LEFT
-		tap.pressed = true
-		tap.position = camera.unproject_position(top)
-		main._unhandled_input(tap)
+		_tap(main, camera.unproject_position(top))
 		assert_eq(main.selected_cell(), socket, "level %d" % game.map.elevation_at(socket))
 
 
@@ -193,11 +189,7 @@ func test_a_tap_off_the_board_says_where_to_tap() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
 	await get_tree().process_frame
-	var tap := InputEventMouseButton.new()
-	tap.button_index = MOUSE_BUTTON_LEFT
-	tap.pressed = true
-	tap.position = Vector2(-500.0, -500.0)
-	main._unhandled_input(tap)
+	_tap(main, Vector2(-500.0, -500.0))
 	assert_eq((main.get_node("Hud/Message") as Label).text, "Tap a socket")
 	assert_false((main.get_node("Hud/BuildMenu") as BuildMenu).visible)
 
@@ -214,6 +206,25 @@ func test_after_game_over_a_plot_does_not_open_the_menu() -> void:
 		(main.get_node("Hud/Message") as Label).text,
 		RejectText.of(GameEvent.RejectReason.GAME_OVER)
 	)
+
+
+## A tap: the button goes down and comes back up in the same place.
+func _tap(main: Node, position: Vector2) -> void:
+	for pressed in [true, false]:
+		var event := InputEventMouseButton.new()
+		event.button_index = MOUSE_BUTTON_LEFT
+		event.pressed = pressed
+		event.position = position
+		_deliver(main, event)
+
+
+## The scene sees a press in `_unhandled_input` (if no button took it) and every
+## release in `_input`, like the engine does.
+func _deliver(main: Node, event: InputEvent) -> void:
+	if event is InputEventMouseButton and not (event as InputEventMouseButton).pressed:
+		main._input(event)
+	else:
+		main._unhandled_input(event)
 
 
 func _first_socket(game: GameState) -> Vector2i:

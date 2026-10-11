@@ -12,14 +12,18 @@ const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
 const GAME_SPEED := 1
+## Pixels of drag that one unit of a trackpad pan gesture stands for.
+const PAN_GESTURE_PIXELS := 12.0
 
 var _game: GameState
 var _clock := Clock.new()
 var _selected := BoardSpace.NO_CELL
 var _message_left := 0.0
+var _gestures := Gestures.new()
 
 @onready var _board: Board = $Board
-@onready var _camera: Camera3D = ($CameraRig as CameraRig).camera()
+@onready var _rig: CameraRig = $CameraRig
+@onready var _camera: Camera3D = _rig.camera()
 @onready var _highlight: CellHighlight = $Highlight
 @onready var _towers: TowersView = $Towers
 @onready var _info: Label = $Hud/Info
@@ -33,6 +37,10 @@ func _ready() -> void:
 	_start(from_url if from_url is int else _board.map_seed)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
+	_gestures.tapped.connect(_on_tap)
+	_gestures.panned.connect(_rig.pan_by_pixels)
+	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
+	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.scraplineReady = true")
@@ -50,12 +58,62 @@ func _process(delta: float) -> void:
 	)
 
 
+## The first pointer is the mouse, or the first finger (Godot turns a touch into
+## mouse events too, and the build menu's buttons rely on that); extra fingers
+## arrive as touch events with an index of 1 or more. A drag pans, a pinch (or
+## the wheel, or a trackpad pinch) zooms and tilts, and only a tap selects.
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var cell := CellPicker.cell_at(_camera, event.position, _board.surface_height)
-		select_cell(cell)
-		if cell == BoardSpace.NO_CELL:
-			_show_message("Tap a socket")
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_WHEEL_UP and button.pressed:
+			_rig.zoom_steps(1.0)
+		elif button.button_index == MOUSE_BUTTON_WHEEL_DOWN and button.pressed:
+			_rig.zoom_steps(-1.0)
+		elif button.button_index == MOUSE_BUTTON_LEFT and button.pressed:
+			_gestures.press(0, button.position)
+	elif event is InputEventMouseMotion:
+		var motion := event as InputEventMouseMotion
+		if motion.button_mask & MOUSE_BUTTON_MASK_LEFT:
+			_gestures.move(0, motion.position)
+	elif event is InputEventScreenTouch and (event as InputEventScreenTouch).index >= 1:
+		var touch := event as InputEventScreenTouch
+		if touch.pressed:
+			_gestures.press(touch.index, touch.position)
+	elif event is InputEventScreenDrag and (event as InputEventScreenDrag).index >= 1:
+		var drag := event as InputEventScreenDrag
+		_gestures.move(drag.index, drag.position)
+	elif event is InputEventMagnifyGesture:
+		_rig.zoom_by((event as InputEventMagnifyGesture).factor)
+	elif event is InputEventPanGesture:
+		# a two-finger trackpad swipe moves the scene; it springs back if it overshoots
+		_rig.pan_by_pixels((event as InputEventPanGesture).delta * PAN_GESTURE_PIXELS)
+		_rig.release_pan()
+
+
+## A release is safe for the tracker to see even when a button took it (it only
+## acts on a pointer it saw go down), so letting go over the menu cannot leave a
+## finger stuck in the tracker.
+func _input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		var button := event as InputEventMouseButton
+		if button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
+			_gestures.release(0, button.position)
+	elif event is InputEventScreenTouch:
+		var touch := event as InputEventScreenTouch
+		if touch.index >= 1 and not touch.pressed:
+			_gestures.release(touch.index, touch.position)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
+		_gestures.cancel()
+
+
+func _on_tap(position: Vector2) -> void:
+	var cell := CellPicker.cell_at(_camera, position, _board.surface_height)
+	select_cell(cell)
+	if cell == BoardSpace.NO_CELL:
+		_show_message("Tap a socket")
 
 
 ## The game being played (read it; change it only with commands).
