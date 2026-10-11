@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=11 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://render/board.gd" id="2_board"]
@@ -7,6 +7,8 @@
 [ext_resource type="Script" path="res://render/towers_view.gd" id="5_towers"]
 [ext_resource type="Script" path="res://render/foes_view.gd" id="7_foes"]
 [ext_resource type="Script" path="res://ui/build_menu.gd" id="6_menu"]
+[ext_resource type="Script" path="res://render/range_ring.gd" id="8_ring"]
+[ext_resource type="Script" path="res://ui/tower_panel.gd" id="9_panel"]
 
 [sub_resource type="Environment" id="Environment_dusk"]
 background_mode = 1
@@ -34,6 +36,9 @@ script = ExtResource("3_rig")
 
 [node name="Highlight" type="Node3D" parent="."]
 script = ExtResource("4_highlight")
+
+[node name="RangeRing" type="MeshInstance3D" parent="."]
+script = ExtResource("8_ring")
 
 [node name="Towers" type="Node3D" parent="."]
 script = ExtResource("5_towers")
@@ -95,3 +100,16 @@ offset_bottom = 210.0
 grow_horizontal = 0
 grow_vertical = 2
 script = ExtResource("6_menu")
+
+[node name="TowerPanel" type="PanelContainer" parent="Hud"]
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -210.0
+offset_right = -20.0
+offset_bottom = 210.0
+grow_horizontal = 0
+grow_vertical = 2
+script = ExtResource("9_panel")

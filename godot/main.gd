@@ -33,6 +33,8 @@ var _gestures := Gestures.new()
 @onready var _info: Label = $Hud/Info
 @onready var _message: Label = $Hud/Message
 @onready var _menu: BuildMenu = $Hud/BuildMenu
+@onready var _panel: TowerPanel = $Hud/TowerPanel
+@onready var _ring: RangeRing = $RangeRing
 @onready var _next_seed: Button = $Hud/NextSeed
 
 
@@ -41,6 +43,8 @@ func _ready() -> void:
 	_start(from_url if from_url is int else _board.map_seed)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
+	_panel.upgrade_pressed.connect(_on_upgrade)
+	_panel.sell_pressed.connect(_on_sell)
 	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
 	_gestures.tapped.connect(_on_tap)
 	_gestures.panned.connect(_rig.pan_by_pixels)
@@ -57,6 +61,7 @@ func _process(delta: float) -> void:
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
 	_update_launch_button()
 	_menu.set_buttons(_game.buttons)
+	_refresh_panel()
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_info.text = (
@@ -144,6 +149,8 @@ func selected_cell() -> Vector2i:
 func select_cell(cell: Vector2i) -> void:
 	_selected = cell
 	_menu.close()
+	_panel.close()
+	_ring.hide_range()
 	if cell == BoardSpace.NO_CELL:
 		_highlight.hide_cell()
 		return
@@ -158,8 +165,9 @@ func select_cell(cell: Vector2i) -> void:
 		return
 	var tower := _tower_on(cell)
 	if tower != null:
-		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
-		_show_message("%s here" % tower.type)
+		_highlight.show_cell(cell, height, FREE_COLOUR)
+		_panel.show_tower(tower, _game.buttons)
+		_show_ring(tower)
 		return
 	if _game.over:
 		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
@@ -185,6 +193,36 @@ func _tower_on(cell: Vector2i) -> Tower:
 		if tower.col == cell.x and tower.row == cell.y:
 			return tower
 	return null
+
+
+## Shows the range ring for a tower, at the top of its tile.
+func _show_ring(tower: Tower) -> void:
+	var cell := Vector2i(tower.col, tower.row)
+	var at := BoardSpace.cell_to_world(tower.col, tower.row)
+	at.y = _board.surface_height(cell)
+	_ring.show_range(at, TowerInfo.effective_range(_game.map, tower))
+
+
+## Keeps the panel and ring true after a tick: an upgrade grows the range, and a
+## tower gone (sold) closes both.
+func _refresh_panel() -> void:
+	var open := _panel.tower()
+	if open == null:
+		return
+	if not _game.towers.has(open):
+		select_cell(BoardSpace.NO_CELL)
+		return
+	_panel.set_buttons(_game.buttons)
+	_show_ring(open)
+
+
+func _on_upgrade(tower_id: int) -> void:
+	Game.submit(_game, Command.upgrade(tower_id))
+
+
+func _on_sell(tower_id: int) -> void:
+	Game.submit(_game, Command.sell(tower_id))
+	select_cell(BoardSpace.NO_CELL)
 
 
 func _on_tower_chosen(tower: String) -> void:
