@@ -148,7 +148,7 @@ func test_building_without_the_buttons_shows_the_rejection() -> void:
 	game.buttons = 0
 	# the menu disables the buttons itself, so send the command the way a stale
 	# menu could
-	Game.submit(game, Command.build("ballista", main.selected_cell().x, main.selected_cell().y))
+	Game.submit(game, Command.build("spoolGuard", main.selected_cell().x, main.selected_cell().y))
 	main._process(0.05)
 	assert_eq(game.towers.size(), 0)
 	assert_string_contains(

@@ -49,7 +49,7 @@ The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Ho
 
 ### Mapping from the ported sim
 
-The ids in the code are stable keys; the GDD renames what the player sees and adds content. Until the combat port, `godot/content` still holds the old four tower ids; they change to the GDD's when the towers are ported (see Phase 4).
+The ids in the code are stable keys; the GDD renames what the player sees and adds content. `godot/content` holds the GDD's three combat tower ids (`spoolGuard`, `thimbleMortar`, `prismSpire`); the Guard Tent comes in Phase 7.
 
 | Ported or prototype concept | In the GDD |
 | --- | --- |

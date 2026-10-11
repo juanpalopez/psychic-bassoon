@@ -5,7 +5,7 @@ extends GutTest
 const SCENE := preload("res://render/tower_view.tscn")
 
 
-func _tower(level: int, type: String = "ballista") -> Tower:
+func _tower(level: int, type: String = "spoolGuard") -> Tower:
 	var tower := Tower.new()
 	tower.id = 4
 	tower.type = type
@@ -15,7 +15,7 @@ func _tower(level: int, type: String = "ballista") -> Tower:
 	return tower
 
 
-func _view(level: int, top: float = 0.3, type: String = "ballista") -> TowerView:
+func _view(level: int, top: float = 0.3, type: String = "spoolGuard") -> TowerView:
 	var view := SCENE.instantiate() as TowerView
 	add_child_autofree(view)
 	view.setup(_tower(level, type), TowerLooks.for_type(type), top)
@@ -39,7 +39,7 @@ func test_it_stands_on_its_cell_at_the_height_of_the_tile() -> void:
 
 
 func test_the_body_grows_with_each_tier_by_the_looks_numbers() -> void:
-	var look := TowerLooks.for_type("ballista")
+	var look := TowerLooks.for_type("spoolGuard")
 	for level in 3:
 		var view := _view(level)
 		assert_almost_eq(
@@ -53,12 +53,12 @@ func test_each_tier_adds_a_visible_pip() -> void:
 
 
 func test_the_body_is_coloured_by_the_looks_colour() -> void:
-	for type in ["ballista", "catapult", "frostSpire", "stormSpire"]:
+	for type in ["spoolGuard", "thimbleMortar", "prismSpire"]:
 		var view := _view(0, 0.3, type)
 		assert_eq(view.body_colour(), TowerLooks.for_type(type).body_colour, type)
 
 
 func test_setting_up_again_rebuilds_the_pips_not_adds_to_them() -> void:
 	var view := _view(0)
-	view.setup(_tower(2), TowerLooks.for_type("ballista"), 0.3)
+	view.setup(_tower(2), TowerLooks.for_type("spoolGuard"), 0.3)
 	assert_eq(view.pip_count(), 3)

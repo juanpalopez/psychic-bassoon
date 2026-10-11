@@ -29,13 +29,13 @@ func test_each_look_has_its_own_colour_and_sensible_sizes() -> void:
 		assert_lt(look.foot, 1.0, id)
 		assert_gt(look.base_height, 0.3, id)
 		assert_gt(look.height_per_level, 0.0, id)
-	assert_eq(colours.size(), TOWERS.TOWER_IDS.size(), "four colours, none repeated")
+	assert_eq(colours.size(), TOWERS.TOWER_IDS.size(), "three colours, none repeated")
 
 
 func test_a_look_holds_no_game_numbers() -> void:
 	# the properties of a look are only visual
 	var names := []
-	for property in TowerLooks.for_type("ballista").get_property_list():
+	for property in TowerLooks.for_type("spoolGuard").get_property_list():
 		if property.usage & PROPERTY_USAGE_SCRIPT_VARIABLE:
 			names.append(property.name)
 	for forbidden in ["cost", "damage", "range", "rate", "splash", "slow", "chain"]:

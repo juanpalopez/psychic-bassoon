@@ -1,49 +1,43 @@
-## Tower definitions ported from the 2D prototype's `DEF` table (the
-## TypeScript content in `src/content/towers.ts`). Data only.
+## The towers of the GDD's combat slice, as numbers. The GDD gives none, so they
+## start from the prototype's table (`src/content/towers.ts`): the Spool Guard is
+## its Ballista, the Thimble Mortar its Catapult, and the Prism Spire takes the
+## Storm Spire's damage and rate as damage per second. The prototype's Frost Spire
+## and Storm Spire have no GDD counterpart and are dropped; the Guard Tent comes
+## in Phase 7. Data only; the owner tunes the numbers.
 ##
-## Level-indexed stats: index 0 is level 1, index 2 is level 3. The ids are
-## the stable keys shared with the fixtures.
+## Level-indexed stats: index 0 is level 1, index 2 is level 3.
 extends RefCounted
 
-const TOWER_IDS: Array[String] = ["ballista", "catapult", "frostSpire", "stormSpire"]
+const TOWER_IDS: Array[String] = ["spoolGuard", "thimbleMortar", "prismSpire"]
 
-## Per tower: `name`, `cost`, `damage`, `range`, `rate` (shots per second) and,
-## for some, `splash` (Catapult blast radius, cells), `slow` (Frost Spire speed
-## reduction, 0..1) and `chain` (Storm Spire number of targets).
+## Per tower: `name`, `cost`, `damage` (per shot, or per second for a beam),
+## `range` (cells) and, for a tower that fires shots, `rate` (shots per second).
+## The Thimble Mortar also has `splash` (blast radius, cells). The Prism Spire is
+## a continuous beam: `beam` is true and it has no `rate`.
 const DEFS := {
-	"ballista":
+	"spoolGuard":
 	{
-		"name": "Ballista",
+		"name": "Spool Guard",
 		"cost": [50, 60, 110],
 		"damage": [9, 15, 26],
 		"range": [2.3, 2.6, 3.0],
 		"rate": [3.0, 3.6, 4.5],
 	},
-	"catapult":
+	"thimbleMortar":
 	{
-		"name": "Catapult",
+		"name": "Thimble Mortar",
 		"cost": [90, 90, 160],
 		"damage": [32, 56, 96],
 		"range": [2.8, 3.1, 3.5],
 		"rate": [0.7, 0.8, 0.95],
 		"splash": [0.95, 1.15, 1.35],
 	},
-	"frostSpire":
+	"prismSpire":
 	{
-		"name": "Frost Spire",
-		"cost": [70, 70, 120],
-		"damage": [3, 5, 9],
-		"range": [1.7, 2.0, 2.4],
-		"rate": [1.0, 1.15, 1.35],
-		"slow": [0.35, 0.45, 0.55],
-	},
-	"stormSpire":
-	{
-		"name": "Storm Spire",
+		"name": "Prism Spire",
 		"cost": [110, 100, 180],
-		"damage": [18, 30, 50],
+		"damage": [16, 33, 65],
 		"range": [2.3, 2.6, 2.9],
-		"rate": [0.9, 1.1, 1.3],
-		"chain": [3, 4, 6],
+		"beam": true,
 	},
 }

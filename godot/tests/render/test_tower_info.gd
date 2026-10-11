@@ -17,7 +17,7 @@ func test_the_range_is_the_levels_base_range() -> void:
 		if map.elevation_at(cell) == 0:
 			level_0_socket = cell
 			break
-	var tower := _tower("ballista", 0)
+	var tower := _tower("spoolGuard", 0)
 	tower.col = level_0_socket.x
 	tower.row = level_0_socket.y
 	assert_almost_eq(TowerInfo.effective_range(map, tower), 2.3, 1e-9)
@@ -31,7 +31,7 @@ func test_a_level_2_socket_reaches_15_percent_further() -> void:
 		var map := MapGen.generate(map_seed)
 		for cell in map.sockets:
 			if map.elevation_at(cell) == 2:
-				var tower := _tower("catapult", 1)
+				var tower := _tower("thimbleMortar", 1)
 				tower.col = cell.x
 				tower.row = cell.y
 				# a level 2 Catapult reaches 3.1 cells, times 1.15
@@ -44,13 +44,13 @@ func test_a_level_2_socket_reaches_15_percent_further() -> void:
 
 
 func test_the_next_upgrade_cost_and_none_at_the_top() -> void:
-	assert_eq(TowerInfo.next_cost(_tower("ballista", 0)), 60)
-	assert_eq(TowerInfo.next_cost(_tower("ballista", 1)), 110)
-	assert_eq(TowerInfo.next_cost(_tower("ballista", 2)), -1)
+	assert_eq(TowerInfo.next_cost(_tower("spoolGuard", 0)), 60)
+	assert_eq(TowerInfo.next_cost(_tower("spoolGuard", 1)), 110)
+	assert_eq(TowerInfo.next_cost(_tower("spoolGuard", 2)), -1)
 
 
 func test_the_refund_is_70_percent_of_what_was_spent_rounded_down() -> void:
-	assert_eq(TowerInfo.refund(_tower("ballista", 0, 50)), 35)
+	assert_eq(TowerInfo.refund(_tower("spoolGuard", 0, 50)), 35)
 	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so 62, like the sim
-	assert_eq(TowerInfo.refund(_tower("catapult", 0, 90)), 62)
-	assert_eq(TowerInfo.refund(_tower("ballista", 1, 110)), 77)
+	assert_eq(TowerInfo.refund(_tower("thimbleMortar", 0, 90)), 62)
+	assert_eq(TowerInfo.refund(_tower("spoolGuard", 1, 110)), 77)

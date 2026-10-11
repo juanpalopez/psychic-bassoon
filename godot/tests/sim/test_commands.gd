@@ -19,13 +19,13 @@ func assert_rejected_by(events: Array[GameEvent], command: Command, reason: REAS
 func test_build_places_a_level_1_tower_and_charges_its_cost() -> void:
 	var game := Game.create(SEED)
 	var cell := GameTestKit.socket(game)
-	var events := GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
-	var cost: int = TOWERS.DEFS.ballista.cost[0]
+	var events := GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
+	var cost: int = TOWERS.DEFS.spoolGuard.cost[0]
 	assert_eq(game.buttons, RULES.START_BUTTONS - cost)
 	assert_eq(game.towers.size(), 1)
 	var tower := game.towers[0]
 	assert_eq(tower.id, 0)
-	assert_eq(tower.type, "ballista")
+	assert_eq(tower.type, "spoolGuard")
 	assert_eq(tower.level, 0)
 	assert_eq(Vector2i(tower.col, tower.row), cell)
 	assert_eq(tower.invested, cost)
@@ -39,8 +39,8 @@ func test_each_tower_gets_its_own_id() -> void:
 	GameTestKit.run(
 		game,
 		[
-			GameTestKit.build_at("ballista", GameTestKit.socket(game, 0)),
-			GameTestKit.build_at("ballista", GameTestKit.socket(game, 1))
+			GameTestKit.build_at("spoolGuard", GameTestKit.socket(game, 0)),
+			GameTestKit.build_at("spoolGuard", GameTestKit.socket(game, 1))
 		]
 	)
 	assert_eq([game.towers[0].id, game.towers[1].id], [0, 1])
@@ -48,7 +48,7 @@ func test_each_tower_gets_its_own_id() -> void:
 
 func test_build_on_the_path_is_rejected() -> void:
 	var game := Game.create(SEED)
-	var command := GameTestKit.build_at("ballista", game.map.path[3])
+	var command := GameTestKit.build_at("spoolGuard", game.map.path[3])
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
 	assert_eq(game.buttons, RULES.START_BUTTONS)
 
@@ -68,24 +68,24 @@ func test_build_off_the_board_is_rejected() -> void:
 		Vector2i(0, MAP_RULES.GRID_ROWS),
 		Vector2i(0, -1)
 	]:
-		var command := GameTestKit.build_at("ballista", cell)
+		var command := GameTestKit.build_at("spoolGuard", cell)
 		assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
 
 
 func test_build_on_an_occupied_plot_is_rejected() -> void:
 	var game := Game.create(SEED)
 	var cell := GameTestKit.socket(game)
-	GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
-	var command := GameTestKit.build_at("ballista", cell)
+	GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
+	var command := GameTestKit.build_at("spoolGuard", cell)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.OCCUPIED)
 	assert_eq(game.towers.size(), 1)
 
 
 func test_build_needs_the_buttons_and_allows_an_exact_fit() -> void:
 	var game := Game.create(SEED)
-	var cost: int = TOWERS.DEFS.stormSpire.cost[0]
+	var cost: int = TOWERS.DEFS.prismSpire.cost[0]
 	game.buttons = cost - 1
-	var command := GameTestKit.build_at("stormSpire", GameTestKit.socket(game))
+	var command := GameTestKit.build_at("prismSpire", GameTestKit.socket(game))
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_BUTTONS)
 	game.buttons = cost
 	GameTestKit.run(game, [command])
@@ -101,9 +101,9 @@ func _with_tower(type: String) -> GameState:
 
 
 func test_upgrade_raises_the_level_and_charges_the_next_cost() -> void:
-	var game := _with_tower("ballista")
+	var game := _with_tower("spoolGuard")
 	var events := GameTestKit.run(game, [Command.upgrade(0)])
-	var costs: Array = TOWERS.DEFS.ballista.cost
+	var costs: Array = TOWERS.DEFS.spoolGuard.cost
 	assert_eq(game.buttons, 1000 - int(costs[1]))
 	assert_eq(game.towers[0].level, 1)
 	assert_eq(game.towers[0].invested, int(costs[0]) + int(costs[1]))
@@ -113,7 +113,7 @@ func test_upgrade_raises_the_level_and_charges_the_next_cost() -> void:
 
 
 func test_upgrade_stops_at_level_3() -> void:
-	var game := _with_tower("ballista")
+	var game := _with_tower("spoolGuard")
 	GameTestKit.run(game, [Command.upgrade(0)])
 	GameTestKit.run(game, [Command.upgrade(0)])
 	assert_eq(game.towers[0].level, 2)
@@ -122,8 +122,8 @@ func test_upgrade_stops_at_level_3() -> void:
 
 
 func test_upgrade_needs_the_buttons() -> void:
-	var game := _with_tower("ballista")
-	var costs: Array = TOWERS.DEFS.ballista.cost
+	var game := _with_tower("spoolGuard")
+	var costs: Array = TOWERS.DEFS.spoolGuard.cost
 	game.buttons = int(costs[1]) - 1
 	var command := Command.upgrade(0)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_ENOUGH_BUTTONS)
@@ -139,10 +139,10 @@ func test_upgrade_of_an_unknown_tower_is_rejected() -> void:
 func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 	var game := Game.create(SEED)
 	var cell := GameTestKit.socket(game)
-	GameTestKit.run(game, [GameTestKit.build_at("ballista", cell)])
+	GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
 	game.buttons = 1000
 	GameTestKit.run(game, [Command.upgrade(0)])
-	var costs: Array = TOWERS.DEFS.ballista.cost
+	var costs: Array = TOWERS.DEFS.spoolGuard.cost
 	var invested := int(costs[0]) + int(costs[1])
 	var events := GameTestKit.run(game, [Command.sell(0)])
 	var refund := 77  # 70% of 50 + 60 Buttons, written out so the rate is checked too
@@ -152,14 +152,14 @@ func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 	assert_eq(events.size(), 1)
 	assert_eq(events[0].kind, KIND.TOWER_SOLD)
 	assert_eq([events[0].tower_id, events[0].refund], [0, refund])
-	GameTestKit.run(game, [GameTestKit.build_at("catapult", cell)])
+	GameTestKit.run(game, [GameTestKit.build_at("thimbleMortar", cell)])
 	assert_eq(game.towers.size(), 1)
 
 
 func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
 	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so the refund is 62, not 63
 	var game := Game.create(SEED)
-	GameTestKit.run(game, [GameTestKit.build_at("catapult", GameTestKit.socket(game))])
+	GameTestKit.run(game, [GameTestKit.build_at("thimbleMortar", GameTestKit.socket(game))])
 	game.buttons = 0
 	GameTestKit.run(game, [Command.sell(0)])
 	assert_eq(game.buttons, 62)

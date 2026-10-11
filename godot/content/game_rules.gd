@@ -21,10 +21,3 @@ const EARLY_CALL_PER_WAVE := 2
 ## Clearing a wave pays `WAVE_CLEAR_BASE + wave * WAVE_CLEAR_PER_WAVE`.
 const WAVE_CLEAR_BASE := 15
 const WAVE_CLEAR_PER_WAVE := 2
-## Seconds a Frost Spire slow lasts after the last pulse.
-const FROST_SLOW_SECONDS := 1.4
-## Catapult shell speed, cells per second.
-const ROCKET_SPEED := 5.5
-## Storm Spire: reach to the next target and damage kept per jump.
-const ARC_CHAIN_RADIUS := 1.6
-const ARC_CHAIN_FALLOFF := 0.8
