@@ -9,6 +9,12 @@ const ROWS := 16
 ## centre: the nearest that a corner-centred 2x2 block allows is 1.58 cells, the next
 ## is 2.12 (a diagonal), so 1.6 means beside the road.
 const BESIDE := 1.6
+## Seeds whose roads, with a detour, offer a block that reaches 3 road cells only
+## through diagonal corners (nearest road cell 2.12 away) when touching the road is
+## not required.
+const DIAGONAL_ONLY_SEEDS: Array[int] = [
+	404, 491, 1661, 1718, 1940, 2800, 3325, 3336, 3427, 3472, 4898
+]
 
 var _seeds: Array[int] = []
 
@@ -67,7 +73,10 @@ func test_every_socket_gives_a_level_1_spool_guard_some_road_to_shoot_at() -> vo
 
 
 func test_a_detour_does_not_let_a_block_drift_from_the_road_either() -> void:
+	var seeds: Array[int] = DIAGONAL_ONLY_SEEDS.duplicate()
 	for map_seed in range(1, 60):
+		seeds.append(map_seed)
+	for map_seed in seeds:
 		var map := MapGen.generate(map_seed, COLS, ROWS, true, 2)
 		var road := _road_centres(map)
 		for anchor in map.sockets:

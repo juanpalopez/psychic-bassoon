@@ -48,8 +48,9 @@ static func place(map: GameMap) -> bool:
 
 
 ## Anchors whose whole block is on the board, off the road and off the
-## Heartstone's footprint, with a stretch of road in reach of the block's centre
-## (a single cell: within `SOCKET_REACH` of the road), in reading order.
+## Heartstone's footprint, touching the road and with a stretch of it in reach
+## of the block's centre (a single cell: within `SOCKET_REACH` of the road), in
+## reading order.
 static func _candidates(map: GameMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for row in range(0, map.rows - map.footprint + 1):
@@ -79,23 +80,29 @@ static func _block_near_road(map: GameMap, col: int, row: int) -> bool:
 	return false
 
 
-## True when the block anchored at (col, row) has a stretch of road to shoot at:
-## at least `SOCKET_MIN_ROAD_COVERAGE` road cells within `SOCKET_COVERAGE_REACH`
-## of the block's centre.
+## True when the block anchored at (col, row) touches the road and has a stretch
+## of it to shoot at: a road cell's centre within `SOCKET_BLOCK_TOUCH_DISTANCE` of
+## the block's centre, and at least `SOCKET_MIN_ROAD_COVERAGE` road cells within
+## `SOCKET_COVERAGE_REACH` of it.
 static func _block_centre_near_road(map: GameMap, col: int, row: int) -> bool:
 	var centre := map.socket_centre(Vector2i(col, row))
 	var reach: float = RULES.SOCKET_COVERAGE_REACH
+	var touch: float = RULES.SOCKET_BLOCK_TOUCH_DISTANCE
 	var span := int(ceil(reach)) + map.footprint
 	var covered := 0
+	var touching := false
 	for y in range(maxi(0, row - span), mini(map.rows, row + map.footprint + span)):
 		for x in range(maxi(0, col - span), mini(map.cols, col + map.footprint + span)):
 			if map.tiles[y][x] != GameMap.Tile.ROAD:
 				continue
 			var dx := float(x) + RULES.CELL_CENTRE - centre.x
 			var dy := float(y) + RULES.CELL_CENTRE - centre.y
-			if dx * dx + dy * dy <= reach * reach:
+			var squared := dx * dx + dy * dy
+			if squared <= reach * reach:
 				covered += 1
-	return covered >= RULES.SOCKET_MIN_ROAD_COVERAGE
+			if squared <= touch * touch:
+				touching = true
+	return touching and covered >= RULES.SOCKET_MIN_ROAD_COVERAGE
 
 
 static func _road_within_reach(map: GameMap, col: int, row: int) -> bool:
