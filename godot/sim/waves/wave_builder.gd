@@ -35,7 +35,7 @@ static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 
 ## Lists a wave from the rolls of its foes (`count_for(wave)` of them, one per
 ## foe, each from 0 up to 1): a roll above the orc threshold makes a heavy foe in
-## a normal wave from `ORC_FROM_WAVE` on; swarm waves ignore the rolls.
+## a wave from `ORC_FROM_WAVE` on (a swarm has a lower threshold, so more orcs).
 static func compose(wave: int, rolls: Array[float]) -> Array[SpawnOrder]:
 	var boss := wave % WAVES.BOSS_EVERY == 0
 	var swarm := is_swarm(wave)
@@ -45,7 +45,7 @@ static func compose(wave: int, rolls: Array[float]) -> Array[SpawnOrder]:
 		- minf(WAVES.ORC_THRESHOLD_CAP, float(wave) * WAVES.ORC_THRESHOLD_PER_WAVE)
 	)
 	if swarm:
-		orc_threshold = WAVES.SWARM_ORC_THRESHOLD
+		orc_threshold -= WAVES.SWARM_ORC_THRESHOLD_DROP
 	var orders: Array[SpawnOrder] = []
 	for roll in rolls:
 		var type: String = WAVES.FILLER_FOE

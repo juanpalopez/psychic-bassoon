@@ -54,3 +54,24 @@
   mortarHeavy  cleared [9, 10, 14, 18, 18, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 11, 15] heart 7.2 buttons_left 337
   prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 18, 19] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 19] heart 0.4 buttons_left 45
   mix          cleared [9, 14, 14, 14, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15, 15, 15, 20, 20, 20] heart 5.4 buttons_left 364
+# Second round: the orc threshold of a swarm is the normal one minus SWARM_ORC_THRESHOLD_DROP (count x1.5, goblin hp x2.0, reward x0.5 unless named). {} is drop 0.05.
+{}
+  spoolOnly    cleared [14, 14, 14, 14, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 19, 20] heart 7.1 buttons_left 1107
+  mortarHeavy  cleared [9, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 8.8 buttons_left 463
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 18, 18, 19, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 19] heart 4.9 buttons_left 190
+  mix          cleared [14, 14, 14, 14, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 20] heart 7.5 buttons_left 459
+{"waves:SWARM_ORC_THRESHOLD_DROP": 0.1}
+  spoolOnly    cleared [14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15] heart 6.6 buttons_left 985
+  mortarHeavy  cleared [9, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15] heart 8.7 buttons_left 498
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 19] heart 3.9 buttons_left 204
+  mix          cleared [14, 14, 14, 14, 14, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 20] heart 6.9 buttons_left 510
+{"waves:SWARM_ORC_THRESHOLD_DROP": 0.15}
+  spoolOnly    cleared [6, 14, 14, 14, 14, 14, 14, 18, 19, 19, 19, 20, 20, 20, 20, 20] died_on [7, 15, 15, 15, 15, 15, 15, 20, 20] heart 6.0 buttons_left 992
+  mortarHeavy  cleared [9, 14, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15, 20, 20] heart 8.3 buttons_left 499
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 19, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] heart 3.1 buttons_left 157
+  mix          cleared [14, 14, 14, 14, 14, 14, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 20] heart 6.2 buttons_left 489
+{"waves:SWARM_ORC_THRESHOLD_DROP": 0.1, "waves:SWARM_HP_MULTIPLIER": 2.5}
+  spoolOnly    cleared [9, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15, 15, 15, 15, 15, 15] heart 6.6 buttons_left 976
+  mortarHeavy  cleared [9, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15] heart 8.6 buttons_left 495
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 19, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] heart 2.8 buttons_left 187
+  mix          cleared [14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15] heart 6.9 buttons_left 428

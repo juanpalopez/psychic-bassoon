@@ -1,5 +1,6 @@
+# Chosen set (SWARM_ORC_THRESHOLD_DROP 0.1), seeds 1 to 16, 20 waves, from scripts/balance_sweep.py
 {}
-  spoolOnly    cleared [18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 20, 20, 20] heart 9.1 buttons_left 1405
-  mortarHeavy  cleared [9, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 9.0 buttons_left 377
-  prismHeavy   cleared [14, 16, 17, 18, 18, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [15, 17, 18, 19, 19, 19, 20, 20] heart 4.7 buttons_left 216
-  mix          cleared [18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20, 20] heart 10.3 buttons_left 594
+  spoolOnly    cleared [14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15] heart 6.6 buttons_left 985
+  mortarHeavy  cleared [9, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15] heart 8.7 buttons_left 498
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 19] heart 3.9 buttons_left 204
+  mix          cleared [14, 14, 14, 14, 14, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 20] heart 6.9 buttons_left 510

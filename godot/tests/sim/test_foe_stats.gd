@@ -41,6 +41,14 @@ func test_swarm_goblins_are_tougher_and_pay_less() -> void:
 	assert_eq(FoeStats.for_wave("corrugatedOrc", 5).hp, Rounding.half_up(130.0 * 2.44))
 
 
+func test_wave_15_swarm_goblin() -> void:
+	# n = 14: hp scale 1 + 2.8 + 7.84 = 11.64, so 20 * 11.64 = 232.8; doubled 465.6
+	var stats := FoeStats.for_wave("scrapGoblin", 15)
+	assert_eq(stats.hp, 466)
+	# 4 * (1 + 0.04 * 14) = 6.24; halved 3.12
+	assert_eq(stats.reward, 3)
+
+
 func test_wave_10_goblin() -> void:
 	# n = 9: hp scale 1 + 0.2 * 9 + 0.04 * 81 = 6.04, so 20 * 6.04 = 120.8
 	var stats := FoeStats.for_wave("scrapGoblin", 10)

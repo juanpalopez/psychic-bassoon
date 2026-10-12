@@ -26,6 +26,9 @@ func test_a_swarm_has_the_swarm_multiplier_times_the_usual_foes() -> void:
 			WaveBuilder.count_for(wave), Rounding.half_up(usual * WAVES.SWARM_COUNT_MULTIPLIER)
 		)
 		assert_gt(WaveBuilder.count_for(wave), Rounding.half_up(usual))
+	# by hand with the multiplier 1.5: 13 * 1.5 = 19.5 -> 20 and 27 * 1.5 = 40.5 -> 41
+	assert_eq(WaveBuilder.count_for(5), 20)
+	assert_eq(WaveBuilder.count_for(15), 41)
 
 
 func test_other_waves_and_boss_waves_keep_the_usual_count() -> void:
@@ -36,8 +39,12 @@ func test_other_waves_and_boss_waves_keep_the_usual_count() -> void:
 
 func test_a_swarm_wave_is_goblins_with_a_few_orcs_by_its_own_threshold() -> void:
 	for wave in [5, 15]:
-		for order in WaveBuilder.compose(wave, _rolls(wave, WAVES.SWARM_ORC_THRESHOLD)):
+		# the normal threshold 0.82 - 0.01 * wave, lowered for a swarm
+		var threshold := 0.82 - 0.01 * float(wave) - WAVES.SWARM_ORC_THRESHOLD_DROP
+		for order in WaveBuilder.compose(wave, _rolls(wave, threshold)):
 			assert_eq(order.type, "scrapGoblin", "a roll at the threshold is a goblin")
+		for order in WaveBuilder.compose(wave, _rolls(wave, threshold + 0.001)):
+			assert_eq(order.type, "corrugatedOrc", "a roll just above it is an orc")
 		var orders := WaveBuilder.compose(wave, _rolls(wave, 0.999))
 		for order in orders:
 			assert_eq(order.type, "corrugatedOrc", "a roll above it is an orc")
