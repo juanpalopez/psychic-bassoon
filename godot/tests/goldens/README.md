@@ -5,5 +5,11 @@ Regression data written by the GDScript sim itself, not by the TypeScript sim (w
 | File | Written by | Holds |
 | --- | --- | --- |
 | `sockets.json` | `godot --headless --path godot -s tools/write_sockets_golden.gd` | for 8 seeds, the sockets in reading order and their elevation levels |
+| `socket_blocks.json` | `godot --headless --path godot -s tools/write_socket_blocks_golden.gd` | for 8 seeds on the 22 by 16 board, the 2x2 socket anchors, their levels and the Heartstone's footprint |
+| `replays.json` | `godot --headless --path godot -s tools/write_replays_golden.gd` | 5 whole games played by the scripted bot (won, lost and stopped runs, each strategy): the seed, the commands with their ticks, a checkpoint every 20 seconds of play and the final state |
 
-Everything here is whole numbers. Float goldens (from the combat port on) carry their IEEE-754 bits as hex strings.
+## How a replay golden works
+
+A checkpoint is taken at the start of a tick, before that tick's commands. It holds a few readable numbers (tick, wave, Buttons, Heartstone health, foe and tower counts), the SHA-256 of the whole state and a running SHA-256 of every event so far, with every float turned into its IEEE-754 bits first, so a change in the last bit of any foe's position shows up. `tests/sim/test_replay.gd` checks two things: the bot, played again from the seed, gives the recorded commands and checkpoints, and the recorded commands alone, fed to a fresh game, give the same checkpoints. When a checkpoint differs, the readable numbers say roughly where the games diverged; then replay with a snapshot of the full state (`GameTestKit.snapshot`) around that tick.
+
+Whole numbers and strings are written as they are; floats are never written, only inside the hash.
