@@ -171,3 +171,27 @@ func test_blocks_do_not_change_the_road() -> void:
 		var blocks := _blocks(map_seed)
 		assert_eq(blocks.path, plain.path)
 		assert_eq(blocks.tiles, plain.tiles)
+
+
+func test_a_board_that_comes_up_short_of_blocks_is_drawn_again() -> void:
+	# these seeds left only 11 blocks on the first road when a detour was asked for;
+	# the generator now tries another road, so the count holds
+	for map_seed in [2501, 2996]:
+		var map := MapGen.generate(map_seed, COLS, ROWS, true, 2)
+		assert_not_null(map, "seed %d" % map_seed)
+		assert_between(map.sockets.size(), 12, 22, "seed %d" % map_seed)
+		assert_between(map.routes.size(), 1, 2)
+
+
+func test_a_detour_and_blocks_hold_12_to_22_blocks_over_a_run_of_seeds() -> void:
+	for map_seed in range(2480, 3020):
+		var map := MapGen.generate(map_seed, COLS, ROWS, true, 2)
+		assert_not_null(map, "seed %d" % map_seed)
+		assert_between(map.sockets.size(), 12, 22, "seed %d" % map_seed)
+
+
+func test_a_smaller_board_with_blocks_still_gets_its_blocks_by_trying_again() -> void:
+	for map_seed in [308842, 696873, 744387]:
+		var map := MapGen.generate(map_seed, 20, 14, false, 2)
+		assert_not_null(map, "seed %d" % map_seed)
+		assert_gte(map.sockets.size(), 12, "seed %d" % map_seed)

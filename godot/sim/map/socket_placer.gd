@@ -15,7 +15,11 @@ const RULES := preload("res://content/map_rules.gd")
 
 ## Fills `map.sockets` (the anchor, top-left cell, of each block) and
 ## `map.elevation` (one level for all the cells of a block) for the map's seed.
-static func place(map: GameMap) -> void:
+## Returns false, leaving the map without sockets, when the road leaves room for
+## fewer than `SOCKET_MIN` of them: the generator then draws another road. That
+## happens on a few roads of a 22 by 16 board with a detour and 2x2 blocks (seeds
+## 2501 and 2996 among 6,000 consecutive ones), and on small boards.
+static func place(map: GameMap) -> bool:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
 	_shuffle(candidates, rng)
@@ -26,15 +30,8 @@ static func place(map: GameMap) -> void:
 			break
 		if _keeps_distance(cell, chosen, map.footprint):
 			chosen.append(cell)
-	# the spacing rule leaves room for at least the minimum on every board the
-	# generator can make (checked over 50,000 seeds at 9 by 13 and 6,000 at 22 by 16,
-	# where the fewest was exactly the minimum, 4,000 with a detour, and 1,500 at 24
-	# by 16; a 20 by 14 board with 2x2 blocks can fall short, so blocks need the GDD
-	# board or larger); fail loudly if it ever does not
-	# (an assert is gone from a release build, so the error is logged there too)
 	if chosen.size() < RULES.SOCKET_MIN:
-		push_error("too few sockets for seed %d: %d" % [map.seed, chosen.size()])
-		assert(false, "too few sockets for seed %d" % map.seed)
+		return false
 	chosen.sort_custom(_reading_order)
 	map.sockets = chosen
 	map.elevation = _flat_elevation(map.cols, map.rows)
@@ -46,6 +43,7 @@ static func place(map: GameMap) -> void:
 		for dy in map.footprint:
 			for dx in map.footprint:
 				map.elevation[anchor.y + dy][anchor.x + dx] = level
+	return true
 
 
 ## Anchors whose whole block is on the board, off the road and off the
