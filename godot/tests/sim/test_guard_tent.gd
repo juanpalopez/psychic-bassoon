@@ -88,3 +88,49 @@ func test_a_tent_that_dies_with_the_game_state_is_plain_data() -> void:
 	var snap := GameTestKit.snapshot(game)
 	assert_eq(snap.guards.size(), 2)
 	assert_true(JSON.stringify(snap).length() > 0)
+
+
+func test_when_two_road_points_tie_the_post_is_the_one_nearer_the_heartstone() -> void:
+	var tied := _tied_socket(1)
+	assert_ne(tied, Vector2i(-1, -1), "seed 1 has a tent socket with two equally near road points")
+	var game := Game.create(1)
+	game.buttons = 500
+	GameTestKit.run(game, [Command.build("guardTent", tied.x, tied.y)])
+	var middle := GuardKit.post(game)
+	assert_almost_eq(middle, _last_nearest_along(game, tied), 1e-9)
+	assert_gt(_last_nearest_along(game, tied) - _first_nearest_along(game, tied), 0.5)
+
+
+## A socket of the seed's map with two exactly equally near road points.
+func _tied_socket(map_seed: int) -> Vector2i:
+	var game := Game.create(map_seed)
+	for anchor in game.map.sockets:
+		if _first_nearest_along(game, anchor) != _last_nearest_along(game, anchor):
+			return anchor
+	return Vector2i(-1, -1)
+
+
+func _first_nearest_along(game: GameState, anchor: Vector2i) -> float:
+	return _nearest_alongs(game, anchor)[0]
+
+
+func _last_nearest_along(game: GameState, anchor: Vector2i) -> float:
+	var all := _nearest_alongs(game, anchor)
+	return all[all.size() - 1]
+
+
+## Every point (0.05 apart, found by index) at the least distance from the block.
+func _nearest_alongs(game: GameState, anchor: Vector2i) -> Array[float]:
+	var route := game.routes[0]
+	var centre := game.map.socket_centre(anchor)
+	var best := INF
+	var found: Array[float] = []
+	for i in int(floor(route.total / 0.05)) + 1:
+		var at := route.position_at(float(i) * 0.05)
+		var squared := (at.x - centre.x) * (at.x - centre.x) + (at.y - centre.y) * (at.y - centre.y)
+		if squared < best:
+			best = squared
+			found = [float(i) * 0.05]
+		elif squared == best:
+			found.append(float(i) * 0.05)
+	return found

@@ -110,23 +110,24 @@ func test_an_orc_shrugs_off_a_guard_and_beats_it_in_the_end() -> void:
 	assert_true(orc.alive)
 
 
-func test_a_fallen_guard_comes_back_after_its_respawn_time() -> void:
+func test_a_fallen_guard_comes_back_after_exactly_its_respawn_time() -> void:
 	var game := GuardKit.game_with_tent()
 	var guard: Guard = game.guards[0]
 	guard.hp = 0.5
 	var orc := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
-	GuardKit.tick(game, 60)
-	assert_false(guard.alive)
-	var raised := false
-	var ticks := 0
-	for i in 13 * 30:
+	var fell := -1
+	var raised := -1
+	for i in 16 * 30:
 		Game.tick(game)
-		if guard.alive:
-			raised = true
-			break
-		ticks += 1
-	assert_true(raised, "back after 12 s")
-	assert_gt(ticks, 11 * 30 - 60, "and not much sooner: it fell within the first 2 s")
+		if fell < 0 and not GuardKit.events_of(game, GameEvent.Kind.GUARD_FELL).is_empty():
+			fell = game.tick_count
+		elif fell >= 0 and raised < 0:
+			for event in GuardKit.events_of(game, GameEvent.Kind.GUARD_RAISED):
+				if event.guard_id == guard.id:
+					raised = game.tick_count
+	assert_gt(fell, 0, "the guard fell")
+	assert_gt(raised, fell, "and was raised again")
+	assert_almost_eq(float(raised - fell), 12.0 * 30.0, 1.0, "after 12 s, a level 1 tent")
 	assert_eq(guard.hp, guard.max_hp)
 	assert_true(orc.alive)
 

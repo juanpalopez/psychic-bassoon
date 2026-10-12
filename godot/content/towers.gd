@@ -17,8 +17,9 @@
 ## per blow, `guard_interval` seconds between blows, `respawn` seconds after a fall,
 ## `regen` hp a second out of a fight), `guard_spacing` cells apart with a body
 ## `guard_radius` wide. `range` is the reach the player sees; the guards post at the
-## point of the road nearest the tent (a socket is always within 1.6 cells of it). It is
-## not in `TOWER_IDS` (the build menu) until the render step adds it. Interim numbers.
+## point of the road nearest the tent (a socket is always within the block touch
+## distance of it, see `map_rules.gd`). It is not in `TOWER_IDS` (the build menu)
+## until the render step adds it. Interim numbers.
 ##
 ## Level-indexed stats: index 0 is level 1, index 2 is level 3.
 extends RefCounted

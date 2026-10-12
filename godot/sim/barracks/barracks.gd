@@ -55,16 +55,18 @@ static func release_guards(game: GameState, tent: Tower) -> void:
 
 
 ## The distance along the main route of the road point nearest the tent's block
-## (the one nearer the Heartstone on an exact tie, which a real map almost never
-## has). The tent's `range` is the reach shown to the player; a socket is always
-## within 1.6 cells of the road, so the nearest point is always in reach.
+## (the one nearer the Heartstone on an exact tie; ties are common where the road
+## bends around a block). The points are `GUARD_POST_STEP` apart and found by
+## index, not by adding, so which of two tied points wins never depends on rounding.
+## The tent's `range` is the reach shown to the player; a socket is always within
+## the block touch distance of the road (`MapRules`), so the nearest point is in reach.
 static func post_for(game: GameState, tent: Tower) -> float:
 	var route := game.routes[0]
 	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
 	var best := 0.0
 	var best_distance := INF
-	var along := 0.0
-	while along <= route.total:
+	for i in int(floor(route.total / RULES.GUARD_POST_STEP)) + 1:
+		var along := float(i) * RULES.GUARD_POST_STEP
 		var at := route.position_at(along)
 		var dx := at.x - centre.x
 		var dy := at.y - centre.y
@@ -72,7 +74,6 @@ static func post_for(game: GameState, tent: Tower) -> float:
 		if squared <= best_distance:
 			best_distance = squared
 			best = along
-		along += RULES.GUARD_POST_STEP
 	return best
 
 
