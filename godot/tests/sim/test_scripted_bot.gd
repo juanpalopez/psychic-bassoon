@@ -103,15 +103,36 @@ func test_it_never_sends_a_command_the_sim_rejects() -> void:
 		assert_gte(game.buttons, 0, profile_id)
 
 
+func test_it_never_sends_an_upgrade_it_cannot_pay_for() -> void:
+	var game := Game.create(1)
+	# a tower on every socket and almost nothing to spend: it must wait, not try
+	game.buttons = 50 * game.map.sockets.size()
+	game.heartstone_health = 100000
+	var bot := _bot("spoolOnly")
+	_play(game, bot, game.map.sockets.size() * 3 + 5)
+	game.buttons = 59
+	var rejected := 0
+	for i in 5:
+		bot.act(game)
+		game.heartstone_health = 100000
+		Game.tick(game)
+		for event in game.events:
+			if event.kind == GameEvent.Kind.COMMAND_REJECTED:
+				rejected += 1
+		game.buttons = mini(game.buttons, 59)
+	assert_eq(rejected, 0, "59 Buttons do not buy a 60 Button upgrade, and it did not try")
+
+
 func test_it_upgrades_once_every_socket_has_a_tower() -> void:
 	var game := Game.create(1)
 	game.buttons = 100000
 	game.heartstone_health = 100000
 	var bot := _bot("spoolOnly")
-	_play(game, bot, game.map.sockets.size() * 3 + 20)
+	var rejected := _play(game, bot, game.map.sockets.size() * 3 + 20)
 	assert_eq(game.towers.size(), game.map.sockets.size(), "one tower on every socket")
 	# afterwards the spare Buttons go into upgrades, lowest level first
-	_play(game, bot, 200)
+	rejected += _play(game, bot, 200)
+	assert_eq(rejected, 0, "no build or upgrade was refused")
 	var levels: Array[int] = []
 	for tower in game.towers:
 		levels.append(tower.level)
@@ -128,7 +149,8 @@ func test_it_upgrades_the_lowest_level_tower_first() -> void:
 	# now just enough for three upgrades (60 each); the first kills pay a few more
 	# Buttons, far from a fourth
 	game.buttons = 60 * 3
-	_play(game, bot, 20)
+	var rejected := _play(game, bot, 20)
+	assert_eq(rejected, 0)
 	var upgraded := 0
 	var high := 0
 	for tower in game.towers:
@@ -154,6 +176,40 @@ func test_it_launches_the_first_wave_on_the_first_tick_and_waits_while_a_wave_ru
 			if event.kind == GameEvent.Kind.WAVE_LAUNCHED:
 				launched += 1
 	assert_eq(launched, 0, "it does not call a second wave while the first is walking")
+
+
+## Plays `ticks` ticks and counts the waves launched while foes were still walking
+## (the early calls).
+func _early_calls(profile: Dictionary, ticks: int) -> int:
+	var game := Game.create(1)
+	var bot := ScriptedBot.new(profile)
+	game.buttons = 0
+	game.heartstone_health = 100000
+	var early := 0
+	for i in ticks:
+		var walking := game.foes.size()
+		var was_running := game.running
+		bot.act(game)
+		Game.tick(game)
+		for event in game.events:
+			if (
+				event.kind == GameEvent.Kind.WAVE_LAUNCHED
+				and was_running
+				and walking > 0
+				and game.spawners.size() > 0
+			):
+				early += 1
+	return early
+
+
+func test_a_profile_waiting_for_no_foes_never_calls_a_wave_while_foes_walk() -> void:
+	var profile := {"build_order": [], "call_early": true, "early_foes_left": 0}
+	assert_eq(_early_calls(profile, 600), 0)
+
+
+func test_a_profile_with_a_high_threshold_calls_waves_early() -> void:
+	var profile := {"build_order": [], "call_early": true, "early_foes_left": 100}
+	assert_gt(_early_calls(profile, 600), 0)
 
 
 func test_a_profile_that_calls_early_does_so_when_few_foes_are_left() -> void:

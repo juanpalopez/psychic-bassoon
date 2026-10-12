@@ -17,15 +17,15 @@ The bot (`godot/sim/bot`) builds its profile's towers in turn on the sockets tha
 Measured on `main` after Map v2 (one road, 2x2 sockets) and the combat core, with the prototype's tower, foe and wave numbers unchanged. Seeds 1 to 8, 20 waves.
 
 ```
-profile        seed  cleared  died  heart  towers  levels(0/1/2)  buttons  kills  leaks  minutes
-spoolOnly         1        9    10      0      20  15/5/0          6    129     10     10.8
-spoolOnly         2       20     0     14      18  0/0/18       1171    417      1     17.8
-spoolOnly         3       20     0     14      17  0/0/17       1483    417      1     25.1
-spoolOnly         4       20     0     14      19  0/0/19        745    417      1     20.6
-spoolOnly         5        7     8      0      14  13/1/0         40     88     10      6.3
-spoolOnly         6       20     0     20      17  0/0/17       1770    418      0     16.8
-spoolOnly         7       20     0     12      14  0/0/14       1992    416      2     23.3
-spoolOnly         8       20     0     20      15  0/0/15       1874    418      0     19.2
+profile        seed  cleared  died  heart  sockets  towers  levels(0/1/2)  buttons  kills  leaks  minutes
+spoolOnly         1        9    10      0       20      20  15/5/0          6    129     10     10.8
+spoolOnly         2       20     0     14       18      18  0/0/18       1171    417      1     17.8
+spoolOnly         3       20     0     14       17      17  0/0/17       1483    417      1     25.1
+spoolOnly         4       20     0     14       19      19  0/0/19        745    417      1     20.6
+spoolOnly         5        7     8      0       14      14  13/1/0         40     88     10      6.3
+spoolOnly         6       20     0     20       17      17  0/0/17       1770    418      0     16.8
+spoolOnly         7       20     0     12       14      14  0/0/14       1992    416      2     23.3
+spoolOnly         8       20     0     20       15      15  0/0/15       1874    418      0     19.2
 spoolOnly      median waves cleared: 20
 
 spoolOnly, waves averaged over the runs that cleared them
@@ -50,14 +50,14 @@ wave  runs  clear(s)  kills  leaks  towers  buttons
   18     6      57.8   31.0   0.00    16.7      382
   19     6      72.0   33.0   0.00    16.7      790
   20     6     113.5   36.0   0.00    16.7     1506
-mortarHeavy       1       20     0     14      20  0/7/13        252    417      1     18.3
-mortarHeavy       2       20     0     14      18  0/4/14        371    417      1     15.9
-mortarHeavy       3       20     0     14      17  0/2/15        363    417      1     20.9
-mortarHeavy       4       20     0     14      19  0/7/12        305    417      1     19.0
-mortarHeavy       5       20     0      8      14  0/0/14        945    414      4     16.7
-mortarHeavy       6       20     0     14      17  0/1/16        340    417      1     15.4
-mortarHeavy       7       20     0     14      14  0/0/14        808    417      1     20.3
-mortarHeavy       8       20     0     14      15  0/0/15        524    417      1     17.9
+mortarHeavy       1       20     0     14       20      20  0/7/13        252    417      1     18.3
+mortarHeavy       2       20     0     14       18      18  0/4/14        371    417      1     15.9
+mortarHeavy       3       20     0     14       17      17  0/2/15        363    417      1     20.9
+mortarHeavy       4       20     0     14       19      19  0/7/12        305    417      1     19.0
+mortarHeavy       5       20     0      8       14      14  0/0/14        945    414      4     16.7
+mortarHeavy       6       20     0     14       17      17  0/1/16        340    417      1     15.4
+mortarHeavy       7       20     0     14       14      14  0/0/14        808    417      1     20.3
+mortarHeavy       8       20     0     14       15      15  0/0/15        524    417      1     17.9
 mortarHeavy    median waves cleared: 20
 
 mortarHeavy, waves averaged over the runs that cleared them
@@ -82,14 +82,14 @@ wave  runs  clear(s)  kills  leaks  towers  buttons
   18     8      44.0   31.0   0.00    16.8      127
   19     8      45.3   33.0   0.00    16.8      172
   20     8      95.5   36.0   0.00    16.8      488
-mix               1       20     0     10      20  0/6/14        390    415      3     22.0
-mix               2       20     0     14      18  0/2/16        251    417      1     18.4
-mix               3       20     0     14      17  0/0/17        323    417      1     27.5
-mix               4       20     0     14      19  0/6/13        355    417      1     21.8
-mix               5        8     9      0      13  13/0/0         18    106     10      7.8
-mix               6       20     0     14      17  0/0/17        460    417      1     18.5
-mix               7       20     0     14      14  0/0/14       1018    417      1     25.3
-mix               8       20     0     14      15  0/0/15        564    417      1     18.6
+mix               1       20     0     10       20      20  0/6/14        390    415      3     22.0
+mix               2       20     0     14       18      18  0/2/16        251    417      1     18.4
+mix               3       20     0     14       17      17  0/0/17        323    417      1     27.5
+mix               4       20     0     14       19      19  0/6/13        355    417      1     21.8
+mix               5        8     9      0       14      13  13/0/0         18    106     10      7.8
+mix               6       20     0     14       17      17  0/0/17        460    417      1     18.5
+mix               7       20     0     14       14      14  0/0/14       1018    417      1     25.3
+mix               8       20     0     14       15      15  0/0/15        564    417      1     18.6
 mix            median waves cleared: 20
 
 mix, waves averaged over the runs that cleared them
@@ -114,6 +114,8 @@ wave  runs  clear(s)  kills  leaks  towers  buttons
   18     7      59.5   31.0   0.00    17.1      173
   19     7      59.9   33.0   0.00    17.1      203
   20     7     109.3   36.0   0.00    17.1      480
+
+mean main road over 8 seeds: 71.1 cells (the old 9 by 13 board: 33.1)
 
 wave composition on seed 1
 wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
@@ -141,8 +143,14 @@ wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
 
 ## What the baseline says
 
-- **The game is far too easy after the first boss.** The bot clears 20 waves on 21 of the 24 runs. By wave 20 the bot has every socket built and every tower at level 3, and still holds hundreds to well over a thousand unspent Buttons: the economy has nothing left to buy.
+- **The game is far too easy after the first boss.** The bot clears 20 waves on 21 of the 24 runs. It builds a tower on every socket (the `sockets` and `towers` columns match on every run) and ends with most towers at level 3. It still holds unspent Buttons: 700 to 2,000 for the Spool Guard strategy, 250 to 1,000 for the other two, which finish with some towers at level 2. The economy runs out of things to buy.
 - **The first boss is the only real test.** Wave 10 (the Cardboard Golem and an escort) leaks on most runs (the Golem costs 6 Heartstone health when it gets through). The three lost runs (Spool Guards only on seeds 1 and 5, the mix on seed 5) die on waves 8 to 10, with only 13 to 20 towers built and almost none upgraded: the bot was behind on Buttons, not out-fought late. The Golem does not split into Scrap Goblins yet (#187), so the boss is easier than designed.
 - **Waves 1 to 3 are safe, waves 4 to 9 leak a little**, which matches the target for the early game.
-- **The long road helps the player.** The main road is about 75 cells on the 22 by 16 board against about 33 on the old 9 by 13 one (the mean of 100 seeds), so the same tower numbers get more than twice the time on target.
+- **The long road helps the player.** The main road is about 71 cells on the 22 by 16 board against about 33 on the old 9 by 13 one (the `mean main road` line of the `--detail` output, over seeds 1 to 8), so the same tower numbers get more than twice the time on target.
 - **Strategies hardly differ.** Spool Guards alone, Mortar-heavy and the mix all clear the same waves, so the Orc counter and the swarm counter do not matter yet.
+
+## Limits of the bot
+
+- It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
+- The per-wave rows count kills and leaks since the previous clear. A game that ends in the middle of a wave keeps those numbers in `unfinished`, and with early calls kills belong to the wave that clears next.
+- It never sells, never moves a tower and plays one fixed build order per profile.

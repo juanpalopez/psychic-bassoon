@@ -82,3 +82,35 @@ func test_the_bot_gets_a_stronger_game_than_nothing() -> void:
 	var without := BotRunner.play(1, idle, 5)
 	assert_gt(with_towers.waves_cleared, without.waves_cleared)
 	assert_gt(with_towers.heartstone_health, without.heartstone_health)
+
+
+func test_a_refused_command_is_counted() -> void:
+	var act := func(game: GameState) -> void:
+		var road: Vector2i = game.map.path[3]
+		Game.submit(game, Command.build("spoolGuard", road.x, road.y))
+	var result := BotRunner.play_with(1, act, 1, 90)
+	assert_gt(result.rejected, 0)
+	assert_eq(result.towers, 0)
+
+
+func test_the_result_says_how_many_sockets_the_map_had() -> void:
+	var result := BotRunner.play(1, PROFILES.PROFILES.mix, 1)
+	assert_eq(result.sockets, Game.create(1).map.sockets.size())
+	assert_lte(result.towers, result.sockets)
+
+
+func test_a_lost_game_reports_the_unfinished_wave_apart_from_the_cleared_ones() -> void:
+	var idle := {"build_order": [], "call_early": false, "early_foes_left": 0}
+	var result := BotRunner.play(1, idle, 30)
+	assert_true(result.over)
+	var kills := 0
+	var leaks := 0
+	var ticks := 0
+	for wave in result.waves:
+		kills += wave.kills
+		leaks += wave.leaks
+		ticks += wave.ticks
+	assert_eq(kills + result.unfinished.kills, result.kills)
+	assert_eq(leaks + result.unfinished.leaks, result.leaks)
+	assert_eq(ticks + result.unfinished.ticks, result.ticks)
+	assert_gt(result.unfinished.leaks, 0, "the game ended in the middle of a wave")

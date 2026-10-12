@@ -11,8 +11,17 @@ const DEFAULT_MAX_TICKS := 54000
 static func play(
 	map_seed: int, profile: Dictionary, max_waves: int, max_ticks: int = DEFAULT_MAX_TICKS
 ) -> Dictionary:
+	return play_with(map_seed, ScriptedBot.new(profile).act, max_waves, max_ticks)
+
+
+## The same with any player: `act` is called with the game before every tick and
+## may only send commands. The per-wave records and `unfinished` count what
+## happened since the previous clear (with early calls, kills belong to the wave
+## that clears next), so together they add up to the totals.
+static func play_with(
+	map_seed: int, act: Callable, max_waves: int, max_ticks: int = DEFAULT_MAX_TICKS
+) -> Dictionary:
 	var game := Game.create(map_seed)
-	var bot := ScriptedBot.new(profile)
 	var kills := 0
 	var leaks := 0
 	var rejected := 0
@@ -21,7 +30,7 @@ static func play(
 	var waves_cleared := 0
 	var ticks := 0
 	while ticks < max_ticks and not game.over and waves_cleared < max_waves:
-		bot.act(game)
+		act.call(game)
 		Game.tick(game)
 		ticks += 1
 		since_clear.ticks += 1
@@ -61,6 +70,7 @@ static func play(
 		"died_on_wave": game.wave if game.over else 0,
 		"heartstone_health": game.heartstone_health,
 		"towers": game.towers.size(),
+		"sockets": game.map.sockets.size(),
 		"tower_levels": levels,
 		"buttons": game.buttons,
 		"kills": kills,
@@ -68,4 +78,5 @@ static func play(
 		"rejected": rejected,
 		"ticks": ticks,
 		"waves": waves,
+		"unfinished": since_clear,
 	}
