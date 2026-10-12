@@ -71,7 +71,12 @@ func refresh() -> void:
 	var level := _tower.level
 	_title.text = "%s  Level %d" % [def.name, level + 1]
 	var reach: float = def.range[level] if _reach < 0.0 else _reach
-	_stats.text = "Damage %d  Range %s  Rate %s/s" % [def.damage[level], reach, def.rate[level]]
+	if def.get("beam", false):
+		_stats.text = "Damage %d/s  Range %s" % [def.damage[level], reach]
+	else:
+		_stats.text = (
+			"Damage %d  Range %s  Rate %s/s" % [def.damage[level], reach, def.rate[level]]
+		)
 	var cost := TowerInfo.next_cost(_tower)
 	if cost < 0:
 		_upgrade.text = "Max level"

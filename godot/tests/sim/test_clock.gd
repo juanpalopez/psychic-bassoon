@@ -116,8 +116,8 @@ func _play(frame_seconds: float, speed: int, ticks: int) -> GameState:
 	var clock := Clock.new()
 	var cells := game.map.sockets
 	var script := {
-		0: Command.build("ballista", cells[0].x, cells[0].y),
-		30: Command.build("catapult", cells[5].x, cells[5].y),
+		0: Command.build("spoolGuard", cells[0].x, cells[0].y),
+		30: Command.build("thimbleMortar", cells[5].x, cells[5].y),
 		60: Command.upgrade(0),
 		90: Command.launch_wave(),
 		120: Command.sell(1),

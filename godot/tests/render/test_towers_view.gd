@@ -15,7 +15,7 @@ func _tower(id: int, type: String, col: int, row: int, level: int = 0) -> Tower:
 func test_one_tower_scene_per_tower_at_its_cell() -> void:
 	var view := TowersView.new()
 	add_child_autofree(view)
-	view.sync([_tower(0, "ballista", 1, 2), _tower(1, "catapult", 3, 4)] as Array[Tower])
+	view.sync([_tower(0, "spoolGuard", 1, 2), _tower(1, "thimbleMortar", 3, 4)] as Array[Tower])
 	assert_eq(view.get_child_count(), 2)
 	var first := view.get_child(0) as TowerView
 	assert_not_null(first)
@@ -27,7 +27,7 @@ func test_one_tower_scene_per_tower_at_its_cell() -> void:
 func test_no_towers_means_no_scenes() -> void:
 	var view := TowersView.new()
 	add_child_autofree(view)
-	view.sync([_tower(0, "ballista", 1, 2)] as Array[Tower])
+	view.sync([_tower(0, "spoolGuard", 1, 2)] as Array[Tower])
 	view.sync([] as Array[Tower])
 	assert_eq(view.get_child_count(), 0)
 
@@ -35,9 +35,9 @@ func test_no_towers_means_no_scenes() -> void:
 func test_a_higher_level_makes_a_taller_tower() -> void:
 	var view := TowersView.new()
 	add_child_autofree(view)
-	view.sync([_tower(0, "ballista", 1, 2, 0)] as Array[Tower])
+	view.sync([_tower(0, "spoolGuard", 1, 2, 0)] as Array[Tower])
 	var low := (view.get_child(0) as TowerView).body_height()
-	view.sync([_tower(0, "ballista", 1, 2, 2)] as Array[Tower])
+	view.sync([_tower(0, "spoolGuard", 1, 2, 2)] as Array[Tower])
 	var high := (view.get_child(0) as TowerView).body_height()
 	assert_gt(high, low)
 
@@ -45,7 +45,7 @@ func test_a_higher_level_makes_a_taller_tower() -> void:
 func test_syncing_the_same_towers_again_keeps_the_same_nodes() -> void:
 	var view := TowersView.new()
 	add_child_autofree(view)
-	var towers: Array[Tower] = [_tower(0, "ballista", 1, 2)]
+	var towers: Array[Tower] = [_tower(0, "spoolGuard", 1, 2)]
 	view.sync(towers)
 	var node := view.get_child(0)
 	view.sync(towers)
@@ -56,5 +56,5 @@ func test_a_tower_stands_on_the_surface_it_is_given() -> void:
 	var view := TowersView.new()
 	add_child_autofree(view)
 	var surface := func(_cell: Vector2i) -> float: return 1.5
-	view.sync([_tower(0, "ballista", 1, 2, 0)] as Array[Tower], surface)
+	view.sync([_tower(0, "spoolGuard", 1, 2, 0)] as Array[Tower], surface)
 	assert_almost_eq((view.get_child(0) as TowerView).position.y, 1.5, 1e-6)

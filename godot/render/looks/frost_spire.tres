@@ -1,8 +1,0 @@
-[gd_resource type="Resource" script_class="TowerLook" load_steps=2 format=3]
-
-[ext_resource type="Script" path="res://render/tower_look.gd" id="1_look"]
-
-[resource]
-script = ExtResource("1_look")
-body_colour = Color(0.557, 0.267, 0.678, 1)
-pip_colour = Color(0.95, 0.85, 1, 1)

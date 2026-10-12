@@ -3,7 +3,7 @@ class_name Tower
 extends RefCounted
 
 var id: int = 0
-## A tower id from `content/towers.gd`, such as "ballista".
+## A tower id from `content/towers.gd`, such as "spoolGuard".
 var type: String = ""
 var level: int = 0
 var col: int = 0

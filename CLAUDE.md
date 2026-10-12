@@ -3,7 +3,7 @@
 A papercraft stop-motion tower defense for phones and tablets, in the browser first and as a native iOS app next (Android only if wanted later). **Godot 4 + GDScript**, web export first (GitHub Pages). The design is the GDD in `docs/GDD.md` (adopted by the owner on 2026-10-11); the old Scrapline medieval design and the 2D prototype are no longer the rules target. The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as a read-only reference for formulas until the GDScript combat lands (Phase 4, step 8). The game is renamed Papercraft Kingdom Defense; the repo stays `psychic-bassoon`, and the code still says Scrapline until the rename ticket.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
-- Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes) has fixtures, the tower and foe ids do not and change to the GDD's with the combat port. Display names and lore strings live only in `godot/content`.
+- Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes) has fixtures, the tower and foe ids do not, and they already use the GDD's. Display names and lore strings live only in `godot/content`.
 - Original prototype (a starting point for numbers, not the rules target): `prototype/scrapline.html`
 
 > Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content, a read-only reference for formulas that is removed in Phase 4 step 8.
@@ -174,11 +174,11 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
 
 ## Naming
 
-Use the GDD's names in code-facing content and the UI (display names only; ids are lowerCamelCase keys). The ported sim still has the old ids until the combat port renames them:
+Use the GDD's names in code-facing content and the UI (display names only; ids are lowerCamelCase keys). The foe and tower ids are already the GDD's; the Guard Tent's id arrives with it in Phase 7:
 
 | Prototype or ported id | Papercraft Kingdom Defense |
 | --- | --- |
-| scout / walker / tank / boss (`scamp`, `raider`, `ironclad`, `warlord`) | Scrap Goblin / Corrugated Orc / Corrugated Orc / Cardboard Golem (ids to become `scrapGoblin`, `corrugatedOrc`, `cardboardGolem`) |
+| scout / walker / tank / boss (`scamp`, `raider`, `ironclad`, `warlord`) | Scrap Goblin / Corrugated Orc / Corrugated Orc / Cardboard Golem (ids `scrapGoblin`, `corrugatedOrc`, `cardboardGolem`) |
 | (new) | Razor Moth (flying), Ink Shaman (support) |
 | `ballista`, `catapult` | The Spool Guard (`spoolGuard`), The Thimble Mortar (`thimbleMortar`) |
 | `frostSpire`, `stormSpire` | The Prism Spire (`prismSpire`), with specs Cryo-Origami Spire and Blot Singularity |

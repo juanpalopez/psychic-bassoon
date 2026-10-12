@@ -56,11 +56,11 @@ func test_same_seed_gives_the_same_game() -> void:
 func test_state_survives_json() -> void:
 	var game := Game.create(SEED)
 	GameTestKit.run(
-		game, [Command.build("ballista", GameTestKit.socket(game).x, GameTestKit.socket(game).y)]
+		game, [Command.build("spoolGuard", GameTestKit.socket(game).x, GameTestKit.socket(game).y)]
 	)
 	var snapshot := GameTestKit.snapshot(game)
 	var parsed: Dictionary = JSON.parse_string(JSON.stringify(snapshot))
-	assert_eq(parsed.towers[0][1], "ballista")
+	assert_eq(parsed.towers[0][1], "spoolGuard")
 	assert_eq(int(parsed.buttons), game.buttons)
 	assert_eq(int(parsed.rngState), game.rng.state)
 	assert_eq(parsed.routes.size(), game.map.routes.size())
@@ -88,10 +88,11 @@ func test_commands_run_in_submission_order() -> void:
 	var game := Game.create(SEED)
 	var cell := GameTestKit.socket(game)
 	GameTestKit.run(
-		game, [GameTestKit.build_at("ballista", cell), GameTestKit.build_at("catapult", cell)]
+		game,
+		[GameTestKit.build_at("spoolGuard", cell), GameTestKit.build_at("thimbleMortar", cell)]
 	)
 	assert_eq(game.towers.size(), 1)
-	assert_eq(game.towers[0].type, "ballista")
+	assert_eq(game.towers[0].type, "spoolGuard")
 
 
 func test_queue_is_empty_after_each_tick() -> void:
@@ -102,14 +103,14 @@ func test_queue_is_empty_after_each_tick() -> void:
 
 func test_commands_do_not_run_before_the_tick() -> void:
 	var game := Game.create(SEED)
-	Game.submit(game, GameTestKit.build_at("ballista", GameTestKit.socket(game)))
+	Game.submit(game, GameTestKit.build_at("spoolGuard", GameTestKit.socket(game)))
 	assert_eq(game.towers.size(), 0)
 	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_events_last_one_tick_only() -> void:
 	var game := Game.create(SEED)
-	GameTestKit.run(game, [GameTestKit.build_at("ballista", GameTestKit.socket(game))])
+	GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", GameTestKit.socket(game))])
 	assert_eq(game.events.size(), 1)
 	Game.tick(game)
 	assert_eq(game.events.size(), 0)
