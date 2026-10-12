@@ -33,6 +33,9 @@ func test_the_content_names_the_footprints() -> void:
 	assert_eq(RULES.SOCKET_FOOTPRINT_LEGACY, 1)
 	assert_eq(RULES.SOCKET_FOOTPRINT, 2)
 	assert_eq(RULES.SOCKET_BLOCK_GAP, 1)
+	assert_eq(RULES.SOCKET_MIN_ROAD_COVERAGE, 3)
+	assert_eq(RULES.SOCKET_COVERAGE_REACH, 2.3)
+	assert_eq(RULES.SOCKET_BLOCK_TOUCH_DISTANCE, 1.6)
 
 
 func test_a_map_knows_its_footprint() -> void:

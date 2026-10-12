@@ -51,6 +51,18 @@ const SOCKET_FOOTPRINT := 2
 const GAME_SOCKET_FOOTPRINT := 2
 ## Blocks of 2 or more cells leave this many empty cells between each other.
 const SOCKET_BLOCK_GAP := 1
+## A 2x2 block must have at least this many road cells within
+## `SOCKET_COVERAGE_REACH` cells of its centre (a level 1 Spool Guard's reach, the
+## shortest of the towers), so a tower there has a stretch of road to shoot at, not
+## a corner, and its centre must be within `SOCKET_BLOCK_TOUCH_DISTANCE` of a road
+## cell's centre. A block's centre sits on a cell corner, so the nearest a road
+## cell can be is 1.58 cells (the block touches the road along an edge) and the
+## next is 2.12 (a diagonal corner only): 1.6 keeps the first and rejects the
+## second, which a road with a detour can otherwise satisfy through three corners.
+## Single-cell sockets keep the looser `SOCKET_REACH` rule.
+const SOCKET_MIN_ROAD_COVERAGE := 3
+const SOCKET_COVERAGE_REACH := 2.3
+const SOCKET_BLOCK_TOUCH_DISTANCE := 1.6
 
 ## Elevation levels: 0 the cutting mat, 1 a glued cardboard rise, 2 tiered
 ## cliffs. Roads and plain ground are level 0; a socket gets a level by weight.

@@ -154,3 +154,11 @@ wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
 - It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
 - The per-wave rows count kills and leaks since the previous clear. A game that ends in the middle of a wave keeps those numbers in `unfinished`, and with early calls kills belong to the wave that clears next.
 - It never sells, never moves a tower and plays one fixed build order per profile.
+
+## Sockets next to the road (2026-10-12)
+
+**The baseline tables and bullets above were measured under the first block-socket rule and no longer describe the game.** That rule accepted a 2x2 block when any one cell was within 2 cells of the road. Over 60 maps and 1,047 sockets, 291 (28%) reached no road cell with a level 1 Spool Guard and 314 (30%) were farther than 2.3 cells from the road.
+
+A block is now accepted only when it touches the road and has a stretch of it to shoot at: a road cell's centre within 1.6 cells of the block's centre, and at least 3 road cells within 2.3 cells of it (a level 1 Spool Guard's reach). A block's centre sits on a cell corner, so the nearest a road cell can be is 1.58 cells (the block touches the road along an edge) and the next is 2.12 (a diagonal corner only); 1.6 keeps the first and rejects the second. Without the touching rule, 3 road cells in reach almost always mean touching, but with a detour on, 1 placed block in 6,000 maps reached its 3 cells only through diagonal corners (and 11 of the first 6,000 maps had such a candidate), so the rule stays. Over thousands of seeds of the game board no socket is out of reach, no map is short of 12 blocks, and 0.1% of roads are drawn again with the detour off (2 in 3,000 seeds; 0.4% with it on).
+
+**Effect on the baseline (seeds 1 to 8, 20 waves, the three original profiles):** the bot now clears 20 waves on all 24 runs, against 21 of 24 before, and most runs end with 14 to 20 Heartstone health. Socket counts changed per seed (seed 1 went from 20 to 16, seed 7 from 14 to 22), and the three lost runs of the old baseline (waves 8 to 10) are now wins. The game got easier, so the pass below starts from a game that the bot never loses.

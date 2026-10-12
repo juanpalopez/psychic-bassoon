@@ -17,8 +17,9 @@ const RULES := preload("res://content/map_rules.gd")
 ## `map.elevation` (one level for all the cells of a block) for the map's seed.
 ## Returns false, leaving the map without sockets, when the road leaves room for
 ## fewer than `SOCKET_MIN` of them: the generator then draws another road. That
-## happens on a few roads of a 22 by 16 board with a detour and 2x2 blocks (seeds
-## 2501 and 2996 among 6,000 consecutive ones), and on small boards.
+## happens on about 0.1% of the roads of the game board (22 by 16, one road, 2x2
+## blocks: 2 of 3,000 seeds), on about 0.4% with a detour (11 of 3,000), and
+## often on small boards (20 by 14: 3% to 7%).
 static func place(map: GameMap) -> bool:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
@@ -47,8 +48,9 @@ static func place(map: GameMap) -> bool:
 
 
 ## Anchors whose whole block is on the board, off the road and off the
-## Heartstone's footprint, with a cell of the block within `SOCKET_REACH` of the
-## road, in reading order.
+## Heartstone's footprint, touching the road and with a stretch of it in reach
+## of the block's centre (a single cell: within `SOCKET_REACH` of the road), in
+## reading order.
 static func _candidates(map: GameMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for row in range(0, map.rows - map.footprint + 1):
@@ -69,11 +71,38 @@ static func _block_is_free(map: GameMap, col: int, row: int) -> bool:
 
 
 static func _block_near_road(map: GameMap, col: int, row: int) -> bool:
+	if map.footprint > 1:
+		return _block_centre_near_road(map, col, row)
 	for dy in map.footprint:
 		for dx in map.footprint:
 			if _road_within_reach(map, col + dx, row + dy):
 				return true
 	return false
+
+
+## True when the block anchored at (col, row) touches the road and has a stretch
+## of it to shoot at: a road cell's centre within `SOCKET_BLOCK_TOUCH_DISTANCE` of
+## the block's centre, and at least `SOCKET_MIN_ROAD_COVERAGE` road cells within
+## `SOCKET_COVERAGE_REACH` of it.
+static func _block_centre_near_road(map: GameMap, col: int, row: int) -> bool:
+	var centre := map.socket_centre(Vector2i(col, row))
+	var reach: float = RULES.SOCKET_COVERAGE_REACH
+	var touch: float = RULES.SOCKET_BLOCK_TOUCH_DISTANCE
+	var span := int(ceil(reach)) + map.footprint
+	var covered := 0
+	var touching := false
+	for y in range(maxi(0, row - span), mini(map.rows, row + map.footprint + span)):
+		for x in range(maxi(0, col - span), mini(map.cols, col + map.footprint + span)):
+			if map.tiles[y][x] != GameMap.Tile.ROAD:
+				continue
+			var dx := float(x) + RULES.CELL_CENTRE - centre.x
+			var dy := float(y) + RULES.CELL_CENTRE - centre.y
+			var squared := dx * dx + dy * dy
+			if squared <= reach * reach:
+				covered += 1
+			if squared <= touch * touch:
+				touching = true
+	return touching and covered >= RULES.SOCKET_MIN_ROAD_COVERAGE
 
 
 static func _road_within_reach(map: GameMap, col: int, row: int) -> bool:
