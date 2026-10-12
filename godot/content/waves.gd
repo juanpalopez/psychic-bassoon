@@ -12,6 +12,15 @@ const BOSS_FOE := "cardboardGolem"
 const BOSS_EVERY := 10
 ## A goblin swarm wave every this many waves.
 const SWARM_EVERY := 5
+## A swarm has this many times the foes of a normal wave of its number.
+const SWARM_COUNT_MULTIPLIER := 1.5
+## In a swarm the orc threshold is the normal one (below) lowered by this much, so a
+## swarm has more orcs than the waves around it at every point of the run.
+const SWARM_ORC_THRESHOLD_DROP := 0.1
+## Swarm goblins have this many times the hp and pay this share of the reward: they
+## are many and frail, so without this a bigger swarm only feeds the player.
+const SWARM_HP_MULTIPLIER := 2.0
+const SWARM_REWARD_MULTIPLIER := 0.5
 ## Foes in wave w: round(BASE_COUNT + w * COUNT_PER_WAVE).
 const BASE_COUNT := 6.0
 const COUNT_PER_WAVE := 1.4

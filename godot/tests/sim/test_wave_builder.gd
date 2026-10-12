@@ -2,6 +2,7 @@
 ## counts and gaps are written out by hand from the formulas.
 extends GutTest
 
+const WAVES := preload("res://content/waves.gd")
 const SEED := 42
 
 
@@ -58,12 +59,16 @@ func test_orcs_arrive_and_become_commoner_in_later_waves() -> void:
 
 
 func test_every_fifth_wave_is_a_goblin_swarm_with_tight_gaps() -> void:
-	# wave 5: round(6 + 7) = 13 foes, gap = 0.95 - 0.125 = 0.825, swarm multiplier 0.45
+	# wave 5: the usual 13 foes times the swarm multiplier, gap = 0.95 - 0.125 = 0.825
 	var orders := _build(5)
-	assert_eq(orders.size(), 13)
+	assert_eq(orders.size(), Rounding.half_up(13.0 * WAVES.SWARM_COUNT_MULTIPLIER))
 	for order in orders:
-		assert_eq(order.type, "scrapGoblin")
-		assert_almost_eq(order.gap, 0.825 * 0.45, 1e-12)
+		if order.type == "scrapGoblin":
+			assert_almost_eq(order.gap, 0.825 * WAVES.GAP_GOBLIN_SWARM, 1e-12)
+		else:
+			assert_eq(order.type, "corrugatedOrc", "a few orcs are mixed in")
+			assert_almost_eq(order.gap, 0.825 * WAVES.GAP_ORC, 1e-12)
+	assert_gt(_types(orders).count("scrapGoblin"), 0, "goblins are still the filler")
 
 
 func test_every_tenth_wave_is_a_boss_wave_with_an_escort_and_the_golem() -> void:
@@ -123,8 +128,11 @@ func test_building_wave_after_wave_keeps_one_stream_going() -> void:
 
 
 func test_waves_grow_in_size() -> void:
+	# swarm waves are bigger than the waves around them (see test_swarm_waves.gd)
 	var previous := 0
 	for wave in range(1, 30):
+		if WaveBuilder.is_swarm(wave):
+			continue
 		var count := _build(wave).size()
 		assert_gte(count + 2, previous, "wave %d" % wave)
 		previous = count
@@ -148,9 +156,9 @@ func _first_roll(wave: int, value: float) -> Array[float]:
 func test_the_count_is_6_plus_1_point_4_per_wave_rounded() -> void:
 	assert_eq(WaveBuilder.count_for(1), 7)
 	assert_eq(WaveBuilder.count_for(2), 9)
-	assert_eq(WaveBuilder.count_for(5), 13)
+	assert_eq(WaveBuilder.count_for(6), 14)
 	assert_eq(WaveBuilder.count_for(10), 20)
-	assert_eq(WaveBuilder.count_for(15), 27)
+	assert_eq(WaveBuilder.count_for(16), 28)
 
 
 func test_a_roll_above_the_threshold_makes_an_orc_and_an_orc_waits_longer() -> void:
@@ -185,12 +193,6 @@ func test_the_orc_threshold_stops_falling_at_wave_20() -> void:
 			assert_eq(order.type, "corrugatedOrc", "wave %d at 0.63" % wave)
 		for order in WaveBuilder.compose(wave, _rolls(wave, 0.61)):
 			assert_eq(order.type, "scrapGoblin", "wave %d at 0.61" % wave)
-
-
-func test_a_swarm_wave_ignores_the_rolls() -> void:
-	for wave in [5, 15]:
-		for order in WaveBuilder.compose(wave, _rolls(wave, 0.99)):
-			assert_eq(order.type, "scrapGoblin")
 
 
 func test_a_boss_wave_holds_the_rolled_foes_between_the_escort_and_the_golem() -> void:

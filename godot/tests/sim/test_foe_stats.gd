@@ -3,6 +3,7 @@
 extends GutTest
 
 const FOES := preload("res://content/foes.gd")
+const WAVES := preload("res://content/waves.gd")
 
 
 func test_the_three_ground_foes_have_the_gdd_roles() -> void:
@@ -26,6 +27,26 @@ func test_wave_1_is_the_base_foe_with_a_hair_more_speed() -> void:
 	assert_almost_eq(stats.speed, 1.9 * 1.006, 1e-12)
 	assert_eq(stats.reward, 4)
 	assert_eq(stats.armor, 0)
+
+
+func test_swarm_goblins_are_tougher_and_pay_less() -> void:
+	# wave 5 is a swarm: n = 4, hp scale 1 + 0.8 + 0.64 = 2.44, reward 4 * 1.16 = 4.64
+	var swarm := FoeStats.for_wave("scrapGoblin", 5)
+	assert_eq(swarm.hp, Rounding.half_up(20.0 * 2.44 * WAVES.SWARM_HP_MULTIPLIER))
+	assert_eq(swarm.reward, Rounding.half_up(4.0 * 1.16 * WAVES.SWARM_REWARD_MULTIPLIER))
+	assert_gt(WAVES.SWARM_HP_MULTIPLIER, 1.0)
+	assert_lt(WAVES.SWARM_REWARD_MULTIPLIER, 1.0)
+	# the same goblin in wave 6 and an orc in the swarm wave are unscaled
+	assert_eq(FoeStats.for_wave("scrapGoblin", 6).hp, Rounding.half_up(20.0 * (1.0 + 1.0 + 1.0)))
+	assert_eq(FoeStats.for_wave("corrugatedOrc", 5).hp, Rounding.half_up(130.0 * 2.44))
+
+
+func test_wave_15_swarm_goblin() -> void:
+	# n = 14: hp scale 1 + 2.8 + 7.84 = 11.64, so 20 * 11.64 = 232.8; doubled 465.6
+	var stats := FoeStats.for_wave("scrapGoblin", 15)
+	assert_eq(stats.hp, 466)
+	# 4 * (1 + 0.04 * 14) = 6.24; halved 3.12
+	assert_eq(stats.reward, 3)
 
 
 func test_wave_10_goblin() -> void:
@@ -64,9 +85,12 @@ func test_armor_steps_up_every_12_waves() -> void:
 
 
 func test_a_stronger_wave_never_makes_a_foe_weaker() -> void:
+	# a swarm wave's goblins are scaled apart (tested above), so they are left out
 	for id in FOES.FOE_IDS:
 		var previous := FoeStats.for_wave(id, 1)
 		for wave in range(2, 60):
+			if id == WAVES.FILLER_FOE and WaveBuilder.is_swarm(wave):
+				continue
 			var stats := FoeStats.for_wave(id, wave)
 			assert_gte(stats.hp, previous.hp, "%s hp, wave %d" % [id, wave])
 			assert_gte(stats.speed, previous.speed, "%s speed, wave %d" % [id, wave])
