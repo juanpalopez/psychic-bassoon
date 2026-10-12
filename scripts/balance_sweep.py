@@ -59,13 +59,22 @@ def make_copy(index, cfg, tmp):
         if isinstance(val, bool) or not isinstance(val, (int, float)):
             sys.exit("config %d: %s must be a number, not %r" % (index, key, val))
         path = os.path.join(dest, FILES[name_file])
+        text = open(path).read()
+        found = re.search(r"const %s := ([^\n]+)" % re.escape(name), text)
+        # a constant written with a decimal point stays a float: an int in its place
+        # would turn a division in the sim into an integer division
+        if found and "." in found.group(1) and isinstance(val, int):
+            val = float(val)
         text, n = re.subn(r"(const %s := )[^\n]+" % re.escape(name), r"\g<1>%s" % json.dumps(val),
-                          open(path).read())
+                          text)
         if n != 1:
             sys.exit("config %d: constant %s not found in %s" % (index, name, name_file))
         open(path, "w").write(text)
-    imported = subprocess.run([GODOT, "--headless", "--path", dest, "--import"],
-                              capture_output=True, text=True)
+    try:
+        imported = subprocess.run([GODOT, "--headless", "--path", dest, "--import"],
+                                  capture_output=True, text=True)
+    except FileNotFoundError:
+        sys.exit("godot not found (%s): put it on the PATH or set GODOT" % GODOT)
     if imported.returncode != 0:
         sys.exit("config %d: godot could not import the copy:\n%s" % (index, imported.stderr))
     return dest
