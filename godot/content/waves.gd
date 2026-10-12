@@ -37,9 +37,10 @@ const ORC_BASE_THRESHOLD := 0.82
 const ORC_THRESHOLD_PER_WAVE := 0.01
 const ORC_THRESHOLD_CAP := 0.2
 
-## hp multiplier: 1 + HP_LINEAR * (w - 1) + HP_QUADRATIC * (w - 1)^2.
+## hp multiplier: 1 + HP_LINEAR * (w - 1) + HP_QUADRATIC * (w - 1)^2. The quadratic
+## term was 0.014 in the prototype; 0.04 is the interim balance (`docs/BALANCE.md`).
 const HP_LINEAR := 0.2
-const HP_QUADRATIC := 0.014
+const HP_QUADRATIC := 0.04
 ## Speed multiplier: 1 + min(SPEED_CAP, w * SPEED_PER_WAVE).
 const SPEED_PER_WAVE := 0.006
 const SPEED_CAP := 0.25

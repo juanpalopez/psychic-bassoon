@@ -29,9 +29,9 @@ func test_wave_1_is_the_base_foe_with_a_hair_more_speed() -> void:
 
 
 func test_wave_10_goblin() -> void:
-	# n = 9: hp scale 1 + 0.2 * 9 + 0.014 * 81 = 3.934, so 20 * 3.934 = 78.68
+	# n = 9: hp scale 1 + 0.2 * 9 + 0.04 * 81 = 6.04, so 20 * 6.04 = 120.8
 	var stats := FoeStats.for_wave("scrapGoblin", 10)
-	assert_eq(stats.hp, 79)
+	assert_eq(stats.hp, 121)
 	assert_almost_eq(stats.speed, 1.9 * 1.06, 1e-12)
 	# 4 * (1 + 0.04 * 9) = 5.44
 	assert_eq(stats.reward, 5)
@@ -39,14 +39,14 @@ func test_wave_10_goblin() -> void:
 
 
 func test_wave_24_orc() -> void:
-	# n = 23: scale 1 + 4.6 + 0.014 * 529 = 13.006, so 130 * 13.006 = 1690.78
+	# n = 23: scale 1 + 4.6 + 0.04 * 529 = 26.76, so 130 * 26.76 = 3478.8
 	var stats := FoeStats.for_wave("corrugatedOrc", 24)
-	assert_eq(stats.hp, 1691)
+	assert_eq(stats.hp, 3479)
 	assert_almost_eq(stats.speed, 0.68 * 1.144, 1e-12)
 	# 13 * (1 + 0.04 * 23) = 24.96
 	assert_eq(stats.reward, 25)
-	# an extra armor point every 12 waves: 4 + 2
-	assert_eq(stats.armor, 6)
+	# an extra armor point every 12 waves: 6 + 2
+	assert_eq(stats.armor, 8)
 
 
 func test_speed_bonus_stops_at_the_cap() -> void:
@@ -57,10 +57,10 @@ func test_speed_bonus_stops_at_the_cap() -> void:
 
 
 func test_armor_steps_up_every_12_waves() -> void:
-	assert_eq(FoeStats.for_wave("corrugatedOrc", 11).armor, 4)
-	assert_eq(FoeStats.for_wave("corrugatedOrc", 12).armor, 5)
-	assert_eq(FoeStats.for_wave("corrugatedOrc", 23).armor, 5)
-	assert_eq(FoeStats.for_wave("corrugatedOrc", 24).armor, 6)
+	assert_eq(FoeStats.for_wave("corrugatedOrc", 11).armor, 6)
+	assert_eq(FoeStats.for_wave("corrugatedOrc", 12).armor, 7)
+	assert_eq(FoeStats.for_wave("corrugatedOrc", 23).armor, 7)
+	assert_eq(FoeStats.for_wave("corrugatedOrc", 24).armor, 8)
 
 
 func test_a_stronger_wave_never_makes_a_foe_weaker() -> void:

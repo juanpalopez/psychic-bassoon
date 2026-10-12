@@ -3,7 +3,8 @@
 ## Scrap Goblin is the Scamp (swarm), the Corrugated Orc the Ironclad (armored)
 ## and the Cardboard Golem the Warlord (boss). The prototype's mid-tier Raider has
 ## no counterpart in the GDD and is dropped. Flying (Razor Moth) and support (Ink
-## Shaman) foes arrive in Phase 7. Data only.
+## Shaman) foes arrive in Phase 7. Data only. The Corrugated Orc's armor is 6 (the
+## prototype's Ironclad had 4): see the interim balance in `docs/BALANCE.md`.
 extends RefCounted
 
 const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"]
@@ -31,7 +32,7 @@ const DEFS := {
 		"hp": 130,
 		"speed": 0.68,
 		"reward": 13,
-		"armor": 4,
+		"armor": 6,
 		"resist": 0,
 		"radius": 0.38,
 		"leak": 2

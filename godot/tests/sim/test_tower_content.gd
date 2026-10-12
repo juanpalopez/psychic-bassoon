@@ -34,12 +34,15 @@ func test_each_level_costs_a_whole_number_of_buttons_and_hits_harder_and_further
 			assert_true(cost is int and cost > 0, id)
 
 
-func test_the_numbers_start_from_the_prototype() -> void:
-	# the Spool Guard is the prototype's Ballista, the Mortar its Catapult
+func test_the_numbers_started_from_the_prototype_and_were_tuned_with_the_bot() -> void:
+	# the Spool Guard is the prototype's Ballista (damage raised from 9, 15, 26 so
+	# it still hurts the Corrugated Orc's heavier armor), the Mortar its Catapult
+	# (damage trimmed from 32, 56, 96: untrimmed it wins nearly every map)
 	assert_eq(TOWERS.DEFS.spoolGuard.cost, [50, 60, 110])
-	assert_eq(TOWERS.DEFS.spoolGuard.damage, [9, 15, 26])
+	assert_eq(TOWERS.DEFS.spoolGuard.damage, [11, 18, 30])
 	assert_eq(TOWERS.DEFS.spoolGuard.rate, [3.0, 3.6, 4.5])
 	assert_eq(TOWERS.DEFS.thimbleMortar.cost, [90, 90, 160])
+	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [29, 51, 88])
 	assert_eq(TOWERS.DEFS.thimbleMortar.splash, [0.95, 1.15, 1.35])
 
 
@@ -53,9 +56,10 @@ func test_the_prism_spire_is_a_beam_with_damage_per_second_and_no_rate() -> void
 	var def: Dictionary = TOWERS.DEFS.prismSpire
 	assert_true(def.beam)
 	assert_false(def.has("rate"))
-	# the Storm Spire's damage times its rate, rounded: 18 * 0.9, 30 * 1.1, 50 * 1.3
-	assert_eq(def.damage, [16, 33, 65])
-	assert_eq(def.cost, [110, 100, 180])
+	# damage per second, more than doubled from the Storm Spire's damage times its
+	# rate (16, 33, 65) so that a Prism-only build keeps up with the others
+	assert_eq(def.damage, [36, 72, 140])
+	assert_eq(def.cost, [100, 90, 160])
 	assert_eq(def.range, [2.3, 2.6, 2.9])
 
 

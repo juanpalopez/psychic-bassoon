@@ -8,7 +8,7 @@ The numbers of the sim (foes, towers, economy) started from the 2D prototype's, 
 godot --headless --path godot -s tools/balance_run.gd -- --seeds=1,2,3,4,5,6,7,8 --waves=20 --detail
 ```
 
-Options: `--seeds=` (comma-separated map seeds), `--profiles=` (`spoolOnly`, `mortarHeavy`, `mix`; see `godot/content/bot_profiles.gd`) and `--waves=` (waves to clear; the run also stops when the Heartstone falls or after 30 minutes of play). `--detail` adds the wave tables below. Twenty-four runs of about 20 minutes of play each take about a minute.
+Options: `--seeds=` (comma-separated map seeds), `--profiles=` (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`; see `godot/content/bot_profiles.gd`) and `--waves=` (waves to clear; the run also stops when the Heartstone falls or after 30 minutes of play). `--detail` adds the wave tables below. Twenty-four runs of about 20 minutes of play each take about a minute.
 
 The bot (`godot/sim/bot`) builds its profile's towers in turn on the sockets that reach the most road, saves up when it cannot pay, upgrades (lowest level, then cheapest) once every socket has a tower, and launches the next wave as soon as none is running. It is a steady, mildly clever player, not an expert: it never sells, never calls a wave early (in these profiles), and builds in a fixed order. A human who plays well should do better; a human who plays badly, worse.
 
@@ -149,6 +149,14 @@ wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
 - **The long road helps the player.** The main road is about 71 cells on the 22 by 16 board against about 33 on the old 9 by 13 one (the `mean main road` line of the `--detail` output, over seeds 1 to 8), so the same tower numbers get more than twice the time on target.
 - **Strategies hardly differ.** Spool Guards alone, Mortar-heavy and the mix all clear the same waves, so the Orc counter and the swarm counter do not matter yet.
 
+## Sweeping several sets of numbers
+
+```bash
+python3 scripts/balance_sweep.py '[{"waves:HP_QUADRATIC": 0.03}, {"waves:HP_QUADRATIC": 0.05}]'
+```
+
+Each item of the list is one configuration: `"file:CONSTANT": value` sets a `const` of `godot/content/<file>.gd` (`waves`, `foes`, `towers` or `rules`), and `"sub:file#n": ["old text", "new text"]` replaces a piece of text (for a number inside a table, such as a tower's damage list). The optional second and third arguments are the seeds (default `1,...,8`) and the number of parallel workers. The script never touches the working tree: it copies the project, edits the copy and prints, per configuration and profile, the waves each seed cleared, the waves they died on, the mean Buttons left and the mean Heartstone health.
+
 ## Limits of the bot
 
 - It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
@@ -166,3 +174,50 @@ A block is now accepted only when it touches the road and has a stretch of it to
 ## The Golem splits (#187)
 
 The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (not when it leaks). Measured on seeds 1 to 8, 20 waves, the three original profiles, on `main` before and after the change (the tables above were already out of date because of the socket fix): 7 of the 24 runs now leak where `main` leaked nothing (spool-only on seeds 1, 2, 5 and 6, Heartstone health 20 to 16, 18, 16 and 16; mortar-heavy on seeds 2, 3 and 5, 20 to 16), and all 24 runs still clear 20 waves. In those runs wave 10 goes from 0 leaks to 4: the Golem dies near the end of the road, so its goblins start a few cells (at most 1.2) from the end and walk out before the towers can retarget. So wave 10 now costs about 4 Heartstone health on roughly one run in three, which is the point of a boss. The children do not inherit the Golem's slow, and a Golem destroyed within 1.2 cells of the start stacks its children on the spawn point. Any balance round that merges after this one must be re-measured.
+
+## Interim balance (2026-10-12)
+
+**Goal (owner, 2026-10-12):** a light pass now, a full one after the Phase 7 content (guards, heroes, spells, flyers, support foes). The aim is that a build of only one kind of tower can carry a run about as far as the others, that a mix is at least as good as the best of them, and that waves 11 to 20 push back. These numbers are interim: guards that block foes, heroes and spells will change the power of everything, and the economy has nothing to buy late in the game (the Spool Guard strategy ends with about 1,200 unspent Buttons).
+
+**Method:** the scripted bot with four profiles (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`) on seeds 1 to 8 (1 to 16 where noted), 20 waves. `prismHeavy` builds Prism Spire, Spool Guard, Prism Spire in turn, so it is not Prism-only. Every round below was run on the current `main` (sockets beside the road, the Golem splitting), through `scripts/balance_sweep.py`; the exact configurations and the raw output are in `docs/balance/` (`rounds-seeds-1-8.json` and `.txt`, `rounds-seeds-1-16.json` and `.txt`), so each line can be reproduced. "Won" is a run that clears all 20 waves; a run that stops at 19 waves cleared without dying hit the 30-minute play cap and does not count as won; the numbers are the medians of the waves cleared, or the wins out of the maps.
+
+**What the rounds showed**
+
+| Round | Numbers | Spool only | Mortar heavy | Prism heavy | Mix |
+| --- | --- | --- | --- | --- | --- |
+| R1a | Prototype numbers, HP growth 0.014 | 8 of 8 won | 8 of 8 won | 2 of 8 won, median 10 | 8 of 8 won |
+| R1b | Prototype numbers, HP growth 0.03 | 5 of 8 won | 8 of 8 won | 0 of 8 won, median 8.5 | 5 of 8 won |
+| R2a | R1b with Prism damage 32 / 66 / 130 | 5 of 8 | 8 of 8 | 3 of 8, median 18.5 | 8 of 8 |
+| R2b | R2a with Prism cost 90 / 90 / 150 | 5 of 8 | 8 of 8 | 8 of 8 won | 8 of 8 |
+| R3a | R1b with Orc armor 8 | 0 of 8, median 7 | 8 of 8 won | 0 of 8, median 8 | 1 of 8, median 9 |
+| R3b | HP 0.03, Orc armor 6, Prism 32 / 66 / 130, Spool 11 / 18 / 30, Mortar 32 / 56 / 96 | 8 of 8 | 8 of 8 | 3 of 8, median 18.5 | 8 of 8 |
+| R4a | The final numbers below, HP growth 0.05 | 0 of 8, median 17 | 3 of 8, median 15 | 1 of 8, median 14 | 2 of 8, median 14 |
+| R4b | Final numbers, HP growth 0.06 | 0 of 8, median 14 | 2 of 8, median 11 | 0 of 8, median 12 | 1 of 8, median 11.5 |
+| R4c | Final numbers, HP growth 0.07 | 0 of 8, median 10 | 0 of 8, median 10 | 0 of 8, median 9.5 | 0 of 8, median 10.5 |
+
+1. **The Prism Spire is the weak tower.** With the prototype's numbers a Prism-heavy build is lost on waves 7 to 13 on most maps while the others win (R1a, R1b). 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button. Doubling its damage alone is not enough (R2a); doubling it and cutting the cost to 90 makes it win everything (R2b), so the final numbers sit between: damage 36, 72, 140 per second at 100, 90, 160 Buttons.
+2. **Orc armor is what separates the towers.** At armor 8 the Spool Guard and Prism-heavy builds collapse (they cleared 6 to 9 waves and won no map) and the Mix nearly does (it won 1 of 8 maps, the others ending on waves 8 to 10), while the Mortar's splash still wins every map (R3a). At 6, with the Spool Guard raised about 20% (9, 15, 26 to 11, 18, 30), the Spool Guard is back in the game (R3b).
+3. **The Mortar needs a trim, but a smaller one than I first made.** With the final numbers at HP growth 0.04 (seeds 1 to 16, `rounds-seeds-1-16`): the untrimmed Mortar (32 / 56 / 96) wins 14 of 16 maps against 9 for the Spool Guard and 7 for Prism-heavy; 26 / 46 / 80 wins 6 of 16 (too weak); 29 / 51 / 88 wins 10 of 16. That is the number used.
+4. **Foe HP growth sets the difficulty once the towers are close to each other.** At 0.04 the strategies win 7 to 12 of 16 maps and the weak maps are lost between waves 11 and 20; 0.05 is harder than the target (0 to 3 of 8 won), 0.06 and 0.07 are much too hard.
+
+**Changes** (all in `godot/content`):
+
+| Number | Before | Now |
+| --- | --- | --- |
+| Corrugated Orc armor | 4 | 6 |
+| Foe HP growth, quadratic term (`HP_QUADRATIC`) | 0.014 | 0.04 |
+| Spool Guard damage, levels 1 to 3 | 9, 15, 26 | 11, 18, 30 |
+| Thimble Mortar damage | 32, 56, 96 | 29, 51, 88 |
+| Prism Spire damage per second | 16, 33, 65 | 36, 72, 140 |
+| Prism Spire cost | 110, 100, 180 | 100, 90, 160 |
+
+**Result** (seeds 1 to 16, 20 waves, `rounds-seeds-1-16` configuration R5c):
+
+| Strategy | Median waves cleared | Range | Won | Mean Heartstone health at the end | Buttons left |
+| --- | --- | --- | --- | --- | --- |
+| Spool Guards only | 20 | 17 to 20 | 9 of 16 | 7.3 | 1,193 |
+| Mortar heavy | 20 | 10 to 20 | 10 of 16 | 5.8 | 297 |
+| Prism heavy | 19 | 15 to 20 | 7 of 16 | 5.1 | 129 |
+| Mix | 20 | 10 to 20 | 12 of 16 | 10.1 | 486 |
+
+Solo builds are within a wave of each other in median, they win 7 to 10 of 16 maps, and the mix wins the most (12 of 16) with the highest Heartstone health. Mortar heavy and Mix have the worst maps (both end on wave 10), and Prism heavy has the lowest Heartstone health at the end (5.1). Only one run in the 64 ends with the Heartstone untouched. Still to do: the economy (Buttons pile up), the boss wave as a real test, the targets of #203 for the first four waves, and everything involving the new content.
