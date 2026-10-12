@@ -5,7 +5,7 @@
 ## `early_foes_left`: how few foes must be left for it to do so.
 extends RefCounted
 
-const PROFILE_IDS: Array[String] = ["spoolOnly", "mortarHeavy", "mix"]
+const PROFILE_IDS: Array[String] = ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"]
 
 const PROFILES := {
 	"spoolOnly":
@@ -17,6 +17,12 @@ const PROFILES := {
 	"mortarHeavy":
 	{
 		"build_order": ["thimbleMortar", "thimbleMortar", "spoolGuard"],
+		"call_early": false,
+		"early_foes_left": 0,
+	},
+	"prismHeavy":
+	{
+		"build_order": ["prismSpire", "spoolGuard", "prismSpire"],
 		"call_early": false,
 		"early_foes_left": 0,
 	},

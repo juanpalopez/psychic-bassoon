@@ -106,8 +106,9 @@ func test_speed_and_frame_rate_never_change_the_game() -> void:
 			GameTestKit.snapshot(reference),
 			"the whole game at speed %d, frame %f" % [setup[0], setup[1]]
 		)
-	# foes really are on the board in this run (otherwise the check proves little)
-	assert_gt(reference.foes.size(), 0)
+	# foes really spawned in this run (the towers may have shot them all by now, so
+	# count the ids handed out: two towers, then the foes)
+	assert_gt(reference.next_id, 2, "foes spawned, otherwise the check proves little")
 
 
 ## A scripted player: builds, upgrades and launches on fixed ticks.

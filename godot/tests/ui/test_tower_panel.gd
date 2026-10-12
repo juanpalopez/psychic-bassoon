@@ -36,8 +36,8 @@ func test_it_names_the_tower_and_its_level() -> void:
 func test_it_shows_the_levels_stats_from_the_content() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("spoolGuard", 1, 110), 0)
-	# level 2 Ballista: damage 15, range 2.6, rate 3.6
-	assert_string_contains(panel.stats_text(), "15")
+	# level 2 Spool Guard: damage 18, range 2.6, rate 3.6
+	assert_string_contains(panel.stats_text(), "18")
 	assert_string_contains(panel.stats_text(), "2.6")
 	assert_string_contains(panel.stats_text(), "3.6")
 
@@ -45,8 +45,8 @@ func test_it_shows_the_levels_stats_from_the_content() -> void:
 func test_a_beam_tower_shows_damage_per_second_and_no_rate() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("prismSpire", 1, 210), 0)
-	# level 2 Prism Spire: 33 damage per second, range 2.6
-	assert_string_contains(panel.stats_text(), "33/s")
+	# level 2 Prism Spire: 72 damage per second, range 2.6
+	assert_string_contains(panel.stats_text(), "72/s")
 	assert_string_contains(panel.stats_text(), "2.6")
 	assert_false(panel.stats_text().contains("Rate"))
 

@@ -149,6 +149,14 @@ wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
 - **The long road helps the player.** The main road is about 71 cells on the 22 by 16 board against about 33 on the old 9 by 13 one (the `mean main road` line of the `--detail` output, over seeds 1 to 8), so the same tower numbers get more than twice the time on target.
 - **Strategies hardly differ.** Spool Guards alone, Mortar-heavy and the mix all clear the same waves, so the Orc counter and the swarm counter do not matter yet.
 
+## Sweeping several sets of numbers
+
+```bash
+python3 scripts/balance_sweep.py '[{"waves:HP_QUADRATIC": 0.03}, {"waves:HP_QUADRATIC": 0.05}]'
+```
+
+Each item of the list is one configuration: `"file:CONSTANT": value` sets a `const` of `godot/content/<file>.gd` (`waves`, `foes`, `towers` or `rules`), and `"sub:file#n": ["old text", "new text"]` replaces a piece of text (for a number inside a table, such as a tower's damage list). The optional second and third arguments are the seeds (default `1,...,8`) and the number of parallel workers. The script never touches the working tree: it copies the project, edits the copy and prints, per configuration and profile, the waves each seed cleared, the waves they died on, the mean Buttons left and the mean Heartstone health.
+
 ## Limits of the bot
 
 - It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
@@ -166,3 +174,38 @@ A block is now accepted only when it touches the road and has a stretch of it to
 ## The Golem splits (#187)
 
 The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (not when it leaks). Measured on seeds 1 to 8, 20 waves, the three original profiles, on `main` before and after the change (the tables above were already out of date because of the socket fix): 7 of the 24 runs now leak where `main` leaked nothing (spool-only on seeds 1, 2, 5 and 6, Heartstone health 20 to 16, 18, 16 and 16; mortar-heavy on seeds 2, 3 and 5, 20 to 16), and all 24 runs still clear 20 waves. In those runs wave 10 goes from 0 leaks to 4: the Golem dies near the end of the road, so its goblins start a few cells (at most 1.2) from the end and walk out before the towers can retarget. So wave 10 now costs about 4 Heartstone health on roughly one run in three, which is the point of a boss. The children do not inherit the Golem's slow, and a Golem destroyed within 1.2 cells of the start stacks its children on the spawn point. Any balance round that merges after this one must be re-measured.
+
+## Interim balance (2026-10-12)
+
+**Goal (owner, 2026-10-12):** a light pass now, a full one after the Phase 7 content (guards, heroes, spells, flyers, support foes). The aim is that a build of only one kind of tower can carry a run about as far as the others, and that a mix beats any single kind, while waves 11 to 20 push back. These numbers are interim: guards that block foes, heroes and spells will change the power of everything, and the economy has nothing to buy late in the game (the Spool Guard strategy ends with about 1,200 unspent Buttons).
+
+**Method:** the scripted bot with four profiles (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`) on seeds 1 to 8 (1 to 16 for the final table), 20 waves, 6 configurations per round. A sweep (`scripts/balance_sweep.py`, see below) runs in about 90 seconds because each configuration runs in its own copy of the project and each profile in its own process, in parallel.
+
+**What the rounds showed (on the socket layout of the fix above):**
+
+1. With the prototype's numbers and sockets beside the road, every profile clears 20 waves on almost every map. The Prism Spire was the exception: a Prism-only build died on waves 6 to 10 on every map, because 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button.
+2. Raising foe HP growth (0.014 to 0.03) alone changed little. Doubling the Prism Spire's damage brought a Prism-only build to waves 12 to 20; cutting its cost to 90 brought it to all 20.
+3. Orc armor is what separates the towers. At 8 the Spool Guard collapses (waves 6 to 8) and the Mortar's splash dominates; at 6 the Spool Guard is weak but alive (waves 7 to 18), so its damage was raised about 20% (9, 15, 26 to 11, 18, 30). The Mortar then led, so its damage was trimmed about 19% (32, 56, 96 to 26, 46, 80).
+4. With the towers close, foe HP growth sets the difficulty: 0.04 puts the medians at waves 19 to 20 (2 to 5 wins in 8, depending on the tower numbers), 0.05 drops the Mortar and Mix to a median of 11 to 12, 0.06 and 0.07 are too hard (medians 9 to 14).
+
+**Changes** (all in `godot/content`):
+
+| Number | Before | Now |
+| --- | --- | --- |
+| Corrugated Orc armor | 4 | 6 |
+| Foe HP growth, quadratic term (`HP_QUADRATIC`) | 0.014 | 0.04 |
+| Spool Guard damage, levels 1 to 3 | 9, 15, 26 | 11, 18, 30 |
+| Thimble Mortar damage | 32, 56, 96 | 26, 46, 80 |
+| Prism Spire damage per second | 16, 33, 65 | 36, 72, 140 |
+| Prism Spire cost | 110, 100, 180 | 100, 90, 160 |
+
+**Result** (seeds 1 to 16, 20 waves; "won" is a run that clears all 20):
+
+| Strategy | Median waves cleared | Range | Won | Mean Heartstone health at the end | Buttons left |
+| --- | --- | --- | --- | --- | --- |
+| Spool Guards only | 20 | 17 to 20 | 10 of 16 | 9.1 | 1,191 |
+| Mortar heavy | 19 | 9 to 20 | 6 of 16 | 3.5 | 251 |
+| Prism heavy | 20 | 15 to 20 | 9 of 16 | 5.9 | 206 |
+| Mix | 20 | 10 to 20 | 10 of 16 | 9.1 | 482 |
+
+Solo builds are within a wave of each other, the mix is as good as the best solo build, and the weakest maps are lost around waves 9 to 18. The Mortar is the least reliable strategy (it needs good sockets for its short reach). Still to do: the economy (Buttons pile up), the boss wave as a real test, a mix that clearly beats every solo build, and everything involving the new content.

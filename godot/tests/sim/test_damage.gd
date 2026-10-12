@@ -25,14 +25,14 @@ func test_the_ground_foes_start_with_the_hp_and_armor_the_tests_below_rely_on() 
 	var goblin: Foe = _game_with("scrapGoblin")[1]
 	var orc: Foe = _game_with("corrugatedOrc")[1]
 	assert_eq([goblin.hp, goblin.armor, goblin.reward], [20.0, 0, 4])
-	assert_eq([orc.hp, orc.armor], [130.0, 4])
+	assert_eq([orc.hp, orc.armor], [130.0, 6])
 
 
 func test_physical_damage_is_cut_by_armor() -> void:
 	var made := _game_with("corrugatedOrc")
 	var dealt := Damage.apply(made[0], made[1], 10.0, Damage.Kind.PHYSICAL)
-	assert_eq(dealt, 6.0)
-	assert_eq((made[1] as Foe).hp, 124.0)
+	assert_eq(dealt, 4.0)
+	assert_eq((made[1] as Foe).hp, 126.0)
 
 
 func test_physical_damage_against_no_armor_is_whole() -> void:
@@ -44,9 +44,9 @@ func test_physical_damage_against_no_armor_is_whole() -> void:
 func test_armor_never_cuts_a_hit_below_a_quarter_of_it() -> void:
 	assert_eq(RULES.MIN_DAMAGE_FRACTION, 0.25)
 	var made := _game_with("corrugatedOrc")
-	# 4 damage against 4 armor would be 0: the floor is a quarter of 4
+	# 4 damage against 6 armor would be nothing: the floor is a quarter of 4
 	assert_eq(Damage.apply(made[0], made[1], 4.0, Damage.Kind.PHYSICAL), 1.0)
-	# 2 damage against 4 armor: the floor, 0.5
+	# 2 damage against 6 armor: the floor, 0.5
 	assert_eq(Damage.apply(made[0], made[1], 2.0, Damage.Kind.PHYSICAL), 0.5)
 
 
@@ -85,7 +85,7 @@ func test_the_orcs_armor_makes_magic_the_better_counter() -> void:
 	var magic := _game_with("corrugatedOrc")
 	var by_spool := Damage.apply(physical[0], physical[1], 9.0, Damage.Kind.PHYSICAL)
 	var by_prism := Damage.apply(magic[0], magic[1], 9.0, Damage.Kind.MAGIC)
-	assert_eq(by_spool, 5.0)
+	assert_eq(by_spool, 3.0)
 	assert_eq(by_prism, 9.0)
 
 

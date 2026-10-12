@@ -36,7 +36,9 @@ func _coverage(game: GameState, anchor: Vector2i) -> int:
 
 
 func test_there_are_three_profiles_with_real_towers() -> void:
-	assert_eq(PROFILES.PROFILE_IDS, ["spoolOnly", "mortarHeavy", "mix"] as Array[String])
+	assert_eq(
+		PROFILES.PROFILE_IDS, ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"] as Array[String]
+	)
 	for id in PROFILES.PROFILE_IDS:
 		var profile: Dictionary = PROFILES.PROFILES[id]
 		assert_gt(profile.build_order.size(), 0, id)
