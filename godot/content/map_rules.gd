@@ -51,13 +51,12 @@ const SOCKET_FOOTPRINT := 2
 const GAME_SOCKET_FOOTPRINT := 2
 ## Blocks of 2 or more cells leave this many empty cells between each other.
 const SOCKET_BLOCK_GAP := 1
-## A block's centre is at most this far (cells) from the centre of the nearest road
-## cell, so a level 1 tower (reach 2.3) always has road in range. Single-cell
-## sockets keep the looser `SOCKET_REACH` rule.
-const SOCKET_BLOCK_ROAD_DISTANCE := 1.8
-## And at least this many road cells lie within `SOCKET_COVERAGE_REACH` cells of the
-## block's centre (a level 1 Spool Guard's reach, the shortest of the towers), so
-## a tower there has a stretch of road to shoot at, not a corner.
+## A 2x2 block must have at least this many road cells within
+## `SOCKET_COVERAGE_REACH` cells of its centre (a level 1 Spool Guard's reach, the
+## shortest of the towers), so a tower there has a stretch of road to shoot at, not
+## a corner. A block's centre sits on a cell corner, so on this grid that means the
+## block touches the road: the nearest road cell is 1.58 cells away, never more.
+## Single-cell sockets keep the looser `SOCKET_REACH` rule.
 const SOCKET_MIN_ROAD_COVERAGE := 3
 const SOCKET_COVERAGE_REACH := 2.3
 
