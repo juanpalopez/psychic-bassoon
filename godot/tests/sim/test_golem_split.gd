@@ -39,6 +39,15 @@ func test_the_content_says_how_many_and_how_far_apart() -> void:
 	assert_false(FOES.DEFS.corrugatedOrc.has("splits_into"))
 
 
+func test_every_foe_that_splits_says_how_many_and_how_far_apart() -> void:
+	for id in FOES.FOE_IDS:
+		var def: Dictionary = FOES.DEFS[id]
+		if def.has("splits_into"):
+			assert_true(FOES.DEFS.has(def.splits_into), "%s splits into a known foe" % id)
+			assert_gt(int(def.get("split_count", 0)), 0, "%s needs split_count" % id)
+			assert_gt(float(def.get("split_spacing", 0.0)), 0.0, "%s needs split_spacing" % id)
+
+
 func test_a_foe_knows_the_wave_it_came_in() -> void:
 	var game := Game.create(1)
 	assert_eq(FoeSpawner.spawn(game, "scrapGoblin", 7, 0).wave, 7)
@@ -113,6 +122,8 @@ func test_the_kill_pays_the_golems_reward_once() -> void:
 	assert_eq(_goblins(game).size(), 4)
 
 
+## A guard for the future: a leaking foe never goes through `Damage`, so nothing
+## splits on the leak path today.
 func test_a_golem_that_leaks_splits_nothing() -> void:
 	var game := Game.create(1)
 	var golem := _golem(game, 10, game.routes[0].total - 0.01)
