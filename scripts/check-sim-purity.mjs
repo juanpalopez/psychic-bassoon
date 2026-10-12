@@ -87,6 +87,7 @@ const ALLOWED_BUILTINS = new Set([
   'PackedStringArray',
   'Vector2',
   'Vector2i',
+  'Rect2i',
   'Callable',
   'Variant',
   'Error',
