@@ -21,4 +21,8 @@ static func of(reason: GameEvent.RejectReason) -> String:
 			return "No such tower"
 		GameEvent.RejectReason.WAVE_IN_PROGRESS:
 			return "A wave is still coming"
+		GameEvent.RejectReason.GAME_WON:
+			return "You already won"
+		GameEvent.RejectReason.FINAL_WAVE:
+			return "That was the final wave"
 	return "That did not work"

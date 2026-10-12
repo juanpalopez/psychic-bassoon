@@ -18,7 +18,12 @@ static func step(
 ) -> int:
 	var ticks := clock.advance(elapsed_seconds, speed)
 	var ran := 0
-	while ran < ticks and not game.over and (until_tick < 0 or game.tick_count < until_tick):
+	while (
+		ran < ticks
+		and not game.over
+		and not game.won
+		and (until_tick < 0 or game.tick_count < until_tick)
+	):
 		if before_tick.is_valid():
 			before_tick.call(game)
 		Game.tick(game)

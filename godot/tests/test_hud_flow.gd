@@ -168,3 +168,19 @@ func test_an_order_while_paused_says_it_waits() -> void:
 	main.select_cell(main.game().map.sockets[0])
 	(main.get_node("Hud/BuildMenu") as BuildMenu).tower_buttons()[0].pressed.emit()
 	assert_string_contains((main.get_node("Hud/Message") as Label).text, "Paused")
+
+
+func test_a_won_game_shows_the_victory_overlay_and_play_again_starts_afresh() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	var overlay := main.get_node("Hud/GameOver") as GameOverPanel
+	game.wave = 20
+	game.won = true
+	main._process(0.05)
+	assert_true(overlay.visible)
+	assert_string_contains(overlay.title_text(), "holds")
+	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "won")
+	assert_true((main.get_node("Hud/LaunchWave") as Button).disabled)
+	overlay.play_again_button().pressed.emit()
+	assert_false(main.game().won)
+	assert_false(overlay.visible)

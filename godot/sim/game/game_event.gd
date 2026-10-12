@@ -16,6 +16,7 @@ enum Kind {
 	GAME_OVER,
 	FOE_KILLED,
 	TOWER_FIRED,
+	GAME_WON,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.
@@ -28,6 +29,8 @@ enum RejectReason {
 	MAX_LEVEL,
 	NO_SUCH_TOWER,
 	WAVE_IN_PROGRESS,
+	GAME_WON,
+	FINAL_WAVE,
 }
 
 var kind: Kind = Kind.TOWER_BUILT

@@ -8,6 +8,8 @@ signal play_again
 const BUTTON_SIZE := Vector2(320.0, 96.0)
 ## The title wraps at this width, so the panel stays narrow on a small screen.
 const TEXT_WIDTH := 340.0
+const LOST_TITLE := "The Heartstone has fallen"
+const WON_TITLE := "The Heartstone holds!"
 
 var _title := Label.new()
 var _detail := Label.new()
@@ -19,7 +21,7 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(box)
-	_title.text = "The Heartstone has fallen"
+	_title.text = LOST_TITLE
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_title.custom_minimum_size = Vector2(TEXT_WIDTH, 0.0)
@@ -34,7 +36,15 @@ func _ready() -> void:
 
 ## Opens the overlay for a game lost on `wave`.
 func show_for(wave: int) -> void:
+	_title.text = LOST_TITLE
 	_detail.text = "You fell on wave %d" % wave
+	visible = true
+
+
+## Opens the overlay for a game won by clearing `wave`.
+func show_won(wave: int) -> void:
+	_title.text = WON_TITLE
+	_detail.text = "You cleared wave %d" % wave
 	visible = true
 
 

@@ -77,7 +77,9 @@ func _process(delta: float) -> void:
 	_message.visible = _message_left > 0.0
 	_top_bar.show_state(_game)
 	_speed_bar.show_speed(_speed)
-	if _game.over:
+	if _game.won:
+		_game_over.show_won(_game.wave)
+	elif _game.over:
 		_game_over.show_for(_game.wave)
 	else:
 		_game_over.close()
@@ -181,9 +183,12 @@ func select_cell(cell: Vector2i) -> void:
 		_panel.show_tower(tower, _game.buttons, TowerInfo.effective_range(_game.map, tower))
 		_show_ring(tower)
 		return
-	if _game.over:
+	if _game.over or _game.won:
+		var why := (
+			GameEvent.RejectReason.GAME_WON if _game.won else GameEvent.RejectReason.GAME_OVER
+		)
 		_highlight.show_block(anchor, footprint, height, BLOCKED_COLOUR)
-		_show_message(RejectText.of(GameEvent.RejectReason.GAME_OVER))
+		_show_message(RejectText.of(why))
 		return
 	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
 	_menu.open_for(anchor, _game.buttons)
@@ -305,11 +310,17 @@ func _seed_from_url() -> Variant:
 ## The launch button says what a press would do, and rests while it cannot.
 func _update_launch_button() -> void:
 	var next := _game.wave + 1
-	if _game.over:
+	if _game.won:
+		_launch.text = "You won"
+		_launch.disabled = true
+	elif _game.over:
 		_launch.text = "Game over"
 		_launch.disabled = true
 	elif not _game.spawners.is_empty():
 		_launch.text = "Wave %d is coming..." % _game.wave
+		_launch.disabled = true
+	elif _game.wave >= EARLY_RULES.WIN_WAVE:
+		_launch.text = "Final wave"
 		_launch.disabled = true
 	elif _game.running:
 		var bonus: int = EARLY_RULES.EARLY_CALL_BASE + _game.wave * EARLY_RULES.EARLY_CALL_PER_WAVE

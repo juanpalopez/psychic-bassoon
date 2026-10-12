@@ -68,6 +68,7 @@ static func snapshot(game: GameState) -> Dictionary:
 		routes.append(cells)
 	return {
 		"seed": game.seed,
+		"won": game.won,
 		"tick": game.tick_count,
 		"buttons": game.buttons,
 		"heartstone_health": game.heartstone_health,

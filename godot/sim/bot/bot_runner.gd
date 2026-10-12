@@ -29,7 +29,7 @@ static func play_with(
 	var since_clear := {"kills": 0, "leaks": 0, "ticks": 0}
 	var waves_cleared := 0
 	var ticks := 0
-	while ticks < max_ticks and not game.over and waves_cleared < max_waves:
+	while ticks < max_ticks and not game.over and not game.won and waves_cleared < max_waves:
 		act.call(game)
 		Game.tick(game)
 		ticks += 1
@@ -67,6 +67,7 @@ static func play_with(
 		"seed": map_seed,
 		"waves_cleared": waves_cleared,
 		"over": game.over,
+		"won": game.won,
 		"died_on_wave": game.wave if game.over else 0,
 		"heartstone_health": game.heartstone_health,
 		"towers": game.towers.size(),

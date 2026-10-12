@@ -35,7 +35,7 @@ func test_the_hud_shows_the_wave_the_heartstones_health_and_the_buttons() -> voi
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	_frames(main, 1.0)
 	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
-	assert_string_contains(text, "Wave 1")
+	assert_string_contains(text, "Wave 1/20")
 	assert_string_contains(text, "Heartstone %d" % main.game().heartstone_health)
 	assert_string_contains(text, "Buttons %d" % main.game().buttons)
 
@@ -92,9 +92,11 @@ func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
 	game.over = true
-	game.wave = 99
+	# the wave counter never goes past the win wave in a real game
+	game.wave = 20
 	game.heartstone_health = 20
-	game.buttons = 99999
+	# more Buttons than a run ever holds (the Spool Guard strategy ends with 2,500)
+	game.buttons = 9999
 	main._process(0.05)
 	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
 	# the bar has 1280 - 20 - 500 px before it would run under the speed buttons

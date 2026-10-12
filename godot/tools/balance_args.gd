@@ -3,6 +3,7 @@
 class_name BalanceArgs
 extends RefCounted
 
+const RULES := preload("res://content/game_rules.gd")
 const PROFILES := preload("res://content/bot_profiles.gd")
 const DEFAULT_SEEDS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
 const DEFAULT_WAVES := 20
@@ -41,6 +42,8 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			var text := arg.trim_prefix("--waves=")
 			if not text.is_valid_int() or int(text) < 1:
 				return _bad(out, arg, "waves must be a whole number of at least 1")
+			if int(text) > RULES.WIN_WAVE:
+				return _bad(out, arg, "a run ends at wave %d, when it is won" % RULES.WIN_WAVE)
 			out.waves = int(text)
 		elif arg == "--detail":
 			out.detail = true

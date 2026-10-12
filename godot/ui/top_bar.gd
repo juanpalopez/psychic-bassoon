@@ -2,6 +2,8 @@
 class_name TopBar
 extends HBoxContainer
 
+const RULES := preload("res://content/game_rules.gd")
+
 var _labels: Array[Label] = []
 
 
@@ -16,7 +18,7 @@ func _ready() -> void:
 func show_state(game: GameState) -> void:
 	_labels[0].text = "Buttons %d" % game.buttons
 	_labels[1].text = "Heartstone %d" % game.heartstone_health
-	_labels[2].text = "Wave %d" % game.wave
+	_labels[2].text = "Wave %d/%d" % [game.wave, RULES.WIN_WAVE]
 	_labels[3].text = "Seed %d" % game.seed
 
 
