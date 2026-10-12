@@ -8,6 +8,9 @@ const TICK_RATE := 30
 const MAX_FRAME_SECONDS := 0.05
 ## Fastest game speed the player can pick (1x, 2x, 3x).
 const MAX_GAME_SPEED := 3
+## Clearing this wave wins the run. The greybox ends here; the GDD has no
+## endless mode yet, so this is a stand-in until chapters or the boss decide it.
+const WIN_WAVE := 20
 const START_BUTTONS := 180
 const START_HEARTSTONE_HEALTH := 20
 const TOWER_LEVELS := 3

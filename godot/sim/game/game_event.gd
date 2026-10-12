@@ -16,6 +16,7 @@ enum Kind {
 	GAME_OVER,
 	FOE_KILLED,
 	TOWER_FIRED,
+	GAME_WON,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.

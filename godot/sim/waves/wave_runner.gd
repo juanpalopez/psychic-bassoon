@@ -51,3 +51,8 @@ static func settle(game: GameState) -> void:
 	event.wave = game.wave
 	event.bonus = bonus
 	game.events.append(event)
+	if game.wave >= RULES.WIN_WAVE:
+		game.won = true
+		var win := GameEvent.of(GameEvent.Kind.GAME_WON)
+		win.wave = game.wave
+		game.events.append(win)

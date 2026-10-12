@@ -47,7 +47,7 @@ static func tick(game: GameState) -> void:
 	game.pending = []
 	for command in commands:
 		_apply(game, command)
-	if not game.over:
+	if not game.over and not game.won:
 		WaveRunner.step_spawners(game)
 		Combat.step(game)
 		if not game.over:
@@ -145,7 +145,7 @@ static func _launch_wave(game: GameState, command: Command) -> void:
 
 
 static func _apply(game: GameState, command: Command) -> void:
-	if game.over:
+	if game.over or game.won:
 		return _reject(game, command, GameEvent.RejectReason.GAME_OVER)
 	match command.kind:
 		Command.Kind.BUILD:

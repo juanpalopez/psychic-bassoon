@@ -33,3 +33,18 @@ func test_it_can_be_hidden_again() -> void:
 	panel.show_for(1)
 	panel.close()
 	assert_false(panel.visible)
+
+
+func test_a_win_says_so_and_names_the_wave() -> void:
+	var panel := _panel()
+	panel.show_won(20)
+	assert_true(panel.visible)
+	assert_string_contains(panel.title_text(), "holds")
+	assert_string_contains(panel.detail_text(), "wave 20")
+
+
+func test_a_loss_after_a_win_says_the_heartstone_fell_again() -> void:
+	var panel := _panel()
+	panel.show_won(20)
+	panel.show_for(6)
+	assert_string_contains(panel.title_text(), "fallen")

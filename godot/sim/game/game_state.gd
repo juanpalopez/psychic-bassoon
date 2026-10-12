@@ -16,6 +16,8 @@ var heartstone_health: int = 0
 var wave: int = 0
 var running: bool = false
 var over: bool = false
+## True once `WIN_WAVE` has been cleared; like `over`, it stops the game.
+var won: bool = false
 var towers: Array[Tower] = []
 ## Foes on the board, in the order they spawned.
 var foes: Array[Foe] = []

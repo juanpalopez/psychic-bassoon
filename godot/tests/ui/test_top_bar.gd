@@ -15,7 +15,7 @@ func test_it_shows_the_state_of_the_game() -> void:
 	game.wave = 3
 	var bar := _bar()
 	bar.show_state(game)
-	assert_eq(bar.texts(), ["Buttons 123", "Heartstone 14", "Wave 3", "Seed 7"])
+	assert_eq(bar.texts(), ["Buttons 123", "Heartstone 14", "Wave 3/20", "Seed 7"])
 
 
 func test_it_follows_the_game_when_it_changes() -> void:
