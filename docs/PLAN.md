@@ -30,7 +30,7 @@ The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Ho
 
 **Loop.** Scout and build (spend Buttons, the currency, on pre-etched sockets) → engage the wave (call it early for bonus income) → combat (targeting priorities, hero commands, drop-scraps, spells powered by regenerating PVA Ink / Crafting Energy) → rewards (Golden Staples from remaining kingdom health, spent in a workshop tech tree on permanent skills, base stats and new origami blueprints).
 
-**Maps.** A seeded cutting-mat board of 1 m tiles in three levels: level 0 the mat (the path runs along marked gridlines), level 1 a glued cardboard rise (a choke point for ground units), level 2 tiered cliffs (a +15% range bonus and no line-of-sight blockers). Branching paths with toggleable cardboard drawbridges and levers; foil rivers slow foes by 25%; tape strips are single-use slowing zones. Building is on 12 to 22 pre-etched circular sockets per map, not on free cells.
+**Maps.** A seeded cutting-mat board of 1 m tiles, **22 columns by 16 rows (352 cells), landscape** (GDD update, 2026-10-12; it was 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 22 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
 
 **Towers.** Four archetypes, each with tiers 1 to 3 (linear damage, range and fire-rate upgrades) and a tier 4 that splits into two specialisations, each with one active and one passive ability.
 
@@ -61,7 +61,7 @@ The ids in the code are stable keys; the GDD renames what the player sees and ad
 | Raider, Ironclad | Corrugated Orc (one armored foe; speed and armor tiers by wave) |
 | Warlord | Cardboard Golem |
 | (none) | Razor Moth (flying), Ink Shaman (support), the hero, the spells, the tech tree |
-| Heartstone, lives | The kingdom's health; the Heartstone goes away |
+| Heartstone, lives | The Heartstone's health (the Heartstone returns in the 2026-10-12 GDD; the code says `kingdom_health` until the rename ticket) |
 | Free plots on every non-road cell | 12 to 22 sockets |
 | Gold | Buttons (in a run), Golden Staples (between runs) |
 
@@ -75,7 +75,7 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 4. **Blocking and melee.** The Guard Tent's guards block and fight, so foes need an attack and units need health. The prototype has neither. This is a new combat context.
 5. **Flying foes.** Razor Moths ignore routes: their line from spawn to the kingdom and which towers can hit them (an anti-air flag) are open.
 6. **Status effects.** Slow, bleed, freeze, blind, armor strip, buffs and healing need one shared status model with stacking and timers.
-7. **New commands.** Choose a tier-4 specialisation, activate an ability, move the hero, cast a spell at a point, toggle a drawbridge, spend Golden Staples. They are commands like `build`, never direct state changes.
+7. **New commands.** Choose a tier-4 specialisation, activate an ability, move the hero, cast a spell at a point, spend Golden Staples. They are commands like `build`, never direct state changes.
 8. **Radial menu and the greybox.** The greybox build menu is a side panel (step A2); the radial menu replaces it in A5. Pan, pinch and the 30° to 65° tilt are camera work for Phase 5.
 9. **Stop-motion at 12 fps.** Animation is sampled at 12 fps while the sim ticks at 30 Hz and the camera runs at 60: baked vertex-animation clips are sampled at a stepped time, so it costs nothing extra; it needs checking with the `MultiMesh` foes.
 10. **Story presentation.** The GDD has lore but no chapters, story cards or voice. The old chapter plan is dropped until the owner asks for it.
@@ -85,6 +85,12 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 14. **Meta-progression and determinism.** Golden Staples upgrade permanent skills and base stats, so the same seed and commands give different runs for different tech trees. A run's input must be the seed, the commands and a frozen meta-loadout (the tech-tree state at the start of the run), stored with replays, shared seeds and best-wave records.
 15. **Smaller mechanics.** Line-of-sight blockers (level 2 towers bypass them), harvesting drop-scraps (a tap command?), the wave timer that starts a wave when it expires, and the Golem spawning Scrap Goblins when destroyed (needed for the Phase 5 gate "to the boss").
 16. **Asset pipeline.** The GDD's section 7 is titled "asset pipeline" but has no pipeline content; the plan's Meshy, Blender and Godot pipeline stands until the owner adds one.
+17. **GDD update, 2026-10-12.** The map is 22×16 with 2x2 sockets and a Heartstone footprint (Map v2, step 5a of Phase 4). The update no longer mentions branching routes, toggleable drawbridges, levers or level 1 as a choke point (dropped), and the river slow is now 50% only for a foe knocked into the water (a knockback mechanic nobody has yet: Guard Tent units or the hero). It adds the Kitchen Mess Tent (an aura and shield model for friendly troops), the Camp Cook hero and the Messenger Crow. Owner answers, 2026-10-12: **one path and one spawn source**, so the detour, branching, drawbridges and levers are all dropped for now (the earlier "detour stays" is superseded); the Mess Tent and Camp Cook numbers are generated by Claude to fit the other towers and heroes when they are built in Phase 7, for the owner to tune; the balance pass for the longer roads follows the generator and socket tickets.
+
+### Backlog
+
+- **Several spawn sources that merge into the existing path** (owner idea, 2026-10-12). Each source would have its own entry road joining the main road. Not planned for a phase; the sim already lets a foe pick among several routes (`routes` and the route stream), which is the starting point. Needs a design pass (wave composition per source, tower coverage, how the roads merge) and its own ticket once a phase takes it.
+- **Branching with drawbridges and levers** (the original GDD): dropped on 2026-10-12; revisit only if the owner asks.
 
 ## Engine decision: Godot
 
@@ -190,7 +196,7 @@ Which units can come from where, and what has to be built. Nothing here is verif
 | Razor Moth, Ink Shaman | Same pipeline | Flying wings (tissue paper and wire) need a flap clip; the Shaman needs a healing aura effect. |
 | Towers (4, tiers 1 to 4, 8 specialisations) | Blender, built with Claude, from spools, tents, prisms and thimbles | Parts animated in an `AnimationPlayer`, no skeleton, at most 3 mesh parts each. Tier lights or paper tags show the tier; specialisations add a visible part. |
 | Hero (Knight of Cardboard), planes, guards | Blender or Meshy | The hero is skinned like a boss; paper planes and guards are small `MultiMesh` or scene instances. |
-| Board tiles and props | Blender tiles (cutting mat, cardboard rise, tiered cliffs, foil rivers, tape strips, drawbridges, levers) and CC0 paper textures | Terrain through modular 1 m tiles; sockets as etched circles that become folded cardstock when built. |
+| Board tiles and props | Blender tiles (cutting mat, cardboard rise, tiered cliffs, foil rivers, tape strips) and CC0 paper textures | Terrain through modular 1 m tiles; sockets as etched circles that become folded cardstock when built. |
 | Effects | Shaders and particles | The Blot shader, glue pools, thumbtacks, confetti, ink vortex, wax freeze; no new models. |
 
 Rule: if a unit's silhouette is not distinct at zoomed-out view, change the model, not the readability pillar.
@@ -253,7 +259,7 @@ From the 2D prototype (the ported base) to the GDD design.
 
 | Area | Prototype | Papercraft Kingdom Defense |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded cutting-mat board with three levels, 12 to 22 sockets, branching routes with drawbridges, river and tape hazards. The ported road generator (a main road and a detour) is the first layer. |
+| Map | Random path on a 9×13 grid | Seeded cutting-mat board of 22×16 cells with three levels, 12 to 22 sockets of 2x2 cells, a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
 | Building | Any free cell | Pre-etched sockets; a radial context menu |
 | Towers | 4 types, 3 levels | 4 archetypes, tiers 1 to 3 plus a tier 4 specialisation each (8 specialisations) with an active and a passive ability; targeting priorities |
 | Foes | Scout, walker, tank, boss | Scrap Goblin, Razor Moth (flying), Corrugated Orc, Ink Shaman (support), Cardboard Golem (boss) |
@@ -278,7 +284,7 @@ Each phase ends with a gate that must pass before the next starts (exception: th
 | 4 · Sim in GDScript, designed from the GDD | PRNG, road generator and routes, game core (done); sockets and elevation, foes and waves, combat core and economy for the first towers and foes, replay goldens, headless run | **The same seed and commands replay to the same result** (goldens), the ported core still matches its fixtures, and `src/` is gone |
 | 5 · Play in Godot (greybox started in parallel with Phase 4, 2026-10-11) | Greybox board, picking, foes, towers, HUD and loop (steps A1 to A6); papercraft terrain tiles, camera pan, pinch and tilt, the radial menu | **A full run to the boss at 60 fps on the owner's phone with 80 foes**, every action reachable in landscape |
 | 6 · Art and ambience (papercraft) | Materials and shaders (kraft, cardboard, mat, foil, tape, the Blot), the Scrap Goblin through the pipeline first, then the other foes, the four towers, board tiles, stop-motion stepping at 12 fps, Claude Design HUD and Theme | All foes and towers use final models, each distinct at zoomed-out view; performance budget met |
-| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, drawbridges and hazards | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
+| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, the Kitchen Mess Tent, the Camp Cook, the Messenger Crow, bridges and hazards (rivers, tape, PVA puddles; drawbridges only if the owner confirms them) | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
 | 8 · Meta, polish, launch, native | Golden Staples tech tree and saved progress, audio, performance pass, README with key art; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
 
 ## Phase details
@@ -313,15 +319,16 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 
 **Work breakdown** (test-first, one context at a time)
 1. Done: PRNG (mulberry32 and `deriveRng`) on masked 32-bit integers, matching its fixtures.
-2. Done: the road generator (main road and a detour) and the routes, matching their fixtures. This is the first map layer.
+2. Done: the road generator (main road and a detour; the game will use the main road only, see 5a) and the routes, matching their fixtures. This is the first map layer.
 3. Done: game state, commands, the command queue and rejection events, the 30 Hz tick, the clock and the frame stepper.
 4. Done: sockets and elevation: 12 to 22 sockets on non-road cells within reach of the road (their own random stream, so the road fixtures still match), three elevation levels by weight with the +15% range multiplier on level 2, `build` only on a socket, and a first golden written by the GDScript sim (`godot/tests/goldens`, `godot/tools`).
 5. Done, except the Golem's split (it needs combat): foes, waves and economy: content for the Scrap Goblin, Corrugated Orc and Cardboard Golem (ground foes first), movement along routes, wave composition and scaling (from the prototype's numbers), kingdom health, Buttons, early-call and wave-clear bonuses, game over. All numbers are starting points for the owner to tune. Calling a wave early while the previous wave's foes still walk lets those foes count toward the new wave's clear, so the earlier wave pays no clear bonus of its own (the prototype's rule). The kingdom's health stops at 0.
+5a. **Map v2** (GDD update, 2026-10-12; owner decisions the same day): (1) rename `kingdom_health` to the Heartstone's health in code, HUD and docs; (2) make the road generator size-aware, parameterised by columns and rows and by whether it grows a detour (the game: no detour, one path from one spawn), with the 9×13 case with detours still checked against the frozen fixtures; the game uses a landscape 22×16 board, generated on the transposed grid (16 columns by 22 rows) and turned, so the road crosses the long side, then a new golden; (3) sockets become 2x2 footprint blocks that never overlap each other or the road, range measured from the block's centre; (4) the Heartstone's footprint; (5) a balance pass for the longer roads (wave pacing, tower reach in cells). The greybox follows in Phase 5 (the board render, camera fit and picking for 22×16).
 6. Combat core: targeting priorities, damage and armor, tiers 1 to 3 of the Spool Guard (fast single target, physical), Thimble Mortar (splash) and Prism Spire (a continuous magic beam; the Corrugated Orc's armor makes it the counter), with damage types (physical, magic, true) and how armor applies to each, and one shared status model starting with slow (used later by rivers, tape and the specialisations). Tower and foe ids change to the GDD's here.
 7. Determinism: a scripted bot, replay goldens for several seeds, and a headless CLI (`godot --headless`) that prints the map and the wave log.
 8. Cleanup, once step 6 no longer needs the TypeScript formulas: remove `src/`, the fixture exporter (`scripts/export-fixtures.ts` and its staleness test), the TypeScript sim CLI (`pnpm sim`, replaced by the `godot --headless` CLI of step 7), the `tsconfig.sim.json` lint step, the `src/**` blocks in `eslint.config.js`, the Vitest `src` include, and the fixtures nobody uses (`damage.json`, `waves.json`, `scaling.json`, `replays.json`). Keep `prng.json`, `maps.json` and `routes.json` frozen, and replace the staleness test with a committed SHA-256 of those three files checked in CI, so "never regenerated" is enforced. Update `CLAUDE.md`, the README and `fixtures/README.md` in the same PR.
 
-Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells, drawbridges and hazards are Phase 7. Their content flags and commands are added then.
+Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells and hazards are Phase 7. Their content flags and commands are added then.
 
 **Gate checklist**
 - [ ] The same seed and commands give the same result: replay goldens for several seeds pass, and change only by a reviewed balance change.
@@ -370,7 +377,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 1. Materials and shaders: kraft paper, cardboard (corrugation, fibre detail), the cutting mat, foil, tape and glue; translucent creased edges; the Blot vertex-displacement shader for ink-drenched surfaces.
 2. The Scrap Goblin through the whole pipeline first (Meshy in a papercraft look, Blender cleanup, rig, clips, vertex animation at 12 fps; ticket #157), then the Corrugated Orc and the Cardboard Golem. Record each in `assets/CREDITS.md`, with the Meshy plan, date and prompt.
 3. The four towers in Blender, built with Claude: spool, tent, prism and thimble, with tier parts and the eight specialisations as visible changes.
-4. Board tiles and props (cutting mat, cardboard rise, cliffs, foil river, tape, drawbridge, lever) and the CC0 paper textures.
+4. Board tiles and props (cutting mat, cardboard rise, cliffs, foil river, tape) and the CC0 paper textures.
 5. Stop-motion stepping at 12 fps for characters and projectiles.
 6. Claude Design: system and tokens first, in the papercraft style, then the HUD, radial menu, Toolbox Tray and workshop screens; build the Godot Theme from them.
 7. Budget re-check.
@@ -391,7 +398,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability.
 5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl).
 6. Global spells and the Toolbox Tray: PVA Glue Trap, Falling Thumbtacks, The Crafter's Eraser, with Crafting Energy.
-7. Map depth: branching routes with toggleable drawbridges and levers, foil rivers, tape strips (a command to toggle a bridge).
+7. Map depth: foil rivers with popsicle-stick bridges, tape strips, PVA puddles. Drawbridges and levers are dropped (owner, 2026-10-12).
 8. Balance: headless runs for each new foe and tower; each foe needs at least two answers at tier 3 and a third from a specialisation.
 
 **Gate checklist**
