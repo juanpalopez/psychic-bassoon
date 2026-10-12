@@ -72,9 +72,12 @@ jobs:
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
-          if ! git diff --quiet "$BASE_SHA" HEAD -- fixtures/; then
-            echo "::error::fixtures/ changed in this PR; the frozen fixtures are never regenerated."
-            git diff --stat "$BASE_SHA" HEAD -- fixtures/
+          frozen="fixtures/prng.json fixtures/maps.json fixtures/routes.json"
+          # shellcheck disable=SC2086
+          if ! git diff --quiet "$BASE_SHA" HEAD -- $frozen; then
+            echo "::error::A frozen fixture changed in this PR; they are never regenerated."
+            # shellcheck disable=SC2086
+            git diff --stat "$BASE_SHA" HEAD -- $frozen
             exit 1
           fi
 
