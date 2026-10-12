@@ -33,6 +33,8 @@ func test_bad_input_is_an_error_with_a_message() -> void:
 		"--seeds=",
 		"--seeds=1,,2",
 		"--seeds=1.5",
+		"--seeds=1,1",
+		"--profiles=mix,mix",
 		"--profiles=foo",
 		"--profiles=",
 		"--waves=0",

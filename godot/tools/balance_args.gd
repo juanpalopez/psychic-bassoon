@@ -24,6 +24,8 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			for part in arg.trim_prefix("--seeds=").split(","):
 				if not part.is_valid_int():
 					return _bad(out, arg, "a seed must be a whole number")
+				if seeds.has(int(part)):
+					return _bad(out, arg, "seed %s is listed twice" % part)
 				seeds.append(int(part))
 			out.seeds = seeds
 		elif arg.begins_with("--profiles="):
@@ -31,6 +33,8 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			for part in arg.trim_prefix("--profiles=").split(","):
 				if not PROFILES.PROFILES.has(part):
 					return _bad(out, arg, "unknown profile %s" % part)
+				if ids.has(part):
+					return _bad(out, arg, "profile %s is listed twice" % part)
 				ids.append(part)
 			out.profiles = ids
 		elif arg.begins_with("--waves="):
