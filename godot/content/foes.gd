@@ -9,7 +9,8 @@ extends RefCounted
 const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"]
 
 ## Per foe: `name`, `hp`, `speed` (cells per second), `reward` (Buttons for a kill),
-## `armor`, `radius` (cells) and `leak` (kingdom health lost when it gets
+## `armor` (cuts physical damage), `resist` (cuts magic damage; no foe has any yet),
+## `radius` (cells) and `leak` (kingdom health lost when it gets
 ## through). The Golem also names what it splits into when destroyed.
 const DEFS := {
 	"scrapGoblin":
@@ -19,6 +20,7 @@ const DEFS := {
 		"speed": 1.9,
 		"reward": 4,
 		"armor": 0,
+		"resist": 0,
 		"radius": 0.24,
 		"leak": 1
 	},
@@ -29,6 +31,7 @@ const DEFS := {
 		"speed": 0.68,
 		"reward": 13,
 		"armor": 4,
+		"resist": 0,
 		"radius": 0.38,
 		"leak": 2
 	},
@@ -39,6 +42,7 @@ const DEFS := {
 		"speed": 0.5,
 		"reward": 110,
 		"armor": 6,
+		"resist": 0,
 		"radius": 0.5,
 		"leak": 6,
 		"splits_into": "scrapGoblin",

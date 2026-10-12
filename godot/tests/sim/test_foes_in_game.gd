@@ -68,8 +68,8 @@ func test_a_foe_starts_with_its_wave_stats_and_walks_on_its_spawn_tick() -> void
 		Game.tick(game)
 	var foe := game.foes[0]
 	var stats := FoeStats.for_wave("scrapGoblin", 1)
-	assert_eq(foe.hp, stats.hp)
-	assert_eq(foe.max_hp, stats.hp)
+	assert_eq(foe.hp, float(stats.hp))
+	assert_eq(foe.max_hp, float(stats.hp))
 	assert_eq(foe.speed, stats.speed)
 	assert_eq(foe.reward, stats.reward)
 	assert_eq(foe.armor, stats.armor)
