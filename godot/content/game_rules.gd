@@ -16,6 +16,8 @@ const START_HEARTSTONE_HEALTH := 20
 const TOWER_LEVELS := 3
 ## Share of the Buttons invested that a sale returns.
 const SELL_REFUND := 0.7
+## How finely the route is searched for the point nearest a Guard Tent, in cells.
+const GUARD_POST_STEP := 0.05
 ## A timer (a tower's cooldown, a slow) this close to zero counts as run out:
 ## 1/3 s minus ten 1/30 s ticks is not exactly 0 in floating point, and would cost
 ## a whole tick.

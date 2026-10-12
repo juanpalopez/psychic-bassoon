@@ -10,6 +10,7 @@ const RULES := preload("res://content/game_rules.gd")
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
 	_move_foes(game)
+	Barracks.step(game)
 	TowerFire.step(game)
 	TowerFire.release_fallen_locks(game)
 	_remove_the_fallen(game)
@@ -41,15 +42,20 @@ static func _move_foes(game: GameState) -> void:
 		# a foe that fell earlier (a hit between ticks) must not walk or leak
 		if not foe.alive:
 			continue
+		var held := foe.engaged_guard_id != -1
 		var slowed := foe.slow_timer > RULES.TIMER_EPSILON
 		var walk := foe.speed * (1.0 - foe.slow) if slowed else foe.speed
-		foe.distance += walk * Game.TICK_SECONDS
+		# a held foe does not walk, but a slow on it keeps running out
+		if not held:
+			foe.distance += walk * Game.TICK_SECONDS
 		if slowed:
 			foe.slow_timer -= Game.TICK_SECONDS
 			# the slow ends with its last slowed step, not a tick later
 			if foe.slow_timer <= RULES.TIMER_EPSILON:
 				foe.slow = 0.0
 				foe.slow_timer = 0.0
+		if held:
+			continue
 		var route := game.routes[foe.route]
 		if foe.distance >= route.total:
 			foe.alive = false

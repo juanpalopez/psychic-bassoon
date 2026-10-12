@@ -32,3 +32,11 @@ var y: float = 0.0
 var slow: float = 0.0
 var slow_timer: float = 0.0
 var alive: bool = true
+## A guard (`GameState.guards`) holding this foe still, or -1. A held foe does not walk.
+var engaged_guard_id: int = -1
+## Damage per blow and seconds between blows when it fights a guard.
+var attack_damage: float = 0.0
+var attack_interval: float = 0.0
+var attack_cooldown: float = 0.0
+## Whether a guard can stop it.
+var blockable: bool = true

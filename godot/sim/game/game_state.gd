@@ -19,6 +19,8 @@ var over: bool = false
 ## True once `WIN_WAVE` has been cleared; like `over`, it stops the game.
 var won: bool = false
 var towers: Array[Tower] = []
+## The guards of the Guard Tents, in the order they were raised.
+var guards: Array[Guard] = []
 ## Foes on the board, in the order they spawned.
 var foes: Array[Foe] = []
 ## Waves still releasing foes.

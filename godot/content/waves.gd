@@ -55,5 +55,7 @@ const SPEED_PER_WAVE := 0.006
 const SPEED_CAP := 0.25
 ## Reward multiplier: 1 + REWARD_PER_WAVE * (w - 1).
 const REWARD_PER_WAVE := 0.04
+## A foe's blows grow with the wave: 1 + ATTACK_PER_WAVE * (w - 1).
+const ATTACK_PER_WAVE := 0.03
 ## An extra armor point every this many waves.
 const ARMOR_EVERY_WAVES := 12

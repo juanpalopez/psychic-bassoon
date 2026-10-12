@@ -12,6 +12,7 @@ var hp: int = 0
 var speed: float = 0.0
 var reward: int = 0
 var armor: int = 0
+var attack_damage: float = 0.0
 
 
 ## The stats of foe `id` spawned in `wave`, or null for an unknown foe.
@@ -31,5 +32,6 @@ static func for_wave(id: String, wave: int) -> FoeStats:
 		stats.hp = Rounding.half_up(float(base.hp) * hp_scale * WAVES.SWARM_HP_MULTIPLIER)
 		reward_scale *= WAVES.SWARM_REWARD_MULTIPLIER
 	stats.reward = Rounding.half_up(float(base.reward) * reward_scale)
+	stats.attack_damage = float(base.attack_damage) * (1.0 + WAVES.ATTACK_PER_WAVE * n)
 	stats.armor = int(base.armor) + int(floor(float(wave) / float(WAVES.ARMOR_EVERY_WAVES)))
 	return stats

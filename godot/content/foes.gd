@@ -11,9 +11,12 @@ const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"
 
 ## Per foe: `name`, `hp`, `speed` (cells per second), `reward` (Buttons for a kill),
 ## `armor` (cuts physical damage), `resist` (cuts magic damage; no foe has any yet),
-## `radius` (cells) and `leak` (Heartstone health lost when it gets
-## through). The Golem also names what it splits into when destroyed: `splits_into`,
-## `split_count` of them, `split_spacing` cells apart along the route, behind it.
+## `radius` (cells), `leak` (Heartstone health lost when it gets
+## through) and, for a fight with a guard (`docs/BARRACKS.md`), `attack_damage`
+## per blow, `attack_interval` (seconds between blows) and `blockable` (whether a
+## guard can stop it; the Golem is not blockable). The Golem also names what it
+## splits into when destroyed: `splits_into`, `split_count` of them,
+## `split_spacing` cells apart along the route, behind it.
 const DEFS := {
 	"scrapGoblin":
 	{
@@ -24,7 +27,10 @@ const DEFS := {
 		"armor": 0,
 		"resist": 0,
 		"radius": 0.24,
-		"leak": 1
+		"leak": 1,
+		"attack_damage": 3,
+		"attack_interval": 0.8,
+		"blockable": true,
 	},
 	"corrugatedOrc":
 	{
@@ -35,7 +41,10 @@ const DEFS := {
 		"armor": 6,
 		"resist": 0,
 		"radius": 0.38,
-		"leak": 2
+		"leak": 2,
+		"attack_damage": 14,
+		"attack_interval": 1.6,
+		"blockable": true,
 	},
 	"cardboardGolem":
 	{
@@ -47,6 +56,9 @@ const DEFS := {
 		"resist": 0,
 		"radius": 0.5,
 		"leak": 6,
+		"attack_damage": 40,
+		"attack_interval": 2.0,
+		"blockable": false,
 		"splits_into": "scrapGoblin",
 		"split_count": 4,
 		"split_spacing": 0.4,
