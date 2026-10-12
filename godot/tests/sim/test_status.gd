@@ -104,3 +104,22 @@ func test_a_slow_draws_no_random_numbers() -> void:
 	Game.tick(game)
 	assert_eq(game.rng.state, waves)
 	assert_eq(game.route_rng.state, routes)
+
+
+func test_a_slow_that_runs_out_this_tick_is_gone_at_once() -> void:
+	var game := Game.create(1)
+	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
+	Status.apply_slow(foe, 0.5, 0.1)
+	for i in 3:
+		Game.tick(game)
+	assert_eq(foe.slow, 0.0, "cleared in the tick of its last slowed step")
+	assert_eq(foe.slow_timer, 0.0)
+
+
+func test_a_timer_a_hair_above_zero_counts_as_run_out() -> void:
+	var foe := _foe()
+	Status.apply_slow(foe, 0.6, 1.0)
+	foe.slow_timer = 1e-12
+	Status.apply_slow(foe, 0.3, 2.0)
+	assert_eq(foe.slow, 0.3, "the stronger slow had run out")
+	assert_eq(foe.slow_timer, 2.0)

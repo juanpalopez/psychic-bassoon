@@ -72,6 +72,21 @@ static func foes_within(game: GameState, x: float, y: float, radius: float) -> A
 	return found
 
 
+## Lets go of every lock whose foe has fallen, so no tower keeps pointing at a
+## foe that is about to leave the game. Run after all towers have fired.
+static func release_fallen_locks(game: GameState) -> void:
+	for tower in game.towers:
+		if tower.target_id < 0:
+			continue
+		var held := false
+		for foe in game.foes:
+			if foe.id == tower.target_id and foe.alive:
+				held = true
+				break
+		if not held:
+			tower.target_id = -1
+
+
 ## A beam tower's turn: keep the locked foe while it lives and stays in reach,
 ## else lock the foe the tower would target, and hurt it a tick's share of the
 ## beam's damage per second. No event is emitted: render reads `target_id`.
@@ -82,8 +97,9 @@ static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
 	tower.target_id = target.id if target != null else -1
 	if target == null:
 		return
-	var per_tick := float(def.damage[tower.level]) * Game.TICK_SECONDS
-	Damage.apply(game, target, per_tick, Damage.kind_named(def.damage_type))
+	var per_second := float(def.damage[tower.level])
+	var kind := Damage.kind_named(def.damage_type)
+	Damage.apply_beam(game, target, per_second, kind, Game.TICK_SECONDS)
 
 
 ## The foe the tower is locked on, if it is still alive and within reach.

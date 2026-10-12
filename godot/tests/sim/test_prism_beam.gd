@@ -114,6 +114,7 @@ func test_a_kill_pays_once_and_the_lock_moves_off_the_fallen_foe() -> void:
 		if event.kind == GameEvent.Kind.FOE_KILLED:
 			killed += 1
 	assert_eq(killed, 1)
+	assert_eq(scene.tower.target_id, -1, "no lock on a foe that is already gone")
 	Game.tick(scene.game)
 	assert_eq(scene.tower.target_id, -1, "nothing left to lock")
 	assert_eq(scene.game.buttons, buttons + foe.reward, "no second reward")
@@ -127,20 +128,94 @@ func test_a_beam_fires_no_shot_events() -> void:
 		assert_eq(TowerFireKit.kinds(scene.game, GameEvent.Kind.TOWER_FIRED).size(), 0)
 
 
+## Builds a second tower of `type` on the free socket nearest the foe.
+func _build_beside(scene: TowerFireKit.Scene, foe: Foe, type: String) -> Tower:
+	var best := Vector2i(-1, -1)
+	var best_gap := INF
+	for socket in scene.game.map.sockets:
+		if socket == Vector2i(scene.tower.col, scene.tower.row):
+			continue
+		var gap := Vector2(float(socket.x) + 0.5, float(socket.y) + 0.5).distance_to(
+			Vector2(foe.x, foe.y)
+		)
+		if gap < best_gap:
+			best_gap = gap
+			best = socket
+	assert_lt(best_gap, 2.3, "a second socket within reach of the foe")
+	scene.game.buttons = 1000
+	var built := scene.game.towers.size()
+	Game.submit(scene.game, Command.build(type, best.x, best.y))
+	Game.tick(scene.game)
+	assert_eq(scene.game.towers.size(), built + 1, "the second tower was built")
+	return scene.game.towers[built]
+
+
 func test_two_beams_on_one_foe_add_up() -> void:
 	var scene := TowerFireKit.scene("prismSpire")
-	var game := scene.game
-	var second := Tower.new()
-	second.id = 99
-	second.type = "prismSpire"
-	second.col = scene.tower.col
-	second.row = scene.tower.row
-	game.towers.append(second)
-	var foe := TowerFireKit.foe(game, scene.near, "cardboardGolem")
+	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
+	var second := _build_beside(scene, foe, "prismSpire")
+	assert_eq(second.type, "prismSpire")
 	var start := foe.hp
 	for i in 30:
-		Game.tick(game)
+		Game.tick(scene.game)
 	assert_almost_eq(_hp_lost(foe, start), 32.0, 1e-9)
+
+
+func test_a_lock_is_released_the_tick_another_tower_kills_the_foe() -> void:
+	var scene := TowerFireKit.scene("prismSpire")
+	var foe := TowerFireKit.foe(scene.game, scene.near, "scrapGoblin")
+	var spool := _build_beside(scene, foe, "spoolGuard")
+	assert_eq(spool.type, "spoolGuard")
+	scene.tower.cooldown = 0.0
+	spool.cooldown = 0.0
+	scene.game.events = []
+	foe.hp = 5.0
+	Game.tick(scene.game)
+	# the beam (first in the list) hurt it by 0.53, the Spool Guard's 9 killed it
+	assert_false(foe.alive)
+	assert_eq(scene.tower.target_id, -1)
+
+
+func test_defence_is_taken_off_the_beams_damage_per_second_not_per_tick() -> void:
+	var scene := TowerFireKit.scene("prismSpire")
+	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
+	foe.resist = 1
+	var start := foe.hp
+	for i in 30:
+		Game.tick(scene.game)
+	assert_almost_eq(_hp_lost(foe, start), 15.0, 1e-9, "16 a second less 1 resist")
+	foe.resist = 20
+	start = foe.hp
+	for i in 30:
+		Game.tick(scene.game)
+	assert_almost_eq(_hp_lost(foe, start), 4.0, 1e-9, "the floor is a quarter of 16")
+
+
+func test_an_upgrade_while_locked_keeps_the_lock_and_hits_harder() -> void:
+	var scene := TowerFireKit.scene("prismSpire")
+	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
+	Game.tick(scene.game)
+	assert_eq(scene.tower.target_id, foe.id)
+	scene.game.buttons = 1000
+	Game.submit(scene.game, Command.upgrade(scene.tower.id))
+	var start := foe.hp
+	for i in 30:
+		Game.tick(scene.game)
+	assert_eq(scene.tower.target_id, foe.id)
+	assert_almost_eq(_hp_lost(foe, start), 33.0, 1e-9, "level 2 beam, 33 a second")
+
+
+func test_selling_a_locked_tower_stops_the_beam() -> void:
+	var scene := TowerFireKit.scene("prismSpire")
+	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
+	Game.tick(scene.game)
+	Game.submit(scene.game, Command.sell(scene.tower.id))
+	Game.tick(scene.game)
+	var start := foe.hp
+	for i in 10:
+		Game.tick(scene.game)
+	assert_eq(scene.game.towers.size(), 0)
+	assert_eq(foe.hp, start)
 
 
 func test_a_non_beam_tower_never_holds_a_lock() -> void:
