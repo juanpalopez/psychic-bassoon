@@ -13,6 +13,9 @@ const START_KINGDOM_HEALTH := 20
 const TOWER_LEVELS := 3
 ## Share of the Buttons invested that a sale returns.
 const SELL_REFUND := 0.7
+## A cooldown this close to zero counts as run out: 1/3 s minus ten 1/30 s ticks
+## is not exactly 0 in floating point, and would cost the tower a whole tick.
+const COOLDOWN_EPSILON := 1e-9
 ## Armor never cuts a hit below this share of its damage.
 const MIN_DAMAGE_FRACTION := 0.25
 ## Calling a wave early pays `EARLY_CALL_BASE + wave * EARLY_CALL_PER_WAVE`.

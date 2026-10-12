@@ -92,3 +92,11 @@ func _scan(dir: String, old: Array[String], old_files: Array[String], found: Arr
 		for id in old:
 			if text.contains(id):
 				found.append("%s/%s has %s" % [dir, file, id])
+
+
+func test_each_tower_names_a_damage_type_the_sim_knows() -> void:
+	var expected := {"spoolGuard": "physical", "thimbleMortar": "physical", "prismSpire": "magic"}
+	for id in TOWERS.TOWER_IDS:
+		assert_eq(TOWERS.DEFS[id].damage_type, expected[id], id)
+		assert_true(Damage.NAMES.has(TOWERS.DEFS[id].damage_type), id)
+	assert_eq(Damage.kind_named("true"), Damage.Kind.TRUE)

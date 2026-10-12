@@ -15,6 +15,7 @@ enum Kind {
 	FOE_LEAKED,
 	GAME_OVER,
 	FOE_KILLED,
+	TOWER_FIRED,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.
@@ -46,9 +47,12 @@ var foe_type: String = ""
 var leak: int = 0
 ## FOE_KILLED: the foe (`foe_id`, `foe_type`), the Buttons it paid, and where it fell.
 var reward: int = 0
+## TOWER_FIRED: the tower (`tower_id`), its target (`foe_id`), where the target
+## stood (`x`, `y`) and the blast radius in cells (0 for a single-target shot).
+var splash: float = 0.0
 var x: float = 0.0
 var y: float = 0.0
-## Only FOE_KILLED sets `x` and `y`; they are 0.0 on every other event.
+## Only FOE_KILLED and TOWER_FIRED set `x` and `y`; they are 0.0 on every other event.
 ## COMMAND_REJECTED: the command and the reason.
 var command: Command = null
 var reason: RejectReason = RejectReason.GAME_OVER
