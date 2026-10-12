@@ -21,8 +21,16 @@ static func build(cells: Array[Vector2i]) -> Route:
 		push_error("a route needs at least one cell")
 		return null
 	var route := Route.new()
-	route.xs.append(float(cells[0].x) + RULES.CELL_CENTRE)
-	route.ys.append(-RULES.SPAWN_OFFSET)
+	# the spawn point sits off the board edge the road enters from: above the top
+	# row for a road that starts by going down, left of the first column for one
+	# that starts by going right
+	var goes_right := cells.size() > 1 and cells[1].x > cells[0].x
+	if goes_right:
+		route.xs.append(-RULES.SPAWN_OFFSET)
+		route.ys.append(float(cells[0].y) + RULES.CELL_CENTRE)
+	else:
+		route.xs.append(float(cells[0].x) + RULES.CELL_CENTRE)
+		route.ys.append(-RULES.SPAWN_OFFSET)
 	for cell in cells:
 		route.xs.append(float(cell.x) + RULES.CELL_CENTRE)
 		route.ys.append(float(cell.y) + RULES.CELL_CENTRE)

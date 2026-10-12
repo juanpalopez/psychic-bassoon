@@ -1,6 +1,12 @@
-## Builds the board for a seed. The same seed always gives the same map, and
-## equals the TypeScript sim's (`src/sim/map/mapgen.ts`): it draws only from
-## its own stream, so other subsystems cannot shift it.
+## Builds the board for a seed. The same seed always gives the same map, and it
+## draws only from its own stream, so other subsystems cannot shift it. At the
+## original 9 by 13 board, with a detour, it equals the TypeScript sim's maps
+## (`src/sim/map/mapgen.ts`, frozen as fixtures).
+##
+## The road generator draws a road that runs down a tall board. A wide board
+## (more columns than rows, the GDD's 22 by 16) is made by drawing on the turned
+## grid (16 columns by 22 rows) and turning the cells back, so the road crosses
+## the long side from the left edge to the right.
 class_name MapGen
 extends RefCounted
 
@@ -17,49 +23,73 @@ class Detour:
 	var cells: Array[Vector2i] = []
 
 
-## Builds the map for a seed.
-static func generate(seed: int) -> GameMap:
+## Builds the map for a seed on a board of `cols` by `rows` cells. With
+## `with_detour` a second route may leave the main road, run beside it and rejoin.
+static func generate(
+	seed: int,
+	cols: int = RULES.GRID_COLS,
+	rows: int = RULES.GRID_ROWS,
+	with_detour: bool = RULES.GAME_DETOUR
+) -> GameMap:
+	var wide := cols > rows
+	var tall_cols := rows if wide else cols
+	var tall_rows := cols if wide else rows
 	var rng := Rng.derive(seed, Streams.MAP)
 	for attempt in RULES.MAX_ATTEMPTS:
-		var path := _try_path(rng)
+		var path := _try_path(rng, tall_cols, tall_rows)
 		if path.is_empty():
 			continue
+		var routes: Array = [path]
+		if with_detour:
+			var detour := _add_detour(path, rng, tall_cols, tall_rows)
+			if not detour.is_empty():
+				routes.append(detour)
+		if wide:
+			routes = _turned(routes)
 		var map := GameMap.new()
 		map.seed = seed
-		map.path = path
-		map.routes = [path]
-		var detour := _add_detour(path, rng)
-		if not detour.is_empty():
-			map.routes.append(detour)
-		map.tiles = _tiles_for(map.routes)
+		map.cols = cols
+		map.rows = rows
+		map.routes = routes
+		map.path = routes[0]
+		map.tiles = _tiles_for(routes, cols, rows)
 		SocketPlacer.place(map)
 		return map
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
 	return null
 
 
+## The routes with every cell's column and row swapped.
+static func _turned(routes: Array) -> Array:
+	var out: Array = []
+	for route in routes:
+		var cells: Array[Vector2i] = []
+		for cell in route:
+			cells.append(Vector2i(cell.y, cell.x))
+		out.append(cells)
+	return out
+
+
 ## One attempt at the main road. Returns an empty array when it came out short.
-static func _try_path(rng: Rng) -> Array[Vector2i]:
-	var col: int = RULES.START_MARGIN + rng.next_int(RULES.GRID_COLS - 2 * RULES.START_MARGIN)
+static func _try_path(rng: Rng, cols: int, rows: int) -> Array[Vector2i]:
+	var col: int = RULES.START_MARGIN + rng.next_int(cols - 2 * RULES.START_MARGIN)
 	var row := 0
 	var cells: Array[Vector2i] = [Vector2i(col, row)]
-	while row < RULES.GRID_ROWS - 1:
-		var run := mini(
-			RULES.MIN_RUN_DOWN + rng.next_int(RULES.RUN_DOWN_VARIANCE), RULES.GRID_ROWS - 1 - row
-		)
+	while row < rows - 1:
+		var run := mini(RULES.MIN_RUN_DOWN + rng.next_int(RULES.RUN_DOWN_VARIANCE), rows - 1 - row)
 		for i in run:
 			row += 1
 			cells.append(Vector2i(col, row))
-		if row >= RULES.GRID_ROWS - 1:
+		if row >= rows - 1:
 			break
-		var target := rng.next_int(RULES.GRID_COLS)
+		var target := rng.next_int(cols)
 		while absi(target - col) < RULES.MIN_TURN_COLUMNS:
-			target = rng.next_int(RULES.GRID_COLS)
+			target = rng.next_int(cols)
 		var step := signi(target - col)
 		while col != target:
 			col += step
 			cells.append(Vector2i(col, row))
-	if cells.size() >= RULES.GRID_ROWS + RULES.MIN_EXTRA_CELLS:
+	if cells.size() >= rows + RULES.MIN_EXTRA_CELLS:
 		return cells
 	return []
 
@@ -72,7 +102,7 @@ static func _gap(a: Vector2i, b: Vector2i) -> int:
 ## paralleled `DETOUR_OFFSET` cells to one side, joined by a one-cell connector
 ## at each end (so a plot is left between the roads). It must stay on the board
 ## and never touch the main road except at its two joins.
-static func _detour_candidates(path: Array[Vector2i]) -> Array[Detour]:
+static func _detour_candidates(path: Array[Vector2i], cols: int, rows: int) -> Array[Detour]:
 	var on_path := {}
 	for cell in path:
 		on_path[cell] = true
@@ -98,7 +128,7 @@ static func _detour_candidates(path: Array[Vector2i]) -> Array[Detour]:
 				for from_index in range(start + 1, i - 3):
 					for to_index in range(from_index + 2, i - 1):
 						var cells := _detour_cells(path, from_index, to_index, side, along_col)
-						if _fits(cells, path, on_path, from_index, to_index):
+						if _fits(cells, path, on_path, from_index, to_index, cols, rows):
 							var detour := Detour.new()
 							detour.from_index = from_index
 							detour.to_index = to_index
@@ -133,10 +163,12 @@ static func _fits(
 	path: Array[Vector2i],
 	on_path: Dictionary,
 	from_index: int,
-	to_index: int
+	to_index: int,
+	cols: int,
+	rows: int
 ) -> bool:
 	for cell in cells:
-		if cell.x < 0 or cell.x >= RULES.GRID_COLS or cell.y < 0 or cell.y >= RULES.GRID_ROWS:
+		if cell.x < 0 or cell.x >= cols or cell.y < 0 or cell.y >= rows:
 			return false
 	var last_n := cells.size() - 1
 	for n in cells.size():
@@ -153,8 +185,8 @@ static func _fits(
 
 ## Picks one detour (from the map's own stream) and returns the second route,
 ## or an empty array when none fits.
-static func _add_detour(path: Array[Vector2i], rng: Rng) -> Array[Vector2i]:
-	var candidates := _detour_candidates(path)
+static func _add_detour(path: Array[Vector2i], rng: Rng, cols: int, rows: int) -> Array[Vector2i]:
+	var candidates := _detour_candidates(path, cols, rows)
 	if candidates.is_empty():
 		return []
 	var pick: Detour = candidates[rng.next_int(candidates.size())]
@@ -165,11 +197,11 @@ static func _add_detour(path: Array[Vector2i], rng: Rng) -> Array[Vector2i]:
 	return route
 
 
-static func _tiles_for(routes: Array) -> Array[PackedByteArray]:
+static func _tiles_for(routes: Array, cols: int, rows: int) -> Array[PackedByteArray]:
 	var tiles: Array[PackedByteArray] = []
-	for row in RULES.GRID_ROWS:
+	for row in rows:
 		var line := PackedByteArray()
-		line.resize(RULES.GRID_COLS)
+		line.resize(cols)
 		line.fill(GameMap.Tile.PLOT)
 		tiles.append(line)
 	for route in routes:

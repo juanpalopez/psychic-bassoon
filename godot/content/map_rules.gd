@@ -2,9 +2,19 @@
 ## (`src/content/rules.ts`). Data only: the sim reads these, never hard-codes.
 extends RefCounted
 
-## Board size in cells.
+## The board the game builds, in cells. It is the legacy portrait board until the
+## renderer draws the GDD's landscape one (Map v2), then it becomes the landscape
+## board and `GAME_DETOUR` turns off.
 const GRID_COLS := 9
 const GRID_ROWS := 13
+## The ported generator's original board, which the frozen fixtures pin.
+const LEGACY_COLS := 9
+const LEGACY_ROWS := 13
+## The GDD's board: 22 columns by 16 rows, landscape (a road crosses the long side).
+const LANDSCAPE_COLS := 22
+const LANDSCAPE_ROWS := 16
+## Whether the game's road grows a detour. The fixtures' maps all have one.
+const GAME_DETOUR := true
 
 ## Give up and retry when the path is shorter than rows + this many cells.
 const MIN_EXTRA_CELLS := 16

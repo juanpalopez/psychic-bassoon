@@ -26,11 +26,12 @@ static func place(map: GameMap) -> void:
 		if _keeps_distance(cell, chosen):
 			chosen.append(cell)
 	# the spacing rule leaves room for at least the minimum on every board the
-	# generator can make (checked over 50,000 seeds); fail loudly if it ever does not
+	# generator can make (checked over 50,000 seeds at 9 by 13 and 6,000 at 22 by 16,
+	# where the fewest was exactly the minimum); fail loudly if it ever does not
 	assert(chosen.size() >= RULES.SOCKET_MIN, "too few sockets for seed %d" % map.seed)
 	chosen.sort_custom(_reading_order)
 	map.sockets = chosen
-	map.elevation = _flat_elevation()
+	map.elevation = _flat_elevation(map.cols, map.rows)
 	var total := 0
 	for weight in RULES.ELEVATION_WEIGHTS:
 		total += weight
@@ -41,8 +42,8 @@ static func place(map: GameMap) -> void:
 ## Cells that are not road but have a road cell within `SOCKET_REACH`.
 static func _candidates(map: GameMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
-	for row in RULES.GRID_ROWS:
-		for col in RULES.GRID_COLS:
+	for row in map.rows:
+		for col in map.cols:
 			if map.tiles[row][col] == GameMap.Tile.ROAD:
 				continue
 			if _road_within_reach(map, col, row):
@@ -55,7 +56,7 @@ static func _road_within_reach(map: GameMap, col: int, row: int) -> bool:
 		for dx in range(-RULES.SOCKET_REACH, RULES.SOCKET_REACH + 1):
 			var x := col + dx
 			var y := row + dy
-			if x < 0 or x >= RULES.GRID_COLS or y < 0 or y >= RULES.GRID_ROWS:
+			if x < 0 or x >= map.cols or y < 0 or y >= map.rows:
 				continue
 			if map.tiles[y][x] == GameMap.Tile.ROAD:
 				return true
@@ -82,14 +83,14 @@ static func _reading_order(a: Vector2i, b: Vector2i) -> bool:
 	return a.y < b.y or (a.y == b.y and a.x < b.x)
 
 
-static func _flat_elevation() -> Array[PackedByteArray]:
-	var rows: Array[PackedByteArray] = []
-	for row in RULES.GRID_ROWS:
+static func _flat_elevation(cols: int, rows: int) -> Array[PackedByteArray]:
+	var lines: Array[PackedByteArray] = []
+	for row in rows:
 		var line := PackedByteArray()
-		line.resize(RULES.GRID_COLS)
+		line.resize(cols)
 		line.fill(0)
-		rows.append(line)
-	return rows
+		lines.append(line)
+	return lines
 
 
 ## The level whose share of the weights holds `roll` (0 up to the total weight).

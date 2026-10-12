@@ -8,6 +8,9 @@ enum Tile { PLOT, ROAD }
 const RULES := preload("res://content/map_rules.gd")
 
 var seed: int = 0
+## Board size in cells.
+var cols: int = 0
+var rows: int = 0
 ## The main road in walking order, from the spawn row to the Heartstone.
 var path: Array[Vector2i] = []
 ## Every route from the spawn to the Heartstone. `routes[0]` equals `path`;
