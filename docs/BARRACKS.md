@@ -26,10 +26,10 @@ A foe gets three new numbers in `godot/content/foes.gd`: `attack_damage`, `attac
 
 ### Guards
 
-A Guard Tent owns 2 guards. Each guard is a unit with hp, an attack and a **post**: a fixed distance along the route, the point of the road nearest to the tent's block within its range (ties go to the point nearer the Heartstone). The two guards stand half a cell apart so a second foe is not blocked by the same body.
+A Guard Tent owns 2 guards. Each guard is a unit with hp, an attack and a **post**: a fixed distance along the route, the point of the road nearest to the tent's block (ties, common where the road bends around a block, go to the point nearer the Heartstone). The two guards stand half a cell apart so a second foe is not blocked by the same body.
 
 - A guard blocks **one** foe at a time: the first blockable foe that reaches its post (foe reaches `post - guard radius - foe radius`). Other foes walk past a busy guard. This keeps the tent a tool for holding the dangerous foe, not a wall that stops a whole swarm, which would break the wave design.
-- A blocked foe stops walking and fights the guard. Both attack on their own interval (physical damage; the guard's armor applies, the foe's armor applies to the guard's blows). Towers keep shooting the stopped foe, which is the point: a held orc is a free target for the Thimble Mortar.
+- A blocked foe stops walking and fights the guard; a slow on it keeps running out while it is held. Both attack on their own interval (physical damage; the guard's armor applies, the foe's armor applies to the guard's blows). Towers keep shooting the stopped foe, which is the point: a held orc is a free target for the Thimble Mortar.
 - When the guard falls the foe walks on. When the foe falls the guard is free again. A fallen guard comes back at its post after `respawn` seconds (the tent keeps its 2 guards).
 - Out of a fight a guard regenerates `regen` hp per second.
 - Selling or replacing the tent removes its guards; a blocked foe walks on.
@@ -43,7 +43,7 @@ A Guard Tent owns 2 guards. Each guard is a unit with hp, an attack and a **post
 | Guard armor | 0 | 2 | 4 |
 | Guard damage per blow | 4 | 7 | 12 |
 | Guard attack interval (s) | 1.0 | 1.0 | 1.0 |
-| Range (cells, to find a post) | 1.9 | 2.2 | 2.5 |
+| Reach (cells, shown to the player; the post is simply the nearest road point) | 1.9 | 2.2 | 2.5 |
 | Respawn (s) | 12 | 10 | 8 |
 | Regen (hp per second) | 1.0 | 1.5 | 2.0 |
 
