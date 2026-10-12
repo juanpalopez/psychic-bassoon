@@ -11,7 +11,9 @@ const ROWS := 16
 const BESIDE := 1.6
 ## Seeds whose roads, with a detour, offer a block that reaches 3 road cells only
 ## through diagonal corners (nearest road cell 2.12 away) when touching the road is
-## not required.
+## not required. Only seed 2800 actually places such a block; in the others it was a
+## candidate that the shuffle did not pick, so the maps differ only through a
+## smaller candidate list. Keep 2800: it is the one that fails without the rule.
 const DIAGONAL_ONLY_SEEDS: Array[int] = [
 	404, 491, 1661, 1718, 1940, 2800, 3325, 3336, 3427, 3472, 4898
 ]
