@@ -214,8 +214,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     tests/               # GUT tests, including the fixtures for the ported core
     export_presets.cfg   # web export preset (Godot reads it from the project root)
     web/                 # the custom HTML shell (landscape prompt, meta tags, loader)
-  fixtures/              # JSON from the TypeScript sim for the ported core (prng, maps, routes); later GDScript replay goldens
-  src/                   # the TypeScript sim and content: a read-only reference, removed in Phase 4 step 8
+  fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS; later GDScript replay goldens
   assets-src/            # .blend sources and raw packs (Git LFS)
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
@@ -234,7 +233,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
-| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. During the migration it also runs the legacy TypeScript checks. |
+| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
 | `deploy` | Push to `main`, only after `ci` passes | Publishes to GitHub Pages. The Godot export is served at the root URL. Until the game exists that is the Phase 3 stub scene; the Three.js build is no longer served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
 
@@ -281,7 +280,7 @@ Each phase ends with a gate that must pass before the next starts (exception: th
 | 1 · Simulation port, TypeScript (done) | Rules in `src/sim`, seeded RNG, 30 Hz tick; Vitest coverage | A headless run replays exactly from its seed |
 | 2 · 3D greybox, Three.js (done) | Angled camera, picking, models, DOM HUD, landscape | Plays as well as the 2D prototype on a phone (owner-tested on iPhone) |
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
-| 4 · Sim in GDScript, designed from the GDD | PRNG, road generator and routes, game core (done); sockets and elevation, foes and waves, combat core and economy for the first towers and foes, replay goldens, headless run | **The same seed and commands replay to the same result** (goldens), the ported core still matches its fixtures, and `src/` is gone |
+| 4 · Sim in GDScript, designed from the GDD | PRNG, road generator and routes, game core (done); sockets and elevation, foes and waves, combat core and economy for the first towers and foes, replay goldens, headless run | **The same seed and commands replay to the same result** (goldens), the ported core still matches its fixtures, and `src/` is gone (done) |
 | 5 · Play in Godot (greybox started in parallel with Phase 4, 2026-10-11) | Greybox board, picking, foes, towers, HUD and loop (steps A1 to A6); papercraft terrain tiles, camera pan, pinch and tilt, the radial menu | **A full run to the boss at 60 fps on the owner's phone with 80 foes**, every action reachable in landscape |
 | 6 · Art and ambience (papercraft) | Materials and shaders (kraft, cardboard, mat, foil, tape, the Blot), the Scrap Goblin through the pipeline first, then the other foes, the four towers, board tiles, stop-motion stepping at 12 fps, Claude Design HUD and Theme | All foes and towers use final models, each distinct at zoomed-out view; performance budget met |
 | 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, the Kitchen Mess Tent, the Camp Cook, the Messenger Crow, bridges and hazards (rivers, tape, PVA puddles; drawbridges only if the owner confirms them) | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
@@ -326,7 +325,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 5a. **Map v2** (GDD update, 2026-10-12; owner decisions the same day): (1) done: `kingdom_health` renamed to `heartstone_health` in code, HUD and docs; (2) make the road generator size-aware, parameterised by columns and rows and by whether it grows a detour (the game: no detour, one path from one spawn), with the 9×13 case with detours still checked against the frozen fixtures; the game uses a landscape 22×16 board, generated on the transposed grid (16 columns by 22 rows) and turned, so the road crosses the long side, then a new golden; (3) sockets become 2x2 footprint blocks that never overlap each other or the road, range measured from the block's centre; (4) the Heartstone's footprint; (5) a balance pass for the longer roads (wave pacing, tower reach in cells). The greybox follows in Phase 5 (the board render, camera fit and picking for 22×16).
 6. Combat core: targeting priorities, damage and armor, tiers 1 to 3 of the Spool Guard (fast single target, physical), Thimble Mortar (splash) and Prism Spire (a continuous magic beam; the Corrugated Orc's armor makes it the counter), with damage types (physical, magic, true) and how armor applies to each, and one shared status model starting with slow (used later by rivers, tape and the specialisations). Tower and foe ids change to the GDD's here.
 7. Determinism: a scripted bot, replay goldens for several seeds, and a headless CLI (`godot --headless`) that prints the map and the wave log.
-8. Cleanup, once step 6 no longer needs the TypeScript formulas: remove `src/`, the fixture exporter (`scripts/export-fixtures.ts` and its staleness test), the TypeScript sim CLI (`pnpm sim`, replaced by the `godot --headless` CLI of step 7), the `tsconfig.sim.json` lint step, the `src/**` blocks in `eslint.config.js`, the Vitest `src` include, and the fixtures nobody uses (`damage.json`, `waves.json`, `scaling.json`, `replays.json`). Keep `prng.json`, `maps.json` and `routes.json` frozen, and replace the staleness test with a committed SHA-256 of those three files checked in CI, so "never regenerated" is enforced. Update `CLAUDE.md`, the README and `fixtures/README.md` in the same PR.
+8. Cleanup (done, #211), once step 6 no longer needs the TypeScript formulas: remove `src/`, the fixture exporter (`scripts/export-fixtures.ts` and its staleness test), the TypeScript sim CLI (`pnpm sim`, replaced by the `godot --headless` CLI of step 7), the `tsconfig.sim.json` lint step, the `src/**` blocks in `eslint.config.js`, the Vitest `src` include, and the fixtures nobody uses (`damage.json`, `waves.json`, `scaling.json`, `replays.json`). Keep `prng.json`, `maps.json` and `routes.json` frozen, and replace the staleness test with a committed SHA-256 of those three files checked in CI, so "never regenerated" is enforced. Update `CLAUDE.md`, the README and `fixtures/README.md` in the same PR.
 
 Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells and hazards are Phase 7. Their content flags and commands are added then.
 
@@ -335,7 +334,7 @@ Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells
 - [ ] The ported core still matches its TypeScript fixtures (PRNG, maps, routes).
 - [ ] The sim imports nothing from the scene tree (lint).
 - [ ] A 12-minute headless run finishes within a time budget on CI.
-- [ ] `src/` and the unused fixtures are removed.
+- [x] `src/` and the unused fixtures are removed (#211).
 
 ### Phase 5 · Play in Godot
 

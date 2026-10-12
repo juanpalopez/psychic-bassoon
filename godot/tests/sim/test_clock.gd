@@ -1,5 +1,5 @@
 ## The fixed-step clock and the frame stepper. Ported from
-## `src/sim/game/clock.test.ts` and `frame.test.ts`.
+## `web-three-final:src/sim/game/clock.test.ts` and `frame.test.ts`.
 extends GutTest
 
 const RULES := preload("res://content/game_rules.gd")

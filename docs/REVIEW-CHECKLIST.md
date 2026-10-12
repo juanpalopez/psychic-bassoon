@@ -7,7 +7,7 @@ What the `adversarial-reviewer` agent reads instead of the full `CLAUDE.md` and 
 | Tier | When | Model | Depth |
 | --- | --- | --- | --- |
 | Skip | Dependabot bump with green CI, typo or wording-only docs, generated files | none | Check CI is green and the title conforms, then merge |
-| Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic sim modules (`godot/sim`, and `src/sim` while it exists) (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
+| Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic sim modules (`godot/sim`) (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
 | Deep | `.github/workflows/`, determinism-critical sim code (the PRNG, the tick and command loop, the replay test and seed or snapshot handling), anything touching secrets, permissions, deploy or release, a rule change in `CLAUDE.md` | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
 
 When unsure, take the higher tier.
@@ -32,8 +32,8 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 ## What to check
 
 1. **Ticket.** Compare the diff with the ticket's "Done when". List unmet or unverified items and any work from a later phase. The only allowed exceptions are the Phase 5 greybox (tickets under the Phase 5 epic) and Track B (the Scrap Goblin, #157); a greybox PR must not edit `godot/sim`, `fixtures/` or content numbers, and `godot/render` and `godot/ui` must not touch `rng`, `route_rng` or `pending`, and must not assign to or call a mutating method on a field of the game state (plain reads are allowed until read-only accessors exist). Edits to `godot/content` numbers by a greybox PR are caught by review only.
-2. **Sim rules.** TypeScript (`src/sim`, the read-only reference): no DOM, `Math.random` or clock, including through `globalThis`. GDScript (`godot/sim`): no `Node`, `get_tree`, `Engine`, `Time` or `OS`, no `randf`/`randi`; integer division, 32-bit masking and rounding follow the parity rules in `CLAUDE.md`. No `Math.random()` or clock reads. Player actions only as commands. Game speed is more ticks, never a bigger tick.
-3. **Content.** Balance numbers live in `godot/content` (or `src/content` for the TypeScript game); no magic numbers in logic. Lore names are used.
+2. **Sim rules.** GDScript (`godot/sim`): no `Node`, `get_tree`, `Engine`, `Time` or `OS`, no `randf`/`randi`; integer division, 32-bit masking and rounding follow the parity rules in `CLAUDE.md`. No `Math.random()` or clock reads. Player actions only as commands. Game speed is more ticks, never a bigger tick.
+3. **Content.** Balance numbers live in `godot/content`; no magic numbers in logic. Lore names are used.
 4. **Tests.** Sim and content changes have tests written first, with a fixed seed and no timing. A test that cannot fail is a finding.
 5. **Render and UI.** Typed GDScript. No hard-coded colours (the Theme only). Free nodes you remove; no allocation per frame; one `MultiMesh` per foe type. Tap targets of at least 44 px. Respect reduced motion.
 6. **Assets.** CC0, the owner's own, or Meshy-generated (paid plan only; the row says `Owned by the owner (Meshy paid plan)` with the date and the prompt or reference; flag any third-party IP, brand or likeness in the prompt; free-plan CC BY outputs are a blocker); each recorded in `assets/CREDITS.md`; GLB only, within the per-unit triangle budget (foe 800 to 1,200 with a baked 512 px map, tower 1,500 to 3,000, boss 3,000 to 5,000) and the frame caps in the plan.

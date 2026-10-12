@@ -16,7 +16,6 @@
     "noEmit": true
   },
   "include": [
-    "src",
     "e2e-godot",
     "scripts",
     "vitest.config.ts",

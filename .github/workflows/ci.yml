@@ -63,6 +63,9 @@ jobs:
       - name: Asset budget and credits
         run: pnpm check:assets
 
+      - name: Frozen fixtures
+        run: pnpm check:fixtures
+
   godot:
     name: godot
     runs-on: ubuntu-latest

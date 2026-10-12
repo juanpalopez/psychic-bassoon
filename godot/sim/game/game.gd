@@ -1,6 +1,6 @@
 ## The game's public entry: create it from a seed, submit commands, run ticks.
 ##
-## Ported from `src/sim/game/game.ts`. Player actions arrive only as commands,
+## Ported from `web-three-final:src/sim/game/game.ts`. Player actions arrive only as commands,
 ## queued by `submit` and run, in order, at the start of the next `tick`.
 class_name Game
 extends RefCounted

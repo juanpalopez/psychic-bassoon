@@ -1,5 +1,5 @@
 ## Board size and map-generation numbers, ported from the TypeScript content
-## (`src/content/rules.ts`). Data only: the sim reads these, never hard-codes.
+## (`web-three-final:src/content/rules.ts`). Data only: the sim reads these, never hard-codes.
 extends RefCounted
 
 ## The board the game builds, in cells: the GDD's landscape board.

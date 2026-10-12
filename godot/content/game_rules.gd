@@ -1,5 +1,5 @@
 ## Economy and combat constants ported from the 2D prototype, as in the
-## TypeScript content (`src/content/rules.ts`). Data only.
+## TypeScript content (`web-three-final:src/content/rules.ts`). Data only.
 extends RefCounted
 
 ## Fixed simulation rate. Game speed adds ticks, never a bigger tick.

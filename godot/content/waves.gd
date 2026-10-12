@@ -1,5 +1,5 @@
 ## Wave composition and per-wave scaling, from the prototype's numbers
-## (`src/content/waves.ts`) adapted to the GDD's three ground foes. Data only.
+## (`web-three-final:src/content/waves.ts`) adapted to the GDD's three ground foes. Data only.
 extends RefCounted
 
 ## The foes a wave is made of: the filler, the heavy foe (also the boss escort)

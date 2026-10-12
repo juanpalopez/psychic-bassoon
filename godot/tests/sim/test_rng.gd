@@ -79,7 +79,7 @@ func test_derive_matches_the_fixture() -> void:
 
 
 func test_derive_wraps_negative_and_large_seeds_like_typescript() -> void:
-	# golden values computed with src/sim/rng.ts
+	# golden values computed with web-three-final:src/sim/rng.ts
 	assert_eq(Rng.derive(-1, 0).state, 920564995)
 	assert_eq(Rng.derive(-123456789, 2).state, 1427600077)
 	assert_eq(Rng.derive(5, 1 << 40).state, 1478832577)

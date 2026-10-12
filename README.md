@@ -15,7 +15,7 @@ It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in th
 ### Prerequisites
 
 - [Godot](https://godotengine.org/) with the exact version in `.godot-version` (the web export templates must match it)
-- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the TypeScript reference sim, the frozen fixtures and the smoke test
+- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the repo's checks, the frozen-fixture check and the smoke test
 - [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit) 4.5.0 (`pip install gdtoolkit==4.5.0`) for `gdformat` and `gdlint`
 
 ### Install
@@ -37,18 +37,13 @@ mkdir -p build/web/godot && cp godot/web/godot-redirect.html build/web/godot/ind
 pnpm serve                                                           # serve the export on your LAN, port 8080
 ```
 
-Open the "Network" address on a phone on the same Wi-Fi. The TypeScript simulation can still be watched headless; it prints the seeded map, plays a scripted build order and logs each wave:
-
-```bash
-pnpm sim -- --seed 42               # 10 waves from seed 42
-pnpm sim -- --seed 7 --waves 25     # more waves
-```
+Open the "Network" address on a phone on the same Wi-Fi.
 
 ### Test
 
 ```bash
 godot --headless --path godot -s addons/gut/gut_cmdln.gd -gexit     # GUT tests for the GDScript sim
-pnpm test                # Vitest: the TypeScript reference sim, the fixtures and the repo's scripts
+pnpm test                # Vitest: the repo's scripts (checks and tooling)
 pnpm exec playwright install chromium   # once
 pnpm test:e2e:godot      # Playwright smoke test against build/web
 ```
@@ -57,12 +52,12 @@ pnpm test:e2e:godot      # Playwright smoke test against build/web
 
 ```bash
 (cd godot && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdformat && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdlint)
-pnpm lint                # Prettier, ESLint and TypeScript type checks
+pnpm lint                # Prettier, ESLint and TypeScript type checks (scripts and e2e)
 pnpm format              # Prettier --write
 pnpm check:sim-purity    # the GDScript sim must stay free of the scene tree and random numbers
 pnpm check:assets        # godot/assets against assets/CREDITS.md
 pnpm check:godot-size    # download size of build/web
-pnpm fixtures            # regenerate fixtures/ from the TypeScript sim (only after a TypeScript sim fix)
+pnpm check:fixtures      # the frozen fixtures against fixtures/SHA256SUMS
 ```
 
 Before every commit run the checks for what you touched; CI runs all of them.
@@ -77,9 +72,8 @@ godot/
   ui/        HUD scenes and the Theme (Phase 5)
   web/       the custom HTML shell and manifest for the web export
   tests/     GUT tests
-src/         the TypeScript simulation and content: a read-only reference, removed in Phase 4 step 8
-fixtures/    JSON exported from the TypeScript sim: what the GDScript sim must reproduce
-scripts/     fixtures export, sim CLI, CI checks (purity, assets, size)
+fixtures/    frozen JSON from the retired TypeScript sim (PRNG, maps, routes): what the GDScript sim must reproduce
+scripts/     CI checks (purity, assets, size, fixtures) and balance tooling
 e2e-godot/   Playwright smoke test of the web export
 assets-src/  Blender sources and raw packs
 docs/        plan, review checklist, art references
@@ -88,7 +82,7 @@ prototype/   the original 2D prototype (rules and balance reference)
 
 A few rules shape the code. The full list is in [`CLAUDE.md`](CLAUDE.md).
 
-- `godot/sim` is pure and deterministic: no scene tree, no engine singletons, no `randf`/`randi`; all randomness goes through the seeded PRNG, and results equal the TypeScript fixtures exactly.
+- `godot/sim` is pure and deterministic: no scene tree, no engine singletons, no `randf`/`randi`; all randomness goes through the seeded PRNG, and the ported core equals the frozen fixtures exactly.
 - The sim runs at a fixed 30 Hz tick and owns all state. Render and UI only read snapshots. Player actions reach the sim as commands (`build`, `upgrade`, `sell`, `launchWave`).
 - All balance numbers live in `godot/content`, not in logic.
 - The HUD is built from Godot `Control` nodes, and every action is reachable by the thumbs holding the phone sideways (landscape only).
