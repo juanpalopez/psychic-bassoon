@@ -4,6 +4,8 @@
 class_name Combat
 extends RefCounted
 
+const RULES := preload("res://content/game_rules.gd")
+
 
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
@@ -38,10 +40,11 @@ static func _move_foes(game: GameState) -> void:
 		# a foe that fell earlier (a hit between ticks) must not walk or leak
 		if not foe.alive:
 			continue
-		if foe.slow_timer > 0.0:
+		if foe.slow_timer > RULES.TIMER_EPSILON:
 			foe.slow_timer -= Game.TICK_SECONDS
 		else:
 			foe.slow = 0.0
+			foe.slow_timer = 0.0
 		foe.distance += foe.speed * (1.0 - foe.slow) * Game.TICK_SECONDS
 		var route := game.routes[foe.route]
 		if foe.distance >= route.total:

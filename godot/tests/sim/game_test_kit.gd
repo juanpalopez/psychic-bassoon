@@ -33,7 +33,8 @@ static func snapshot(game: GameState) -> Dictionary:
 				tower.col,
 				tower.row,
 				tower.invested,
-				tower.cooldown
+				tower.cooldown,
+				tower.target_id
 			]
 		)
 	var foes := []

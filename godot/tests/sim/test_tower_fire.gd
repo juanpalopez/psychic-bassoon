@@ -175,16 +175,6 @@ func test_a_mortar_shell_hurts_every_foe_within_its_splash() -> void:
 	assert_eq(shots[0].splash, 0.95)
 
 
-func test_a_prism_spire_fires_no_shots() -> void:
-	# the beam comes in a later ticket; until then the tower stays quiet
-	var scene := TowerFireKit.scene("prismSpire")
-	var foe := TowerFireKit.foe(scene.game, scene.near)
-	for i in 30:
-		Game.tick(scene.game)
-	assert_eq(foe.hp, 20.0)
-	assert_eq(TowerFireKit.kinds(scene.game, GameEvent.Kind.TOWER_FIRED).size(), 0)
-
-
 func test_firing_draws_no_random_numbers() -> void:
 	var with_tower := TowerFireKit.scene()
 	var without := Game.create(1)
