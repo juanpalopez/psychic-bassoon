@@ -95,20 +95,23 @@ func test_step_stops_exactly_at_the_tick_limit() -> void:
 
 func test_speed_and_frame_rate_never_change_the_game() -> void:
 	# Speed only changes how many ticks run per frame, never the tick: a run
-	# driven by frames at 1x, 2x or 3x matches the tick-by-tick run.
-	var ticks := 300
-	var reference := _play(1.0 / 30.0, 1, ticks)
-	for setup in [[1, 1.0 / 60.0], [2, 1.0 / 60.0], [3, 1.0 / 30.0], [3, 1.0 / 20.0]]:
-		var game := _play(setup[1], setup[0], ticks)
-		assert_eq(game.tick_count, ticks)
-		assert_eq(
-			GameTestKit.snapshot(game),
-			GameTestKit.snapshot(reference),
-			"the whole game at speed %d, frame %f" % [setup[0], setup[1]]
-		)
-	# foes really spawned in this run (the towers may have shot them all by now, so
-	# count the ids handed out: two towers, then the foes)
-	assert_gt(reference.next_id, 2, "foes spawned, otherwise the check proves little")
+	# driven by frames at 1x, 2x or 3x matches the tick-by-tick run. It is checked
+	# at tick 130, while the first foes are still walking (the snapshot holds their
+	# positions and hp), and at tick 300, after the towers have killed them all.
+	for ticks in [130, 300]:
+		var reference := _play(1.0 / 30.0, 1, ticks)
+		for setup in [[1, 1.0 / 60.0], [2, 1.0 / 60.0], [3, 1.0 / 30.0], [3, 1.0 / 20.0]]:
+			var game := _play(setup[1], setup[0], ticks)
+			assert_eq(game.tick_count, ticks)
+			assert_eq(
+				GameTestKit.snapshot(game),
+				GameTestKit.snapshot(reference),
+				"the whole game at speed %d, frame %f, tick %d" % [setup[0], setup[1], ticks]
+			)
+		if ticks == 130:
+			assert_gt(reference.foes.size(), 0, "foes are on the board at tick 130")
+		else:
+			assert_gt(reference.next_id, 2, "foes spawned and were shot by tick 300")
 
 
 ## A scripted player: builds, upgrades and launches on fixed ticks.

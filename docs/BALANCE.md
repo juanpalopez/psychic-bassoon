@@ -183,9 +183,9 @@ The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (n
 
 **What the rounds showed (on the socket layout of the fix above):**
 
-1. With the prototype's numbers and sockets beside the road, every profile clears 20 waves on almost every map. The Prism Spire was the exception: a Prism-only build died on waves 6 to 10 on every map, because 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button.
+1. With the prototype's numbers (the first six rows below, foe HP growth 0.014 and 0.03) and sockets beside the road, `spoolOnly`, `mortarHeavy` and `mix` clear 20 waves on almost every map. `prismHeavy` (its build order is Prism Spire, Spool Guard, Prism Spire, so not Prism-only) was the exception: with all the prototype's numbers it died on waves 9 to 13 and won 2 of 8 maps; at HP growth 0.03 it died on waves 6 to 11 on every map. The cause: 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button.
 2. Raising foe HP growth (0.014 to 0.03) alone changed little. Doubling the Prism Spire's damage brought a Prism-only build to waves 12 to 20; cutting its cost to 90 brought it to all 20.
-3. Orc armor is what separates the towers. At 8 the Spool Guard collapses (waves 6 to 8) and the Mortar's splash dominates; at 6 the Spool Guard is weak but alive (waves 7 to 18), so its damage was raised about 20% (9, 15, 26 to 11, 18, 30). The Mortar then led, so its damage was trimmed about 19% (32, 56, 96 to 26, 46, 80).
+3. Orc armor is what separates the towers. At 8 (with the original Mortar damage and HP growth 0.03) the Spool Guard collapses (waves 6 to 8) and the Mortar's splash dominates (`mortarHeavy` won on 5 of 8 maps while `spoolOnly` never got past wave 8); with the trimmed Mortar it is no longer ahead; at 6 the Spool Guard is weak but alive (waves 7 to 18), so its damage was raised about 20% (9, 15, 26 to 11, 18, 30). The Mortar then led, so its damage was trimmed about 19% (32, 56, 96 to 26, 46, 80).
 4. With the towers close, foe HP growth sets the difficulty: 0.04 puts the medians at waves 19 to 20 (2 to 5 wins in 8, depending on the tower numbers), 0.05 drops the Mortar and Mix to a median of 11 to 12, 0.06 and 0.07 are too hard (medians 9 to 14).
 
 **Changes** (all in `godot/content`):
@@ -208,4 +208,4 @@ The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (n
 | Prism heavy | 20 | 15 to 20 | 9 of 16 | 5.9 | 206 |
 | Mix | 20 | 10 to 20 | 10 of 16 | 9.1 | 482 |
 
-Solo builds are within a wave of each other, the mix is as good as the best solo build, and the weakest maps are lost around waves 9 to 18. The Mortar is the least reliable strategy (it needs good sockets for its short reach). Still to do: the economy (Buttons pile up), the boss wave as a real test, a mix that clearly beats every solo build, and everything involving the new content.
+Solo builds are within a wave of each other in median (Mortar heavy is the least reliable: it lost 4 of 16 maps at waves 9 to 10, which Spool and Prism never did), the mix is as good as the best solo build, and the weakest maps are lost around waves 9 to 18. The Mortar is the least reliable strategy (it needs good sockets for its short reach). Still to do: the economy (Buttons pile up), the boss wave as a real test, a mix that clearly beats every solo build, and everything involving the new content.

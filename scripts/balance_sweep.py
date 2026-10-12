@@ -20,6 +20,8 @@ import tempfile
 from concurrent.futures import ThreadPoolExecutor
 
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# the godot binary: the GODOT environment variable, else `godot` on the PATH
+GODOT = os.environ.get("GODOT", "godot")
 PROFILES = ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"]
 FILES = {
     "waves": "content/waves.gd",
@@ -35,35 +37,60 @@ def make_copy(index, cfg, tmp):
                     ignore=shutil.ignore_patterns(".godot"))
     for key, val in cfg.items():
         if key.startswith("sub:"):
-            path = os.path.join(dest, FILES[key.split(":")[1].split("#")[0]])
+            name_file = key.split(":")[1].split("#")[0]
+            if name_file not in FILES:
+                sys.exit("config %d: unknown file %r in %s (use %s)"
+                         % (index, name_file, key, ", ".join(FILES)))
+            if not (isinstance(val, list) and len(val) == 2
+                    and all(isinstance(v, str) for v in val)):
+                sys.exit("config %d: %s needs [old text, new text]" % (index, key))
+            path = os.path.join(dest, FILES[name_file])
             text = open(path).read()
             if val[0] not in text:
                 sys.exit("config %d: %r not found for %s" % (index, val[0], key))
             open(path, "w").write(text.replace(val[0], val[1], 1))
             continue
+        if ":" not in key:
+            sys.exit("config %d: key %r is not file:CONSTANT or sub:file#n" % (index, key))
         name_file, name = key.split(":")
+        if name_file not in FILES:
+            sys.exit("config %d: unknown file %r in %s (use %s)"
+                     % (index, name_file, key, ", ".join(FILES)))
+        if isinstance(val, bool) or not isinstance(val, (int, float)):
+            sys.exit("config %d: %s must be a number, not %r" % (index, key, val))
         path = os.path.join(dest, FILES[name_file])
-        text, n = re.subn(r"(const %s := )[^\n]+" % re.escape(name), r"\g<1>%s" % val,
+        text, n = re.subn(r"(const %s := )[^\n]+" % re.escape(name), r"\g<1>%s" % json.dumps(val),
                           open(path).read())
         if n != 1:
             sys.exit("config %d: constant %s not found in %s" % (index, name, name_file))
         open(path, "w").write(text)
-    subprocess.run(["godot", "--headless", "--path", dest, "--import"], capture_output=True)
+    imported = subprocess.run([GODOT, "--headless", "--path", dest, "--import"],
+                              capture_output=True, text=True)
+    if imported.returncode != 0:
+        sys.exit("config %d: godot could not import the copy:\n%s" % (index, imported.stderr))
     return dest
 
 
 def run_job(job):
     index, profile, dest, seeds = job
-    out = subprocess.run(
-        ["godot", "--headless", "--path", dest, "-s", "tools/balance_run.gd", "--",
+    run = subprocess.run(
+        [GODOT, "--headless", "--path", dest, "-s", "tools/balance_run.gd", "--",
          "--seeds=" + seeds, "--waves=20", "--profiles=" + profile],
-        capture_output=True, text=True).stdout
+        capture_output=True, text=True)
+    out = run.stdout
+    # a number that breaks a script makes godot print a script error and play a game
+    # without it (a quiet "win"), so any error in the output is fatal
+    if run.returncode != 0 or "SCRIPT ERROR" in out or "SCRIPT ERROR" in run.stderr:
+        sys.exit("config %d, %s: godot failed:\n%s%s" % (index, profile, out[-1500:], run.stderr[-1500:]))
     rows = []
     for line in out.splitlines():
         p = line.split()
         if len(p) >= 11 and p[0] == profile and p[1].lstrip("-").isdigit():
             # cleared, died on wave, Heartstone health, Buttons left
             rows.append((int(p[2]), int(p[3]), int(p[4]), int(p[8])))
+    wanted = len(seeds.split(","))
+    if len(rows) != wanted:
+        sys.exit("config %d, %s: %d rows for %d seeds:\n%s" % (index, profile, len(rows), wanted, out[-1500:]))
     return index, profile, rows
 
 

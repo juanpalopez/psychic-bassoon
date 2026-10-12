@@ -35,7 +35,7 @@ func _coverage(game: GameState, anchor: Vector2i) -> int:
 	return count
 
 
-func test_there_are_three_profiles_with_real_towers() -> void:
+func test_there_are_four_profiles_with_real_towers() -> void:
 	assert_eq(
 		PROFILES.PROFILE_IDS, ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"] as Array[String]
 	)
@@ -46,6 +46,19 @@ func test_there_are_three_profiles_with_real_towers() -> void:
 			assert_true(TOWERS.DEFS.has(tower), "%s: %s" % [id, tower])
 		assert_true(profile.has("call_early"), id)
 		assert_true(profile.has("early_foes_left"), id)
+
+
+func test_the_prism_heavy_profile_builds_prism_spires_first_and_most() -> void:
+	var game := Game.create(1)
+	game.buttons = 100000
+	_play(game, _bot("prismHeavy"), 30)
+	assert_gte(game.towers.size(), 6)
+	var prisms := 0
+	for tower in game.towers:
+		if tower.type == "prismSpire":
+			prisms += 1
+	assert_eq(game.towers[0].type, "prismSpire", "the first tower is a Prism Spire")
+	assert_gt(prisms, game.towers.size() / 2, "more than half are Prism Spires")
 
 
 func test_the_first_tower_goes_on_the_socket_that_reaches_the_most_road() -> void:
