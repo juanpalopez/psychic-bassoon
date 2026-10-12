@@ -20,6 +20,7 @@ static func spawn(game: GameState, type: String, wave: int, route: int = -1) -> 
 	foe.id = game.next_id
 	game.next_id += 1
 	foe.type = type
+	foe.wave = wave
 	foe.hp = float(stats.hp)
 	foe.max_hp = float(stats.hp)
 	foe.speed = stats.speed

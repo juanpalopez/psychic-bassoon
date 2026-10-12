@@ -11,7 +11,8 @@ const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"
 ## Per foe: `name`, `hp`, `speed` (cells per second), `reward` (Buttons for a kill),
 ## `armor` (cuts physical damage), `resist` (cuts magic damage; no foe has any yet),
 ## `radius` (cells) and `leak` (Heartstone health lost when it gets
-## through). The Golem also names what it splits into when destroyed.
+## through). The Golem also names what it splits into when destroyed: `splits_into`,
+## `split_count` of them, `split_spacing` cells apart along the route, behind it.
 const DEFS := {
 	"scrapGoblin":
 	{
@@ -47,5 +48,6 @@ const DEFS := {
 		"leak": 6,
 		"splits_into": "scrapGoblin",
 		"split_count": 4,
+		"split_spacing": 0.4,
 	},
 }

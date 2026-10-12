@@ -3,6 +3,8 @@ class_name Foe
 extends RefCounted
 
 var id: int = 0
+## The wave it came in: its strength, and what it splits into, follow from it.
+var wave: int = 0
 ## A foe id from `content/foes.gd`, such as "scrapGoblin".
 var type: String = ""
 ## Health is a float: a hit is a fraction (armor, a beam tick).

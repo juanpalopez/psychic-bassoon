@@ -63,4 +63,5 @@ static func _hurt(game: GameState, foe: Foe, amount: float) -> float:
 		event.x = foe.x
 		event.y = foe.y
 		game.events.append(event)
+		Splitting.spawn_children(game, foe)
 	return dealt
