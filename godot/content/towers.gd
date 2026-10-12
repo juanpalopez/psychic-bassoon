@@ -8,8 +8,9 @@
 ## Interim balance (2026-10-12, see `docs/BALANCE.md`): tuned with the scripted bot so
 ## that a build of only one tower keeps up with the others. Spool Guard damage was
 ## raised from 9, 15, 26 (the Corrugated Orc's armor is now 6), Thimble Mortar damage
-## trimmed from 32, 56, 96 (untrimmed it wins 14 of 16 maps), and the Prism Spire's damage per second raised from 16,
-## 33, 65 with its cost cut from 110, 100, 180. Redo it after the Phase 7 content.
+## trimmed from 32, 56, 96 (untrimmed it wins 14 of 16 maps), and the Prism Spire's
+## damage per second raised from 16, 33, 65 with its cost cut from 110, 100, 180.
+## Redo it after the Phase 7 content.
 ##
 ## Level-indexed stats: index 0 is level 1, index 2 is level 3.
 extends RefCounted
