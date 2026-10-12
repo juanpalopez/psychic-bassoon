@@ -1,0 +1,18 @@
+[
+  {
+    "label": "R5a final numbers with the Mortar untrimmed, 32/56/96",
+    "config": {
+      "sub:towers#2": ["\"damage\": [29, 51, 88]", "\"damage\": [32, 56, 96]"]
+    }
+  },
+  {
+    "label": "R5b final numbers with the Mortar at 26/46/80",
+    "config": {
+      "sub:towers#2": ["\"damage\": [29, 51, 88]", "\"damage\": [26, 46, 80]"]
+    }
+  },
+  {
+    "label": "R5c final numbers (Mortar 29/51/88)",
+    "config": {}
+  }
+]

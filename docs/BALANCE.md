@@ -177,16 +177,28 @@ The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (n
 
 ## Interim balance (2026-10-12)
 
-**Goal (owner, 2026-10-12):** a light pass now, a full one after the Phase 7 content (guards, heroes, spells, flyers, support foes). The aim is that a build of only one kind of tower can carry a run about as far as the others, and that a mix beats any single kind, while waves 11 to 20 push back. These numbers are interim: guards that block foes, heroes and spells will change the power of everything, and the economy has nothing to buy late in the game (the Spool Guard strategy ends with about 1,200 unspent Buttons).
+**Goal (owner, 2026-10-12):** a light pass now, a full one after the Phase 7 content (guards, heroes, spells, flyers, support foes). The aim is that a build of only one kind of tower can carry a run about as far as the others, that a mix is at least as good as the best of them, and that waves 11 to 20 push back. These numbers are interim: guards that block foes, heroes and spells will change the power of everything, and the economy has nothing to buy late in the game (the Spool Guard strategy ends with about 1,200 unspent Buttons).
 
-**Method:** the scripted bot with four profiles (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`) on seeds 1 to 8 (1 to 16 for the final table), 20 waves, 6 configurations per round. A sweep (`scripts/balance_sweep.py`, see below) runs in about 90 seconds because each configuration runs in its own copy of the project and each profile in its own process, in parallel.
+**Method:** the scripted bot with four profiles (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`) on seeds 1 to 8 (1 to 16 where noted), 20 waves. `prismHeavy` builds Prism Spire, Spool Guard, Prism Spire in turn, so it is not Prism-only. Every round below was run on the current `main` (sockets beside the road, the Golem splitting), through `scripts/balance_sweep.py`; the exact configurations and the raw output are in `docs/balance/` (`rounds-seeds-1-8.json` and `.txt`, `rounds-seeds-1-16.json` and `.txt`), so each line can be reproduced. "Won" is a run that clears all 20 waves; the numbers are the medians of the waves cleared, or the wins out of the maps.
 
-**What the rounds showed (on the socket layout of the fix above):**
+**What the rounds showed**
 
-1. With the prototype's numbers (the first six rows below, foe HP growth 0.014 and 0.03) and sockets beside the road, `spoolOnly`, `mortarHeavy` and `mix` clear 20 waves on almost every map. `prismHeavy` (its build order is Prism Spire, Spool Guard, Prism Spire, so not Prism-only) was the exception: with all the prototype's numbers it died on waves 9 to 13 and won 2 of 8 maps; at HP growth 0.03 it died on waves 6 to 11 on every map. The cause: 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button.
-2. Raising foe HP growth (0.014 to 0.03) alone changed little. Doubling the Prism Spire's damage brought a Prism-only build to waves 12 to 20; cutting its cost to 90 brought it to all 20.
-3. Orc armor is what separates the towers. At 8 (with the original Mortar damage and HP growth 0.03) the Spool Guard collapses (waves 6 to 8) and the Mortar's splash dominates (`mortarHeavy` won on 5 of 8 maps while `spoolOnly` never got past wave 8); with the trimmed Mortar it is no longer ahead; at 6 the Spool Guard is weak but alive (waves 7 to 18), so its damage was raised about 20% (9, 15, 26 to 11, 18, 30). The Mortar then led, so its damage was trimmed about 19% (32, 56, 96 to 26, 46, 80).
-4. With the towers close, foe HP growth sets the difficulty: 0.04 puts the medians at waves 19 to 20 (2 to 5 wins in 8, depending on the tower numbers), 0.05 drops the Mortar and Mix to a median of 11 to 12, 0.06 and 0.07 are too hard (medians 9 to 14).
+| Round | Numbers | Spool only | Mortar heavy | Prism heavy | Mix |
+| --- | --- | --- | --- | --- | --- |
+| R1a | Prototype numbers, HP growth 0.014 | 8 of 8 won | 8 of 8 won | 2 of 8 won, median 10 | 8 of 8 won |
+| R1b | Prototype numbers, HP growth 0.03 | 5 of 8 won | 8 of 8 won | 0 of 8 won, median 8.5 | 5 of 8 won |
+| R2a | R1b with Prism damage 32 / 66 / 130 | 5 of 8 | 8 of 8 | 3 of 8, median 18.5 | 8 of 8 |
+| R2b | R2a with Prism cost 90 / 90 / 150 | 5 of 8 | 8 of 8 | 8 of 8 won | 8 of 8 |
+| R3a | R1b with Orc armor 8 | 0 of 8, median 7 | 8 of 8 won | 0 of 8, median 8 | 1 of 8, median 9 |
+| R3b | HP 0.03, Orc armor 6, Prism 32 / 66 / 130, Spool 11 / 18 / 30, Mortar 32 / 56 / 96 | 8 of 8 | 8 of 8 | 3 of 8, median 18.5 | 8 of 8 |
+| R4a | The final numbers below, HP growth 0.05 | 0 of 8, median 17 | 3 of 8, median 15 | 1 of 8, median 14 | 2 of 8, median 14 |
+| R4b | Final numbers, HP growth 0.06 | 0 of 8, median 14 | 2 of 8, median 11 | 0 of 8, median 12 | 1 of 8, median 11.5 |
+| R4c | Final numbers, HP growth 0.07 | 0 of 8, median 10 | 0 of 8, median 10 | 0 of 8, median 9.5 | 0 of 8, median 10.5 |
+
+1. **The Prism Spire is the weak tower.** With the prototype's numbers a Prism-heavy build is lost on waves 7 to 13 on most maps while the others win (R1a, R1b). 16 damage per second for 110 Buttons is about a quarter of a Spool Guard's damage per Button. Doubling its damage alone is not enough (R2a); doubling it and cutting the cost to 90 makes it win everything (R2b), so the final numbers sit between: damage 36, 72, 140 per second at 100, 90, 160 Buttons.
+2. **Orc armor is what separates the towers.** At armor 8 the Spool Guard, Prism-heavy and Mix collapse (waves 6 to 9) while the Mortar's splash still wins every map (R3a). At 6, with the Spool Guard raised about 20% (9, 15, 26 to 11, 18, 30), the Spool Guard is back in the game (R3b).
+3. **The Mortar needs a trim, but a smaller one than I first made.** With the final numbers at HP growth 0.04 (seeds 1 to 16, `rounds-seeds-1-16`): the untrimmed Mortar (32 / 56 / 96) wins 14 of 16 maps against 9 for the Spool Guard and 7 for Prism-heavy; 26 / 46 / 80 wins 6 of 16 (too weak); 29 / 51 / 88 wins 10 of 16. That is the number used.
+4. **Foe HP growth sets the difficulty once the towers are close to each other.** At 0.04 the strategies win 7 to 12 of 16 maps and the weak maps are lost around waves 10 to 19; 0.05 is harder than the target (0 to 3 of 8 won), 0.06 and 0.07 are much too hard.
 
 **Changes** (all in `godot/content`):
 
@@ -195,17 +207,17 @@ The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (n
 | Corrugated Orc armor | 4 | 6 |
 | Foe HP growth, quadratic term (`HP_QUADRATIC`) | 0.014 | 0.04 |
 | Spool Guard damage, levels 1 to 3 | 9, 15, 26 | 11, 18, 30 |
-| Thimble Mortar damage | 32, 56, 96 | 26, 46, 80 |
+| Thimble Mortar damage | 32, 56, 96 | 29, 51, 88 |
 | Prism Spire damage per second | 16, 33, 65 | 36, 72, 140 |
 | Prism Spire cost | 110, 100, 180 | 100, 90, 160 |
 
-**Result** (seeds 1 to 16, 20 waves; "won" is a run that clears all 20):
+**Result** (seeds 1 to 16, 20 waves, `rounds-seeds-1-16` configuration R5c):
 
 | Strategy | Median waves cleared | Range | Won | Mean Heartstone health at the end | Buttons left |
 | --- | --- | --- | --- | --- | --- |
-| Spool Guards only | 20 | 17 to 20 | 10 of 16 | 9.1 | 1,191 |
-| Mortar heavy | 19 | 9 to 20 | 6 of 16 | 3.5 | 251 |
-| Prism heavy | 20 | 15 to 20 | 9 of 16 | 5.9 | 206 |
-| Mix | 20 | 10 to 20 | 10 of 16 | 9.1 | 482 |
+| Spool Guards only | 20 | 17 to 20 | 9 of 16 | 7.3 | 1,193 |
+| Mortar heavy | 20 | 10 to 20 | 10 of 16 | 5.8 | 297 |
+| Prism heavy | 19 | 15 to 20 | 7 of 16 | 5.1 | 129 |
+| Mix | 20 | 10 to 20 | 12 of 16 | 10.1 | 486 |
 
-Solo builds are within a wave of each other in median (Mortar heavy is the least reliable: it lost 4 of 16 maps at waves 9 to 10, which Spool and Prism never did), the mix is as good as the best solo build, and the weakest maps are lost around waves 9 to 18. The Mortar is the least reliable strategy (it needs good sockets for its short reach). Still to do: the economy (Buttons pile up), the boss wave as a real test, a mix that clearly beats every solo build, and everything involving the new content.
+Solo builds are within a wave of each other in median, they win 7 to 10 of 16 maps, and the mix wins the most (12 of 16) with the highest Heartstone health. Mortar heavy is the least reliable on bad maps (its worst map ends on wave 10) and Prism heavy the one that rarely goes through a map untouched. Still to do: the economy (Buttons pile up), the boss wave as a real test, the targets of #203 for the first four waves, and everything involving the new content.
