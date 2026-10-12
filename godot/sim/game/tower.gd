@@ -12,3 +12,6 @@ var row: int = 0
 var invested: int = 0
 ## Seconds until it may fire again; 0 while it waits for a target.
 var cooldown: float = 0.0
+## A beam tower's locked foe (its id), or -1 when it has none. Render reads it to
+## draw the beam; other towers keep -1.
+var target_id: int = -1

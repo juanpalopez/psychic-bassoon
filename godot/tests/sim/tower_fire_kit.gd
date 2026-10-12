@@ -75,3 +75,21 @@ static func shot_ticks(scene: Scene, foe: Foe, ticks: int) -> Array[int]:
 		if foe.hp < before:
 			at.append(i)
 	return at
+
+
+## The distance along route 0 of the road point farthest from the tower, and
+## that point's distance from the tower in cells.
+static func farthest_from(scene: Scene) -> Array:
+	var route := scene.game.routes[0]
+	var centre := Vector2(float(scene.tower.col) + 0.5, float(scene.tower.row) + 0.5)
+	var best_along := 0.0
+	var best_gap := 0.0
+	var along := 0.0
+	while along <= route.total:
+		var point := route.position_at(along)
+		var gap := centre.distance_to(Vector2(point.x, point.y))
+		if gap > best_gap:
+			best_gap = gap
+			best_along = along
+		along += 0.05
+	return [best_along, best_gap]

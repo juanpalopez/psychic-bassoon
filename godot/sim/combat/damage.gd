@@ -36,9 +36,22 @@ static func after_defence(foe: Foe, amount: float, kind: Kind) -> float:
 ## Hurts `foe` and returns the hp it lost (never more than it had). A foe that
 ## has already fallen takes nothing.
 static func apply(game: GameState, foe: Foe, amount: float, kind: Kind) -> float:
+	return _hurt(game, foe, after_defence(foe, amount, kind))
+
+
+## A beam's share of a tick: the defence is taken off the damage per second, as
+## it would be off a shot, and only then is the result spread over `seconds`. A
+## flat armor or resist taken off each tiny tick would eat the whole beam.
+static func apply_beam(
+	game: GameState, foe: Foe, damage_per_second: float, kind: Kind, seconds: float
+) -> float:
+	return _hurt(game, foe, after_defence(foe, damage_per_second, kind) * seconds)
+
+
+static func _hurt(game: GameState, foe: Foe, amount: float) -> float:
 	if not foe.alive:
 		return 0.0
-	var dealt := minf(after_defence(foe, amount, kind), foe.hp)
+	var dealt := minf(amount, foe.hp)
 	foe.hp -= dealt
 	if foe.hp <= 0.0:
 		foe.alive = false

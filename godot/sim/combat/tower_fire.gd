@@ -4,7 +4,7 @@
 ## over). The Spool Guard hits one foe, the Thimble Mortar everything within its
 ## splash of the target. The shot happens the tick it is fired (a renderer draws
 ## the flight from the TOWER_FIRED event). A beam tower (the Prism Spire) fires
-## no shots; its beam comes later.
+## no shots: it locks a foe and hurts it a little every tick.
 class_name TowerFire
 extends RefCounted
 
@@ -18,10 +18,11 @@ static func step(game: GameState) -> void:
 	for tower in game.towers:
 		var def: Dictionary = TOWERS.DEFS[tower.type]
 		if def.get("beam", false):
+			_beam(game, tower, def)
 			continue
-		var was_ready := tower.cooldown <= RULES.COOLDOWN_EPSILON
+		var was_ready := tower.cooldown <= RULES.TIMER_EPSILON
 		tower.cooldown -= Game.TICK_SECONDS
-		if tower.cooldown > RULES.COOLDOWN_EPSILON:
+		if tower.cooldown > RULES.TIMER_EPSILON:
 			continue
 		var target := target_for(game, tower)
 		if target == null:
@@ -69,6 +70,49 @@ static func foes_within(game: GameState, x: float, y: float, radius: float) -> A
 		if foe.alive and dx * dx + dy * dy <= limit:
 			found.append(foe)
 	return found
+
+
+## Lets go of every lock whose foe has fallen, so no tower keeps pointing at a
+## foe that is about to leave the game. Run after all towers have fired.
+static func release_fallen_locks(game: GameState) -> void:
+	for tower in game.towers:
+		if tower.target_id < 0:
+			continue
+		var held := false
+		for foe in game.foes:
+			if foe.id == tower.target_id and foe.alive:
+				held = true
+				break
+		if not held:
+			tower.target_id = -1
+
+
+## A beam tower's turn: keep the locked foe while it lives and stays in reach,
+## else lock the foe the tower would target, and hurt it a tick's share of the
+## beam's damage per second. No event is emitted: render reads `target_id`.
+static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
+	var target := _locked_foe(game, tower)
+	if target == null:
+		target = target_for(game, tower)
+	tower.target_id = target.id if target != null else -1
+	if target == null:
+		return
+	var per_second := float(def.damage[tower.level])
+	var kind := Damage.kind_named(def.damage_type)
+	Damage.apply_beam(game, target, per_second, kind, Game.TICK_SECONDS)
+
+
+## The foe the tower is locked on, if it is still alive and within reach.
+static func _locked_foe(game: GameState, tower: Tower) -> Foe:
+	if tower.target_id < 0:
+		return null
+	var reach := reach_of(game, tower)
+	var centre_x := float(tower.col) + MAP_RULES.CELL_CENTRE
+	var centre_y := float(tower.row) + MAP_RULES.CELL_CENTRE
+	for foe in foes_within(game, centre_x, centre_y, reach):
+		if foe.id == tower.target_id:
+			return foe
+	return null
 
 
 static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -> void:
