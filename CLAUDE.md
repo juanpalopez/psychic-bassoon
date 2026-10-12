@@ -49,7 +49,7 @@ godot/
   render/    scenes and scripts: terrain, foes (MultiMesh), towers, camera, effects
   ui/        HUD scenes (Control nodes) and the Theme
   tests/     GUT tests and the fixtures for the ported core
-fixtures/    frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), and later GDScript replay goldens
+fixtures/    frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes); GDScript replay goldens live in `godot/tests/goldens/`
 ```
 
 - `godot/sim` must never touch the scene tree or engine singletons: no `Node`, no `get_tree`, no `Engine`, `Time` or `OS` calls, no `randf`/`randi`/`randomize`. A lint script enforces it; don't disable it.

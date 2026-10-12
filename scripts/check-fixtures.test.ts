@@ -1,6 +1,12 @@
 import {spawnSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
-import {mkdtempSync, rmSync, writeFileSync} from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {afterEach, beforeEach, describe, expect, it} from 'vitest';
@@ -73,6 +79,30 @@ describe('check-fixtures script', () => {
   it('fails when the list is missing', () => {
     writeFileSync(join(dir, 'a.json'), '{}');
     expect(check().status).toBe(1);
+  });
+
+  it('fails on a JSON file in a subfolder or with another case', () => {
+    seed({'a.json': '{}'});
+    mkdirSync(join(dir, 'sub'));
+    writeFileSync(join(dir, 'sub', 'b.json'), '{}');
+    expect(check().status).toBe(1);
+    rmSync(join(dir, 'sub'), {recursive: true});
+    writeFileSync(join(dir, 'NEW.JSON'), '{}');
+    expect(check().status).toBe(1);
+  });
+
+  // Pinned here so a change to a frozen fixture has to touch this test as well
+  // as SHA256SUMS, and CI also rejects any diff under fixtures/ in a PR.
+  it('lists exactly the three frozen fixtures with their hashes', () => {
+    const sums = readFileSync('fixtures/SHA256SUMS', 'utf8');
+    expect(sums).toBe(
+      [
+        '43f05c07263d91bc64e4761dca60dcdb2e4714ba121545c959a67b5c8cd8010b  prng.json',
+        'ebec8a74c772eea8bf02576e74a668057e4a8854dffc7ace050f6b647b1cfcba  maps.json',
+        '7625d599b0012a31d0fa07a1a55e0671d7ad31f0822a341a9b92c29f27aab202  routes.json',
+        '',
+      ].join('\n')
+    );
   });
 
   it('passes on the real frozen fixtures', () => {

@@ -40,9 +40,16 @@ for (const [name, hash] of expected) {
 }
 
 if (existsSync(dir)) {
-  for (const name of readdirSync(dir)) {
-    if (name.endsWith('.json') && !expected.has(name)) {
-      problems.push(`${join(dir, name)} is not listed in SHA256SUMS`);
+  for (const entry of readdirSync(dir, {
+    recursive: true,
+    withFileTypes: true,
+  })) {
+    if (!entry.isFile() || !entry.name.toLowerCase().endsWith('.json'))
+      continue;
+    const path = join(entry.parentPath, entry.name);
+    const name = path.slice(dir.length + 1);
+    if (!expected.has(name)) {
+      problems.push(`${path} is not listed in SHA256SUMS`);
     }
   }
 }

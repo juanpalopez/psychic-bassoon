@@ -23,6 +23,7 @@ jobs:
         with:
           lfs: false
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Lint workflows (actionlint)
         env:
@@ -65,6 +66,17 @@ jobs:
 
       - name: Frozen fixtures
         run: pnpm check:fixtures
+
+      - name: Frozen fixtures unchanged in this PR
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if ! git diff --quiet "$BASE_SHA" HEAD -- fixtures/; then
+            echo "::error::fixtures/ changed in this PR; the frozen fixtures are never regenerated."
+            git diff --stat "$BASE_SHA" HEAD -- fixtures/
+            exit 1
+          fi
 
   godot:
     name: godot

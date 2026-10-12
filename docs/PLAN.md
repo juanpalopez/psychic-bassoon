@@ -214,7 +214,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     tests/               # GUT tests, including the fixtures for the ported core
     export_presets.cfg   # web export preset (Godot reads it from the project root)
     web/                 # the custom HTML shell (landscape prompt, meta tags, loader)
-  fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS; later GDScript replay goldens
+  fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
@@ -340,7 +340,7 @@ Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells
 
 **Goal:** the game playable on the phone in Godot: a full run to the boss, in the GDD's interaction model.
 
-**Rescope (owner decision, 2026-10-11): greybox first, in parallel with Phase 4.** Phase 5 starts now as a greybox while the rest of the sim port continues. This is a deliberate exception to "work one phase at a time". The risk is low because the greybox only reads sim snapshots and sends commands, so it cannot change the sim's results; if a sim change breaks a greybox scene, the greybox adapts. The Three.js renderer and HUD are already gone; `src/sim` and the fixture exporter stay as a read-only reference until Phase 4 step 8. Track C (terrain art) is parked at the proof of concept (Blender tiles plus world-space Godot shaders and scatter) and returns as the art pass over A1, with the terrain code reading the real map; how the path is drawn is decided in Phase 5.
+**Rescope (owner decision, 2026-10-11): greybox first, in parallel with Phase 4.** Phase 5 starts now as a greybox while the rest of the sim port continues. This is a deliberate exception to "work one phase at a time". The risk is low because the greybox only reads sim snapshots and sends commands, so it cannot change the sim's results; if a sim change breaks a greybox scene, the greybox adapts. The Three.js renderer and HUD are already gone; the TypeScript sim and the fixture exporter were removed in Phase 4 step 8 (they stay in the tag `web-three-final`). Track C (terrain art) is parked at the proof of concept (Blender tiles plus world-space Godot shaders and scatter) and returns as the art pass over A1, with the terrain code reading the real map; how the path is drawn is decided in Phase 5.
 
 | Step | You get | What it teaches |
 | --- | --- | --- |
