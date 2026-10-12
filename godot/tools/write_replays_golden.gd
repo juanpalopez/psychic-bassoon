@@ -1,5 +1,5 @@
 ## Writes `tests/goldens/replays.json`: whole games played by the scripted bot
-## (the commands it sent, a checkpoint every minute of play and the final state,
+## (the commands it sent, a checkpoint every 20 seconds of play and the final state,
 ## with floats as bits), written by the GDScript sim itself. Run it only for a
 ## reviewed balance change (a new rule or number), then commit the result:
 ##
@@ -26,7 +26,7 @@ func _init() -> void:
 		push_error("cannot write %s" % PATH)
 		quit(1)
 		return
-	file.store_string(JSON.stringify(out) + "\n")
+	file.store_string(JSON.stringify(out, "\t", true) + "\n")
 	file.close()
 	for rec in out:
 		print("seed %d %s: %s after %d ticks" % [rec.seed, rec.profile, rec.outcome, rec.ticks])

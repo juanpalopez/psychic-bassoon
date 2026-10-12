@@ -2,15 +2,16 @@
 ## A recording is plain data: the seed, the commands (tick first), and a
 ## checkpoint of the state every `CHECKPOINT_EVERY` ticks and at the end. A
 ## checkpoint is taken at the start of its tick, before that tick's commands.
-## It holds a few readable numbers and a SHA-256 of the whole state, so a
-## difference anywhere (a float's last bit included) shows up, in little space.
+## It holds a few readable numbers, a SHA-256 of the whole state, and a running
+## SHA-256 of every event drained so far, so a difference anywhere (a float's
+## last bit, an event's payload) shows up, in little space.
 class_name ReplayKit
 extends RefCounted
 
 const PROFILES := preload("res://content/bot_profiles.gd")
 
-## Two seconds of play at 30 Hz, times thirty: one checkpoint a minute.
-const CHECKPOINT_EVERY := 1800
+## Twenty seconds of play at 30 Hz.
+const CHECKPOINT_EVERY := 600
 
 
 ## Plays `map_seed` with the named bot profile for up to `max_waves` waves.
@@ -19,16 +20,20 @@ static func record(map_seed: int, profile_id: String, max_waves: int) -> Diction
 	var commands := []
 	var checkpoints := []
 	var seen := []
+	var events := EventDigest.new()
 	var act := func(game: GameState) -> void:
 		seen.append(game)
+		# the events of the tick that just ran, folded before this tick's checkpoint
+		events.fold(game)
 		if game.tick_count % CHECKPOINT_EVERY == 0:
-			checkpoints.append(checkpoint(game))
+			checkpoints.append(checkpoint(game, events))
 		var before := game.pending.size()
 		bot.act(game)
 		for i in range(before, game.pending.size()):
 			commands.append(encode(game.tick_count, game.pending[i]))
 	var result := BotRunner.play_with(map_seed, act, max_waves)
 	var game: GameState = seen.back()
+	events.fold(game)
 	var outcome := "unfinished"
 	if result.won:
 		outcome = "won"
@@ -44,7 +49,7 @@ static func record(map_seed: int, profile_id: String, max_waves: int) -> Diction
 		"ticks": game.tick_count,
 		"commands": commands,
 		"checkpoints": checkpoints,
-		"final": checkpoint(game),
+		"final": checkpoint(game, events),
 	}
 
 
@@ -58,20 +63,39 @@ static func replay(recording: Dictionary) -> Dictionary:
 		if not by_tick.has(tick):
 			by_tick[tick] = []
 		by_tick[tick].append(decode(entry))
+	var events := EventDigest.new()
 	var checkpoints := []
 	for tick in int(recording.ticks):
 		if tick % CHECKPOINT_EVERY == 0:
-			checkpoints.append(checkpoint(game))
+			checkpoints.append(checkpoint(game, events))
 		for command in by_tick.get(tick, []):
 			Game.submit(game, command)
 		Game.tick(game)
-	return {"checkpoints": checkpoints, "final": checkpoint(game)}
+		events.fold(game)
+	return {"checkpoints": checkpoints, "final": checkpoint(game, events)}
 
 
-## A few readable numbers and the hash of the whole state.
-static func checkpoint(game: GameState) -> Dictionary:
+## A few readable numbers and the hashes of the whole state and of the events.
+static func checkpoint(game: GameState, events: EventDigest) -> Dictionary:
 	var state := GameTestKit.snapshot(game)
 	state.erase("routes")
+	state.erase("events")
+	state.erase("pending")
+	var more := []
+	for foe in game.foes:
+		more.append(
+			[
+				foe.id,
+				foe.wave,
+				foe.max_hp,
+				foe.resist,
+				foe.radius,
+				foe.leak,
+				foe.slow_timer,
+				foe.alive
+			]
+		)
+	state["foe_details"] = more
 	return {
 		"tick": game.tick_count,
 		"wave": game.wave,
@@ -80,6 +104,7 @@ static func checkpoint(game: GameState) -> Dictionary:
 		"foes": game.foes.size(),
 		"towers": game.towers.size(),
 		"hash": JSON.stringify(_with_bits(state), "", true).sha256_text(),
+		"events": events.digest,
 	}
 
 
@@ -131,6 +156,46 @@ static func normalised(value: Variant) -> Variant:
 	if value is float and value == floor(value):
 		return int(value)
 	return value
+
+
+## Folds the events of each tick into one running hash.
+class EventDigest:
+	extends RefCounted
+	var digest := ""
+
+	## Call once after every tick, with the game that just ticked.
+	func fold(game: GameState) -> void:
+		if game.events.is_empty():
+			return
+		var lines := []
+		for event in game.events:
+			lines.append(ReplayKit.describe(event))
+		digest = (digest + JSON.stringify(lines)).sha256_text()
+
+
+## Every field of an event, floats as bits.
+static func describe(event: GameEvent) -> Array:
+	var command := ""
+	if event.command != null:
+		command = JSON.stringify(encode(0, event.command))
+	return [
+		event.kind,
+		event.tower_id,
+		event.level,
+		event.refund,
+		event.wave,
+		event.early_bonus,
+		event.bonus,
+		event.foe_id,
+		event.foe_type,
+		event.leak,
+		event.reward,
+		bits(event.splash),
+		bits(event.x),
+		bits(event.y),
+		command,
+		event.reason,
+	]
 
 
 static func _with_bits(value: Variant) -> Variant:
