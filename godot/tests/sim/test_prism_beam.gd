@@ -128,33 +128,10 @@ func test_a_beam_fires_no_shot_events() -> void:
 		assert_eq(TowerFireKit.kinds(scene.game, GameEvent.Kind.TOWER_FIRED).size(), 0)
 
 
-## Builds a second tower of `type` on the free socket nearest the foe.
-func _build_beside(scene: TowerFireKit.Scene, foe: Foe, type: String) -> Tower:
-	var best := Vector2i(-1, -1)
-	var best_gap := INF
-	for socket in scene.game.map.sockets:
-		if socket == Vector2i(scene.tower.col, scene.tower.row):
-			continue
-		var gap := Vector2(float(socket.x) + 0.5, float(socket.y) + 0.5).distance_to(
-			Vector2(foe.x, foe.y)
-		)
-		if gap < best_gap:
-			best_gap = gap
-			best = socket
-	assert_lt(best_gap, 2.3, "a second socket within reach of the foe")
-	scene.game.buttons = 1000
-	var built := scene.game.towers.size()
-	Game.submit(scene.game, Command.build(type, best.x, best.y))
-	Game.tick(scene.game)
-	assert_eq(scene.game.towers.size(), built + 1, "the second tower was built")
-	return scene.game.towers[built]
-
-
 func test_two_beams_on_one_foe_add_up() -> void:
-	var scene := TowerFireKit.scene("prismSpire")
+	var scene := TowerFireKit.pair("prismSpire", "prismSpire")
+	assert_eq(scene.second.type, "prismSpire")
 	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
-	var second := _build_beside(scene, foe, "prismSpire")
-	assert_eq(second.type, "prismSpire")
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
@@ -162,12 +139,9 @@ func test_two_beams_on_one_foe_add_up() -> void:
 
 
 func test_a_lock_is_released_the_tick_another_tower_kills_the_foe() -> void:
-	var scene := TowerFireKit.scene("prismSpire")
+	var scene := TowerFireKit.pair("prismSpire", "spoolGuard")
+	assert_eq(scene.second.type, "spoolGuard")
 	var foe := TowerFireKit.foe(scene.game, scene.near, "scrapGoblin")
-	var spool := _build_beside(scene, foe, "spoolGuard")
-	assert_eq(spool.type, "spoolGuard")
-	scene.tower.cooldown = 0.0
-	spool.cooldown = 0.0
 	scene.game.events = []
 	foe.hp = 5.0
 	Game.tick(scene.game)

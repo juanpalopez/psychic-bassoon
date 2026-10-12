@@ -11,6 +11,10 @@ func _board(map_seed: int) -> Board:
 	return board
 
 
+func _cells_per_block(board: Board) -> int:
+	return board.map.footprint * board.map.footprint
+
+
 func test_the_board_holds_the_map_for_its_seed() -> void:
 	var board := _board(7920)
 	var map := MapGen.generate(7920)
@@ -22,7 +26,7 @@ func test_every_cell_is_a_road_tile_a_socket_or_ground() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
 		assert_eq(
-			board.road_count + board.ground_count + board.socket_count,
+			board.road_count + board.ground_count + board.socket_count * _cells_per_block(board),
 			RULES.GRID_COLS * RULES.GRID_ROWS
 		)
 		var road := {}
@@ -39,7 +43,7 @@ func test_changing_the_seed_rebuilds_the_board() -> void:
 	assert_ne(board.map.path, before)
 	assert_eq(board.map.path, MapGen.generate(7920).path)
 	assert_eq(
-		board.road_count + board.ground_count + board.socket_count,
+		board.road_count + board.ground_count + board.socket_count * _cells_per_block(board),
 		RULES.GRID_COLS * RULES.GRID_ROWS
 	)
 
@@ -58,7 +62,9 @@ func test_spawn_and_heartstone_markers_sit_on_the_ends_of_the_road() -> void:
 	var spawn := path[0]
 	var heartstone := path[path.size() - 1]
 	var spawn_at := BoardSpace.cell_to_world(spawn.x, spawn.y)
-	var heartstone_at := BoardSpace.cell_to_world(heartstone.x, heartstone.y)
+	var block := board.map.heartstone
+	assert_true(block.has_point(heartstone), "the footprint holds the end of the road")
+	var heartstone_at := BoardSpace.footprint_centre(block.position, block.size.x)
 	assert_almost_eq(board.spawn_marker.position.x, spawn_at.x, 1e-6)
 	assert_almost_eq(board.spawn_marker.position.z, spawn_at.z, 1e-6)
 	assert_almost_eq(board.heartstone_marker.position.x, heartstone_at.x, 1e-6)
@@ -102,3 +108,29 @@ func test_a_higher_socket_stands_taller_than_the_road_and_the_ground() -> void:
 	assert_lt(heights[0], heights[1])
 	assert_lt(heights[1], heights[2])
 	assert_lt(board.surface_height(board.map.path[3]), board.surface_height(board.map.sockets[0]))
+
+
+func test_a_socket_is_drawn_as_a_block_as_wide_as_its_footprint() -> void:
+	var board := _board(1)
+	var anchor := board.map.sockets[0]
+	var transform := board.socket_transform(0)
+	var middle := BoardSpace.footprint_centre(anchor, board.map.footprint)
+	assert_almost_eq(transform.origin.x, middle.x, 1e-5)
+	assert_almost_eq(transform.origin.z, middle.z, 1e-5)
+	assert_almost_eq(transform.basis.x.length(), float(board.map.footprint), 1e-5)
+	assert_almost_eq(transform.basis.z.length(), float(board.map.footprint), 1e-5)
+
+
+func test_every_cell_of_a_socket_block_has_the_blocks_height() -> void:
+	var board := _board(7920)
+	for anchor in board.map.sockets:
+		var height := board.surface_height(anchor)
+		for dy in board.map.footprint:
+			for dx in board.map.footprint:
+				assert_eq(board.surface_height(anchor + Vector2i(dx, dy)), height, str(anchor))
+
+
+func test_the_heartstone_marker_covers_its_footprint() -> void:
+	var board := _board(1)
+	var box := board.heartstone_marker.mesh as BoxMesh
+	assert_gte(box.size.x, float(board.map.heartstone.size.x) * 0.6)

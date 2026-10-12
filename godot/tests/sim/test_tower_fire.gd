@@ -28,7 +28,7 @@ func test_a_foe_in_reach_is_hit_and_the_shot_is_reported() -> void:
 func test_a_foe_out_of_reach_is_left_alone() -> void:
 	var scene := TowerFireKit.scene()
 	var route := scene.game.routes[0]
-	var centre := Vector2(float(scene.tower.col) + 0.5, float(scene.tower.row) + 0.5)
+	var centre := scene.game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
 	# the point of the road farthest from the tower
 	var farthest := 0.0
 	var gap := 0.0
@@ -69,7 +69,7 @@ func test_a_level_2_socket_reaches_a_foe_a_level_0_socket_would_miss() -> void:
 		for socket in game.map.sockets:
 			if game.map.elevation_at(socket) != 2:
 				continue
-			var centre := Vector2(float(socket.x) + 0.5, float(socket.y) + 0.5)
+			var centre := game.map.socket_centre(socket)
 			var along := 0.0
 			while along <= route.total:
 				var point := route.position_at(along)
@@ -105,10 +105,11 @@ func test_a_tie_goes_to_the_foe_that_spawned_first() -> void:
 
 
 func test_foes_on_different_routes_are_compared_by_distance_left() -> void:
-	var scene := TowerFireKit.scene()
+	# the game has one road now; the sim still supports a detour (a backlog idea)
+	var scene := TowerFireKit.scene("spoolGuard", 1, false, Game.create(1, 9, 13, true, 1))
 	var game := scene.game
 	assert_gt(game.routes.size(), 1, "this seed has a detour")
-	var centre := Vector2(float(scene.tower.col) + 0.5, float(scene.tower.row) + 0.5)
+	var centre := scene.game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
 	var far := TowerFireKit.foe(game, 1.0, "scrapGoblin", 0)
 	var close := TowerFireKit.foe(game, 1.0, "scrapGoblin", 1)
 	# both stand at the tower; what differs is how far each has left to walk

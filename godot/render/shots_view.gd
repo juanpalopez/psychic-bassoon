@@ -54,9 +54,10 @@ func _init() -> void:
 		_beam_to.append(Vector3.ZERO)
 
 
-## Where a shot or beam leaves a tower standing on a tile `surface` tall.
-static func muzzle(tower: Tower, surface: float) -> Vector3:
-	var at := BoardSpace.cell_to_world(tower.col, tower.row)
+## Where a shot or beam leaves a tower standing on a tile `surface` tall, over
+## the middle of its socket block of `footprint` cells.
+static func muzzle(tower: Tower, surface: float, footprint: int = 1) -> Vector3:
+	var at := BoardSpace.footprint_centre(Vector2i(tower.col, tower.row), footprint)
 	return Vector3(at.x, surface + MUZZLE_HEIGHT, at.z)
 
 
@@ -108,7 +109,7 @@ func show_beams(game: GameState, surface_height: Callable) -> void:
 		var surface := 0.0
 		if surface_height.is_valid():
 			surface = surface_height.call(Vector2i(tower.col, tower.row))
-		_beam_from[shown] = muzzle(tower, surface)
+		_beam_from[shown] = muzzle(tower, surface, game.map.footprint)
 		_beam_to[shown] = body_point(foe.x, foe.y)
 		_place_line(_beams[shown], _beam_from[shown], _beam_to[shown])
 		shown += 1

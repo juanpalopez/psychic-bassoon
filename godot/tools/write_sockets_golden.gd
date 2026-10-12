@@ -12,7 +12,7 @@ const PATH := "res://tests/goldens/sockets.json"
 func _init() -> void:
 	var out := []
 	for map_seed in SEEDS:
-		var map := MapGen.generate(map_seed)
+		var map := MapGen.generate(map_seed, 9, 13, true, 1)
 		var cells := []
 		var levels := []
 		for cell in map.sockets:

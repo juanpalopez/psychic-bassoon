@@ -14,10 +14,11 @@ var _height := 0.0
 @onready var _pips: Node3D = $Pips
 
 
-## Puts the tower on its cell, standing on a tile whose top is `surface_top`.
-func setup(tower: Tower, look: TowerLook, surface_top: float) -> void:
+## Puts the tower on its socket (at the middle of its block of `footprint` cells),
+## standing on a tile whose top is `surface_top`.
+func setup(tower: Tower, look: TowerLook, surface_top: float, footprint: int = 1) -> void:
 	tower_id = tower.id
-	var at := BoardSpace.cell_to_world(tower.col, tower.row)
+	var at := BoardSpace.footprint_centre(Vector2i(tower.col, tower.row), footprint)
 	position = Vector3(at.x, surface_top, at.z)
 	_height = look.base_height + look.height_per_level * float(tower.level)
 	var box := BoxMesh.new()

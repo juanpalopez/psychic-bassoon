@@ -96,7 +96,7 @@ func test_a_locked_beam_draws_a_line_from_its_tower_to_its_foe() -> void:
 	view.show_beams(scene.game, func(_cell: Vector2i) -> float: return 0.3)
 	assert_eq(view.visible_beams(), 1)
 	assert_eq(view.beam_to(0), ShotsView.body_point(foe.x, foe.y))
-	assert_eq(view.beam_from(0), ShotsView.muzzle(scene.tower, 0.3))
+	assert_eq(view.beam_from(0), ShotsView.muzzle(scene.tower, 0.3, scene.game.map.footprint))
 
 
 func test_a_beam_goes_when_its_lock_goes() -> void:
@@ -144,3 +144,13 @@ func test_the_muzzle_and_the_body_point_follow_the_board_space() -> void:
 	var on_board := BoardSpace.point_to_world(2.5, 7.5)
 	assert_almost_eq(body.x, on_board.x, 1e-9)
 	assert_almost_eq(body.z, on_board.z, 1e-9)
+
+
+func test_the_muzzle_of_a_tower_on_a_block_is_over_the_blocks_centre() -> void:
+	var tower := Tower.new()
+	tower.col = 3
+	tower.row = 5
+	var middle := BoardSpace.footprint_centre(Vector2i(3, 5), 2)
+	var muzzle := ShotsView.muzzle(tower, 0.4, 2)
+	assert_almost_eq(muzzle.x, middle.x, 1e-9)
+	assert_almost_eq(muzzle.z, middle.z, 1e-9)

@@ -1,4 +1,4 @@
-## A flat, see-through square laid over the selected cell.
+## A flat, see-through square laid over the selected cell or socket block.
 class_name CellHighlight
 extends Node3D
 
@@ -24,8 +24,15 @@ func _init() -> void:
 
 ## Shows the square on `cell`, resting on a tile `height` tall.
 func show_cell(cell: Vector2i, height: float, colour: Color) -> void:
-	var at := BoardSpace.cell_to_world(cell.x, cell.y)
+	show_block(cell, 1, height, colour)
+
+
+## Shows the square over a block of `footprint` cells whose top-left cell is
+## `anchor`.
+func show_block(anchor: Vector2i, footprint: int, height: float, colour: Color) -> void:
+	var at := BoardSpace.footprint_centre(anchor, footprint)
 	position = Vector3(at.x, height + LIFT, at.z)
+	scale = Vector3(float(footprint), 1.0, float(footprint))
 	_material.albedo_color = colour
 	visible = true
 

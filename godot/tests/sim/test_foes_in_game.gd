@@ -190,7 +190,7 @@ func test_with_two_routes_foes_use_both_and_one_draw_per_foe() -> void:
 	# find a seed whose map has a detour
 	var game: GameState = null
 	for map_seed in range(1, 40):
-		var candidate := Game.create(map_seed)
+		var candidate := Game.create(map_seed, 9, 13, true, 1)
 		if candidate.routes.size() == 2:
 			game = candidate
 			break
@@ -212,7 +212,7 @@ func test_with_two_routes_foes_use_both_and_one_draw_per_foe() -> void:
 func test_with_one_route_the_route_stream_is_not_touched() -> void:
 	var game: GameState = null
 	for map_seed in range(1, 80):
-		var candidate := Game.create(map_seed)
+		var candidate := Game.create(map_seed, 9, 13, true, 1)
 		if candidate.routes.size() == 1:
 			game = candidate
 			break
@@ -238,7 +238,7 @@ func test_the_route_each_foe_takes_is_the_next_draw_of_the_route_stream() -> voi
 	var game: GameState = null
 	var draws: Array[int] = []
 	for map_seed in range(1, 80):
-		var candidate := Game.create(map_seed)
+		var candidate := Game.create(map_seed, 9, 13, true, 1)
 		if candidate.routes.size() != 2:
 			continue
 		var stream := Rng.derive(map_seed, Streams.ROUTES)

@@ -32,7 +32,7 @@ func _tile_strings(map: GameMap) -> Array:
 func test_every_fixture_map_matches_exactly() -> void:
 	assert_eq(_fixtures.size(), 120)
 	for entry in _fixtures:
-		var map := MapGen.generate(int(entry.seed))
+		var map := MapGen.generate(int(entry.seed), RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		assert_eq(map.path, _cells(entry.path), "path of seed %d" % entry.seed)
 		assert_eq(map.routes.size(), entry.routes.size(), "route count of seed %d" % entry.seed)
 		for i in entry.routes.size():
@@ -43,8 +43,8 @@ func test_every_fixture_map_matches_exactly() -> void:
 
 
 func test_same_seed_gives_the_same_map() -> void:
-	var a := MapGen.generate(4242)
-	var b := MapGen.generate(4242)
+	var a := MapGen.generate(4242, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
+	var b := MapGen.generate(4242, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 	assert_eq(a.path, b.path)
 	assert_eq(a.routes, b.routes)
 	assert_eq(a.tiles, b.tiles)
@@ -53,13 +53,13 @@ func test_same_seed_gives_the_same_map() -> void:
 func test_different_seeds_give_different_maps() -> void:
 	var paths := {}
 	for seed in range(1, 40):
-		paths[MapGen.generate(seed).path] = true
+		paths[MapGen.generate(seed, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1).path] = true
 	assert_gt(paths.size(), 30)
 
 
 func test_routes_are_valid_for_every_fixture_seed() -> void:
 	for entry in _fixtures:
-		var map := MapGen.generate(int(entry.seed))
+		var map := MapGen.generate(int(entry.seed), RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		assert_eq(map.routes[0], map.path, "main road is routes[0], seed %d" % entry.seed)
 		for route in map.routes:
 			var first: Vector2i = route[0]
@@ -67,15 +67,15 @@ func test_routes_are_valid_for_every_fixture_seed() -> void:
 			assert_eq(first, map.path[0], "start, seed %d" % entry.seed)
 			assert_eq(last, map.path[map.path.size() - 1], "end, seed %d" % entry.seed)
 			assert_eq(first.y, 0)
-			assert_eq(last.y, RULES.GRID_ROWS - 1)
+			assert_eq(last.y, RULES.LEGACY_ROWS - 1)
 			var seen := {}
 			for i in route.size():
 				var cell: Vector2i = route[i]
 				assert_true(
-					cell.x >= 0 and cell.x < RULES.GRID_COLS, "inside, seed %d" % entry.seed
+					cell.x >= 0 and cell.x < RULES.LEGACY_COLS, "inside, seed %d" % entry.seed
 				)
 				assert_true(
-					cell.y >= 0 and cell.y < RULES.GRID_ROWS, "inside, seed %d" % entry.seed
+					cell.y >= 0 and cell.y < RULES.LEGACY_ROWS, "inside, seed %d" % entry.seed
 				)
 				assert_false(seen.has(cell), "route never revisits a cell, seed %d" % entry.seed)
 				seen[cell] = true
@@ -94,14 +94,14 @@ func test_routes_are_valid_for_every_fixture_seed() -> void:
 
 func test_road_tiles_are_exactly_the_route_cells() -> void:
 	for seed in range(1, 60):
-		var map := MapGen.generate(seed)
+		var map := MapGen.generate(seed, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		var road := {}
 		for route in map.routes:
 			for cell in route:
 				road[cell] = true
 		var count := 0
-		for row in RULES.GRID_ROWS:
-			for col in RULES.GRID_COLS:
+		for row in RULES.LEGACY_ROWS:
+			for col in RULES.LEGACY_COLS:
 				var is_road: bool = map.tiles[row][col] == GameMap.Tile.ROAD
 				assert_eq(
 					is_road, road.has(Vector2i(col, row)), "seed %d cell %d,%d" % [seed, col, row]
@@ -113,7 +113,7 @@ func test_road_tiles_are_exactly_the_route_cells() -> void:
 func test_most_maps_get_one_detour_and_never_more() -> void:
 	var with_detour := 0
 	for seed in range(1, 60):
-		var map := MapGen.generate(seed)
+		var map := MapGen.generate(seed, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		assert_between(map.routes.size(), 1, 2)
 		with_detour += 1 if map.routes.size() == 2 else 0
 	assert_gt(with_detour, 30)

@@ -65,7 +65,7 @@ func _process(delta: float) -> void:
 	var ticks_speed := _speed.ticks_speed()
 	if ticks_speed > 0:
 		Frame.step(_game, _clock, delta, ticks_speed, Callable(), _after_tick)
-	_towers.sync(_game.towers, _board.surface_height)
+	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
 	if ticks_speed > 0:
 		_shots.update(delta)
@@ -151,7 +151,8 @@ func selected_cell() -> Vector2i:
 	return _selected
 
 
-## Selects a cell: highlights it and, for a free socket, opens the build menu.
+## Selects a cell: highlights it and, for a free socket (any cell of its block),
+## opens the build menu. A socket selects its anchor, the block's top-left cell.
 ## `BoardSpace.NO_CELL` clears the selection.
 func select_cell(cell: Vector2i) -> void:
 	_selected = cell
@@ -166,22 +167,26 @@ func select_cell(cell: Vector2i) -> void:
 		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
 		_show_message("That is road: build on a socket")
 		return
-	if not _game.map.is_socket(cell):
+	var anchor := _game.map.socket_anchor_at(cell)
+	if anchor == GameMap.NO_SOCKET:
 		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
 		_show_message(RejectText.of(GameEvent.RejectReason.NOT_A_SOCKET))
 		return
-	var tower := _tower_on(cell)
+	# any cell of a socket block selects the block, by its anchor
+	_selected = anchor
+	var footprint := _game.map.footprint
+	var tower := _tower_on(anchor)
 	if tower != null:
-		_highlight.show_cell(cell, height, FREE_COLOUR)
+		_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
 		_panel.show_tower(tower, _game.buttons, TowerInfo.effective_range(_game.map, tower))
 		_show_ring(tower)
 		return
 	if _game.over:
-		_highlight.show_cell(cell, height, BLOCKED_COLOUR)
+		_highlight.show_block(anchor, footprint, height, BLOCKED_COLOUR)
 		_show_message(RejectText.of(GameEvent.RejectReason.GAME_OVER))
 		return
-	_highlight.show_cell(cell, height, FREE_COLOUR)
-	_menu.open_for(cell, _game.buttons)
+	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
+	_menu.open_for(anchor, _game.buttons)
 
 
 ## Starts a fresh game on a map seed.
@@ -193,7 +198,7 @@ func _start(map_seed: int) -> void:
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
 	_speed = GameSpeed.new()
-	_towers.sync(_game.towers, _board.surface_height)
+	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_update_launch_button()
 
 
@@ -207,7 +212,7 @@ func _tower_on(cell: Vector2i) -> Tower:
 ## Shows the range ring for a tower, at the top of its tile.
 func _show_ring(tower: Tower) -> void:
 	var cell := Vector2i(tower.col, tower.row)
-	var at := BoardSpace.cell_to_world(tower.col, tower.row)
+	var at := BoardSpace.footprint_centre(cell, _game.map.footprint)
 	at.y = _board.surface_height(cell)
 	_ring.show_range(at, TowerInfo.effective_range(_game.map, tower))
 
@@ -273,7 +278,7 @@ func _draw_shot(game: GameState, event: GameEvent) -> void:
 		if tower.id == event.tower_id:
 			var surface := _board.surface_height(Vector2i(tower.col, tower.row))
 			_shots.add_shot(
-				ShotsView.muzzle(tower, surface),
+				ShotsView.muzzle(tower, surface, game.map.footprint),
 				ShotsView.body_point(event.x, event.y),
 				event.splash
 			)

@@ -1,7 +1,7 @@
 ## The board as flat greybox tiles, drawn from the real map.
 ##
 ## A flat strip for every road cell (the main road brown, a detour lighter), a
-## low dark tile for plain ground, a raised tile for every socket (the pre-etched
+## low dark tile for plain ground, a raised tile for every socket block (the pre-etched
 ## tower sites: higher on higher elevation levels, paler on the mat, browner on
 ## cardboard), and a marker for the spawn and the Heartstone. One MultiMesh each
 ## for the road, the ground and the sockets, so the board is a handful of draw
@@ -42,6 +42,9 @@ var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
 # what rebuild() made, so it never frees a node someone else put under the board
 var _built: Array[Node] = []
+# the transform of every socket tile, kept because the headless renderer cannot
+# read a MultiMesh back
+var _socket_transforms: Array[Transform3D] = []
 
 
 func _ready() -> void:
@@ -54,6 +57,7 @@ func rebuild() -> void:
 		remove_child(child)
 		child.queue_free()
 	_built.clear()
+	_socket_transforms.clear()
 	map = MapGen.generate(map_seed)
 	_add_ground()
 	_add_tiles()
@@ -67,9 +71,14 @@ func surface_height(cell: Vector2i) -> float:
 		return GROUND_HEIGHT
 	if map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
 		return ROAD_HEIGHT
-	if map.is_socket(cell):
+	if map.socket_anchor_at(cell) != GameMap.NO_SOCKET:
 		return SOCKET_BASE_HEIGHT + SOCKET_LEVEL_STEP * float(map.elevation_at(cell))
 	return GROUND_HEIGHT
+
+
+## The transform drawn for the index-th socket tile (its block's box).
+func socket_transform(index: int) -> Transform3D:
+	return _socket_transforms[index]
 
 
 func _add_ground() -> void:
@@ -92,10 +101,10 @@ func _add_tiles() -> void:
 		for cell in route:
 			road[cell] = main_cells.has(cell)
 	var ground: Array[Vector2i] = []
-	for row in RULES.GRID_ROWS:
-		for col in RULES.GRID_COLS:
+	for row in map.rows:
+		for col in map.cols:
 			var cell := Vector2i(col, row)
-			if not road.has(cell) and not map.is_socket(cell):
+			if not road.has(cell) and map.socket_anchor_at(cell) == GameMap.NO_SOCKET:
 				ground.append(cell)
 	var road_cells: Array[Vector2i] = []
 	var road_colours: Array[Color] = []
@@ -113,13 +122,17 @@ func _add_tiles() -> void:
 	socket_count = map.sockets.size()
 	_add(_tiles("Road", road_cells, road_colours, ROAD_FOOTPRINT))
 	_add(_tiles("Ground", ground, ground_colours, FOOTPRINT))
-	_add(_tiles("Sockets", map.sockets, socket_colours, FOOTPRINT))
+	_add(_tiles("Sockets", map.sockets, socket_colours, FOOTPRINT, map.footprint))
 
 
-## One MultiMesh holding a box per cell, each with its own colour, as tall as
-## `surface_height` says.
+## One MultiMesh holding a box per cell (or per block of `span` cells, given its
+## top-left cell), each with its own colour, as tall as `surface_height` says.
 func _tiles(
-	node_name: String, cells: Array[Vector2i], colours: Array[Color], footprint: float
+	node_name: String,
+	cells: Array[Vector2i],
+	colours: Array[Color],
+	footprint: float,
+	span: int = 1
 ) -> MultiMeshInstance3D:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
@@ -130,11 +143,12 @@ func _tiles(
 	multimesh.instance_count = cells.size()
 	for i in cells.size():
 		var height := surface_height(cells[i])
-		var at := BoardSpace.cell_to_world(cells[i].x, cells[i].y)
+		var at := BoardSpace.footprint_centre(cells[i], span)
 		at.y = height / 2.0
-		multimesh.set_instance_transform(
-			i, Transform3D(Basis.from_scale(Vector3(1.0, height, 1.0)), at)
-		)
+		var tile := Transform3D(Basis.from_scale(Vector3(float(span), height, float(span))), at)
+		multimesh.set_instance_transform(i, tile)
+		if node_name == "Sockets":
+			_socket_transforms.append(tile)
 		multimesh.set_instance_color(i, colours[i])
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
@@ -147,18 +161,26 @@ func _tiles(
 
 func _add_markers() -> void:
 	var start := map.path[0]
-	var end := map.path[map.path.size() - 1]
-	spawn_marker = _marker("Spawn", start, SPAWN_COLOUR, Vector3(0.7, 0.9, 0.7))
-	heartstone_marker = _marker("Heartstone", end, HEARTSTONE_COLOUR, Vector3(0.7, 1.2, 0.7))
+	var span := map.heartstone.size.x
+	spawn_marker = _marker("Spawn", start, 1, SPAWN_COLOUR, Vector3(0.7, 0.9, 0.7))
+	heartstone_marker = _marker(
+		"Heartstone",
+		map.heartstone.position,
+		span,
+		HEARTSTONE_COLOUR,
+		Vector3(0.7 * float(span), 1.2, 0.7 * float(span))
+	)
 
 
-func _marker(node_name: String, cell: Vector2i, colour: Color, size: Vector3) -> MeshInstance3D:
+func _marker(
+	node_name: String, cell: Vector2i, span: int, colour: Color, size: Vector3
+) -> MeshInstance3D:
 	var marker := MeshInstance3D.new()
 	marker.name = node_name
 	var box := BoxMesh.new()
 	box.size = size
 	marker.mesh = box
-	marker.position = BoardSpace.cell_to_world(cell.x, cell.y) + Vector3(0.0, size.y / 2.0, 0.0)
+	marker.position = BoardSpace.footprint_centre(cell, span) + Vector3(0.0, size.y / 2.0, 0.0)
 	marker.material_override = _material(colour)
 	_add(marker)
 	return marker

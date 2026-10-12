@@ -58,3 +58,13 @@ func test_a_tower_stands_on_the_surface_it_is_given() -> void:
 	var surface := func(_cell: Vector2i) -> float: return 1.5
 	view.sync([_tower(0, "spoolGuard", 1, 2, 0)] as Array[Tower], surface)
 	assert_almost_eq((view.get_child(0) as TowerView).position.y, 1.5, 1e-6)
+
+
+func test_towers_on_blocks_stand_at_the_blocks_centre() -> void:
+	var view := TowersView.new()
+	add_child_autofree(view)
+	view.sync([_tower(0, "spoolGuard", 4, 2)] as Array[Tower], Callable(), 2)
+	var middle := BoardSpace.footprint_centre(Vector2i(4, 2), 2)
+	var node := view.get_child(0) as TowerView
+	assert_almost_eq(node.position.x, middle.x, 1e-6)
+	assert_almost_eq(node.position.z, middle.z, 1e-6)
