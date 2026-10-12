@@ -12,7 +12,8 @@ const RULES := preload("res://content/game_rules.gd")
 
 ## What `amount` of damage of `kind` comes to against `foe`'s defences.
 static func after_defence(foe: Foe, amount: float, kind: Kind) -> float:
-	if amount <= 0.0:
+	# written so that NaN counts as no damage
+	if not (amount > 0.0):
 		return 0.0
 	match kind:
 		Kind.PHYSICAL:
@@ -28,8 +29,6 @@ static func apply(game: GameState, foe: Foe, amount: float, kind: Kind) -> float
 	if not foe.alive:
 		return 0.0
 	var dealt := minf(after_defence(foe, amount, kind), foe.hp)
-	if dealt <= 0.0:
-		return 0.0
 	foe.hp -= dealt
 	if foe.hp <= 0.0:
 		foe.alive = false
