@@ -1,0 +1,56 @@
+# Swarm candidates, seeds 1 to 16, 20 waves. Each block is one set of numbers; the first line is the changes to godot/content/waves.gd. {} is the numbers before this change (swarm multiplier 1.0, no swarm orcs, goblins unchanged).
+{}
+  spoolOnly    cleared [17, 17, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [18, 18, 20, 20, 20, 20, 20] heart 7.3 buttons_left 1193
+  mortarHeavy  cleared [10, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [11, 20, 20, 20, 20] heart 5.8 buttons_left 297
+  prismHeavy   cleared [15, 16, 17, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [16, 17, 18, 19, 19, 20, 20] heart 5.1 buttons_left 129
+  mix          cleared [10, 15, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [11, 16] heart 10.1 buttons_left 486
+{"waves:SWARM_COUNT_MULTIPLIER": 1.4}
+  spoolOnly    cleared [18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20] heart 8.4 buttons_left 1311
+  mortarHeavy  cleared [9, 10, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 11, 20] heart 8.9 buttons_left 345
+  prismHeavy   cleared [16, 17, 18, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 18, 19, 19, 20] heart 7.4 buttons_left 222
+  mix          cleared [19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20, 20] heart 10.2 buttons_left 563
+{"waves:SWARM_COUNT_MULTIPLIER": 1.8}
+  spoolOnly    cleared [18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20] heart 8.9 buttons_left 1454
+  mortarHeavy  cleared [9, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 9.1 buttons_left 391
+  prismHeavy   cleared [16, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 19, 20, 20] heart 8.8 buttons_left 327
+  mix          cleared [19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20] heart 11.1 buttons_left 651
+{"waves:SWARM_COUNT_MULTIPLIER": 1.8, "waves:GAP_GOBLIN_SWARM": 0.35}
+  spoolOnly    cleared [18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20] heart 8.9 buttons_left 1454
+  mortarHeavy  cleared [9, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 9.1 buttons_left 391
+  prismHeavy   cleared [16, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 19, 20, 20] heart 8.5 buttons_left 323
+  mix          cleared [19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20] heart 11.1 buttons_left 651
+{"waves:SWARM_COUNT_MULTIPLIER": 1.4, "waves:SWARM_ORC_THRESHOLD": 0.83, "waves:SWARM_HP_MULTIPLIER": 1.5, "waves:SWARM_REWARD_MULTIPLIER": 0.6}
+  spoolOnly    cleared [18, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20, 20] heart 8.3 buttons_left 1312
+  mortarHeavy  cleared [9, 10, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 11, 20] heart 8.8 buttons_left 362
+  prismHeavy   cleared [16, 17, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 18, 20, 20, 20] heart 7.4 buttons_left 272
+  mix          cleared [18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20, 20] heart 10.3 buttons_left 552
+{"waves:SWARM_COUNT_MULTIPLIER": 1.6, "waves:SWARM_ORC_THRESHOLD": 0.8, "waves:SWARM_HP_MULTIPLIER": 1.5, "waves:SWARM_REWARD_MULTIPLIER": 0.5}
+  spoolOnly    cleared [18, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20] heart 9.1 buttons_left 1372
+  mortarHeavy  cleared [9, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 8.3 buttons_left 375
+  prismHeavy   cleared [14, 16, 17, 18, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 17, 18, 19, 19] heart 7.0 buttons_left 231
+  mix          cleared [19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20] heart 10.8 buttons_left 582
+{"waves:SWARM_COUNT_MULTIPLIER": 1.4, "waves:SWARM_ORC_THRESHOLD": 0.75, "waves:SWARM_HP_MULTIPLIER": 2.0, "waves:SWARM_REWARD_MULTIPLIER": 0.5}
+  spoolOnly    cleared [18, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20] heart 8.4 buttons_left 1351
+  mortarHeavy  cleared [9, 10, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 11, 20] heart 8.7 buttons_left 343
+  prismHeavy   cleared [14, 15, 17, 17, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 16, 18, 19, 19, 20, 20] heart 4.9 buttons_left 204
+  mix          cleared [18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20, 20, 20] heart 9.2 buttons_left 539
+{"waves:SWARM_COUNT_MULTIPLIER": 1.6, "waves:SWARM_ORC_THRESHOLD": 0.7, "waves:SWARM_HP_MULTIPLIER": 3.0, "waves:SWARM_REWARD_MULTIPLIER": 0.4}
+  spoolOnly    cleared [9, 14, 14, 16, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15, 15, 17, 20] heart 6.8 buttons_left 1080
+  mortarHeavy  cleared [9, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 8.9 buttons_left 422
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 19, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] heart 1.4 buttons_left 116
+  mix          cleared [14, 14, 14, 14, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15] heart 6.1 buttons_left 364
+{"waves:SWARM_COUNT_MULTIPLIER": 2.0, "waves:SWARM_ORC_THRESHOLD": 0.65, "waves:SWARM_HP_MULTIPLIER": 4.0, "waves:SWARM_REWARD_MULTIPLIER": 0.3}
+  spoolOnly    cleared [6, 6, 9, 9, 9, 9, 14, 14, 14, 14, 18, 19, 19, 20, 20, 20] died_on [7, 7, 10, 10, 10, 10, 15, 15, 15, 15, 20] heart 3.1 buttons_left 674
+  mortarHeavy  cleared [4, 8, 14, 14, 14, 14, 14, 14, 14, 19, 19, 20, 20, 20, 20, 20] died_on [5, 9, 15, 15, 15, 15, 15, 15, 15] heart 2.9 buttons_left 233
+  prismHeavy   cleared [9, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 19] died_on [10, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] heart 0.3 buttons_left 70
+  mix          cleared [6, 9, 9, 12, 14, 14, 14, 14, 14, 14, 14, 14, 19, 20, 20, 20] died_on [7, 10, 10, 13, 15, 15, 15, 15, 15, 15, 15, 15] heart 1.1 buttons_left 221
+{"waves:SWARM_COUNT_MULTIPLIER": 1.5, "waves:SWARM_ORC_THRESHOLD": 0.75, "waves:SWARM_HP_MULTIPLIER": 2.5, "waves:SWARM_REWARD_MULTIPLIER": 0.45}
+  spoolOnly    cleared [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 19, 20, 20] heart 8.8 buttons_left 1320
+  mortarHeavy  cleared [9, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 8.8 buttons_left 375
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 16, 18, 18, 18, 18, 19, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 17, 19, 19, 19] heart 2.1 buttons_left 94
+  mix          cleared [14, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 20, 20] heart 9.4 buttons_left 541
+{"waves:SWARM_COUNT_MULTIPLIER": 1.4, "waves:SWARM_ORC_THRESHOLD": 0.78, "waves:SWARM_HP_MULTIPLIER": 3.0, "waves:SWARM_REWARD_MULTIPLIER": 0.4}
+  spoolOnly    cleared [14, 14, 16, 18, 18, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 17, 19] heart 5.6 buttons_left 1100
+  mortarHeavy  cleared [9, 10, 14, 18, 18, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 11, 15] heart 7.2 buttons_left 337
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 18, 19] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 19] heart 0.4 buttons_left 45
+  mix          cleared [9, 14, 14, 14, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15, 15, 15, 20, 20, 20] heart 5.4 buttons_left 364

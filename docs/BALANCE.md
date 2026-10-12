@@ -221,3 +221,29 @@ The Cardboard Golem now leaves four Scrap Goblins behind when it is destroyed (n
 | Mix | 20 | 10 to 20 | 12 of 16 | 10.1 | 486 |
 
 Solo builds are within a wave of each other in median, they win 7 to 10 of 16 maps, and the mix wins the most (12 of 16) with the highest Heartstone health. Mortar heavy and Mix have the worst maps (both end on wave 10), and Prism heavy has the lowest Heartstone health at the end (5.1). Only one run in the 64 ends with the Heartstone untouched. Still to do: the economy (Buttons pile up), the boss wave as a real test, the targets of #203 for the first four waves, and everything involving the new content.
+
+## Bigger swarms (2026-10-12, #216)
+
+The owner found the game too easy and asked for bigger swarms. A swarm wave (every 5th wave that is not a boss wave: 5, 15) now has more foes, a few orcs and tougher goblins that pay less.
+
+| Number (`godot/content/waves.gd`) | Before | Now |
+| --- | --- | --- |
+| `SWARM_COUNT_MULTIPLIER` (foes in a swarm, times the usual count) | 1.0 | 1.5 |
+| `SWARM_ORC_THRESHOLD` (a roll above this makes an orc in a swarm) | no orcs | 0.75 (about 1 foe in 4) |
+| `SWARM_HP_MULTIPLIER` (swarm Scrap Goblin hp) | 1.0 | 2.0 |
+| `SWARM_REWARD_MULTIPLIER` (swarm Scrap Goblin Buttons) | 1.0 | 0.5 |
+
+**Why not only a bigger count.** Raw sweeps are in `docs/balance/swarms-candidates-seeds-1-16.txt`. Multiplying only the count (×1.4 and ×1.8) made the game easier: more strategies reached wave 20 and the Heartstone ended with more health (Mortar heavy 5.8 to 9.1 at ×1.8). A Scrap Goblin has 20 hp at wave 1 and pays Buttons, so a bigger swarm of frail goblins dies to splash and beams and pays for more towers. The swarm needs weight (hp, a few orcs) and a smaller reward.
+
+**Why these numbers.** Harsher sets killed the Prism-heavy build on wave 15 (×1.6, threshold 0.7, hp ×3: 13 of 16 maps lost at wave 15; ×2, hp ×4: every strategy collapsed). The set above keeps every strategy able to win and moves the losses to the swarm waves.
+
+**Result** (seeds 1 to 16, 20 waves, `swarms-seeds-1-16.txt`; the numbers before are `rounds-seeds-1-16` R5c):
+
+| Strategy | Won before | Won now | Mean Heartstone health before | now |
+| --- | --- | --- | --- | --- |
+| Spool Guards only | 9 | 10 | 7.3 | 9.1 |
+| Mortar heavy | 10 | 13 | 5.8 | 9.0 |
+| Prism heavy | 7 | 6 | 5.1 | 4.7 |
+| Mix | 12 | 12 | 10.1 | 10.3 |
+
+**What it says.** The swarm change does not make the game harder overall: the wave counts changed the waves' random draws, so single maps moved either way, and the totals are about the same (38 wins of 64 before, 41 now). Prism heavy is the build that swarms hurt (it wins 6 of 16 maps, down from 7, and its worst losses are on waves 15 to 19), which fits its role (a single beam against many bodies). What keeps the game easy is the economy: every strategy ends with 200 to 1,400 unspent Buttons, so extra pressure just gets bought off. The balance pass after Phase 7 (#203) should add a sink for Buttons or scale the late waves. Swarms stay in the game as a distinct kind of wave.
