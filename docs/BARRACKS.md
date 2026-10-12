@@ -1,6 +1,6 @@
 # Design: the Guard Tent, blocking and the Kitchen Mess Tent
 
-Status: proposal for the owner's approval (2026-10-12). The GDD gives the shape (section 4, towers 2 and 5; section 6, heroes); it gives no numbers, so the numbers below are mine and start from the three towers and three foes that exist now. Everything marked "interim" is tuned with the scripted bot like the other numbers (`docs/BALANCE.md`).
+Status: approved by the owner (2026-10-12), see Decisions below. The GDD gives the shape (section 4, towers 2 and 5; section 6, heroes); it gives no numbers, so the numbers below are mine and start from the three towers and three foes that exist now. Everything marked "interim" is tuned with the scripted bot like the other numbers (`docs/BALANCE.md`).
 
 The owner asked on 2026-10-12 to add both tents ahead of the rest of Phase 7. This document is the design pass that `docs/PLAN.md` asks for before blocking and melee ("a new combat context").
 
@@ -79,8 +79,10 @@ A new bounded context `godot/sim/barracks/` with a small public entry, read by `
 
 Not in this work: the tier-4 specs and their actives and passives, the Knight and the Camp Cook, flying foes, Ink Shaman.
 
-## Questions for the owner
+## Decisions (owner, 2026-10-12)
 
-1. Is "one foe per guard, others walk past" right, or should the tent stop everything behind a held foe (a real wall)? The wall makes swarms trivial and the Golem unblockable by design; I chose the first.
-2. Should the Golem be blockable? I made it unblockable (the GDD says the boss needs the hero and spells).
-3. Should a tent's two guards stand on one post or two? I propose half a cell apart on the same stretch.
+1. **Blocking:** one foe per guard; other foes walk past a busy guard. No wall.
+2. **The Golem** is not blockable by guards (it needs the hero and spells).
+3. **Posts:** a tent's two guards stand on the same stretch of road, half a cell apart.
+
+Status: approved. Building follows the plan above.
