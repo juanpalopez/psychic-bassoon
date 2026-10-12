@@ -2,8 +2,9 @@
 ## into `split_count` Scrap Goblins on its own route, `split_spacing` cells apart
 ## along it, the first where the Golem fell and the others behind it (a Golem that
 ## falls within `split_spacing` cells of the start stacks the extra ones on the
-## spawn point), with the strength of the Golem's wave. They do not inherit its slow. The route is the Golem's (no random draw), the goblins
-## are announced like any spawn, and nothing splits when a foe leaks.
+## spawn point), with the strength of the Golem's wave. They do not inherit its
+## slow. The route is the Golem's (no random draw), the goblins are announced like
+## any spawn, and nothing splits when a foe leaks.
 class_name Splitting
 extends RefCounted
 
