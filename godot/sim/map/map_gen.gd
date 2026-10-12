@@ -1,7 +1,7 @@
 ## Builds the board for a seed. The same seed always gives the same map, and it
 ## draws only from its own stream, so other subsystems cannot shift it. At the
 ## original 9 by 13 board, with a detour, it equals the TypeScript sim's maps
-## (`src/sim/map/mapgen.ts`, frozen as fixtures).
+## (`web-three-final:src/sim/map/mapgen.ts`, frozen as fixtures).
 ##
 ## The road generator draws a road that runs down a tall board. A wide board
 ## (more columns than rows, the GDD's 22 by 16) is made by drawing on the turned

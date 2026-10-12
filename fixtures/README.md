@@ -1,37 +1,16 @@
 # Fixtures: the frozen reference for the ported core
 
-> **Status (2026-10-11):** the game design is now `docs/GDD.md`, and parity with the TypeScript prototype is no longer the goal for new content. Only `prng.json`, `maps.json` and `routes.json` stay as regression tests for the ported core (PRNG, road generator, routes); they are **frozen: never regenerate them and add no new cases**. `waves.json`, `scaling.json`, `damage.json` and `replays.json` describe prototype rules that the GDScript sim will not reproduce; they are deleted in Phase 4 step 8 together with `src/` and the exporter, and a committed hash check keeps the frozen three from changing. New regression data after the combat port is GDScript replay goldens, written by the GDScript sim.
+> **Status (2026-10-12):** the game design is `docs/GDD.md`, and parity with the TypeScript prototype is no longer the goal for new content. `prng.json`, `maps.json` and `routes.json` stay as regression tests for the ported core (PRNG, road generator, routes). They are **frozen: never regenerate them and add no new cases.** The TypeScript sim that wrote them was removed in Phase 4 step 8 (it stays in the git tag `web-three-final`). New regression data after the combat port is GDScript replay goldens, written by the GDScript sim (see `godot/tests/goldens/`).
 
-JSON produced by the TypeScript sim (`pnpm fixtures`). The GDScript ported core
-must reproduce every value in the frozen three **exactly**. Do not edit these files
-by hand. A Vitest check fails if they differ from what the TypeScript sim writes
-(until Phase 4 step 8 replaces it with the hash check).
+The GDScript ported core must reproduce every value here **exactly**. Do not edit these files by hand. `SHA256SUMS` lists the hash of each file; `pnpm check:fixtures` (and CI) fails when a listed file changes or goes missing, or when another JSON file appears in this folder.
 
-Format rules (so Godot's `JSON.parse`, which reads every number as a float,
-can compare them with `==`): all integers here are below 2^53; fingerprints are
-hex strings; floats are written with the shortest text that round-trips, so
-parsing them gives the same double; there are no `NaN` or `-0` values.
+Format rules (so Godot's `JSON.parse`, which reads every number as a float, can compare them with `==`): all integers here are below 2^53; fingerprints are hex strings; floats are written with the shortest text that round-trips, so parsing them gives the same double; there are no `NaN` or `-0` values.
 
 | File | Content |
 | --- | --- |
 | `prng.json` | per seed: 16 `nextFloat`, 16 `nextInt(6)`, 8 `nextRange(0.8, 3.2)`, and the `deriveRng` state for streams 0, 1, 2 and 100 |
 | `maps.json` | 120 seeds: main `path`, all `routes` (cells as `[col, row]`), and `tiles` (one string per row, `#` road, `.` plot) |
 | `routes.json` | the first 12 map seeds: per route the point coordinates, cumulative distances and total as float bits, and 24 `positionAt` samples as `[along, x, y]` bits (including one before the start and one past the end) |
-| `waves.json` | 8 seeds, waves 1 to 40: `[foe, gap]` per spawn, drawn in wave order from the waves stream (`deriveRng(seed, 1)`) |
-| `scaling.json` | per foe, waves 1 to 60: `[hp, speed, reward, armor]` |
-| `damage.json` | hp lost per tower level, foe and wave; the armor floor; the kill rule |
-| `replays.json` | 4 seeds, 3 minutes of the scripted bot: the commands as `[tick, command]`, a state snapshot every 600 ticks and at the end, and the TypeScript fingerprint (reference only) |
-
-A replay snapshot lists: `tick`, `gold`, `lives`, `wave`, `running`, `over`,
-`towers` as `[id, type, level, col, row, invested, cooldown]`, `enemies` as
-`[id, type, route, hp, distance, x, y, slow, slowTimer]`, `shots` as
-`[x, y, targetId, damage]`, `spawners` as `[wave, timer, queued]`, the two RNG
-states and `nextId`. Replaying the commands in the GDScript sim must give the
-same snapshots at the same ticks.
-
-Ids: foes `scamp raider ironclad warlord`; towers `ballista catapult
-frostSpire stormSpire`; commands `build`, `upgrade`, `sell`, `launchWave` as in
-`src/sim/game/game.ts`.
 
 ## Exact floats
 
@@ -44,18 +23,12 @@ each number (integers too) is the 16 hex digits of its IEEE-754 bits (big-endian
 | --- | --- | --- |
 | `prng.json` | `floats`, `ranges` | `floatBits` for `floats`; `ranges` have no bits: recompute them from the `floatBits` draws (`min + float * (max - min)`) and compare bits |
 | `routes.json` | (bits only) | all values |
-| `waves.json` | `waves` | `bits` |
-| `scaling.json` | `waves` | `bits` |
-| `damage.json` | `towerHits`, `armorFloor`, `kill` | `bits` (an object with the same keys) |
-| `replays.json` | `checkpoints`, `final` | `checkpointsBits`, `finalBits` |
 
 Decode a bits string with `PackedByteArray.decode_double` (see `_from_bits` in
 `godot/tests/sim/test_rng.gd`) and compare the bits of the result.
 
 ## Notes for the port
 
-- **Checkpoint timing.** A replay checkpoint at tick N is the state at the *start* of tick N: before the commands logged at tick N are submitted and before tick N runs. Snapshot at the same moment in GDScript.
 - **Float parsing.** Godot's `JSON.parse` is not guaranteed to round the last bit. `prng.json` carries `floatBits` (the IEEE-754 bits of each float as 16 hex digits); the first Phase 4 test must parse the decimal text and check the bits equal these. If it does not, compare floats through their bits instead.
-- **Damage cases.** `damage.json` has every tower level against every foe at waves 1, 12 and 24, both sides of the armor floor (a hit never drops below 25% of its damage), and the kill rule (reward paid once).
 - **Paths.** The fixtures live outside the Godot project; read them in GUT with `ProjectSettings.globalize_path("res://../fixtures/maps.json")`.
 - **Line endings.** `.gitattributes` keeps the files LF on every platform.

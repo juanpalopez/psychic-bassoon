@@ -1,4 +1,4 @@
-## The four commands. Ported from `src/sim/game/game.test.ts`.
+## The four commands. Ported from `web-three-final:src/sim/game/game.test.ts`.
 extends GutTest
 
 const RULES := preload("res://content/game_rules.gd")

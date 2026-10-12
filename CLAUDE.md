@@ -1,12 +1,12 @@
 # Papercraft Kingdom Defense
 
-A papercraft stop-motion tower defense for phones and tablets, in the browser first and as a native iOS app next (Android only if wanted later). **Godot 4 + GDScript**, web export first (GitHub Pages). The design is the GDD in `docs/GDD.md` (adopted by the owner on 2026-10-11); the old Scrapline medieval design and the 2D prototype are no longer the rules target. The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation in `src/` stays as a read-only reference for formulas until the GDScript combat lands (Phase 4, step 8). The game is renamed Papercraft Kingdom Defense; the repo stays `psychic-bassoon`, and the code still says Scrapline until the rename ticket.
+A papercraft stop-motion tower defense for phones and tablets, in the browser first and as a native iOS app next (Android only if wanted later). **Godot 4 + GDScript**, web export first (GitHub Pages). The design is the GDD in `docs/GDD.md` (adopted by the owner on 2026-10-11); the old Scrapline medieval design and the 2D prototype are no longer the rules target. The Three.js game that shipped Phases 0 to 2 is retired (last build: the tag `web-three-final`); the TypeScript simulation that held the formulas is removed from the tree (Phase 4, step 8) and stays readable in that tag (`git show web-three-final:src/sim/...`). The game is renamed Papercraft Kingdom Defense; the repo stays `psychic-bassoon`, and the code still says Scrapline until the rename ticket.
 
 - Plan and roadmap: `docs/PLAN.md` (phases 0–8, each closed by a gate; the engine decision is in it)
 - Design, lore and naming: `docs/GDD.md` (the owner's design document) and `docs/PLAN.md` → Design (the summary, the mapping from the ported sim, and the gaps in the GDD). Tower and foe ids are stable keys only where a fixture uses them; the ported core (PRNG, maps, routes) has fixtures, the tower and foe ids do not, and they already use the GDD's. Display names and lore strings live only in `godot/content`.
 - Original prototype (a starting point for numbers, not the rules target): `prototype/scrapline.html`
 
-> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6). `src/` holds only the TypeScript sim and content, a read-only reference for formulas that is removed in Phase 4 step 8.
+> Paths named in this file that do not exist yet are created in the phase that needs them: `godot/`, `fixtures/` and the Godot CI (Phase 3), `godot/sim/` (Phase 4), `godot/render/` and `godot/ui/` (Phase 5), `godot/assets/` (the Scrap Goblin, ticket #157, and Phase 6) and `docs/art/` (Phase 6).
 
 ## Commands
 
@@ -21,24 +21,24 @@ mkdir -p build/web && godot --headless --path godot --export-release "Web" ../bu
 python3 -m http.server -d build/web                  # serve the export; open on a phone over LAN
 ```
 
-TypeScript reference (the old sim, the frozen fixtures and the repo's checks; removed or reduced in Phase 4 step 8):
+Repo checks and tooling (TypeScript and Node):
 
 ```bash
 pnpm install
-pnpm test         # Vitest (sim, content, fixtures, repo scripts)
+pnpm test         # Vitest (repo scripts)
 pnpm test:e2e:godot   # Playwright smoke test of the web export in build/web
 pnpm serve        # serve build/web on your LAN (port 8080), to open on a phone
 pnpm check:assets # godot/assets against assets/CREDITS.md
+pnpm check:fixtures # the frozen fixtures against fixtures/SHA256SUMS
 pnpm lint         # Prettier check + ESLint + tsc --noEmit
 pnpm format       # Prettier --write (run before committing)
-pnpm sim -- --seed 42   # headless run: map and wave log
 ```
 
 ## Working rules
 
 - **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases. **Exception (owner, 2026-10-11):** Phase 5 starts now as a greybox, in parallel with the rest of Phase 4. The greybox only reads sim snapshots and sends commands, so it cannot change parity; it never edits `godot/sim` or `fixtures/`. Art, lore and everything else from Phases 6 to 8 still wait, except Track B: ticket #157, the Scrap Goblin (the old Scamp) through the asset pipeline. Sim API the greybox needs (a read-only snapshot, previous foe positions, event draining) is added by Phase 4 sim tickets with tests and deep review, never inside a greybox PR; `godot/render` and `godot/ui` use only `Game.create`, `Game.submit`, `Game.tick`, read-only accessors and drained events, and never `rng`, `route_rng`, `pending` or field assignments on the state (a CI check enforces it from greybox step A1, ticket #156; it scans `godot/render`, `godot/ui` and `godot/main.gd`; plain reads of state fields are allowed until read-only accessors exist).
-- **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes), which stays equal to its TypeScript fixtures; those fixtures are frozen and never regenerated, and the game state, commands and tick are covered by GUT tests. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check. Don't change the TypeScript sim; it is removed in Phase 4 step 8.
-- **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for TypeScript, and `gdformat`, `gdlint`, GUT and the web export for Godot.
+- **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes), which stays equal to its fixtures (made by the retired TypeScript sim); those fixtures are frozen and never regenerated, and `fixtures/SHA256SUMS` enforces it in CI, and the game state, commands and tick are covered by GUT tests. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`web-three-final:src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check.
+- **Keep `main` deployable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for the repo's TypeScript and Node scripts, and `gdformat`, `gdlint`, GUT and the web export for Godot.
 
 ## Architecture
 
@@ -49,7 +49,7 @@ godot/
   render/    scenes and scripts: terrain, foes (MultiMesh), towers, camera, effects
   ui/        HUD scenes (Control nodes) and the Theme
   tests/     GUT tests and the fixtures for the ported core
-fixtures/    JSON exported from the TypeScript sim for the ported core (prng, maps, routes), and later GDScript replay goldens
+fixtures/    frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes); GDScript replay goldens live in `godot/tests/goldens/`
 ```
 
 - `godot/sim` must never touch the scene tree or engine singletons: no `Node`, no `get_tree`, no `Engine`, `Time` or `OS` calls, no `randf`/`randi`/`randomize`. A lint script enforces it; don't disable it.
@@ -60,7 +60,6 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 - A map is a grid (the GDD now says 22 columns by 16 rows; the code still builds 9 by 13 until the Map v2 tickets land) with one route from the one spawn point to the Heartstone (owner, 2026-10-12: no detour or branching for now; several spawn sources are a backlog idea), 12 to 22 sockets for towers (2x2 cells each in the GDD), and three elevation levels. The road generator and routes are ported (a main road and, until Map v2 turns it off, a detour); sockets and elevation are new map layers on top of it. Foes pick a route; towers target across routes. The sim keeps the grid, the polyline routes and the sockets as plain data; Godot nodes (`GridMap`, `Path3D`) only draw them.
 - Game speed (1×/2×/3×) means more sim ticks per frame, never a bigger tick.
 - For value parity with TypeScript use only `+ - * /`, `sqrt`, `floor`, `min`, `max`, `abs`. Traps: `/` on two integers is integer division in GDScript (divide by a float); keep PRNG values in [0, 2^32) and mask after every `*`, `+` and `^` (replacing `Math.imul` and `>>>`); `Math.round` becomes `int(floor(x + 0.5))`; avoid trig and `round`. Fixtures and goldens keep large integers and floats as hex bits and are compared with exact `==`.
-- While `src/sim` exists it keeps its own rules: no DOM, `Math.random` or clock (ESLint), no magic numbers outside `src/content`.
 
 ### Domain-driven design
 
@@ -92,7 +91,7 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 - Fix the seed in tests; never depend on timing.
 - **TDD where possible.** For `godot/sim` and `godot/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
 - Test the domain through its public commands and snapshots, not internals, so refactors don't break tests.
-- The TypeScript Vitest suite keeps running while `src/` exists (until Phase 4 step 8).
+- The Vitest suite covers the repo's scripts (checks and tooling); `pnpm check:fixtures` guards the frozen fixtures.
 
 ## Code style
 
@@ -100,7 +99,7 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 - **Code style: the official [GDScript style guide](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_styleguide.html), enforced by tools, not by review.** `gdformat` formats and `gdlint` checks (gdtoolkit, pinned version; run from `godot/`, where `.gdlintrc` lives). CI fails on unformatted or unlinted code. Don't hand-format and don't disable a rule to get around it.
   - Naming: `snake_case` for files, functions and variables; `PascalCase` for classes and nodes; `CONSTANT_CASE` for constants and enum members.
   - Comments explain why, not what. Use `##` doc comments on public APIs.
-- TypeScript code (the reference sim and the repo's scripts) keeps the Google TypeScript Style Guide with Prettier and ESLint.
+- TypeScript code (the repo's scripts) keeps the Google TypeScript Style Guide with Prettier and ESLint.
 - Small focused commits in the Conventional Commits format: `type(scope): summary`, for example `feat(sim): add seeded PRNG` or `fix(render): dispose removed meshes`.
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`. Mark breaking changes with `!` and a `BREAKING CHANGE:` footer.
   - Scopes (optional): `sim`, `render`, `ui`, `content`, `assets`, `docs`, `ci`, `build`, `deps`.
@@ -115,7 +114,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
 - **Tiers:**
   - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
-  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic sim modules (`godot/sim`, and `src/sim` while it exists) (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
+  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic sim modules (`godot/sim`) (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
   - **Deep** (`opus`, pass `model: opus`): workflows, determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling), secrets, permissions, deploy or release, rule changes in this file. When unsure, take the higher tier.
 - **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, build, size, smoke test, title format).
 - **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
@@ -137,7 +136,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 
 ## CI/CD and releases
 
-- CI runs on every pull request and push to `main`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, and the Godot job: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export. A red CI blocks merging.
+- CI runs on every pull request and push to `main`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, the frozen-fixture check, and the Godot job: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export. A red CI blocks merging.
 - CD: every push to `main` deploys the Godot export to GitHub Pages at the site root (for now the Phase 3 stub scene, until the game exists). The Three.js game is not served any more.
 - Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, exports, and creates a GitHub Release with generated notes from the Conventional Commits and the build attached.
 - Keep workflows in `.github/workflows/`. Pin action versions and never commit secrets.

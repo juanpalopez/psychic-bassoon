@@ -2,7 +2,7 @@
 ##
 ## Game speed multiplies the tick count; the tick itself stays fixed. A long
 ## frame is clamped so a stalled tab cannot trigger a burst of ticks. Ported
-## from `src/sim/game/clock.ts`.
+## from `web-three-final:src/sim/game/clock.ts`.
 class_name Clock
 extends RefCounted
 

@@ -23,6 +23,7 @@ jobs:
         with:
           lfs: false
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Lint workflows (actionlint)
         env:
@@ -62,6 +63,23 @@ jobs:
 
       - name: Asset budget and credits
         run: pnpm check:assets
+
+      - name: Frozen fixtures
+        run: pnpm check:fixtures
+
+      - name: Frozen fixtures unchanged in this PR
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          frozen="fixtures/prng.json fixtures/maps.json fixtures/routes.json"
+          # shellcheck disable=SC2086
+          if ! git diff --quiet "$BASE_SHA" HEAD -- $frozen; then
+            echo "::error::A frozen fixture changed in this PR; they are never regenerated."
+            # shellcheck disable=SC2086
+            git diff --stat "$BASE_SHA" HEAD -- $frozen
+            exit 1
+          fi
 
   godot:
     name: godot

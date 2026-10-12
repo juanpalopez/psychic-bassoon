@@ -1,5 +1,5 @@
 ## Advances the game by one rendered frame: real time at a speed becomes a
-## whole number of fixed ticks. Ported from `src/sim/game/frame.ts`.
+## whole number of fixed ticks. Ported from `web-three-final:src/sim/game/frame.ts`.
 class_name Frame
 extends RefCounted
 

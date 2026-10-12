@@ -1,5 +1,5 @@
 ## The game aggregate: creation, the tick, and the four commands. Ported from
-## `src/sim/game/game.test.ts`.
+## `web-three-final:src/sim/game/game.test.ts`.
 extends GutTest
 
 const RULES := preload("res://content/game_rules.gd")

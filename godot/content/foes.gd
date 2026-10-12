@@ -1,5 +1,5 @@
 ## The foes the GDD's ground roster starts with, as numbers. The GDD gives none,
-## so they start from the prototype's table (`src/content/enemies.ts`): the
+## so they start from the prototype's table (`web-three-final:src/content/enemies.ts`): the
 ## Scrap Goblin is the Scamp (swarm), the Corrugated Orc the Ironclad (armored)
 ## and the Cardboard Golem the Warlord (boss). The prototype's mid-tier Raider has
 ## no counterpart in the GDD and is dropped. Flying (Razor Moth) and support (Ink

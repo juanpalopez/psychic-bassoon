@@ -1,5 +1,5 @@
 ## The towers of the GDD's combat slice, as numbers. The GDD gives none, so they
-## start from the prototype's table (`src/content/towers.ts`): the Spool Guard is
+## start from the prototype's table (`web-three-final:src/content/towers.ts`): the Spool Guard is
 ## its Ballista, the Thimble Mortar its Catapult, and the Prism Spire takes the
 ## Storm Spire's damage and rate as damage per second. The prototype's Frost Spire
 ## and Storm Spire have no GDD counterpart and are dropped; the Guard Tent comes

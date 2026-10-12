@@ -1,7 +1,7 @@
 import {readdirSync, readFileSync, statSync} from 'node:fs';
 import {join} from 'node:path';
 
-// The Godot sim must be pure and deterministic, like src/sim: no scene tree,
+// The Godot sim must be pure and deterministic, like the retired `web-three-final:src/sim`: no scene tree,
 // no engine singletons, no Godot random numbers, only maths that matches the
 // TypeScript sim, and nothing from render or ui. It uses an allowlist for
 // what a sim class may extend and which capitalised names it may use.

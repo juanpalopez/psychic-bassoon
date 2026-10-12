@@ -9,9 +9,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "sim": "tsx scripts/sim/cli.ts",
-    "fixtures": "tsx scripts/export-fixtures.ts",
-    "lint": "prettier --check . && eslint . && tsc --noEmit && tsc -p tsconfig.sim.json --noEmit",
+    "lint": "prettier --check . && eslint . && tsc --noEmit",
     "lint:fix": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -22,7 +20,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "serve": "node scripts/serve-static.mjs build/web 8080 0.0.0.0",
-    "check:render-boundary": "node scripts/check-render-boundary.mjs"
+    "check:render-boundary": "node scripts/check-render-boundary.mjs",
+    "check:fixtures": "node scripts/check-fixtures.mjs"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -32,7 +31,6 @@
     "eslint-config-prettier": "10.1.8",
     "globals": "17.13.0",
     "prettier": "3.9.9",
-    "tsx": "4.23.15",
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
     "vitest": "5.0.3"
