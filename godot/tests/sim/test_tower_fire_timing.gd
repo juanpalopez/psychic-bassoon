@@ -62,15 +62,15 @@ func test_foes_move_first_so_the_shot_lands_where_the_foe_now_stands() -> void:
 
 func test_a_foe_that_walks_off_the_end_this_tick_leaks_before_a_tower_can_shoot_it() -> void:
 	var scene := TowerFireKit.scene("spoolGuard", 1, true)
-	assert_lt(scene.gap, 2.3, "a tower within reach of the kingdom")
+	assert_lt(scene.gap, 2.3, "a tower within reach of the Heartstone")
 	var route := scene.game.routes[0]
 	var foe := TowerFireKit.foe(scene.game, route.total - 0.01)
 	foe.speed = 1.9
 	foe.hp = 1.0
-	var health := scene.game.kingdom_health
+	var health := scene.game.heartstone_health
 	var buttons := scene.game.buttons
 	Game.tick(scene.game)
-	assert_eq(scene.game.kingdom_health, health - foe.leak)
+	assert_eq(scene.game.heartstone_health, health - foe.leak)
 	assert_eq(scene.game.buttons, buttons, "no reward for a foe that got through")
 	assert_eq(TowerFireKit.kinds(scene.game, GameEvent.Kind.FOE_LEAKED).size(), 1)
 	assert_eq(TowerFireKit.kinds(scene.game, GameEvent.Kind.TOWER_FIRED).size(), 0)

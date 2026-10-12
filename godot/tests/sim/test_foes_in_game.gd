@@ -1,5 +1,5 @@
 ## Foes walking the routes: the wave runner releases them, they walk, leak into
-## the kingdom, and the wave ends. Ported from the prototype's spawner and mover
+## the Heartstone, and the wave ends. Ported from the prototype's spawner and mover
 ## with the GDD's names.
 extends GutTest
 
@@ -133,7 +133,7 @@ func test_foes_walk_the_route_at_their_speed() -> void:
 
 func test_a_cleared_wave_pays_its_bonus_once() -> void:
 	var game := _launched()
-	game.kingdom_health = 1000
+	game.heartstone_health = 1000
 	var before := game.buttons
 	var bonus := 0
 	var cleared := 0
@@ -155,7 +155,7 @@ func test_a_cleared_wave_pays_its_bonus_once() -> void:
 
 func test_the_wave_is_not_cleared_while_foes_are_still_on_the_board() -> void:
 	var game := _launched()
-	game.kingdom_health = 1000
+	game.heartstone_health = 1000
 	_until(game, func() -> bool: return game.spawners.is_empty())
 	assert_gt(game.foes.size(), 0, "some foes are still walking when the last one is out")
 	assert_true(game.running)
@@ -163,7 +163,7 @@ func test_the_wave_is_not_cleared_while_foes_are_still_on_the_board() -> void:
 
 func test_calling_the_next_wave_early_pays_the_early_bonus() -> void:
 	var game := _launched()
-	game.kingdom_health = 1000
+	game.heartstone_health = 1000
 	_until(game, func() -> bool: return game.spawners.is_empty())
 	var before := game.buttons
 	var events := GameTestKit.run(game, [Command.launch_wave()])
@@ -195,7 +195,7 @@ func test_with_two_routes_foes_use_both_and_one_draw_per_foe() -> void:
 			game = candidate
 			break
 	assert_not_null(game, "a map with a detour exists")
-	game.kingdom_health = 100000
+	game.heartstone_health = 100000
 	GameTestKit.run(game, [Command.launch_wave()])
 	var state_before := game.route_rng.state
 	_until(game, func() -> bool: return game.spawners.is_empty())
@@ -227,7 +227,7 @@ func test_the_same_seed_and_commands_give_the_same_game() -> void:
 	var a := Game.create(7)
 	var b := Game.create(7)
 	for game in [a, b]:
-		game.kingdom_health = 100000
+		game.heartstone_health = 100000
 		GameTestKit.run(game, [Command.launch_wave()])
 		_tick(game, 400)
 	assert_eq(GameTestKit.snapshot(a), GameTestKit.snapshot(b))
@@ -276,7 +276,7 @@ func test_calling_a_wave_early_leaves_one_clear_for_the_later_wave() -> void:
 	# wave 1's foes still walk when wave 2 is called, so they count toward wave 2's
 	# clear: wave 1 never gets its own bonus (the prototype's rule)
 	var game := _launched()
-	game.kingdom_health = 100000
+	game.heartstone_health = 100000
 	_until(game, func() -> bool: return game.spawners.is_empty())
 	GameTestKit.run(game, [Command.launch_wave()])
 	var clears: Array[GameEvent] = []

@@ -10,7 +10,7 @@ const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"
 
 ## Per foe: `name`, `hp`, `speed` (cells per second), `reward` (Buttons for a kill),
 ## `armor` (cuts physical damage), `resist` (cuts magic damage; no foe has any yet),
-## `radius` (cells) and `leak` (kingdom health lost when it gets
+## `radius` (cells) and `leak` (Heartstone health lost when it gets
 ## through). The Golem also names what it splits into when destroyed.
 const DEFS := {
 	"scrapGoblin":

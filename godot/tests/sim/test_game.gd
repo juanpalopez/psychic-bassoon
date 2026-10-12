@@ -11,12 +11,12 @@ const FIXTURE := "res://../fixtures/prng.json"
 const REASON := GameEvent.RejectReason
 
 
-func test_create_starts_with_prototype_buttons_kingdom_health_and_tick_zero() -> void:
+func test_create_starts_with_prototype_buttons_heartstone_health_and_tick_zero() -> void:
 	var game := Game.create(SEED)
 	assert_eq(game.seed, SEED)
 	assert_eq(game.tick_count, 0)
 	assert_eq(game.buttons, RULES.START_BUTTONS)
-	assert_eq(game.kingdom_health, RULES.START_KINGDOM_HEALTH)
+	assert_eq(game.heartstone_health, RULES.START_HEARTSTONE_HEALTH)
 	assert_eq(game.wave, 0)
 	assert_false(game.running)
 	assert_false(game.over)
@@ -76,10 +76,10 @@ func test_tick_advances_the_counter_by_one() -> void:
 func test_tick_changes_nothing_else_without_commands() -> void:
 	var game := Game.create(SEED)
 	var buttons := game.buttons
-	var kingdom_health := game.kingdom_health
+	var heartstone_health := game.heartstone_health
 	Game.tick(game)
 	assert_eq(game.buttons, buttons)
-	assert_eq(game.kingdom_health, kingdom_health)
+	assert_eq(game.heartstone_health, heartstone_health)
 	assert_eq(game.towers.size(), 0)
 	assert_eq(game.events.size(), 0)
 

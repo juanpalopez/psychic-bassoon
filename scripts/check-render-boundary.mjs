@@ -16,7 +16,7 @@ import {join} from 'node:path';
 
 // Every field of GameState and of the map and towers it holds.
 const FIELDS =
-  'seed|map|route|routes|tick_count|buttons|kingdom_health|wave|running|over|towers|spawners|rng|route_rng|next_id|pending|events|path|tiles|tower_id|invested|cooldown|level';
+  'seed|map|route|routes|tick_count|buttons|heartstone_health|wave|running|over|towers|spawners|rng|route_rng|next_id|pending|events|path|tiles|tower_id|invested|cooldown|level';
 const MUTATORS =
   'append|append_array|push_back|push_front|erase|clear|insert|remove_at|remove|pop_back|pop_front|pop_at|resize|assign|sort|sort_custom|shuffle|reverse|fill|set|merge|erase_at';
 // An assignment operator, plain or compound (`=`, `+=`, `**=`, `<<=`, `|=`...),

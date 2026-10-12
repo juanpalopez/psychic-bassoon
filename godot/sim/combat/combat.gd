@@ -1,5 +1,5 @@
-## What happens between the foes and the kingdom each tick: foes walk their
-## routes, a foe that gets to the end leaks and takes kingdom health, and the
+## What happens between the foes and the Heartstone each tick: foes walk their
+## routes, a foe that gets to the end leaks and takes Heartstone health, and the
 ## game ends when the health is gone. Towers fire after the foes have moved.
 class_name Combat
 extends RefCounted
@@ -13,7 +13,7 @@ static func step(game: GameState) -> void:
 	TowerFire.step(game)
 	TowerFire.release_fallen_locks(game)
 	_remove_the_fallen(game)
-	if game.kingdom_health <= 0 and not game.over:
+	if game.heartstone_health <= 0 and not game.over:
 		game.over = true
 		var event := GameEvent.of(GameEvent.Kind.GAME_OVER)
 		event.wave = game.wave
@@ -53,7 +53,7 @@ static func _move_foes(game: GameState) -> void:
 		var route := game.routes[foe.route]
 		if foe.distance >= route.total:
 			foe.alive = false
-			game.kingdom_health = maxi(0, game.kingdom_health - foe.leak)
+			game.heartstone_health = maxi(0, game.heartstone_health - foe.leak)
 			var event := GameEvent.of(GameEvent.Kind.FOE_LEAKED)
 			event.foe_id = foe.id
 			event.foe_type = foe.type

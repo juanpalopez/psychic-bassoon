@@ -1,5 +1,5 @@
 ## Towers shoot: each tick, after the foes move, a tower whose cooldown is up
-## fires at the foe nearest the kingdom within its reach. Everything goes
+## fires at the foe nearest the Heartstone within its reach. Everything goes
 ## through `Game.tick` and the game's public state.
 extends GutTest
 
@@ -85,7 +85,7 @@ func test_a_level_2_socket_reaches_a_foe_a_level_0_socket_would_miss() -> void:
 	fail_test("no level 2 socket with a road point in the bonus band")
 
 
-func test_the_foe_nearest_the_kingdom_is_the_target() -> void:
+func test_the_foe_nearest_the_heartstone_is_the_target() -> void:
 	var scene := TowerFireKit.scene()
 	var behind := TowerFireKit.foe(scene.game, scene.near - 0.3)
 	var ahead := TowerFireKit.foe(scene.game, scene.near + 0.3)

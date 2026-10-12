@@ -70,7 +70,7 @@ static func snapshot(game: GameState) -> Dictionary:
 		"seed": game.seed,
 		"tick": game.tick_count,
 		"buttons": game.buttons,
-		"kingdom_health": game.kingdom_health,
+		"heartstone_health": game.heartstone_health,
 		"wave": game.wave,
 		"running": game.running,
 		"over": game.over,

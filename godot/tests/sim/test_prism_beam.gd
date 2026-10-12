@@ -50,7 +50,7 @@ func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
 	assert_lt(_hp_lost(orc_b, start) / 27.0, 0.6, "armor ate over 40% of the Spool Guard")
 
 
-func test_the_beam_locks_the_foe_nearest_the_kingdom() -> void:
+func test_the_beam_locks_the_foe_nearest_the_heartstone() -> void:
 	var scene := TowerFireKit.scene("prismSpire")
 	var behind := TowerFireKit.foe(scene.game, scene.near - 0.3, "cardboardGolem")
 	var ahead := TowerFireKit.foe(scene.game, scene.near + 0.3, "cardboardGolem")

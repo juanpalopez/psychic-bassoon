@@ -22,7 +22,7 @@ static func create(seed: int) -> GameState:
 		game.routes.append(Route.build(cells))
 	game.route = game.routes[0]
 	game.buttons = RULES.START_BUTTONS
-	game.kingdom_health = RULES.START_KINGDOM_HEALTH
+	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)
 	game.route_rng = Rng.derive(seed, Streams.ROUTES)
 	return game
