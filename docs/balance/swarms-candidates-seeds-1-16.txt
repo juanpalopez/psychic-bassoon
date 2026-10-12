@@ -75,3 +75,9 @@
   mortarHeavy  cleared [9, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15] heart 8.6 buttons_left 495
   prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 19, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15] heart 2.8 buttons_left 187
   mix          cleared [14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15] heart 6.9 buttons_left 428
+# First-round set the PR first proposed (orc threshold fixed at 0.75 in swarms, a rule since replaced by SWARM_ORC_THRESHOLD_DROP; run on commit 6ed37a8, 41 wins of 64). The constant name is the old one.
+{"waves:SWARM_COUNT_MULTIPLIER": 1.5, "waves:SWARM_ORC_THRESHOLD_FIXED": 0.75, "waves:SWARM_HP_MULTIPLIER": 2.0, "waves:SWARM_REWARD_MULTIPLIER": 0.5}
+  spoolOnly    cleared [18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 20, 20, 20] heart 9.1 buttons_left 1405
+  mortarHeavy  cleared [9, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10] heart 9.0 buttons_left 377
+  prismHeavy   cleared [14, 16, 17, 18, 18, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [15, 17, 18, 19, 19, 19, 20, 20] heart 4.7 buttons_left 216
+  mix          cleared [18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [20, 20] heart 10.3 buttons_left 594
