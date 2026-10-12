@@ -17,6 +17,48 @@ func test_a_foe_reaching_a_guard_stops_and_the_engagement_is_reported() -> void:
 	assert_eq(goblin.distance, at, "a held foe does not walk")
 
 
+func test_a_foe_far_from_the_post_is_not_held_but_one_at_its_body_is() -> void:
+	# the first guard stands 0.25 before the middle of the post, and its stop is
+	# 0.2 + 0.24 = 0.44 further back: 0.69 before the middle; one tick walks 0.07
+	var game := GuardKit.game_with_tent()
+	var far := GuardKit.foe_before_post(game, "scrapGoblin", 0.9)
+	GuardKit.tick(game, 1)
+	assert_eq(far.engaged_guard_id, -1, "0.83 before the middle is out of reach")
+	var other := GuardKit.game_with_tent()
+	var near := GuardKit.foe_before_post(other, "scrapGoblin", 0.6)
+	GuardKit.tick(other, 1)
+	assert_ne(near.engaged_guard_id, -1, "0.53 before it is held")
+	assert_gte(near.distance, GuardKit.post(other) - 0.69)
+
+
+func test_a_guards_armor_cuts_the_foes_blow() -> void:
+	var game := GuardKit.game_with_tent()
+	GameTestKit.run(game, [Command.upgrade(GuardKit.tent(game).id)])
+	GameTestKit.run(game, [Command.upgrade(GuardKit.tent(game).id)])
+	assert_eq(game.guards[0].armor, 4)
+	game.guards[1].alive = false
+	game.guards[1].respawn_timer = 1000.0
+	game.guards[0].hp = game.guards[0].max_hp
+	GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
+	GuardKit.tick(game, 3)
+	# the orc's first blow is 14, less the guard's 4 armor: 10 (170 to 160), and
+	# nothing has regenerated in a fight
+	assert_eq(game.guards[0].hp, 160.0)
+
+
+func test_a_slow_on_a_held_foe_keeps_running_out() -> void:
+	var game := GuardKit.game_with_tent()
+	game.guards[1].alive = false
+	game.guards[1].respawn_timer = 1000.0
+	var orc := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
+	Status.apply_slow(orc, 0.5, 0.5)
+	GuardKit.tick(game, 3)
+	assert_ne(orc.engaged_guard_id, -1)
+	GuardKit.tick(game, 30)
+	assert_eq(orc.slow_timer, 0.0, "the slow ran out while the orc was held")
+	assert_eq(orc.slow, 0.0)
+
+
 func test_each_guard_holds_one_foe_and_the_third_walks_past() -> void:
 	var game := GuardKit.game_with_tent()
 	var held := [
@@ -76,12 +118,15 @@ func test_a_fallen_guard_comes_back_after_its_respawn_time() -> void:
 	GuardKit.tick(game, 60)
 	assert_false(guard.alive)
 	var raised := false
-	for i in 12 * 30:
+	var ticks := 0
+	for i in 13 * 30:
 		Game.tick(game)
 		if guard.alive:
 			raised = true
 			break
+		ticks += 1
 	assert_true(raised, "back after 12 s")
+	assert_gt(ticks, 11 * 30 - 60, "and not much sooner: it fell within the first 2 s")
 	assert_eq(guard.hp, guard.max_hp)
 	assert_true(orc.alive)
 

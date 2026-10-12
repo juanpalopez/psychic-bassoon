@@ -55,7 +55,9 @@ static func release_guards(game: GameState, tent: Tower) -> void:
 
 
 ## The distance along the main route of the road point nearest the tent's block
-## (the one nearer the Heartstone when two are equally near).
+## (the one nearer the Heartstone on an exact tie, which a real map almost never
+## has). The tent's `range` is the reach shown to the player; a socket is always
+## within 1.6 cells of the road, so the nearest point is always in reach.
 static func post_for(game: GameState, tent: Tower) -> float:
 	var route := game.routes[0]
 	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
@@ -141,6 +143,7 @@ static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 	event.tower_id = guard.tent_id
 	event.guard_id = guard.id
 	event.foe_id = best.id
+	event.foe_type = best.type
 	game.events.append(event)
 	return best
 
