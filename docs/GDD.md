@@ -1,6 +1,6 @@
 # Papercraft Kingdom Defense: Game Design Document (GDD)
 
-> **Source:** the owner's Google Doc "Game Design Document - Papercraft Kingdom Defense" (snapshot taken 2026-10-11 from its plain-text export). The Google Doc is the living version; this file is the copy the plan and the code are checked against. Where the GDD and `docs/PLAN.md` disagree, the plan lists the open question under "Gaps in the GDD". The GDD gives few numbers; balance numbers live in `godot/content` and are tuned by headless runs.
+> **Source:** the owner's Google Doc "Game Design Document - Papercraft Kingdom Defense" (first snapshot 2026-10-11; updated 2026-10-12 with the 22 x 16 map, 2x2 sockets, the Heartstone, the Kitchen Mess Tent, the Camp Cook, the Messenger Crow and an audio section). The Google Doc is the living version; this file is the copy the plan and the code are checked against. Where the GDD and `docs/PLAN.md` disagree, the plan lists the open question under "Gaps in the GDD". The GDD gives few numbers; balance numbers live in `godot/content` and are tuned by headless runs.
 
 ## 1. Executive summary and narrative lore
 
@@ -23,7 +23,7 @@ The primary gameplay loop balances tactical preparation with real-time micro-man
 1. **Scout and build phase:** review wave paths, inspect enemy composition icons, and spend starting Buttons (currency) to place base towers on pre-etched sockets.
 2. **Engage wave:** trigger the wave early for bonus resource income or allow the timer to expire.
 3. **Combat and resource management:** manage tower targeting priorities, deploy hero movement commands, harvest defeated enemy drop-scraps, and cast Global Crafting Spells using regenerable PVA Ink/Energy.
-4. **Wave rewards and permanent tech tree:** earn Golden Staples based on remaining kingdom health. Spend staples in the workshop menu to upgrade permanent crafting skills, unlock base stats, and purchase new origami blueprints.
+4. **Wave rewards and permanent tech tree:** earn Golden Staples based on remaining Heartstone health. Spend staples in the workshop menu to upgrade permanent crafting skills, unlock base stats, and purchase new origami blueprints.
 
 ### Touch ergonomics and interaction model
 
@@ -34,27 +34,26 @@ Designed specifically for handheld screens, the interaction layer prioritizes to
   - One-finger pan: smooth panning across the cutting mat table with soft edge rubber-banding bounds.
   - Two-finger pinch-to-zoom: smooth elevation zoom bounded between 30° and 65° isometric view angles.
 - **Global spell activation:** drag-and-drop mechanics from a persistent bottom-right "Toolbox Tray". Spells display live projection decals on the map ground layer before releasing touch to cast.
+- **Screen-space non-grid HUD:** persistent gameplay metrics (Heartstone HP, Buttons currency, PVA Ink) live on a 2D `CanvasLayer` overlay so they never occupy world grid cells. A bottom-docked toolbox tray holds the spells, and a diegetic Messenger Crow (an origami courier on a spring wire, see section 6) delivers event notifications.
 
 ## 3. Map system and level design
 
 ### Grid architecture
 
-Maps are constructed using modular 1m x 1m GridMap tiles within Godot 4. Terrain is categorized by distinct physical elevations that affect combat mechanics:
+Maps are strictly standardized to a **22-column by 16-row landscape grid (352 cells)**, built from modular 1m x 1m GridMap tiles within Godot 4. The board is surrounded by an out-of-bounds diorama skirt that represents the rest of the craft-room desk. Terrain is categorized by distinct physical elevations:
 
-- **Level 0 (cutting mat table):** standard ground path level. Enemies traverse along marked gridlines.
-- **Level 1 (glued cardboard rise):** low elevation layer constructed from double-walled corrugated cardboard. Grants ground units blocking choke points.
-- **Level 2 (elevated tiered cliffs):** high points made from stacked paperboard blocks. Towers placed on Level 2 automatically receive a +15% Range Bonus and bypass low-terrain Line of Sight (LOS) blockades.
+- **Level 0 (cutting mat table):** base surface. Enemies move along marked lanes 1 to 2 cells wide.
+- **Level 1 (glued cardboard rise):** a low layer of double-walled corrugated cardboard, +1.0 m high.
+- **Level 2 (elevated tiered cliffs):** high cliffs of stacked paperboard blocks, +2.0 m high. Towers placed on Level 2 receive a +15% Range Bonus and bypass low-terrain Line of Sight (LOS) blockades.
 
-### Pathing systems
+### Sockets, footprints and objectives
 
-Pathfinding utilizes Godot Path3D splines with custom logic for dynamic environmental hazards:
+- **Sockets and footprints:** tower sockets occupy a standard 2x2 cell footprint (2.0 m x 2.0 m) with a pre-etched circular outline that flashes white when tapped. Towers have exaggerated vertical heights (3 m to 6 m) for readability. There are 12 to 22 sockets per map; a socket turns to folded cardstock once built on.
+- **Heartstone objective:** at the end of the enemy lane, on a 2x2 to 3x3 cell footprint, an illuminated origami heart crystal is the core objective. Its health is the player's health.
 
-- **Branching choke points:** maps feature split paths with toggleable cardboard drawbridges operated by nearby mechanical levers.
-- **Environmental obstacles:** foil paper rivers slow enemy movement by 25%, while sticky tape strips act as single-use slowing zones.
+### Environmental hazards and dynamic paths
 
-### Sockets and placement
-
-To eliminate placement frustration on small mobile screens, free-form building is replaced by pre-etched circular sockets (12 to 22 per map). Sockets flash subtle white pencil-outlines when selected and visually alter their texture to folded cardstock once built upon.
+Maps include interactive craft-room hazards along the enemy paths: blue metallic-foil rivers crossed by wooden popsicle-stick bridges (a foe knocked into the water is slowed 50%), sticky tape strips that act as single-use traps, and sticky PVA glue puddles.
 
 ## 4. Tower archetypes and level upgrade system
 
@@ -73,14 +72,17 @@ Every tower follows a strict 4-tier structural path:
 ### Core towers and specializations
 
 ```
-                  ┌─ Crossbow Ballista
-   ┌─ The Spool Guard ┴─ Paper-Plane Aviary
+   ┌─ The Spool Guard ┬─ Crossbow Ballista
+   │                  └─ Paper-Plane Aviary
    ├─ The Guard Tent  ┬─ Cardboard Knights
-Towers ┤             └─ Scissor Rogues
+   │                  └─ Scissor Rogues
+Towers ┤
    ├─ The Prism Spire ┬─ Cryo-Origami Spire
    │                  └─ Blot Singularity
-   └─ The Thimble     ┬─ Glitter Cannon
-      Mortar          └─ Sticky Glue Mortar
+   ├─ The Thimble     ┬─ Glitter Cannon
+   │  Mortar          └─ Sticky Glue Mortar
+   └─ The Kitchen     ┬─ Iron Rations
+      Mess Tent       └─ Gourmet Frenzy
 ```
 
 #### 1. The Spool Guard (archer tower)
@@ -127,6 +129,17 @@ Base unit: a heavy metal thimble loaded with matchstick powder, launching splash
   - Active: PVA Deluge. Coats the target area in heavy PVA glue, reducing enemy movement speed by 70% for 6 seconds.
   - Passive: Lingering Residue. Mortar shells leave burning/slowing pools on the track for 4 seconds after impact.
 
+#### 5. The Kitchen Mess Tent (barracks support)
+
+Base unit: a 2x2 footprint cardboard mess hall that generates a base aura, Hearty Stew, boosting neighboring unit attack speed and health regeneration.
+
+- **Spec A: Iron Rations**
+  - Active: Fortified Feast. Instantly grants a heavy shield barrier to all friendly troops within aura range for 10 seconds.
+  - Passive: Hardtack Toughness. Increases max health of nearby barracks defenders by +30%.
+- **Spec B: Gourmet Frenzy**
+  - Active: Boiling Broth Splash. Splashes scalding stew onto enemy paths, dealing area fire damage and applying a movement speed penalty.
+  - Passive: Sugar Rush. Buffs movement and attack speed of friendly hero and barracks units within range by +25%.
+
 ## 5. Enemy roster and attributes
 
 | Category | Unit name | Visual material | Gameplay attributes and counters |
@@ -147,6 +160,18 @@ A movable, persistent hero unit crafted from heavy cardstock and foil armor.
 - **Ability 1 (passive), Rally Cry:** allied units within a 3-meter radius gain +15% attack speed and +10% health regeneration.
 - **Ability 2 (active), Blade Whirl:** the Knight spins with a foil sword, dealing heavy physical area-of-effect damage to all adjacent ground units (15 s cooldown).
 
+### Hero unit 2: the Camp Cook
+
+A specialized barracks support hero crafted from folded recipe paper and a tin foil ladle.
+
+- **Role:** area-buff support unit and defensive crowd-controller.
+- **Ability 1 (passive), Rations and Morale:** nearby troops heal 2% HP per second and gain +10% resistance to all damage types.
+- **Ability 2 (active), Boiling Stew Splash:** throws a ladle of boiling paper-pulp soup, burning enemies in a target area and reducing their move speed by 40% for 5 s.
+
+### Diegetic alert messenger: the Messenger Crow
+
+A non-combat origami crow attached to a spring wire that flies across the screen layer to deliver receipt-paper scrolls containing wave alerts, secret objectives, and urgent craft warnings.
+
 ### Global crafting spells
 
 Activated from the bottom tray by spending Crafting Energy generated during wave combat.
@@ -159,7 +184,27 @@ Activated from the bottom tray by spending Crafting Energy generated during wave
 2. **Falling Thumbtacks:** drops a handful of brass thumbtacks onto a 2x2 grid area. Deals physical damage and causes light enemies to stumble/pause for 0.5 s per tack stepped on.
 3. **The Crafter's Eraser:** a targeted rubber eraser tool that wipes away non-boss enemy shields, armor plating, and positive magical buffs in a targeted radius.
 
-## 7. Godot 4 technical architecture and asset pipeline
+## 7. Audio architecture: music and diegetic SFX
+
+### Foley philosophy and sound matrix
+
+All sound effects use a physical, tactile craft-room foley palette to reinforce the miniature physical world:
+
+- **Rubber band twangs:** Ballista fires and catapult releases.
+- **Thimble clinks and metal snaps:** artillery impacts and armor hits.
+- **Glass rim chimes:** Prism Spire attacks and magical spell activations.
+- **Scissor snaps and paper tears:** slash attacks, creep deaths, and cardstock construction.
+- **Stamp thuds:** heavy boss footsteps and UI button confirmations.
+
+### Adaptive soundtrack architecture
+
+The interactive music system switches stem layers by the intensity of the game state:
+
+- **Tier 1, planning stem:** light acoustic guitar, marimba, and soft paper rustles during build phases.
+- **Tier 2, wave stem:** adds rhythmic cardboard percussion, pizzicato strings, and energetic woodwinds during active combat.
+- **Tier 3, boss and urgent stem:** brass fanfares, intense wooden percussion, and low cello swells during boss spawns or low Heartstone health.
+
+## 8. Godot 4 technical architecture and asset pipeline
 
 ### Scene and node architecture
 
@@ -168,7 +213,8 @@ The game framework uses an event-driven design to ensure optimal performance on 
 ```
 Main Scene (Node3D)
 ├── GameManager (Node) -------- Handles state machine, wave orchestration, and currency
-├── BoardGrid (GridMap) ------- Manages 1m x 1m modular terrain tiles & height levels
+├── AudioManager (Node) ------- Orchestrates 3-tier adaptive audio stems & diegetic foley SFX
+├── BoardGrid (GridMap) ------- Manages 22x16 modular terrain tiles & height levels
 ├── PathController (Node3D) --- Contains Path3D splines & dynamic bridge/route updates
 ├── TowerSockets (Node3D) ----- Container for individual Socket nodes
 │   └── TowerSocket (Area3D) - Manages occupancy state, radial menu triggers, & placement
