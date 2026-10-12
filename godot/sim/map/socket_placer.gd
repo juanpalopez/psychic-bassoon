@@ -28,8 +28,13 @@ static func place(map: GameMap) -> void:
 			chosen.append(cell)
 	# the spacing rule leaves room for at least the minimum on every board the
 	# generator can make (checked over 50,000 seeds at 9 by 13 and 6,000 at 22 by 16,
-	# where the fewest was exactly the minimum); fail loudly if it ever does not
-	assert(chosen.size() >= RULES.SOCKET_MIN, "too few sockets for seed %d" % map.seed)
+	# where the fewest was exactly the minimum, 4,000 with a detour, and 1,500 at 24
+	# by 16; a 20 by 14 board with 2x2 blocks can fall short, so blocks need the GDD
+	# board or larger); fail loudly if it ever does not
+	# (an assert is gone from a release build, so the error is logged there too)
+	if chosen.size() < RULES.SOCKET_MIN:
+		push_error("too few sockets for seed %d: %d" % [map.seed, chosen.size()])
+		assert(false, "too few sockets for seed %d" % map.seed)
 	chosen.sort_custom(_reading_order)
 	map.sockets = chosen
 	map.elevation = _flat_elevation(map.cols, map.rows)

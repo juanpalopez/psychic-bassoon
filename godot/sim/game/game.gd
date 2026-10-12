@@ -14,10 +14,16 @@ const TICK_SECONDS := 1.0 / RULES.TICK_RATE
 
 
 ## Creates the game for a seed, on tick 0.
-static func create(seed: int) -> GameState:
+static func create(
+	seed: int,
+	cols: int = MAP_RULES.GRID_COLS,
+	rows: int = MAP_RULES.GRID_ROWS,
+	with_detour: bool = MAP_RULES.GAME_DETOUR,
+	footprint: int = MAP_RULES.GAME_SOCKET_FOOTPRINT
+) -> GameState:
 	var game := GameState.new()
 	game.seed = seed
-	game.map = MapGen.generate(seed)
+	game.map = MapGen.generate(seed, cols, rows, with_detour, footprint)
 	for cells in game.map.routes:
 		game.routes.append(Route.build(cells))
 	game.route = game.routes[0]

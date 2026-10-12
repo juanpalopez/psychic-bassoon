@@ -7,7 +7,6 @@ extends GutTest
 const RULES := preload("res://content/map_rules.gd")
 const COLS := 22
 const ROWS := 16
-const GOLDEN := "res://tests/goldens/socket_blocks.json"
 
 var _seeds: Array[int] = []
 
