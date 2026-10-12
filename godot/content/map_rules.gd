@@ -45,6 +45,14 @@ const SOCKET_MIN := 12
 const SOCKET_MAX := 22
 const SOCKET_REACH := 2
 const SOCKET_SPACING := 2
+## A socket is a square block of this many cells on a side. The GDD says 2; the
+## game keeps the single cell of the first greybox (`GAME_SOCKET_FOOTPRINT`) until
+## the renderer draws blocks (Map v2), and the frozen sockets golden is one cell.
+const SOCKET_FOOTPRINT_LEGACY := 1
+const SOCKET_FOOTPRINT := 2
+const GAME_SOCKET_FOOTPRINT := 1
+## Blocks of 2 or more cells leave this many empty cells between each other.
+const SOCKET_BLOCK_GAP := 1
 
 ## Elevation levels: 0 the cutting mat, 1 a glued cardboard rise, 2 tiered
 ## cliffs. Roads and plain ground are level 0; a socket gets a level by weight.

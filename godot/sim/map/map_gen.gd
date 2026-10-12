@@ -29,7 +29,8 @@ static func generate(
 	seed: int,
 	cols: int = RULES.GRID_COLS,
 	rows: int = RULES.GRID_ROWS,
-	with_detour: bool = RULES.GAME_DETOUR
+	with_detour: bool = RULES.GAME_DETOUR,
+	footprint: int = RULES.GAME_SOCKET_FOOTPRINT
 ) -> GameMap:
 	var wide := cols > rows
 	var tall_cols := rows if wide else cols
@@ -50,13 +51,23 @@ static func generate(
 		map.seed = seed
 		map.cols = cols
 		map.rows = rows
+		map.footprint = footprint
 		map.routes = routes
 		map.path = routes[0]
 		map.tiles = _tiles_for(routes, cols, rows)
+		map.heartstone = _heartstone_block(map.path[map.path.size() - 1], cols, rows, footprint)
 		SocketPlacer.place(map)
 		return map
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
 	return null
+
+
+## The Heartstone's footprint: a block of `footprint` cells on the board that
+## holds the road's last cell and reaches back from it (just that cell when the
+## footprint is 1).
+static func _heartstone_block(last: Vector2i, cols: int, rows: int, footprint: int) -> Rect2i:
+	var anchor := Vector2i(mini(last.x, cols - footprint), mini(last.y, rows - footprint))
+	return Rect2i(anchor, Vector2i(footprint, footprint))
 
 
 ## The routes with every cell's column and row swapped.

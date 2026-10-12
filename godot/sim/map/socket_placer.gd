@@ -13,7 +13,8 @@ extends RefCounted
 const RULES := preload("res://content/map_rules.gd")
 
 
-## Fills `map.sockets` and `map.elevation` for the map's seed.
+## Fills `map.sockets` (the anchor, top-left cell, of each block) and
+## `map.elevation` (one level for all the cells of a block) for the map's seed.
 static func place(map: GameMap) -> void:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
@@ -23,7 +24,7 @@ static func place(map: GameMap) -> void:
 	for cell in candidates:
 		if chosen.size() >= target:
 			break
-		if _keeps_distance(cell, chosen):
+		if _keeps_distance(cell, chosen, map.footprint):
 			chosen.append(cell)
 	# the spacing rule leaves room for at least the minimum on every board the
 	# generator can make (checked over 50,000 seeds at 9 by 13 and 6,000 at 22 by 16,
@@ -35,20 +36,41 @@ static func place(map: GameMap) -> void:
 	var total := 0
 	for weight in RULES.ELEVATION_WEIGHTS:
 		total += weight
-	for cell in chosen:
-		map.elevation[cell.y][cell.x] = _weighted_level(rng.next_int(total))
+	for anchor in chosen:
+		var level := _weighted_level(rng.next_int(total))
+		for dy in map.footprint:
+			for dx in map.footprint:
+				map.elevation[anchor.y + dy][anchor.x + dx] = level
 
 
-## Cells that are not road but have a road cell within `SOCKET_REACH`.
+## Anchors whose whole block is on the board, off the road and off the
+## Heartstone's footprint, with a cell of the block within `SOCKET_REACH` of the
+## road, in reading order.
 static func _candidates(map: GameMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
-	for row in map.rows:
-		for col in map.cols:
-			if map.tiles[row][col] == GameMap.Tile.ROAD:
-				continue
-			if _road_within_reach(map, col, row):
+	for row in range(0, map.rows - map.footprint + 1):
+		for col in range(0, map.cols - map.footprint + 1):
+			if _block_is_free(map, col, row) and _block_near_road(map, col, row):
 				out.append(Vector2i(col, row))
 	return out
+
+
+static func _block_is_free(map: GameMap, col: int, row: int) -> bool:
+	for dy in map.footprint:
+		for dx in map.footprint:
+			if map.tiles[row + dy][col + dx] == GameMap.Tile.ROAD:
+				return false
+			if map.heartstone.has_point(Vector2i(col + dx, row + dy)):
+				return false
+	return true
+
+
+static func _block_near_road(map: GameMap, col: int, row: int) -> bool:
+	for dy in map.footprint:
+		for dx in map.footprint:
+			if _road_within_reach(map, col + dx, row + dy):
+				return true
+	return false
 
 
 static func _road_within_reach(map: GameMap, col: int, row: int) -> bool:
@@ -72,9 +94,17 @@ static func _shuffle(cells: Array[Vector2i], rng: Rng) -> void:
 		cells[j] = held
 
 
-static func _keeps_distance(cell: Vector2i, chosen: Array[Vector2i]) -> bool:
+## A single cell keeps `SOCKET_SPACING` (Manhattan) from the others; a block's
+## anchor keeps its own size plus `SOCKET_BLOCK_GAP` (Chebyshev), so blocks never
+## touch.
+static func _keeps_distance(cell: Vector2i, chosen: Array[Vector2i], footprint: int) -> bool:
 	for other in chosen:
-		if absi(cell.x - other.x) + absi(cell.y - other.y) < RULES.SOCKET_SPACING:
+		var dx := absi(cell.x - other.x)
+		var dy := absi(cell.y - other.y)
+		if footprint == 1:
+			if dx + dy < RULES.SOCKET_SPACING:
+				return false
+		elif maxi(dx, dy) < footprint + RULES.SOCKET_BLOCK_GAP:
 			return false
 	return true
 
