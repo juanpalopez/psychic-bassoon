@@ -1,6 +1,6 @@
 ## What happens between the foes and the kingdom each tick: foes walk their
 ## routes, a foe that gets to the end leaks and takes kingdom health, and the
-## game ends when the health is gone. (Towers shoot in the next step.)
+## game ends when the health is gone. Towers fire after the foes have moved.
 class_name Combat
 extends RefCounted
 
@@ -8,6 +8,7 @@ extends RefCounted
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
 	_move_foes(game)
+	TowerFire.step(game)
 	_remove_the_fallen(game)
 	if game.kingdom_health <= 0 and not game.over:
 		game.over = true

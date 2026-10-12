@@ -10,14 +10,16 @@ extends RefCounted
 
 const TOWER_IDS: Array[String] = ["spoolGuard", "thimbleMortar", "prismSpire"]
 
-## Per tower: `name`, `cost`, `damage` (per shot, or per second for a beam),
-## `range` (cells) and, for a tower that fires shots, `rate` (shots per second).
+## Per tower: `name`, `damage_type` ("physical", "magic" or "true"), `cost`,
+## `damage` (per shot, or per second for a beam), `range` (cells) and, for a
+## tower that fires shots, `rate` (shots per second).
 ## The Thimble Mortar also has `splash` (blast radius, cells). The Prism Spire is
 ## a continuous beam: `beam` is true and it has no `rate`.
 const DEFS := {
 	"spoolGuard":
 	{
 		"name": "Spool Guard",
+		"damage_type": "physical",
 		"cost": [50, 60, 110],
 		"damage": [9, 15, 26],
 		"range": [2.3, 2.6, 3.0],
@@ -26,6 +28,7 @@ const DEFS := {
 	"thimbleMortar":
 	{
 		"name": "Thimble Mortar",
+		"damage_type": "physical",
 		"cost": [90, 90, 160],
 		"damage": [32, 56, 96],
 		"range": [2.8, 3.1, 3.5],
@@ -35,6 +38,7 @@ const DEFS := {
 	"prismSpire":
 	{
 		"name": "Prism Spire",
+		"damage_type": "magic",
 		"cost": [110, 100, 180],
 		"damage": [16, 33, 65],
 		"range": [2.3, 2.6, 2.9],

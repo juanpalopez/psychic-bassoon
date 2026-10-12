@@ -8,6 +8,16 @@ extends RefCounted
 enum Kind { PHYSICAL, MAGIC, TRUE }
 
 const RULES := preload("res://content/game_rules.gd")
+## The content names the kinds as strings.
+const NAMES := {"physical": Kind.PHYSICAL, "magic": Kind.MAGIC, "true": Kind.TRUE}
+
+
+## The kind a content name stands for. An unknown name is a content bug.
+static func kind_named(name: String) -> Kind:
+	if not NAMES.has(name):
+		push_error("unknown damage type %s" % name)
+		return Kind.PHYSICAL
+	return NAMES[name]
 
 
 ## What `amount` of damage of `kind` comes to against `foe`'s defences.
