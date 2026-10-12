@@ -29,6 +29,7 @@ var _speed := GameSpeed.new()
 @onready var _highlight: CellHighlight = $Highlight
 @onready var _towers: TowersView = $Towers
 @onready var _foes: FoesView = $Foes
+@onready var _shots: ShotsView = $Shots
 @onready var _launch: Button = $Hud/LaunchWave
 @onready var _top_bar: TopBar = $Hud/TopBar
 @onready var _speed_bar: SpeedBar = $Hud/SpeedBar
@@ -66,6 +67,9 @@ func _process(delta: float) -> void:
 		Frame.step(_game, _clock, delta, ticks_speed, Callable(), _after_tick)
 	_towers.sync(_game.towers, _board.surface_height)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
+	if ticks_speed > 0:
+		_shots.update(delta)
+	_shots.show_beams(_game, _board.surface_height)
 	_update_launch_button()
 	_menu.set_buttons(_game.buttons)
 	_refresh_panel()
@@ -259,6 +263,21 @@ func _after_tick(game: GameState) -> void:
 	for event in game.events:
 		if event.kind == GameEvent.Kind.COMMAND_REJECTED:
 			_show_message(RejectText.of(event.reason))
+		elif event.kind == GameEvent.Kind.TOWER_FIRED:
+			_draw_shot(game, event)
+
+
+## Draws the shot a tower fired this tick, from the tower to where its target stood.
+func _draw_shot(game: GameState, event: GameEvent) -> void:
+	for tower in game.towers:
+		if tower.id == event.tower_id:
+			var surface := _board.surface_height(Vector2i(tower.col, tower.row))
+			_shots.add_shot(
+				ShotsView.muzzle(tower, surface),
+				ShotsView.body_point(event.x, event.y),
+				event.splash
+			)
+			return
 
 
 func _show_message(text: String) -> void:
