@@ -10,5 +10,5 @@ var col: int = 0
 var row: int = 0
 ## Buttons spent so far; a sale refunds a share of it.
 var invested: int = 0
-## Seconds until it may fire again. Runs below zero while idle.
+## Seconds until it may fire again; 0 while it waits for a target.
 var cooldown: float = 0.0

@@ -1,14 +1,16 @@
 ## Towers shooting. Each tick, after the foes move, a tower whose cooldown has
 ## run out picks the foe nearest the kingdom within its reach and fires; its
-## cooldown then restarts at one over its rate. The Spool Guard hits one foe, the
-## Thimble Mortar everything within its splash of the target. The shot happens
-## the tick it is fired (a renderer draws the flight from the TOWER_FIRED
-## event). A beam tower (the Prism Spire) fires no shots; its beam comes later.
+## cooldown then restarts at one over its rate (plus what the last tick ran
+## over). The Spool Guard hits one foe, the Thimble Mortar everything within its
+## splash of the target. The shot happens the tick it is fired (a renderer draws
+## the flight from the TOWER_FIRED event). A beam tower (the Prism Spire) fires
+## no shots; its beam comes later.
 class_name TowerFire
 extends RefCounted
 
 const TOWERS := preload("res://content/towers.gd")
 const MAP_RULES := preload("res://content/map_rules.gd")
+const RULES := preload("res://content/game_rules.gd")
 
 
 ## Runs every tower's turn.
@@ -17,13 +19,20 @@ static func step(game: GameState) -> void:
 		var def: Dictionary = TOWERS.DEFS[tower.type]
 		if def.get("beam", false):
 			continue
+		var was_ready := tower.cooldown <= RULES.COOLDOWN_EPSILON
 		tower.cooldown -= Game.TICK_SECONDS
-		if tower.cooldown > 0.0:
+		if tower.cooldown > RULES.COOLDOWN_EPSILON:
 			continue
 		var target := target_for(game, tower)
 		if target == null:
+			# an idle tower waits at 0, so it keeps no head start
+			tower.cooldown = 0.0
 			continue
-		tower.cooldown = 1.0 / float(def.rate[tower.level])
+		# the part of the last tick that ran past the cooldown carries over, so a
+		# rate that does not divide the tick still averages out; a tower that was
+		# already waiting has no such remainder
+		var carried := 0.0 if was_ready else tower.cooldown
+		tower.cooldown = carried + 1.0 / float(def.rate[tower.level])
 		_fire(game, tower, def, target)
 
 

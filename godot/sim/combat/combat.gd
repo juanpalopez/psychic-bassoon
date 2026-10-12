@@ -35,7 +35,7 @@ static func _remove_the_fallen(game: GameState) -> void:
 
 static func _move_foes(game: GameState) -> void:
 	for foe in game.foes:
-		# a foe that fell this tick (a hit before the move) must not walk or leak
+		# a foe that fell earlier (a hit between ticks) must not walk or leak
 		if not foe.alive:
 			continue
 		if foe.slow_timer > 0.0:
