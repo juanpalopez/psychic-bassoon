@@ -51,7 +51,26 @@ static func snapshot(game: GameState) -> Dictionary:
 				foe.slow,
 				foe.distance,
 				foe.x,
-				foe.y
+				foe.y,
+				foe.engaged_guard_id,
+				foe.attack_cooldown
+			]
+		)
+	var guards := []
+	for guard in game.guards:
+		guards.append(
+			[
+				guard.id,
+				guard.tent_id,
+				guard.hp,
+				guard.max_hp,
+				guard.armor,
+				guard.damage,
+				guard.cooldown,
+				guard.post,
+				guard.alive,
+				guard.respawn_timer,
+				guard.foe_id
 			]
 		)
 	var spawners := []
@@ -79,6 +98,7 @@ static func snapshot(game: GameState) -> Dictionary:
 		"routes": routes,
 		"foes": foes,
 		"spawners": spawners,
+		"guards": guards,
 		"rngState": game.rng.state,
 		"routeRngState": game.route_rng.state,
 		"nextId": game.next_id,

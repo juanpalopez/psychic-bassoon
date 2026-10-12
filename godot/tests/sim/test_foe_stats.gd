@@ -49,6 +49,18 @@ func test_wave_15_swarm_goblin() -> void:
 	assert_eq(stats.reward, 3)
 
 
+func test_a_foes_blows_grow_with_the_wave_and_the_golem_is_not_blockable() -> void:
+	assert_eq(FoeStats.for_wave("scrapGoblin", 1).attack_damage, 3.0)
+	# 3 * (1 + 0.03 * 19) = 4.71 and 14 * (1 + 0.03 * 9) = 17.78
+	assert_almost_eq(FoeStats.for_wave("scrapGoblin", 20).attack_damage, 4.71, 1e-12)
+	assert_almost_eq(FoeStats.for_wave("corrugatedOrc", 10).attack_damage, 17.78, 1e-12)
+	assert_eq(FOES.DEFS.scrapGoblin.attack_interval, 0.8)
+	assert_eq(FOES.DEFS.corrugatedOrc.attack_interval, 1.6)
+	assert_true(FOES.DEFS.scrapGoblin.blockable)
+	assert_true(FOES.DEFS.corrugatedOrc.blockable)
+	assert_false(FOES.DEFS.cardboardGolem.blockable)
+
+
 func test_wave_10_goblin() -> void:
 	# n = 9: hp scale 1 + 0.2 * 9 + 0.04 * 81 = 6.04, so 20 * 6.04 = 120.8
 	var stats := FoeStats.for_wave("scrapGoblin", 10)

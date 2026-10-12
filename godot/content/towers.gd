@@ -12,6 +12,13 @@
 ## damage per second raised from 16, 33, 65 with its cost cut from 110, 100, 180.
 ## Redo it after the Phase 7 content.
 ##
+## The Guard Tent (`docs/BARRACKS.md`) is a tower that does not shoot: `guards` is
+## true, and it owns `guard_count` guards (`guard_hp`, `guard_armor`, `guard_damage`
+## per blow, `guard_interval` seconds between blows, `respawn` seconds after a fall,
+## `regen` hp a second out of a fight), `guard_spacing` cells apart with a body
+## `guard_radius` wide. `range` is how far from the tent a guard may post. It is
+## not in `TOWER_IDS` (the build menu) until the render step adds it. Interim numbers.
+##
 ## Level-indexed stats: index 0 is level 1, index 2 is level 3.
 extends RefCounted
 
@@ -50,5 +57,22 @@ const DEFS := {
 		"damage": [36, 72, 140],
 		"range": [2.3, 2.6, 2.9],
 		"beam": true,
+	},
+	"guardTent":
+	{
+		"name": "Guard Tent",
+		"damage_type": "physical",
+		"guards": true,
+		"cost": [70, 80, 140],
+		"range": [1.9, 2.2, 2.5],
+		"guard_count": 2,
+		"guard_spacing": 0.5,
+		"guard_radius": 0.2,
+		"guard_hp": [60, 100, 170],
+		"guard_armor": [0, 2, 4],
+		"guard_damage": [4, 7, 12],
+		"guard_interval": [1.0, 1.0, 1.0],
+		"respawn": [12, 10, 8],
+		"regen": [1.0, 1.5, 2.0],
 	},
 }

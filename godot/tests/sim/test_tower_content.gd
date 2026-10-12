@@ -7,7 +7,9 @@ const TOWERS := preload("res://content/towers.gd")
 
 func test_the_three_combat_towers_in_build_order() -> void:
 	assert_eq(TOWERS.TOWER_IDS, ["spoolGuard", "thimbleMortar", "prismSpire"])
-	assert_eq(TOWERS.DEFS.keys().size(), 3)
+	# the Guard Tent is content too, but not in the build menu yet (see towers.gd)
+	assert_eq(TOWERS.DEFS.keys().size(), 4)
+	assert_true(TOWERS.DEFS.has("guardTent"))
 	for id in TOWERS.TOWER_IDS:
 		assert_true(TOWERS.DEFS.has(id), id)
 

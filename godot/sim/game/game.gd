@@ -94,6 +94,8 @@ static func _build(game: GameState, command: Command) -> void:
 	var event := GameEvent.of(GameEvent.Kind.TOWER_BUILT)
 	event.tower_id = tower.id
 	game.events.append(event)
+	if TOWERS.DEFS[tower.type].get("guards", false):
+		Barracks.raise_guards(game, tower)
 
 
 static func _upgrade(game: GameState, command: Command) -> void:
@@ -109,6 +111,8 @@ static func _upgrade(game: GameState, command: Command) -> void:
 	game.buttons -= cost
 	tower.invested += cost
 	tower.level += 1
+	if TOWERS.DEFS[tower.type].get("guards", false):
+		Barracks.level_up(game, tower)
 	var event := GameEvent.of(GameEvent.Kind.TOWER_UPGRADED)
 	event.tower_id = tower.id
 	event.level = tower.level
@@ -122,6 +126,7 @@ static func _sell(game: GameState, command: Command) -> void:
 	var refund := int(floor(float(tower.invested) * RULES.SELL_REFUND))
 	game.buttons += refund
 	game.towers.erase(tower)
+	Barracks.release_guards(game, tower)
 	var event := GameEvent.of(GameEvent.Kind.TOWER_SOLD)
 	event.tower_id = tower.id
 	event.refund = refund
