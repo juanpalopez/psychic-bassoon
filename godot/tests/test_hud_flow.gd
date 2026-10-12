@@ -66,7 +66,7 @@ func test_play_again_starts_a_new_game_on_the_same_seed() -> void:
 	var first: GameState = main.game()
 	var map_seed := first.seed
 	first.over = true
-	first.kingdom_health = 0
+	first.heartstone_health = 0
 	main._process(0.05)
 	(main.get_node("Hud/GameOver") as GameOverPanel).play_again_button().pressed.emit()
 	var second: GameState = main.game()

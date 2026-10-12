@@ -3,7 +3,7 @@
 ## A flat strip for every road cell (the main road brown, a detour lighter), a
 ## low dark tile for plain ground, a raised tile for every socket (the pre-etched
 ## tower sites: higher on higher elevation levels, paler on the mat, browner on
-## cardboard), and a marker for the spawn and the kingdom. One MultiMesh each
+## cardboard), and a marker for the spawn and the Heartstone. One MultiMesh each
 ## for the road, the ground and the sockets, so the board is a handful of draw
 ## calls. Set `map_seed` (also in the editor: this is a `@tool` script) and the
 ## board rebuilds from `MapGen.generate`. It only reads the map.

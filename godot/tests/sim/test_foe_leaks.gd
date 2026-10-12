@@ -1,4 +1,4 @@
-## Foes that get through: the leak, the kingdom's health and game over.
+## Foes that get through: the leak, the Heartstone's health and game over.
 extends GutTest
 
 const SEED := 42
@@ -33,11 +33,11 @@ func _events_of(game: GameState, kind: GameEvent.Kind) -> Array[GameEvent]:
 
 func test_a_foe_that_reaches_the_end_leaks_and_leaves() -> void:
 	var game := _launched()
-	var start_health := game.kingdom_health
-	_until(game, func() -> bool: return game.kingdom_health < start_health)
-	assert_lt(game.kingdom_health, start_health)
+	var start_health := game.heartstone_health
+	_until(game, func() -> bool: return game.heartstone_health < start_health)
+	assert_lt(game.heartstone_health, start_health)
 	# the goblin that got through cost 1
-	assert_eq(game.kingdom_health, start_health - 1)
+	assert_eq(game.heartstone_health, start_health - 1)
 
 
 func test_a_leak_is_an_event_and_the_foe_is_gone() -> void:
@@ -55,12 +55,12 @@ func test_a_leak_is_an_event_and_the_foe_is_gone() -> void:
 	assert_true(found)
 
 
-func test_the_game_ends_when_the_kingdom_has_no_health_left() -> void:
+func test_the_game_ends_when_the_heartstone_has_no_health_left() -> void:
 	var game := _launched()
-	game.kingdom_health = 1
+	game.heartstone_health = 1
 	_until(game, func() -> bool: return game.over)
 	assert_true(game.over)
-	assert_eq(game.kingdom_health, 0)
+	assert_eq(game.heartstone_health, 0)
 	# commands are now turned away
 	var events := GameTestKit.run(game, [Command.launch_wave()])
 	assert_eq(events[0].reason, GameEvent.RejectReason.GAME_OVER)
@@ -68,7 +68,7 @@ func test_the_game_ends_when_the_kingdom_has_no_health_left() -> void:
 
 func test_game_over_is_announced_once_with_the_wave() -> void:
 	var game := _launched()
-	game.kingdom_health = 1
+	game.heartstone_health = 1
 	var announced := 0
 	for i in 20000:
 		Game.tick(game)
@@ -83,7 +83,7 @@ func test_game_over_is_announced_once_with_the_wave() -> void:
 
 func test_nothing_moves_once_the_game_is_over() -> void:
 	var game := _launched()
-	game.kingdom_health = 1
+	game.heartstone_health = 1
 	_until(game, func() -> bool: return game.over)
 	var distances: Array[float] = []
 	for foe in game.foes:
@@ -95,23 +95,23 @@ func test_nothing_moves_once_the_game_is_over() -> void:
 
 func test_a_big_leak_takes_what_is_left_and_health_stops_at_zero() -> void:
 	var game := Game.create(SEED)
-	game.kingdom_health = 1
+	game.heartstone_health = 1
 	var orc := FoeSpawner.spawn(game, "corrugatedOrc", 1, 0)
 	orc.distance = game.routes[0].total - 0.001
 	Game.tick(game)
 	var leaks := _events_of(game, GameEvent.Kind.FOE_LEAKED)
 	assert_eq(leaks.size(), 1)
-	# an orc leaks 2, the kingdom had 1: it ends at 0, not -1
+	# an orc leaks 2, the Heartstone had 1: it ends at 0, not -1
 	assert_eq(leaks[0].leak, 2)
 	assert_eq(leaks[0].foe_type, "corrugatedOrc")
-	assert_eq(game.kingdom_health, 0)
+	assert_eq(game.heartstone_health, 0)
 	assert_true(game.over)
 
 
 func test_a_leak_takes_the_foes_own_leak_from_the_health() -> void:
 	var game := Game.create(SEED)
-	var start := game.kingdom_health
+	var start := game.heartstone_health
 	var golem := FoeSpawner.spawn(game, "cardboardGolem", 10, 0)
 	golem.distance = game.routes[0].total - 0.001
 	Game.tick(game)
-	assert_eq(game.kingdom_health, start - 6)
+	assert_eq(game.heartstone_health, start - 6)

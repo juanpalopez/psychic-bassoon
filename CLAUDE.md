@@ -65,7 +65,7 @@ fixtures/    JSON exported from the TypeScript sim for the ported core (prng, ma
 ### Domain-driven design
 
 - `godot/sim` is the domain. Split it into bounded contexts by game concept (for example map, waves, combat, economy), one folder each, with a small public entry class. Contexts talk through commands, events and snapshots, not by reaching into each other's internals.
-- Use the ubiquitous language from the lore table in names, types and tests (Scrap Goblin, Spool Guard, Prism Spire, kingdom health, wave, Buttons, Golden Staples). No synonyms for the same concept. Display names and lore strings live in `godot/content` and the Naming table; a rename changes those, not the logic.
+- Use the ubiquitous language from the lore table in names, types and tests (Scrap Goblin, Spool Guard, Prism Spire, Heartstone health, wave, Buttons, Golden Staples). No synonyms for the same concept. Display names and lore strings live in `godot/content` and the Naming table; a rename changes those, not the logic.
 - Model state as plain data and pure functions. Value objects are immutable; the sim state is the single aggregate root that only commands change.
 - Domain code never depends on infrastructure. `render`, `ui`, storage and the browser are adapters that read snapshots and send commands.
 
@@ -183,5 +183,5 @@ Use the GDD's names in code-facing content and the UI (display names only; ids a
 | `ballista`, `catapult` | The Spool Guard (`spoolGuard`), The Thimble Mortar (`thimbleMortar`) |
 | `frostSpire`, `stormSpire` | The Prism Spire (`prismSpire`), with specs Cryo-Origami Spire and Blot Singularity |
 | (new) | The Guard Tent (`guardTent`) |
-| gold / lives (`gold`, `lives`) | Buttons / kingdom health (`buttons`, `kingdom_health`, `START_BUTTONS`, `START_KINGDOM_HEALTH`); Golden Staples between runs |
-| Heartstone, kingdom | the Heartstone (it returns in the 2026-10-12 GDD; the code says `kingdom_health` until its rename ticket, then `heartstone_health`) |
+| gold / lives (`gold`, `lives`) | Buttons / Heartstone health (`buttons`, `heartstone_health`, `START_BUTTONS`, `START_HEARTSTONE_HEALTH`); Golden Staples between runs |
+| Heartstone, kingdom | the Heartstone, the objective at the end of the road (it returns in the 2026-10-12 GDD; no "kingdom" in code, UI or tests) |

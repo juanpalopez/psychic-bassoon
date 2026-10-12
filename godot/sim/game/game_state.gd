@@ -11,7 +11,7 @@ var route: Route = null
 var routes: Array[Route] = []
 var tick_count: int = 0
 var buttons: int = 0
-var kingdom_health: int = 0
+var heartstone_health: int = 0
 ## Number of the wave most recently launched; 0 before the first.
 var wave: int = 0
 var running: bool = false

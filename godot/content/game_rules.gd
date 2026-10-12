@@ -9,7 +9,7 @@ const MAX_FRAME_SECONDS := 0.05
 ## Fastest game speed the player can pick (1x, 2x, 3x).
 const MAX_GAME_SPEED := 3
 const START_BUTTONS := 180
-const START_KINGDOM_HEALTH := 20
+const START_HEARTSTONE_HEALTH := 20
 const TOWER_LEVELS := 3
 ## Share of the Buttons invested that a sale returns.
 const SELL_REFUND := 0.7

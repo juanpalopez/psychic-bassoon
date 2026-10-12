@@ -1,5 +1,5 @@
 ## The scene plays waves: a launch button, foes drawn on the board, the wave and
-## the kingdom's health on screen, and the game-over state.
+## the Heartstone's health on screen, and the game-over state.
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
@@ -30,13 +30,13 @@ func test_the_launch_button_starts_wave_1_and_foes_appear_on_the_board() -> void
 	assert_eq(view.visible_count("scrapGoblin"), game.foes.size())
 
 
-func test_the_hud_shows_the_wave_the_kingdoms_health_and_the_buttons() -> void:
+func test_the_hud_shows_the_wave_the_heartstones_health_and_the_buttons() -> void:
 	var main := await _main()
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	_frames(main, 1.0)
 	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())
 	assert_string_contains(text, "Wave 1")
-	assert_string_contains(text, "Kingdom %d" % main.game().kingdom_health)
+	assert_string_contains(text, "Heartstone %d" % main.game().heartstone_health)
 	assert_string_contains(text, "Buttons %d" % main.game().buttons)
 
 
@@ -47,7 +47,7 @@ func test_the_button_is_disabled_while_foes_are_still_coming_then_offers_an_earl
 	_frames(main, 0.5)
 	assert_true(launch.disabled)
 	var game: GameState = main.game()
-	game.kingdom_health = 100000
+	game.heartstone_health = 100000
 	while not game.spawners.is_empty():
 		_frames(main, 0.5)
 	assert_false(launch.disabled)
@@ -55,20 +55,20 @@ func test_the_button_is_disabled_while_foes_are_still_coming_then_offers_an_earl
 	assert_string_contains(launch.text, "Call wave 2 early (+12)")
 
 
-func test_a_foe_that_gets_through_costs_the_kingdom_health() -> void:
+func test_a_foe_that_gets_through_costs_the_heartstone_health() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
-	var start := game.kingdom_health
+	var start := game.heartstone_health
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
-	while game.kingdom_health == start and game.tick_count < 4000:
+	while game.heartstone_health == start and game.tick_count < 4000:
 		_frames(main, 1.0)
-	assert_lt(game.kingdom_health, start)
+	assert_lt(game.heartstone_health, start)
 
 
 func test_game_over_is_shown_and_the_button_stops_working() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
-	game.kingdom_health = 1
+	game.heartstone_health = 1
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	while not game.over and game.tick_count < 4000:
 		_frames(main, 1.0)
@@ -93,7 +93,7 @@ func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
 	var game: GameState = main.game()
 	game.over = true
 	game.wave = 99
-	game.kingdom_health = 20
+	game.heartstone_health = 20
 	game.buttons = 99999
 	main._process(0.05)
 	var text := " ".join((main.get_node("Hud/TopBar") as TopBar).texts())

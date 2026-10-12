@@ -12,7 +12,7 @@ func test_it_is_hidden_until_shown() -> void:
 	assert_false(_panel().visible)
 
 
-func test_it_says_the_kingdom_fell_and_on_which_wave() -> void:
+func test_it_says_the_heartstone_fell_and_on_which_wave() -> void:
 	var panel := _panel()
 	panel.show_for(6)
 	assert_true(panel.visible)

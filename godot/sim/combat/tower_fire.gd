@@ -1,5 +1,5 @@
 ## Towers shooting. Each tick, after the foes move, a tower whose cooldown has
-## run out picks the foe nearest the kingdom within its reach and fires; its
+## run out picks the foe nearest the Heartstone within its reach and fires; its
 ## cooldown then restarts at one over its rate (plus what the last tick ran
 ## over). The Spool Guard hits one foe, the Thimble Mortar everything within its
 ## splash of the target. The shot happens the tick it is fired (a renderer draws

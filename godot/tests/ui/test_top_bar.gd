@@ -1,4 +1,4 @@
-## The top bar: Buttons, kingdom health, wave and seed.
+## The top bar: Buttons, Heartstone health, wave and seed.
 extends GutTest
 
 
@@ -11,11 +11,11 @@ func _bar() -> TopBar:
 func test_it_shows_the_state_of_the_game() -> void:
 	var game := Game.create(7)
 	game.buttons = 123
-	game.kingdom_health = 14
+	game.heartstone_health = 14
 	game.wave = 3
 	var bar := _bar()
 	bar.show_state(game)
-	assert_eq(bar.texts(), ["Buttons 123", "Kingdom 14", "Wave 3", "Seed 7"])
+	assert_eq(bar.texts(), ["Buttons 123", "Heartstone 14", "Wave 3", "Seed 7"])
 
 
 func test_it_follows_the_game_when_it_changes() -> void:

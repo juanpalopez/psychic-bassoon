@@ -178,11 +178,11 @@ func test_a_foe_killed_one_step_from_the_end_does_not_also_leak() -> void:
 	var game: GameState = made[0]
 	var foe: Foe = made[1]
 	foe.distance = game.routes[foe.route].total - 0.0001
-	var health := game.kingdom_health
+	var health := game.heartstone_health
 	var buttons := game.buttons
 	Damage.apply(game, foe, 99.0, Damage.Kind.TRUE)
 	Game.tick(game)
-	assert_eq(game.kingdom_health, health, "no health lost for a dead foe")
+	assert_eq(game.heartstone_health, health, "no health lost for a dead foe")
 	assert_eq(game.buttons, buttons + foe.reward, "paid once")
 	for event in game.events:
 		assert_ne(event.kind, GameEvent.Kind.FOE_LEAKED)

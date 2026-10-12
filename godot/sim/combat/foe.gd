@@ -18,7 +18,7 @@ var armor: int = 0
 var resist: int = 0
 ## Body radius, in cells.
 var radius: float = 0.0
-## Kingdom health lost when it gets through.
+## Heartstone health lost when it gets through.
 var leak: int = 0
 ## Index into `GameState.routes` of the route this foe walks.
 var route: int = 0
