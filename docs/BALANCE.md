@@ -154,3 +154,7 @@ wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)
 - It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
 - The per-wave rows count kills and leaks since the previous clear. A game that ends in the middle of a wave keeps those numbers in `unfinished`, and with early calls kills belong to the wave that clears next.
 - It never sells, never moves a tower and plays one fixed build order per profile.
+
+## Sockets next to the road (2026-10-12)
+
+The baseline above was measured with the first block-socket rule, which accepted a 2x2 block when any one cell was within 2 cells of the road. Over 60 maps and 1,047 sockets, 291 (28%) reached no road cell with a level 1 Spool Guard and 314 (30%) were farther than 2.3 cells from the road. A block is now accepted only when its centre is within 1.8 cells of a road cell's centre (that is, beside the road) and at least 3 road cells are within 2.3 cells of it. Over 3,000 seeds of the game board no socket is out of reach, 0.1% of roads are drawn again to find room for 12 blocks, and no map is short. The baseline tables are re-measured in the balance pass.

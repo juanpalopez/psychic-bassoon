@@ -47,8 +47,9 @@ static func place(map: GameMap) -> bool:
 
 
 ## Anchors whose whole block is on the board, off the road and off the
-## Heartstone's footprint, with a cell of the block within `SOCKET_REACH` of the
-## road, in reading order.
+## Heartstone's footprint, with the block's centre within
+## `SOCKET_BLOCK_ROAD_DISTANCE` of the road (a single cell: within `SOCKET_REACH`),
+## in reading order.
 static func _candidates(map: GameMap) -> Array[Vector2i]:
 	var out: Array[Vector2i] = []
 	for row in range(0, map.rows - map.footprint + 1):
@@ -69,11 +70,38 @@ static func _block_is_free(map: GameMap, col: int, row: int) -> bool:
 
 
 static func _block_near_road(map: GameMap, col: int, row: int) -> bool:
+	if map.footprint > 1:
+		return _block_centre_near_road(map, col, row)
 	for dy in map.footprint:
 		for dx in map.footprint:
 			if _road_within_reach(map, col + dx, row + dy):
 				return true
 	return false
+
+
+## True when the block anchored at (col, row) is beside the road: the nearest
+## road cell's centre is within `SOCKET_BLOCK_ROAD_DISTANCE` of the block's centre
+## and at least `SOCKET_MIN_ROAD_COVERAGE` road cells are within
+## `SOCKET_COVERAGE_REACH` of it.
+static func _block_centre_near_road(map: GameMap, col: int, row: int) -> bool:
+	var centre := map.socket_centre(Vector2i(col, row))
+	var near_limit: float = RULES.SOCKET_BLOCK_ROAD_DISTANCE
+	var reach: float = RULES.SOCKET_COVERAGE_REACH
+	var span := int(ceil(maxf(near_limit, reach))) + map.footprint
+	var near := false
+	var covered := 0
+	for y in range(maxi(0, row - span), mini(map.rows, row + map.footprint + span)):
+		for x in range(maxi(0, col - span), mini(map.cols, col + map.footprint + span)):
+			if map.tiles[y][x] != GameMap.Tile.ROAD:
+				continue
+			var dx := float(x) + RULES.CELL_CENTRE - centre.x
+			var dy := float(y) + RULES.CELL_CENTRE - centre.y
+			var squared := dx * dx + dy * dy
+			if squared <= near_limit * near_limit:
+				near = true
+			if squared <= reach * reach:
+				covered += 1
+	return near and covered >= RULES.SOCKET_MIN_ROAD_COVERAGE
 
 
 static func _road_within_reach(map: GameMap, col: int, row: int) -> bool:

@@ -61,11 +61,16 @@ func test_foes_move_first_so_the_shot_lands_where_the_foe_now_stands() -> void:
 
 
 func test_a_foe_that_walks_off_the_end_this_tick_leaks_before_a_tower_can_shoot_it() -> void:
-	var scene := TowerFireKit.scene("spoolGuard", 1, true)
-	# the Heartstone keeps its footprint clear, so the nearest block is a little
-	# further than a level 1 tower reaches: level 3 reaches it
-	scene.tower.level = 2
-	assert_lt(scene.gap, TowerFire.reach_of(scene.game, scene.tower), "within reach of the end")
+	# the Heartstone keeps its footprint clear, so a block is not always within reach
+	# of the end of the road: take a seed where a level 3 tower reaches it
+	var scene: TowerFireKit.Scene = null
+	for map_seed in range(1, 80):
+		var candidate := TowerFireKit.scene("spoolGuard", map_seed, true)
+		candidate.tower.level = 2
+		if candidate.gap < TowerFire.reach_of(candidate.game, candidate.tower):
+			scene = candidate
+			break
+	assert_not_null(scene, "some seed has a block within reach of the end of the road")
 	var route := scene.game.routes[0]
 	var foe := TowerFireKit.foe(scene.game, route.total - 0.01)
 	foe.speed = 1.9
