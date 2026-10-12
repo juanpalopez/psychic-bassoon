@@ -9,7 +9,6 @@ class_name TowerFire
 extends RefCounted
 
 const TOWERS := preload("res://content/towers.gd")
-const MAP_RULES := preload("res://content/map_rules.gd")
 const RULES := preload("res://content/game_rules.gd")
 
 
@@ -48,11 +47,10 @@ static func reach_of(game: GameState, tower: Tower) -> float:
 ## distance left to walk on its own route (routes differ in length, so the
 ## distance walked is not comparable); the foe that spawned first wins a tie.
 static func target_for(game: GameState, tower: Tower) -> Foe:
-	var centre_x := float(tower.col) + MAP_RULES.CELL_CENTRE
-	var centre_y := float(tower.row) + MAP_RULES.CELL_CENTRE
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	var best: Foe = null
 	var best_left := 0.0
-	for foe in foes_within(game, centre_x, centre_y, reach_of(game, tower)):
+	for foe in foes_within(game, centre.x, centre.y, reach_of(game, tower)):
 		var left := game.routes[foe.route].total - foe.distance
 		if best == null or left < best_left:
 			best = foe
@@ -107,9 +105,8 @@ static func _locked_foe(game: GameState, tower: Tower) -> Foe:
 	if tower.target_id < 0:
 		return null
 	var reach := reach_of(game, tower)
-	var centre_x := float(tower.col) + MAP_RULES.CELL_CENTRE
-	var centre_y := float(tower.row) + MAP_RULES.CELL_CENTRE
-	for foe in foes_within(game, centre_x, centre_y, reach):
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	for foe in foes_within(game, centre.x, centre.y, reach):
 		if foe.id == tower.target_id:
 			return foe
 	return null

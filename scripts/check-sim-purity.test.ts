@@ -26,6 +26,12 @@ describe('check-sim-purity script', () => {
     expect(check(source).status).toBe(0);
   });
 
+  it('passes the plain value types the sim uses, Rect2i included', () => {
+    const source =
+      'class_name Thing\nextends RefCounted\n\nvar block := Rect2i()\nvar cell := Vector2i(1, 2)\nvar at := Vector2(1.0, 2.0)\n';
+    expect(check(source).status).toBe(0);
+  });
+
   it.each([
     ['extends Node', 'extends Node\n'],
     ['extends Node3D', 'extends Node3D\n'],

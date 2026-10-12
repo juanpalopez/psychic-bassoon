@@ -6,11 +6,18 @@ extends RefCounted
 enum Tile { PLOT, ROAD }
 
 const RULES := preload("res://content/map_rules.gd")
+## What `socket_anchor_at` returns for a cell that is in no socket.
+const NO_SOCKET := Vector2i(-1, -1)
 
 var seed: int = 0
 ## Board size in cells.
 var cols: int = 0
 var rows: int = 0
+## Cells on a side of a socket's block (1 is a single cell).
+var footprint: int = 1
+## The Heartstone's footprint: a block of `footprint` cells that holds the last
+## cell of the road (just that cell when the footprint is 1). No socket overlaps it.
+var heartstone := Rect2i()
 ## The main road in walking order, from the spawn row to the Heartstone.
 var path: Array[Vector2i] = []
 ## Every route from the spawn to the Heartstone. `routes[0]` equals `path`;
@@ -29,6 +36,27 @@ var elevation: Array[PackedByteArray] = []
 ## True when a tower can be built on the cell.
 func is_socket(cell: Vector2i) -> bool:
 	return sockets.has(cell)
+
+
+## The anchor (top-left cell) of the socket block that holds `cell`, or
+## `NO_SOCKET` when the cell is in none.
+func socket_anchor_at(cell: Vector2i) -> Vector2i:
+	for anchor in sockets:
+		if (
+			cell.x >= anchor.x
+			and cell.x < anchor.x + footprint
+			and cell.y >= anchor.y
+			and cell.y < anchor.y + footprint
+		):
+			return anchor
+	return NO_SOCKET
+
+
+## The middle of the socket block anchored at `anchor`, in cell units: half a
+## cell in for a single cell, a whole cell in for a 2x2 block.
+func socket_centre(anchor: Vector2i) -> Vector2:
+	var half := float(footprint) / 2.0
+	return Vector2(float(anchor.x) + half, float(anchor.y) + half)
 
 
 ## The elevation level of a cell (0 off the board).
