@@ -2,19 +2,18 @@
 ## (`src/content/rules.ts`). Data only: the sim reads these, never hard-codes.
 extends RefCounted
 
-## The board the game builds, in cells. It is the legacy portrait board until the
-## renderer draws the GDD's landscape one (Map v2), then it becomes the landscape
-## board and `GAME_DETOUR` turns off.
-const GRID_COLS := 9
-const GRID_ROWS := 13
+## The board the game builds, in cells: the GDD's landscape board.
+const GRID_COLS := 22
+const GRID_ROWS := 16
 ## The ported generator's original board, which the frozen fixtures pin.
 const LEGACY_COLS := 9
 const LEGACY_ROWS := 13
 ## The GDD's board: 22 columns by 16 rows, landscape (a road crosses the long side).
 const LANDSCAPE_COLS := 22
 const LANDSCAPE_ROWS := 16
-## Whether the game's road grows a detour. The fixtures' maps all have one.
-const GAME_DETOUR := true
+## Whether the game's road grows a detour. The owner chose one road and one spawn
+## (2026-10-12); the fixtures' maps all have a detour, so they ask for one.
+const GAME_DETOUR := false
 
 ## Give up and retry when the path is shorter than rows + this many cells.
 const MIN_EXTRA_CELLS := 16
@@ -45,12 +44,11 @@ const SOCKET_MIN := 12
 const SOCKET_MAX := 22
 const SOCKET_REACH := 2
 const SOCKET_SPACING := 2
-## A socket is a square block of this many cells on a side. The GDD says 2; the
-## game keeps the single cell of the first greybox (`GAME_SOCKET_FOOTPRINT`) until
-## the renderer draws blocks (Map v2), and the frozen sockets golden is one cell.
+## A socket is a square block of this many cells on a side: the GDD says 2
+## (`GAME_SOCKET_FOOTPRINT`); the frozen sockets golden is the old single cell.
 const SOCKET_FOOTPRINT_LEGACY := 1
 const SOCKET_FOOTPRINT := 2
-const GAME_SOCKET_FOOTPRINT := 1
+const GAME_SOCKET_FOOTPRINT := 2
 ## Blocks of 2 or more cells leave this many empty cells between each other.
 const SOCKET_BLOCK_GAP := 1
 

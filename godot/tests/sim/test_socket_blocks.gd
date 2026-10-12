@@ -39,6 +39,7 @@ func test_a_map_knows_its_footprint() -> void:
 	assert_eq(_blocks(1).footprint, 2)
 	assert_eq(MapGen.generate(1, 9, 13, true, 1).footprint, 1)
 	assert_eq(MapGen.generate(1).footprint, RULES.GAME_SOCKET_FOOTPRINT)
+	assert_eq(RULES.GAME_SOCKET_FOOTPRINT, 2)
 
 
 func test_every_landscape_map_has_12_to_22_blocks() -> void:

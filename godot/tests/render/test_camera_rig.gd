@@ -45,7 +45,7 @@ func test_the_fit_is_tight_so_the_board_is_not_tiny() -> void:
 
 
 func test_a_narrower_screen_needs_the_camera_further_back() -> void:
-	assert_gt(_fit(4.0 / 3.0), _fit(16.0 / 9.0))
+	assert_gt(_fit(1.0), _fit(16.0 / 9.0))
 
 
 func test_the_margin_leaves_room_on_every_screen_shape() -> void:

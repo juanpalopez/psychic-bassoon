@@ -62,3 +62,12 @@ func test_setting_up_again_rebuilds_the_pips_not_adds_to_them() -> void:
 	var view := _view(0)
 	view.setup(_tower(2), TowerLooks.for_type("spoolGuard"), 0.3)
 	assert_eq(view.pip_count(), 3)
+
+
+func test_a_tower_on_a_block_stands_at_the_blocks_centre() -> void:
+	var view := SCENE.instantiate() as TowerView
+	add_child_autofree(view)
+	view.setup(_tower(0), TowerLooks.for_type("spoolGuard"), 0.5, 2)
+	var middle := BoardSpace.footprint_centre(Vector2i(3, 6), 2)
+	assert_almost_eq(view.position.x, middle.x, 1e-6)
+	assert_almost_eq(view.position.z, middle.z, 1e-6)

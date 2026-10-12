@@ -18,7 +18,7 @@ func before_all() -> void:
 
 
 func _landscape(map_seed: int, with_detour: bool = false) -> GameMap:
-	return MapGen.generate(map_seed, COLS, ROWS, with_detour)
+	return MapGen.generate(map_seed, COLS, ROWS, with_detour, 1)
 
 
 func test_the_content_names_both_board_sizes() -> void:
@@ -35,7 +35,7 @@ func test_a_map_knows_its_size() -> void:
 	assert_eq(map.elevation.size(), ROWS)
 	for line in map.elevation:
 		assert_eq(line.size(), COLS)
-	var legacy := MapGen.generate(1, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true)
+	var legacy := MapGen.generate(1, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 	assert_eq([legacy.cols, legacy.rows], [9, 13])
 
 
@@ -146,7 +146,7 @@ func test_a_landscape_route_starts_off_the_left_edge_and_ends_at_the_heartstone(
 
 
 func test_a_portrait_route_still_starts_above_the_top_edge() -> void:
-	var map := MapGen.generate(1, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true)
+	var map := MapGen.generate(1, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 	var route := Route.build(map.path)
 	var start := route.position_at(0.0)
 	assert_eq(start.y, -RULES.SPAWN_OFFSET)
@@ -169,6 +169,10 @@ func test_every_landscape_map_gets_12_to_22_sockets_off_the_road_within_reach() 
 		assert_eq(map.elevation.size(), ROWS)
 
 
-func test_the_game_still_builds_the_legacy_board_until_the_render_moves() -> void:
+func test_the_game_builds_the_gdd_board_by_default() -> void:
 	var game := Game.create(1)
-	assert_eq([game.map.cols, game.map.rows], [RULES.GRID_COLS, RULES.GRID_ROWS])
+	assert_eq([game.map.cols, game.map.rows], [COLS, ROWS])
+	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [COLS, ROWS])
+	assert_eq(game.map.footprint, 2)
+	assert_eq(game.routes.size(), 1, "one road, no detour")
+	assert_false(RULES.GAME_DETOUR)

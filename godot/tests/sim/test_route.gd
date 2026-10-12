@@ -30,7 +30,7 @@ func test_cumulative_distance_adds_the_spawn_gap_and_one_per_step() -> void:
 
 func test_every_generated_route_has_the_expected_length() -> void:
 	for seed in range(1, 60):
-		var map := MapGen.generate(seed)
+		var map := MapGen.generate(seed, RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		for cells in map.routes:
 			var route := Route.build(cells)
 			assert_almost_eq(route.total, 0.95 + float(cells.size() - 1), EPSILON, "seed %d" % seed)
@@ -86,7 +86,7 @@ func test_routes_match_the_typescript_bits() -> void:
 	var entries: Array = JSON.parse_string(text)
 	assert_eq(entries.size(), 12)
 	for entry in entries:
-		var map := MapGen.generate(int(entry.seed))
+		var map := MapGen.generate(int(entry.seed), RULES.LEGACY_COLS, RULES.LEGACY_ROWS, true, 1)
 		assert_eq(map.routes.size(), entry.routes.size(), "route count, seed %d" % entry.seed)
 		for r in entry.routes.size():
 			var want: Dictionary = entry.routes[r]

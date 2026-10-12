@@ -13,8 +13,8 @@ var _key := ""
 
 ## Draws one scene per tower. It rebuilds only when a tower was added, sold or
 ## upgraded since the last call, so calling it every frame is cheap.
-func sync(towers: Array[Tower], surface_height: Callable = Callable()) -> void:
-	var key := ""
+func sync(towers: Array[Tower], surface_height: Callable = Callable(), footprint: int = 1) -> void:
+	var key := "%d;" % footprint
 	for tower in towers:
 		key += "%d:%s:%d:%d:%d;" % [tower.id, tower.type, tower.level, tower.col, tower.row]
 	if key == _key:
@@ -29,4 +29,4 @@ func sync(towers: Array[Tower], surface_height: Callable = Callable()) -> void:
 			top = surface_height.call(Vector2i(tower.col, tower.row))
 		var view := SCENE.instantiate() as TowerView
 		add_child(view)
-		view.setup(tower, TowerLooks.for_type(tower.type), top)
+		view.setup(tower, TowerLooks.for_type(tower.type), top, footprint)
