@@ -13,9 +13,11 @@ class Scene:
 	var gap: float = 0.0
 
 
-static func scene(type: String = "spoolGuard", map_seed: int = 1, at_end: bool = false) -> Scene:
+static func scene(
+	type: String = "spoolGuard", map_seed: int = 1, at_end: bool = false, existing: GameState = null
+) -> Scene:
 	var scene := Scene.new()
-	scene.game = Game.create(map_seed)
+	scene.game = existing if existing != null else Game.create(map_seed)
 	var route := scene.game.routes[0]
 	var best_socket := Vector2i(-1, -1)
 	scene.gap = INF

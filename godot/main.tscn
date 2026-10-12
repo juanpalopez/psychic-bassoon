@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=16 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://render/board.gd" id="2_board"]
@@ -13,6 +13,7 @@
 [ext_resource type="Script" path="res://ui/top_bar.gd" id="11_top"]
 [ext_resource type="Script" path="res://ui/speed_bar.gd" id="12_speed"]
 [ext_resource type="Script" path="res://ui/game_over_panel.gd" id="13_over"]
+[ext_resource type="Script" path="res://render/shots_view.gd" id="14_shots"]
 
 [sub_resource type="Environment" id="Environment_dusk"]
 background_mode = 1
@@ -46,6 +47,9 @@ script = ExtResource("8_ring")
 
 [node name="Towers" type="Node3D" parent="."]
 script = ExtResource("5_towers")
+
+[node name="Shots" type="Node3D" parent="."]
+script = ExtResource("14_shots")
 
 [node name="Foes" type="Node3D" parent="."]
 script = ExtResource("7_foes")
