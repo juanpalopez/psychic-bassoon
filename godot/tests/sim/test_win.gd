@@ -66,6 +66,7 @@ func test_a_won_game_runs_nothing_more() -> void:
 	assert_eq(foe.distance, at, "foes stop walking")
 	assert_eq(game.heartstone_health, RULES.START_HEARTSTONE_HEALTH)
 	assert_eq(game.tick_count, ticks + 30, "the tick count still runs")
+	assert_eq(game.events.size(), 0, "no shots, spawns or other events")
 
 
 func test_a_won_game_refuses_commands() -> void:
@@ -80,7 +81,7 @@ func test_a_won_game_refuses_commands() -> void:
 	assert_eq(game.buttons, buttons)
 	var refused := _kinds(game, GameEvent.Kind.COMMAND_REJECTED)
 	assert_eq(refused.size(), 2)
-	assert_eq(refused[0].reason, GameEvent.RejectReason.GAME_OVER)
+	assert_eq(refused[0].reason, GameEvent.RejectReason.GAME_WON)
 
 
 func test_the_frame_stepper_stops_when_the_game_is_won() -> void:
@@ -93,13 +94,33 @@ func test_the_frame_stepper_stops_when_the_game_is_won() -> void:
 
 
 func test_a_game_cannot_be_lost_and_won() -> void:
-	var lost := _about_to_clear(RULES.WIN_WAVE)
-	lost.over = true
-	Game.tick(lost)
-	assert_false(lost.won, "a lost game does not settle a wave")
-	var won := _about_to_clear(RULES.WIN_WAVE)
-	Game.tick(won)
-	assert_false(won.over)
+	# the last foe of wave 20 leaks and takes the last Heartstone health: the run is
+	# lost, and the wave does not settle into a win on the same tick
+	var game := _about_to_clear(RULES.WIN_WAVE)
+	game.heartstone_health = 1
+	var foe := FoeSpawner.spawn(game, "scrapGoblin", RULES.WIN_WAVE, 0)
+	foe.distance = 1.0e9
+	Game.tick(game)
+	assert_true(game.over)
+	assert_false(game.won)
+	assert_eq(_kinds(game, GameEvent.Kind.GAME_WON).size(), 0)
+	assert_eq(_kinds(game, GameEvent.Kind.WAVE_CLEARED).size(), 0)
+
+
+func test_no_wave_can_be_launched_after_the_win_wave() -> void:
+	var game := _about_to_clear(RULES.WIN_WAVE)
+	game.spawners = []
+	var before := game.buttons
+	Game.submit(game, Command.launch_wave())
+	Game.tick(game)
+	assert_eq(game.wave, RULES.WIN_WAVE)
+	assert_eq(
+		game.buttons, before + RULES.WAVE_CLEAR_BASE + RULES.WIN_WAVE * RULES.WAVE_CLEAR_PER_WAVE
+	)
+	var refused := _kinds(game, GameEvent.Kind.COMMAND_REJECTED)
+	assert_eq(refused.size(), 1)
+	assert_eq(refused[0].reason, GameEvent.RejectReason.FINAL_WAVE)
+	assert_true(game.won, "and the wave settles into the win")
 
 
 func test_the_scripted_bot_wins_a_20_wave_run() -> void:

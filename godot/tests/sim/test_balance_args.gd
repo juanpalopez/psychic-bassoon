@@ -38,6 +38,7 @@ func test_bad_input_is_an_error_with_a_message() -> void:
 		"--profiles=foo",
 		"--profiles=",
 		"--waves=0",
+		"--waves=21",
 		"--waves=-3",
 		"--waves=x",
 		"--wave=30",

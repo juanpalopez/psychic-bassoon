@@ -26,7 +26,7 @@ func _init(profile: Dictionary) -> void:
 
 ## Sends this tick's commands. Call it before `Game.tick`.
 func act(game: GameState) -> void:
-	if game.over:
+	if game.over or game.won:
 		return
 	_rank_sockets(game)
 	_spend(game)

@@ -129,6 +129,9 @@ static func _sell(game: GameState, command: Command) -> void:
 
 
 static func _launch_wave(game: GameState, command: Command) -> void:
+	# the run ends when the win wave is cleared, so no wave comes after it
+	if game.wave >= RULES.WIN_WAVE:
+		return _reject(game, command, GameEvent.RejectReason.FINAL_WAVE)
 	if game.running and not game.spawners.is_empty():
 		return _reject(game, command, GameEvent.RejectReason.WAVE_IN_PROGRESS)
 	var early_bonus := 0
@@ -145,7 +148,9 @@ static func _launch_wave(game: GameState, command: Command) -> void:
 
 
 static func _apply(game: GameState, command: Command) -> void:
-	if game.over or game.won:
+	if game.won:
+		return _reject(game, command, GameEvent.RejectReason.GAME_WON)
+	if game.over:
 		return _reject(game, command, GameEvent.RejectReason.GAME_OVER)
 	match command.kind:
 		Command.Kind.BUILD:
