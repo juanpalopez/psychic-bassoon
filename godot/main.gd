@@ -60,7 +60,7 @@ func _ready() -> void:
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
 	if OS.has_feature("web"):
-		JavaScriptBridge.eval("window.scraplineReady = true")
+		JavaScriptBridge.eval("window.gameReady = true")
 
 
 func _process(delta: float) -> void:
@@ -174,7 +174,7 @@ func select_cell(cell: Vector2i) -> void:
 	_selected = cell
 	if OS.has_feature("web"):
 		# the end-to-end test reads the selection the way a person sees it
-		JavaScriptBridge.eval("window.scraplineSelected = '%d,%d'" % [cell.x, cell.y])
+		JavaScriptBridge.eval("window.gameSelected = '%d,%d'" % [cell.x, cell.y])
 	_menu.close()
 	_panel.close()
 	_ring.hide_range()
