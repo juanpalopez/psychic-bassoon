@@ -14,7 +14,7 @@ test('the Godot export starts and renders a canvas', async ({page}) => {
   await expect(page.locator('#status')).toBeHidden({timeout: 60_000});
   // set by main.gd once the scene is built, so the engine really ran
   await page.waitForFunction(
-    () => (window as unknown as {scraplineReady?: boolean}).scraplineReady,
+    () => (window as unknown as {gameReady?: boolean}).gameReady,
     undefined,
     {timeout: 60_000}
   );
@@ -128,7 +128,7 @@ test('a tap with a touch id other than 0 selects a socket', async ({
   const page = await context.newPage();
   await page.goto(`${baseURL}/index.html`);
   await page.waitForFunction(
-    () => (window as unknown as {scraplineReady?: boolean}).scraplineReady,
+    () => (window as unknown as {gameReady?: boolean}).gameReady,
     undefined,
     {timeout: 60_000}
   );
@@ -144,13 +144,12 @@ test('a tap with a touch id other than 0 selects a socket', async ({
   }
   await page.waitForFunction(
     () =>
-      (window as unknown as {scraplineSelected?: string}).scraplineSelected !==
-      undefined,
+      (window as unknown as {gameSelected?: string}).gameSelected !== undefined,
     undefined,
     {timeout: 10_000}
   );
   const selected = await page.evaluate(
-    () => (window as unknown as {scraplineSelected?: string}).scraplineSelected
+    () => (window as unknown as {gameSelected?: string}).gameSelected
   );
   expect(selected).not.toBe('-1,-1');
   await context.close();

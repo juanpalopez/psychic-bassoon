@@ -2,7 +2,7 @@
 
 A tactile, stop-motion papercraft tower defense for phones and tablets. In a forgotten corner of an old craft room, an abandoned cutting mat holds a tiny paper kingdom, until The Blot, a bottle of corrupted purple ink, twists scraps of stationery into monsters. You are the Grand Crafter: build spool guards, guard tents, prism spires and thimble mortars from office supplies, command a cardboard knight, cast glue and thumbtack spells, and hold the line. The design is in [`docs/GDD.md`](docs/GDD.md).
 
-It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in the browser first and as a native iOS app later. The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code still says Scrapline until the rename ticket. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
+It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in the browser first and as a native iOS app later. The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
 - **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/ (for now the greybox: the real map with sockets where you can tap a socket and build, not the game yet; add `?seed=42` to pick a map)
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)

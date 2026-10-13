@@ -1,6 +1,6 @@
 # Papercraft Kingdom Defense: Plan
 
-Codename: **Project Slag**. The repo is `psychic-bassoon`; the game is **Papercraft Kingdom Defense** (formerly Scrapline) and its tracker board is Project Slag.
+Codename: **Project Slag**. The repo is `psychic-bassoon`; the game is **Papercraft Kingdom Defense** (formerly Scrapline; the code was renamed on 2026-10-13) and its tracker board is Project Slag.
 
 _Updated 2026-10-11: the owner adopted the Papercraft Kingdom Defense GDD (`docs/GDD.md`) as the design. Living version: the Claude doc of the same name; the GDD itself lives in the owner's Google Doc._
 
@@ -456,6 +456,6 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
 - [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows.
-- [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package still say Scrapline until the rename ticket.
+- [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package were renamed on 2026-10-13 (#163).
 - [x] Meshy: tried and dropped (owner, 2026-10-13): the generated models were not good enough, so the owner models every foe in Blender. No generated models are used; the earlier paid-plan rules no longer apply.
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Decided by the Scrap Goblin spike (ticket #157); fallback is part animation and fewer animated instances.

@@ -8,7 +8,7 @@
 		<meta name="apple-mobile-web-app-capable" content="yes">
 		<meta name="mobile-web-app-capable" content="yes">
 		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-		<meta name="apple-mobile-web-app-title" content="Scrapline">
+		<meta name="apple-mobile-web-app-title" content="Papercraft">
 		<link rel="manifest" href="manifest.webmanifest">
 		<title>$GODOT_PROJECT_NAME</title>
 		<style>
@@ -37,10 +37,10 @@ html, body { margin: 0; height: 100%; overflow: hidden; background: #11151b; col
 		<div id="installHint" role="status" hidden>To play full screen, tap Share, then Add to Home Screen.</div>
 		<div id="rotate" role="status"><b aria-hidden="true">&#10227;</b><span>Turn your phone sideways to play</span></div>
 		<div id="status">
-			<div id="message">Loading Scrapline&hellip;</div>
+			<div id="message">Loading Papercraft Kingdom Defense&hellip;</div>
 			<div id="bar"><div></div></div>
 		</div>
-		<noscript>Scrapline needs JavaScript.</noscript>
+		<noscript>Papercraft Kingdom Defense needs JavaScript.</noscript>
 		<script src="$GODOT_URL"></script>
 		<script>
 const GODOT_CONFIG = $GODOT_CONFIG;
@@ -95,7 +95,7 @@ if (missing.length > 0) {
 			if (total > 0) {
 				bar.style.width = Math.round((current / total) * 100) + '%';
 			} else {
-				message.textContent = 'Loading Scrapline… ' + Math.round(current / 1048576) + ' MB';
+				message.textContent = 'Loading Papercraft Kingdom Defense… ' + Math.round(current / 1048576) + ' MB';
 			}
 		},
 	}).then(function () {
