@@ -4,71 +4,55 @@
     "file": "sim/barracks/barracks.gd",
     "old": "guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))",
     "new": "guard.speed_bonus += float(def.guard_speed_bonus[tent.level])",
-    "tests": [
-      "test_mess_tent"
-    ]
+    "tests": ["test_mess_tent"]
   },
   {
     "name": "the aura has no radius",
     "file": "sim/barracks/barracks.gd",
     "old": "if dx * dx + dy * dy > reach * reach:",
     "new": "if false:",
-    "tests": [
-      "test_mess_tent"
-    ]
+    "tests": ["test_mess_tent"]
   },
   {
     "name": "the aura ignores the socket's elevation",
     "file": "sim/barracks/barracks.gd",
     "old": "var reach := TowerFire.reach_of(game, tent)",
     "new": "var reach: float = def.range[tent.level]",
-    "tests": [
-      "test_mess_tent"
-    ]
+    "tests": ["test_mess_tent"]
   },
   {
     "name": "the first Mess Tent wins instead of the strongest",
     "file": "sim/barracks/barracks.gd",
     "old": "guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))",
     "new": "guard.speed_bonus = guard.speed_bonus if guard.speed_bonus > 0.0 else float(def.guard_speed_bonus[tent.level])",
-    "tests": [
-      "test_mess_tent"
-    ]
+    "tests": ["test_mess_tent"]
   },
   {
     "name": "a foe's blow ignores the guard's armor",
     "file": "sim/barracks/barracks.gd",
     "old": "foe.attack_damage - float(guard.armor)",
     "new": "foe.attack_damage - 0.0",
-    "tests": [
-      "test_guard_fight"
-    ]
+    "tests": ["test_guard_fight"]
   },
   {
     "name": "a guard grabs foes from far up the road",
     "file": "sim/barracks/barracks.gd",
     "old": "var stop := guard.post - guard.radius - foe.radius",
     "new": "var stop := guard.post - 5.0",
-    "tests": [
-      "test_guard_fight"
-    ]
+    "tests": ["test_guard_fight"]
   },
   {
     "name": "a post tie goes to the earlier road point",
     "file": "sim/barracks/barracks.gd",
     "old": "if squared <= best_distance:",
     "new": "if squared < best_distance:",
-    "tests": [
-      "test_guard_tent"
-    ]
+    "tests": ["test_guard_tent"]
   },
   {
     "name": "a held foe keeps walking",
     "file": "sim/combat/combat.gd",
     "old": "\t\tif not held:\n\t\t\tfoe.distance += walk * Game.TICK_SECONDS",
     "new": "\t\tfoe.distance += walk * Game.TICK_SECONDS",
-    "tests": [
-      "test_guard_fight"
-    ]
+    "tests": ["test_guard_fight"]
   }
 ]
