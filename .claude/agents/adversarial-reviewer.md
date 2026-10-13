@@ -22,6 +22,7 @@ The caller gives you: the PR number (or numbers, for a small stack), base branch
 
 - Stay inside the tool-call limit for your tier. Batch independent commands in one call.
 - Spend effort on what CI cannot see: logic errors, missing or weak tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough. In the deep tier, prove it by mutation: change the code in a scratch worktree and see whether a test or check fails.
+- If the caller sends the author's mutation list or numbers, check them instead of redoing them: run `python3 scripts/mutate.py <list>` (it works in a temporary copy and takes seconds), look at the survivors, and add a mutation only for a rule the list misses. Do not edit code by hand, and never check out, reset or modify an existing worktree: make your own scratch worktree and remove it.
 - Verify claims before reporting them, and quote only the decisive line of output. Separate what you proved from what you suspect, and say which is which.
 - On a re-review, check only whether each earlier finding is fixed and whether the new diff added problems.
 - For a stack, follow "Review a stack as a whole" in the checklist: read the shared context once, review each PR's own diff in order, add the cross-PR checks, and report per PR with its own verdict plus a short stack-level section.

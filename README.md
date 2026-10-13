@@ -58,6 +58,7 @@ pnpm check:sim-purity    # the GDScript sim must stay free of the scene tree and
 pnpm check:assets        # godot/assets against assets/CREDITS.md
 pnpm check:godot-size    # download size of build/web
 pnpm check:fixtures      # the frozen fixtures against fixtures/SHA256SUMS
+python3 scripts/mutate.py scripts/mutations/barracks.json   # can the tests fail? (survivors are untested rules)
 ```
 
 Before every commit run the checks for what you touched; CI runs all of them.
