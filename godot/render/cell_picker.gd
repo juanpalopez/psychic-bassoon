@@ -7,8 +7,8 @@
 class_name CellPicker
 extends RefCounted
 
-## Above the tallest tile the board can have (a level 2 socket is 0.74 high).
-const TOP := 1.0
+## Above the tallest tile the board can have (a level 2 socket is 2.0 high).
+const TOP := 2.1
 ## How far the ray moves per step while it is walked down, in world units.
 const STEP := 0.02
 

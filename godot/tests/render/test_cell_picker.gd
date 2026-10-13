@@ -49,7 +49,7 @@ func _scene(map_seed: int) -> Dictionary:
 
 
 func test_a_tap_on_the_top_of_a_raised_tile_picks_that_tile() -> void:
-	# a level 2 socket stands 0.74 high: cutting the ray with the ground alone
+	# a level 2 socket stands 2.0 high: cutting the ray with the ground alone
 	# would pick the cell behind it
 	var scene := _scene(7920)
 	var board: Board = scene.board
