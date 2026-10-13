@@ -20,6 +20,21 @@ func _deliver(main: Node, event: InputEvent) -> void:
 		main._unhandled_input(event)
 
 
+## A finger going down or up the way the engine delivers it: the touch event goes
+## to `_input` and (if no button took it) to `_unhandled_input`; the first finger
+## also arrives as an emulated mouse press or release.
+func _finger(main: Node, index: int, position: Vector2, pressed: bool, mouse: bool) -> void:
+	var touch := InputEventScreenTouch.new()
+	touch.index = index
+	touch.pressed = pressed
+	touch.position = position
+	main._input(touch)
+	if pressed:
+		main._unhandled_input(touch)
+	if mouse:
+		_press(main, position, pressed)
+
+
 func _move_to(main: Node, position: Vector2) -> void:
 	var motion := InputEventMouseMotion.new()
 	motion.position = position
@@ -77,17 +92,46 @@ func test_a_second_finger_pinches_to_zoom() -> void:
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var rig := main.get_node("CameraRig") as CameraRig
-	_press(main, Vector2(400.0, 300.0), true)
-	var touch := InputEventScreenTouch.new()
-	touch.index = 1
-	touch.pressed = true
-	touch.position = Vector2(500.0, 300.0)
-	main._unhandled_input(touch)
+	_finger(main, 0, Vector2(400.0, 300.0), true, true)
+	_finger(main, 1, Vector2(500.0, 300.0), true, false)
 	var drag := InputEventScreenDrag.new()
 	drag.index = 1
 	drag.position = Vector2(700.0, 300.0)
 	main._unhandled_input(drag)
 	assert_gt(rig.zoom, 0.0, "spreading the fingers zoomed in")
+	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
+
+
+func test_a_tap_with_a_first_finger_that_is_not_index_0_selects_the_socket() -> void:
+	# Safari numbers its touches from wherever it left off, so the first finger can be 7
+	for index in [0, 1, 7]:
+		var main := MAIN_SCENE.instantiate()
+		add_child_autofree(main)
+		await get_tree().process_frame
+		var game: GameState = main.game()
+		var camera := (main.get_node("CameraRig") as CameraRig).camera()
+		var socket: Vector2i = game.map.sockets[0]
+		var at := BoardSpace.footprint_centre(socket, game.map.footprint)
+		var position := camera.unproject_position(at)
+		_finger(main, index, position, true, true)
+		_finger(main, index, position, false, true)
+		assert_eq(main.selected_cell(), socket, "a tap with finger index %d" % index)
+
+
+func test_a_pinch_with_odd_finger_indexes_still_zooms_and_never_selects() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var rig := main.get_node("CameraRig") as CameraRig
+	_finger(main, 5, Vector2(400.0, 300.0), true, true)
+	_finger(main, 2, Vector2(500.0, 300.0), true, false)
+	var drag := InputEventScreenDrag.new()
+	drag.index = 2
+	drag.position = Vector2(700.0, 300.0)
+	main._unhandled_input(drag)
+	assert_gt(rig.zoom, 0.0, "spreading the fingers zoomed in")
+	_finger(main, 2, Vector2(700.0, 300.0), false, false)
+	_finger(main, 5, Vector2(400.0, 300.0), false, true)
 	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
 
 
