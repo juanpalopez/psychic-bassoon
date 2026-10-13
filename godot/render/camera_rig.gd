@@ -5,7 +5,7 @@
 ## on the 720 px canvas); a pinch or the mouse wheel moves it. The pitch barely changes:
 ## a steep, nearly top-down view keeps units and sockets readable at every zoom. A one-finger drag
 ## pans, within the board and rubber-banding back after release. The field of
-## view is about 35 degrees, landscape.
+## view is about 20 degrees, landscape.
 ##
 ## `fit_distance`, `pitch_for`, `closest_distance`, `pan_limit` and `rubber` are
 ## plain maths so they can be tested; `frame` places the camera for a screen

@@ -17,6 +17,7 @@ const BOB_HEIGHT := 10.0
 const BOB_SPEED := 6.0
 ## The model is about half a unit wide; the camera fills the square view with it.
 const CAMERA_POSITION := Vector3(0.0, 0.3, 1.5)
+## Narrow enough that the half-unit model fills its square view from 1.5 units away.
 const CAMERA_FOV := 30.0
 const CAMERA_TARGET := Vector3(0.0, 0.3, 0.0)
 const FACE_RIGHT_DEGREES := 90.0

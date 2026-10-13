@@ -194,3 +194,18 @@ func test_zooming_out_pulls_a_panned_view_back_to_the_middle() -> void:
 		rig._process(1.0 / 60.0)
 	assert_almost_eq(rig.pan.x, 0.0, 1e-3)
 	assert_almost_eq(rig.pan.y, 0.0, 1e-3)
+
+
+func test_the_rigs_own_default_frames_every_board_corner() -> void:
+	for aspect in [4.0 / 3.0, 16.0 / 9.0, 2.16]:
+		var rig := CameraRig.new()
+		add_child_autofree(rig)
+		rig.frame(aspect)
+		var camera := rig.camera()
+		var tan_v := tan(deg_to_rad(camera.fov) / 2.0)
+		for corner in BoardSpace.corners():
+			var local := camera.global_transform.affine_inverse() * corner
+			var depth := -local.z
+			assert_gt(depth, 0.0)
+			assert_lte(absf(local.y) / (depth * tan_v), 1.0 + 1e-6, "vertical at %s" % aspect)
+			assert_lte(absf(local.x) / (depth * tan_v * aspect), 1.0 + 1e-6, "horizontal")

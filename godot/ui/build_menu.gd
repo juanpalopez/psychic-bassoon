@@ -7,7 +7,7 @@ extends PanelContainer
 signal tower_chosen(tower: String)
 
 const TOWERS := preload("res://content/towers.gd")
-const BUTTON_SIZE := Vector2(170.0, 96.0)
+const BUTTON_SIZE := Vector2(172.0, 96.0)
 
 ## The plot the menu was opened for.
 var cell := BoardSpace.NO_CELL
@@ -28,6 +28,7 @@ func _ready() -> void:
 		button.custom_minimum_size = BUTTON_SIZE
 		# long names wrap inside the fixed width, so five towers fit in one row
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		button.theme_type_variation = &"StripButton"
 		button.pressed.connect(_choose.bind(id))
 		box.add_child(button)
 		_tower_buttons.append(button)
