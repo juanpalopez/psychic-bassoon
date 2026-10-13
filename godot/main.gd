@@ -10,9 +10,9 @@
 extends Node3D
 
 const EARLY_RULES := preload("res://content/game_rules.gd")
-## The view a run starts in: a little closer than the whole board, so cells and units read
-## well; pinching out shows the whole board.
-const START_ZOOM := 0.0
+## The view a run starts in: about 13 cells across and 9 down, the size of units and sockets
+## the owner picked from a reference; pinching out shows the whole board.
+const START_ZOOM := 0.7
 const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
