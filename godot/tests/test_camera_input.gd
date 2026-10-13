@@ -118,6 +118,29 @@ func test_a_tap_with_a_first_finger_that_is_not_index_0_selects_the_socket() -> 
 		assert_eq(main.selected_cell(), socket, "a tap with finger index %d" % index)
 
 
+func test_a_finger_a_button_took_still_counts_so_another_finger_can_tap_the_board() -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	var camera := (main.get_node("CameraRig") as CameraRig).camera()
+	var socket: Vector2i = game.map.sockets[0]
+	var position := camera.unproject_position(
+		BoardSpace.footprint_centre(socket, game.map.footprint)
+	)
+	# the first finger lands on a button: the engine takes it as the mouse, the board
+	# only sees it in `_input` (a button swallowed it before `_unhandled_input`)
+	var on_button := InputEventScreenTouch.new()
+	on_button.index = 3
+	on_button.pressed = true
+	on_button.position = Vector2(50.0, 50.0)
+	main._input(on_button)
+	# a second finger taps the socket: it is not the mouse, so only its touch events tell
+	_finger(main, 4, position, true, false)
+	_finger(main, 4, position, false, false)
+	assert_eq(main.selected_cell(), socket, "the second finger's tap selects the socket")
+
+
 func test_a_pinch_with_odd_finger_indexes_still_zooms_and_never_selects() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
