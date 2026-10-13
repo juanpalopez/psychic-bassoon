@@ -30,6 +30,7 @@ var _speed := GameSpeed.new()
 @onready var _towers: TowersView = $Towers
 @onready var _foes: FoesView = $Foes
 @onready var _shots: ShotsView = $Shots
+@onready var _guards: GuardsView = $Guards
 @onready var _launch: Button = $Hud/LaunchWave
 @onready var _top_bar: TopBar = $Hud/TopBar
 @onready var _speed_bar: SpeedBar = $Hud/SpeedBar
@@ -67,6 +68,7 @@ func _process(delta: float) -> void:
 		Frame.step(_game, _clock, delta, ticks_speed, Callable(), _after_tick)
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
+	_guards.update(_game)
 	if ticks_speed > 0:
 		_shots.update(delta)
 	_shots.show_beams(_game, _board.surface_height)
