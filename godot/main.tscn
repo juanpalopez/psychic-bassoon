@@ -69,6 +69,17 @@ offset_right = 260.0
 offset_bottom = 172.0
 text = "Next seed"
 
+[node name="Sound" type="Button" parent="Hud"]
+theme = ExtResource("10_theme")
+custom_minimum_size = Vector2(240, 96)
+offset_left = 272.0
+offset_top = 76.0
+offset_right = 512.0
+offset_bottom = 172.0
+toggle_mode = true
+button_pressed = true
+text = "Sound"
+
 [node name="LaunchWave" type="Button" parent="Hud"]
 theme = ExtResource("10_theme")
 custom_minimum_size = Vector2(420, 96)
