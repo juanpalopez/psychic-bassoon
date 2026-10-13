@@ -9,7 +9,7 @@ func test_the_mess_tent_is_content_with_three_levels_and_no_attack() -> void:
 	assert_eq(def.name, "Kitchen Mess Tent")
 	assert_true(def.support)
 	assert_eq(def.cost, [100, 100, 160])
-	assert_eq(def.range, [2.2, 2.5, 2.8])
+	assert_eq(def.range, [3.0, 3.3, 3.6])
 	assert_eq(def.guard_speed_bonus, [0.12, 0.18, 0.25])
 	assert_eq(def.guard_regen_bonus, [2.0, 3.0, 4.0])
 	assert_false(def.has("damage"))
@@ -68,26 +68,96 @@ func test_the_aura_makes_a_guard_strike_more_often() -> void:
 	assert_gt(fed, plain)
 
 
+func _level0_within(sockets: Array, reach: float, count: int) -> Array:
+	var found := []
+	for entry in sockets:
+		if entry[2] == 0 and entry[1] <= reach - 0.05:
+			found.append(entry[0])
+	return found.slice(0, count) if found.size() >= count else []
+
+
 func test_two_mess_tents_do_not_stack_and_the_strongest_wins() -> void:
-	var game := GuardKit.game_with_both(2)
-	var second := GuardKit.socket_near_post(game, 2.1)
-	var spare := Vector2i(-1, -1)
-	for anchor in game.map.sockets:
-		var taken := false
-		for tower in game.towers:
-			taken = taken or (tower.col == anchor.x and tower.row == anchor.y)
-		var centre := game.map.socket_centre(anchor)
-		var at := game.routes[0].position_at(GuardKit.post(game))
-		if not taken and centre.distance_to(Vector2(at.x, at.y)) <= 2.6:
-			spare = anchor
-			break
-	if spare == Vector2i(-1, -1):
-		pending("no second socket near the post on this seed")
-		return
-	GameTestKit.run(game, [Command.build("messTent", spare.x, spare.y)])
+	var reach: float = TOWERS.DEFS.messTent.range[0]
+	var game := GuardKit.find_game(
+		func(sockets: Array) -> bool: return not _level0_within(sockets, reach, 2).is_empty()
+	)
+	assert_not_null(game, "some seed has two plain sockets in a level 1 aura's reach")
+	var pair := _level0_within(GuardKit.sockets_by_distance(game), reach, 2)
+	# the strong tent first and the weak one last, so "the last one wins" fails too
+	GameTestKit.run(game, [Command.build("messTent", pair[0].x, pair[0].y)])
+	var strong := game.towers[1]
+	GameTestKit.run(game, [Command.upgrade(strong.id)])
+	GameTestKit.run(game, [Command.upgrade(strong.id)])
+	GameTestKit.run(game, [Command.build("messTent", pair[1].x, pair[1].y)])
 	GuardKit.tick(game, 1)
-	assert_almost_eq(game.guards[0].speed_bonus, 0.25, 1e-12, "the level 3 aura, not the sum")
-	assert_ne(second, Vector2i(-1, -1))
+	var top := TOWERS.DEFS.messTent
+	assert_almost_eq(game.guards[0].speed_bonus, float(top.guard_speed_bonus[2]), 1e-12)
+	assert_almost_eq(game.guards[0].regen_bonus, float(top.guard_regen_bonus[2]), 1e-12)
+
+
+func test_a_mess_tent_out_of_reach_gives_the_guards_nothing() -> void:
+	var farthest: float = TOWERS.DEFS.messTent.range[2] * 1.15 + 0.1
+	var game := GuardKit.find_game(
+		func(sockets: Array) -> bool:
+			for entry in sockets:
+				if entry[2] == 0 and entry[1] > farthest:
+					return true
+			return false
+	)
+	assert_not_null(game)
+	var far := Vector2i(-1, -1)
+	for entry in GuardKit.sockets_by_distance(game):
+		if entry[2] == 0 and entry[1] > farthest:
+			far = entry[0]
+	GameTestKit.run(game, [Command.build("messTent", far.x, far.y)])
+	GameTestKit.run(game, [Command.upgrade(game.towers[1].id)])
+	GameTestKit.run(game, [Command.upgrade(game.towers[1].id)])
+	GuardKit.tick(game, 1)
+	assert_eq(game.guards[0].speed_bonus, 0.0, "even a level 3 tent too far away")
+	assert_eq(game.guards[0].regen_bonus, 0.0)
+
+
+func test_a_high_socket_reaches_further_like_a_towers_range_does() -> void:
+	var reach: float = TOWERS.DEFS.messTent.range[0]
+	var window := func(entry: Array, level: int) -> bool:
+		return entry[2] == level and entry[1] > reach + 0.02 and entry[1] < reach * 1.15 - 0.02
+	var game := GuardKit.find_game(
+		func(sockets: Array) -> bool:
+			var high := false
+			for entry in sockets:
+				high = high or window.call(entry, 2)
+			return high
+	)
+	assert_not_null(game, "some seed has a level 2 socket just beyond a level 1 aura")
+	var spot := Vector2i(-1, -1)
+	for entry in GuardKit.sockets_by_distance(game):
+		if window.call(entry, 2):
+			spot = entry[0]
+	GameTestKit.run(game, [Command.build("messTent", spot.x, spot.y)])
+	GuardKit.tick(game, 1)
+	assert_gt(
+		game.guards[0].speed_bonus, 0.0, "the 15 percent of a level 2 socket reaches the post"
+	)
+
+
+func test_the_same_seed_and_commands_replay_the_same_with_both_tents() -> void:
+	var a := GameTestKit.snapshot(_play_both())
+	var b := GameTestKit.snapshot(_play_both())
+	assert_eq(a, b)
+
+
+func _play_both() -> GameState:
+	var game := GuardKit.game_with_both(1)
+	GameTestKit.run(game, [Command.launch_wave()])
+	GuardKit.tick(game, 900)
+	return game
+
+
+func test_the_regen_and_speed_bonuses_both_rise_with_the_level() -> void:
+	var def: Dictionary = TOWERS.DEFS.messTent
+	for level in 2:
+		assert_gt(def.guard_speed_bonus[level + 1], def.guard_speed_bonus[level])
+		assert_gt(def.guard_regen_bonus[level + 1], def.guard_regen_bonus[level])
 
 
 func test_selling_the_mess_tent_ends_the_bonus() -> void:

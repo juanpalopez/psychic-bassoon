@@ -62,11 +62,35 @@ static func socket_near_post(game: GameState, reach: float) -> Vector2i:
 static func game_with_both(level: int = 0) -> GameState:
 	for map_seed in range(1, 40):
 		var game := game_with_tent(map_seed)
-		var anchor := socket_near_post(game, 2.1)
+		var anchor := socket_near_post(game, 2.9)
 		if anchor == Vector2i(-1, -1):
 			continue
 		GameTestKit.run(game, [Command.build("messTent", anchor.x, anchor.y)])
 		for i in level:
 			GameTestKit.run(game, [Command.upgrade(game.towers[1].id)])
 		return game
+	return null
+
+
+## The sockets of the game other than the Guard Tent's own, with their distance from
+## the middle of the guards' post, nearest first: `[anchor, distance, elevation]`.
+static func sockets_by_distance(game: GameState) -> Array:
+	var at := game.routes[0].position_at(post(game))
+	var found := []
+	for anchor in game.map.sockets:
+		if anchor == Vector2i(game.towers[0].col, game.towers[0].row):
+			continue
+		var gap := game.map.socket_centre(anchor).distance_to(Vector2(at.x, at.y))
+		found.append([anchor, gap, game.map.elevation_at(anchor)])
+	found.sort_custom(func(a: Array, b: Array) -> bool: return a[1] < b[1])
+	return found
+
+
+## A game with a Guard Tent (on its first socket) of the first seed from 1 to 400 for
+## which `wanted` accepts the sockets by distance; null when no seed does.
+static func find_game(wanted: Callable) -> GameState:
+	for map_seed in range(1, 400):
+		var game := game_with_tent(map_seed)
+		if wanted.call(sockets_by_distance(game)):
+			return game
 	return null

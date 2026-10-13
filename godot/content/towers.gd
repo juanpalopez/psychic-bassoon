@@ -90,7 +90,7 @@ const DEFS := {
 		"name": "Kitchen Mess Tent",
 		"support": true,
 		"cost": [100, 100, 160],
-		"range": [2.2, 2.5, 2.8],
+		"range": [3.0, 3.3, 3.6],
 		"guard_speed_bonus": [0.12, 0.18, 0.25],
 		"guard_regen_bonus": [2.0, 3.0, 4.0],
 	},

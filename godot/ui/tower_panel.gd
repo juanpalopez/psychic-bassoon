@@ -73,10 +73,10 @@ func refresh() -> void:
 	var reach: float = def.range[level] if _reach < 0.0 else _reach
 	if def.get("support", false):
 		_stats.text = (
-			"Guards +%d%% speed  +%s hp/s  Reach %s"
+			"Guards +%d%% speed  +%d hp/s  Reach %s"
 			% [
 				int(round(def.guard_speed_bonus[level] * 100.0)),
-				def.guard_regen_bonus[level],
+				int(round(def.guard_regen_bonus[level])),
 				reach
 			]
 		)
