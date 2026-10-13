@@ -8,7 +8,9 @@
 ## cannot pay. Once every socket has a tower it upgrades, the lowest level and
 ## then the cheapest first. It launches the next wave when none is running (and,
 ## if its profile says so, early when few foes are left). One build or upgrade
-## per tick, so it never spends the same Buttons twice.
+## per tick, so it never spends the same Buttons twice. A Kitchen Mess Tent goes on the
+## free socket whose aura reaches the most guards (none before a Guard Tent stands);
+## when no socket suits the next tower of its order it builds the next one instead.
 class_name ScriptedBot
 extends RefCounted
 
@@ -37,15 +39,60 @@ func _spend(game: GameState) -> void:
 	var order: Array = _profile.build_order
 	var free := _best_free_socket(game)
 	if free != GameMap.NO_SOCKET and not order.is_empty():
-		var type: String = order[game.towers.size() % order.size()]
+		var next := _next_build(game, order)
+		var type: String = next.type
+		var spot: Vector2i = next.socket
 		var cost: int = TOWERS.DEFS[type].cost[0]
 		# save up for the next tower rather than upgrading past it
 		if game.buttons >= cost:
-			Game.submit(game, Command.build(type, free.x, free.y))
+			Game.submit(game, Command.build(type, spot.x, spot.y))
 		return
 	var target := _cheapest_upgrade(game)
 	if target != null and game.buttons >= _next_cost(target):
 		Game.submit(game, Command.upgrade(target.id))
+
+
+## The tower of the order to build next and where: the one its turn names, or the
+## first after it that has a socket to go on (a Spool Guard when none has).
+func _next_build(game: GameState, order: Array) -> Dictionary:
+	for k in order.size():
+		var type: String = order[(game.towers.size() + k) % order.size()]
+		var spot := _socket_for(game, type)
+		if spot != GameMap.NO_SOCKET:
+			return {"type": type, "socket": spot}
+	return {"type": SCOUT_TOWER, "socket": _best_free_socket(game)}
+
+
+## Where a tower of `type` goes: the free socket that reaches the most road, or for
+## a support tower the one whose aura reaches the most guards (nearest first).
+func _socket_for(game: GameState, type: String) -> Vector2i:
+	if not TOWERS.DEFS[type].get("support", false):
+		return _best_free_socket(game)
+	var reach_base: float = TOWERS.DEFS[type].range[0]
+	var best := GameMap.NO_SOCKET
+	var best_covered := 0
+	var best_distance := INF
+	for anchor in _ranked:
+		if _is_taken(game, anchor):
+			continue
+		var centre := game.map.socket_centre(anchor)
+		var reach := reach_base * game.map.range_multiplier(anchor)
+		var covered := 0
+		var distance := 0.0
+		for guard in game.guards:
+			var at := game.routes[0].position_at(guard.post)
+			var gap := centre.distance_to(Vector2(at.x, at.y))
+			if gap <= reach:
+				covered += 1
+				distance += gap
+		if (
+			covered > best_covered
+			or (covered == best_covered and covered > 0 and distance < best_distance)
+		):
+			best = anchor
+			best_covered = covered
+			best_distance = distance
+	return best
 
 
 func _call_wave(game: GameState) -> void:
@@ -84,14 +131,16 @@ func _next_cost(tower: Tower) -> int:
 
 func _best_free_socket(game: GameState) -> Vector2i:
 	for anchor in _ranked:
-		var taken := false
-		for tower in game.towers:
-			if tower.col == anchor.x and tower.row == anchor.y:
-				taken = true
-				break
-		if not taken:
+		if not _is_taken(game, anchor):
 			return anchor
 	return GameMap.NO_SOCKET
+
+
+func _is_taken(game: GameState, anchor: Vector2i) -> bool:
+	for tower in game.towers:
+		if tower.col == anchor.x and tower.row == anchor.y:
+			return true
+	return false
 
 
 ## Orders the map's sockets by the road they reach, most first; done once per map.

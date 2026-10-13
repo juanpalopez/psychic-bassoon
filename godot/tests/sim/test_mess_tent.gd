@@ -57,15 +57,16 @@ func test_the_aura_makes_a_guard_strike_more_often() -> void:
 	for game in [with_tent, without]:
 		game.guards[1].alive = false
 		game.guards[1].respawn_timer = 1000.0
-		orcs.append(GuardKit.foe_before_post(game, "corrugatedOrc", 0.3))
+		# a wave 10 orc has 785 hp, so it is still there after ten seconds
+		orcs.append(GuardKit.foe_before_post(game, "corrugatedOrc", 0.3, 10))
 		GuardKit.tick(game, 300)
-	# a blow of 4 does 1 against the orc's armor, one a second after the first; with
-	# the strongest aura (25 percent faster) about 25 percent more blows land
-	var plain: float = 130.0 - orcs[1].hp
-	var fed: float = 130.0 - orcs[0].hp
-	assert_almost_eq(plain, 7.0, 1.0)
-	assert_almost_eq(fed, 9.0, 1.0)
-	assert_gt(fed, plain)
+	# a blow of 16 does 10 against the orc's armor, one a second; with the strongest
+	# aura (25 percent faster) about 25 percent more blows land
+	var plain: float = 785.0 - orcs[1].hp
+	var fed: float = 785.0 - orcs[0].hp
+	assert_almost_eq(plain, 100.0, 15.0)
+	assert_almost_eq(fed, 125.0, 15.0)
+	assert_gt(fed, plain + 10.0)
 
 
 func _level0_within(sockets: Array, reach: float, count: int) -> Array:

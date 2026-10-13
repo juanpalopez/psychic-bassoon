@@ -9,11 +9,11 @@ func test_the_guard_tent_is_content_with_three_levels() -> void:
 	var def: Dictionary = TOWERS.DEFS.guardTent
 	assert_eq(def.name, "Guard Tent")
 	assert_true(def.guards)
-	assert_eq(def.cost, [70, 80, 140])
-	assert_eq(def.guard_hp, [60, 100, 170])
+	assert_eq(def.cost, [55, 65, 110])
+	assert_eq(def.guard_hp, [120, 200, 320])
 	assert_eq(def.guard_armor, [0, 2, 4])
-	assert_eq(def.guard_damage, [4, 7, 12])
-	assert_eq(def.respawn, [12, 10, 8])
+	assert_eq(def.guard_damage, [16, 28, 48])
+	assert_eq(def.respawn, [6, 5, 4])
 	assert_eq(def.guard_count, 2)
 
 
@@ -24,11 +24,11 @@ func test_a_new_tent_raises_two_guards_at_full_health() -> void:
 	var events := GameTestKit.run(game, [Command.build("guardTent", anchor.x, anchor.y)])
 	assert_eq(game.guards.size(), 2)
 	for guard in game.guards:
-		assert_eq(guard.hp, 60.0)
-		assert_eq(guard.max_hp, 60.0)
+		assert_eq(guard.hp, 120.0)
+		assert_eq(guard.max_hp, 120.0)
 		assert_true(guard.alive)
 		assert_eq(guard.tent_id, game.towers[0].id)
-	assert_eq(game.buttons, 430)
+	assert_eq(game.buttons, 445)
 	var raised := 0
 	for event in events:
 		if event.kind == GameEvent.Kind.GUARD_RAISED:
@@ -65,12 +65,12 @@ func test_upgrading_the_tent_makes_the_guards_tougher_and_heals_the_gain() -> vo
 	var game := GuardKit.game_with_tent()
 	game.guards[0].hp = 30.0
 	GameTestKit.run(game, [Command.upgrade(GuardKit.tent(game).id)])
-	assert_eq(game.guards[0].max_hp, 100.0)
-	# 30 hp plus the 40 the level adds, plus a tick of regeneration (1.5 hp a second)
-	assert_almost_eq(game.guards[0].hp, 70.0, 0.1)
-	assert_eq(game.guards[1].hp, 100.0)
+	assert_eq(game.guards[0].max_hp, 200.0)
+	# 30 hp plus the 80 the level adds, plus a tick of regeneration (1.5 hp a second)
+	assert_almost_eq(game.guards[0].hp, 110.0, 0.1)
+	assert_eq(game.guards[1].hp, 200.0)
 	assert_eq(game.guards[0].armor, 2)
-	assert_eq(game.guards[0].damage, 7.0)
+	assert_eq(game.guards[0].damage, 28.0)
 
 
 func test_selling_the_tent_removes_its_guards_and_frees_the_foe_they_held() -> void:

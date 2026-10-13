@@ -7,14 +7,17 @@ func test_a_foe_reaching_a_guard_stops_and_the_engagement_is_reported() -> void:
 	var goblin := GuardKit.foe_before_post(game, "scrapGoblin", 0.5)
 	var engaged := 0
 	var at := -1.0
-	for i in 60:
+	var held_ticks := 0
+	for i in 20:
 		Game.tick(game)
 		engaged += GuardKit.events_of(game, GameEvent.Kind.FOE_ENGAGED).size()
-		if goblin.engaged_guard_id != -1 and at < 0.0:
-			at = goblin.distance
-	assert_ne(goblin.engaged_guard_id, -1)
+		if goblin.engaged_guard_id != -1:
+			held_ticks += 1
+			if at < 0.0:
+				at = goblin.distance
+			assert_eq(goblin.distance, at, "a held foe does not walk")
+	assert_gt(held_ticks, 5, "the goblin is held for a while (a guard needs two blows to kill it)")
 	assert_eq(engaged, 1)
-	assert_eq(goblin.distance, at, "a held foe does not walk")
 
 
 func test_a_foe_far_from_the_post_is_not_held_but_one_at_its_body_is() -> void:
@@ -41,9 +44,9 @@ func test_a_guards_armor_cuts_the_foes_blow() -> void:
 	game.guards[0].hp = game.guards[0].max_hp
 	GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
 	GuardKit.tick(game, 3)
-	# the orc's first blow is 14, less the guard's 4 armor: 10 (170 to 160), and
+	# the orc's first blow is 14, less the guard's 4 armor: 10 (320 to 310), and
 	# nothing has regenerated in a fight
-	assert_eq(game.guards[0].hp, 160.0)
+	assert_eq(game.guards[0].hp, 310.0)
 
 
 func test_a_slow_on_a_held_foe_keeps_running_out() -> void:
@@ -86,34 +89,42 @@ func test_a_goblin_loses_to_a_guard_and_pays_its_reward() -> void:
 	for guard in game.guards:
 		assert_eq(guard.foe_id, -1, "the guard is free again")
 	var hurt: Guard = game.guards[0] if game.guards[0].hp < game.guards[1].hp else game.guards[1]
-	assert_gt(hurt.hp, 60.0 - 24.0, "a goblin hits for 3 about every 0.8 s")
-	assert_lt(hurt.hp, 60.0, "and did hit")
+	assert_gt(hurt.hp, 120.0 - 24.0, "a goblin hits for 3 about every 0.8 s")
+	assert_lt(hurt.hp, 120.0, "and did hit")
 
 
-func test_an_orc_shrugs_off_a_guard_and_beats_it_in_the_end() -> void:
+func test_an_orc_is_held_and_worn_down_and_a_later_orc_beats_the_guard() -> void:
 	var game := GuardKit.game_with_tent()
 	# the second guard is down, so the first one stands alone
 	game.guards[1].alive = false
 	game.guards[1].respawn_timer = 1000.0
 	var orc := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
 	GuardKit.tick(game, 150)
-	# a blow of 4 against armor 6 does the quarter that always gets through: 1 a second
-	assert_almost_eq(orc.hp, 130.0 - 5.0, 2.0)
+	# a blow of 16 against armor 6 does 10, about one a second: an early orc is worn down
+	assert_almost_eq(orc.hp, 130.0 - 50.0, 12.0)
+	var strong := GuardKit.game_with_tent()
+	strong.guards[1].alive = false
+	strong.guards[1].respawn_timer = 1000.0
+	var late := GuardKit.foe_before_post(strong, "corrugatedOrc", 0.3, 10)
 	var fell := false
-	for i in 250:
-		Game.tick(game)
-		if not GuardKit.events_of(game, GameEvent.Kind.GUARD_FELL).is_empty():
+	for i in 600:
+		Game.tick(strong)
+		if not GuardKit.events_of(strong, GameEvent.Kind.GUARD_FELL).is_empty():
 			fell = true
 			break
-	assert_true(fell, "14 damage every 1.6 s wears 60 hp down in about 7 s")
-	assert_eq(orc.engaged_guard_id, -1, "the orc walks on")
-	assert_true(orc.alive)
+	# a wave 10 orc hits for 17.78 every 1.6 s (11 a second) and has 785 hp
+	assert_true(fell, "it wears 120 hp down in about 11 s")
+	assert_eq(late.engaged_guard_id, -1, "the orc walks on")
+	assert_true(late.alive)
 
 
 func test_a_fallen_guard_comes_back_after_exactly_its_respawn_time() -> void:
 	var game := GuardKit.game_with_tent()
 	var guard: Guard = game.guards[0]
 	guard.hp = 0.5
+	# the other guard is down, so the orc walks on once this one falls
+	game.guards[1].alive = false
+	game.guards[1].respawn_timer = 1000.0
 	var orc := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
 	var fell := -1
 	var raised := -1
@@ -127,7 +138,7 @@ func test_a_fallen_guard_comes_back_after_exactly_its_respawn_time() -> void:
 					raised = game.tick_count
 	assert_gt(fell, 0, "the guard fell")
 	assert_gt(raised, fell, "and was raised again")
-	assert_almost_eq(float(raised - fell), 12.0 * 30.0, 1.0, "after 12 s, a level 1 tent")
+	assert_almost_eq(float(raised - fell), 6.0 * 30.0, 1.0, "after 6 s, a level 1 tent")
 	assert_eq(guard.hp, guard.max_hp)
 	assert_true(orc.alive)
 
@@ -138,7 +149,7 @@ func test_a_guard_out_of_a_fight_regains_health() -> void:
 	GuardKit.tick(game, 90)
 	assert_almost_eq(game.guards[0].hp, 33.0, 0.2)
 	GuardKit.tick(game, 3000)
-	assert_eq(game.guards[0].hp, 60.0, "never above the maximum")
+	assert_eq(game.guards[0].hp, 120.0, "never above the maximum")
 
 
 func test_the_golem_is_not_held() -> void:

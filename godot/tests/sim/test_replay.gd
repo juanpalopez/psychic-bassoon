@@ -101,6 +101,16 @@ func test_the_golden_covers_a_won_run_and_a_lost_run() -> void:
 	assert_gt(lost, 0)
 
 
+func test_a_golden_game_builds_both_tents_so_the_barracks_are_covered() -> void:
+	var built := {}
+	for entry in _golden():
+		for command in entry.commands:
+			if command[1] == "build":
+				built[command[2]] = true
+	assert_true(built.has("guardTent"))
+	assert_true(built.has("messTent"))
+
+
 func test_the_bot_still_plays_the_golden_games() -> void:
 	for entry in _golden():
 		var rec := ReplayKit.record(int(entry.seed), entry.profile, int(entry.max_waves))

@@ -34,29 +34,29 @@ A Guard Tent owns 2 guards. Each guard is a unit with hp, an attack and a **post
 - Out of a fight a guard regenerates `regen` hp per second.
 - Selling or replacing the tent removes its guards; a blocked foe walks on.
 
-### Guard Tent numbers (interim)
+### Guard Tent numbers (tuned with the bot, #223; the first proposal was 70/80/140 Buttons, 60/100/170 hp, 4/7/12 damage and 12/10/8 s)
 
 | | Level 1 | Level 2 | Level 3 |
 | --- | --- | --- | --- |
-| Cost (Buttons) | 70 | 80 | 140 |
-| Guard hp | 60 | 100 | 170 |
+| Cost (Buttons) | 55 | 65 | 110 |
+| Guard hp | 120 | 200 | 320 |
 | Guard armor | 0 | 2 | 4 |
-| Guard damage per blow | 4 | 7 | 12 |
+| Guard damage per blow | 16 | 28 | 48 |
 | Guard attack interval (s) | 1.0 | 1.0 | 1.0 |
 | Reach (cells, shown to the player; the post is simply the nearest road point) | 1.9 | 2.2 | 2.5 |
-| Respawn (s) | 12 | 10 | 8 |
+| Respawn (s) | 6 | 5 | 4 |
 | Regen (hp per second) | 1.0 | 1.5 | 2.0 |
 
-Reading: a level-1 guard (60 hp, 4 dps) holds a wave-1 Scrap Goblin (20 hp, about 4.3 dps against it) for 5 seconds and takes about 21 damage, so two guards hold two goblins and fall to the third. Against a Corrugated Orc (armor 6) a physical blow of 4 does the minimum quarter damage, so a guard cannot kill an orc; it holds it. At 14 damage per 1.6 s the orc kills a level-1 guard in about 7 s, a level-3 guard (170 hp, armor 4) in about 20 s. The tent buys time for the towers, it is not a damage dealer. That is the role the GDD gives it.
+Reading: a level-1 guard (120 hp, 16 damage a second) kills a wave-1 Scrap Goblin (20 hp) in two blows and takes about 6 damage. Against a Corrugated Orc (armor 6) a blow of 16 does 10: an early orc (130 hp) is held for about 13 seconds and killed, a wave 10 orc (785 hp, 17.8 per 1.6 s) wears a level-1 guard down in about 11 s and walks on. The first proposal's guards (4 damage a blow) did a quarter of that against orcs and, with the tent costing more than a Spool Guard, a bot that built tents lost every map (`docs/balance/tents-candidates-seeds-1-16.txt`); the numbers above make a build with one Guard Tent and one Mess Tent win 6 of 16 maps, in line with the other builds.
 
-### Kitchen Mess Tent numbers (interim)
+### Kitchen Mess Tent numbers (interim; the aura was first 2.2/2.5/2.8 cells, but only 36% of Guard Tents then had a free socket in reach, against 57% at 3.0, 66% at 3.3 and 87% at 3.6)
 
 A 2x2 tent with no attack. Its aura reaches `aura` cells from its block's centre; every guard whose **post** is inside it gets the buffs. Two tents' buffs do not stack: the strongest applies.
 
 | | Level 1 | Level 2 | Level 3 |
 | --- | --- | --- | --- |
 | Cost (Buttons) | 100 | 100 | 160 |
-| Aura radius (cells) | 2.2 | 2.5 | 2.8 |
+| Aura radius (cells) | 3.0 | 3.3 | 3.6 |
 | Guard attack speed bonus | +12% | +18% | +25% |
 | Guard regen bonus (hp per second) | +2 | +3 | +4 |
 
@@ -72,10 +72,10 @@ A new bounded context `godot/sim/barracks/` with a small public entry, read by `
 
 ## Plan
 
-1. Foe attacks, guards, blocking and the Guard Tent in the sim and content (tests first, deep review: it changes the tick loop).
-2. The bot builds Guard Tents in a new profile; balance run; the post-tent goldens are written.
-3. Greybox render and UI: the tent in the build menu and panel, guards drawn on the road with hp bars, an engaged foe stands still.
-4. The Kitchen Mess Tent: aura, content, render, balance.
+1. Foe attacks, guards, blocking and the Guard Tent in the sim and content (done, #220).
+2. The bot builds Guard Tents in a new profile; balance run; a tent replay golden (done, #223).
+3. Greybox render and UI: the tent in the build menu and panel, guards drawn on the road with hp bars (done, #222).
+4. The Kitchen Mess Tent: aura, content, render (done, #224).
 
 Not in this work: the tier-4 specs and their actives and passives, the Knight and the Camp Cook, flying foes, Ink Shaman.
 

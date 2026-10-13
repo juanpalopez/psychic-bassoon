@@ -4,8 +4,8 @@
 usage: python3 scripts/balance_sweep.py '<configs json>' [seeds] [workers]
 
 A config is a dict: {"waves:HP_QUADRATIC": 0.03, "sub:towers#1": ["old", "new"]}.
-`file:CONSTANT` sets a `const` of godot/content/<file>.gd (waves, foes, towers or
-rules); `sub:<file>#<n>` replaces `old` by `new` in that file (the `#n` only keeps
+`file:CONSTANT` sets a `const` of godot/content/<file>.gd (waves, foes, towers,
+rules or profiles); `sub:<file>#<n>` replaces `old` by `new` in that file (the `#n` only keeps
 the keys apart). Each config runs in its own copy of the godot project, and each
 (config, profile) is one godot process playing every seed, so a sweep takes about as
 long as its slowest job. The working tree is never touched.
@@ -22,12 +22,15 @@ from concurrent.futures import ThreadPoolExecutor
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # the godot binary: the GODOT environment variable, else `godot` on the PATH
 GODOT = os.environ.get("GODOT", "godot")
-PROFILES = ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"]
+# the profiles to play: the BALANCE_PROFILES environment variable (comma separated), else all
+ALL_PROFILES = "spoolOnly,mortarHeavy,prismHeavy,mix,guardMix"
+PROFILES = [p.strip() for p in (os.environ.get("BALANCE_PROFILES") or ALL_PROFILES).split(",")]
 FILES = {
     "waves": "content/waves.gd",
     "foes": "content/foes.gd",
     "towers": "content/towers.gd",
     "rules": "content/game_rules.gd",
+    "profiles": "content/bot_profiles.gd",
 }
 
 
