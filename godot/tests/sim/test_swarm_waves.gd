@@ -57,11 +57,3 @@ func test_a_swarm_wave_is_goblins_with_a_few_orcs_by_its_own_threshold() -> void
 		var types := _types(WaveBuilder.compose(wave, one))
 		assert_eq(types.count("corrugatedOrc"), 1)
 		assert_eq(types.size(), WaveBuilder.count_for(wave))
-
-
-func test_a_swarm_keeps_its_tight_gap_for_the_goblins_and_the_orc_gap_for_orcs() -> void:
-	var rolls := _rolls(5, 0.0)
-	rolls[0] = 0.999
-	var orders := WaveBuilder.compose(5, rolls)
-	assert_almost_eq(orders[0].gap, 0.825 * WAVES.GAP_ORC, 1e-12)
-	assert_almost_eq(orders[1].gap, 0.825 * WAVES.GAP_GOBLIN_SWARM, 1e-12)

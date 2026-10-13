@@ -41,7 +41,7 @@ static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 ## float) from the sizes the wave allows (`GROUP_CAP` by wave). A pick bigger than what is
 ## left is cut down to the biggest allowed size that fits, and the next group takes the rest.
 static func group_sizes(wave: int, total: int, rng: Rng) -> Array[int]:
-	var cap := 0
+	var cap: int = WAVES.GROUP_CAP[0]
 	for i in WAVES.GROUP_CAP_FROM_WAVE.size():
 		if wave >= WAVES.GROUP_CAP_FROM_WAVE[i]:
 			cap = WAVES.GROUP_CAP[i]
@@ -96,10 +96,8 @@ static func compose(wave: int, rolls: Array[float]) -> Array[SpawnOrder]:
 		var type: String = WAVES.FILLER_FOE
 		if wave >= WAVES.ORC_FROM_WAVE and roll > orc_threshold:
 			type = WAVES.HEAVY_FOE
-		var multiplier: float = WAVES.GAP_ORC
-		if type == WAVES.FILLER_FOE:
-			multiplier = WAVES.GAP_GOBLIN_SWARM if swarm else WAVES.GAP_GOBLIN
-		orders.append(SpawnOrder.of(type, gap * multiplier))
+		# the pause of a rolled foe is set by its group (`_space_in_groups`)
+		orders.append(SpawnOrder.of(type, WAVES.GROUP_SPACING))
 	if boss:
 		orders.append(SpawnOrder.of(WAVES.BOSS_FOE, WAVES.GOLEM_GAP))
 		orders.push_front(SpawnOrder.of(WAVES.HEAVY_FOE, gap * WAVES.GAP_BOSS_ESCORT))

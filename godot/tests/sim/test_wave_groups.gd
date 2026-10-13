@@ -124,3 +124,28 @@ func test_waves_are_bigger_by_the_size_multiplier() -> void:
 	assert_eq(WaveBuilder.count_for(5), 27)
 	assert_eq(WaveBuilder.count_for(15), 57)
 	assert_eq(WaveBuilder.count_for(20), 48)
+
+
+func test_a_pick_bigger_than_what_is_left_is_cut_to_the_biggest_size_that_fits() -> void:
+	# wave 28 allows all sizes; 13 foes over many seeds: every size fits, the sum is exact,
+	# and a cut pick is not collapsed to 1 (some group is bigger than 1)
+	var biggest := 0
+	for map_seed in 40:
+		var sizes := _sizes(28, 13, map_seed)
+		assert_eq(_sum(sizes), 13)
+		for size in sizes:
+			assert_true(size in WAVES.GROUP_SIZES)
+			biggest = maxi(biggest, size)
+	assert_gt(biggest, 3)
+	assert_eq(_sizes(28, 1), [1], "one foe left is a group of one")
+
+
+func test_every_allowed_size_is_picked_about_as_often() -> void:
+	var seen := {}
+	for map_seed in 60:
+		for size in _sizes(28, 200, map_seed):
+			seen[size] = seen.get(size, 0) + 1
+	for size in WAVES.GROUP_SIZES:
+		assert_true(seen.has(size), "size %d is picked" % size)
+	# a pick biased toward the top would starve the small sizes
+	assert_gt(seen[1], seen[21] / 4)

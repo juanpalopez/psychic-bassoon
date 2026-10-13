@@ -46,10 +46,8 @@ const FIRST_SPAWN_DELAY := 0.2
 const GAP_BASE := 0.95
 const GAP_PER_WAVE := 0.025
 const GAP_MIN := 0.32
-## The pause after a foe, as a multiple of the base gap.
-const GAP_GOBLIN := 0.6
-const GAP_GOBLIN_SWARM := 0.45
-const GAP_ORC := 1.4
+## The base gap now only sets the boss escort's pause (rolled foes pause by group, see
+## GROUP_SPACING), as a multiple of it.
 const GAP_BOSS_ESCORT := 2.0
 ## The pause in seconds after the Golem.
 const GOLEM_GAP := 1.0
