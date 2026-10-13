@@ -78,6 +78,22 @@ describe('check-assets script', () => {
     expect(run().status).toBe(1);
   });
 
+  it('ignores the .import file Godot writes next to a credited model', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb.import'), '[remap]');
+    writeFileSync(credits, '| `models/kit/a.glb` | Kenney | CC0 | none |\n');
+    expect(run().status).toBe(0);
+  });
+
+  it('still wants a credit for the model itself, import file or not', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(credits, '# no rows\n');
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb.import'), '[remap]');
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('a.glb is not recorded');
+  });
+
   it('ignores .DS_Store', () => {
     writeFileSync(join(assets, 'models', '.DS_Store'), 'junk');
     writeFileSync(credits, '# Credits\n');

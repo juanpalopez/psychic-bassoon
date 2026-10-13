@@ -8,8 +8,10 @@ import {
 import {join, relative, sep} from 'node:path';
 
 const MAX_ASSET_BYTES = 6_000_000;
-// Placeholders and OS junk that is never shipped on purpose.
+// Placeholders and OS junk that is never shipped on purpose, and the `.import`
+// file Godot writes next to each asset it imports (it belongs to the credited file).
 const IGNORED = new Set(['.gitkeep', '.DS_Store', 'Thumbs.db']);
+const isGodotImport = name => name.endsWith('.import');
 const assetsDir = process.argv[2] ?? 'godot/assets';
 const creditsFile = process.argv[3] ?? 'assets/CREDITS.md';
 
@@ -23,7 +25,12 @@ if (!existsSync(creditsFile)) {
 }
 
 const files = readdirSync(assetsDir, {recursive: true, withFileTypes: true})
-  .filter(entry => !entry.isDirectory() && !IGNORED.has(entry.name))
+  .filter(
+    entry =>
+      !entry.isDirectory() &&
+      !IGNORED.has(entry.name) &&
+      !isGodotImport(entry.name)
+  )
   .map(entry => join(entry.parentPath, entry.name));
 // A symlink or a device could hide size or skip the credits check.
 const odd = files.filter(file => !lstatSync(file).isFile());

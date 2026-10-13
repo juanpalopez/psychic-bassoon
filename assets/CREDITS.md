@@ -4,7 +4,11 @@ Every file in `godot/assets/` is listed here with its source and licence. CI (`p
 
 ## Models
 
-`godot/assets/` is empty for now: the Godot greybox draws primitives. When a model is added, add a row for it here, as a table line that starts with the file path in backticks (path relative to `godot/assets/`, then source, licence and edits).
+The greybox draws primitives, except the models below. When a model is added, add a row for it here, as a table line that starts with the file path in backticks (path relative to `godot/assets/`, then source, licence and edits).
+
+| File | Source | Licence | Edits |
+| --- | --- | --- | --- |
+| `models/goblin_lowpoly.glb` | Original, the owner (greybox Scrap Goblin, 542 triangles, static) | Owned by the owner (all rights reserved) | none; drawn scaled to 1.0 cells tall by `render/foes_view.gd` |
 
 ## History: assets of the Three.js game
 
