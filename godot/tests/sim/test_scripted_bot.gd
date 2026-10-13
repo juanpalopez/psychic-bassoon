@@ -35,9 +35,10 @@ func _coverage(game: GameState, anchor: Vector2i) -> int:
 	return count
 
 
-func test_there_are_four_profiles_with_real_towers() -> void:
+func test_there_are_five_profiles_with_real_towers() -> void:
 	assert_eq(
-		PROFILES.PROFILE_IDS, ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"] as Array[String]
+		PROFILES.PROFILE_IDS,
+		["spoolOnly", "mortarHeavy", "prismHeavy", "mix", "guardMix"] as Array[String]
 	)
 	for id in PROFILES.PROFILE_IDS:
 		var profile: Dictionary = PROFILES.PROFILES[id]

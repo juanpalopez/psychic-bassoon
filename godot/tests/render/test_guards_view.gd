@@ -41,7 +41,7 @@ func test_the_health_bar_follows_the_guards_health() -> void:
 	var view := _view()
 	view.update(game)
 	assert_almost_eq(view.health_fraction_of(game.guards[0].id), 1.0, 1e-9)
-	game.guards[0].hp = 15.0
+	game.guards[0].hp = 30.0
 	view.update(game)
 	assert_almost_eq(view.health_fraction_of(game.guards[0].id), 0.25, 1e-9)
 

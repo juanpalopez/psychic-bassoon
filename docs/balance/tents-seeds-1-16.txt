@@ -1,0 +1,7 @@
+# Final tent numbers (aura 3.0/3.3/3.6, guards hp 120/200/320, damage 16/28/48, cost 55/65/110, respawn 6/5/4), seeds 1 to 16, 20 waves, all five profiles
+{}
+  spoolOnly    cleared [14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15] heart 6.6 buttons_left 985
+  mortarHeavy  cleared [9, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 15] heart 8.7 buttons_left 498
+  prismHeavy   cleared [14, 14, 14, 14, 14, 14, 14, 14, 14, 18, 19, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 15, 15, 15, 15, 19] heart 3.9 buttons_left 204
+  mix          cleared [14, 14, 14, 14, 14, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 15, 15, 15, 15, 20] heart 6.9 buttons_left 510
+  guardMix     cleared [9, 14, 14, 14, 14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [10, 15, 15, 15, 15, 20, 20, 20] heart 5.1 buttons_left 380

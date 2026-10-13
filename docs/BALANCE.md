@@ -247,3 +247,30 @@ The owner found the game too easy and asked for bigger swarms. A swarm wave (eve
 | Mix | 12 | 8 | 10.1 | 6.9 |
 
 **What it says.** Wins fall from 38 to 32 of 64 and 22 of the 25 losses are on wave 15, the swarm: the swarm is now a real test, which was the aim. Two things to know. First, the Thimble Mortar barely notices (12 of 16 wins, its splash is the counter to a swarm), so the Mix (8 of 16) now wins less than the best solo build, against the interim rule that a mix should be at least as good; the post-Phase 7 balance pass (#203) should settle that, probably with a stronger answer to swarms for the Spool Guard and the Prism Spire or a weaker Mortar. Second, the Buttons that every strategy still ends with (200 to 1,000) show the economy is the real reason the game is easy; extra pressure only helps so far while the player can buy it off. Runs that neither won nor lost stopped at the 30 minute cap of the bot runner (the runner prints 30.0 minutes for them); they are counted in neither column.
+
+## Guard Tent and Kitchen Mess Tent (2026-10-13, #223)
+
+The scripted bot got a profile with both tents, `guardMix` (`spoolGuard`, `thimbleMortar`, `prismSpire`, `spoolGuard`, `guardTent`, `thimbleMortar`, `messTent`, `prismSpire`; the tents go in slots 5 and 7, after the damage towers). The Guard Tent goes on the free socket that reaches the most road, like any tower; the Mess Tent on the free socket whose aura reaches the most guards (none before a Guard Tent stands; when no socket suits it the bot builds the next tower of its order). Raw sweeps: `docs/balance/tents-candidates-seeds-1-16.txt` (all produced by `scripts/balance_sweep.py`; `BALANCE_PROFILES=guardMix` plays one profile) and `tents-seeds-1-16.txt` (the final numbers, all five profiles).
+
+**What the first numbers did.** With the first proposal (Guard Tent 70/80/140 Buttons, guards 60/100/170 hp and 4/7/12 damage, respawn 12/10/8 s) a profile with tents in half its slots won 0 of 16 maps, and with tents in 2 of 8 slots 2 of 16 (the plain mix wins 8). The guards' blows were cut to a quarter by the Orc's armor and a tent cost more than a Spool Guard, so a tent was a bad use of Buttons; tents in half the slots also starved the economy. Stronger guards helped step by step (a tent-light order with the first numbers won 2 of 16, 1 of 16 without the Mess Tent, and 1 of 16 with 2x damage and hp; then 2, 4, 5 and 7 wins as guards got tougher, cheaper and faster to return); those rounds ran with the Mess Tent aura at 2.2 cells, which almost never had a socket to stand on: over seeds 1 to 40, with every socket tried as the place of a Guard Tent (642 tents), only 36 percent had another socket within 2.2 cells of their post (57 percent within 3.0, 66 percent within 3.3, 87 percent within 3.6; method and figures in `godot/tools/aura_coverage.gd` and `docs/balance/aura-coverage.txt`). So the aura is now 3.0, 3.3 and 3.6 cells, which reaches a spot for a level 1 tent on about 57 percent of Guard Tents and for a level 3 tent on about 87 percent.
+
+| Number (`godot/content/towers.gd`) | First proposal | Now |
+| --- | --- | --- |
+| Guard Tent cost | 70, 80, 140 | 55, 65, 110 |
+| Guard hp | 60, 100, 170 | 120, 200, 320 |
+| Guard damage per blow | 4, 7, 12 | 16, 28, 48 |
+| Guard respawn (s) | 12, 10, 8 | 6, 5, 4 |
+| Mess Tent aura (cells) | 2.2, 2.5, 2.8 | 3.0, 3.3, 3.6 |
+
+**Result** (seeds 1 to 16, 20 waves, `tents-seeds-1-16.txt`):
+
+| Strategy | Won | Mean Heartstone health | Buttons left |
+| --- | --- | --- | --- |
+| Spool Guards only | 7 | 6.6 | 985 |
+| Mortar heavy | 12 | 8.7 | 498 |
+| Prism heavy | 5 | 3.9 | 204 |
+| Mix | 8 | 6.9 | 510 |
+| Guard mix (Guard Tent and Mess Tent) | 6 | 5.1 | 380 |
+
+**What it says.** The Guard Tent is now a usable choice and not a better one: the guard mix wins 6 of 16, between Prism heavy (5) and the plain mix (8). The Mess Tent is not yet worth its price: the same guard numbers at an aura of 2.2 cells (where the bot rarely found a socket for a Mess Tent and built the next tower instead) won 7 maps with 390 Buttons left, and at 3.0 cells (where it does build it) 6 maps with 380 left, so building the Mess Tent cost a map, which is within noise but not a gain. It is recorded as a known-weak support (100 to 160 Buttons for +12 to +25% blows and +2 to +4 hp a second) for the post-Phase 7 pass (#203), where its bonus or its cost should change. That is the intended role (the GDD's tent holds and supports; the damage comes from the towers), but the bot cannot show the tent's real value, which is holding the one dangerous foe where several towers reach it, and the Golem is not blockable. A player will use it better than the bot does, so the numbers err on the side of not being strong. Not done here: tier 4 specs, the hero, the Camp Cook.
+

@@ -5,7 +5,7 @@
 ## `early_foes_left`: how few foes must be left for it to do so.
 extends RefCounted
 
-const PROFILE_IDS: Array[String] = ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"]
+const PROFILE_IDS: Array[String] = ["spoolOnly", "mortarHeavy", "prismHeavy", "mix", "guardMix"]
 
 const PROFILES := {
 	"spoolOnly":
@@ -29,6 +29,24 @@ const PROFILES := {
 	"mix":
 	{
 		"build_order": ["spoolGuard", "thimbleMortar", "prismSpire", "spoolGuard"],
+		"call_early": false,
+		"early_foes_left": 0,
+	},
+	# the mix with a Guard Tent and a Mess Tent for its aura among the damage towers
+	# (docs/BARRACKS.md); a build with tents in half its slots starves its economy
+	"guardMix":
+	{
+		"build_order":
+		[
+			"spoolGuard",
+			"thimbleMortar",
+			"prismSpire",
+			"spoolGuard",
+			"guardTent",
+			"thimbleMortar",
+			"messTent",
+			"prismSpire"
+		],
 		"call_early": false,
 		"early_foes_left": 0,
 	},

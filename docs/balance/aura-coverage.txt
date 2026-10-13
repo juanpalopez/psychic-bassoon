@@ -1,0 +1,6 @@
+method: every socket of seeds 1 to 40 as a Guard Tent; another socket within the radius
+radius 2.2: 232 of 642 Guard Tents (36%)
+radius 2.8: 363 of 642 Guard Tents (57%)
+radius 3.0: 366 of 642 Guard Tents (57%)
+radius 3.3: 426 of 642 Guard Tents (66%)
+radius 3.6: 556 of 642 Guard Tents (87%)

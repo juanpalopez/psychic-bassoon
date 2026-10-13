@@ -7,7 +7,10 @@ func test_no_arguments_give_the_defaults() -> void:
 	var args := BalanceArgs.parse(PackedStringArray())
 	assert_eq(args.error, "")
 	assert_eq(args.seeds, [1, 2, 3, 4, 5, 6, 7, 8] as Array[int])
-	assert_eq(args.profiles, ["spoolOnly", "mortarHeavy", "prismHeavy", "mix"] as Array[String])
+	assert_eq(
+		args.profiles,
+		["spoolOnly", "mortarHeavy", "prismHeavy", "mix", "guardMix"] as Array[String]
+	)
 	assert_eq(args.waves, 20)
 	assert_false(args.detail)
 
