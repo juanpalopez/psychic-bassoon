@@ -148,9 +148,9 @@ func test_reduced_motion_stops_the_bob() -> void:
 
 
 func test_the_crow_holds_in_the_middle_of_the_screen_whatever_the_controls_size() -> void:
-	# a Control under a CanvasLayer can report a size of 0, which once put the crow off the left edge
+	# a Control under a CanvasLayer can report a size of 0 (as it does here), which once put
+	# the crow off the left edge
 	var crow := _crow()
-	crow.size = Vector2.ZERO
 	crow.deliver("x")
 	crow.advance(ALERTS.CROW_FLY_SECONDS)
 	var middle := crow.get_viewport_rect().size.x / 2.0
