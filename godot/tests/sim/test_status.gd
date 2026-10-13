@@ -58,6 +58,10 @@ func test_a_slow_that_is_not_a_share_or_has_no_time_is_ignored() -> void:
 	Status.apply_slow(foe, 0.5, 0.0)
 	Status.apply_slow(foe, 0.5, -1.0)
 	Status.apply_slow(foe, 0.5, NAN)
+	# a time the move loop would count as already run out is no slow either: it would
+	# never be cleared, and the foe would keep a slow that does nothing
+	Status.apply_slow(foe, 0.5, Status.RULES.TIMER_EPSILON)
+	Status.apply_slow(foe, 0.5, 1e-10)
 	assert_eq(foe.slow, 0.0)
 	assert_eq(foe.slow_timer, 0.0)
 
