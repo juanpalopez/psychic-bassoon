@@ -52,15 +52,16 @@ for (const path of listed) {
   }
 }
 
-// CC0 (packs and the owner's dedications) or a Meshy output owned by the
-// owner under the paid plan. CC BY outputs (Meshy free plan) are not used.
-const OWNED_MESHY = /^\s*Owned by the owner \(Meshy paid plan\)/;
+// CC0 for packs, or the owner's own models, which the owner keeps the rights to.
+// Only the licence column counts, and it has to start with the licence (a row that
+// says "CC BY 4.0, not CC0" is not CC0).
+const OWNED = /^\s*Owned by the owner \(all rights reserved\)/;
 for (const [, path, rest] of rows) {
-  // columns: | file | source | licence | edits |; only the licence column counts
+  // columns: | file | source | licence | edits |
   const licence = (rest ?? '').split('|')[2] ?? '';
-  if (!/CC0/i.test(licence) && !OWNED_MESHY.test(licence)) {
+  if (!/^\s*CC0\b/i.test(licence) && !OWNED.test(licence)) {
     errors.push(
-      `${path}: the credits row does not say CC0 or 'Owned by the owner (Meshy paid plan)'`
+      `${path}: the credits row does not say CC0 or 'Owned by the owner (all rights reserved)'`
     );
   }
 }
