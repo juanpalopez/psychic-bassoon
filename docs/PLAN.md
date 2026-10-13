@@ -330,10 +330,10 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells and hazards are Phase 7. Their content flags and commands are added then.
 
 **Gate checklist**
-- [ ] The same seed and commands give the same result: replay goldens for several seeds pass, and change only by a reviewed balance change.
-- [ ] The ported core still matches its TypeScript fixtures (PRNG, maps, routes).
-- [ ] The sim imports nothing from the scene tree (lint).
-- [ ] A 12-minute headless run finishes within a time budget on CI.
+- [x] The same seed and commands give the same result: replay goldens for six games (won, lost and stopped runs, every strategy, a tent game) pass, and change only by a reviewed balance change (#214, #227).
+- [x] The ported core still matches its fixtures (PRNG, maps, routes): GUT compares them and `fixtures/SHA256SUMS` plus a CI diff guard keep them frozen (#212).
+- [x] The sim imports nothing from the scene tree (`pnpm check:sim-purity` in CI).
+- [x] A whole headless bot game (20 waves, about 25 minutes of play) finishes within a time budget on CI (#215): 5 s measured on the CI runner (5 s on a laptop), budget 60 s, so it catches a sim several times slower. Measured 2026-10-13.
 - [x] `src/` and the unused fixtures are removed (#211).
 
 ### Phase 5 · Play in Godot
@@ -363,10 +363,12 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Gate checklist**
 - [ ] A full run to the boss at 60 fps on the owner's phone with 80 foes.
-- [ ] Every action is reachable in landscape; tap targets at least 44 px (the GDD asks for 48 pt).
+- [x] Every action is reachable in landscape; tap targets at least 44 px on an 844x390 phone (`test_hud_flow.gd` checks the overlap and the size; the GDD asks for 48 pt, which stays a Phase 6 polish item).
 - [ ] The path, sockets and foes line up by eye on the phone: foes stay on the path, hits land on visible foes at corners.
-- [ ] The replay goldens still pass.
-- [ ] (Interim, greybox) A1 to A6 play a full run in Godot with boxes and capsules, before any final art.
+- [x] The replay goldens still pass.
+- [x] (Interim, greybox) A1 to A6 play a full run in Godot with boxes and capsules, before any final art.
+
+**Phase 5 status (2026-10-13):** the two open items need the owner's phone and cannot be closed by tests: the 60 fps run with 80 foes, and the path, sockets and foes lining up by eye.
 
 ### Phase 6 · Art and ambience (papercraft)
 
