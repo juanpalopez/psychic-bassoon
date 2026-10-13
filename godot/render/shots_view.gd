@@ -13,7 +13,8 @@ const LINE_WIDTH := 0.06
 const BEAM_WIDTH := 0.1
 const RING_HEIGHT := 0.03
 ## Where on a tower a shot or beam starts, above its tile.
-const MUZZLE_HEIGHT := 1.1
+## Where up the drawn tower a shot leaves it, as a share of its height.
+const MUZZLE_SHARE := 0.8
 ## Where on a foe a shot or beam ends, above the ground.
 const BODY_HEIGHT := 0.4
 const SHOT_COLOUR := Color(1.0, 0.95, 0.6, 1.0)
@@ -58,7 +59,8 @@ func _init() -> void:
 ## the middle of its socket block of `footprint` cells.
 static func muzzle(tower: Tower, surface: float, footprint: int = 1) -> Vector3:
 	var at := BoardSpace.footprint_centre(Vector2i(tower.col, tower.row), footprint)
-	return Vector3(at.x, surface + MUZZLE_HEIGHT, at.z)
+	var height := TowerView.height_of(tower.level, TowerLooks.for_type(tower.type))
+	return Vector3(at.x, surface + height * MUZZLE_SHARE, at.z)
 
 
 ## Where a shot or beam lands on a foe at a sim position.

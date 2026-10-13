@@ -1,6 +1,7 @@
 ## Tower shots and beams, drawn as short-lived lines (and a ring for a blast).
 extends GutTest
 
+const TOWER_SCENE := preload("res://render/tower_view.tscn")
 const FROM := Vector3(1.0, 1.0, 2.0)
 const TO := Vector3(4.0, 0.5, -2.0)
 
@@ -154,3 +155,20 @@ func test_the_muzzle_of_a_tower_on_a_block_is_over_the_blocks_centre() -> void:
 	var muzzle := ShotsView.muzzle(tower, 0.4, 2)
 	assert_almost_eq(muzzle.x, middle.x, 1e-9)
 	assert_almost_eq(muzzle.z, middle.z, 1e-9)
+
+
+func test_a_shot_leaves_every_drawn_tower_inside_its_upper_body() -> void:
+	# the muzzle follows the drawn height, so swapping a model cannot leave it inside the base
+	for type in ["spoolGuard", "thimbleMortar", "prismSpire"]:
+		for level in [0, 1, 2]:
+			var tower := Tower.new()
+			tower.type = type
+			tower.level = level
+			tower.col = 3
+			tower.row = 5
+			var view := TOWER_SCENE.instantiate() as TowerView
+			add_child_autofree(view)
+			view.setup(tower, TowerLooks.for_type(type), 0.0, 2)
+			var muzzle := ShotsView.muzzle(tower, 0.0, 2)
+			assert_gt(muzzle.y, view.body_height() * 0.5, "%s level %d" % [type, level])
+			assert_lte(muzzle.y, view.body_height(), "%s level %d" % [type, level])

@@ -132,5 +132,16 @@ func test_every_cell_of_a_socket_block_has_the_blocks_height() -> void:
 
 func test_the_heartstone_marker_covers_its_footprint() -> void:
 	var board := _board(1)
-	var box := board.heartstone_marker.mesh as BoxMesh
-	assert_gte(box.size.x, float(board.map.heartstone.size.x) * 0.6)
+	# the owner's model, scaled to most of the footprint (a box if the file is missing)
+	var width := board.heartstone_marker.mesh.get_aabb().size.x * board.heartstone_marker.scale.x
+	assert_gte(width, float(board.map.heartstone.size.x) * 0.6)
+	assert_false(board.heartstone_marker.mesh is BoxMesh, "the model, not the box")
+	assert_almost_eq(
+		(
+			board.heartstone_marker.position.y
+			+ board.heartstone_marker.mesh.get_aabb().position.y * board.heartstone_marker.scale.y
+		),
+		0.0,
+		1e-6,
+		"standing on the ground"
+	)
