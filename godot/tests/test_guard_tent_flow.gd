@@ -10,7 +10,7 @@ func _build_tent(main: Node, game: GameState) -> void:
 	var menu := main.get_node("Hud/BuildMenu") as BuildMenu
 	main.select_cell(game.map.sockets[0])
 	var index := TOWERS.TOWER_IDS.find("guardTent")
-	assert_eq(menu.tower_buttons()[index].text, "Guard Tent  %d" % TOWERS.DEFS.guardTent.cost[0])
+	assert_eq(menu.tower_buttons()[index].text, "Guard Tent\n%d" % TOWERS.DEFS.guardTent.cost[0])
 	menu.tower_buttons()[index].pressed.emit()
 	main._process(0.05)
 

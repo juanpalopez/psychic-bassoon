@@ -74,17 +74,19 @@ func test_the_wheel_zooms_in_and_out() -> void:
 	add_child_autofree(main)
 	await get_tree().process_frame
 	var rig := main.get_node("CameraRig") as CameraRig
+	var start := rig.zoom
+	assert_almost_eq(start, main.START_ZOOM, 1e-9, "a run starts a little zoomed in")
 	for wheel in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_UP]:
 		var event := InputEventMouseButton.new()
 		event.button_index = wheel
 		event.pressed = true
 		main._unhandled_input(event)
-	assert_almost_eq(rig.zoom, 2.0 * CameraRig.WHEEL_STEP, 1e-9)
+	assert_almost_eq(rig.zoom, start + 2.0 * CameraRig.WHEEL_STEP, 1e-9)
 	var down := InputEventMouseButton.new()
 	down.button_index = MOUSE_BUTTON_WHEEL_DOWN
 	down.pressed = true
 	main._unhandled_input(down)
-	assert_almost_eq(rig.zoom, CameraRig.WHEEL_STEP, 1e-9)
+	assert_almost_eq(rig.zoom, start + CameraRig.WHEEL_STEP, 1e-9)
 
 
 func test_a_second_finger_pinches_to_zoom() -> void:

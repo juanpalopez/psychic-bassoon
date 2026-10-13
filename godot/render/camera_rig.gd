@@ -1,8 +1,9 @@
 ## The board camera: it frames the whole board, and lets the player pan and zoom.
 ##
 ## The view is one number, `zoom`, from 0 (the whole board in view, looking down
-## at 65 degrees) to 1 (close, looking in at 30 degrees, cells about 120 px wide
-## on the 720 px canvas); a pinch or the mouse wheel moves it. A one-finger drag
+## at 62 degrees) to 1 (close, looking in at 56 degrees, cells about 120 px wide
+## on the 720 px canvas); a pinch or the mouse wheel moves it. The pitch barely changes:
+## a steep, nearly top-down view keeps units and sockets readable at every zoom. A one-finger drag
 ## pans, within the board and rubber-banding back after release. The field of
 ## view is about 35 degrees, landscape.
 ##
@@ -15,8 +16,8 @@ extends Node3D
 ## The narrowest screen the rig frames for (a hidden canvas reports no size).
 const MIN_ASPECT := 0.5
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
-const MAX_PITCH := 65.0
-const MIN_PITCH := 30.0
+const MAX_PITCH := 62.0
+const MIN_PITCH := 56.0
 ## How wide a cell is, in pixels of the 720 px canvas, at the closest zoom.
 const CLOSEST_CELL_PIXELS := 120.0
 ## How far the target may leave the centre, as a share of the board's half size
@@ -31,9 +32,9 @@ const PINCH_SENSITIVITY := 0.6
 ## How fast the view settles when the finger lets go (per second).
 const SPRING := 14.0
 
-@export var fov_degrees: float = 35.0
+@export var fov_degrees: float = 20.0
 ## Room left around the board, as a share of its size.
-@export var margin: float = 1.05
+@export var margin: float = 1.0
 
 ## 0 is the whole board in view, 1 is the closest view.
 var zoom: float = 0.0
@@ -89,7 +90,7 @@ static func fit_distance(
 	return distance
 
 
-## The pitch for a zoom: 65 degrees zoomed out, 30 degrees zoomed in.
+## The pitch for a zoom: 62 degrees zoomed out, 56 degrees zoomed in.
 static func pitch_for(zoom_value: float) -> float:
 	return lerpf(MAX_PITCH, MIN_PITCH, clampf(zoom_value, 0.0, 1.0))
 

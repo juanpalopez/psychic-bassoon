@@ -1,4 +1,4 @@
-## A panel with one button per tower, two to a row: its name and what it costs. It opens for a
+## A strip along the bottom with one button per tower: its name and what it costs. It opens for a
 ## free plot, greys out what the player cannot afford, and announces the choice;
 ## it does not touch the game (the scene turns the choice into a command).
 class_name BuildMenu
@@ -7,7 +7,7 @@ extends PanelContainer
 signal tower_chosen(tower: String)
 
 const TOWERS := preload("res://content/towers.gd")
-const BUTTON_SIZE := Vector2(240.0, 96.0)
+const BUTTON_SIZE := Vector2(170.0, 96.0)
 
 ## The plot the menu was opened for.
 var cell := BoardSpace.NO_CELL
@@ -18,15 +18,16 @@ var _buttons := 0
 
 func _ready() -> void:
 	visible = false
-	# two columns: five towers in one would reach the speed bar on a phone
-	var box := GridContainer.new()
-	box.columns = 2
+	# one row along the bottom, so the board above it stays in view
+	var box := HBoxContainer.new()
 	add_child(box)
 	for id in TOWERS.TOWER_IDS:
 		var button := Button.new()
 		var def: Dictionary = TOWERS.DEFS[id]
-		button.text = "%s  %d" % [def.name, def.cost[0]]
+		button.text = "%s\n%d" % [def.name, def.cost[0]]
 		button.custom_minimum_size = BUTTON_SIZE
+		# long names wrap inside the fixed width, so five towers fit in one row
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.pressed.connect(_choose.bind(id))
 		box.add_child(button)
 		_tower_buttons.append(button)

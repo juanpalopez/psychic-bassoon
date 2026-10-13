@@ -7,7 +7,7 @@ signal upgrade_pressed(tower_id: int)
 signal sell_pressed(tower_id: int)
 
 const TOWERS := preload("res://content/towers.gd")
-const BUTTON_SIZE := Vector2(240.0, 96.0)
+const BUTTON_SIZE := Vector2(200.0, 96.0)
 
 var _tower: Tower
 var _buttons := 0
@@ -21,13 +21,17 @@ var _sell := Button.new()
 
 func _ready() -> void:
 	visible = false
-	var box := VBoxContainer.new()
-	add_child(box)
+	# a strip along the bottom: the words on the left, the two buttons beside them
+	var row := HBoxContainer.new()
+	add_child(row)
+	var words := VBoxContainer.new()
+	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(words)
 	for label in [_title, _stats]:
-		box.add_child(label)
+		words.add_child(label)
 	for button in [_upgrade, _sell]:
 		button.custom_minimum_size = BUTTON_SIZE
-		box.add_child(button)
+		row.add_child(button)
 	_upgrade.pressed.connect(func() -> void: upgrade_pressed.emit(_tower.id))
 	_sell.pressed.connect(func() -> void: sell_pressed.emit(_tower.id))
 

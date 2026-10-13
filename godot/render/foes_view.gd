@@ -29,9 +29,9 @@ const FALLBACK_COLOUR := Color("cccccc")
 ## scaled to that height with its feet on the road and faces +Z at yaw 0, keeps its own
 ## materials and is darkened as the foe is hurt; a missing file leaves the capsule.
 const MODELS := {
-	"scrapGoblin": {"path": "res://assets/models/enemies/scrap_goblin.glb", "height": 1.0},
-	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 1.5},
-	"cardboardGolem": {"path": "res://assets/models/enemies/cardboard_golem.glb", "height": 2.4},
+	"scrapGoblin": {"path": "res://assets/models/enemies/scrap_goblin.glb", "height": 1.8},
+	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 2.7},
+	"cardboardGolem": {"path": "res://assets/models/enemies/cardboard_golem.glb", "height": 4.2},
 }
 ## A foe that has not moved yet faces along the road, towards +x.
 const DEFAULT_YAW := PI / 2.0
