@@ -50,6 +50,15 @@ func setup(tower: Tower, look: TowerLook, surface_top: float, footprint: int = 1
 	_build_pips(tower.level + 1, look)
 
 
+## How tall a tower of `level` is drawn with `look`, from the tile up: the model's
+## height at its tier scale, or the box fallback's.
+static func height_of(level: int, look: TowerLook) -> float:
+	var mesh := ModelLoader.mesh(look.model_path)
+	if mesh == null:
+		return look.base_height + look.height_per_level * float(level)
+	return mesh.get_aabb().end.y * look.model_scale * (1.0 + TIER_GROWTH * float(level))
+
+
 ## Whether the tower is drawn with its model (and not the box).
 func has_model() -> bool:
 	return _has_model
