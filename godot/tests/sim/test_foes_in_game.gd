@@ -40,7 +40,7 @@ func test_launching_a_wave_queues_its_foes() -> void:
 	var game := _launched()
 	assert_eq(game.spawners.size(), 1)
 	assert_eq(game.spawners[0].wave, 1)
-	assert_eq(game.spawners[0].queue.size(), 7, "wave 1 holds 7 foes")
+	assert_eq(game.spawners[0].queue.size(), 10, "wave 1 holds 10 foes")
 
 
 func test_the_first_foe_appears_on_the_tick_the_spawn_delay_runs_out() -> void:
@@ -202,9 +202,9 @@ func test_with_two_routes_foes_use_both_and_one_draw_per_foe() -> void:
 	var used := {}
 	for foe in game.foes:
 		used[foe.route] = true
-	# 7 foes in wave 1 drew 7 route numbers
+	# 10 foes in wave 1 drew 10 route numbers
 	var expected := Rng.derive(game.seed, Streams.ROUTES)
-	for i in 7:
+	for i in 10:
 		expected.next_int(2)
 	assert_eq(game.route_rng.state, expected.state)
 
@@ -243,17 +243,17 @@ func test_the_route_each_foe_takes_is_the_next_draw_of_the_route_stream() -> voi
 			continue
 		var stream := Rng.derive(map_seed, Streams.ROUTES)
 		var picks: Array[int] = []
-		for i in 7:
+		for i in 10:
 			picks.append(stream.next_int(2))
 		if picks.has(0) and picks.has(1):
 			game = candidate
 			draws = picks
 			break
-	assert_not_null(game, "a map with a detour whose first 7 draws use both routes")
+	assert_not_null(game, "a map with a detour whose first 10 draws use both routes")
 	GameTestKit.run(game, [Command.launch_wave()])
 	_until(game, func() -> bool: return game.spawners.is_empty())
-	assert_eq(game.foes.size(), 7)
-	for i in 7:
+	assert_eq(game.foes.size(), 10)
+	for i in 10:
 		assert_eq(game.foes[i].route, draws[i], "foe %d" % i)
 
 

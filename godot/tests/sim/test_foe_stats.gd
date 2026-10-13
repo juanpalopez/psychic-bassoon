@@ -24,7 +24,7 @@ func test_the_three_ground_foes_have_the_gdd_roles() -> void:
 func test_wave_1_is_the_base_foe_with_a_hair_more_speed() -> void:
 	var stats := FoeStats.for_wave("scrapGoblin", 1)
 	assert_eq(stats.hp, 20)
-	assert_almost_eq(stats.speed, 1.9 * 1.006, 1e-12)
+	assert_almost_eq(stats.speed, 2.13 * 1.006, 1e-12)
 	assert_eq(stats.reward, 4)
 	assert_eq(stats.armor, 0)
 
@@ -33,7 +33,10 @@ func test_swarm_goblins_are_tougher_and_pay_less() -> void:
 	# wave 5 is a swarm: n = 4, hp scale 1 + 0.8 + 0.64 = 2.44, reward 4 * 1.16 = 4.64
 	var swarm := FoeStats.for_wave("scrapGoblin", 5)
 	assert_eq(swarm.hp, Rounding.half_up(20.0 * 2.44 * WAVES.SWARM_HP_MULTIPLIER))
-	assert_eq(swarm.reward, Rounding.half_up(4.0 * 1.16 * WAVES.SWARM_REWARD_MULTIPLIER))
+	assert_eq(
+		swarm.reward,
+		Rounding.half_up(4.0 * 1.16 * WAVES.SWARM_REWARD_MULTIPLIER * WAVES.REWARD_MULTIPLIER)
+	)
 	assert_gt(WAVES.SWARM_HP_MULTIPLIER, 1.0)
 	assert_lt(WAVES.SWARM_REWARD_MULTIPLIER, 1.0)
 	# the same goblin in wave 6 and an orc in the swarm wave are unscaled
@@ -65,7 +68,7 @@ func test_wave_10_goblin() -> void:
 	# n = 9: hp scale 1 + 0.2 * 9 + 0.04 * 81 = 6.04, so 20 * 6.04 = 120.8
 	var stats := FoeStats.for_wave("scrapGoblin", 10)
 	assert_eq(stats.hp, 121)
-	assert_almost_eq(stats.speed, 1.9 * 1.06, 1e-12)
+	assert_almost_eq(stats.speed, 2.13 * 1.06, 1e-12)
 	# 4 * (1 + 0.04 * 9) = 5.44
 	assert_eq(stats.reward, 5)
 	assert_eq(stats.armor, 0)
@@ -75,18 +78,18 @@ func test_wave_24_orc() -> void:
 	# n = 23: scale 1 + 4.6 + 0.04 * 529 = 26.76, so 130 * 26.76 = 3478.8
 	var stats := FoeStats.for_wave("corrugatedOrc", 24)
 	assert_eq(stats.hp, 3479)
-	assert_almost_eq(stats.speed, 0.68 * 1.144, 1e-12)
-	# 13 * (1 + 0.04 * 23) = 24.96
-	assert_eq(stats.reward, 25)
+	assert_almost_eq(stats.speed, 0.76 * 1.144, 1e-12)
+	# 13 * (1 + 0.04 * 23) = 24.96, times the reward multiplier 0.9 = 22.46
+	assert_eq(stats.reward, 22)
 	# an extra armor point every 12 waves: 6 + 2
 	assert_eq(stats.armor, 8)
 
 
 func test_speed_bonus_stops_at_the_cap() -> void:
 	# 0.006 * 100 would be 0.6; the cap is 0.25
-	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 100).speed, 0.5 * 1.25, 1e-12)
-	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 41).speed, 0.5 * 1.246, 1e-12)
-	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 42).speed, 0.5 * 1.25, 1e-12)
+	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 100).speed, 0.56 * 1.25, 1e-12)
+	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 41).speed, 0.56 * 1.246, 1e-12)
+	assert_almost_eq(FoeStats.for_wave("cardboardGolem", 42).speed, 0.56 * 1.25, 1e-12)
 
 
 func test_armor_steps_up_every_12_waves() -> void:

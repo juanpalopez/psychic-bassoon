@@ -299,3 +299,29 @@ The ticket's targets, measured with the scripted bot on seeds 1 to 12 (`godot/to
 
 **What stays open, for the pass after the Phase 7 content** (#237): the economy still leaves 200 to 1,000 Buttons unspent in every strategy (the extra pressure is bought off, see the swarm section); the Mess Tent is a weak support for its price; Prism heavy is the weakest build against swarms; Razor Moths, the Ink Shaman, tier 4 specs, the hero and spells all change the balance. The replay goldens were regenerated for this change (a reviewed balance change); the same games win and lose, but their ticks, final Heartstone health and Buttons changed.
 
+## Waves in Fibonacci groups (2026-10-13, #240)
+
+The owner asked for bigger batches of enemies in random groups of Fibonacci sizes up to 21, and a little more speed. Owner answers: bigger waves (not the same total) and slightly faster foes.
+
+**What changed** (`godot/content` and `godot/sim/waves/wave_builder.gd`):
+
+- A wave has 1.4 times as many foes (`WAVE_SIZE_MULTIPLIER`): wave 1 has 10, wave 10 has 28 plus the escort and the Golem, wave 20 has 48, swarm waves 27 (wave 5) and 57 (wave 15).
+- The foes of a wave are cut into groups of 1, 2, 3, 5, 8, 13 or 21 (`GROUP_SIZES`), one draw of the waves stream per group. The biggest group a wave may have rises with the wave: 5 foes up to wave 3, 8 from wave 4, 13 from wave 8, 21 from wave 13. Inside a group each foe follows 0.14 s behind the one before; between groups there is a pause of 2.4 s less 0.05 s per wave (at least 1.0 s). The boss escort and the Golem keep their own gaps.
+- Foes are about 12 percent faster: Scrap Goblin 1.9 to 2.13, Corrugated Orc 0.68 to 0.76, Cardboard Golem 0.5 to 0.56 cells a second.
+- Every kill pays 0.9 times as much (`REWARD_MULTIPLIER`): bigger waves pay more Buttons.
+- Towers: Spool Guard damage 11, 18, 30 to 13, 21, 35; Prism Spire damage per second 36, 72, 140 to 42, 84, 163; Thimble Mortar damage 27, 48, 83 to 22, 40, 68.
+
+**Why the towers moved.** The raw sweeps are in `docs/balance/groups-candidates.txt` (seeds 1 to 8, then 16 for the last round). With only the waves and the speed changed, the economy was the first problem: reward 1.0 left 1,300 to 2,000 Buttons unspent, and reward 0.8 collapsed every strategy by wave 10; 0.9 sits between. The second was that groups are what the GDD says a goblin swarm is, a job for splash: with the old tower numbers the Spool-only and Prism-only builds never won a map at any reward setting (0 of 8) while Mortar-heavy won 5 to 7 of 8. So the single-target towers went up by about 18 percent and the Mortar down by about 18 percent; two earlier sets (Spool 14, 22, 37 and Prism 44, 88, 171 with the Mortar at 25, 45, 77, and the same with the Mortar at 22, 40, 68) won 7 to 13 of 16 maps for each strategy, easier than before the change.
+
+**Result** (seeds 1 to 16, 20 waves, `docs/balance/groups-final-seeds-1-16.txt`; "before" is the final pass above):
+
+| Strategy | Won before | Won now | Mean Heartstone health | Buttons left |
+| --- | --- | --- | --- | --- |
+| Spool Guards only | 7 | 7 | 4.2 | 2,093 |
+| Mortar heavy | 6 | 6 | 3.2 | 565 |
+| Prism heavy | 5 | 4 | 3.1 | 757 |
+| Mix | 7 | 9 | 6.6 | 1,339 |
+| Guard mix | 6 | 6 | 3.3 | 860 |
+
+**What it says.** The win rates sit where they did (25 to 56 percent) but the game is a different one: waves are bigger and faster, arrive in clumps, and the losses fall earlier in the single-target builds (Prism heavy loses on waves 12 to 15 on 7 of its 11 losses). The Mix is now the best build (9 of 16), which is the intended direction: splash for the groups and single-target for the Orcs and the boss. Still true: Spool-only ends with about 2,000 unspent Buttons (it cannot spend them on anything that helps), which is the economy item of #237. The sweeps change little between 16 seeds and 8: results move by one or two maps, so numbers within that are noise. The replay goldens were regenerated for this reviewed change.
+

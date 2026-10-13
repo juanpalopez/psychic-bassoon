@@ -12,13 +12,13 @@ func test_the_beam_deals_its_damage_per_second_spread_over_the_ticks() -> void:
 	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
 	var start := foe.hp
 	Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 36.0 / 30.0, 1e-12, "one tick of 36 a second")
+	assert_almost_eq(_hp_lost(foe, start), 42.0 / 30.0, 1e-12, "one tick of 42 a second")
 	for i in 29:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 36.0, 1e-9, "a second of beam")
+	assert_almost_eq(_hp_lost(foe, start), 42.0, 1e-9, "a second of beam")
 	for i in 60:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 108.0, 1e-9, "three seconds")
+	assert_almost_eq(_hp_lost(foe, start), 126.0, 1e-9, "three seconds")
 
 
 func test_a_higher_level_hits_harder() -> void:
@@ -31,7 +31,7 @@ func test_a_higher_level_hits_harder() -> void:
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 72.0, 1e-9)
+	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9)
 
 
 func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
@@ -40,14 +40,14 @@ func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
 	var start := orc_a.hp
 	for i in 30:
 		Game.tick(prism.game)
-	assert_almost_eq(_hp_lost(orc_a, start), 36.0, 1e-9, "the whole 36 a second")
+	assert_almost_eq(_hp_lost(orc_a, start), 42.0, 1e-9, "the whole 42 a second")
 	var spool := TowerFireKit.scene("spoolGuard")
 	var orc_b := TowerFireKit.foe(spool.game, spool.near, "corrugatedOrc")
 	for i in 30:
 		Game.tick(spool.game)
-	# 3 shots a second of 11 against 6 armor: 5 each, 15 a second of 33 on paper
-	assert_almost_eq(_hp_lost(orc_b, start), 15.0, 1e-9)
-	assert_lt(_hp_lost(orc_b, start) / 33.0, 0.6, "armor ate over 40% of the Spool Guard")
+	# 3 shots a second of 13 against 6 armor: 7 each, 21 a second of 39 on paper
+	assert_almost_eq(_hp_lost(orc_b, start), 21.0, 1e-9)
+	assert_lt(_hp_lost(orc_b, start) / 39.0, 0.6, "armor ate over 40% of the Spool Guard")
 
 
 func test_the_beam_locks_the_foe_nearest_the_heartstone() -> void:
@@ -135,7 +135,7 @@ func test_two_beams_on_one_foe_add_up() -> void:
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 72.0, 1e-9)
+	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9)
 
 
 func test_a_lock_is_released_the_tick_another_tower_kills_the_foe() -> void:
@@ -157,12 +157,12 @@ func test_defence_is_taken_off_the_beams_damage_per_second_not_per_tick() -> voi
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 35.0, 1e-9, "36 a second less 1 resist")
+	assert_almost_eq(_hp_lost(foe, start), 41.0, 1e-9, "42 a second less 1 resist")
 	foe.resist = 40
 	start = foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 9.0, 1e-9, "the floor is a quarter of 36")
+	assert_almost_eq(_hp_lost(foe, start), 10.5, 1e-9, "the floor is a quarter of 42")
 
 
 func test_an_upgrade_while_locked_keeps_the_lock_and_hits_harder() -> void:
@@ -176,7 +176,7 @@ func test_an_upgrade_while_locked_keeps_the_lock_and_hits_harder() -> void:
 	for i in 30:
 		Game.tick(scene.game)
 	assert_eq(scene.tower.target_id, foe.id)
-	assert_almost_eq(_hp_lost(foe, start), 72.0, 1e-9, "level 2 beam, 72 a second")
+	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9, "level 2 beam, 84 a second")
 
 
 func test_selling_a_locked_tower_stops_the_beam() -> void:

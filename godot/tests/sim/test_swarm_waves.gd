@@ -21,19 +21,23 @@ func _types(orders: Array[SpawnOrder]) -> Array[String]:
 func test_a_swarm_has_the_swarm_multiplier_times_the_usual_foes() -> void:
 	assert_gt(WAVES.SWARM_COUNT_MULTIPLIER, 1.0, "swarms are bigger than a normal wave")
 	for wave in [5, 15]:
-		var usual := WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE
+		var usual := (
+			(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE) * WAVES.WAVE_SIZE_MULTIPLIER
+		)
 		assert_eq(
 			WaveBuilder.count_for(wave), Rounding.half_up(usual * WAVES.SWARM_COUNT_MULTIPLIER)
 		)
 		assert_gt(WaveBuilder.count_for(wave), Rounding.half_up(usual))
-	# by hand with the multiplier 1.5: 13 * 1.5 = 19.5 -> 20 and 27 * 1.5 = 40.5 -> 41
-	assert_eq(WaveBuilder.count_for(5), 20)
-	assert_eq(WaveBuilder.count_for(15), 41)
+	# by hand: 13 * 1.4 * 1.5 = 27.3 -> 27 and 27 * 1.4 * 1.5 = 56.7 -> 57
+	assert_eq(WaveBuilder.count_for(5), 27)
+	assert_eq(WaveBuilder.count_for(15), 57)
 
 
 func test_other_waves_and_boss_waves_keep_the_usual_count() -> void:
 	for wave in [1, 4, 6, 9, 10, 11, 14, 19, 20]:
-		var usual := WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE
+		var usual := (
+			(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE) * WAVES.WAVE_SIZE_MULTIPLIER
+		)
 		assert_eq(WaveBuilder.count_for(wave), Rounding.half_up(usual), "wave %d" % wave)
 
 

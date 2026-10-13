@@ -21,9 +21,24 @@ const SWARM_ORC_THRESHOLD_DROP := 0.1
 ## are many and frail, so without this a bigger swarm only feeds the player.
 const SWARM_HP_MULTIPLIER := 2.0
 const SWARM_REWARD_MULTIPLIER := 0.5
-## Foes in wave w: round(BASE_COUNT + w * COUNT_PER_WAVE).
+## Foes in wave w: round((BASE_COUNT + w * COUNT_PER_WAVE) * WAVE_SIZE_MULTIPLIER). The
+## multiplier made waves 40% bigger when they were cut into groups (2026-10-13, #240).
 const BASE_COUNT := 6.0
 const COUNT_PER_WAVE := 1.4
+const WAVE_SIZE_MULTIPLIER := 1.4
+
+## A wave's foes walk in groups of these sizes (Fibonacci), each group's size drawn from
+## the waves stream. From wave GROUP_CAP_FROM_WAVE[i] on, a group may have up to
+## GROUP_CAP[i] foes. Inside a group each foe follows GROUP_SPACING seconds behind the
+## one before; after a group comes a pause of max(GROUP_PAUSE_MIN, GROUP_PAUSE_BASE - w *
+## GROUP_PAUSE_PER_WAVE) seconds.
+const GROUP_SIZES: Array[int] = [1, 2, 3, 5, 8, 13, 21]
+const GROUP_CAP_FROM_WAVE: Array[int] = [1, 4, 8, 13]
+const GROUP_CAP: Array[int] = [5, 8, 13, 21]
+const GROUP_SPACING := 0.14
+const GROUP_PAUSE_BASE := 2.4
+const GROUP_PAUSE_PER_WAVE := 0.05
+const GROUP_PAUSE_MIN := 1.0
 ## Seconds before the first foe of a wave.
 const FIRST_SPAWN_DELAY := 0.2
 
@@ -53,6 +68,9 @@ const HP_QUADRATIC := 0.04
 ## Speed multiplier: 1 + min(SPEED_CAP, w * SPEED_PER_WAVE).
 const SPEED_PER_WAVE := 0.006
 const SPEED_CAP := 0.25
+## Every foe's reward is also multiplied by REWARD_MULTIPLIER: waves are bigger and walk
+## in groups, so each kill pays less to keep the economy in step.
+const REWARD_MULTIPLIER := 0.9
 ## Reward multiplier: 1 + REWARD_PER_WAVE * (w - 1).
 const REWARD_PER_WAVE := 0.04
 ## A foe's blows grow with the wave: 1 + ATTACK_PER_WAVE * (w - 1).
