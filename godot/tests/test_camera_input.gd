@@ -141,6 +141,26 @@ func test_a_finger_a_button_took_still_counts_so_another_finger_can_tap_the_boar
 	assert_eq(main.selected_cell(), socket, "the second finger's tap selects the socket")
 
 
+func test_the_mouse_finger_lifting_leaves_the_extra_finger_a_pointer_the_next_finger_pinches_with(
+) -> void:
+	var main := MAIN_SCENE.instantiate()
+	add_child_autofree(main)
+	await get_tree().process_frame
+	var rig := main.get_node("CameraRig") as CameraRig
+	_finger(main, 6, Vector2(400.0, 300.0), true, true)
+	_finger(main, 8, Vector2(500.0, 300.0), true, false)
+	# the first (mouse) finger lifts, the extra one stays down, a new finger lands
+	_finger(main, 6, Vector2(400.0, 300.0), false, true)
+	_finger(main, 9, Vector2(450.0, 300.0), true, true)
+	var before := rig.zoom
+	var drag := InputEventScreenDrag.new()
+	drag.index = 8
+	drag.position = Vector2(800.0, 300.0)
+	main._unhandled_input(drag)
+	assert_ne(rig.zoom, before, "the two fingers on the board still pinch")
+	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
+
+
 func test_a_pinch_with_odd_finger_indexes_still_zooms_and_never_selects() -> void:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)

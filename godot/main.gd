@@ -172,6 +172,9 @@ func selected_cell() -> Vector2i:
 ## `BoardSpace.NO_CELL` clears the selection.
 func select_cell(cell: Vector2i) -> void:
 	_selected = cell
+	if OS.has_feature("web"):
+		# the end-to-end test reads the selection the way a person sees it
+		JavaScriptBridge.eval("window.scraplineSelected = '%d,%d'" % [cell.x, cell.y])
 	_menu.close()
 	_panel.close()
 	_ring.hide_range()
