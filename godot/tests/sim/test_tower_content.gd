@@ -6,8 +6,10 @@ const TOWERS := preload("res://content/towers.gd")
 
 
 func test_the_towers_in_build_order() -> void:
-	assert_eq(TOWERS.TOWER_IDS, ["spoolGuard", "thimbleMortar", "prismSpire", "guardTent"])
-	assert_eq(TOWERS.DEFS.keys().size(), 4)
+	assert_eq(
+		TOWERS.TOWER_IDS, ["spoolGuard", "thimbleMortar", "prismSpire", "guardTent", "messTent"]
+	)
+	assert_eq(TOWERS.DEFS.keys().size(), 5)
 	for id in TOWERS.TOWER_IDS:
 		assert_true(TOWERS.DEFS.has(id), id)
 
@@ -20,15 +22,20 @@ func test_display_names_are_the_gdds() -> void:
 
 func test_every_tower_has_three_levels_of_cost_damage_and_range() -> void:
 	for id in TOWERS.TOWER_IDS:
-		var damage_key := "guard_damage" if TOWERS.DEFS[id].get("guards", false) else "damage"
-		for key in ["cost", damage_key, "range"]:
+		var def: Dictionary = TOWERS.DEFS[id]
+		var strength_key := "damage"
+		if def.get("guards", false):
+			strength_key = "guard_damage"
+		elif def.get("support", false):
+			strength_key = "guard_speed_bonus"
+		for key in ["cost", strength_key, "range"]:
 			assert_eq(TOWERS.DEFS[id][key].size(), 3, "%s %s" % [id, key])
 
 
 func test_each_level_costs_a_whole_number_of_buttons_and_hits_harder_and_further() -> void:
 	for id in TOWERS.TOWER_IDS:
 		var def: Dictionary = TOWERS.DEFS[id]
-		var damage: Array = def.guard_damage if def.get("guards", false) else def.damage
+		var damage: Array = def.get("guard_damage", def.get("guard_speed_bonus", def.get("damage")))
 		for level in 2:
 			assert_gt(damage[level + 1], damage[level], "%s damage" % id)
 			assert_gt(def.range[level + 1], def.range[level], "%s range" % id)
@@ -108,6 +115,9 @@ func test_each_tower_names_a_damage_type_the_sim_knows() -> void:
 		"guardTent": "physical"
 	}
 	for id in TOWERS.TOWER_IDS:
+		if TOWERS.DEFS[id].get("support", false):
+			assert_false(TOWERS.DEFS[id].has("damage_type"), "%s deals no damage" % id)
+			continue
 		assert_eq(TOWERS.DEFS[id].damage_type, expected[id], id)
 		assert_true(Damage.NAMES.has(TOWERS.DEFS[id].damage_type), id)
 	assert_eq(Damage.kind_named("true"), Damage.Kind.TRUE)

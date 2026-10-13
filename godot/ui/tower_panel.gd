@@ -71,9 +71,18 @@ func refresh() -> void:
 	var level := _tower.level
 	_title.text = "%s  Level %d" % [def.name, level + 1]
 	var reach: float = def.range[level] if _reach < 0.0 else _reach
-	if def.get("guards", false):
+	if def.get("support", false):
 		_stats.text = (
-			"Guards %d hp  Blow %d  Reach %s"
+			"Guards +%d%% speed  +%d hp/s  Reach %.1f"
+			% [
+				int(round(def.guard_speed_bonus[level] * 100.0)),
+				int(round(def.guard_regen_bonus[level])),
+				reach
+			]
+		)
+	elif def.get("guards", false):
+		_stats.text = (
+			"Guards %d hp  Blow %d  Reach %.1f"
 			% [def.guard_hp[level], def.guard_damage[level], reach]
 		)
 	elif def.get("beam", false):

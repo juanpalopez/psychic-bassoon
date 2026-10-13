@@ -81,6 +81,7 @@ static func post_for(game: GameState, tent: Tower) -> float:
 static func step(game: GameState) -> void:
 	if game.guards.is_empty():
 		return
+	_apply_auras(game)
 	for guard in game.guards:
 		var tent := _tent_of(game, guard)
 		var def: Dictionary = TOWERS.DEFS[tent.type]
@@ -91,11 +92,38 @@ static func step(game: GameState) -> void:
 		if held == null:
 			guard.foe_id = -1
 			guard.hp = minf(
-				guard.max_hp, guard.hp + float(def.regen[tent.level]) * Game.TICK_SECONDS
+				guard.max_hp,
+				guard.hp + (float(def.regen[tent.level]) + guard.regen_bonus) * Game.TICK_SECONDS
 			)
 			held = _take_a_foe(game, guard)
 		if held != null:
 			_fight(game, guard, held)
+
+
+## Gives each guard the bonus of the strongest Kitchen Mess Tent whose aura holds the
+## guard's post (a distance from the middle of the tent's block, raised by its
+## socket's elevation like a tower's reach). Auras do not add up.
+static func _apply_auras(game: GameState) -> void:
+	var tents: Array[Tower] = []
+	for tower in game.towers:
+		if TOWERS.DEFS[tower.type].get("support", false):
+			tents.append(tower)
+	for guard in game.guards:
+		guard.speed_bonus = 0.0
+		guard.regen_bonus = 0.0
+		if tents.is_empty():
+			continue
+		var at := game.routes[0].position_at(guard.post)
+		for tent in tents:
+			var def: Dictionary = TOWERS.DEFS[tent.type]
+			var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
+			var dx := at.x - centre.x
+			var dy := at.y - centre.y
+			var reach := TowerFire.reach_of(game, tent)
+			if dx * dx + dy * dy > reach * reach:
+				continue
+			guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))
+			guard.regen_bonus = maxf(guard.regen_bonus, float(def.guard_regen_bonus[tent.level]))
 
 
 static func _set_level(guard: Guard, def: Dictionary, level: int) -> void:
@@ -152,7 +180,7 @@ static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 	guard.cooldown -= Game.TICK_SECONDS
 	if guard.cooldown <= RULES.TIMER_EPSILON:
-		guard.cooldown += guard.interval
+		guard.cooldown += guard.interval / (1.0 + guard.speed_bonus)
 		Damage.apply(game, foe, guard.damage, Damage.Kind.PHYSICAL)
 	foe.attack_cooldown -= Game.TICK_SECONDS
 	if foe.attack_cooldown <= RULES.TIMER_EPSILON and foe.alive:
