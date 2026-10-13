@@ -15,7 +15,7 @@ Closes #
 - [ ] `godot/sim` passes `pnpm check:sim-purity`
 - [ ] Balance numbers live in `godot/content`; no magic numbers in logic
 - [ ] No hard-coded colours (CSS tokens or the Godot Theme only) and no `Math.random()` or `randf`/`randi` in the sim
-- [ ] New third-party assets or the owner's own models (CC0) are recorded in `assets/CREDITS.md` with source and licence
+- [ ] New assets (CC0 packs, or the owner's own models as `Owned by the owner (all rights reserved)`) are recorded in `assets/CREDITS.md` with source and licence
 - [ ] Docs updated if behaviour or rules changed
 - [ ] Adversarial review done at the right tier (see `docs/REVIEW-CHECKLIST.md`) and posted, or skipped by rule; blockers and majors fixed or answered
 

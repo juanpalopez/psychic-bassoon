@@ -172,7 +172,7 @@ Track B, one asset end to end (owner rescope, 2026-10-11): the Scrap Goblin (the
 If the Scrap Goblin cannot reach 60 fps with vertex animation, the fallback is part animation and fewer animated instances (see Risks).
 
 
-0. Foes: modelled by the owner in Blender in a papercraft look (flat cut-out shapes, visible fold lines and paper grain), then bake one 512 px map per foe with colours matched to the shared palette, rig, clips; this is the Track B list above.
+0. Foes: modelled by the owner in Blender in a papercraft look (flat cut-out shapes, visible fold lines and paper grain), then reduce to the triangle budget, bake one 512 px map per foe with colours matched to the shared palette, rig and make the clips; this is the Track B list above.
 1. Shortlist CC0 sources for the papercraft look: paper, cardboard, kraft and cutting-mat textures (Poly Haven, ambientCG) and any low-poly or paper-style packs. Kenney and Quaternius medieval kits no longer fit the style and are placeholders only. Check each licence file; anything not clearly CC0 is out.
 2. Map every unit to a pack model and write the gaps in `docs/art/GAPS.md` (see the gap plan below).
 3. In Blender, build or remap faces to one shared palette texture; kitbash gap units from pack parts.
@@ -183,7 +183,7 @@ If the Scrap Goblin cannot reach 60 fps with vertex animation, the fallback is p
 
 **Claude Design:** design system (tokens, type, panels) first, in the papercraft style; then mobile screens (title, HUD, radial menu, Toolbox Tray, workshop tech tree, pause, game over); key art for the README and personal site; reference sheets per foe and tower tier. Claude Design covers 2D screens and reference art, not 3D models.
 
-- **Rough silhouette sheets** (shape and colour only) for the 5 foes and 4 towers come first and brief the models.
+- **Rough silhouette sheets** (shape and colour only) for the 5 foes and 5 towers (Spool Guard, Guard Tent, Prism Spire, Thimble Mortar, Kitchen Mess Tent) come first and brief the models.
 - **Final reference sheets** are drawn after the pack shortlist, so they follow what the packs can supply instead of asking for shapes that can't be sourced. The owner's foe models are briefed from the silhouette sheets.
 
 ### Asset gap plan _(Phase 6)_
@@ -192,9 +192,9 @@ Which units can come from where, and what has to be built. Nothing here is verif
 
 | Unit | Likely source | Gap and fallback |
 | --- | --- | --- |
-| Scrap Goblin, Corrugated Orc, Cardboard Golem | The owner's Blender models in a papercraft look | A baked 512 px map per foe (1,024 px for the Golem), a rig for the Golem, walk, attack, hit and death clips baked to vertex animation sampled at 12 fps. The Golem is skinned. Licence: the owner's CC0 dedication, recorded in `assets/CREDITS.md`. |
+| Scrap Goblin, Corrugated Orc, Cardboard Golem | The owner's Blender models in a papercraft look | A baked 512 px map per foe (1,024 px for the Golem), a rig for the Golem, walk, attack, hit and death clips baked to vertex animation sampled at 12 fps. The Golem is skinned. Licence: owned by the owner (all rights reserved), recorded in `assets/CREDITS.md`. |
 | Razor Moth, Ink Shaman | Same pipeline | Flying wings (tissue paper and wire) need a flap clip; the Shaman needs a healing aura effect. |
-| Towers (4, tiers 1 to 4, 8 specialisations) | Blender, built with Claude, from spools, tents, prisms and thimbles | Parts animated in an `AnimationPlayer`, no skeleton, at most 3 mesh parts each. Tier lights or paper tags show the tier; specialisations add a visible part. |
+| Towers (5, tiers 1 to 4; 8 specialisations on four of them) | Blender, built with Claude, from spools, tents, prisms and thimbles | Parts animated in an `AnimationPlayer`, no skeleton, at most 3 mesh parts each. Tier lights or paper tags show the tier; specialisations add a visible part. |
 | Hero (Knight of Cardboard), planes, guards, Mess Tent | The owner's Blender models | The hero is skinned like a boss; paper planes and guards are small `MultiMesh` or scene instances (a guard needs idle, strike, fall and rise clips); the Kitchen Mess Tent is a fifth tower. |
 | Board tiles and props | Blender tiles (cutting mat, cardboard rise, tiered cliffs, foil rivers, tape strips) and CC0 paper textures | Terrain through modular 1 m tiles; sockets as etched circles that become folded cardstock when built. |
 | Effects | Shaders and particles | The Blot shader, glue pools, thumbtacks, confetti, ink vortex, wax freeze; no new models. |
@@ -226,7 +226,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 - All balance numbers live in `godot/content`.
 - Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
 - Git LFS for binary sources; only compressed GLBs ship.
-- MIT for code; each art source keeps its terms (CC0 packs, the owner's own models).
+- MIT for code; each art source keeps its terms (CC0 packs; the owner's own models stay all rights reserved).
 
 ## CI/CD pipeline
 
@@ -375,14 +375,14 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 **Work breakdown**
 1. Materials and shaders: kraft paper, cardboard (corrugation, fibre detail), the cutting mat, foil, tape and glue; translucent creased edges; the Blot vertex-displacement shader for ink-drenched surfaces.
 2. The Scrap Goblin through the whole pipeline first (the owner's Blender model, rig, clips including attack, vertex animation at 12 fps; ticket #157), then the Corrugated Orc and the Cardboard Golem. Record each in `assets/CREDITS.md`.
-3. The four towers in Blender, built with Claude: spool, tent, prism and thimble, with tier parts and the eight specialisations as visible changes.
+3. The five towers in Blender, built with Claude or by the owner: spool, Guard Tent, prism, thimble and the Kitchen Mess Tent, with tier parts and the eight specialisations as visible changes, and the guards (idle, strike, fall and rise clips; small instances, not in the tower cap).
 4. Board tiles and props (cutting mat, cardboard rise, cliffs, foil river, tape) and the CC0 paper textures.
 5. Stop-motion stepping at 12 fps for characters and projectiles.
 6. Claude Design: system and tokens first, in the papercraft style, then the HUD, radial menu, Toolbox Tray and workshop screens; build the Godot Theme from them.
 7. Budget re-check.
 
 **Gate checklist**
-- [ ] All foes and towers (tiers 1 to 3) use final models, each distinct at zoomed-out view.
+- [ ] All foes, towers (tiers 1 to 3) and guards use final models, each distinct at zoomed-out view.
 - [ ] Every gap in the asset gap plan has a fallback.
 - [ ] Performance budget still met; the replay goldens still pass.
 
@@ -393,7 +393,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 **Work breakdown**
 1. Flying: the Razor Moth, its line to the Heartstone, an anti-air flag on towers.
 2. Support: the Ink Shaman (healing and speed buffs) and a support-first targeting priority.
-3. Blocking and melee: foes attack and units have health; the Guard Tent and its guards.
+3. Blocking and melee: foes attack and units have health; the Guard Tent and its guards (done 2026-10-13, #220, #222; the Kitchen Mess Tent too, #224).
 4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability.
 5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl).
 6. Global spells and the Toolbox Tray: PVA Glue Trap, Falling Thumbtacks, The Crafter's Eraser, with Crafting Energy.

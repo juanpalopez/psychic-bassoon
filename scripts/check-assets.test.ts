@@ -110,11 +110,11 @@ describe('check-assets script', () => {
     expect(result.output).toContain('does not say CC0');
   });
 
-  it('accepts the owner dedicating their own model under CC0', () => {
+  it("accepts the owner's own model when the owner keeps the rights", () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     writeFileSync(
       credits,
-      "| `models/kit/a.glb` | Original, the owner | CC0 1.0 (the owner's dedication) | modelled in Blender |\n"
+      '| `models/kit/a.glb` | Original, the owner | Owned by the owner (all rights reserved) | modelled in Blender |\n'
     );
     expect(run().status).toBe(0);
   });
@@ -130,11 +130,15 @@ describe('check-assets script', () => {
     expect(result.output).toContain('does not say CC0');
   });
 
-  it('only reads the licence column, not the source or the edits', () => {
+  it('only reads the licence column, and it has to start with the licence', () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     for (const row of [
       '| `models/kit/a.glb` | Someone | CC BY 4.0 | CC0 |\n',
       '| `models/kit/a.glb` | CC0 pack | CC BY 4.0 | none |\n',
+      '| `models/kit/a.glb` | Someone | CC BY 4.0, not CC0 | none |\n',
+      '| `models/kit/a.glb` | Someone | Not Owned by the owner (all rights reserved) | none |\n',
+      '| `models/kit/a.glb` | CC0 | | none |\n',
+      '| `models/kit/a.glb` | CC0 |\n',
     ]) {
       writeFileSync(credits, row);
       const result = run();

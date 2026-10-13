@@ -111,4 +111,4 @@ Work is planned in phases and tracked as tickets on the [project board](https://
 
 ## License
 
-[MIT](LICENSE) for the code. Art keeps each source's terms (CC0 for packs and for the owner's own models).
+[MIT](LICENSE) for the code. Art keeps each source's terms (CC0 for packs; the owner keeps the rights to their own models).
