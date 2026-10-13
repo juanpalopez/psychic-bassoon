@@ -76,23 +76,30 @@ func _level0_within(sockets: Array, reach: float, count: int) -> Array:
 	return found.slice(0, count) if found.size() >= count else []
 
 
-func test_two_mess_tents_do_not_stack_and_the_strongest_wins() -> void:
+func test_two_mess_tents_do_not_stack_and_the_strongest_wins_in_either_order() -> void:
 	var reach: float = TOWERS.DEFS.messTent.range[0]
 	var game := GuardKit.find_game(
 		func(sockets: Array) -> bool: return not _level0_within(sockets, reach, 2).is_empty()
 	)
 	assert_not_null(game, "some seed has two plain sockets in a level 1 aura's reach")
 	var pair := _level0_within(GuardKit.sockets_by_distance(game), reach, 2)
-	# the strong tent first and the weak one last, so "the last one wins" fails too
-	GameTestKit.run(game, [Command.build("messTent", pair[0].x, pair[0].y)])
-	var strong := game.towers[1]
-	GameTestKit.run(game, [Command.upgrade(strong.id)])
-	GameTestKit.run(game, [Command.upgrade(strong.id)])
-	GameTestKit.run(game, [Command.build("messTent", pair[1].x, pair[1].y)])
-	GuardKit.tick(game, 1)
 	var top := TOWERS.DEFS.messTent
-	assert_almost_eq(game.guards[0].speed_bonus, float(top.guard_speed_bonus[2]), 1e-12)
-	assert_almost_eq(game.guards[0].regen_bonus, float(top.guard_regen_bonus[2]), 1e-12)
+	# the strong tent on the nearer socket and built first, the weak one last ...
+	var first := GuardKit.game_with_tent(game.seed)
+	GameTestKit.run(first, [Command.build("messTent", pair[0].x, pair[0].y)])
+	GameTestKit.run(first, [Command.upgrade(first.towers[1].id)])
+	GameTestKit.run(first, [Command.upgrade(first.towers[1].id)])
+	GameTestKit.run(first, [Command.build("messTent", pair[1].x, pair[1].y)])
+	# ... and the other way round: the weak tent first and nearer, the strong one last
+	var second := GuardKit.game_with_tent(game.seed)
+	GameTestKit.run(second, [Command.build("messTent", pair[0].x, pair[0].y)])
+	GameTestKit.run(second, [Command.build("messTent", pair[1].x, pair[1].y)])
+	GameTestKit.run(second, [Command.upgrade(second.towers[2].id)])
+	GameTestKit.run(second, [Command.upgrade(second.towers[2].id)])
+	for built in [first, second]:
+		GuardKit.tick(built, 1)
+		assert_almost_eq(built.guards[0].speed_bonus, float(top.guard_speed_bonus[2]), 1e-12)
+		assert_almost_eq(built.guards[0].regen_bonus, float(top.guard_regen_bonus[2]), 1e-12)
 
 
 func test_a_mess_tent_out_of_reach_gives_the_guards_nothing() -> void:
@@ -100,15 +107,17 @@ func test_a_mess_tent_out_of_reach_gives_the_guards_nothing() -> void:
 	var game := GuardKit.find_game(
 		func(sockets: Array) -> bool:
 			for entry in sockets:
-				if entry[2] == 0 and entry[1] > farthest:
+				if entry[2] == 0 and entry[1] > farthest and entry[1] < farthest + 0.5:
 					return true
 			return false
 	)
 	assert_not_null(game)
 	var far := Vector2i(-1, -1)
 	for entry in GuardKit.sockets_by_distance(game):
-		if entry[2] == 0 and entry[1] > farthest:
+		# nearest first: the socket just outside the largest reach there can be
+		if entry[2] == 0 and entry[1] > farthest and entry[1] < farthest + 0.5:
 			far = entry[0]
+			break
 	GameTestKit.run(game, [Command.build("messTent", far.x, far.y)])
 	GameTestKit.run(game, [Command.upgrade(game.towers[1].id)])
 	GameTestKit.run(game, [Command.upgrade(game.towers[1].id)])
