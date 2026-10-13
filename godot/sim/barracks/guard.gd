@@ -17,6 +17,10 @@ var cooldown: float = 0.0
 var radius: float = 0.0
 ## Where it stands, in cells walked along `routes[0]`.
 var post: float = 0.0
+## Bonuses from a Kitchen Mess Tent whose aura holds the guard's post, set each tick:
+## a share more blows, and hp a second more regeneration.
+var speed_bonus: float = 0.0
+var regen_bonus: float = 0.0
 var alive: bool = true
 ## Seconds until it is raised again after a fall.
 var respawn_timer: float = 0.0

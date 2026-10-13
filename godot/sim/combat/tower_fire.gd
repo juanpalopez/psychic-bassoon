@@ -16,7 +16,7 @@ const RULES := preload("res://content/game_rules.gd")
 static func step(game: GameState) -> void:
 	for tower in game.towers:
 		var def: Dictionary = TOWERS.DEFS[tower.type]
-		if def.get("guards", false):
+		if def.get("guards", false) or def.get("support", false):
 			continue
 		if def.get("beam", false):
 			_beam(game, tower, def)

@@ -18,13 +18,21 @@
 ## `regen` hp a second out of a fight), `guard_spacing` cells apart with a body
 ## `guard_radius` wide. `range` is the reach the player sees; the guards post at the
 ## point of the road nearest the tent (a socket is always within the block touch
-## distance of it, see `map_rules.gd`). It is last in `TOWER_IDS`, the build menu's
-## order. Interim numbers.
+## distance of it, see `map_rules.gd`). Interim numbers.
+##
+## The Kitchen Mess Tent is a `support` tower: it does not shoot and has no damage. Its
+## `range` is the radius of its aura, in cells from the middle of its block; every
+## guard posted inside it gets `guard_speed_bonus` (a share more blows) and
+## `guard_regen_bonus` (hp a second more out of a fight). Only the strongest aura
+## applies to a guard. Interim numbers (`docs/BARRACKS.md`). The build menu follows
+## the order of `TOWER_IDS`.
 ##
 ## Level-indexed stats: index 0 is level 1, index 2 is level 3.
 extends RefCounted
 
-const TOWER_IDS: Array[String] = ["spoolGuard", "thimbleMortar", "prismSpire", "guardTent"]
+const TOWER_IDS: Array[String] = [
+	"spoolGuard", "thimbleMortar", "prismSpire", "guardTent", "messTent"
+]
 
 ## Per tower: `name`, `damage_type` ("physical", "magic" or "true"), `cost`,
 ## `damage` (per shot, or per second for a beam), `range` (cells) and, for a
@@ -76,5 +84,14 @@ const DEFS := {
 		"guard_interval": [1.0, 1.0, 1.0],
 		"respawn": [12, 10, 8],
 		"regen": [1.0, 1.5, 2.0],
+	},
+	"messTent":
+	{
+		"name": "Kitchen Mess Tent",
+		"support": true,
+		"cost": [100, 100, 160],
+		"range": [2.2, 2.5, 2.8],
+		"guard_speed_bonus": [0.12, 0.18, 0.25],
+		"guard_regen_bonus": [2.0, 3.0, 4.0],
 	},
 }

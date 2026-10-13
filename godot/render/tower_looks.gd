@@ -7,6 +7,7 @@ const FILE_NAMES := {
 	"thimbleMortar": "thimble_mortar",
 	"prismSpire": "prism_spire",
 	"guardTent": "guard_tent",
+	"messTent": "mess_tent",
 }
 const FALLBACK_FILE := "spool_guard"
 const DIRECTORY := "res://render/looks/"

@@ -1,4 +1,4 @@
-## A panel with one button per tower: its name and what it costs. It opens for a
+## A panel with one button per tower, two to a row: its name and what it costs. It opens for a
 ## free plot, greys out what the player cannot afford, and announces the choice;
 ## it does not touch the game (the scene turns the choice into a command).
 class_name BuildMenu
@@ -18,7 +18,9 @@ var _buttons := 0
 
 func _ready() -> void:
 	visible = false
-	var box := VBoxContainer.new()
+	# two columns: five towers in one would reach the speed bar on a phone
+	var box := GridContainer.new()
+	box.columns = 2
 	add_child(box)
 	for id in TOWERS.TOWER_IDS:
 		var button := Button.new()
