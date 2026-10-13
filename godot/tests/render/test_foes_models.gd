@@ -31,14 +31,35 @@ func _view(models: Dictionary = MODELS) -> FoesView:
 	return view
 
 
-func test_the_scrap_goblin_uses_the_model_and_the_others_stay_capsules() -> void:
+func test_every_ground_foe_uses_its_model() -> void:
 	var view := _view()
+	for type in FOES.FOE_IDS:
+		assert_true(view.uses_model(type), type)
+		assert_false(view.mesh_of(type) is CapsuleMesh, type)
+		assert_gt(view.mesh_of(type).get_aabb().size.y, 0.0, type)
+	assert_gt(MODELS.cardboardGolem.height, MODELS.corrugatedOrc.height)
+	assert_gt(MODELS.corrugatedOrc.height, MODELS.scrapGoblin.height)
+
+
+func test_a_foe_without_a_model_entry_stays_a_capsule() -> void:
+	var view := _view({"scrapGoblin": MODELS.scrapGoblin})
 	assert_true(view.uses_model("scrapGoblin"))
-	assert_false(view.mesh_of("scrapGoblin") is CapsuleMesh)
-	assert_gt(view.mesh_of("scrapGoblin").get_aabb().size.y, 0.0)
 	assert_false(view.uses_model("corrugatedOrc"))
 	assert_true(view.mesh_of("corrugatedOrc") is CapsuleMesh)
-	assert_true(view.mesh_of("cardboardGolem") is CapsuleMesh)
+
+
+func test_a_hurt_model_is_tinted_through_the_instance_colour() -> void:
+	var view := _view()
+	var healthy := _foe(0, "corrugatedOrc", 4.5, 3.5)
+	var hurt := _foe(1, "corrugatedOrc", 5.5, 3.5)
+	hurt.hp = 5
+	view.update(_game_with([healthy, hurt] as Array[Foe], 1), 1.0)
+	assert_eq(view.drawn_colour("corrugatedOrc", 0), Color.WHITE)
+	assert_lt(view.drawn_colour("corrugatedOrc", 1).v, 0.9)
+	var mesh := view.mesh_of("corrugatedOrc")
+	for surface in mesh.get_surface_count():
+		var material := mesh.surface_get_material(surface) as StandardMaterial3D
+		assert_true(material.vertex_color_use_as_albedo, "surface %d" % surface)
 
 
 func test_a_missing_model_file_falls_back_to_a_capsule() -> void:

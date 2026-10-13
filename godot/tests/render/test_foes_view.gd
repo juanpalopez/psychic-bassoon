@@ -139,7 +139,7 @@ func test_a_hurt_foe_is_drawn_darker() -> void:
 	assert_gt(healthy.v, hurt.v)
 
 
-func test_a_bigger_foe_is_a_bigger_capsule() -> void:
+func test_a_bigger_foe_is_drawn_taller() -> void:
 	var view := _view()
 	view.update(
 		_game_with(
@@ -150,8 +150,11 @@ func test_a_bigger_foe_is_a_bigger_capsule() -> void:
 		),
 		1.0
 	)
-	var small := view.drawn_scale("scrapGoblin", 0)
-	var large := view.drawn_scale("cardboardGolem", 0)
+	# a model is scaled to its height, a capsule by the foe's radius: compare what is drawn
+	var small := view.drawn_scale("scrapGoblin", 0) * view.mesh_of("scrapGoblin").get_aabb().size.y
+	var large := (
+		view.drawn_scale("cardboardGolem", 0) * view.mesh_of("cardboardGolem").get_aabb().size.y
+	)
 	assert_gt(large, small)
 
 

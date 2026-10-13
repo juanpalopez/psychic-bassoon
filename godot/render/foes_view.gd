@@ -23,12 +23,14 @@ const COLOURS := {
 	"cardboardGolem": Color("8a6a43"),
 }
 const FALLBACK_COLOUR := Color("cccccc")
-## The foes drawn with a model from `godot/assets/models` instead of a capsule (greybox
-## models by the owner): its file and how tall it stands, in cells. A model is
-## scaled to that height with its feet on the road and faces +Z at yaw 0; a missing
-## file leaves the capsule.
+## The foes drawn with a model from `godot/assets/models/enemies` instead of a capsule
+## (greybox models by the owner): its file and how tall it stands, in cells. A model is
+## scaled to that height with its feet on the road and faces +Z at yaw 0, keeps its own
+## materials and is darkened as the foe is hurt; a missing file leaves the capsule.
 const MODELS := {
-	"scrapGoblin": {"path": "res://assets/models/goblin_lowpoly.glb", "height": 1.0},
+	"scrapGoblin": {"path": "res://assets/models/enemies/scrap_goblin.glb", "height": 1.0},
+	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 1.5},
+	"cardboardGolem": {"path": "res://assets/models/enemies/cardboard_golem.glb", "height": 2.4},
 }
 ## A foe that has not moved yet faces along the road, towards +x.
 const DEFAULT_YAW := PI / 2.0
@@ -61,6 +63,7 @@ func _init(models: Dictionary = MODELS) -> void:
 			var box := mesh.get_aabb()
 			var scale := float(models[type].height) / box.size.y
 			_models[type] = {"mesh": mesh, "scale": scale, "foot": -box.position.y * scale}
+			_make_tintable(mesh)
 			multimesh.mesh = mesh
 		else:
 			var capsule := CapsuleMesh.new()
@@ -72,9 +75,10 @@ func _init(models: Dictionary = MODELS) -> void:
 		var instance := MultiMeshInstance3D.new()
 		instance.name = type
 		instance.multimesh = multimesh
-		var material := StandardMaterial3D.new()
-		material.vertex_color_use_as_albedo = true
-		instance.material_override = material
+		if mesh == null:
+			var material := StandardMaterial3D.new()
+			material.vertex_color_use_as_albedo = true
+			instance.material_override = material
 		add_child(instance)
 		_multimeshes[type] = multimesh
 		_used[type] = 0
@@ -183,7 +187,9 @@ func update(game: GameState, alpha: float) -> void:
 			_drawn_yaws[foe.type][index] = yaw
 		multimesh.set_instance_transform(index, Transform3D(basis, position))
 		var health := float(foe.hp) / maxf(float(foe.max_hp), 1.0)
-		var base: Color = COLOURS.get(foe.type, FALLBACK_COLOUR)
+		var base: Color = (
+			Color.WHITE if _models.has(foe.type) else COLOURS.get(foe.type, FALLBACK_COLOUR)
+		)
 		var colour := base.darkened(HURT_DARKEN * (1.0 - clampf(health, 0.0, 1.0)))
 		multimesh.set_instance_color(index, colour)
 		_drawn_positions[foe.type][index] = position
@@ -214,3 +220,16 @@ static func _first_mesh(node: Node) -> Mesh:
 		if found != null:
 			return found
 	return null
+
+
+## Lets the instance colour tint the model's own materials (the instance colour is
+## white for a healthy foe and darker as it is hurt): each surface's material is
+## copied with `vertex_color_use_as_albedo`.
+static func _make_tintable(mesh: Mesh) -> void:
+	for surface in mesh.get_surface_count():
+		var material := mesh.surface_get_material(surface) as StandardMaterial3D
+		if material == null:
+			continue
+		var tintable := material.duplicate() as StandardMaterial3D
+		tintable.vertex_color_use_as_albedo = true
+		mesh.surface_set_material(surface, tintable)
