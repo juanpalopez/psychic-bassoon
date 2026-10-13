@@ -9,6 +9,10 @@ rules or profiles); `sub:<file>#<n>` replaces `old` by `new` in that file (the `
 the keys apart). Each config runs in its own copy of the godot project, and each
 (config, profile) is one godot process playing every seed, so a sweep takes about as
 long as its slowest job. The working tree is never touched.
+
+To explore cheaply, play one profile (`BALANCE_PROFILES=guardMix`) on a few seeds
+(`1,2,3,4,5,6`) and only for the final numbers all profiles on seeds 1 to 16: a
+full sweep of one config is 5 profiles x 16 seeds.
 """
 import json
 import os

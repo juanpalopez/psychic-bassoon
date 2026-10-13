@@ -10,7 +10,19 @@ What the `adversarial-reviewer` agent reads instead of the full `CLAUDE.md` and 
 | Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic sim modules (`godot/sim`) (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
 | Deep | `.github/workflows/`, determinism-critical sim code (the PRNG, the tick and command loop, the replay test and seed or snapshot handling), anything touching secrets, permissions, deploy or release, a rule change in `CLAUDE.md` | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
 
-When unsure, take the higher tier.
+When unsure, take the higher tier, but choose the tier by what the PR touches, not by how it feels. A review costs about 50k tokens (a standard one 30k to 40k, a deep one 50k to 75k); the deep tier pays off on the tick loop, the PRNG, seeds, snapshots and goldens, workflows and rule changes, and not on UI, render, content numbers, docs, tools or CI scripts, which are standard. A sim PR that does not touch the tick loop, the PRNG, seeds or snapshots is standard if its tests were checked with `scripts/mutate.py`.
+
+## What the caller sends the reviewer
+
+The author does the cheap work first and hands over the evidence, so the reviewer verifies instead of rediscovering:
+
+- The PR number, base, head commit, ticket, tier, and for a re-review the earlier findings and the diff since.
+- **The author's mutation results**: the list from `scripts/mutate.py` (a file in `scripts/mutations/`), with the survivors. The reviewer checks that the list covers the rules of the ticket and adds a mutation only for a rule it is missing; it does not rebuild a worktree to edit code by hand.
+- **The author's numbers**: for a balance or doc PR, the raw files and the commands that made them. The reviewer recounts a sample and the claims that matter, not every number.
+- A tool call budget (the tier's limit) and the instruction to report only what it proved, and to say what it did not check.
+- Never reuse or reset the author's worktrees: create a new scratch worktree and remove it afterwards.
+
+A re-review is worth its cost when logic changed (code under `godot/sim`, the tick loop, input handling). A fix that only adds tests, changes wording or moves a number is checked by the author with `scripts/mutate.py`, and the PR says so.
 
 ## Do not repeat CI
 
