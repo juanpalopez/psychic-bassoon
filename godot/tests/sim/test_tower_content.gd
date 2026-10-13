@@ -5,11 +5,9 @@ extends GutTest
 const TOWERS := preload("res://content/towers.gd")
 
 
-func test_the_three_combat_towers_in_build_order() -> void:
-	assert_eq(TOWERS.TOWER_IDS, ["spoolGuard", "thimbleMortar", "prismSpire"])
-	# the Guard Tent is content too, but not in the build menu yet (see towers.gd)
+func test_the_towers_in_build_order() -> void:
+	assert_eq(TOWERS.TOWER_IDS, ["spoolGuard", "thimbleMortar", "prismSpire", "guardTent"])
 	assert_eq(TOWERS.DEFS.keys().size(), 4)
-	assert_true(TOWERS.DEFS.has("guardTent"))
 	for id in TOWERS.TOWER_IDS:
 		assert_true(TOWERS.DEFS.has(id), id)
 
@@ -22,15 +20,17 @@ func test_display_names_are_the_gdds() -> void:
 
 func test_every_tower_has_three_levels_of_cost_damage_and_range() -> void:
 	for id in TOWERS.TOWER_IDS:
-		for key in ["cost", "damage", "range"]:
+		var damage_key := "guard_damage" if TOWERS.DEFS[id].get("guards", false) else "damage"
+		for key in ["cost", damage_key, "range"]:
 			assert_eq(TOWERS.DEFS[id][key].size(), 3, "%s %s" % [id, key])
 
 
 func test_each_level_costs_a_whole_number_of_buttons_and_hits_harder_and_further() -> void:
 	for id in TOWERS.TOWER_IDS:
 		var def: Dictionary = TOWERS.DEFS[id]
+		var damage: Array = def.guard_damage if def.get("guards", false) else def.damage
 		for level in 2:
-			assert_gt(def.damage[level + 1], def.damage[level], "%s damage" % id)
+			assert_gt(damage[level + 1], damage[level], "%s damage" % id)
 			assert_gt(def.range[level + 1], def.range[level], "%s range" % id)
 		for cost in def.cost:
 			assert_true(cost is int and cost > 0, id)
@@ -101,7 +101,12 @@ func _scan(dir: String, old: Array[String], old_files: Array[String], found: Arr
 
 
 func test_each_tower_names_a_damage_type_the_sim_knows() -> void:
-	var expected := {"spoolGuard": "physical", "thimbleMortar": "physical", "prismSpire": "magic"}
+	var expected := {
+		"spoolGuard": "physical",
+		"thimbleMortar": "physical",
+		"prismSpire": "magic",
+		"guardTent": "physical"
+	}
 	for id in TOWERS.TOWER_IDS:
 		assert_eq(TOWERS.DEFS[id].damage_type, expected[id], id)
 		assert_true(Damage.NAMES.has(TOWERS.DEFS[id].damage_type), id)

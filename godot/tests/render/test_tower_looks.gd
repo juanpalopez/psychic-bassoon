@@ -29,7 +29,7 @@ func test_each_look_has_its_own_colour_and_sensible_sizes() -> void:
 		assert_lt(look.foot, 1.0, id)
 		assert_gt(look.base_height, 0.3, id)
 		assert_gt(look.height_per_level, 0.0, id)
-	assert_eq(colours.size(), TOWERS.TOWER_IDS.size(), "three colours, none repeated")
+	assert_eq(colours.size(), TOWERS.TOWER_IDS.size(), "every tower has its own colour")
 
 
 func test_a_look_holds_no_game_numbers() -> void:
