@@ -57,7 +57,7 @@ func test_a_group_draws_one_float_from_the_waves_stream() -> void:
 	var rng := Rng.derive(SEED, Streams.WAVES)
 	var sizes := WaveBuilder.group_sizes(12, 40, rng)
 	var expected := Rng.derive(SEED, Streams.WAVES)
-	# one draw per group; a last group that had to be cut down still drew once
+	# one draw per group; a group that had to be cut down to fit still drew once
 	for i in sizes.size():
 		expected.next_float()
 	assert_eq(rng.state, expected.state)
@@ -83,22 +83,31 @@ func test_foes_inside_a_group_follow_closely_and_the_last_one_waits_for_the_next
 		assert_gt(pauses, 0)
 
 
-func test_the_pause_between_groups_shrinks_with_the_wave_to_a_floor() -> void:
-	# 2.4 - 0.05 * wave, never under 1.0
-	var pause_at := func(wave: int) -> float:
-		return maxf(
-			WAVES.GROUP_PAUSE_MIN, WAVES.GROUP_PAUSE_BASE - float(wave) * WAVES.GROUP_PAUSE_PER_WAVE
-		)
-	assert_almost_eq(pause_at.call(2), 2.3, 1e-9)
-	assert_almost_eq(pause_at.call(20), 1.4, 1e-9)
-	assert_almost_eq(pause_at.call(40), 1.0, 1e-9)
+func _group_ends(orders: Array[SpawnOrder]) -> Array[float]:
+	# the pauses between groups are the gaps that are not the tight spacing
+	var ends: Array[float] = []
+	for order in orders:
+		if not is_equal_approx(order.gap, WAVES.GROUP_SPACING):
+			ends.append(order.gap)
+	return ends
+
+
+func test_the_pause_between_groups_is_written_out_and_has_a_floor() -> void:
+	# 2.4 - 0.05 * wave, never under 1.0: 2.3 at wave 2, 1.45 at wave 19, the floor 1.0 at wave
+	# 33 (not boss waves: their escort and Golem have gaps of their own)
+	for entry in [[2, 2.3], [19, 1.45], [28, 1.0], [33, 1.0]]:
+		var ends := _group_ends(WaveBuilder.build(entry[0], Rng.derive(SEED, Streams.WAVES)))
+		assert_gt(ends.size(), 0, "wave %d has groups" % entry[0])
+		for gap in ends:
+			assert_almost_eq(gap, entry[1], 1e-9, "wave %d" % entry[0])
 
 
 func test_a_boss_wave_keeps_its_escort_in_front_and_the_golem_behind_the_groups() -> void:
 	var orders := WaveBuilder.build(10, Rng.derive(SEED, Streams.WAVES))
 	assert_eq(orders[0].type, "corrugatedOrc")
 	assert_eq(orders[orders.size() - 1].type, "cardboardGolem")
-	# the escort's and the Golem's own gaps are kept, not turned into group gaps
+	# the escort's and the Golem's own gaps are kept, not turned into group gaps (the Golem
+	# is last, so nothing waits after it; the time before it is the last group's pause)
 	var gap := maxf(WAVES.GAP_MIN, WAVES.GAP_BASE - 10.0 * WAVES.GAP_PER_WAVE)
 	assert_almost_eq(orders[0].gap, gap * WAVES.GAP_BOSS_ESCORT, 1e-9)
 	assert_almost_eq(orders[orders.size() - 1].gap, WAVES.GOLEM_GAP, 1e-9)

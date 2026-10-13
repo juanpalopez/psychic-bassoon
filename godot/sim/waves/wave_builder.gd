@@ -38,8 +38,8 @@ static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 
 
 ## Cuts `total` foes into groups of Fibonacci sizes: each group's size is drawn (one
-## float) from the sizes the wave allows (`GROUP_CAP` by wave), and the last group is
-## the biggest Fibonacci size that still fits what is left.
+## float) from the sizes the wave allows (`GROUP_CAP` by wave). A pick bigger than what is
+## left is cut down to the biggest allowed size that fits, and the next group takes the rest.
 static func group_sizes(wave: int, total: int, rng: Rng) -> Array[int]:
 	var cap := 0
 	for i in WAVES.GROUP_CAP_FROM_WAVE.size():

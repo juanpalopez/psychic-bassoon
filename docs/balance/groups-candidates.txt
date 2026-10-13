@@ -113,3 +113,11 @@
   prismHeavy   cleared [11, 13, 14, 14, 14, 14, 14, 17, 19, 19, 19, 19, 20, 20, 20, 20] died_on [12, 14, 15, 15, 15, 15, 15, 18, 20, 20, 20] heart 3.1 buttons_left 757
   mix          cleared [9, 11, 14, 14, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 12, 15, 15, 20, 20] heart 6.6 buttons_left 1339
   guardMix     cleared [9, 11, 14, 14, 14, 14, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [10, 12, 15, 15, 15, 15, 20, 20] heart 3.3 buttons_left 860
+
+## Round 6: the first 'too easy' set on seeds 1 to 16 (reward 0.9, Spool 14/22/37, Prism 44/88/171, Mortar 25/45/77), run afterwards so that its raw lines are kept
+{"sub:towers#1": ["\"damage\": [13, 21, 35],", "\"damage\": [14, 22, 37],"], "sub:towers#2": ["\"damage\": [42, 84, 163],", "\"damage\": [44, 88, 171],"], "sub:towers#3": ["\"damage\": [22, 40, 68],", "\"damage\": [25, 45, 77],"]}
+  spoolOnly    cleared [16, 17, 18, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 18, 19, 19, 19, 20, 20] heart 6.8 buttons_left 2409
+  mortarHeavy  cleared [8, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [9, 20, 20] heart 8.9 buttons_left 1259
+  prismHeavy   cleared [13, 14, 14, 14, 14, 14, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [14, 15, 15, 15, 15, 15, 20] heart 5.4 buttons_left 904
+  mix          cleared [14, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [15, 19, 20] heart 12.8 buttons_left 1621
+  guardMix     cleared [13, 14, 14, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [14, 15, 15, 20] heart 7.4 buttons_left 1065
