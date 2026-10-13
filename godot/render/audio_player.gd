@@ -10,6 +10,9 @@ const SFX_VOICES := 8
 const SFX_MIN_GAP_MSEC := 60
 const MUSIC_VOLUME_DB := -8.0
 
+## Milliseconds since start; tests replace it so they never wait on the wall clock.
+var clock: Callable = Time.get_ticks_msec
+
 var _unlocked := false
 var _muted := false
 var _music_key := ""
@@ -18,6 +21,8 @@ var _music: AudioStreamPlayer
 var _voices: Array[AudioStreamPlayer] = []
 var _next_voice := 0
 var _last_msec := {}
+var _confirmed := false
+var _music_starts := 0
 
 
 func _ready() -> void:
@@ -37,6 +42,15 @@ func unlock() -> void:
 	_apply_music()
 
 
+## iOS Safari counts only the end of a touch as a gesture for audio, so the first release
+## after the unlock starts the music again, once, in case the first start was refused.
+func confirm_unlock() -> void:
+	if not _unlocked or _confirmed:
+		return
+	_confirmed = true
+	_apply_music()
+
+
 func is_unlocked() -> bool:
 	return _unlocked
 
@@ -45,10 +59,31 @@ func set_muted(value: bool) -> void:
 	_muted = value
 	if _music != null:
 		_music.stream_paused = value
+	if value:
+		for voice in _voices:
+			voice.stop()
 
 
 func is_muted() -> bool:
 	return _muted
+
+
+## How many times a tune was started.
+func music_starts() -> int:
+	return _music_starts
+
+
+## Whether any effect is sounding now.
+func any_voice_playing() -> bool:
+	for voice in _voices:
+		if voice.playing:
+			return true
+	return false
+
+
+## Whether the music player is paused (by the mute).
+func is_music_paused() -> bool:
+	return _music.stream_paused
 
 
 ## How many effects started (the throttled and muted ones do not count).
@@ -71,7 +106,7 @@ func set_music(key: String) -> void:
 func play_sfx(key: String) -> void:
 	if not _unlocked or _muted or key == "":
 		return
-	var now := Time.get_ticks_msec()
+	var now: int = clock.call()
 	if _last_msec.has(key) and now - int(_last_msec[key]) < SFX_MIN_GAP_MSEC:
 		return
 	_last_msec[key] = now
@@ -92,9 +127,11 @@ func _apply_music() -> void:
 	if stream is AudioStreamOggVorbis:
 		(stream as AudioStreamOggVorbis).loop = true
 	_music.stream = stream
-	_music.stream_paused = _muted
 	if stream != null:
+		_music_starts += 1
 		_music.play()
+	# play() clears a pause, so the mute is applied after it
+	_music.stream_paused = _muted
 
 
 func _load(name: String) -> AudioStream:

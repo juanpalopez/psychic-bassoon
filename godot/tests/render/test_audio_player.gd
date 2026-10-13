@@ -37,21 +37,53 @@ func test_after_the_tap_a_sound_plays_and_music_switches() -> void:
 
 func test_the_same_sound_in_the_same_instant_plays_once() -> void:
 	var player := _player()
+	var now := [1000]
+	player.clock = func() -> int: return now[0]
 	player.unlock()
 	for i in 20:
 		player.play_sfx("scissor_snap")
 	assert_eq(player.sfx_played(), 1, "a crowd of kills in one tick is one snap")
 	player.play_sfx("metal_snap")
 	assert_eq(player.sfx_played(), 2)
+	now[0] += 59
+	player.play_sfx("scissor_snap")
+	assert_eq(player.sfx_played(), 2, "still inside the window")
+	now[0] += 1
+	player.play_sfx("scissor_snap")
+	assert_eq(player.sfx_played(), 3, "a new snap once the window has passed")
 
 
-func test_muting_silences_sounds_and_music() -> void:
+func test_muting_silences_sounds_and_pauses_the_music() -> void:
 	var player := _player()
 	player.unlock()
 	player.set_music("tier2_wave")
+	assert_false(player.is_music_paused())
 	player.set_muted(true)
 	player.play_sfx("metal_snap")
 	assert_eq(player.sfx_played(), 0)
 	assert_true(player.is_muted())
+	assert_true(player.is_music_paused())
+	player.set_music("tier3_boss")
+	assert_true(player.is_music_paused(), "a tune switched while muted stays paused")
 	player.set_muted(false)
-	assert_eq(player.playing_music(), "tier2_wave", "the music comes back")
+	assert_false(player.is_music_paused())
+	assert_eq(player.playing_music(), "tier3_boss")
+
+
+func test_muting_stops_effects_already_playing() -> void:
+	var player := _player()
+	player.unlock()
+	player.play_sfx("paper_tear")
+	assert_true(player.any_voice_playing())
+	player.set_muted(true)
+	assert_false(player.any_voice_playing())
+
+
+func test_the_first_release_starts_the_music_again_once() -> void:
+	var player := _player()
+	player.unlock()
+	player.set_music("tier1_planning")
+	player.confirm_unlock()
+	assert_eq(player.music_starts(), 2, "the tune, then the retry")
+	player.confirm_unlock()
+	assert_eq(player.music_starts(), 2, "only once")

@@ -140,6 +140,11 @@ func _input(event: InputEvent) -> void:
 		or (event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
 	):
 		_audio.unlock()
+	elif (
+		(event is InputEventMouseButton and not (event as InputEventMouseButton).pressed)
+		or (event is InputEventScreenTouch and not (event as InputEventScreenTouch).pressed)
+	):
+		_audio.confirm_unlock()
 	if event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
 		if button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
