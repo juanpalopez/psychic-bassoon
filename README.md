@@ -107,8 +107,8 @@ Work is planned in phases and tracked as tickets on the [project board](https://
 
 ### Assets
 
-[CC0](https://creativecommons.org/publicdomain/zero/1.0/) packs, the owner's own models and Meshy-generated models, compressed to GLB in `godot/assets/`, with the source and licence recorded in `assets/CREDITS.md`.
+[CC0](https://creativecommons.org/publicdomain/zero/1.0/) packs and the owner's own models, compressed to GLB in `godot/assets/`, with the source and licence recorded in `assets/CREDITS.md`.
 
 ## License
 
-[MIT](LICENSE) for the code. Art keeps each source's terms (CC0 for packs; Meshy plan terms for generated models).
+[MIT](LICENSE) for the code. Art keeps each source's terms (CC0 for packs and for the owner's own models).

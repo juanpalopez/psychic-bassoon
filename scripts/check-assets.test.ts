@@ -110,21 +110,31 @@ describe('check-assets script', () => {
     expect(result.output).toContain('does not say CC0');
   });
 
-  it('accepts a Meshy output owned by the owner on the paid plan', () => {
+  it('accepts the owner dedicating their own model under CC0', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(
+      credits,
+      "| `models/kit/a.glb` | Original, the owner | CC0 1.0 (the owner's dedication) | modelled in Blender |\n"
+    );
+    expect(run().status).toBe(0);
+  });
+
+  it('no longer accepts a Meshy output', () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     writeFileSync(
       credits,
       '| `models/kit/a.glb` | Meshy (paid plan, 2026-10-10) | Owned by the owner (Meshy paid plan) | prompt: a goblin |\n'
     );
-    expect(run().status).toBe(0);
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
   });
 
   it('only reads the licence column, not the source or the edits', () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     for (const row of [
-      '| `models/kit/a.glb` | Meshy (free plan) | CC BY 4.0 | prompt: Owned by the owner (Meshy paid plan) |\n',
-      '| `models/kit/a.glb` | Meshy (free plan), not CC0 | CC BY 4.0 | none |\n',
-      '| `models/kit/a.glb` | Meshy (free plan) | CC BY 4.0 | CC0 |\n',
+      '| `models/kit/a.glb` | Someone | CC BY 4.0 | CC0 |\n',
+      '| `models/kit/a.glb` | CC0 pack | CC BY 4.0 | none |\n',
     ]) {
       writeFileSync(credits, row);
       const result = run();
