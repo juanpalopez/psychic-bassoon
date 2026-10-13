@@ -23,6 +23,17 @@ const COLOURS := {
 	"cardboardGolem": Color("8a6a43"),
 }
 const FALLBACK_COLOUR := Color("cccccc")
+## The foes drawn with a model from `godot/assets/models/enemies` instead of a capsule
+## (greybox models by the owner): its file and how tall it stands, in cells. A model is
+## scaled to that height with its feet on the road and faces +Z at yaw 0, keeps its own
+## materials and is darkened as the foe is hurt; a missing file leaves the capsule.
+const MODELS := {
+	"scrapGoblin": {"path": "res://assets/models/enemies/scrap_goblin.glb", "height": 1.0},
+	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 1.5},
+	"cardboardGolem": {"path": "res://assets/models/enemies/cardboard_golem.glb", "height": 2.4},
+}
+## A foe that has not moved yet faces along the road, towards +x.
+const DEFAULT_YAW := PI / 2.0
 
 var _multimeshes := {}
 var _tick_seen := -1
@@ -34,25 +45,40 @@ var _used := {}
 var _drawn_positions := {}
 var _drawn_scales := {}
 var _drawn_colours := {}
+## Per model type: its mesh, the scale that makes it its height and the height of its
+## lowest point above the origin, so that it can stand on the road.
+var _models := {}
+## The way each foe last walked (radians about the vertical axis), by foe id.
+var _yaws := {}
+var _drawn_yaws := {}
 
 
-func _init() -> void:
+func _init(models: Dictionary = MODELS) -> void:
 	for type in FOES.FOE_IDS:
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.use_colors = true
-		var capsule := CapsuleMesh.new()
-		capsule.radius = CAPSULE_RADIUS
-		capsule.height = CAPSULE_HEIGHT
-		multimesh.mesh = capsule
+		var mesh := _model_mesh(models[type].path) if models.has(type) else null
+		if mesh != null:
+			var box := mesh.get_aabb()
+			var scale := float(models[type].height) / box.size.y
+			_models[type] = {"mesh": mesh, "scale": scale, "foot": -box.position.y * scale}
+			_make_tintable(mesh)
+			multimesh.mesh = mesh
+		else:
+			var capsule := CapsuleMesh.new()
+			capsule.radius = CAPSULE_RADIUS
+			capsule.height = CAPSULE_HEIGHT
+			multimesh.mesh = capsule
 		multimesh.instance_count = MAX_PER_TYPE
 		multimesh.visible_instance_count = 0
 		var instance := MultiMeshInstance3D.new()
 		instance.name = type
 		instance.multimesh = multimesh
-		var material := StandardMaterial3D.new()
-		material.vertex_color_use_as_albedo = true
-		instance.material_override = material
+		if mesh == null:
+			var material := StandardMaterial3D.new()
+			material.vertex_color_use_as_albedo = true
+			instance.material_override = material
 		add_child(instance)
 		_multimeshes[type] = multimesh
 		_used[type] = 0
@@ -60,6 +86,7 @@ func _init() -> void:
 		_drawn_positions[type] = _filled(Vector3.ZERO)
 		_drawn_scales[type] = _filled(0.0)
 		_drawn_colours[type] = _filled(Color.WHITE)
+		_drawn_yaws[type] = _filled(0.0)
 
 
 ## A list of `MAX_PER_TYPE` copies of `value`.
@@ -68,6 +95,21 @@ func _filled(value: Variant) -> Array:
 	out.resize(MAX_PER_TYPE)
 	out.fill(value)
 	return out
+
+
+## Whether a foe type is drawn with a model (and not the capsule).
+func uses_model(type: String) -> bool:
+	return _models.has(type)
+
+
+## The mesh a foe type is drawn with.
+func mesh_of(type: String) -> Mesh:
+	return (_multimeshes[type] as MultiMesh).mesh
+
+
+## The way instance `index` of a model type faces (radians about the vertical axis).
+func drawn_yaw(type: String, index: int) -> float:
+	return _drawn_yaws[type][index]
 
 
 ## How many foes of this type are drawn right now.
@@ -97,6 +139,7 @@ func reset() -> void:
 	_tick_seen = -1
 	_previous.clear()
 	_current.clear()
+	_yaws.clear()
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = 0
 
@@ -128,14 +171,25 @@ func update(game: GameState, alpha: float) -> void:
 		var from: Vector2 = _previous.get(foe.id, Vector2(foe.x, foe.y))
 		var to: Vector2 = _current.get(foe.id, Vector2(foe.x, foe.y))
 		var at := from.lerp(to, blend)
-		var scale := foe.radius / CAPSULE_RADIUS
 		var position := BoardSpace.point_to_world(at.x, at.y)
+		var scale := foe.radius / CAPSULE_RADIUS
+		var basis := Basis.from_scale(Vector3(scale, scale, scale))
 		position.y = GROUND + CAPSULE_HEIGHT * scale / 2.0
-		multimesh.set_instance_transform(
-			index, Transform3D(Basis.from_scale(Vector3(scale, scale, scale)), position)
-		)
+		if _models.has(foe.type):
+			var model: Dictionary = _models[foe.type]
+			var walked := to - from
+			if walked.length_squared() > 1e-9:
+				_yaws[foe.id] = atan2(walked.x, walked.y)
+			var yaw: float = _yaws.get(foe.id, DEFAULT_YAW)
+			scale = model.scale
+			basis = Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(scale, scale, scale))
+			position.y = GROUND + float(model.foot)
+			_drawn_yaws[foe.type][index] = yaw
+		multimesh.set_instance_transform(index, Transform3D(basis, position))
 		var health := float(foe.hp) / maxf(float(foe.max_hp), 1.0)
-		var base: Color = COLOURS.get(foe.type, FALLBACK_COLOUR)
+		var base: Color = (
+			Color.WHITE if _models.has(foe.type) else COLOURS.get(foe.type, FALLBACK_COLOUR)
+		)
 		var colour := base.darkened(HURT_DARKEN * (1.0 - clampf(health, 0.0, 1.0)))
 		multimesh.set_instance_color(index, colour)
 		_drawn_positions[foe.type][index] = position
@@ -143,3 +197,39 @@ func update(game: GameState, alpha: float) -> void:
 		_drawn_colours[foe.type][index] = colour
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = _used[type]
+
+
+## The first mesh found in a model file, or null when the file is missing or has none.
+static func _model_mesh(path: String) -> Mesh:
+	if not ResourceLoader.exists(path):
+		return null
+	var scene := load(path) as PackedScene
+	if scene == null:
+		return null
+	var root := scene.instantiate()
+	var found := _first_mesh(root)
+	root.free()
+	return found
+
+
+static func _first_mesh(node: Node) -> Mesh:
+	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
+		return (node as MeshInstance3D).mesh
+	for child in node.get_children():
+		var found := _first_mesh(child)
+		if found != null:
+			return found
+	return null
+
+
+## Lets the instance colour tint the model's own materials (the instance colour is
+## white for a healthy foe and darker as it is hurt): each surface's material is
+## copied with `vertex_color_use_as_albedo`.
+static func _make_tintable(mesh: Mesh) -> void:
+	for surface in mesh.get_surface_count():
+		var material := mesh.surface_get_material(surface) as StandardMaterial3D
+		if material == null:
+			continue
+		var tintable := material.duplicate() as StandardMaterial3D
+		tintable.vertex_color_use_as_albedo = true
+		mesh.surface_set_material(surface, tintable)
