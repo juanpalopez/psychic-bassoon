@@ -1,0 +1,7 @@
+# Final numbers for the Fibonacci groups (#240): reward x0.9, Spool Guard 13/21/35, Prism Spire 42/84/163, Mortar 22/40/68, seeds 1 to 16, 20 waves. The first line is the set as run in the sweep (a change list); the content files now hold these numbers.
+{"sub:towers#1": ["\"damage\": [14, 22, 37],", "\"damage\": [13, 21, 35],"], "sub:towers#2": ["\"damage\": [44, 88, 171],", "\"damage\": [42, 84, 163],"], "sub:towers#3": ["\"damage\": [25, 45, 77],", "\"damage\": [22, 40, 68],"]}
+  spoolOnly    cleared [14, 16, 17, 17, 18, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 17, 18, 18, 19, 19, 19, 20, 20] heart 4.2 buttons_left 2093
+  mortarHeavy  cleared [6, 6, 9, 9, 10, 10, 14, 14, 19, 19, 20, 20, 20, 20, 20, 20] died_on [7, 7, 10, 10, 11, 11, 15, 15, 20] heart 3.2 buttons_left 565
+  prismHeavy   cleared [11, 13, 14, 14, 14, 14, 14, 17, 19, 19, 19, 19, 20, 20, 20, 20] died_on [12, 14, 15, 15, 15, 15, 15, 18, 20, 20, 20] heart 3.1 buttons_left 757
+  mix          cleared [9, 11, 14, 14, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [10, 12, 15, 15, 20, 20] heart 6.6 buttons_left 1339
+  guardMix     cleared [9, 11, 14, 14, 14, 14, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [10, 12, 15, 15, 15, 15, 20, 20] heart 3.3 buttons_left 860

@@ -31,7 +31,7 @@ static func for_wave(id: String, wave: int) -> FoeStats:
 	if id == WAVES.FILLER_FOE and WaveBuilder.is_swarm(wave):
 		stats.hp = Rounding.half_up(float(base.hp) * hp_scale * WAVES.SWARM_HP_MULTIPLIER)
 		reward_scale *= WAVES.SWARM_REWARD_MULTIPLIER
-	stats.reward = Rounding.half_up(float(base.reward) * reward_scale)
+	stats.reward = Rounding.half_up(float(base.reward) * reward_scale * WAVES.REWARD_MULTIPLIER)
 	stats.attack_damage = float(base.attack_damage) * (1.0 + WAVES.ATTACK_PER_WAVE * n)
 	stats.armor = int(base.armor) + int(floor(float(wave) / float(WAVES.ARMOR_EVERY_WAVES)))
 	return stats

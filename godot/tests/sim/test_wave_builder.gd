@@ -17,25 +17,12 @@ func _types(orders: Array[SpawnOrder]) -> Array[String]:
 	return out
 
 
-func test_wave_1_has_seven_foes_all_goblins() -> void:
-	# round(6 + 1.4) = 7
+func test_wave_1_has_ten_foes_all_goblins() -> void:
+	# round((6 + 1.4) * 1.4) = 10
 	var orders := _build(1)
-	assert_eq(orders.size(), 7)
+	assert_eq(orders.size(), 10)
 	for order in orders:
 		assert_eq(order.type, "scrapGoblin")
-
-
-func test_a_normal_wave_pauses_by_the_goblin_multiplier() -> void:
-	# gap = max(0.32, 0.95 - 0.025 * 2) = 0.9, goblin multiplier 0.6
-	for order in _build(2):
-		assert_almost_eq(order.gap, 0.9 * 0.6, 1e-12)
-
-
-func test_the_gap_between_foes_has_a_floor() -> void:
-	# 0.95 - 0.025 * 40 is below the floor of 0.32
-	for order in _build(40):
-		if order.type == "scrapGoblin":
-			assert_almost_eq(order.gap, 0.32 * 0.6, 1e-12)
 
 
 func test_no_orcs_before_wave_4() -> void:
@@ -58,23 +45,21 @@ func test_orcs_arrive_and_become_commoner_in_later_waves() -> void:
 	assert_gt(orcs_by_wave[14], orcs_by_wave[4])
 
 
-func test_every_fifth_wave_is_a_goblin_swarm_with_tight_gaps() -> void:
-	# wave 5: the usual 13 foes times the swarm multiplier, gap = 0.95 - 0.125 = 0.825
-	var orders := _build(5)
-	assert_eq(orders.size(), Rounding.half_up(13.0 * WAVES.SWARM_COUNT_MULTIPLIER))
+func test_every_fifth_wave_is_a_goblin_swarm_with_a_few_orcs() -> void:
+	# wave 5: the usual 13 foes times the size and swarm multipliers
+	var rolls := _rolls(5, 0.0)
+	rolls[0] = 0.99
+	var orders := WaveBuilder.compose(5, rolls)
+	assert_eq(orders.size(), 27)
 	for order in orders:
-		if order.type == "scrapGoblin":
-			assert_almost_eq(order.gap, 0.825 * WAVES.GAP_GOBLIN_SWARM, 1e-12)
-		else:
-			assert_eq(order.type, "corrugatedOrc", "a few orcs are mixed in")
-			assert_almost_eq(order.gap, 0.825 * WAVES.GAP_ORC, 1e-12)
+		assert_true(order.type in ["scrapGoblin", "corrugatedOrc"], "a few orcs are mixed in")
 	assert_gt(_types(orders).count("scrapGoblin"), 0, "goblins are still the filler")
 
 
 func test_every_tenth_wave_is_a_boss_wave_with_an_escort_and_the_golem() -> void:
-	# wave 10: round(6 + 14) = 20 foes, plus the escort in front and the Golem behind
-	var orders := _build(10)
-	assert_eq(orders.size(), 22)
+	# wave 10: round((6 + 14) * 1.4) = 28 foes, plus the escort in front and the Golem behind
+	var orders := WaveBuilder.compose(10, _rolls(10, 0.0))
+	assert_eq(orders.size(), 30)
 	assert_eq(orders[0].type, "corrugatedOrc")
 	# gap = 0.95 - 0.25 = 0.7, the escort pauses twice as long
 	assert_almost_eq(orders[0].gap, 0.7 * 2.0, 1e-12)
@@ -90,7 +75,7 @@ func test_every_tenth_wave_is_a_boss_wave_with_an_escort_and_the_golem() -> void
 func test_a_boss_wave_is_not_also_a_swarm() -> void:
 	# wave 10 is a multiple of 5 and of 10: the boss rule wins
 	assert_true(_types(_build(10)).has("corrugatedOrc") or _types(_build(10)).has("cardboardGolem"))
-	assert_eq(_build(10).size(), 22)
+	assert_eq(_build(10).size(), 30)
 
 
 func test_the_same_seed_gives_the_same_wave() -> void:
@@ -103,7 +88,8 @@ func test_the_same_seed_gives_the_same_wave() -> void:
 
 
 func test_a_wave_draws_exactly_one_float_per_normal_foe() -> void:
-	# the boss escort and the Golem are not rolled, so wave 10 draws 20
+	# the boss escort and the Golem are not rolled, so wave 10 draws 28; then one float for
+	# each group the rolled foes are cut into
 	for wave in [1, 4, 5, 10]:
 		var rng := Rng.derive(SEED, Streams.WAVES)
 		var orders := WaveBuilder.build(wave, rng)
@@ -111,6 +97,8 @@ func test_a_wave_draws_exactly_one_float_per_normal_foe() -> void:
 		var rolled := orders.size() - (2 if wave % 10 == 0 else 0)
 		for i in rolled:
 			expected.next_float()
+		for size in WaveBuilder.group_sizes(wave, rolled, expected):
+			pass
 		assert_eq(rng.state, expected.state, "wave %d" % wave)
 
 
@@ -119,11 +107,15 @@ func test_building_wave_after_wave_keeps_one_stream_going() -> void:
 	var rng := Rng.derive(SEED, Streams.WAVES)
 	var first := WaveBuilder.build(1, rng)
 	var second := WaveBuilder.build(2, rng)
-	assert_eq(first.size(), 7)
-	assert_eq(second.size(), 9)
+	assert_eq(first.size(), 10)
+	assert_eq(second.size(), 12)
 	var fresh := Rng.derive(SEED, Streams.WAVES)
-	for i in 16:
+	for i in 10:
 		fresh.next_float()
+	WaveBuilder.group_sizes(1, 10, fresh)
+	for i in 12:
+		fresh.next_float()
+	WaveBuilder.group_sizes(2, 12, fresh)
 	assert_eq(rng.state, fresh.state)
 
 
@@ -153,21 +145,20 @@ func _first_roll(wave: int, value: float) -> Array[float]:
 	return rolls
 
 
-func test_the_count_is_6_plus_1_point_4_per_wave_rounded() -> void:
-	assert_eq(WaveBuilder.count_for(1), 7)
-	assert_eq(WaveBuilder.count_for(2), 9)
-	assert_eq(WaveBuilder.count_for(6), 14)
-	assert_eq(WaveBuilder.count_for(10), 20)
-	assert_eq(WaveBuilder.count_for(16), 28)
+func test_the_count_is_6_plus_1_point_4_per_wave_times_1_point_4_rounded() -> void:
+	assert_eq(WaveBuilder.count_for(1), 10)
+	assert_eq(WaveBuilder.count_for(2), 12)
+	assert_eq(WaveBuilder.count_for(6), 20)
+	assert_eq(WaveBuilder.count_for(10), 28)
+	assert_eq(WaveBuilder.count_for(16), 40)
 
 
-func test_a_roll_above_the_threshold_makes_an_orc_and_an_orc_waits_longer() -> void:
-	# wave 8: threshold 0.82 - 0.08 = 0.74; gap 0.95 - 0.2 = 0.75; orc multiplier 1.4
+func test_a_roll_above_the_threshold_makes_an_orc() -> void:
+	# wave 8: threshold 0.82 - 0.08 = 0.74
 	var orders := WaveBuilder.compose(8, _rolls(8, 0.9))
-	assert_eq(orders.size(), 17)
+	assert_eq(orders.size(), 24)
 	for order in orders:
 		assert_eq(order.type, "corrugatedOrc")
-		assert_almost_eq(order.gap, 0.75 * 1.4, 1e-12)
 
 
 func test_the_orc_decision_at_the_threshold_boundary() -> void:
@@ -199,12 +190,12 @@ func test_a_boss_wave_holds_the_rolled_foes_between_the_escort_and_the_golem() -
 	var rolls := _rolls(10, 0.1)
 	rolls[3] = 0.9
 	var orders := WaveBuilder.compose(10, rolls)
-	assert_eq(orders.size(), 22)
+	assert_eq(orders.size(), 30)
 	for i in orders.size():
 		var expected := "scrapGoblin"
 		# the escort comes first, so the roll at index 3 lands at order 4
 		if i == 0 or i == 4:
 			expected = "corrugatedOrc"
-		if i == 21:
+		if i == 29:
 			expected = "cardboardGolem"
 		assert_eq(orders[i].type, expected, "order %d" % i)

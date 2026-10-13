@@ -15,6 +15,7 @@ const WAVES := preload("res://content/waves.gd")
 ## The number of foes in a wave (not counting the boss escort and the boss).
 static func count_for(wave: int) -> int:
 	var count: float = WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE
+	count *= WAVES.WAVE_SIZE_MULTIPLIER
 	if is_swarm(wave):
 		count *= WAVES.SWARM_COUNT_MULTIPLIER
 	return Rounding.half_up(count)
@@ -25,12 +26,56 @@ static func is_swarm(wave: int) -> bool:
 	return wave % WAVES.SWARM_EVERY == 0 and wave % WAVES.BOSS_EVERY != 0
 
 
-## Draws one float per foe from the waves stream and lists the wave.
+## Draws one float per foe from the waves stream, lists the wave, then draws one float
+## per group to cut the foes into groups (see `group_sizes`).
 static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 	var rolls: Array[float] = []
 	for i in count_for(wave):
 		rolls.append(rng.next_float())
-	return compose(wave, rolls)
+	var orders := compose(wave, rolls)
+	_space_in_groups(orders, wave, rng)
+	return orders
+
+
+## Cuts `total` foes into groups of Fibonacci sizes: each group's size is drawn (one
+## float) from the sizes the wave allows (`GROUP_CAP` by wave). A pick bigger than what is
+## left is cut down to the biggest allowed size that fits, and the next group takes the rest.
+static func group_sizes(wave: int, total: int, rng: Rng) -> Array[int]:
+	var cap: int = WAVES.GROUP_CAP[0]
+	for i in WAVES.GROUP_CAP_FROM_WAVE.size():
+		if wave >= WAVES.GROUP_CAP_FROM_WAVE[i]:
+			cap = WAVES.GROUP_CAP[i]
+	var allowed: Array[int] = []
+	for size in WAVES.GROUP_SIZES:
+		if size <= cap:
+			allowed.append(size)
+	var sizes: Array[int] = []
+	var left := total
+	while left > 0:
+		var pick: int = allowed[int(floor(rng.next_float() * float(allowed.size())))]
+		while pick > left:
+			pick = allowed[allowed.find(pick) - 1]
+		sizes.append(pick)
+		left -= pick
+	return sizes
+
+
+## Sets the pauses of the rolled foes: `GROUP_SPACING` after a foe inside a group and
+## the wave's group pause after the last foe of a group. The boss escort in front and
+## the Golem behind keep their own pauses.
+static func _space_in_groups(orders: Array[SpawnOrder], wave: int, rng: Rng) -> void:
+	var boss := wave % WAVES.BOSS_EVERY == 0
+	var first := 1 if boss else 0
+	var end := orders.size() - 1 if boss else orders.size()
+	var pause := maxf(
+		WAVES.GROUP_PAUSE_MIN, WAVES.GROUP_PAUSE_BASE - float(wave) * WAVES.GROUP_PAUSE_PER_WAVE
+	)
+	var index := first
+	for size in group_sizes(wave, end - first, rng):
+		for i in size:
+			orders[index].gap = WAVES.GROUP_SPACING
+			index += 1
+		orders[index - 1].gap = pause
 
 
 ## Lists a wave from the rolls of its foes (`count_for(wave)` of them, one per
@@ -51,10 +96,8 @@ static func compose(wave: int, rolls: Array[float]) -> Array[SpawnOrder]:
 		var type: String = WAVES.FILLER_FOE
 		if wave >= WAVES.ORC_FROM_WAVE and roll > orc_threshold:
 			type = WAVES.HEAVY_FOE
-		var multiplier: float = WAVES.GAP_ORC
-		if type == WAVES.FILLER_FOE:
-			multiplier = WAVES.GAP_GOBLIN_SWARM if swarm else WAVES.GAP_GOBLIN
-		orders.append(SpawnOrder.of(type, gap * multiplier))
+		# the pause of a rolled foe is set by its group (`_space_in_groups`)
+		orders.append(SpawnOrder.of(type, WAVES.GROUP_SPACING))
 	if boss:
 		orders.append(SpawnOrder.of(WAVES.BOSS_FOE, WAVES.GOLEM_GAP))
 		orders.push_front(SpawnOrder.of(WAVES.HEAVY_FOE, gap * WAVES.GAP_BOSS_ESCORT))

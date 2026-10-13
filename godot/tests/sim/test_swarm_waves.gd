@@ -21,19 +21,23 @@ func _types(orders: Array[SpawnOrder]) -> Array[String]:
 func test_a_swarm_has_the_swarm_multiplier_times_the_usual_foes() -> void:
 	assert_gt(WAVES.SWARM_COUNT_MULTIPLIER, 1.0, "swarms are bigger than a normal wave")
 	for wave in [5, 15]:
-		var usual := WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE
+		var usual := (
+			(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE) * WAVES.WAVE_SIZE_MULTIPLIER
+		)
 		assert_eq(
 			WaveBuilder.count_for(wave), Rounding.half_up(usual * WAVES.SWARM_COUNT_MULTIPLIER)
 		)
 		assert_gt(WaveBuilder.count_for(wave), Rounding.half_up(usual))
-	# by hand with the multiplier 1.5: 13 * 1.5 = 19.5 -> 20 and 27 * 1.5 = 40.5 -> 41
-	assert_eq(WaveBuilder.count_for(5), 20)
-	assert_eq(WaveBuilder.count_for(15), 41)
+	# by hand: 13 * 1.4 * 1.5 = 27.3 -> 27 and 27 * 1.4 * 1.5 = 56.7 -> 57
+	assert_eq(WaveBuilder.count_for(5), 27)
+	assert_eq(WaveBuilder.count_for(15), 57)
 
 
 func test_other_waves_and_boss_waves_keep_the_usual_count() -> void:
 	for wave in [1, 4, 6, 9, 10, 11, 14, 19, 20]:
-		var usual := WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE
+		var usual := (
+			(WAVES.BASE_COUNT + float(wave) * WAVES.COUNT_PER_WAVE) * WAVES.WAVE_SIZE_MULTIPLIER
+		)
 		assert_eq(WaveBuilder.count_for(wave), Rounding.half_up(usual), "wave %d" % wave)
 
 
@@ -53,11 +57,3 @@ func test_a_swarm_wave_is_goblins_with_a_few_orcs_by_its_own_threshold() -> void
 		var types := _types(WaveBuilder.compose(wave, one))
 		assert_eq(types.count("corrugatedOrc"), 1)
 		assert_eq(types.size(), WaveBuilder.count_for(wave))
-
-
-func test_a_swarm_keeps_its_tight_gap_for_the_goblins_and_the_orc_gap_for_orcs() -> void:
-	var rolls := _rolls(5, 0.0)
-	rolls[0] = 0.999
-	var orders := WaveBuilder.compose(5, rolls)
-	assert_almost_eq(orders[0].gap, 0.825 * WAVES.GAP_ORC, 1e-12)
-	assert_almost_eq(orders[1].gap, 0.825 * WAVES.GAP_GOBLIN_SWARM, 1e-12)

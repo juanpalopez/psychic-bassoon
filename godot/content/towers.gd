@@ -11,7 +11,10 @@
 ## trimmed from 32, 56, 96 (untrimmed it wins 14 of 16 maps), and the Prism Spire's
 ## damage per second raised from 16, 33, 65 with its cost cut from 110, 100, 180.
 ## Final pass for Phase 4 (2026-10-13, #203): the Mortar is trimmed again to 27, 48, 83 so
-## that no strategy wins with ease. Redo it after the Phase 7 content.
+## that no strategy wins with ease. Waves in Fibonacci groups (2026-10-13, #240): waves are
+## 40% bigger, foes 12% faster and splash matters far more, so the Mortar went down to 22,
+## 40, 68 and the Spool Guard and the Prism Spire up to 13, 21, 35 and 42, 84, 163 damage.
+## Redo it after the Phase 7 content.
 ##
 ## The Guard Tent (`docs/BARRACKS.md`) is a tower that does not shoot: `guards` is
 ## true, and it owns `guard_count` guards (`guard_hp`, `guard_armor`, `guard_damage`
@@ -46,7 +49,7 @@ const DEFS := {
 		"name": "Spool Guard",
 		"damage_type": "physical",
 		"cost": [50, 60, 110],
-		"damage": [11, 18, 30],
+		"damage": [13, 21, 35],
 		"range": [2.3, 2.6, 3.0],
 		"rate": [3.0, 3.6, 4.5],
 	},
@@ -55,7 +58,7 @@ const DEFS := {
 		"name": "Thimble Mortar",
 		"damage_type": "physical",
 		"cost": [90, 90, 160],
-		"damage": [27, 48, 83],
+		"damage": [22, 40, 68],
 		"range": [2.8, 3.1, 3.5],
 		"rate": [0.7, 0.8, 0.95],
 		"splash": [0.95, 1.15, 1.35],
@@ -65,7 +68,7 @@ const DEFS := {
 		"name": "Prism Spire",
 		"damage_type": "magic",
 		"cost": [100, 90, 160],
-		"damage": [36, 72, 140],
+		"damage": [42, 84, 163],
 		"range": [2.3, 2.6, 2.9],
 		"beam": true,
 	},
