@@ -51,7 +51,7 @@ func test_the_numbers_started_from_the_prototype_and_were_tuned_with_the_bot() -
 	assert_eq(TOWERS.DEFS.spoolGuard.damage, [11, 18, 30])
 	assert_eq(TOWERS.DEFS.spoolGuard.rate, [3.0, 3.6, 4.5])
 	assert_eq(TOWERS.DEFS.thimbleMortar.cost, [90, 90, 160])
-	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [29, 51, 88])
+	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [27, 48, 83])
 	assert_eq(TOWERS.DEFS.thimbleMortar.splash, [0.95, 1.15, 1.35])
 
 

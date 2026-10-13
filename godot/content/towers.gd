@@ -10,7 +10,8 @@
 ## raised from 9, 15, 26 (the Corrugated Orc's armor is now 6), Thimble Mortar damage
 ## trimmed from 32, 56, 96 (untrimmed it wins 14 of 16 maps), and the Prism Spire's
 ## damage per second raised from 16, 33, 65 with its cost cut from 110, 100, 180.
-## Redo it after the Phase 7 content.
+## Final pass for Phase 4 (2026-10-13, #203): the Mortar is trimmed again to 27, 48, 83 so
+## that no strategy wins with ease. Redo it after the Phase 7 content.
 ##
 ## The Guard Tent (`docs/BARRACKS.md`) is a tower that does not shoot: `guards` is
 ## true, and it owns `guard_count` guards (`guard_hp`, `guard_armor`, `guard_damage`
@@ -54,7 +55,7 @@ const DEFS := {
 		"name": "Thimble Mortar",
 		"damage_type": "physical",
 		"cost": [90, 90, 160],
-		"damage": [29, 51, 88],
+		"damage": [27, 48, 83],
 		"range": [2.8, 3.1, 3.5],
 		"rate": [0.7, 0.8, 0.95],
 		"splash": [0.95, 1.15, 1.35],

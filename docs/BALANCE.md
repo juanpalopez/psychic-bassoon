@@ -276,3 +276,26 @@ The scripted bot got a profile with both tents, `guardMix` (`spoolGuard`, `thimb
 
 **What it says.** The Guard Tent is now a usable choice and not a better one: the guard mix wins 6 of 16, between Prism heavy (5) and the plain mix (8). The Mess Tent is not yet worth its price: the same guard numbers at an aura of 2.2 cells (where the bot rarely found a socket for a Mess Tent and built the next tower instead) won 7 maps with 390 Buttons left, and at 3.0 cells (where it does build it) 6 maps with 380 left, so building the Mess Tent cost a map, which is within noise but not a gain. It is recorded as a known-weak support (100 to 160 Buttons for +12 to +25% blows and +2 to +4 hp a second) for the post-Phase 7 pass (#203), where its bonus or its cost should change. That is the intended role (the GDD's tent holds and supports; the damage comes from the towers), but the bot cannot show the tent's real value, which is holding the one dangerous foe where several towers reach it, and the Golem is not blockable. A player will use it better than the bot does, so the numbers err on the side of not being strong. Not done here: tier 4 specs, the hero, the Camp Cook.
 
+## Final balance pass for Phase 4 (2026-10-13, #203)
+
+The ticket's targets, measured with the scripted bot on seeds 1 to 12 (`godot/tools/balance_run.gd --detail`) before the change and on seeds 1 to 16 after (`docs/balance/final-pass-seeds-1-16.txt`, all five profiles).
+
+| Target | Before this pass | Now |
+| --- | --- | --- |
+| Waves 1 to 4 are safe for a sensible start | Met: no Heartstone health lost in waves 1 to 4 in any profile (0.00 leaks per wave) | Unchanged (the pass only touches the Thimble Mortar's damage) |
+| The first boss (wave 10) is a real test | Met: the average run leaks 1.0 to 1.6 foes in wave 10 and clears it; the guard mix lost 1 of 12 there; a bot that builds nothing loses (`test_bot_runner`) | Mortar-heavy now loses 2 of 16 on waves 9 and 10, the guard mix 1 |
+| Several strategies reach the boss; none wins to wave 20 with ease | Missed by one: Mortar-heavy won 10 of 12 maps (83%) with 0.7 leaks in wave 20; the others won 4 to 6 of 12 | Met: Spool 7, Mortar 6, Prism 5, Mix 7, guard mix 6 of 16 (31% to 44%) |
+| The Orc needs the Prism Spire or upgrades; the swarm needs the Thimble Mortar | Met: every build without a Mortar loses its losses on the swarm wave 15 (Spool 7 of 16, Prism 9, Mix 6) and Mortar-heavy does not | Met: Mortar-heavy loses 2 of 7 losses on wave 15 |
+
+**The one change.** Thimble Mortar damage 29, 51, 88 to 27, 48, 83 (about 7 percent less). Candidate trims on seeds 1 to 12, Mortar-heavy wins: 27/48/83 gave 6 of 12, 25/45/77 gave 4 of 12 and 23/41/71 only 1 of 12 (raw output kept in the commit description, not in a file): the Mortar's win rate is very sensitive to its damage, so the smallest trim that brought it down was taken. The same trim moved the Mix from 6 to 5 of 12 on those seeds and from 6 to 7 of 16 with the final numbers: it is no longer clearly worse than the best single-tower build (Mix 7, Spool 7).
+
+| Strategy | Won (of 16) | Mean Heartstone health | Buttons left |
+| --- | --- | --- | --- |
+| Spool Guards only | 7 | 6.6 | 985 |
+| Mortar heavy | 6 | 5.3 | 377 |
+| Prism heavy | 5 | 3.9 | 204 |
+| Mix | 7 | 6.2 | 404 |
+| Guard mix (Guard Tent and Mess Tent) | 6 | 4.1 | 325 |
+
+**What stays open, for the pass after the Phase 7 content** (#237): the economy still leaves 200 to 1,000 Buttons unspent in every strategy (the extra pressure is bought off, see the swarm section); the Mess Tent is a weak support for its price; Prism heavy is the weakest build against swarms; Razor Moths, the Ink Shaman, tier 4 specs, the hero and spells all change the balance. The replay goldens were regenerated for this change (a reviewed balance change); their games' outcomes changed in ticks only (the same games win and lose).
+
