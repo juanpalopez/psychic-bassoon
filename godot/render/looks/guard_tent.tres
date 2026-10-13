@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_look")
-body_colour = Color(0.835, 0.282, 0.239, 1)
+body_colour = Color(0.612, 0.325, 0.78, 1)
 pip_colour = Color(1, 0.91, 0.88, 1)

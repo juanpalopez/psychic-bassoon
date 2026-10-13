@@ -68,6 +68,24 @@ func test_updating_again_keeps_the_same_nodes() -> void:
 	assert_eq(view.get_child_count(), 2)
 
 
+func test_a_guard_with_no_health_pool_draws_an_empty_bar_not_nan() -> void:
+	var game := GuardKit.game_with_tent()
+	game.guards[0].max_hp = 0.0
+	game.guards[0].hp = 0.0
+	var view := _view()
+	view.update(game)
+	assert_eq(view.health_fraction_of(game.guards[0].id), 0.0)
+
+
+func test_reset_forgets_the_guards() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	view.reset()
+	assert_eq(view.guard_count(), 0)
+	assert_eq(view.get_child_count(), 0)
+
+
 func test_no_guards_means_nothing_is_drawn() -> void:
 	var game := Game.create(1)
 	var view := _view()

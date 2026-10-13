@@ -202,6 +202,7 @@ func _start(map_seed: int) -> void:
 	_game = Game.create(map_seed)
 	_clock = Clock.new()
 	_foes.reset()
+	_guards.reset()
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
 	_speed = GameSpeed.new()

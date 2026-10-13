@@ -1,7 +1,8 @@
 ## The guards of the Guard Tents, drawn at their posts on the road: a capsule each
 ## with a health bar over it, hidden while the guard is down. One node per guard,
-## kept between calls, so calling `update` every frame creates nothing. It only
-## reads the game.
+## kept between calls, so calling `update` every frame creates no nodes. Guards
+## stand on the main route (`routes[0]`): the game has one route. It only reads
+## the game.
 class_name GuardsView
 extends Node3D
 
@@ -12,10 +13,18 @@ const BODY_HEIGHT := 0.7
 const BAR_WIDTH := 0.5
 const BAR_THICKNESS := 0.06
 const BAR_GAP := 0.12
-const BODY_COLOUR := Color("d94a3d")
+const BODY_COLOUR := Color("9c53c7")
 const BAR_COLOUR := Color("7be07b")
 
 var _nodes := {}
+
+
+## Forgets every guard (a new game starts).
+func reset() -> void:
+	for node in _nodes.values():
+		remove_child(node)
+		node.queue_free()
+	_nodes.clear()
 
 
 ## Shows each guard of the game at its post, adds the new ones and drops the gone.
@@ -33,7 +42,7 @@ func update(game: GameState) -> void:
 		node.position = Vector3(world.x, GROUND + BODY_HEIGHT / 2.0, world.z)
 		node.visible = guard.alive
 		var bar := node.get_node("Bar") as Node3D
-		bar.scale.x = clampf(guard.hp / guard.max_hp, 0.0, 1.0)
+		bar.scale.x = 0.0 if guard.max_hp <= 0.0 else clampf(guard.hp / guard.max_hp, 0.0, 1.0)
 	for id in _nodes.keys():
 		if not seen.has(id):
 			var gone: Node = _nodes[id]
