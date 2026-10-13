@@ -183,13 +183,15 @@ func test_selling_a_locked_tower_stops_the_beam() -> void:
 	var scene := TowerFireKit.scene("prismSpire")
 	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
 	Game.tick(scene.game)
+	var before_sale := foe.hp
+	assert_lt(before_sale, foe.max_hp, "the beam was hurting it")
 	Game.submit(scene.game, Command.sell(scene.tower.id))
 	Game.tick(scene.game)
-	var start := foe.hp
+	assert_eq(foe.hp, before_sale, "the sale tick burns nothing: the tower is gone first")
 	for i in 10:
 		Game.tick(scene.game)
 	assert_eq(scene.game.towers.size(), 0)
-	assert_eq(foe.hp, start)
+	assert_eq(foe.hp, before_sale)
 
 
 func test_a_non_beam_tower_never_holds_a_lock() -> void:

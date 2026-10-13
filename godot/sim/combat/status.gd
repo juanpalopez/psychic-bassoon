@@ -8,12 +8,13 @@ const RULES := preload("res://content/game_rules.gd")
 
 
 ## Slows `foe` by `fraction` (0 to 1, more is clamped) for `seconds`. A slow that
-## is not a positive share or has no time is ignored. While a stronger slow is
+## is not a positive share, or lasts no longer than the timer tolerance (the move
+## loop would never clear it), is ignored. While a stronger slow is
 ## active a weaker one is ignored; an equal or stronger one replaces it and
 ## restarts the timer.
 static func apply_slow(foe: Foe, fraction: float, seconds: float) -> void:
 	# written so that NaN counts as no slow
-	if not (fraction > 0.0 and seconds > 0.0):
+	if not (fraction > 0.0 and seconds > RULES.TIMER_EPSILON):
 		return
 	var share := minf(fraction, 1.0)
 	var active := foe.slow_timer > RULES.TIMER_EPSILON
