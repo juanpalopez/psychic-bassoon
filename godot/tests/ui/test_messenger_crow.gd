@@ -92,3 +92,56 @@ func test_main_feeds_the_crow_from_a_launched_wave() -> void:
 	main._after_tick(main._game)
 	assert_eq(main._crow.text(), "Wave 1 is coming")
 	assert_true(main._crow.visible)
+
+
+func test_a_huge_step_plays_every_queued_message_through_to_rest() -> void:
+	var crow := _crow()
+	for i in ALERTS.CROW_MAX_QUEUE + 1:
+		crow.deliver("m%d" % i)
+	crow.advance(1000.0)
+	assert_eq(crow.phase(), MessengerCrow.Phase.IDLE)
+	assert_eq(crow.pending(), 0)
+
+
+func test_a_message_delivered_while_flying_out_is_shown_next() -> void:
+	var crow := _crow()
+	crow.deliver("first")
+	crow.advance(ALERTS.CROW_FLY_SECONDS + ALERTS.CROW_HOLD_SECONDS + 0.1)
+	assert_eq(crow.phase(), MessengerCrow.Phase.FLYING_OUT)
+	crow.deliver("late")
+	crow.advance(ALERTS.CROW_FLY_SECONDS)
+	assert_eq(crow.text(), "late")
+	assert_eq(crow.phase(), MessengerCrow.Phase.FLYING_IN)
+
+
+func test_clearing_sends_the_crow_home_and_drops_the_queue() -> void:
+	var crow := _crow()
+	crow.deliver("a")
+	crow.deliver("b")
+	crow.clear()
+	assert_eq(crow.phase(), MessengerCrow.Phase.IDLE)
+	assert_eq(crow.pending(), 0)
+	assert_false(crow.visible)
+
+
+func test_the_crow_only_runs_every_frame_while_it_is_out() -> void:
+	var crow := _crow()
+	assert_false(crow.is_processing())
+	crow.deliver("a")
+	assert_true(crow.is_processing())
+	crow.advance(1000.0)
+	assert_false(crow.is_processing())
+
+
+func test_the_crow_flies_below_the_top_bar_and_the_left_hand_buttons() -> void:
+	assert_gt(MessengerCrow.TOP_MARGIN, 280.0)
+
+
+func test_reduced_motion_stops_the_bob() -> void:
+	var crow := _crow()
+	crow.reduced_motion = true
+	crow.deliver("a")
+	crow.advance(0.3)
+	var first: float = crow.get_child(0).position.y
+	crow.advance(0.2)
+	assert_eq(crow.get_child(0).position.y, first)

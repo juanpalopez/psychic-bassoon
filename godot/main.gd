@@ -231,6 +231,7 @@ func select_cell(cell: Vector2i) -> void:
 
 ## Starts a fresh game on a map seed.
 func _start(map_seed: int) -> void:
+	_crow.clear()
 	_board.map_seed = map_seed
 	_game = Game.create(map_seed)
 	_clock = Clock.new()

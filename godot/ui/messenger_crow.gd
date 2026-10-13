@@ -9,8 +9,9 @@ enum Phase { IDLE, FLYING_IN, HOLDING, FLYING_OUT }
 const ALERTS := preload("res://content/alerts.gd")
 const MODEL := "res://assets/models/ui/messenger_crow.glb"
 const THEME := preload("res://ui/hud_theme.tres")
-const VIEW_SIZE := 240
-const TOP_MARGIN := 16.0
+const VIEW_SIZE := 200
+## Below the top bar and the left-hand buttons, so the crow never flies over them.
+const TOP_MARGIN := 290.0
 const SCROLL_GAP := 8.0
 const BOB_HEIGHT := 10.0
 const BOB_SPEED := 6.0
@@ -18,6 +19,10 @@ const BOB_SPEED := 6.0
 const CAMERA_POSITION := Vector3(0.0, 0.3, 1.5)
 const CAMERA_TARGET := Vector3(0.0, 0.3, 0.0)
 const FACE_RIGHT_DEGREES := 90.0
+
+## Set from the platform's reduced-motion setting once that adapter exists: the crow then
+## stops bobbing.
+var reduced_motion := false
 
 var _phase := Phase.IDLE
 var _elapsed := 0.0
@@ -38,6 +43,7 @@ func _ready() -> void:
 	_build_view()
 	_build_scroll()
 	_show_phase()
+	set_process(false)
 
 
 ## Queues a message for the crow to carry; an empty one is ignored.
@@ -65,6 +71,17 @@ func advance(delta: float) -> void:
 		_elapsed = 0.0
 		_next_phase()
 	_show_phase()
+
+
+## Empties the queue and sends the crow home (a new run starts).
+func clear() -> void:
+	_queue.clear()
+	_phase = Phase.IDLE
+	_elapsed = 0.0
+	_text = ""
+	if _viewport != null:
+		_show_phase()
+		set_process(false)
 
 
 func phase() -> Phase:
@@ -110,6 +127,7 @@ func _start(message: String) -> void:
 	_phase = Phase.FLYING_IN
 	_elapsed = 0.0
 	_show_phase()
+	set_process(true)
 
 
 func _next_phase() -> void:
@@ -121,6 +139,7 @@ func _next_phase() -> void:
 		Phase.FLYING_OUT:
 			if _queue.is_empty():
 				_phase = Phase.IDLE
+				set_process(false)
 			else:
 				_text = _queue.pop_front()
 				_phase = Phase.FLYING_IN
@@ -137,14 +156,16 @@ func _show_phase() -> void:
 	_viewport.render_target_update_mode = (
 		SubViewport.UPDATE_ALWAYS if active else SubViewport.UPDATE_DISABLED
 	)
-	_label.text = _text
+	if _label.text != _text:
+		_label.text = _text
+		_scroll.reset_size()
 	if not active:
 		return
 	var across := size.x + float(VIEW_SIZE)
 	var x := position_fraction() * across - float(VIEW_SIZE)
-	var y := TOP_MARGIN + sin(_clock * BOB_SPEED) * BOB_HEIGHT
+	var bob := 0.0 if reduced_motion else sin(_clock * BOB_SPEED) * BOB_HEIGHT
+	var y := TOP_MARGIN + bob
 	_container.position = Vector2(x, y)
-	_scroll.reset_size()
 	_scroll.position = Vector2(
 		x + float(VIEW_SIZE) / 2.0 - _scroll.size.x / 2.0, y + float(VIEW_SIZE) + SCROLL_GAP
 	)
