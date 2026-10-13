@@ -23,6 +23,7 @@ var _message_left := 0.0
 var _gestures := Gestures.new()
 var _fingers := TouchFingers.new()
 var _speed := GameSpeed.new()
+var _audio := AudioPlayer.new()
 
 @onready var _board: Board = $Board
 @onready var _rig: CameraRig = $CameraRig
@@ -41,11 +42,14 @@ var _speed := GameSpeed.new()
 @onready var _panel: TowerPanel = $Hud/TowerPanel
 @onready var _ring: RangeRing = $RangeRing
 @onready var _next_seed: Button = $Hud/NextSeed
+@onready var _sound: Button = $Hud/Sound
 
 
 func _ready() -> void:
 	var from_url: Variant = _seed_from_url()
 	_start(from_url if from_url is int else _board.map_seed)
+	add_child(_audio)
+	_sound.toggled.connect(func(on: bool) -> void: _audio.set_muted(not on))
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
 	_speed_bar.speed_chosen.connect(_on_speed_chosen)
@@ -73,6 +77,7 @@ func _process(delta: float) -> void:
 	if ticks_speed > 0:
 		_shots.update(delta)
 	_shots.show_beams(_game, _board.surface_height)
+	_audio.set_music(SoundMap.music_for(_game))
 	_update_launch_button()
 	_menu.set_buttons(_game.buttons)
 	_refresh_panel()
@@ -129,6 +134,12 @@ func _unhandled_input(event: InputEvent) -> void:
 ## acts on a pointer it saw go down), so letting go over the menu cannot leave a
 ## finger stuck in the tracker.
 func _input(event: InputEvent) -> void:
+	# the first press of any kind (board or button) lets audio start: browsers block it before
+	if (
+		(event is InputEventMouseButton and (event as InputEventMouseButton).pressed)
+		or (event is InputEventScreenTouch and (event as InputEventScreenTouch).pressed)
+	):
+		_audio.unlock()
 	if event is InputEventMouseButton:
 		var button := event as InputEventMouseButton
 		if button.button_index == MOUSE_BUTTON_LEFT and not button.pressed:
@@ -289,6 +300,7 @@ func _on_tower_chosen(tower: String) -> void:
 ## Reads what the tick reported: a refused command becomes a short message.
 func _after_tick(game: GameState) -> void:
 	for event in game.events:
+		_audio.play_sfx(SoundMap.sfx_for(event, game))
 		if event.kind == GameEvent.Kind.COMMAND_REJECTED:
 			_show_message(RejectText.of(event.reason))
 		elif event.kind == GameEvent.Kind.TOWER_FIRED:
