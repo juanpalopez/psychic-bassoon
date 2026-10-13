@@ -100,6 +100,21 @@ func test_tiles_are_drawn_with_few_draw_calls() -> void:
 	assert_lt(surfaces, 30, "a few dozen draw calls at most")
 
 
+func test_the_real_terrain_models_are_used_not_the_box_fallback() -> void:
+	var board := _board(7920)
+	for node_name in ["Mat", "Lane", "Cardboard", "Paperboard", "SocketOverlays", "Desk"]:
+		assert_false(_multimesh(board, node_name).mesh is BoxMesh, node_name)
+
+
+func test_things_standing_on_the_board_use_the_boards_heights() -> void:
+	assert_eq(FoesView.GROUND, Board.ROAD_HEIGHT)
+	assert_eq(GuardsView.GROUND, Board.ROAD_HEIGHT)
+	# the highlight and the range ring float above the etched overlay, never in its plane
+	var overlay := ModelLoader.mesh(Board.TERRAIN + "overlay_socket_empty_2x2.glb")
+	assert_gt(CellHighlight.LIFT, overlay.get_aabb().end.y)
+	assert_gt(RangeRing.LIFT, CellHighlight.LIFT)
+
+
 func test_the_board_draws_one_socket_overlay_per_socket() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
