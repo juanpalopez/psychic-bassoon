@@ -110,3 +110,48 @@ test('the old /godot/ address sends visitors to the root', async ({page}) => {
   await page.waitForURL(url => !url.pathname.includes('/godot'));
   expect(new URL(page.url()).pathname).toBe('/');
 });
+
+// Safari numbers its touches from wherever it left off, so the first finger can be
+// touch id 7 and not 0. The board once read that as a second finger and ignored
+// every tap (iOS: the HUD worked, sockets did not). Unit tests cannot see browser
+// touch numbering, so this taps a socket with id 7 in an iPhone-sized viewport.
+test('a tap with a touch id other than 0 selects a socket', async ({
+  browser,
+  baseURL,
+}) => {
+  const context = await browser.newContext({
+    viewport: {width: 844, height: 390},
+    deviceScaleFactor: 3,
+    hasTouch: true,
+    isMobile: true,
+  });
+  const page = await context.newPage();
+  await page.goto(`${baseURL}/index.html`);
+  await page.waitForFunction(
+    () => (window as unknown as {scraplineReady?: boolean}).scraplineReady,
+    undefined,
+    {timeout: 60_000}
+  );
+  await page.waitForTimeout(1_000);
+  const cdp = await context.newCDPSession(page);
+  // a socket of the first map, at this viewport
+  for (const type of ['touchStart', 'touchEnd'] as const) {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type,
+      touchPoints: type === 'touchStart' ? [{x: 422, y: 213, id: 7}] : [],
+    });
+    await page.waitForTimeout(80);
+  }
+  await page.waitForFunction(
+    () =>
+      (window as unknown as {scraplineSelected?: string}).scraplineSelected !==
+      undefined,
+    undefined,
+    {timeout: 10_000}
+  );
+  const selected = await page.evaluate(
+    () => (window as unknown as {scraplineSelected?: string}).scraplineSelected
+  );
+  expect(selected).not.toBe('-1,-1');
+  await context.close();
+});

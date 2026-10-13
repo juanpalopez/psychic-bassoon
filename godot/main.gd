@@ -21,6 +21,7 @@ var _clock := Clock.new()
 var _selected := BoardSpace.NO_CELL
 var _message_left := 0.0
 var _gestures := Gestures.new()
+var _fingers := TouchFingers.new()
 var _speed := GameSpeed.new()
 
 @onready var _board: Board = $Board
@@ -104,13 +105,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		var motion := event as InputEventMouseMotion
 		if motion.button_mask & MOUSE_BUTTON_MASK_LEFT:
 			_gestures.move(0, motion.position)
-	elif event is InputEventScreenTouch and (event as InputEventScreenTouch).index >= 1:
+	elif event is InputEventScreenTouch:
+		# the first finger is read from the emulated mouse events above; only the
+		# extra fingers come from touch events, whatever indexes the browser gave them
 		var touch := event as InputEventScreenTouch
-		if touch.pressed:
-			_gestures.press(touch.index, touch.position)
-	elif event is InputEventScreenDrag and (event as InputEventScreenDrag).index >= 1:
+		var pointer := _fingers.press(touch.index) if touch.pressed else TouchFingers.MOUSE
+		if touch.pressed and pointer != TouchFingers.MOUSE:
+			_gestures.press(pointer, touch.position)
+	elif event is InputEventScreenDrag:
 		var drag := event as InputEventScreenDrag
-		_gestures.move(drag.index, drag.position)
+		var pointer := _fingers.pointer_of(drag.index)
+		if pointer != TouchFingers.MOUSE:
+			_gestures.move(pointer, drag.position)
 	elif event is InputEventMagnifyGesture:
 		_rig.zoom_by((event as InputEventMagnifyGesture).factor)
 	elif event is InputEventPanGesture:
@@ -129,13 +135,19 @@ func _input(event: InputEvent) -> void:
 			_gestures.release(0, button.position)
 	elif event is InputEventScreenTouch:
 		var touch := event as InputEventScreenTouch
-		if touch.index >= 1 and not touch.pressed:
-			_gestures.release(touch.index, touch.position)
+		if touch.pressed:
+			# every touch is seen here, even one a button takes, so the fingers stay counted
+			_fingers.press(touch.index)
+		else:
+			var pointer := _fingers.release(touch.index)
+			if pointer != TouchFingers.MOUSE:
+				_gestures.release(pointer, touch.position)
 
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_WM_WINDOW_FOCUS_OUT:
 		_gestures.cancel()
+		_fingers.reset()
 
 
 func _on_tap(position: Vector2) -> void:
@@ -160,6 +172,9 @@ func selected_cell() -> Vector2i:
 ## `BoardSpace.NO_CELL` clears the selection.
 func select_cell(cell: Vector2i) -> void:
 	_selected = cell
+	if OS.has_feature("web"):
+		# the end-to-end test reads the selection the way a person sees it
+		JavaScriptBridge.eval("window.scraplineSelected = '%d,%d'" % [cell.x, cell.y])
 	_menu.close()
 	_panel.close()
 	_ring.hide_range()
