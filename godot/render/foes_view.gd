@@ -14,7 +14,8 @@ const MAX_PER_TYPE := 160
 const CAPSULE_RADIUS := 0.5
 const CAPSULE_HEIGHT := 1.6
 ## Where the road surface is, so a foe stands on it.
-const GROUND := 0.06
+## Feet stand on the lane.
+const GROUND := Board.ROAD_HEIGHT
 ## How much darker a foe at 0 hp is drawn.
 const HURT_DARKEN := 0.6
 const COLOURS := {

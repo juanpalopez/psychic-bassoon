@@ -7,7 +7,8 @@ class_name GuardsView
 extends Node3D
 
 ## Where the road surface is, so a guard stands on it (as the foes do).
-const GROUND := 0.06
+## Feet stand on the lane.
+const GROUND := Board.ROAD_HEIGHT
 const BODY_RADIUS := 0.2
 const BODY_HEIGHT := 0.7
 const BAR_WIDTH := 0.5

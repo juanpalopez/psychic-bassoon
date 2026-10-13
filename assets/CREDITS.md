@@ -21,6 +21,20 @@ The greybox draws primitives, except the owner's models below. When a model is a
 | `models/towers/guard_tent.glb` | Original, the owner (greybox Guard Tent, 68 triangles, static) | Owned by the owner (all rights reserved) | none |
 | `models/towers/kitchen_mess_tent.glb` | Original, the owner (greybox Kitchen Mess Tent, 184 triangles, static) | Owned by the owner (all rights reserved) | none |
 | `models/towers/heartstone.glb` | Original, the owner (greybox Heartstone, 196 triangles, static) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_bridge_deck.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_bridge_rail.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_glue_puddle.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_socket_built_2x2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_socket_empty_2x2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_tape_trap.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/skirt_desk.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/skirt_eraser.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/skirt_pencil.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_cardboard_l1.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_foil_river.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_lane.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_mat.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_paperboard_l2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
 
 ## History: assets of the Three.js game
 

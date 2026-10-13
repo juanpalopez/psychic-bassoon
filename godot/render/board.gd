@@ -1,34 +1,38 @@
-## The board as flat greybox tiles, drawn from the real map.
+## The board drawn from the real map with the owner's terrain models.
 ##
-## A flat strip for every road cell (the main road brown, a detour lighter), a
-## low dark tile for plain ground, a raised tile for every socket block (the pre-etched
-## tower sites: higher on higher elevation levels, paler on the mat, browner on
-## cardboard), and a marker for the spawn and the Heartstone. One MultiMesh each
-## for the road, the ground and the sockets, so the board is a handful of draw
-## calls. Set `map_seed` (also in the editor: this is a `@tool` script) and the
-## board rebuilds from `MapGen.generate`. It only reads the map.
+## The paper mat under plain ground (and level 0 sockets), the lane under every road
+## cell, a cardboard or paperboard rise under a socket block on elevation 1 or 2, an
+## etched overlay on each socket, and a desk skirt two tiles thick around the board
+## (with the odd eraser and pencil). One MultiMesh per model, so the board is a handful
+## of draw calls. A missing model falls back to a plain coloured box. Set `map_seed`
+## (also in the editor: this is a `@tool` script) and the board rebuilds from
+## `MapGen.generate`. It only reads the map.
 @tool
 class_name Board
 extends Node3D
 
 const RULES := preload("res://content/map_rules.gd")
-const FOOTPRINT := 0.9
-const ROAD_FOOTPRINT := 0.96
-const ROAD_HEIGHT := 0.06
-const GROUND_HEIGHT := 0.12
-const SOCKET_BASE_HEIGHT := 0.3
-const SOCKET_LEVEL_STEP := 0.22
-const GROUND_TILE_COLOUR := Color("2f5a3a")
-const SOCKET_COLOURS: Array[Color] = [Color("e9e4d0"), Color("c9a46a"), Color("8d6e4a")]
-const MAIN_ROAD_COLOUR := Color("8a6a43")
-const DETOUR_ROAD_COLOUR := Color("b99a6b")
-const GROUND_COLOUR := Color("1c2b22")
+const TERRAIN := "res://assets/models/terrain/"
+## The top of the lane, a hair above the mat so a foe walks on it.
+const ROAD_HEIGHT := 0.01
+const GROUND_HEIGHT := 0.0
+## The top of the rise under a socket block, by elevation level.
+const LEVEL_HEIGHTS: Array[float] = [0.0, 1.0, 2.0]
+const SKIRT_THICKNESS := 2
+## Every nth skirt tile is an eraser or a pencil instead of plain desk.
+const ERASER_EVERY := 23
+const PENCIL_EVERY := 29
+## Fallback box colours, used only when a model file is missing.
+const MAT_COLOUR := Color("2f5a3a")
+const LANE_COLOUR := Color("8a6a43")
+const LEVEL_COLOURS: Array[Color] = [Color("e9e4d0"), Color("c9a46a"), Color("8d6e4a")]
+const OVERLAY_COLOUR := Color("f4efe0")
+const DESK_COLOUR := Color("1c2b22")
 const SPAWN_COLOUR := Color("c0392b")
 const HEARTSTONE_COLOUR := Color("2ee6d6")
 ## The owner's greybox Heartstone and how much of its footprint's width it fills.
 const HEARTSTONE_MODEL := "res://assets/models/towers/heartstone.glb"
 const HEARTSTONE_FILL := 0.9
-const GROUND_MARGIN := 3.0
 
 ## The seed of the map to draw. Changing it rebuilds the board.
 @export var map_seed: int = 1:
@@ -43,6 +47,8 @@ var ground_count: int = 0
 var socket_count: int = 0
 var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
+## The cells of the desk skirt, off the grid, kept for the same reason.
+var skirt_cells: Array[Vector2i] = []
 # what rebuild() made, so it never frees a node someone else put under the board
 var _built: Array[Node] = []
 # the transform of every socket tile, kept because the headless renderer cannot
@@ -61,104 +67,142 @@ func rebuild() -> void:
 		child.queue_free()
 	_built.clear()
 	_socket_transforms.clear()
+	skirt_cells.clear()
 	map = MapGen.generate(map_seed)
-	_add_ground()
 	_add_tiles()
 	_add_markers()
 
 
-## The height of the tile on a cell: the road is flat, plain ground is low, and
-## a socket stands higher with its elevation level.
+## The height of the top of a cell: the lane is a hair above the mat, and a socket
+## block stands on the mat, cardboard or paperboard of its elevation level.
 func surface_height(cell: Vector2i) -> float:
 	if map == null:
 		return GROUND_HEIGHT
 	if map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD:
 		return ROAD_HEIGHT
 	if map.socket_anchor_at(cell) != GameMap.NO_SOCKET:
-		return SOCKET_BASE_HEIGHT + SOCKET_LEVEL_STEP * float(map.elevation_at(cell))
+		return LEVEL_HEIGHTS[map.elevation_at(cell)]
 	return GROUND_HEIGHT
 
 
-## The transform drawn for the index-th socket tile (its block's box).
+## The transform drawn for the index-th socket overlay (centred on its block, on its level).
 func socket_transform(index: int) -> Transform3D:
 	return _socket_transforms[index]
 
 
-func _add_ground() -> void:
-	var ground := MeshInstance3D.new()
-	var plane := PlaneMesh.new()
-	var size := BoardSpace.size()
-	plane.size = Vector2(size.x + GROUND_MARGIN * 2.0, size.y + GROUND_MARGIN * 2.0)
-	ground.mesh = plane
-	ground.position.y = -0.01
-	ground.material_override = _material(GROUND_COLOUR)
-	_add(ground)
-
-
 func _add_tiles() -> void:
-	var main_cells := {}
-	for cell in map.path:
-		main_cells[cell] = true
 	var road := {}
 	for route in map.routes:
 		for cell in route:
-			road[cell] = main_cells.has(cell)
-	var ground: Array[Vector2i] = []
+			road[cell] = true
+	var mat: Array[Vector2i] = []
+	var lane: Array[Vector2i] = []
+	var rises: Array = [mat, [] as Array[Vector2i], [] as Array[Vector2i]]
+	ground_count = 0
 	for row in map.rows:
 		for col in map.cols:
 			var cell := Vector2i(col, row)
-			if not road.has(cell) and map.socket_anchor_at(cell) == GameMap.NO_SOCKET:
-				ground.append(cell)
-	var road_cells: Array[Vector2i] = []
-	var road_colours: Array[Color] = []
-	for cell in road:
-		road_cells.append(cell)
-		road_colours.append(MAIN_ROAD_COLOUR if road[cell] else DETOUR_ROAD_COLOUR)
-	var socket_colours: Array[Color] = []
-	for cell in map.sockets:
-		socket_colours.append(SOCKET_COLOURS[map.elevation_at(cell)])
-	var ground_colours: Array[Color] = []
-	ground_colours.resize(ground.size())
-	ground_colours.fill(GROUND_TILE_COLOUR)
-	road_count = road_cells.size()
-	ground_count = ground.size()
+			if road.has(cell):
+				lane.append(cell)
+			elif map.socket_anchor_at(cell) == GameMap.NO_SOCKET:
+				mat.append(cell)
+				ground_count += 1
+			else:
+				var level := map.elevation_at(cell)
+				if level > 0:
+					rises[level].append(cell)
+				else:
+					mat.append(cell)
+	road_count = lane.size()
 	socket_count = map.sockets.size()
-	_add(_tiles("Road", road_cells, road_colours, ROAD_FOOTPRINT))
-	_add(_tiles("Ground", ground, ground_colours, FOOTPRINT))
-	_add(_tiles("Sockets", map.sockets, socket_colours, FOOTPRINT, map.footprint))
+	_add(_tiles("Mat", mat, "terrain_mat", MAT_COLOUR, 0.1))
+	_add(_tiles("Lane", lane, "terrain_lane", LANE_COLOUR, ROAD_HEIGHT))
+	_add(_tiles("Cardboard", rises[1], "terrain_cardboard_l1", LEVEL_COLOURS[1], 1.0))
+	_add(_tiles("Paperboard", rises[2], "terrain_paperboard_l2", LEVEL_COLOURS[2], 2.0))
+	var overlays := _tiles(
+		"SocketOverlays",
+		map.sockets,
+		"overlay_socket_empty_2x2",
+		OVERLAY_COLOUR,
+		0.02,
+		map.footprint
+	)
+	_add(overlays)
+	_add_skirt()
 
 
-## One MultiMesh holding a box per cell (or per block of `span` cells, given its
-## top-left cell), each with its own colour, as tall as `surface_height` says.
+## One MultiMesh holding a model per cell (or per block of `span` cells, given its
+## top-left cell), standing on `surface_height`. The model's own origin is its centre
+## on the ground plane. Without the file, a box `fallback_height` tall in `colour`.
 func _tiles(
 	node_name: String,
 	cells: Array[Vector2i],
-	colours: Array[Color],
-	footprint: float,
+	model: String,
+	colour: Color,
+	fallback_height: float,
 	span: int = 1
 ) -> MultiMeshInstance3D:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	multimesh.use_colors = true
-	var box := BoxMesh.new()
-	box.size = Vector3(footprint, 1.0, footprint)
-	multimesh.mesh = box
-	multimesh.instance_count = cells.size()
-	for i in cells.size():
-		var height := surface_height(cells[i])
-		var at := BoardSpace.footprint_centre(cells[i], span)
-		at.y = height / 2.0
-		var tile := Transform3D(Basis.from_scale(Vector3(float(span), height, float(span))), at)
-		multimesh.set_instance_transform(i, tile)
-		if node_name == "Sockets":
-			_socket_transforms.append(tile)
-		multimesh.set_instance_color(i, colours[i])
+	var mesh := ModelLoader.mesh(TERRAIN + model + ".glb")
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
+	if mesh == null:
+		var box := BoxMesh.new()
+		box.size = Vector3(float(span), fallback_height, float(span))
+		box.center_offset = Vector3(0.0, fallback_height / 2.0, 0.0)
+		mesh = box
+		var material := StandardMaterial3D.new()
+		material.albedo_color = colour
+		instance.material_override = material
+	multimesh.mesh = mesh
+	multimesh.instance_count = cells.size()
+	for i in cells.size():
+		var at := BoardSpace.footprint_centre(cells[i], span)
+		at.y = surface_height(cells[i]) if node_name == "SocketOverlays" else 0.0
+		var tile := Transform3D(Basis.IDENTITY, at)
+		multimesh.set_instance_transform(i, tile)
+		if node_name == "SocketOverlays":
+			_socket_transforms.append(tile)
 	instance.multimesh = multimesh
-	var material := StandardMaterial3D.new()
-	material.vertex_color_use_as_albedo = true
-	instance.material_override = material
+	return instance
+
+
+## The desk around the board, SKIRT_THICKNESS tiles thick, as three MultiMeshes (plain desk,
+## erasers, pencils). Which tile is an eraser or a pencil comes from its cell, not a random
+## stream, so the same board always looks the same.
+func _add_skirt() -> void:
+	var plain: Array[Vector2i] = []
+	var erasers: Array[Vector2i] = []
+	var pencils: Array[Vector2i] = []
+	for row in range(-SKIRT_THICKNESS, map.rows + SKIRT_THICKNESS):
+		for col in range(-SKIRT_THICKNESS, map.cols + SKIRT_THICKNESS):
+			if col >= 0 and col < map.cols and row >= 0 and row < map.rows:
+				continue
+			var key := (col + SKIRT_THICKNESS) * 31 + (row + SKIRT_THICKNESS) * 17
+			if key % ERASER_EVERY == 0:
+				erasers.append(Vector2i(col, row))
+			elif key % PENCIL_EVERY == 0:
+				pencils.append(Vector2i(col, row))
+			else:
+				plain.append(Vector2i(col, row))
+	_add(_skirt_tiles("Desk", plain, "skirt_desk", 0.15))
+	_add(_skirt_tiles("Erasers", erasers, "skirt_eraser", 0.23))
+	_add(_skirt_tiles("Pencils", pencils, "skirt_pencil", 0.23))
+
+
+## Skirt tiles may lie off the grid, so they are placed by cell without `surface_height`.
+func _skirt_tiles(
+	node_name: String, cells: Array[Vector2i], model: String, height: float
+) -> MultiMeshInstance3D:
+	var instance := _tiles(node_name, [] as Array[Vector2i], model, DESK_COLOUR, height)
+	skirt_cells.append_array(cells)
+	var multimesh := instance.multimesh
+	multimesh.instance_count = cells.size()
+	for i in cells.size():
+		multimesh.set_instance_transform(
+			i, Transform3D(Basis.IDENTITY, BoardSpace.cell_to_world(cells[i].x, cells[i].y))
+		)
 	return instance
 
 
