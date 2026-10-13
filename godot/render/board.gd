@@ -25,6 +25,9 @@ const DETOUR_ROAD_COLOUR := Color("b99a6b")
 const GROUND_COLOUR := Color("1c2b22")
 const SPAWN_COLOUR := Color("c0392b")
 const HEARTSTONE_COLOUR := Color("2ee6d6")
+## The owner's greybox Heartstone and how much of its footprint's width it fills.
+const HEARTSTONE_MODEL := "res://assets/models/towers/heartstone.glb"
+const HEARTSTONE_FILL := 0.9
 const GROUND_MARGIN := 3.0
 
 ## The seed of the map to draw. Changing it rebuilds the board.
@@ -170,6 +173,21 @@ func _add_markers() -> void:
 		HEARTSTONE_COLOUR,
 		Vector3(0.7 * float(span), 1.2, 0.7 * float(span))
 	)
+	_use_heartstone_model(span)
+
+
+## The owner's Heartstone model instead of the box, as wide as most of its footprint and
+## standing on the ground; a missing file leaves the box.
+func _use_heartstone_model(span: int) -> void:
+	var mesh := ModelLoader.mesh(HEARTSTONE_MODEL)
+	if mesh == null:
+		return
+	var box := mesh.get_aabb()
+	var scale := float(span) * HEARTSTONE_FILL / box.size.x
+	heartstone_marker.mesh = mesh
+	heartstone_marker.material_override = null
+	heartstone_marker.scale = Vector3(scale, scale, scale)
+	heartstone_marker.position.y = -box.position.y * scale
 
 
 func _marker(

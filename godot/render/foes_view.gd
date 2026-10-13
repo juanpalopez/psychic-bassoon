@@ -58,7 +58,7 @@ func _init(models: Dictionary = MODELS) -> void:
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.use_colors = true
-		var mesh := _model_mesh(models[type].path) if models.has(type) else null
+		var mesh := ModelLoader.mesh(models[type].path) if models.has(type) else null
 		if mesh != null:
 			var box := mesh.get_aabb()
 			var scale := float(models[type].height) / box.size.y
@@ -197,29 +197,6 @@ func update(game: GameState, alpha: float) -> void:
 		_drawn_colours[foe.type][index] = colour
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = _used[type]
-
-
-## The first mesh found in a model file, or null when the file is missing or has none.
-static func _model_mesh(path: String) -> Mesh:
-	if not ResourceLoader.exists(path):
-		return null
-	var scene := load(path) as PackedScene
-	if scene == null:
-		return null
-	var root := scene.instantiate()
-	var found := _first_mesh(root)
-	root.free()
-	return found
-
-
-static func _first_mesh(node: Node) -> Mesh:
-	if node is MeshInstance3D and (node as MeshInstance3D).mesh != null:
-		return (node as MeshInstance3D).mesh
-	for child in node.get_children():
-		var found := _first_mesh(child)
-		if found != null:
-			return found
-	return null
 
 
 ## Lets the instance colour tint the model's own materials (the instance colour is

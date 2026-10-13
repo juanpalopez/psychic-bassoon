@@ -10,3 +10,8 @@ extends Resource
 ## Height of a level 1 body; each level adds `height_per_level`.
 @export var base_height := 0.9
 @export var height_per_level := 0.35
+## The owner's greybox model (a glb under `assets/models/towers`) drawn instead of the
+## box, and the scale it is drawn at (its own size times this, in cells) at tier 1.
+## An empty or missing path leaves the box.
+@export var model_path := ""
+@export var model_scale := 1.0

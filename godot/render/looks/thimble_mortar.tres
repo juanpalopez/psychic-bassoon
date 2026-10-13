@@ -6,3 +6,5 @@
 script = ExtResource("1_look")
 body_colour = Color(0.902, 0.494, 0.133, 1)
 pip_colour = Color(1, 0.95, 0.85, 1)
+model_path = "res://assets/models/towers/thimble_mortar.glb"
+model_scale = 0.6

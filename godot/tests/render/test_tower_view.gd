@@ -38,10 +38,14 @@ func test_it_stands_on_its_cell_at_the_height_of_the_tile() -> void:
 	assert_eq(view.tower_id, 4)
 
 
-func test_the_body_grows_with_each_tier_by_the_looks_numbers() -> void:
-	var look := TowerLooks.for_type("spoolGuard")
+func test_the_box_body_grows_with_each_tier_by_the_looks_numbers() -> void:
+	# a look without a model draws the box (the models are tested in test_tower_models.gd)
+	var look := TowerLooks.for_type("spoolGuard").duplicate() as TowerLook
+	look.model_path = ""
 	for level in 3:
-		var view := _view(level)
+		var view := SCENE.instantiate() as TowerView
+		add_child_autofree(view)
+		view.setup(_tower(level), look, 0.3)
 		assert_almost_eq(
 			view.body_height(), look.base_height + look.height_per_level * float(level), 1e-5
 		)
