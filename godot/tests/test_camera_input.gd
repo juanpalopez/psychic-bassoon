@@ -75,7 +75,8 @@ func test_the_wheel_zooms_in_and_out() -> void:
 	await get_tree().process_frame
 	var rig := main.get_node("CameraRig") as CameraRig
 	var start := rig.zoom
-	assert_almost_eq(start, main.START_ZOOM, 1e-9, "a run starts a little zoomed in")
+	assert_almost_eq(start, main.START_ZOOM, 1e-9)
+	assert_eq(start, 0.0, "a run starts with the whole board in view")
 	for wheel in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_UP]:
 		var event := InputEventMouseButton.new()
 		event.button_index = wheel

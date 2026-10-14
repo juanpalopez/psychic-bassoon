@@ -18,7 +18,11 @@ func _ticks_after(speed_index: int, seconds: float) -> int:
 	var main := await _main()
 	# a fresh game and clock: the frame the scene ran while starting used real time
 	main._start(main.game().seed)
-	((main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[speed_index]).pressed.emit()
+	# the speed button cycles, so reach a speed by pressing it until it shows that speed
+	var bar := main.get_node("Hud/SpeedBar") as SpeedBar
+	while bar.buttons()[1].text != "%dx" % speed_index:
+		bar.buttons()[1].pressed.emit()
+		main._process(0.0)
 	main._process(seconds)
 	return main.game().tick_count
 
@@ -48,7 +52,7 @@ func test_the_top_bar_shows_the_game() -> void:
 	var game: GameState = main.game()
 	var texts: Array[String] = (main.get_node("Hud/TopBar") as TopBar).texts()
 	assert_eq(texts[0], "Buttons %d" % game.buttons)
-	assert_eq(texts[3], "Seed %d" % game.seed)
+	assert_eq(texts.size(), 3, "the seed is not on the HUD any more")
 
 
 func test_the_game_over_overlay_shows_only_when_the_game_is_over() -> void:
@@ -159,7 +163,7 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 				checked += 1
 				assert_gte(button.get_global_rect().size.y * scale, 44.0, button.text)
 				assert_gte(button.get_global_rect().size.x * scale, 44.0, button.text)
-		assert_gt(checked, 5, shown)
+		assert_gt(checked, 3, shown)
 
 
 func test_a_new_game_starts_running_at_normal_speed() -> void:

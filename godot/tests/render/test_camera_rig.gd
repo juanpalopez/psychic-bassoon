@@ -89,12 +89,12 @@ func test_pitch_runs_from_62_degrees_zoomed_out_to_56_zoomed_in() -> void:
 
 
 func test_the_closest_view_is_never_further_than_the_fit_and_shows_big_cells() -> void:
-	var fit := 20.0
+	var fit := 30.0
 	# a tall canvas: cells reach the target size before the fit distance
 	var close := CameraRig.closest_distance(FOV, 720.0, fit)
 	assert_lt(close, fit)
-	# 120 px per cell on a 720 px canvas
-	assert_almost_eq(720.0 / (2.0 * close * tan(deg_to_rad(FOV) / 2.0)), 120.0, 1e-6)
+	# 100 px per cell on a 720 px canvas
+	assert_almost_eq(720.0 / (2.0 * close * tan(deg_to_rad(FOV) / 2.0)), 100.0, 1e-6)
 	# a canvas so tall that cells are already bigger than that when the board
 	# fits: there is nothing to zoom into, so the limit yields to the fit
 	assert_eq(CameraRig.closest_distance(FOV, 100000.0, fit), fit)

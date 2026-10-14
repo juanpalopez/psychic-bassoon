@@ -1,7 +1,7 @@
 ## The board camera: it frames the whole board, and lets the player pan and zoom.
 ##
 ## The view is one number, `zoom`, from 0 (the whole board in view, looking down
-## at 62 degrees) to 1 (close, looking in at 56 degrees, cells about 120 px wide
+## at 62 degrees) to 1 (close, looking in at 56 degrees, cells about 100 px wide
 ## on the 720 px canvas); a pinch or the mouse wheel moves it. The pitch barely changes:
 ## a steep, nearly top-down view keeps units and sockets readable at every zoom. A one-finger drag
 ## pans, within the board and rubber-banding back after release. The field of
@@ -19,7 +19,7 @@ const MIN_ASPECT := 0.5
 const MAX_PITCH := 62.0
 const MIN_PITCH := 56.0
 ## How wide a cell is, in pixels of the 720 px canvas, at the closest zoom.
-const CLOSEST_CELL_PIXELS := 120.0
+const CLOSEST_CELL_PIXELS := 100.0
 ## How far the target may leave the centre, as a share of the board's half size
 ## at full zoom; zoomed out there is nothing to pan.
 const PAN_LIMIT_SHARE := 0.9

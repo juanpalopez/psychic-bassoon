@@ -10,9 +10,8 @@
 extends Node3D
 
 const EARLY_RULES := preload("res://content/game_rules.gd")
-## The view a run starts in: about 13 cells across and 9 down, the size of units and sockets
-## the owner picked from a reference; pinching out shows the whole board.
-const START_ZOOM := 0.7
+## The view a run starts in: the whole board, centred (owner decision, 2026-10-14).
+const START_ZOOM := 0.0
 const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
@@ -359,6 +358,7 @@ func _seed_from_url() -> Variant:
 ## The launch button says what a press would do, and rests while it cannot.
 func _update_launch_button() -> void:
 	var next := _game.wave + 1
+	_launch.visible = true
 	if _game.won:
 		_launch.text = "You won"
 		_launch.disabled = true
@@ -366,8 +366,10 @@ func _update_launch_button() -> void:
 		_launch.text = "Game over"
 		_launch.disabled = true
 	elif not _game.spawners.is_empty():
-		_launch.text = "Wave %d is coming..." % _game.wave
+		# the Messenger Crow says the wave is coming; the button just steps aside
+		_launch.visible = false
 		_launch.disabled = true
+		return
 	elif _game.wave >= EARLY_RULES.WIN_WAVE:
 		_launch.text = "Final wave"
 		_launch.disabled = true

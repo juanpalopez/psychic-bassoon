@@ -10,7 +10,7 @@ extends Node3D
 ## Feet stand on the lane.
 const GROUND := Board.ROAD_HEIGHT
 const BODY_RADIUS := 0.2
-const BODY_HEIGHT := 1.0
+const BODY_HEIGHT := 0.7
 const BAR_WIDTH := 0.5
 const BAR_THICKNESS := 0.06
 const BAR_GAP := 0.12
