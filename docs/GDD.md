@@ -32,7 +32,8 @@ Designed specifically for handheld screens, the interaction layer prioritizes to
 - **Radial context menus:** tapping a socket or tower opens a minimum 48x48 pt target radial wheel offset above the touch point, ensuring the player's finger never obstructs active selection icons.
 - **Camera navigation:**
   - One-finger pan: smooth panning across the cutting mat table with soft edge rubber-banding bounds.
-  - Two-finger pinch-to-zoom: smooth elevation zoom bounded between 30° and 65° isometric view angles.
+  - Two-finger pinch-to-zoom: smooth zoom with a steep view angle (62° zoomed out, 56° zoomed in; a field of view of 20° keeps it nearly top-down). A run starts with the whole board in view; pinching in shows detail (cells up to about 100 px wide on a 720 px canvas). There is no follow camera.
+- **Screen layout (owner, 2026-10-14):** one compact stats chip top-left (Buttons, Heartstone health, wave; the seed is not shown), Pause and one speed button that cycles 1x, 2x and 3x at the top right with a Menu button (Next seed, Sound), and the Start wave button at the bottom left. The Messenger Crow says that a wave is coming. Build choices appear as a row of buttons anchored at the tapped socket (the radial wheel above is the target look).
 - **Global spell activation:** drag-and-drop mechanics from a persistent bottom-right "Toolbox Tray". Spells display live projection decals on the map ground layer before releasing touch to cast.
 - **Screen-space non-grid HUD:** persistent gameplay metrics (Heartstone HP, Buttons currency, PVA Ink) live on a 2D `CanvasLayer` overlay so they never occupy world grid cells. A bottom-docked toolbox tray holds the spells, and a diegetic Messenger Crow (an origami courier on a spring wire, see section 6) delivers event notifications.
 
@@ -40,7 +41,7 @@ Designed specifically for handheld screens, the interaction layer prioritizes to
 
 ### Grid architecture
 
-Maps are strictly standardized to a **22-column by 16-row landscape grid (352 cells)**, built from modular 1m x 1m GridMap tiles within Godot 4. The board is surrounded by an out-of-bounds diorama skirt that represents the rest of the craft-room desk. Terrain is categorized by distinct physical elevations:
+Maps are strictly standardized to a **16-column by 11-row landscape grid (176 cells)** (owner, 2026-10-14: the 22 by 16 board showed too many cells at a readable unit size; the whole board is in view at the start and there is no follow camera), built from modular 1m x 1m GridMap tiles within Godot 4. The board is surrounded by an out-of-bounds diorama skirt that represents the rest of the craft-room desk. Terrain is categorized by distinct physical elevations:
 
 - **Level 0 (cutting mat table):** base surface. Enemies move along marked lanes 1 to 2 cells wide.
 - **Level 1 (glued cardboard rise):** a low layer of double-walled corrugated cardboard, +1.0 m high.
@@ -48,7 +49,7 @@ Maps are strictly standardized to a **22-column by 16-row landscape grid (352 ce
 
 ### Sockets, footprints and objectives
 
-- **Sockets and footprints:** tower sockets occupy a standard 2x2 cell footprint (2.0 m x 2.0 m) with a pre-etched circular outline that flashes white when tapped. Towers have exaggerated vertical heights (3 m to 6 m) for readability. There are 12 to 22 sockets per map; a socket turns to folded cardstock once built on.
+- **Sockets and footprints:** tower sockets occupy a standard 2x2 cell footprint (2.0 m x 2.0 m) with a pre-etched circular outline that flashes white when tapped. Towers have exaggerated vertical heights (3 m to 6 m) for readability. There are 12 to 15 sockets per map; a socket turns to folded cardstock once built on.
 - **Heartstone objective:** at the end of the enemy lane, on a 2x2 to 3x3 cell footprint, an illuminated origami heart crystal is the core objective. Its health is the player's health.
 
 ### Environmental hazards and dynamic paths
@@ -214,7 +215,7 @@ The game framework uses an event-driven design to ensure optimal performance on 
 Main Scene (Node3D)
 ├── GameManager (Node) -------- Handles state machine, wave orchestration, and currency
 ├── AudioManager (Node) ------- Orchestrates 3-tier adaptive audio stems & diegetic foley SFX
-├── BoardGrid (GridMap) ------- Manages 22x16 modular terrain tiles & height levels
+├── BoardGrid (GridMap) ------- Manages 16x11 modular terrain tiles & height levels
 ├── PathController (Node3D) --- Contains Path3D splines & dynamic bridge/route updates
 ├── TowerSockets (Node3D) ----- Container for individual Socket nodes
 │   └── TowerSocket (Area3D) - Manages occupancy state, radial menu triggers, & placement
