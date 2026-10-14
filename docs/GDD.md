@@ -49,7 +49,7 @@ Maps are strictly standardized to a **16-column by 11-row landscape grid (176 ce
 
 ### Sockets, footprints and objectives
 
-- **Sockets and footprints:** tower sockets occupy a standard 2x2 cell footprint (2.0 m x 2.0 m) with a pre-etched circular outline that flashes white when tapped. Towers have exaggerated vertical heights (3 m to 6 m) for readability. There are 12 to 15 sockets per map; a socket turns to folded cardstock once built on.
+- **Sockets and footprints:** tower sockets occupy a standard 2x2 cell footprint (2.0 m x 2.0 m) with a pre-etched circular outline that flashes white when tapped. Towers have exaggerated vertical heights (3 m to 6 m) for readability. There are 12 to 15 sockets per map (the generator gives 12 on about three maps in four); a socket turns to folded cardstock once built on.
 - **Heartstone objective:** at the end of the enemy lane, on a 2x2 to 3x3 cell footprint, an illuminated origami heart crystal is the core objective. Its health is the player's health.
 
 ### Environmental hazards and dynamic paths
