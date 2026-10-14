@@ -16,7 +16,7 @@ const RING_HEIGHT := 0.03
 ## Where up the drawn tower a shot leaves it, as a share of its height.
 const MUZZLE_SHARE := 0.8
 ## Where on a foe a shot or beam ends, above the ground.
-const BODY_HEIGHT := 0.4
+const BODY_HEIGHT := 0.7
 const SHOT_COLOUR := Color(1.0, 0.95, 0.6, 1.0)
 const BEAM_COLOUR := Color(0.9, 0.5, 1.0, 1.0)
 const RING_COLOUR := Color(1.0, 0.7, 0.3, 0.35)

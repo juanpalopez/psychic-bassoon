@@ -88,7 +88,17 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 	# the scene closes the overlay on a frame when the game is not over
 	main.set_process(false)
 	await get_tree().process_frame
-	if shown != "":
+	if shown == "Menu":
+		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
+	elif shown == "Message":
+		var message := main.get_node("Hud/Message") as Label
+		message.text = "Unknown tower and a rather long sentence to be sure it fits"
+		message.visible = true
+	elif shown == "TowerPanel":
+		var tower := Tower.new()
+		tower.type = "thimbleMortar"
+		(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+	elif shown != "":
 		var panel := main.get_node("Hud/" + shown) as Control
 		if panel is GameOverPanel:
 			(panel as GameOverPanel).show_for(1)
@@ -105,7 +115,7 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 	# 1558x720 is an 844x390 phone: expand stretch widens the 1280x720 canvas
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
-		for shown in ["", "GameOver", "BuildMenu"]:
+		for shown in ["", "GameOver", "BuildMenu", "TowerPanel", "Message", "Menu"]:
 			var rects := await _hud_rects(size.x, size.y, shown)
 			var names := rects.keys()
 			# the web page's Full screen button floats over the top-right corner
@@ -184,3 +194,25 @@ func test_a_won_game_shows_the_victory_overlay_and_play_again_starts_afresh() ->
 	overlay.play_again_button().pressed.emit()
 	assert_false(main.game().won)
 	assert_false(overlay.visible)
+
+
+func test_the_build_menu_is_a_low_strip_not_a_block_over_the_map() -> void:
+	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
+		for panel in ["BuildMenu", "TowerPanel"]:
+			var rects := await _hud_rects(size.x, size.y, panel)
+			var rect: Rect2 = rects[panel]
+			assert_lte(rect.size.y, 140.0, "%s is %s tall at %s" % [panel, rect.size.y, size])
+			assert_gte(rect.end.y, float(size.y) - 40.0, "%s sits along the bottom" % panel)
+
+
+func test_the_menu_button_shows_next_seed_and_sound() -> void:
+	var main := await _main()
+	var next_seed := main.get_node("Hud/NextSeed") as Button
+	var sound := main.get_node("Hud/Sound") as Button
+	assert_false(next_seed.visible)
+	assert_false(sound.visible)
+	(main.get_node("Hud/MenuButton") as Button).button_pressed = true
+	assert_true(next_seed.visible)
+	assert_true(sound.visible)
+	(main.get_node("Hud/MenuButton") as Button).button_pressed = false
+	assert_false(next_seed.visible)

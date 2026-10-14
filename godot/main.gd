@@ -10,6 +10,9 @@
 extends Node3D
 
 const EARLY_RULES := preload("res://content/game_rules.gd")
+## The view a run starts in: about 13 cells across and 9 down, the size of units and sockets
+## the owner picked from a reference; pinching out shows the whole board.
+const START_ZOOM := 0.7
 const MESSAGE_SECONDS := 2.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
@@ -44,12 +47,19 @@ var _crow := MessengerCrow.new()
 @onready var _ring: RangeRing = $RangeRing
 @onready var _next_seed: Button = $Hud/NextSeed
 @onready var _sound: Button = $Hud/Sound
+@onready var _menu_button: Button = $Hud/MenuButton
 
 
 func _ready() -> void:
 	var from_url: Variant = _seed_from_url()
 	_start(from_url if from_url is int else _board.map_seed)
+	_rig.set_zoom(START_ZOOM)
 	add_child(_audio)
+	_menu_button.toggled.connect(
+		func(on: bool) -> void:
+			_next_seed.visible = on
+			_sound.visible = on
+	)
 	_sound.toggled.connect(func(on: bool) -> void: _audio.set_muted(not on))
 	$Hud.add_child(_crow)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))

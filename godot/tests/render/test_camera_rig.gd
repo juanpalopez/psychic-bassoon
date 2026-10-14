@@ -1,8 +1,8 @@
 ## The camera rig must fit the whole board for any landscape screen.
 extends GutTest
 
-const PITCH := 65.0  # the whole-board view is the most top-down one
-const FOV := 35.0
+const PITCH := 62.0  # the whole-board view is the most top-down one
+const FOV := 20.0
 const MARGIN := 1.05
 
 
@@ -80,12 +80,12 @@ func test_the_rig_aims_the_camera_down_at_the_board() -> void:
 	assert_gt(camera.position.y, 0.0)
 
 
-func test_pitch_runs_from_65_degrees_zoomed_out_to_30_zoomed_in() -> void:
-	assert_eq(CameraRig.pitch_for(0.0), 65.0)
-	assert_eq(CameraRig.pitch_for(1.0), 30.0)
-	assert_almost_eq(CameraRig.pitch_for(0.5), 47.5, 1e-9)
-	assert_eq(CameraRig.pitch_for(-3.0), 65.0)
-	assert_eq(CameraRig.pitch_for(9.0), 30.0)
+func test_pitch_runs_from_62_degrees_zoomed_out_to_56_zoomed_in() -> void:
+	assert_eq(CameraRig.pitch_for(0.0), 62.0)
+	assert_eq(CameraRig.pitch_for(1.0), 56.0)
+	assert_almost_eq(CameraRig.pitch_for(0.5), 59.0, 1e-9)
+	assert_eq(CameraRig.pitch_for(-3.0), 62.0)
+	assert_eq(CameraRig.pitch_for(9.0), 56.0)
 
 
 func test_the_closest_view_is_never_further_than_the_fit_and_shows_big_cells() -> void:
@@ -116,7 +116,7 @@ func test_zoom_in_moves_the_camera_closer_and_lower() -> void:
 	rig.set_zoom(1.0)
 	assert_lt(camera.position.length(), far)
 	assert_gt(camera.rotation_degrees.x, far_pitch, "less negative: a lower angle")
-	assert_almost_eq(camera.rotation_degrees.x, -30.0, 1e-4)
+	assert_almost_eq(camera.rotation_degrees.x, -CameraRig.MIN_PITCH, 1e-4)
 
 
 func test_zoom_is_clamped_to_the_range() -> void:
@@ -194,3 +194,18 @@ func test_zooming_out_pulls_a_panned_view_back_to_the_middle() -> void:
 		rig._process(1.0 / 60.0)
 	assert_almost_eq(rig.pan.x, 0.0, 1e-3)
 	assert_almost_eq(rig.pan.y, 0.0, 1e-3)
+
+
+func test_the_rigs_own_default_frames_every_board_corner() -> void:
+	for aspect in [4.0 / 3.0, 16.0 / 9.0, 2.16]:
+		var rig := CameraRig.new()
+		add_child_autofree(rig)
+		rig.frame(aspect)
+		var camera := rig.camera()
+		var tan_v := tan(deg_to_rad(camera.fov) / 2.0)
+		for corner in BoardSpace.corners():
+			var local := camera.global_transform.affine_inverse() * corner
+			var depth := -local.z
+			assert_gt(depth, 0.0)
+			assert_lte(absf(local.y) / (depth * tan_v), 1.0 + 1e-6, "vertical at %s" % aspect)
+			assert_lte(absf(local.x) / (depth * tan_v * aspect), 1.0 + 1e-6, "horizontal")

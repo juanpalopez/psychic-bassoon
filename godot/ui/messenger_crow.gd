@@ -17,6 +17,8 @@ const BOB_HEIGHT := 10.0
 const BOB_SPEED := 6.0
 ## The model is about half a unit wide; the camera fills the square view with it.
 const CAMERA_POSITION := Vector3(0.0, 0.3, 1.5)
+## Narrow enough that the half-unit model fills its square view from 1.5 units away.
+const CAMERA_FOV := 30.0
 const CAMERA_TARGET := Vector3(0.0, 0.3, 0.0)
 const FACE_RIGHT_DEGREES := 90.0
 
@@ -161,7 +163,7 @@ func _show_phase() -> void:
 		_scroll.reset_size()
 	if not active:
 		return
-	var across := size.x + float(VIEW_SIZE)
+	var across := get_viewport_rect().size.x + float(VIEW_SIZE)
 	var x := position_fraction() * across - float(VIEW_SIZE)
 	var bob := 0.0 if reduced_motion else sin(_clock * BOB_SPEED) * BOB_HEIGHT
 	var y := TOP_MARGIN + bob
@@ -186,6 +188,7 @@ func _build_view() -> void:
 	_container.add_child(_viewport)
 	var camera := Camera3D.new()
 	_viewport.add_child(camera)
+	camera.fov = CAMERA_FOV
 	camera.position = CAMERA_POSITION
 	camera.look_at(CAMERA_TARGET)
 	var light := DirectionalLight3D.new()
