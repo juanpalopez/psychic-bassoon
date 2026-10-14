@@ -36,8 +36,8 @@ func test_it_names_the_tower_and_its_level() -> void:
 func test_it_shows_the_levels_stats_from_the_content() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("spoolGuard", 1, 110), 0)
-	# level 2 Spool Guard: damage 21, range 2.6, rate 3.6
-	assert_string_contains(panel.stats_text(), "21")
+	# level 2 Spool Guard: damage 23, range 2.6, rate 3.6
+	assert_string_contains(panel.stats_text(), "23")
 	assert_string_contains(panel.stats_text(), "2.6")
 	assert_string_contains(panel.stats_text(), "3.6")
 

@@ -22,7 +22,7 @@ const DEFS := {
 	{
 		"name": "Scrap Goblin",
 		"hp": 20,
-		"speed": 2.13,
+		"speed": 1.6,
 		"reward": 4,
 		"armor": 0,
 		"resist": 0,
@@ -36,7 +36,7 @@ const DEFS := {
 	{
 		"name": "Corrugated Orc",
 		"hp": 130,
-		"speed": 0.76,
+		"speed": 0.57,
 		"reward": 13,
 		"armor": 6,
 		"resist": 0,
@@ -50,7 +50,7 @@ const DEFS := {
 	{
 		"name": "Cardboard Golem",
 		"hp": 850,
-		"speed": 0.56,
+		"speed": 0.42,
 		"reward": 110,
 		"armor": 6,
 		"resist": 0,

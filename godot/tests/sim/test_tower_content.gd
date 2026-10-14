@@ -48,10 +48,10 @@ func test_the_numbers_started_from_the_prototype_and_were_tuned_with_the_bot() -
 	# it still hurts the Corrugated Orc's heavier armor), the Mortar its Catapult
 	# (damage trimmed from 32, 56, 96: untrimmed it wins nearly every map)
 	assert_eq(TOWERS.DEFS.spoolGuard.cost, [50, 60, 110])
-	assert_eq(TOWERS.DEFS.spoolGuard.damage, [13, 21, 35])
+	assert_eq(TOWERS.DEFS.spoolGuard.damage, [14, 23, 38])
 	assert_eq(TOWERS.DEFS.spoolGuard.rate, [3.0, 3.6, 4.5])
 	assert_eq(TOWERS.DEFS.thimbleMortar.cost, [90, 90, 160])
-	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [22, 40, 68])
+	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [15, 28, 48])
 	assert_eq(TOWERS.DEFS.thimbleMortar.splash, [0.95, 1.15, 1.35])
 
 

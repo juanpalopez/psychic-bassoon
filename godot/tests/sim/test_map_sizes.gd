@@ -5,8 +5,8 @@
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
-const COLS := 22
-const ROWS := 16
+const COLS := 16
+const ROWS := 11
 
 var _seeds: Array[int] = []
 
@@ -23,7 +23,7 @@ func _landscape(map_seed: int, with_detour: bool = false) -> GameMap:
 
 func test_the_content_names_both_board_sizes() -> void:
 	assert_eq([RULES.LEGACY_COLS, RULES.LEGACY_ROWS], [9, 13])
-	assert_eq([RULES.LANDSCAPE_COLS, RULES.LANDSCAPE_ROWS], [22, 16])
+	assert_eq([RULES.LANDSCAPE_COLS, RULES.LANDSCAPE_ROWS], [16, 11])
 
 
 func test_a_map_knows_its_size() -> void:
@@ -176,3 +176,16 @@ func test_the_game_builds_the_gdd_board_by_default() -> void:
 	assert_eq(game.map.footprint, 2)
 	assert_eq(game.routes.size(), 1, "one road, no detour")
 	assert_false(RULES.GAME_DETOUR)
+
+
+func test_the_game_road_is_about_45_cells_and_holds_12_to_15_sockets() -> void:
+	# the 16 by 11 board: a road a good third shorter than the 22 by 16 one (about 76)
+	var total := 0
+	for map_seed in range(1, 21):
+		var map := MapGen.generate(map_seed, COLS, ROWS, false, RULES.SOCKET_FOOTPRINT)
+		total += map.path.size()
+		assert_gte(map.sockets.size(), RULES.SOCKET_MIN, "seed %d" % map_seed)
+		assert_lte(map.sockets.size(), RULES.SOCKET_MAX, "seed %d" % map_seed)
+	var mean := float(total) / 20.0
+	assert_between(mean, 40.0, 50.0, "mean road length %.1f" % mean)
+	assert_eq([RULES.SOCKET_MIN, RULES.SOCKET_MAX], [12, 15])

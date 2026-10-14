@@ -3,14 +3,15 @@
 extends RefCounted
 
 ## The board the game builds, in cells: the GDD's landscape board.
-const GRID_COLS := 22
-const GRID_ROWS := 16
+const GRID_COLS := 16
+const GRID_ROWS := 11
 ## The ported generator's original board, which the frozen fixtures pin.
 const LEGACY_COLS := 9
 const LEGACY_ROWS := 13
-## The GDD's board: 22 columns by 16 rows, landscape (a road crosses the long side).
-const LANDSCAPE_COLS := 22
-const LANDSCAPE_ROWS := 16
+## The board: 16 columns by 11 rows, landscape (a road crosses the long side). The GDD said
+## 22 by 16, but that shows too many cells at a readable unit size (owner, 2026-10-14, #255).
+const LANDSCAPE_COLS := 16
+const LANDSCAPE_ROWS := 11
 ## Whether the game's road grows a detour. The owner chose one road and one spawn
 ## (2026-10-12); the fixtures' maps all have a detour, so they ask for one.
 const GAME_DETOUR := false
@@ -41,7 +42,9 @@ const CELL_CENTRE := 0.5
 ## are not road but lie within `SOCKET_REACH` cells of it (Chebyshev distance),
 ## and no two sockets are closer than `SOCKET_SPACING` (Manhattan distance).
 const SOCKET_MIN := 12
-const SOCKET_MAX := 22
+const SOCKET_MAX := 15
+## The 9 by 13 board of the frozen sockets golden keeps its old upper bound.
+const SOCKET_MAX_LEGACY := 22
 const SOCKET_REACH := 2
 const SOCKET_SPACING := 2
 ## A socket is a square block of this many cells on a side: the GDD says 2

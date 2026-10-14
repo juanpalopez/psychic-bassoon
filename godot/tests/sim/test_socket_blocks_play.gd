@@ -2,8 +2,8 @@
 ## block's centre, and the golden the GDScript sim wrote.
 extends GutTest
 
-const COLS := 22
-const ROWS := 16
+const COLS := 16
+const ROWS := 11
 const GOLDEN := "res://tests/goldens/socket_blocks.json"
 
 

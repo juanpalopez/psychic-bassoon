@@ -25,8 +25,8 @@ func test_a_higher_row_is_nearer_the_camera() -> void:
 
 
 func test_a_road_from_the_left_edge_to_the_right_edge_runs_left_to_right() -> void:
-	var spawn := BoardSpace.cell_to_world(0, 7)
-	var heartstone := BoardSpace.cell_to_world(RULES.GRID_COLS - 1, 7)
+	var spawn := BoardSpace.cell_to_world(0, 5)
+	var heartstone := BoardSpace.cell_to_world(RULES.GRID_COLS - 1, 5)
 	assert_lt(spawn.x, heartstone.x)
 	assert_almost_eq(spawn.z, heartstone.z, 1e-9)
 
@@ -48,7 +48,7 @@ func test_size_is_columns_across_and_rows_deep() -> void:
 	var size := BoardSpace.size()
 	assert_eq(size.x, float(RULES.GRID_COLS))
 	assert_eq(size.y, float(RULES.GRID_ROWS))
-	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [22, 16])
+	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [16, 11])
 
 
 func test_corners_are_the_outer_edge_of_the_board() -> void:
