@@ -4,8 +4,8 @@
 ## (`web-three-final:src/sim/map/mapgen.ts`, frozen as fixtures).
 ##
 ## The road generator draws a road that runs down a tall board. A wide board
-## (more columns than rows, the GDD's 22 by 16) is made by drawing on the turned
-## grid (16 columns by 22 rows) and turning the cells back, so the road crosses
+## (more columns than rows, the game's 16 by 11) is made by drawing on the turned
+## grid (rows by columns) and turning the cells back, so the road crosses
 ## the long side from the left edge to the right.
 class_name MapGen
 extends RefCounted

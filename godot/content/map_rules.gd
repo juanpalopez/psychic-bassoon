@@ -43,8 +43,8 @@ const CELL_CENTRE := 0.5
 ## and no two sockets are closer than `SOCKET_SPACING` (Manhattan distance).
 const SOCKET_MIN := 12
 const SOCKET_MAX := 15
-## The 9 by 13 board of the frozen sockets golden keeps its old upper bound.
-const SOCKET_MAX_LEGACY := 22
+## Single-cell sockets (the 9 by 13 board of the frozen sockets golden) keep the old upper bound.
+const SOCKET_MAX_SINGLE_CELL := 22
 const SOCKET_REACH := 2
 const SOCKET_SPACING := 2
 ## A socket is a square block of this many cells on a side: the GDD says 2

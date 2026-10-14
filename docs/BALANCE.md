@@ -332,7 +332,7 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 
 **What changed** (`godot/content`, `godot/sim/map/socket_placer.gd`):
 
-- The board is 16 columns by 11 rows (176 cells). The road is about 45 cells long on average (22 by 16: about 76), and a map has 12 to 15 sockets (`SOCKET_MAX_LEGACY` keeps 22 for the 9 by 13 board of the frozen sockets golden).
+- The board is 16 columns by 11 rows (176 cells). The road is about 45 cells long on average (22 by 16: about 76), and a map has 12 to 15 sockets in the rules, but in practice 12 on about three maps in four (3,000 seeds: 12 sockets 2,181, 13 664, 14 131, 15 24): the spaced greedy pass runs out of room before the drawn target. Single-cell sockets (`SOCKET_MAX_SINGLE_CELL`, the frozen 9 by 13 golden) keep 22.
 - Foes are 25 percent slower: Scrap Goblin 2.13 to 1.6, Corrugated Orc 0.76 to 0.57, Cardboard Golem 0.56 to 0.42 cells a second.
 - Towers: Spool Guard damage 13, 21, 35 to 14, 23, 38; Thimble Mortar damage 22, 40, 68 to 15, 28, 48 (it won 15 of 16 maps otherwise); Prism Spire unchanged.
 - Replay goldens regenerated (the mix game moved to seed 3 so a won run stays in; the guard mix game to seed 2, the first seed that builds both tents); the socket-blocks golden regenerated for the new board.
@@ -345,6 +345,7 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 | | x0.75 | same | same | base | 1 of 8 | 8 of 8 | 2 of 8 | 6 of 8 | 5 of 8 |
 | | x0.6 | same | same | base | 2 of 8 | 8 of 8 | 6 of 8 | 8 of 8 | 7 of 8 |
 | 1 | x0.75 | 14, 23, 38 | 19, 34, 58 | base | 5 | 15 | 7 | 14 | 12 |
+| 1 | x0.75 | 14, 23, 38 | 19, 34, 58 | 44, 88, 171 | 5 | 15 | 11 | 14 | 12 |
 | 2 | x0.85 | 14, 23, 38 | 16, 30, 51 | 44, 88, 171 | 1 | 1 | 5 | 5 | 2 |
 | 2 | x0.85 | 14, 23, 38 | 14, 26, 44 | 44, 88, 171 | 1 | 0 | 5 | 2 | 1 |
 | 2 | x0.75 | 14, 23, 38 | 16, 30, 51 | 44, 88, 171 | 5 | 9 | 11 | 12 | 8 |
@@ -352,6 +353,8 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 | 3 (chosen) | x0.75 | 14, 23, 38 | 15, 28, 48 | base | 5 | 5 | 7 | 10 | 6 |
 | 3 | x0.75 | 15, 24, 40 | 16, 30, 51 | 41, 82, 159 | 7 | 11 | 7 | 12 | 8 |
 
-**The chosen numbers** put four of five strategies in the band (Spool 5, Mortar 5, Prism 7, Guard mix 6); the Mix wins 10 of 16 (62 percent), a little above the band, which fits the intent that the Mix is the best build. Heartstone health at the end: Spool 2.3, Mortar 1.6, Prism 4.0, Mix 5.8, Guard mix 3.1; Buttons left 1,500 to 3,000 (the economy item of #237 stays open).
+**The chosen numbers** put four of five strategies in the band (Spool 5, Mortar 5, Prism 7, Guard mix 6); the Mix wins 10 of 16 (62 percent), a little above the band, which fits the intent that the Mix is the best build. Heartstone health at the end: Spool 2.3, Mortar 1.6, Prism 4.0, Mix 5.8, Guard mix 3.1; Buttons left 1,478 to 3,272 (the economy item of #237 stays open).
 
 **New finding: the Kitchen Mess Tent is hard to place on the small board.** The guard mix builds a Mess Tent in 3 of 16 seeds in a whole run, and in 2 of 8 within its first 60 steps, because a socket must be near the guards' post. The tent-flow tests now look over several seeds. Left for the owner: a wider aura, or a placement rule that puts the Guard Tent where a Mess Tent socket is near.
+
+The golden for the guard mix is seed 2 (it builds both tents); the CI game-time check plays the guard mix on seed 4, which wins at these numbers (it played seed 2, which now loses at wave 20). A wave-20 clear is what the check needs to time a whole game.

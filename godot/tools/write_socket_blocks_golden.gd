@@ -1,7 +1,7 @@
 ## Writes `tests/goldens/socket_blocks.json`: the 2x2 socket anchors, their levels
-## and the Heartstone's footprint on the landscape 22 by 16 board for a few
-## seeds, written by the GDScript sim itself. Run it only for a reviewed balance
-## change (a new socket rule or number), then commit the result:
+## and the Heartstone's footprint on the landscape board (`LANDSCAPE_COLS` by
+## `LANDSCAPE_ROWS`) for a few seeds, written by the GDScript sim itself. Run it only for a
+## reviewed balance change (a new socket rule or number), then commit the result:
 ##
 ##   godot --headless --path godot -s tools/write_socket_blocks_golden.gd
 extends SceneTree

@@ -24,7 +24,7 @@ static func place(map: GameMap) -> bool:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
 	_shuffle(candidates, rng)
-	var most: int = RULES.SOCKET_MAX_LEGACY if map.footprint == 1 else RULES.SOCKET_MAX
+	var most: int = RULES.SOCKET_MAX_SINGLE_CELL if map.footprint == 1 else RULES.SOCKET_MAX
 	var target: int = RULES.SOCKET_MIN + rng.next_int(most - RULES.SOCKET_MIN + 1)
 	var chosen: Array[Vector2i] = []
 	for cell in candidates:

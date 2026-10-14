@@ -29,7 +29,7 @@ func _types(game: GameState) -> Array[String]:
 func test_the_guard_mix_builds_both_tents_among_its_towers() -> void:
 	# a Mess Tent needs a socket whose aura reaches the guards, which a small board does not
 	# always have, so look over a few seeds
-	var with_both := 0
+	var with_both: Array[int] = []
 	for map_seed in range(1, 9):
 		var game := Game.create(map_seed)
 		game.buttons = 100000
@@ -39,8 +39,9 @@ func test_the_guard_mix_builds_both_tents_among_its_towers() -> void:
 		assert_true(types.has("spoolGuard"), "seed %d" % map_seed)
 		assert_gt(game.guards.size(), 0)
 		if types.has("messTent"):
-			with_both += 1
-	assert_gt(with_both, 0, "some seeds get both tents")
+			with_both.append(map_seed)
+	# seeds 2 and 7 have a socket near the guards' post; a placement change must move this
+	assert_eq(with_both, [2, 7] as Array[int])
 
 
 func test_a_mess_tent_goes_where_its_aura_reaches_the_guards() -> void:

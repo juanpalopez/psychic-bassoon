@@ -15,8 +15,14 @@ func test_the_board_is_centred_on_the_origin() -> void:
 
 func test_a_higher_column_is_further_right() -> void:
 	# the board is landscape as the sim has it: columns run across the screen
-	assert_lt(BoardSpace.cell_to_world(0, 5).x, BoardSpace.cell_to_world(1, 5).x)
-	assert_almost_eq(BoardSpace.cell_to_world(0, 5).z, BoardSpace.cell_to_world(1, 5).z, 1e-9)
+	assert_lt(
+		BoardSpace.cell_to_world(0, int(RULES.GRID_ROWS * 0.5)).x, BoardSpace.cell_to_world(1, 5).x
+	)
+	assert_almost_eq(
+		BoardSpace.cell_to_world(0, int(RULES.GRID_ROWS * 0.5)).z,
+		BoardSpace.cell_to_world(1, 5).z,
+		1e-9
+	)
 
 
 func test_a_higher_row_is_nearer_the_camera() -> void:
@@ -25,8 +31,8 @@ func test_a_higher_row_is_nearer_the_camera() -> void:
 
 
 func test_a_road_from_the_left_edge_to_the_right_edge_runs_left_to_right() -> void:
-	var spawn := BoardSpace.cell_to_world(0, 5)
-	var heartstone := BoardSpace.cell_to_world(RULES.GRID_COLS - 1, 5)
+	var spawn := BoardSpace.cell_to_world(0, int(RULES.GRID_ROWS * 0.5))
+	var heartstone := BoardSpace.cell_to_world(RULES.GRID_COLS - 1, int(RULES.GRID_ROWS * 0.5))
 	assert_lt(spawn.x, heartstone.x)
 	assert_almost_eq(spawn.z, heartstone.z, 1e-9)
 
