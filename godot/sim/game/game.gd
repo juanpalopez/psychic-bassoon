@@ -69,7 +69,7 @@ static func tick(game: GameState) -> void:
 	game.tick_count += 1
 
 
-static func _reject(game: GameState, command: Command, reason: GameEvent.RejectReason) -> void:
+static func reject(game: GameState, command: Command, reason: GameEvent.RejectReason) -> void:
 	game.events.append(GameEvent.rejected(command, reason))
 
 
@@ -78,7 +78,7 @@ static func _is_socket(game: GameState, col: int, row: int) -> bool:
 	return game.map.is_socket(Vector2i(col, row))
 
 
-static func _find_tower(game: GameState, id: int) -> Tower:
+static func find_tower(game: GameState, id: int) -> Tower:
 	for tower in game.towers:
 		if tower.id == id:
 			return tower
@@ -87,15 +87,15 @@ static func _find_tower(game: GameState, id: int) -> Tower:
 
 static func _build(game: GameState, command: Command) -> void:
 	if not TOWERS.DEFS.has(command.tower):
-		return _reject(game, command, GameEvent.RejectReason.UNKNOWN_TOWER)
+		return reject(game, command, GameEvent.RejectReason.UNKNOWN_TOWER)
 	if not _is_socket(game, command.col, command.row):
-		return _reject(game, command, GameEvent.RejectReason.NOT_A_SOCKET)
+		return reject(game, command, GameEvent.RejectReason.NOT_A_SOCKET)
 	for other in game.towers:
 		if other.col == command.col and other.row == command.row:
-			return _reject(game, command, GameEvent.RejectReason.OCCUPIED)
+			return reject(game, command, GameEvent.RejectReason.OCCUPIED)
 	var cost: int = TOWERS.DEFS[command.tower].cost[0]
 	if game.buttons < cost:
-		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
+		return reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
 	game.buttons -= cost
 	var tower := Tower.new()
 	tower.id = game.next_id
@@ -113,15 +113,15 @@ static func _build(game: GameState, command: Command) -> void:
 
 
 static func _upgrade(game: GameState, command: Command) -> void:
-	var tower := _find_tower(game, command.tower_id)
+	var tower := find_tower(game, command.tower_id)
 	if tower == null:
-		return _reject(game, command, GameEvent.RejectReason.NO_SUCH_TOWER)
+		return reject(game, command, GameEvent.RejectReason.NO_SUCH_TOWER)
 	var costs: Array = TOWERS.DEFS[tower.type].cost
 	if tower.level + 1 >= costs.size():
-		return _reject(game, command, GameEvent.RejectReason.MAX_LEVEL)
+		return reject(game, command, GameEvent.RejectReason.MAX_LEVEL)
 	var cost: int = costs[tower.level + 1]
 	if game.buttons < cost:
-		return _reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
+		return reject(game, command, GameEvent.RejectReason.NOT_ENOUGH_BUTTONS)
 	game.buttons -= cost
 	tower.invested += cost
 	tower.level += 1
@@ -134,9 +134,9 @@ static func _upgrade(game: GameState, command: Command) -> void:
 
 
 static func _sell(game: GameState, command: Command) -> void:
-	var tower := _find_tower(game, command.tower_id)
+	var tower := find_tower(game, command.tower_id)
 	if tower == null:
-		return _reject(game, command, GameEvent.RejectReason.NO_SUCH_TOWER)
+		return reject(game, command, GameEvent.RejectReason.NO_SUCH_TOWER)
 	var refund := int(floor(float(tower.invested) * RULES.SELL_REFUND))
 	game.buttons += refund
 	game.towers.erase(tower)
@@ -150,9 +150,9 @@ static func _sell(game: GameState, command: Command) -> void:
 static func _launch_wave(game: GameState, command: Command) -> void:
 	# the run ends when the win wave is cleared, so no wave comes after it
 	if game.wave >= RULES.WIN_WAVE:
-		return _reject(game, command, GameEvent.RejectReason.FINAL_WAVE)
+		return reject(game, command, GameEvent.RejectReason.FINAL_WAVE)
 	if game.running and not game.spawners.is_empty():
-		return _reject(game, command, GameEvent.RejectReason.WAVE_IN_PROGRESS)
+		return reject(game, command, GameEvent.RejectReason.WAVE_IN_PROGRESS)
 	var early_bonus := 0
 	if game.running:
 		early_bonus = RULES.EARLY_CALL_BASE + game.wave * RULES.EARLY_CALL_PER_WAVE
@@ -168,9 +168,9 @@ static func _launch_wave(game: GameState, command: Command) -> void:
 
 static func _apply(game: GameState, command: Command) -> void:
 	if game.won:
-		return _reject(game, command, GameEvent.RejectReason.GAME_WON)
+		return reject(game, command, GameEvent.RejectReason.GAME_WON)
 	if game.over:
-		return _reject(game, command, GameEvent.RejectReason.GAME_OVER)
+		return reject(game, command, GameEvent.RejectReason.GAME_OVER)
 	match command.kind:
 		Command.Kind.BUILD:
 			_build(game, command)
@@ -180,3 +180,7 @@ static func _apply(game: GameState, command: Command) -> void:
 			_sell(game, command)
 		Command.Kind.LAUNCH_WAVE:
 			_launch_wave(game, command)
+		Command.Kind.CHOOSE_SPEC:
+			Specs.choose(game, command)
+		Command.Kind.ACTIVATE_ABILITY:
+			Specs.activate(game, command)

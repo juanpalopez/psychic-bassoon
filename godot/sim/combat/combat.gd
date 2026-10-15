@@ -9,10 +9,12 @@ const RULES := preload("res://content/game_rules.gd")
 
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
+	Specs.tick_cooldowns(game)
 	ShamanAura.step(game)
 	_move_foes(game)
 	Barracks.step(game)
 	TowerFire.step(game)
+	Status.step_bleed(game)
 	TowerFire.release_fallen_locks(game)
 	_remove_the_fallen(game)
 	if game.heartstone_health <= 0 and not game.over:

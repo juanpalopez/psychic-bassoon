@@ -100,6 +100,8 @@ func _ready() -> void:
 	_game_over.play_again.connect(func() -> void: _start(_game.seed))
 	_panel.upgrade_pressed.connect(_on_upgrade)
 	_panel.sell_pressed.connect(_on_sell)
+	_panel.spec_pressed.connect(_on_spec)
+	_panel.ability_pressed.connect(_on_ability)
 	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
 	_gestures.tapped.connect(_on_tap)
 	_gestures.panned.connect(_rig.pan_by_pixels)
@@ -340,6 +342,16 @@ func _note_if_paused() -> void:
 func _on_upgrade(tower_id: int) -> void:
 	_note_if_paused()
 	Game.submit(_game, Command.upgrade(tower_id))
+
+
+func _on_spec(tower_id: int, spec_id: String) -> void:
+	_note_if_paused()
+	Game.submit(_game, Command.choose_spec(tower_id, spec_id))
+
+
+func _on_ability(tower_id: int) -> void:
+	_note_if_paused()
+	Game.submit(_game, Command.activate(tower_id))
 
 
 func _on_sell(tower_id: int) -> void:

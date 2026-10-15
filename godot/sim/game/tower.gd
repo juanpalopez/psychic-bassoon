@@ -15,3 +15,7 @@ var cooldown: float = 0.0
 ## A beam tower's locked foe (its id), or -1 when it has none. Render reads it to
 ## draw the beam; other towers keep -1.
 var target_id: int = -1
+## The tier 4 spec id chosen at the top level, or "" before.
+var spec: String = ""
+## Seconds until the spec's active may be used again; 0 when it is ready.
+var ability_cooldown: float = 0.0

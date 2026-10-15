@@ -25,4 +25,16 @@ static func of(reason: GameEvent.RejectReason) -> String:
 			return "You already won"
 		GameEvent.RejectReason.FINAL_WAVE:
 			return "That was the final wave"
+		GameEvent.RejectReason.NOT_AT_TOP_LEVEL:
+			return "Upgrade to the top level first"
+		GameEvent.RejectReason.SPEC_ALREADY_CHOSEN:
+			return "Already specialised"
+		GameEvent.RejectReason.UNKNOWN_SPEC:
+			return "Unknown specialisation"
+		GameEvent.RejectReason.NO_SPEC:
+			return "Choose a specialisation first"
+		GameEvent.RejectReason.ABILITY_COOLING_DOWN:
+			return "Still cooling down"
+		GameEvent.RejectReason.NO_TARGET:
+			return "No foe in reach"
 	return "That did not work"

@@ -400,7 +400,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 1. Flying: the Razor Moth, its line to the Heartstone, an anti-air flag on towers.
 2. Support: the Ink Shaman (healing and speed buffs) and a support-first targeting priority.
 3. Blocking and melee: foes attack and units have health; the Guard Tent and its guards (done 2026-10-13, #220, #222; the Kitchen Mess Tent too, #224).
-4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability.
+4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability (framework and the Crossbow Ballista in #273; see `docs/lessons/2026-10-16-tier4-framework.md`).
 5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl).
 6. Global spells and the Toolbox Tray: PVA Glue Trap, Falling Thumbtacks, The Crafter's Eraser, with Crafting Energy.
 7. Map depth: foil rivers with popsicle-stick bridges, tape strips, PVA puddles. Drawbridges and levers are dropped (owner, 2026-10-12).

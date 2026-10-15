@@ -20,6 +20,8 @@ enum Kind {
 	GUARD_RAISED,
 	GUARD_FELL,
 	FOE_ENGAGED,
+	SPEC_CHOSEN,
+	ABILITY_USED,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.
@@ -34,6 +36,12 @@ enum RejectReason {
 	WAVE_IN_PROGRESS,
 	GAME_WON,
 	FINAL_WAVE,
+	NOT_AT_TOP_LEVEL,
+	SPEC_ALREADY_CHOSEN,
+	UNKNOWN_SPEC,
+	NO_SPEC,
+	ABILITY_COOLING_DOWN,
+	NO_TARGET,
 }
 
 var kind: Kind = Kind.TOWER_BUILT
@@ -60,7 +68,13 @@ var reward: int = 0
 var splash: float = 0.0
 var x: float = 0.0
 var y: float = 0.0
-## Only FOE_KILLED and TOWER_FIRED set `x` and `y`; they are 0.0 on every other event.
+## ABILITY_USED: the tower (`tower_id`), its target (`foe_id`, at `x`, `y`) and where a line
+## ability ends (`x2`, `y2`).
+var x2: float = 0.0
+var y2: float = 0.0
+## SPEC_CHOSEN: the spec id.
+var spec: String = ""
+## Only FOE_KILLED, TOWER_FIRED and ABILITY_USED set `x` and `y`; they are 0.0 on every other event.
 ## COMMAND_REJECTED: the command and the reason.
 var command: Command = null
 var reason: RejectReason = RejectReason.GAME_OVER
