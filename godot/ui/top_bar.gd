@@ -1,4 +1,4 @@
-## The top bar: Buttons, Heartstone health, wave and seed, one label each.
+## The stats chip: Buttons, Heartstone health and wave, one label each.
 class_name TopBar
 extends HBoxContainer
 
@@ -8,7 +8,7 @@ var _labels: Array[Label] = []
 
 
 func _ready() -> void:
-	for i in 4:
+	for i in 3:
 		var label := Label.new()
 		add_child(label)
 		_labels.append(label)
@@ -19,7 +19,6 @@ func show_state(game: GameState) -> void:
 	_labels[0].text = "Buttons %d" % game.buttons
 	_labels[1].text = "Heartstone %d" % game.heartstone_health
 	_labels[2].text = "Wave %d/%d" % [game.wave, RULES.WIN_WAVE]
-	_labels[3].text = "Seed %d" % game.seed
 
 
 ## The text of each label, in order.

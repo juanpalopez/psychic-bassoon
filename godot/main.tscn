@@ -62,32 +62,41 @@ script = ExtResource("15_guards")
 
 [node name="MenuButton" type="Button" parent="Hud"]
 theme = ExtResource("10_theme")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -380.0
+offset_top = 108.0
+offset_right = -260.0
+offset_bottom = 204.0
+grow_horizontal = 0
 custom_minimum_size = Vector2(120, 96)
-offset_left = 20.0
-offset_top = 84.0
-offset_right = 140.0
-offset_bottom = 180.0
 toggle_mode = true
 text = "Menu"
 
 [node name="NextSeed" type="Button" parent="Hud"]
 visible = false
 theme = ExtResource("10_theme")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -436.0
+offset_top = 216.0
+offset_right = -196.0
+offset_bottom = 312.0
+grow_horizontal = 0
 custom_minimum_size = Vector2(240, 96)
-offset_left = 152.0
-offset_top = 84.0
-offset_right = 392.0
-offset_bottom = 180.0
 text = "Next seed"
 
 [node name="Sound" type="Button" parent="Hud"]
 visible = false
 theme = ExtResource("10_theme")
-custom_minimum_size = Vector2(240, 96)
-offset_left = 404.0
-offset_top = 84.0
-offset_right = 644.0
-offset_bottom = 180.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -180.0
+offset_top = 216.0
+offset_right = -20.0
+offset_bottom = 312.0
+grow_horizontal = 0
+custom_minimum_size = Vector2(160, 96)
 toggle_mode = true
 button_pressed = true
 text = "Sound"
@@ -106,15 +115,16 @@ text = "Start wave 1"
 
 [node name="Message" type="Label" parent="Hud"]
 theme = ExtResource("10_theme")
-visible = false
 anchor_left = 0.5
 anchor_right = 0.5
-offset_left = -300.0
-offset_top = 212.0
-offset_right = 300.0
-offset_bottom = 268.0
+offset_left = -200.0
+offset_top = 120.0
+offset_right = 200.0
+offset_bottom = 176.0
 grow_horizontal = 2
+visible = false
 horizontal_alignment = 1
+autowrap_mode = 3
 
 [node name="BuildMenu" type="PanelContainer" parent="Hud"]
 theme = ExtResource("10_theme")
@@ -157,10 +167,10 @@ script = ExtResource("11_top")
 theme = ExtResource("10_theme")
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -460.0
-offset_top = 104.0
+offset_left = -240.0
+offset_top = 108.0
 offset_right = -20.0
-offset_bottom = 200.0
+offset_bottom = 204.0
 grow_horizontal = 0
 script = ExtResource("12_speed")
 

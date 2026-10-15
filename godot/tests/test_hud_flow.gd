@@ -18,7 +18,14 @@ func _ticks_after(speed_index: int, seconds: float) -> int:
 	var main := await _main()
 	# a fresh game and clock: the frame the scene ran while starting used real time
 	main._start(main.game().seed)
-	((main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[speed_index]).pressed.emit()
+	# the speed button cycles, so reach a speed by pressing it until it shows that speed
+	var bar := main.get_node("Hud/SpeedBar") as SpeedBar
+	for press in GameSpeed.SPEEDS.size():
+		if bar.buttons()[1].text == "%dx" % speed_index:
+			break
+		bar.buttons()[1].pressed.emit()
+		main._process(0.0)
+	assert_eq(bar.buttons()[1].text, "%dx" % speed_index)
 	main._process(seconds)
 	return main.game().tick_count
 
@@ -48,7 +55,7 @@ func test_the_top_bar_shows_the_game() -> void:
 	var game: GameState = main.game()
 	var texts: Array[String] = (main.get_node("Hud/TopBar") as TopBar).texts()
 	assert_eq(texts[0], "Buttons %d" % game.buttons)
-	assert_eq(texts[3], "Seed %d" % game.seed)
+	assert_eq(texts.size(), 3, "the seed is not on the HUD any more")
 
 
 func test_the_game_over_overlay_shows_only_when_the_game_is_over() -> void:
@@ -139,7 +146,7 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> void:
 	# the 1558x720 canvas is drawn at 390/720 of its size on that phone
 	var scale := 390.0 / 720.0
-	for shown in ["", "GameOver", "BuildMenu"]:
+	for shown in ["", "GameOver", "BuildMenu", "TowerPanel", "Menu"]:
 		var port := SubViewport.new()
 		port.size = Vector2i(1558, 720)
 		add_child_autofree(port)
@@ -151,6 +158,12 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 			(main.get_node("Hud/GameOver") as GameOverPanel).show_for(1)
 		elif shown == "BuildMenu":
 			(main.get_node("Hud/BuildMenu") as Control).visible = true
+		elif shown == "TowerPanel":
+			var tower := Tower.new()
+			tower.type = "thimbleMortar"
+			(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+		elif shown == "Menu":
+			(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 		await get_tree().process_frame
 		var checked := 0
 		for node in main.get_node("Hud").find_children("*", "Button", true, false):
@@ -159,7 +172,9 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 				checked += 1
 				assert_gte(button.get_global_rect().size.y * scale, 44.0, button.text)
 				assert_gte(button.get_global_rect().size.x * scale, 44.0, button.text)
-		assert_gt(checked, 5, shown)
+		# Menu, Pause, speed and Start wave; a panel or the open Menu adds its own buttons
+		var expected := {"": 4, "GameOver": 5, "BuildMenu": 9, "TowerPanel": 6, "Menu": 6}
+		assert_gte(checked, int(expected[shown]), shown)
 
 
 func test_a_new_game_starts_running_at_normal_speed() -> void:
@@ -216,3 +231,12 @@ func test_the_menu_button_shows_next_seed_and_sound() -> void:
 	assert_true(sound.visible)
 	(main.get_node("Hud/MenuButton") as Button).button_pressed = false
 	assert_false(next_seed.visible)
+
+
+func test_a_speed_press_while_paused_resumes_at_that_speed() -> void:
+	var main := await _main()
+	var bar := main.get_node("Hud/SpeedBar") as SpeedBar
+	bar.buttons()[0].pressed.emit()
+	assert_eq(main._speed.ticks_speed(), 0)
+	bar.buttons()[1].pressed.emit()
+	assert_eq(main._speed.ticks_speed(), 2, "choosing a speed resumes")

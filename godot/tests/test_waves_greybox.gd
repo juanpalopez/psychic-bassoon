@@ -46,11 +46,13 @@ func test_the_button_is_disabled_while_foes_are_still_coming_then_offers_an_earl
 	launch.pressed.emit()
 	_frames(main, 0.5)
 	assert_true(launch.disabled)
+	assert_false(launch.visible, "the button steps aside while foes come out")
 	var game: GameState = main.game()
 	game.heartstone_health = 100000
 	while not game.spawners.is_empty():
 		_frames(main, 0.5)
 	assert_false(launch.disabled)
+	assert_true(launch.visible, "and comes back for the early call")
 	# 10 + 1 * 2
 	assert_string_contains(launch.text, "Call wave 2 early (+12)")
 
@@ -86,6 +88,7 @@ func test_a_new_seed_clears_the_foes_and_resets_the_button() -> void:
 	assert_eq(main.game().foes.size(), 0)
 	assert_eq((main.get_node("Foes") as FoesView).visible_count("scrapGoblin"), 0)
 	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Start wave 1")
+	assert_true((main.get_node("Hud/LaunchWave") as Button).visible)
 
 
 func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
@@ -102,3 +105,14 @@ func test_the_top_bar_fits_beside_the_speed_buttons_even_at_game_over() -> void:
 	# the bar has 1280 - 20 - 500 px before it would run under the speed buttons
 	var bar := main.get_node("Hud/TopBar") as TopBar
 	assert_lt(bar.get_combined_minimum_size().x, 760.0, text)
+
+
+func test_restarting_in_the_middle_of_a_wave_brings_the_button_back() -> void:
+	var main := await _main()
+	var launch := main.get_node("Hud/LaunchWave") as Button
+	launch.pressed.emit()
+	_frames(main, 0.5)
+	assert_false(launch.visible)
+	main._start(main.game().seed)
+	assert_true(launch.visible)
+	assert_string_contains(launch.text, "Start wave 1")
