@@ -197,30 +197,46 @@ func test_armor_piercing_ignores_a_share_of_the_armor() -> void:
 	assert_almost_eq(float(results[1]), 33.0 - 6.0 * (1.0 - 0.4), 1e-6)
 
 
-func test_the_skewer_hits_up_to_five_foes_nearest_the_tower_first_and_bleeds_them() -> void:
+func test_the_skewer_hits_five_foes_in_a_band_nearest_first_for_full_damage_and_bleeds() -> void:
 	var scene := _chosen_scene()
-	var foes := _line_of_orcs(scene, [0.5, 0.8, 1.0, 1.3, 1.6, 1.9, 2.2])
-	var beside := TowerFireKit.foe(scene.game, 11.0, "corrugatedOrc")
 	var centre := scene.game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
-	beside.x = centre.x + 1.0
-	beside.y = centre.y + 1.2
+	var spec: Dictionary = SPECS.for_tower("spoolGuard")[0]
+	var active: Dictionary = spec.active
+	var radius := TowerFireKit.foe(scene.game, 9.0, "corrugatedOrc").radius
+	var band: float = float(active.width) + radius
+	# edge-in (just inside the band), edge-out (just outside) and one behind the tower
+	var edge_in := _orc_at(scene, 9.1, centre.x + 0.7, centre.y + band - 0.01)
+	var edge_out := _orc_at(scene, 9.2, centre.x + 0.9, centre.y + band + 0.01)
+	var behind := _orc_at(scene, 9.3, centre.x - 0.5, centre.y)
+	var line: Array[Foe] = []
+	# the last one is the target (nearest the Heartstone): it stands farthest, so it is the sixth
+	for offset in [0.5, 1.0, 1.5, 2.0, 2.5]:
+		line.append(_orc_at(scene, 10.0 + offset, centre.x + offset, centre.y))
 	scene.tower.cooldown = 1000.0
 	Game.submit(scene.game, Command.activate(scene.tower.id))
 	Game.tick(scene.game)
-	var hit := 0
-	for foe in foes:
-		if foe.hp < 100.0:
-			hit += 1
-			assert_gt(foe.bleed_timer, 0.0)
-	assert_eq(hit, 5)
-	for i in range(5):
-		assert_lt(foes[i].hp, 100.0, "foe %d is among the five nearest" % i)
-	assert_eq(foes[5].hp, foes[5].max_hp)
-	assert_eq(foes[6].hp, foes[6].max_hp)
-	assert_eq(beside.hp, beside.max_hp, "a foe off the line is missed")
+	var armor := float(line[0].armor)
+	var lost: float = float(active.damage) - armor * (1.0 - 0.4)
+	var bled: float = float(active.bleed_dps) * Game.TICK_SECONDS
+	for foe in [line[0], line[1], line[2], line[3], edge_in]:
+		assert_almost_eq(foe.max_hp - foe.hp, lost + bled, 1e-6)
+		assert_eq(foe.bleed_dps, float(active.bleed_dps))
+		assert_almost_eq(foe.bleed_timer, float(active.bleed_seconds) - Game.TICK_SECONDS, 1e-6)
+	for foe in [line[4], edge_out, behind]:
+		assert_eq(foe.hp, foe.max_hp)
+		assert_eq(foe.bleed_timer, 0.0)
 	var event := TowerFireKit.kinds(scene.game, GameEvent.Kind.ABILITY_USED)[0]
 	assert_eq(event.tower_id, scene.tower.id)
+	assert_eq(event.foe_id, line[4].id)
+	assert_almost_eq(event.x2, centre.x + TowerFire.reach_of(scene.game, scene.tower), 1e-6)
 	assert_almost_eq(event.y2, centre.y, 1e-6)
+
+
+func _orc_at(scene: TowerFireKit.Scene, along: float, x: float, y: float) -> Foe:
+	var foe := TowerFireKit.foe(scene.game, along, "corrugatedOrc")
+	foe.x = x
+	foe.y = y
+	return foe
 
 
 func test_bleeding_hurts_a_little_each_tick_with_true_damage_and_ends() -> void:
@@ -266,14 +282,13 @@ func test_a_foe_that_bleeds_to_death_pays_its_reward_once() -> void:
 	assert_eq(scene.game.buttons, buttons + foe.reward)
 
 
-func test_the_same_commands_replay_to_the_same_game() -> void:
-	var snapshots := []
-	for run in 2:
-		var scene := _chosen_scene()
-		_line_of_orcs(scene, [0.5, 1.0, 1.5])
-		scene.tower.cooldown = 0.0
-		Game.submit(scene.game, Command.activate(scene.tower.id))
-		for i in 120:
-			Game.tick(scene.game)
-		snapshots.append(GameTestKit.snapshot(scene.game))
-	assert_eq(snapshots[0], snapshots[1])
+func test_the_scenario_with_a_spec_matches_its_golden() -> void:
+	var file := FileAccess.open(SpecScenario.GOLDEN_PATH, FileAccess.READ)
+	assert_not_null(file, "run tools/write_specs_golden.gd")
+	# JSON turns whole numbers into floats, so compare after the same round trip
+	var played = JSON.parse_string(JSON.stringify(SpecScenario.play(), "\t", true))
+	assert_eq(played, JSON.parse_string(file.get_as_text()))
+
+
+func test_the_scenario_plays_the_same_twice() -> void:
+	assert_eq(SpecScenario.play(), SpecScenario.play())

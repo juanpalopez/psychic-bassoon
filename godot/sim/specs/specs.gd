@@ -71,7 +71,8 @@ static func armor_ignore(tower: Tower) -> float:
 
 
 ## Heavy Skewer: a bolt from the tower through its target, as far as the tower
-## reaches. Returns false when there is no target to aim at.
+## reaches. Returns false when there is no target to aim at. Only the `max_hits` foes
+## nearest the tower are hit, so the target itself can be missed when that many stand nearer.
 static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	var target := TowerFire.target_for(game, tower)
 	if target == null:
@@ -80,7 +81,7 @@ static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	var to_x := target.x - centre.x
 	var to_y := target.y - centre.y
 	var length := sqrt(to_x * to_x + to_y * to_y)
-	if length < RULES.TIMER_EPSILON:
+	if length < RULES.DISTANCE_EPSILON:
 		return false
 	var dir_x := to_x / length
 	var dir_y := to_y / length
