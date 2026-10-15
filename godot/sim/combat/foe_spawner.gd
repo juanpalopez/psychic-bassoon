@@ -5,9 +5,10 @@ extends RefCounted
 const FOES := preload("res://content/foes.gd")
 
 
-## Spawns a foe of `type` for `wave`. With several routes the route stream picks
-## one (one draw per foe); with one route nothing is drawn. Pass `route` to
-## choose the route yourself. Returns null for an unknown foe.
+## Spawns a foe of `type` for `wave`. Where foes pick a lane at random (the old detour) the
+## route stream picks one (one draw per foe); otherwise a foe with no route given walks
+## the main road and nothing is drawn. Pass `route` to choose it yourself. Returns null for
+## an unknown foe.
 static func spawn(game: GameState, type: String, wave: int, route: int = -1) -> Foe:
 	var stats := FoeStats.for_wave(type, wave)
 	if stats == null:
@@ -15,7 +16,8 @@ static func spawn(game: GameState, type: String, wave: int, route: int = -1) -> 
 	var base: Dictionary = FOES.DEFS[type]
 	var lane := route
 	if lane < 0:
-		lane = game.route_rng.next_int(game.routes.size()) if game.routes.size() > 1 else 0
+		var drawn := game.random_lanes and game.routes.size() > 1
+		lane = game.route_rng.next_int(game.routes.size()) if drawn else 0
 	var foe := Foe.new()
 	foe.id = game.next_id
 	game.next_id += 1

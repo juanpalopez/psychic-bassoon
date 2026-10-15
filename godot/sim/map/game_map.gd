@@ -24,6 +24,10 @@ var path: Array[Vector2i] = []
 ## a second one leaves the main road, runs beside it and rejoins it. Each item
 ## is an `Array[Vector2i]`.
 var routes: Array = []
+## With a second spawn source: how many cells of `routes[1]` come before the main road (the
+## feeder), and the index in `path` of the cell where it joins. Both are 0 without one.
+var feeder_length: int = 0
+var join_index: int = 0
 ## One `PackedByteArray` of `Tile` values per row.
 var tiles: Array[PackedByteArray] = []
 ## The cells where a tower can be built, in reading order (row, then column).

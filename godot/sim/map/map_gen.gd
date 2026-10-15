@@ -24,19 +24,23 @@ class Detour:
 
 
 ## Builds the map for a seed on a board of `cols` by `rows` cells. With
-## `with_detour` a second route may leave the main road, run beside it and rejoin.
+## `with_detour` a second route may leave the main road, run beside it and rejoin. With
+## `second_source` (a wide board, no detour) a second spawn source may be added: a road from
+## the top or bottom edge that joins the main road, as `routes[1]`.
 ## A road that leaves room for fewer than 12 sockets is drawn again.
 static func generate(
 	seed: int,
 	cols: int = RULES.GRID_COLS,
 	rows: int = RULES.GRID_ROWS,
 	with_detour: bool = RULES.GAME_DETOUR,
-	footprint: int = RULES.GAME_SOCKET_FOOTPRINT
+	footprint: int = RULES.GAME_SOCKET_FOOTPRINT,
+	second_source: bool = RULES.GAME_SECOND_SOURCE
 ) -> GameMap:
 	var wide := cols > rows
 	var tall_cols := rows if wide else cols
 	var tall_rows := cols if wide else rows
 	var rng := Rng.derive(seed, Streams.MAP)
+	var feeder_rng := Rng.derive(seed, Streams.SECOND_SOURCE)
 	for attempt in RULES.MAX_ATTEMPTS:
 		var path := _try_path(rng, tall_cols, tall_rows)
 		if path.is_empty():
@@ -46,23 +50,42 @@ static func generate(
 			var detour := _add_detour(path, rng, tall_cols, tall_rows)
 			if not detour.is_empty():
 				routes.append(detour)
-		if wide:
-			routes = _turned(routes)
-		var map := GameMap.new()
-		map.seed = seed
-		map.cols = cols
-		map.rows = rows
-		map.footprint = footprint
-		map.routes = routes
-		map.path = routes[0]
-		map.tiles = _tiles_for(routes, cols, rows)
-		map.heartstone = _heartstone_block(map.path[map.path.size() - 1], cols, rows, footprint)
+		# the road a seed gets never depends on the second source: this road is judged as it
+		# always was, and only then does the second road try to fit beside it
+		var plain := _assemble(seed, cols, rows, footprint, wide, routes, {})
 		# a road with too little room for the sockets is thrown away for another
-		if not SocketPlacer.place(map):
+		if not SocketPlacer.place(plain):
 			continue
-		return map
+		if second_source and wide and not with_detour:
+			for feeder in _feeders(path, feeder_rng, tall_cols, tall_rows):
+				var with_feeder := routes.duplicate()
+				with_feeder.append(feeder.route)
+				var map := _assemble(seed, cols, rows, footprint, wide, with_feeder, feeder)
+				if SocketPlacer.place(map):
+					return map
+		return plain
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
 	return null
+
+
+## A map for these routes (in the tall grid when `wide`), before its sockets are placed.
+static func _assemble(
+	seed: int, cols: int, rows: int, footprint: int, wide: bool, routes: Array, feeder: Dictionary
+) -> GameMap:
+	var turned := _turned(routes) if wide else routes
+	var map := GameMap.new()
+	map.seed = seed
+	map.cols = cols
+	map.rows = rows
+	map.footprint = footprint
+	map.routes = turned
+	map.path = turned[0]
+	if not feeder.is_empty():
+		map.feeder_length = feeder.length
+		map.join_index = feeder.join_index
+	map.tiles = _tiles_for(turned, cols, rows)
+	map.heartstone = _heartstone_block(map.path[map.path.size() - 1], cols, rows, footprint)
+	return map
 
 
 ## The Heartstone's footprint: the block of `footprint` cells that holds the
@@ -211,6 +234,71 @@ static func _add_detour(path: Array[Vector2i], rng: Rng, cols: int, rows: int) -
 	route.append_array(pick.cells)
 	route.append_array(path.slice(pick.to_index))
 	return route
+
+
+## Every feeder that fits the main road, in an order drawn from its own stream, as
+## `{route, length, join_index}` (the first that leaves room for the sockets is used). A feeder
+## is a straight run along a row from the left or right edge of the tall grid (the top or
+## bottom edge of the wide board) to the first main-road cell on that row. It stays two cells
+## clear of the main road except at the join, the join is well inside the road, and the route
+## is the feeder followed by the main road from the join on.
+static func _feeders(path: Array[Vector2i], rng: Rng, cols: int, rows: int) -> Array[Dictionary]:
+	var found: Array[Dictionary] = []
+	for side in [0, cols - 1]:
+		var step := 1 if side == 0 else -1
+		for row in range(RULES.FEEDER_ROW_MARGIN, rows - RULES.FEEDER_ROW_MARGIN):
+			var candidate := _feeder_on_row(path, side, step, row, cols)
+			if candidate.is_empty():
+				continue
+			var route: Array[Vector2i] = []
+			route.append_array(candidate.cells)
+			route.append_array(path.slice(candidate.join_index))
+			(
+				found
+				. append(
+					{
+						"route": route,
+						"length": candidate.cells.size(),
+						"join_index": candidate.join_index,
+					}
+				)
+			)
+	for i in range(found.size() - 1, 0, -1):
+		var j := rng.next_int(i + 1)
+		var held := found[i]
+		found[i] = found[j]
+		found[j] = held
+	return found
+
+
+## The feeder along `row` from the edge column `side`, stepping `step` columns at a time, or an
+## empty dictionary when it does not fit.
+static func _feeder_on_row(
+	path: Array[Vector2i], side: int, step: int, row: int, cols: int
+) -> Dictionary:
+	var cells: Array[Vector2i] = []
+	var col := side
+	var join_index := -1
+	while join_index < 0:
+		var at := path.find(Vector2i(col, row))
+		if at >= 0:
+			join_index = at
+			break
+		cells.append(Vector2i(col, row))
+		col += step
+		if col < 0 or col >= cols:
+			return {}
+	if cells.size() < RULES.FEEDER_MIN_CELLS:
+		return {}
+	if join_index < RULES.FEEDER_JOIN_MARGIN or join_index > path.size() - RULES.FEEDER_JOIN_MARGIN:
+		return {}
+	var last := cells.size() - 1
+	for n in cells.size():
+		for m in path.size():
+			var close := _gap(cells[n], path[m]) < 2
+			if close and not (n == last and m == join_index):
+				return {}
+	return {"cells": cells, "join_index": join_index}
 
 
 static func _tiles_for(routes: Array, cols: int, rows: int) -> Array[PackedByteArray]:

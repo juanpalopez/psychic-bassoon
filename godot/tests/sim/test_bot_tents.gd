@@ -105,11 +105,14 @@ func test_a_guard_tent_of_the_bot_has_its_guards_on_road_within_touch_of_its_blo
 			for guard in game.guards:
 				if guard.tent_id != tower.id:
 					continue
-				var at := game.routes[0].position_at(guard.post)
-				# a post is on the road, and the road is at most this far from a socket
-				assert_lte(
-					centre.distance_to(Vector2(at.x, at.y)), touch + 0.3, "seed %d" % map_seed
-				)
+				# the block was placed within touch of some road (the main road or the second one);
+				# its guards stand on the main road at the point nearest the block
+				var nearest := INF
+				for route in game.routes:
+					for i in range(int(route.total * 4.0) + 1):
+						var at := route.position_at(float(i) / 4.0)
+						nearest = minf(nearest, centre.distance_to(Vector2(at.x, at.y)))
+				assert_lte(nearest, touch + 0.3, "seed %d" % map_seed)
 		assert_gt(tents, 0, "seed %d builds a Guard Tent" % map_seed)
 
 

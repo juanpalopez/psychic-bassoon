@@ -19,11 +19,12 @@ static func create(
 	cols: int = MAP_RULES.GRID_COLS,
 	rows: int = MAP_RULES.GRID_ROWS,
 	with_detour: bool = MAP_RULES.GAME_DETOUR,
-	footprint: int = MAP_RULES.GAME_SOCKET_FOOTPRINT
+	footprint: int = MAP_RULES.GAME_SOCKET_FOOTPRINT,
+	second_source: bool = MAP_RULES.GAME_SECOND_SOURCE
 ) -> GameState:
 	var game := GameState.new()
 	game.seed = seed
-	game.map = MapGen.generate(seed, cols, rows, with_detour, footprint)
+	game.map = MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
 	for cells in game.map.routes:
 		game.routes.append(Route.build(cells))
 	game.route = game.routes[0]
@@ -33,6 +34,13 @@ static func create(
 	for route in game.routes:
 		var start := route.position_at(0.0)
 		game.air_routes.append(Route.straight(start.x, start.y, heart_x, heart_y))
+	# foes pick a lane at random only on the old detour; the second source is by wave and group
+	game.random_lanes = with_detour and game.routes.size() > 1
+	if game.map.feeder_length > 0:
+		game.second_offset = (
+			game.routes[1].cumulative[game.map.feeder_length + 1]
+			- game.routes[0].cumulative[game.map.join_index + 1]
+		)
 	game.buttons = RULES.START_BUTTONS
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)

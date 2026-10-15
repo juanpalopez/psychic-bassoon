@@ -21,6 +21,9 @@ const AIR_FOE := "razorMoth"
 const MOTH_FROM_WAVE := 9
 const MOTH_PERCENT := 12
 const MOTH_MIN := 2
+## Waves after this one split their groups between two spawn sources (when the map has a
+## second road).
+const SECOND_SOURCE_AFTER_WAVE := 10
 ## A goblin swarm wave every this many waves.
 const SWARM_EVERY := 5
 ## A swarm has this many times the foes of a normal wave of its number.

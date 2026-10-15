@@ -152,16 +152,29 @@ static func _held_foe(game: GameState, guard: Guard) -> Foe:
 
 
 ## The blockable, free foe nearest the guard's post that has walked up to it.
+## How far along the main route the foe is, or -1 when it is not on the main road yet: a foe
+## of the second route is on it from the join on, `second_offset` further along its own route.
+static func main_distance(game: GameState, foe: Foe) -> float:
+	if foe.route == 0:
+		return foe.distance
+	if foe.distance < game.routes[foe.route].cumulative[game.map.feeder_length + 1]:
+		return -1.0
+	return foe.distance - game.second_offset
+
+
 static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 	var best: Foe = null
+	var best_along := -1.0
 	for foe in game.foes:
-		if not foe.alive or not foe.blockable or foe.engaged_guard_id != -1 or foe.route != 0:
+		if not foe.alive or not foe.blockable or foe.engaged_guard_id != -1:
 			continue
+		var along := main_distance(game, foe)
 		var stop := guard.post - guard.radius - foe.radius
-		if foe.distance < stop or foe.distance > guard.post:
+		if along < 0.0 or along < stop or along > guard.post:
 			continue
-		if best == null or foe.distance > best.distance:
+		if best == null or along > best_along:
 			best = foe
+			best_along = along
 	if best == null:
 		return null
 	best.engaged_guard_id = guard.id

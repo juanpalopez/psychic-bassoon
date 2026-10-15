@@ -15,6 +15,15 @@ const LANDSCAPE_ROWS := 11
 ## Whether the game's road grows a detour. The owner chose one road and one spawn
 ## (2026-10-12); the fixtures' maps all have a detour, so they ask for one.
 const GAME_DETOUR := false
+## Whether the game's board also grows a second road from another edge that joins the main
+## road (owner, 2026-10-16). Waves use it from `SECOND_SOURCE_AFTER_WAVE` on.
+const GAME_SECOND_SOURCE := true
+## The second road (the feeder) is at least this many cells long before it reaches the main
+## road, joins the main road at least this many cells from its start and from the Heartstone,
+## and leaves the rows this close to the spawn edge and the Heartstone edge free.
+const FEEDER_MIN_CELLS := 3
+const FEEDER_JOIN_MARGIN := 6
+const FEEDER_ROW_MARGIN := 2
 
 ## Give up and retry when the path is shorter than rows + this many cells.
 const MIN_EXTRA_CELLS := 16

@@ -10,5 +10,8 @@ const ROUTES := 2
 ## Where the sockets go and how high they stand. Its own stream, so adding
 ## sockets never moves the road (the road fixtures stay valid).
 const SOCKETS := 3
+## Where the second road (the feeder) leaves the board and joins the main road. Its own
+## stream, so adding it never moves the main road or the sockets' draws.
+const SECOND_SOURCE := 4
 ## Render-only scenery around the board; never affects the game.
 const SCENERY := 100
