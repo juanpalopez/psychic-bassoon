@@ -134,8 +134,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var ticks_speed := _speed.ticks_speed()
-	# Auto start counts game time, so it holds while paused and runs faster at 2x and 3x
-	if _auto.advance(_game, delta * float(ticks_speed)):
+	# Auto start counts game time, so it holds while paused, runs faster at 2x and 3x, and
+	# a slow frame counts no more than the clock lets the game run
+	if _auto.advance(_game, minf(delta, EARLY_RULES.MAX_FRAME_SECONDS) * float(ticks_speed)):
 		Game.submit(_game, Command.launch_wave())
 	if ticks_speed > 0:
 		Frame.step(_game, _clock, delta, ticks_speed, _before_tick, _after_tick)
@@ -298,6 +299,8 @@ func select_cell(cell: Vector2i) -> void:
 		_show_message(RejectText.of(why))
 		return
 	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
+	# the build menu may open over the Menu's dropdown: tapping the board closes it
+	_menu_button.button_pressed = false
 	_menu.open_for(anchor, _game.buttons)
 	_place_menu()
 	# the intro moves on only when the build row really opened for a free socket

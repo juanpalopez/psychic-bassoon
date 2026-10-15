@@ -28,6 +28,30 @@ func test_it_counts_down_between_waves_and_then_asks_for_the_next() -> void:
 	assert_false(auto.counting(), "one launch per countdown")
 
 
+func test_a_new_run_waits_for_the_player_to_start_wave_1() -> void:
+	var auto := AutoWave.new()
+	auto.enabled = true
+	var fresh := Game.create(7)
+	assert_false(auto.advance(fresh, RULES.AUTO_WAVE_SECONDS * 2.0))
+	assert_false(auto.counting())
+
+
+func test_it_launches_once_until_the_wave_has_started() -> void:
+	var auto := AutoWave.new()
+	auto.enabled = true
+	var game := _idle_game()
+	assert_true(auto.advance(game, RULES.AUTO_WAVE_SECONDS))
+	# the launch is still on its way (no tick ran yet): no second countdown, no second launch
+	assert_false(auto.advance(game, RULES.AUTO_WAVE_SECONDS))
+	assert_false(auto.counting())
+	game.running = true
+	auto.advance(game, 0.1)
+	game.running = false
+	game.wave += 1
+	assert_false(auto.advance(game, 0.1))
+	assert_true(auto.counting(), "the next cleared wave counts down again")
+
+
 func test_it_never_calls_a_wave_early() -> void:
 	var auto := AutoWave.new()
 	auto.enabled = true

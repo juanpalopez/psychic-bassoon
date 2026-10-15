@@ -10,6 +10,8 @@ var enabled := false
 
 # seconds of game time until the next wave; below zero while nothing counts down
 var _left := -1.0
+# the countdown ran out and the launch is on its way: no new countdown until the wave starts
+var _fired := false
 
 
 ## Moves the countdown on by `delta` seconds of game time (0 while paused). True on the
@@ -17,6 +19,9 @@ var _left := -1.0
 func advance(game: GameState, delta: float) -> bool:
 	if not enabled or not between_waves(game):
 		_left = -1.0
+		_fired = false
+		return false
+	if _fired:
 		return false
 	if _left < 0.0:
 		_left = RULES.AUTO_WAVE_SECONDS
@@ -24,13 +29,16 @@ func advance(game: GameState, delta: float) -> bool:
 	if _left > 0.0:
 		return false
 	_left = -1.0
+	_fired = true
 	return true
 
 
-## Whether the game sits between two waves, with another wave still to come.
+## Whether a wave was cleared and another is still to come. Wave 1 always waits for the
+## player, so a new run never starts by itself.
 static func between_waves(game: GameState) -> bool:
 	return (
-		not game.running
+		game.wave > 0
+		and not game.running
 		and not game.over
 		and not game.won
 		and game.spawners.is_empty()
@@ -42,6 +50,7 @@ static func between_waves(game: GameState) -> bool:
 ## call to `advance` between waves starts a fresh one.
 func cancel() -> void:
 	_left = -1.0
+	_fired = false
 
 
 func counting() -> bool:

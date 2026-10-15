@@ -145,6 +145,18 @@ describe('check-assets script', () => {
     expect(run().status).toBe(0);
   });
 
+  it('refuses the OFL for a file under fonts/ that is not a font', () => {
+    mkdirSync(join(assets, 'fonts'), {recursive: true});
+    writeFileSync(join(assets, 'fonts', 'goblin.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `fonts/goblin.glb` | Someone | SIL OFL 1.1 | none |\n'
+    );
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
+  });
+
   it('refuses the OFL for anything that is not a font', () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     writeFileSync(

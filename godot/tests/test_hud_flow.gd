@@ -236,10 +236,14 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 		await get_tree().process_frame
 		var hud := main.get_node("Hud")
 		var menu := hud.get_node("BuildMenu") as BuildMenu
+		var menu_button := hud.get_node("MenuButton") as Button
 		for anchor in main.game().map.sockets:
+			# the Menu's dropdown is open when the player taps the board
+			menu_button.button_pressed = true
 			main.select_cell(anchor)
 			await get_tree().process_frame
 			assert_true(menu.visible)
+			assert_false((hud.get_node("NextSeed") as Control).visible, "the dropdown closed")
 			var rect := menu.get_global_rect()
 			assert_true(Rect2(Vector2.ZERO, Vector2(size)).encloses(rect), "on screen")
 			for other in ["TopBar", "SpeedBar", "MenuButton", "LaunchWave", "AutoWave"]:
@@ -248,6 +252,7 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 					rect.intersects(other_rect), "menu for %s over %s at %s" % [anchor, other, size]
 				)
 			var socket: Rect2 = main._socket_on_screen(anchor)
+			assert_false(rect.intersects(socket), "the menu covers the socket %s" % anchor)
 			var gap := maxf(rect.position.y - socket.end.y, socket.position.y - rect.end.y)
 			assert_lte(gap, 2.0 * BuildMenu.SOCKET_GAP + 1.0, "next to %s" % anchor)
 
@@ -280,18 +285,23 @@ func test_auto_start_counts_down_on_the_button_and_then_starts_the_wave() -> voi
 	var auto := main.get_node("Hud/AutoWave") as Button
 	var launch := main.get_node("Hud/LaunchWave") as Button
 	auto.button_pressed = true
-	main._process(0.1)
-	assert_string_contains(launch.text, "Wave 1 in 3")
-	assert_eq(main.game().wave, 0, "not yet")
-	main._process(3.0)
 	main._process(0.05)
-	assert_eq(main.game().wave, 1, "the countdown started wave 1")
+	assert_string_contains(launch.text, "Start wave 1", "wave 1 waits for the player")
+	# as if wave 1 had been played and cleared
+	main.game().wave = 1
+	main._process(0.05)
+	assert_string_contains(launch.text, "Wave 2 in 3")
+	for frame in 70:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "the countdown started wave 2")
 
 
 func test_auto_start_holds_while_paused() -> void:
 	var main := await _main()
 	main._start(main.game().seed)
+	main.game().wave = 1
 	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
 	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
-	main._process(5.0)
-	assert_eq(main.game().wave, 0)
+	for frame in 100:
+		main._process(0.05)
+	assert_eq(main.game().wave, 1)

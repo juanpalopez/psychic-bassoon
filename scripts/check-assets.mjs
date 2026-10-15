@@ -69,7 +69,7 @@ const OFL = /^\s*SIL OFL 1\.1\b/;
 for (const [, path, rest] of rows) {
   // columns: | file | source | licence | edits |
   const licence = (rest ?? '').split('|')[2] ?? '';
-  const font = path.startsWith('fonts/');
+  const font = /^fonts\/[^/]+\.(ttf|otf|woff2?)$/i.test(path);
   if (
     !/^\s*CC0\b/i.test(licence) &&
     !OWNED.test(licence) &&
