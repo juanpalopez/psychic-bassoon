@@ -84,12 +84,15 @@ static func _place_moths(orders: Array[SpawnOrder], wave: int) -> void:
 	var boss := wave % WAVES.BOSS_EVERY == 0
 	var first := 1 if boss else 0
 	var rolled := orders.size() - first - (1 if boss else 0)
-	var moths := maxi(WAVES.MOTH_MIN, rolled * WAVES.MOTH_PERCENT / 100)
+	# the foes a moth may replace: every rolled foe that is not a shaman, so a moth never
+	# lands on one or on another moth, however small the wave
+	var open: Array[int] = []
+	for i in range(first, first + rolled):
+		if orders[i].type != WAVES.SUPPORT_FOE:
+			open.append(i)
+	var moths := mini(maxi(WAVES.MOTH_MIN, rolled * WAVES.MOTH_PERCENT / 100), open.size())
 	for k in moths:
-		var at := first + (2 * k + 1) * rolled / (2 * moths)
-		while orders[at].type == WAVES.SUPPORT_FOE and at < first + rolled - 1:
-			at += 1
-		orders[at].type = WAVES.AIR_FOE
+		orders[open[(2 * k + 1) * open.size() / (2 * moths)]].type = WAVES.AIR_FOE
 
 
 ## Sets the pauses of the rolled foes: `GROUP_SPACING` after a foe inside a group and

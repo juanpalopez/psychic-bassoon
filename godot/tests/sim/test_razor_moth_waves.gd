@@ -55,3 +55,14 @@ func test_the_waves_stream_is_drawn_as_before() -> void:
 			expected.next_float()
 		WaveBuilder.group_sizes(wave, rolled, expected)
 		assert_eq(rng.state, expected.state, "wave %d" % wave)
+
+
+func test_moths_never_land_on_a_shaman_or_on_each_other() -> void:
+	for wave in range(9, 41):
+		var orders := _build(wave)
+		var shamans := _positions(orders, WAVES.SUPPORT_FOE).size()
+		var moths := _positions(orders, WAVES.AIR_FOE).size()
+		var rolled := WaveBuilder.count_for(wave)
+		assert_eq(moths, _expected(wave), "wave %d moths" % wave)
+		assert_eq(shamans, 1 + (wave - WAVES.SHAMAN_FROM_WAVE) / WAVES.SHAMAN_EVERY_WAVES)
+		assert_lte(shamans + moths, rolled)

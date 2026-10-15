@@ -126,3 +126,50 @@ func test_a_beam_locks_a_moth_in_reach() -> void:
 	TowerFire._beam(scene.game, scene.tower, TOWERS.DEFS.prismSpire)
 	assert_eq(scene.tower.target_id, moth.id)
 	assert_lt(moth.hp, moth.max_hp)
+
+
+func test_an_air_foe_is_ranked_by_the_distance_left_on_its_own_line() -> void:
+	var scene := TowerFireKit.scene("spoolGuard")
+	var game: GameState = scene.game
+	var goblin := TowerFireKit.foe(game, scene.near)
+	var moth := _moth_at_the_tower(scene)
+	# one cell into its short line the moth has less left to fly than the goblin has to walk;
+	# measured on the ground road's length it would look the further one
+	moth.distance = 1.0
+	assert_lt(game.air_routes[0].total - moth.distance, game.routes[0].total - goblin.distance)
+	assert_gt(
+		game.routes[0].total - moth.distance,
+		game.routes[0].total - goblin.distance,
+		"on the ground road's length the moth would look the further one"
+	)
+	assert_eq(TowerFire.target_for(game, scene.tower), moth)
+
+
+func test_a_lock_on_a_moth_is_dropped_by_a_tower_that_cannot_hit_air() -> void:
+	var scene := TowerFireKit.scene("thimbleMortar")
+	var moth := _moth_at_the_tower(scene)
+	scene.tower.target_id = moth.id
+	assert_null(TowerFire._locked_foe(scene.game, scene.tower))
+
+
+func test_support_first_and_anti_air_work_together() -> void:
+	var spool := TowerFireKit.scene("spoolGuard")
+	var game: GameState = spool.game
+	var goblin := TowerFireKit.foe(game, spool.near)
+	var moth := _moth_at_the_tower(spool)
+	var shaman := TowerFireKit.foe(game, spool.near - 0.2, "inkShaman")
+	assert_eq(TowerFire.target_for(game, spool.tower), shaman, "a Spool Guard: the shaman first")
+	shaman.alive = false
+	assert_eq(
+		TowerFire.target_for(game, spool.tower).id, moth.id, "then the foe left to walk least"
+	)
+	var mortar := TowerFireKit.scene("thimbleMortar")
+	var mortar_goblin := TowerFireKit.foe(mortar.game, mortar.near)
+	_moth_at_the_tower(mortar)
+	var mortar_shaman := TowerFireKit.foe(mortar.game, mortar.near - 0.2, "inkShaman")
+	assert_eq(
+		TowerFire.target_for(mortar.game, mortar.tower), mortar_shaman, "a Mortar: the shaman"
+	)
+	mortar_shaman.alive = false
+	assert_eq(TowerFire.target_for(mortar.game, mortar.tower), mortar_goblin, "never the moth")
+	assert_ne(goblin, moth)
