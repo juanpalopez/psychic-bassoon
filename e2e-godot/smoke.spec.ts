@@ -159,6 +159,8 @@ test('a tap with a touch id other than 0 selects a socket', async ({
 test('the tour opens on a first visit and not after it was seen', async ({
   browser,
 }) => {
+  // the game is loaded twice here, which needs more than the default 30 s on a slow runner
+  test.setTimeout(120_000);
   const open = async (seen: boolean) => {
     const context = await browser.newContext({
       viewport: {width: 844, height: 390},
