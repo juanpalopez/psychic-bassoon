@@ -3,22 +3,22 @@ extends GutTest
 
 
 func test_an_unseen_tour_is_wanted_in_a_real_run() -> void:
-	assert_true(TourProgress.wanted(false, "", false))
+	assert_true(IntroProgress.wanted(false, "", false))
 
 
 func test_a_seen_tour_is_not_shown_again() -> void:
-	assert_false(TourProgress.wanted(true, "", false))
+	assert_false(IntroProgress.wanted(true, "", false))
 
 
 func test_the_tour_param_zero_and_headless_runs_turn_it_off() -> void:
-	assert_false(TourProgress.wanted(false, "0", false))
-	assert_false(TourProgress.wanted(false, "", true))
-	assert_true(TourProgress.wanted(false, "1", false), "tour=1 shows it as usual")
+	assert_false(IntroProgress.wanted(false, "0", false))
+	assert_false(IntroProgress.wanted(false, "", true))
+	assert_true(IntroProgress.wanted(false, "1", false), "tour=1 shows it as usual")
 
 
 func test_marking_the_tour_seen_is_remembered_by_the_store() -> void:
 	var memory := {}
-	var progress := TourProgress.new(
+	var progress := IntroProgress.new(
 		func() -> bool: return memory.get("seen", false), func() -> void: memory["seen"] = true
 	)
 	assert_false(progress.seen())
@@ -28,6 +28,6 @@ func test_marking_the_tour_seen_is_remembered_by_the_store() -> void:
 
 
 func test_a_browser_that_will_not_store_still_stops_the_tour_for_the_session() -> void:
-	var progress := TourProgress.new(func() -> bool: return false, func() -> void: pass)
+	var progress := IntroProgress.new(func() -> bool: return false, func() -> void: pass)
 	progress.mark_seen()
 	assert_true(progress.seen())

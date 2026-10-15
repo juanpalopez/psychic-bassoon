@@ -1,68 +1,62 @@
-## The words of the first-time tour and of the tower guide. Strings only; the numbers shown
+## The words of the first-visit intro wave and of the tower guide. Strings only; the numbers shown
 ## beside them come from `towers.gd`.
 extends RefCounted
 
-## One card per step. `target` is the name of a HUD control to outline ("" for none).
-const TOUR_STEPS: Array[Dictionary] = [
+## The words of the intro wave, one speech bubble per step. `target` is the name of a HUD
+## control to outline ("" for none).
+const INTRO := {
+	"goal":
 	{
-		"title": "Protect the Heartstone",
 		"text":
 		(
-			"Paper raiders walk the road toward your Heartstone. Each one "
-			+ "that gets there costs Heartstone health. Stop them for 20 "
-			+ "waves to win."
+			"Welcome! Paper raiders walk the road toward your Heartstone. "
+			+ "Every one that gets there costs Heartstone health, so stop them "
+			+ "for 20 waves. Let's build your first tower."
 		),
 		"target": "",
 	},
+	"pick_socket":
 	{
-		"title": "Build on sockets",
 		"text":
 		(
-			"Tap a pale circle, a socket, to build a tower on it. Towers "
-			+ "cost Buttons. You earn Buttons for every foe you stop and "
-			+ "for every wave you clear."
+			"Tap a glowing circle: a socket. Towers cost Buttons, which you earn "
+			+ "from every foe you stop."
 		),
 		"target": "",
 	},
+	"pick_tower":
 	{
-		"title": "Pick the right tower",
 		"text":
 		(
-			"Different foes need different towers. Open the Tower guide "
-			+ "from the Menu at any time to see what each tower is good at."
+			"Hover over a tower, or press and hold it, to see what it does. Tap "
+			+ "it to build. A Spool Guard is a safe first choice."
 		),
-		"target": "MenuButton",
+		"target": "",
 	},
+	"start_wave":
 	{
-		"title": "Start a wave",
-		"text":
-		(
-			"Press Start wave when you are ready. Calling the next wave "
-			+ "early pays a bonus. Pause and the speed button slow the game "
-			+ "down or speed it up."
-		),
+		"text": "Your tower is ready. Press Start wave to send the first raiders.",
 		"target": "LaunchWave",
 	},
+	"watch":
 	{
-		"title": "Upgrade and sell",
 		"text":
 		(
-			"Tap a tower to see its range, then upgrade it to hit harder "
-			+ "or sell it for some Buttons back. A socket on higher paper "
-			+ "reaches further."
+			"Here they come! Your tower shoots what is in range. Tap it to "
+			+ "upgrade or sell; higher paper reaches further."
 		),
 		"target": "",
 	},
+	"done":
 	{
-		"title": "Watch for the crow",
 		"text":
 		(
-			"The Messenger Crow flies in with news of each wave. Good "
-			+ "luck, and keep the Heartstone safe!"
+			"Well done, you held the road! Open Menu for the Tower guide, or How "
+			+ "to play to see this again. Good luck!"
 		),
 		"target": "",
 	},
-]
+}
 
 ## One entry per tower id: what it is, what it is good against, what it is bad at, a tip.
 const TOWERS := {

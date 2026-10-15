@@ -13,6 +13,9 @@ const EARLY_RULES := preload("res://content/game_rules.gd")
 ## The view a run starts in: the whole board, centred (owner decision, 2026-10-14).
 const START_ZOOM := 0.0
 const MESSAGE_SECONDS := 2.0
+## Where the tower card sits: this far from the right edge, and above the build row.
+const CARD_MARGIN := 20.0
+const CARD_ABOVE := 148.0
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
 ## Pixels of drag that one unit of a trackpad pan gesture stands for.
@@ -27,9 +30,13 @@ var _fingers := TouchFingers.new()
 var _speed := GameSpeed.new()
 var _audio := AudioPlayer.new()
 var _crow := MessengerCrow.new()
-var _tour := Tour.new()
+var _flow := IntroFlow.new()
+var _intro := IntroView.new()
+var _glow := SocketGlow.new()
+var _card := TowerCard.new()
+var _glow_shown := false
 var _guide := GuidePanel.new()
-var _progress := TourProgress.default()
+var _progress := IntroProgress.default()
 # whether the game was paused by the player when an overlay opened over it
 var _paused_before_overlay := false
 
@@ -71,10 +78,15 @@ func _ready() -> void:
 	_sound.toggled.connect(func(on: bool) -> void: _audio.set_muted(not on))
 	$Hud.add_child(_crow)
 	$Hud.add_child(_guide)
-	$Hud.add_child(_tour)
-	_tour.finished.connect(_on_tour_finished)
+	$Hud.add_child(_intro)
+	_intro.bind(_flow)
+	_flow.finished.connect(_on_intro_finished)
+	$Hud.add_child(_card)
+	add_child(_glow)
+	_menu.info_requested.connect(_on_info_requested)
+	_menu.info_cleared.connect(_card.hide_card)
 	_guide.closed.connect(func() -> void: _pause_for_overlay(false))
-	_how_to_play.pressed.connect(_start_tour)
+	_how_to_play.pressed.connect(_start_intro)
 	_tower_guide.pressed.connect(_open_guide)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
@@ -89,8 +101,10 @@ func _ready() -> void:
 	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
-	if TourProgress.wanted(_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"):
-		_start_tour()
+	if IntroProgress.wanted(
+		_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"
+	):
+		_start_intro()
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.gameReady = true")
 
@@ -107,6 +121,7 @@ func _process(delta: float) -> void:
 	_shots.show_beams(_game, _board.surface_height)
 	_audio.set_music(SoundMap.music_for(_game))
 	_update_launch_button()
+	_sync_intro()
 	_menu.set_buttons(_game.buttons)
 	_refresh_panel()
 	_message_left = maxf(0.0, _message_left - delta)
@@ -220,6 +235,7 @@ func select_cell(cell: Vector2i) -> void:
 		# the end-to-end test reads the selection the way a person sees it
 		JavaScriptBridge.eval("window.gameSelected = '%d,%d'" % [cell.x, cell.y])
 	_menu.close()
+	_card.hide_card()
 	_panel.close()
 	_ring.hide_range()
 	if cell == BoardSpace.NO_CELL:
@@ -253,6 +269,8 @@ func select_cell(cell: Vector2i) -> void:
 		return
 	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
 	_menu.open_for(anchor, _game.buttons)
+	# the intro moves on only when the build row really opened for a free socket
+	_flow.notify(IntroFlow.Event.SOCKET_SELECTED)
 
 
 ## Starts a fresh game on a map seed.
@@ -266,7 +284,11 @@ func _start(map_seed: int) -> void:
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
 	_speed = GameSpeed.new()
-	_speed.paused = _tour.is_open() or _guide.is_open()
+	_speed.paused = _guide.is_open()
+	# a new game has no pause of the player's to give back
+	_paused_before_overlay = false
+	if _flow.is_active():
+		_flow.skip()
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_update_launch_button()
 
@@ -332,11 +354,25 @@ func _on_tower_chosen(tower: String) -> void:
 	select_cell(BoardSpace.NO_CELL)
 
 
+## The intro moves on when the player builds a tower, starts a wave or clears it.
+func _tell_intro(event: GameEvent) -> void:
+	if event.kind == GameEvent.Kind.TOWER_BUILT:
+		_flow.notify(IntroFlow.Event.TOWER_BUILT)
+	elif event.kind == GameEvent.Kind.WAVE_LAUNCHED:
+		_flow.notify(IntroFlow.Event.WAVE_LAUNCHED)
+	elif event.kind == GameEvent.Kind.WAVE_CLEARED:
+		_flow.notify(IntroFlow.Event.WAVE_CLEARED)
+	elif event.kind == GameEvent.Kind.GAME_OVER or event.kind == GameEvent.Kind.GAME_WON:
+		# the intro has nothing left to say once the game has ended
+		_flow.skip()
+
+
 ## Reads what the tick reported: a refused command becomes a short message.
 func _after_tick(game: GameState) -> void:
 	for event in game.events:
 		_audio.play_sfx(SoundMap.sfx_for(event, game))
 		_crow.deliver(CrowAlerts.text_for(event))
+		_tell_intro(event)
 		if event.kind == GameEvent.Kind.COMMAND_REJECTED:
 			_show_message(RejectText.of(event.reason))
 		elif event.kind == GameEvent.Kind.TOWER_FIRED:
@@ -370,22 +406,23 @@ func _tour_param() -> String:
 	return value if value is String and (value as String).length() <= 4 else ""
 
 
-## Opens the tour over the game, which waits.
-func _start_tour() -> void:
-	_pause_for_overlay(true)
-	_tour.start()
+## Starts the intro wave: speech bubbles on the map, sockets glowing, Skip always there.
+func _start_intro() -> void:
+	_flow.start()
 	_tell_page_tour(true)
 
 
-## The browser smoke test reads whether the tour is open.
+## The browser smoke test reads whether the intro is open.
 func _tell_page_tour(open: bool) -> void:
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.gameTourOpen = %s" % str(open))
 
 
-func _on_tour_finished() -> void:
+func _on_intro_finished(_skipped: bool) -> void:
 	_progress.mark_seen()
-	_pause_for_overlay(false)
+	_glow.hide_all()
+	_glow_shown = false
+	_intro.refresh()
 	_tell_page_tour(false)
 
 
@@ -394,15 +431,41 @@ func _open_guide() -> void:
 	_guide.open()
 
 
-## An overlay (the tour or the guide) pauses the game while it is open and gives the
-## pause back as the player had it.
+## Keeps the glow and the bubble true to the intro's step; called every frame.
+func _sync_intro() -> void:
+	var wanted := _flow.highlights_sockets()
+	if wanted and not _glow_shown:
+		_glow.show_blocks(_free_sockets(), _game.map.footprint, _board.surface_height)
+	elif not wanted and _glow_shown:
+		_glow.hide_all()
+	_glow_shown = wanted
+	_intro.refresh()
+
+
+## The sockets with no tower on them, which the intro asks the player to tap.
+func _free_sockets() -> Array[Vector2i]:
+	var free: Array[Vector2i] = []
+	for anchor in _game.map.sockets:
+		if _tower_on(anchor) == null:
+			free.append(anchor)
+	return free
+
+
+## Shows a tower's card above the build row (hover, or press and hold).
+func _on_info_requested(id: String) -> void:
+	_card.show_for(id)
+	_card.reset_size()
+	var port := get_viewport().get_visible_rect().size
+	_card.position = Vector2(
+		port.x - CARD_MARGIN - _card.size.x, port.y - CARD_ABOVE - _card.size.y
+	)
+
+
+## The guide pauses the game while it is open and gives the pause back as the player had it.
 func _pause_for_overlay(opening: bool) -> void:
 	if opening:
-		if not _tour.is_open() and not _guide.is_open():
+		if not _guide.is_open():
 			_paused_before_overlay = _speed.paused
-		_speed.paused = true
-	elif _tour.is_open() or _guide.is_open():
-		# the other overlay is still open: the game keeps waiting
 		_speed.paused = true
 	else:
 		_speed.paused = _paused_before_overlay

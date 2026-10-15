@@ -102,7 +102,7 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 	elif shown == "Message":
 		var message := main.get_node("Hud/Message") as Label
-		message.text = "Unknown tower and a rather long sentence to be sure it fits"
+		message.text = "That is road: build on a socket"
 		message.visible = true
 	elif shown == "TowerPanel":
 		var tower := Tower.new()
