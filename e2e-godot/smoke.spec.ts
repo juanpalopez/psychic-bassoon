@@ -155,7 +155,7 @@ test('a tap with a touch id other than 0 selects a socket', async ({
   await context.close();
 });
 
-// The first-time tour opens by itself on a fresh browser, and stays closed once it was seen.
+// The first-visit intro wave opens by itself on a fresh browser, and stays closed once it was seen.
 test('the tour opens on a first visit and not after it was seen', async ({
   browser,
 }) => {

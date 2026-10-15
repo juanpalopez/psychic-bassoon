@@ -6,6 +6,7 @@ extends Node3D
 const LIFT := 0.06
 const INNER := 0.78
 const OUTER := 0.95
+# a 3D unshaded material cannot read the HUD theme, so the glow keeps its colour here
 const COLOUR := Color(1.0, 0.85, 0.4)
 const PULSE_SPEED := 4.0
 const MIN_ALPHA := 0.35

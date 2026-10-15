@@ -36,7 +36,7 @@ var _glow := SocketGlow.new()
 var _card := TowerCard.new()
 var _glow_shown := false
 var _guide := GuidePanel.new()
-var _progress := TourProgress.default()
+var _progress := IntroProgress.default()
 # whether the game was paused by the player when an overlay opened over it
 var _paused_before_overlay := false
 
@@ -101,7 +101,9 @@ func _ready() -> void:
 	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
-	if TourProgress.wanted(_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"):
+	if IntroProgress.wanted(
+		_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"
+	):
 		_start_intro()
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.gameReady = true")
@@ -251,7 +253,6 @@ func select_cell(cell: Vector2i) -> void:
 		return
 	# any cell of a socket block selects the block, by its anchor
 	_selected = anchor
-	_flow.notify(IntroFlow.Event.SOCKET_SELECTED)
 	var footprint := _game.map.footprint
 	var tower := _tower_on(anchor)
 	if tower != null:
@@ -268,6 +269,8 @@ func select_cell(cell: Vector2i) -> void:
 		return
 	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
 	_menu.open_for(anchor, _game.buttons)
+	# the intro moves on only when the build row really opened for a free socket
+	_flow.notify(IntroFlow.Event.SOCKET_SELECTED)
 
 
 ## Starts a fresh game on a map seed.
@@ -282,6 +285,8 @@ func _start(map_seed: int) -> void:
 	_game_over.close()
 	_speed = GameSpeed.new()
 	_speed.paused = _guide.is_open()
+	# a new game has no pause of the player's to give back
+	_paused_before_overlay = false
 	if _flow.is_active():
 		_flow.skip()
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
@@ -357,6 +362,9 @@ func _tell_intro(event: GameEvent) -> void:
 		_flow.notify(IntroFlow.Event.WAVE_LAUNCHED)
 	elif event.kind == GameEvent.Kind.WAVE_CLEARED:
 		_flow.notify(IntroFlow.Event.WAVE_CLEARED)
+	elif event.kind == GameEvent.Kind.GAME_OVER or event.kind == GameEvent.Kind.GAME_WON:
+		# the intro has nothing left to say once the game has ended
+		_flow.skip()
 
 
 ## Reads what the tick reported: a refused command becomes a short message.
@@ -427,11 +435,20 @@ func _open_guide() -> void:
 func _sync_intro() -> void:
 	var wanted := _flow.highlights_sockets()
 	if wanted and not _glow_shown:
-		_glow.show_blocks(_game.map.sockets, _game.map.footprint, _board.surface_height)
+		_glow.show_blocks(_free_sockets(), _game.map.footprint, _board.surface_height)
 	elif not wanted and _glow_shown:
 		_glow.hide_all()
 	_glow_shown = wanted
 	_intro.refresh()
+
+
+## The sockets with no tower on them, which the intro asks the player to tap.
+func _free_sockets() -> Array[Vector2i]:
+	var free: Array[Vector2i] = []
+	for anchor in _game.map.sockets:
+		if _tower_on(anchor) == null:
+			free.append(anchor)
+	return free
 
 
 ## Shows a tower's card above the build row (hover, or press and hold).

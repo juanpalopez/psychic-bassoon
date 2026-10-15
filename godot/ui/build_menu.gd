@@ -43,7 +43,7 @@ func _ready() -> void:
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.theme_type_variation = &"StripButton"
 		button.pressed.connect(_choose.bind(id))
-		button.mouse_entered.connect(func() -> void: info_requested.emit(id))
+		button.mouse_entered.connect(_hover.bind(id))
 		button.mouse_exited.connect(func() -> void: info_cleared.emit())
 		button.button_down.connect(_start_hold.bind(id))
 		button.button_up.connect(_stop_hold)
@@ -65,6 +65,9 @@ func open_for(plot: Vector2i, buttons: int) -> void:
 
 func close() -> void:
 	visible = false
+	_hold_timer.stop()
+	_held_id = ""
+	_hold_fired = false
 
 
 ## Greys out the towers that cost more than `buttons`.
@@ -75,9 +78,16 @@ func set_buttons(buttons: int) -> void:
 		_tower_buttons[i].disabled = cost > _buttons
 
 
+## A mouse hovering over a button asks for its card; a touch also produces a mouse enter, but
+## with the button already down, and that is the start of a tap or a hold, not a hover.
+func _hover(id: String) -> void:
+	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		info_requested.emit(id)
+
+
 ## A press that lasted long enough: show the card instead of choosing.
 func hold_elapsed() -> void:
-	if _held_id == "":
+	if _held_id == "" or not visible:
 		return
 	_hold_fired = true
 	info_requested.emit(_held_id)
@@ -93,6 +103,9 @@ func _start_hold(id: String) -> void:
 func _stop_hold() -> void:
 	_hold_timer.stop()
 	_held_id = ""
+	if _hold_fired:
+		# the look is over once the finger lets go
+		info_cleared.emit()
 
 
 func _choose(id: String) -> void:

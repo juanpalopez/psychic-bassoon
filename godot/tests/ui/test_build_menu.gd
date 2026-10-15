@@ -93,9 +93,28 @@ func test_a_press_and_hold_shows_the_card_and_does_not_choose() -> void:
 	menu.tower_buttons()[2].button_up.emit()
 	menu.tower_buttons()[2].pressed.emit()
 	assert_signal_not_emitted(menu, "tower_chosen")
+	assert_signal_emitted(menu, "info_cleared", "the look ends when the finger lets go")
 	assert_true(menu.visible, "the menu stays open after a look")
 	# the next plain tap chooses
 	menu.tower_buttons()[2].button_down.emit()
 	menu.tower_buttons()[2].button_up.emit()
 	menu.tower_buttons()[2].pressed.emit()
 	assert_signal_emitted_with_parameters(menu, "tower_chosen", [TOWERS.TOWER_IDS[2]])
+
+
+func test_closing_the_menu_in_the_middle_of_a_press_cancels_the_hold() -> void:
+	var menu := _menu()
+	watch_signals(menu)
+	menu.open_for(Vector2i(1, 1), 500)
+	menu.tower_buttons()[0].button_down.emit()
+	menu.close()
+	menu.hold_elapsed()
+	assert_signal_not_emitted(menu, "info_requested")
+
+
+func test_the_hold_timer_is_wired_to_the_hold_time() -> void:
+	var menu := _menu()
+	var timers := menu.find_children("*", "Timer", false, false)
+	assert_eq(timers.size(), 1)
+	assert_eq((timers[0] as Timer).wait_time, BuildMenu.HOLD_SECONDS)
+	assert_true((timers[0] as Timer).one_shot)

@@ -100,7 +100,7 @@ func test_building_a_tower_then_starting_and_clearing_a_wave_finishes_the_intro(
 func test_skip_ends_the_intro_remembers_it_and_clears_the_glow() -> void:
 	var main := await _main()
 	var memory := {}
-	main._progress = TourProgress.new(
+	main._progress = IntroProgress.new(
 		func() -> bool: return memory.get("seen", false), func() -> void: memory["seen"] = true
 	)
 	var view := _intro(main)
@@ -190,7 +190,66 @@ func test_every_intro_target_is_a_control_in_the_hud() -> void:
 			assert_true(main.get_node("Hud").get_node_or_null(target) is Control, target)
 
 
-func test_the_bubble_stays_clear_of_every_other_hud_control() -> void:
+func test_tapping_an_occupied_socket_does_not_advance_the_intro() -> void:
+	var main := await _main()
+	var anchor := _a_socket(main)
+	main.select_cell(anchor)
+	main._on_tower_chosen("spoolGuard")
+	Game.tick(main.game())
+	main._flow.start()
+	main._flow.notify(IntroFlow.Event.NEXT)
+	assert_eq(main._flow.step(), IntroFlow.Step.PICK_SOCKET)
+	main.select_cell(anchor)
+	assert_eq(main._flow.step(), IntroFlow.Step.PICK_SOCKET, "a tower is there; no build row opens")
+	main.select_cell(main.game().map.sockets[1])
+	assert_eq(main._flow.step(), IntroFlow.Step.PICK_TOWER)
+
+
+func test_the_glow_leaves_out_sockets_that_already_hold_a_tower() -> void:
+	var main := await _main()
+	main.select_cell(_a_socket(main))
+	main._on_tower_chosen("spoolGuard")
+	Game.tick(main.game())
+	var view := _intro(main)
+	view.next_button().pressed.emit()
+	main._process(0.016)
+	assert_eq(_glow(main).ring_count(), main.game().map.sockets.size() - 1)
+
+
+func test_the_intro_ends_when_the_game_does() -> void:
+	var main := await _main()
+	_intro(main)
+	main.game().events.append(GameEvent.of(GameEvent.Kind.GAME_OVER))
+	main._after_tick(main.game())
+	assert_false(main._flow.is_active())
+
+
+func test_a_restart_behind_the_guide_does_not_keep_the_old_pause() -> void:
+	var main := await _main()
+	main._speed.paused = true
+	main.get_node("Hud/TowerGuide").pressed.emit()
+	main._start(main.game().seed + 1)
+	(_node(main, GuidePanel) as GuidePanel).close_button().pressed.emit()
+	assert_gt(main._speed.ticks_speed(), 0, "the new game is not paused")
+
+
+func _socket_screen_centres(main: Node) -> Array[Vector2]:
+	var centres: Array[Vector2] = []
+	for anchor in main.game().map.sockets:
+		var at := BoardSpace.footprint_centre(anchor, main.game().map.footprint)
+		at.y = main._board.surface_height(anchor)
+		centres.append(main._camera.unproject_position(at))
+	return centres
+
+
+func test_the_bubble_stays_clear_of_every_other_hud_control_and_most_sockets() -> void:
+	var events := [
+		IntroFlow.Event.NEXT,
+		IntroFlow.Event.SOCKET_SELECTED,
+		IntroFlow.Event.TOWER_BUILT,
+		IntroFlow.Event.WAVE_LAUNCHED,
+		IntroFlow.Event.WAVE_CLEARED
+	]
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720), Vector2i(1366, 1024)]:
 		var port := SubViewport.new()
 		port.size = size
@@ -205,15 +264,25 @@ func test_the_bubble_stays_clear_of_every_other_hud_control() -> void:
 		var message := main.get_node("Hud/Message") as Label
 		message.text = "That is road: build on a socket"
 		message.visible = true
-		for step in [IntroFlow.Event.NEXT, IntroFlow.Event.SOCKET_SELECTED]:
+		# every step: the goal, the five that follow, each checked as it shows
+		for i in range(events.size() + 1):
 			view.refresh()
 			await get_tree().process_frame
-			var bubble := view.get_child(1) as Control
+			var bubble := view.bubble()
 			var rect := Rect2(bubble.global_position, bubble.size)
 			for node in main.get_node("Hud").get_children():
 				if node is Control and node != view and (node as Control).is_visible_in_tree():
 					assert_false(
 						rect.intersects((node as Control).get_global_rect()),
-						"bubble %s over %s at %s" % [rect, node.name, size]
+						"step %d: bubble %s over %s at %s" % [i, rect, node.name, size]
 					)
-			main._flow.notify(step)
+			var covered := 0
+			var centres := _socket_screen_centres(main)
+			for centre in centres:
+				if rect.has_point(centre):
+					covered += 1
+			assert_lte(
+				covered * 3, centres.size(), "step %d hides too many sockets at %s" % [i, size]
+			)
+			if i < events.size():
+				main._flow.notify(events[i])

@@ -1,4 +1,4 @@
-## The words of the first-time tour and of the tower guide. Strings only; the numbers shown
+## The words of the first-visit intro wave and of the tower guide. Strings only; the numbers shown
 ## beside them come from `towers.gd`.
 extends RefCounted
 
@@ -51,9 +51,8 @@ const INTRO := {
 	{
 		"text":
 		(
-			"Well done, you held the road! More towers help: open Menu and "
-			+ "Tower guide to see each one, or How to play to see this again. "
-			+ "Good luck!"
+			"Well done, you held the road! Open Menu for the Tower guide, or How "
+			+ "to play to see this again. Good luck!"
 		),
 		"target": "",
 	},

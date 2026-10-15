@@ -17,6 +17,7 @@ const OUTLINE_GROW := 8.0
 var target_resolver: Callable = _find_target
 
 var _flow: IntroFlow
+var _shown_step := IntroFlow.Step.IDLE
 var _highlight: Panel
 var _bubble: PanelContainer
 var _label := Label.new()
@@ -68,7 +69,14 @@ func refresh() -> void:
 	visible = _flow != null and _flow.is_active()
 	if not visible:
 		_highlight.visible = false
+		_shown_step = IntroFlow.Step.IDLE
 		return
+	if _flow.step() == _shown_step:
+		# the words and the layout hold; only an outlined control may have come or gone
+		if _flow.target() != "":
+			_outline(_flow.target())
+		return
+	_shown_step = _flow.step()
 	_fit()
 	_label.text = _flow.text()
 	var width := COMPACT_WIDTH if _flow.compact() else BUBBLE_WIDTH
@@ -78,6 +86,11 @@ func refresh() -> void:
 	_next.text = "Done" if _flow.step() == IntroFlow.Step.DONE else "Next"
 	_outline(_flow.target())
 	_bubble.reset_size()
+
+
+## The speech bubble, for tests.
+func bubble() -> Control:
+	return _bubble
 
 
 func bubble_text() -> String:
