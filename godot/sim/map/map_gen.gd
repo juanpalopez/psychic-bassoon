@@ -290,7 +290,10 @@ static func _feeder_on_row(
 			return {}
 	if cells.size() < RULES.FEEDER_MIN_CELLS:
 		return {}
-	if join_index < RULES.FEEDER_JOIN_MARGIN or join_index > path.size() - RULES.FEEDER_JOIN_MARGIN:
+	var latest := mini(
+		path.size() - RULES.FEEDER_JOIN_MARGIN, path.size() * RULES.FEEDER_JOIN_MAX_PERCENT / 100
+	)
+	if join_index < RULES.FEEDER_JOIN_MARGIN or join_index > latest:
 		return {}
 	var last := cells.size() - 1
 	for n in cells.size():

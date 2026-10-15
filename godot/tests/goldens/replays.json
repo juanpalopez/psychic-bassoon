@@ -5,167 +5,167 @@
 				"buttons": 180,
 				"events": "",
 				"foes": 0,
-				"hash": "70fc84416958bba8b50c3b16089ed3e4ceef2a90265776fc2796292f620bf80c",
+				"hash": "87ce19c014e524df8d4cf2b019faf234a0a810585c8fa063b1f17851ee40ecb7",
 				"heartstone_health": 20,
 				"tick": 0,
 				"towers": 0,
 				"wave": 0
 			},
 			{
-				"buttons": 97,
-				"events": "312fc8601d96a5219fda7b38536c1fb6fe19475001d7798696c308930242622c",
-				"foes": 8,
-				"hash": "64eebfe151a6691128a2becdc29a17c774c0320da74e57e74431f584c04c5a7f",
+				"buttons": 41,
+				"events": "61d4d0a385143254e1c21f1471bf40c572235521b0bbaadfdc87fc78a96c29f3",
+				"foes": 1,
+				"hash": "d1993b53f8dc44ecc3faa7cf03bb146339183cfe6b598dfcb316d02fb272af04",
 				"heartstone_health": 20,
 				"tick": 600,
-				"towers": 2,
+				"towers": 3,
 				"wave": 2
 			},
 			{
-				"buttons": 0,
-				"events": "db5b36985ce70c9199dfccf32465c75ec53b112a127d323f2e97d21c3f199120",
-				"foes": 3,
-				"hash": "81586ed9cab1c10ce7fde9878e3d362947d4f1edd2f979f2e2d3006fd2cdbfba",
+				"buttons": 69,
+				"events": "8810f4598f9adf8f4dd60f7bdd8338f4416ddc0523a09f9a6f327cdb7eb06cf5",
+				"foes": 5,
+				"hash": "d2bfc3581c5efa33b7484276ee284cb10c8d249392ed9e69f115148c8aa79daa",
 				"heartstone_health": 20,
 				"tick": 1200,
-				"towers": 5,
-				"wave": 3
-			},
-			{
-				"buttons": 69,
-				"events": "69e314ce7cbf625e7a0b631761ba7ff5d9f5e127908c6a4981bc32bcdd1da6ad",
-				"foes": 9,
-				"hash": "69cf0c5b1d2c12ec0d13e41734dec0f38def5c1013ebe48f463f2ce1a69b4e3a",
-				"heartstone_health": 20,
-				"tick": 1800,
 				"towers": 5,
 				"wave": 4
 			},
 			{
-				"buttons": 16,
-				"events": "c7efb09c110ae04af07ac4d9bbfab5ff6029b21e27eacd950ecca45a121fa5ee",
-				"foes": 2,
-				"hash": "b87867d13f40d4c31268843e174ea118b9e9195f9071550402389fa10628cd45",
+				"buttons": 29,
+				"events": "6cac8cbed2ae76b6544663df27d32aeafe12cb50bfae5b04677203dda457e4cc",
+				"foes": 1,
+				"hash": "768bf2642c3f76c2751f4b333512b8a463a194cf0af51618c06817ddf3d6c268",
 				"heartstone_health": 20,
-				"tick": 2400,
+				"tick": 1800,
 				"towers": 6,
 				"wave": 4
 			},
 			{
-				"buttons": 81,
-				"events": "c9d7dd328e63d9836c14b6250315d680d557e8827bd7ccabd07e285708989454",
-				"foes": 12,
-				"hash": "7f261df9da065e8e9f774a841f26089f04a113dd01f79c058f00291fdfa50e0d",
+				"buttons": 85,
+				"events": "26faa1cdd82a5fd03c6a03b5d5e464db0404ff0907f40eaaf49a2ded87a4c4ef",
+				"foes": 11,
+				"hash": "54c51a8a6874449b91bba29c3c268dbe9b86bc8d4651e4a98816feb70e313bce",
 				"heartstone_health": 20,
-				"tick": 3000,
+				"tick": 2400,
 				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 9,
-				"events": "ef3a822550f0ce2c018e31e53e5b5a1de4d7ff676a637fdb78c9445e57b34516",
-				"foes": 11,
-				"hash": "5e5b519435023c2aca2eb21156d2e6d4396c30c334416e3d6cb7924daa8e93b1",
+				"buttons": 13,
+				"events": "dc5d59cd2a5945da6b950866e5010639c6d1952dd92331130257f0cbd383e4ed",
+				"foes": 9,
+				"hash": "55a020d0bd8515f0b245c5b9ada60100c884b9c0b19d8a810825644afd74176a",
 				"heartstone_health": 20,
-				"tick": 3600,
+				"tick": 3000,
 				"towers": 7,
 				"wave": 5
 			},
 			{
-				"buttons": 1,
-				"events": "669459850c7c6300f1c41df0c925e4b300c6db8ce9944b90e60b90ce532583c6",
-				"foes": 8,
-				"hash": "4c471e99371b45b9435df58047e30c476d686265e15e2ea029b7c20a6fa25974",
+				"buttons": 5,
+				"events": "f3da6384d00439c46e2fc27089410d24b600f1f40550bf1f4a4b9473cebb264e",
+				"foes": 6,
+				"hash": "986147bd27c6293f222f34a2dfa25a4c0bfdb7d259d2c3aa9909b4910f7be432",
 				"heartstone_health": 20,
-				"tick": 4200,
+				"tick": 3600,
 				"towers": 8,
 				"wave": 5
 			},
 			{
-				"buttons": 88,
-				"events": "30404a8be2d0e48936ccbeb85c10e82ddb403d7239a567d4b9811f6cf68e9fb9",
-				"foes": 1,
-				"hash": "83f6159e5d0d519753f600e8a27929b05c8e47c6afc20f5fdd4b99097aab1aeb",
+				"buttons": 11,
+				"events": "52603354d9cc2adbfa319d3320de54aefc389f0de064ea904a8662c5af2ea2ea",
+				"foes": 2,
+				"hash": "987bf31ca60dcc99d9d1e64c1c51aea167c23896cdb46eefe66b8ebc0e96d208",
+				"heartstone_health": 20,
+				"tick": 4200,
+				"towers": 9,
+				"wave": 5
+			},
+			{
+				"buttons": 22,
+				"events": "a400370acc5e81a42532ad1ebc45a2e4a7767ba35aefecca36469b6487e840e3",
+				"foes": 8,
+				"hash": "260da63e6de2329f77694dacb00efebe157810b73ac2feee8d6ea7b3eb44fb34",
 				"heartstone_health": 20,
 				"tick": 4800,
-				"towers": 9,
+				"towers": 10,
 				"wave": 6
 			},
 			{
-				"buttons": 76,
-				"events": "164e9546d648bae3fccb08686297a0d29e7ba2f5c630c2fa681d635fcb76a3f0",
-				"foes": 3,
-				"hash": "2573e85745c8b60dd0fc30170ff63ddbc5ec8882ed9abf07c5bd1518ebf699f6",
+				"buttons": 66,
+				"events": "2782192944383ee44ebe73bc5814a4557adf8d954f279a267e07cd8951cdd940",
+				"foes": 2,
+				"hash": "e012c56641c2854784fe50935363c13e2ae3d00f9a2139622ae1cdc4d2008cfe",
 				"heartstone_health": 20,
 				"tick": 5400,
 				"towers": 10,
 				"wave": 6
 			},
 			{
-				"buttons": 19,
-				"events": "6374bf22d33261bfddb5676918ef13712712c21218be4c4783ffe4178947f11f",
-				"foes": 15,
-				"hash": "d905567f60a279d516239fdfe2696d96c46a6364c6e29b095abd1e5e41ea2812",
+				"buttons": 26,
+				"events": "8cc2ea41bd8679ece034d3715eb5e470f92e65c4d540308c7e010f50c77afd74",
+				"foes": 10,
+				"hash": "f6d65014b400c7d8a20e9d7606e7f14e460500098638e0c51a3070cd35e73130",
 				"heartstone_health": 20,
 				"tick": 6000,
 				"towers": 12,
 				"wave": 7
 			},
 			{
-				"buttons": 54,
-				"events": "1717553219295840a2c03af9c7bd5819c781a839a6a79474fca369e737b6cce0",
+				"buttons": 19,
+				"events": "bc2bc13b58402fa362c88f5f29e0e588c464ae9628963f897ac7f21aef447acd",
 				"foes": 2,
-				"hash": "66c2fb005d7db119fbb8a4e94e2fdc7f73aafc2fe757ae48dd68570443c1829e",
+				"hash": "9bb2bdf124cd55a5f6cd0af6e1f5c1d08037744b97763c19bdc9dd836d77abd0",
 				"heartstone_health": 20,
 				"tick": 6600,
 				"towers": 13,
 				"wave": 7
 			},
 			{
-				"buttons": 30,
-				"events": "ae4a7285b771c81a6d173a01dd6dedaabd0f33a00cfecab347b473400c920eba",
-				"foes": 12,
-				"hash": "2f66801c379aed30c5583ab2824dcbc9dea19f196cce763b338a1ad3850130c6",
+				"buttons": 33,
+				"events": "85b7758ddf95ecb495f421730927546d68be5c8af41499f1ca60781edac39f87",
+				"foes": 13,
+				"hash": "36e3317e4a59e3b425ade5836649f6eda5d91bd49f407a5e74894b047bb67e5f",
 				"heartstone_health": 20,
 				"tick": 7200,
 				"towers": 13,
 				"wave": 8
 			},
 			{
-				"buttons": 10,
-				"events": "f1c43bcd9978ec0c4df87d3e80a8a92c9938cbd9ff8ec4bee315b29583a060f0",
-				"foes": 4,
-				"hash": "63f7a9e37f9a90aa2b0a50bcb034dcbfa1baaecdbedb2eb51b7e65ef29ab4161",
+				"buttons": 0,
+				"events": "d53b52f04a54bd5d6c54895cdee992a90f6ca17a37ec73b4f290586e35a4409b",
+				"foes": 5,
+				"hash": "4aebeee8db98e0f72a8fb2c0209bcd23194641311a9fab73f79695be94e76d1e",
 				"heartstone_health": 20,
 				"tick": 7800,
 				"towers": 13,
 				"wave": 8
 			},
 			{
-				"buttons": 41,
-				"events": "667247bb97ce21ffcc551cd40957bad694db1740daf7595c238740cc5c29a9e0",
-				"foes": 8,
-				"hash": "d08bad9aa28b3744bf5aa9580dc0f80f79c61b8faeb1d309b7d68a2e1aaf5bac",
+				"buttons": 0,
+				"events": "f6042f14b3ab6c0d7ac9d4e86c630716888cb327bd79af87f3594bb3962085a3",
+				"foes": 1,
+				"hash": "80eb33f6a6f3d02b3a0ba2af999c280b417efd53235597cad286d1261133700d",
 				"heartstone_health": 20,
 				"tick": 8400,
 				"towers": 13,
-				"wave": 9
+				"wave": 8
 			},
 			{
-				"buttons": 42,
-				"events": "9a270f66ea5f640c65d57debc4188a2aa7c7637d572408e42ea0339aefe662c9",
-				"foes": 7,
-				"hash": "85890bcfdded6473443253ff6bb23ac26f420a860436829b3511e511fbb173b5",
+				"buttons": 32,
+				"events": "cb05fd642886bafcbe42800bc87d3e24c7de5ba290925aab9f2271a2785cc2bf",
+				"foes": 8,
+				"hash": "610dfe51a782cbf7b2fe008f47a6d78ae76e4d25dc0927951d51fa32049c81d8",
 				"heartstone_health": 20,
 				"tick": 9000,
 				"towers": 13,
 				"wave": 9
 			},
 			{
-				"buttons": 42,
-				"events": "a9325432ede48e9d66a0578a2987b62094040a2e2dfdc2cb0ed7cd6a25f99b7a",
-				"foes": 1,
-				"hash": "5e57da1a52d28e0e5b9cb444e8d680c8990bc49fc7c999acfd657720fed5d112",
+				"buttons": 27,
+				"events": "51a077031b2c3c935a9d9e3713d3a66127171593ae453354f823e2df6831d9de",
+				"foes": 3,
+				"hash": "c462852cd556021ddc25b5b887dc22c94a4ff78b8c741966cd827c6596d7152d",
 				"heartstone_health": 20,
 				"tick": 9600,
 				"towers": 13,
@@ -173,311 +173,291 @@
 			},
 			{
 				"buttons": 24,
-				"events": "b3fb6a23f0a9cbd19685428db198969e58812cfc6e590cae5da1be61c7d0280a",
-				"foes": 18,
-				"hash": "18ed0cea1ee87be1df3a8214c756c15760b6dc11cf3f62131c210cf35a10480f",
+				"events": "ca1b7e475c2d272ade38a69488381c13edd1381f2601c6039052e6117ca6dac7",
+				"foes": 14,
+				"hash": "9ce6f0cb573a348700a0ed1c0c89fabf9b8dcb50e3b2d84ac4f0722cce2c1cca",
 				"heartstone_health": 20,
 				"tick": 10200,
 				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 3,
-				"events": "f411cdcf163fb90db18927e7e57b13d8ce9a34e6f2709669c433631e9fefb177",
-				"foes": 6,
-				"hash": "49cf97511e6e29806f44d43efc9944233652a9530b88a8039feb0ccb91b60e47",
+				"buttons": 76,
+				"events": "099cd7befff418e14cf183d93c16ad5837c182c297390dcaecbd5a6739a96c00",
+				"foes": 8,
+				"hash": "45eb57e6a3fa5c8c93843329c7e3922aa72a472e77fcc3d4ac189c030c132e74",
 				"heartstone_health": 20,
 				"tick": 10800,
 				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 83,
-				"events": "6b166fb1db76ef80e5dd7ea1aafac76395a77cb4221a9c838c51ff699ba48e67",
-				"foes": 1,
-				"hash": "f0cfbcae654b761695ad9447eaa5e0a9e660d1b706d431b2fac6eb907d2fcece",
+				"buttons": 82,
+				"events": "3d47882f681a95a3fb78a97c456ee58c8b7a007ed9bbabb6837474f94c540ce3",
+				"foes": 2,
+				"hash": "e2aa3863662b20582cce3526b2b96c321e4deff91d7d203864aec691459f1a74",
 				"heartstone_health": 20,
 				"tick": 11400,
 				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 83,
-				"events": "45a7e348771032b07f05de60911373ef6d9a2a7e3653dfbd4eb39f65a3a0bc9b",
+				"buttons": 8,
+				"events": "42212325648caf01f83906a7bc2b2d8dec333db4c5b03b74a96f60ed229a6cc1",
 				"foes": 1,
-				"hash": "10c6dd77c8b77cb529cd561ba3497b5d3f40bb81ab2e5dc061c813dcb7c75486",
+				"hash": "75a2fa45aae0fa2efb2bed4ca9fdabf4e30add1c004cb87ae34538247d74159e",
 				"heartstone_health": 20,
 				"tick": 12000,
 				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 7,
-				"events": "a581d00f79df709606cb2ff47c8e76176acc5ccd5d77386399ee99d01d9e33a7",
-				"foes": 14,
-				"hash": "4fc8a8c46bdab80e659f9dbec6c8b5f8ab79e000a79ef3a60b3de54580bc3b99",
+				"buttons": 33,
+				"events": "79ce48ed22f64f2016c23ab799c3fdfa879bf814746eb30bc9cde11e75c4fe10",
+				"foes": 9,
+				"hash": "cccd0bb420b233d359f91893cd95214b5280f633279b546dc476cc08948f7025",
 				"heartstone_health": 20,
 				"tick": 12600,
 				"towers": 13,
 				"wave": 11
 			},
 			{
-				"buttons": 83,
-				"events": "33a568bc0452a95f7e6282b23eb25262d5bc2cd9b139a859bfebe7eb37fd689d",
-				"foes": 3,
-				"hash": "dadb173a75bcf57e4448bc46e51fcc8a6a4b558fcede534608f917ab475ccfa8",
+				"buttons": 102,
+				"events": "a0e9cc5f6d76f7c26afa9fd2bb17efd5ab9a959f9d6d3ce086bb26b474644ad7",
+				"foes": 4,
+				"hash": "9736a724a32fb8e3755a07aefe49aa034884d1b7fd712f2a09b400f9e6e393e7",
 				"heartstone_health": 20,
 				"tick": 13200,
 				"towers": 13,
 				"wave": 11
 			},
 			{
-				"buttons": 44,
-				"events": "af603660d3a8fd7a08f46833ca39a0324e8058631bb7d9b5b0b213c6fd83b581",
-				"foes": 14,
-				"hash": "3eae72425ed9cacae7ffb5786f11354dd9f26af670760d8fe14a19d94bb3a1ea",
+				"buttons": 50,
+				"events": "56edfd5d11e44579129f8211f8f7d26f059d18484b6df3f8728f366a7fee35fa",
+				"foes": 4,
+				"hash": "b49cc4099005a948b522a430f6f994801d1aa2d104f0ee9ca2cf45119c4cc83d",
 				"heartstone_health": 20,
 				"tick": 13800,
 				"towers": 13,
 				"wave": 12
 			},
 			{
-				"buttons": 46,
-				"events": "7bef3364960e29691b7b1434889bdd64219f05b597c4b7381b46681a7c5dc124",
-				"foes": 12,
-				"hash": "ade3e3ab26ba84bb0e57b768de2621de8ddd6fc6063b4e90fe105cc32b5d3a7c",
+				"buttons": 60,
+				"events": "a9100f188d5427b44bca6b9c9546b8627fc460ee61be14e9191a8269507bb192",
+				"foes": 4,
+				"hash": "943a4f2b156bd45333943e1b850ab7fd046cc429286ffcc1401d2dc53459fec8",
 				"heartstone_health": 20,
 				"tick": 14400,
 				"towers": 13,
 				"wave": 13
 			},
 			{
-				"buttons": 6,
-				"events": "f63cf2f7c024f7e461c8faafd7301509eefe92766042090d33426966bf9ec53a",
-				"foes": 5,
-				"hash": "9609b6632f038d09769ecbac4d131d3c5f73ced178f322bf087f01e24380189f",
+				"buttons": 21,
+				"events": "467f36298151da3c79735c742dba3c1a1513995912ab02b7434fbf0836cecd23",
+				"foes": 7,
+				"hash": "127203b06b2159bcb72ac10805ac0c84b1ea58923704f3ee073895528b0f0969",
 				"heartstone_health": 20,
 				"tick": 15000,
 				"towers": 13,
 				"wave": 13
 			},
 			{
-				"buttons": 7,
-				"events": "45ca70ff2c6c19982368bedcf55832b0d7640a9775f267c8e69f4a37661aebf8",
-				"foes": 15,
-				"hash": "b53ab22f579d85f35db00a8b78051a5df76675350ce6bae488ae3a407b72edf2",
+				"buttons": 106,
+				"events": "4291f519879c2233f675b744795010af30c3cf1c5770b346f56e402226e3f604",
+				"foes": 2,
+				"hash": "cdc4c358a3cfa74a3651d55a80ea692448db27623619463886b32552c4eb6ed5",
 				"heartstone_health": 20,
 				"tick": 15600,
 				"towers": 13,
-				"wave": 14
+				"wave": 13
 			},
 			{
-				"buttons": 44,
-				"events": "4b7da28c4bdb0dd732e9f15b8591b9a70d86186f7d0ad15ed8a343db13986ba8",
-				"foes": 5,
-				"hash": "27a4c8c9664052c5020fb66ff821ebfe73cc1aa7dca18b33268521fdb8d056c0",
+				"buttons": 159,
+				"events": "3c34d8f3a9a8e55f25f54d12477c4a2823500a490140d7e09459e4c6596d8999",
+				"foes": 16,
+				"hash": "84741f02027229096102402e0e1448cfed5e5a2afb5068a41790be67697c6a68",
 				"heartstone_health": 20,
 				"tick": 16200,
 				"towers": 13,
 				"wave": 14
 			},
 			{
-				"buttons": 148,
-				"events": "55948a3cacc110620b53264682c3dfd5ec0e28da8c7383c825120ef7d1ca0358",
-				"foes": 26,
-				"hash": "0423b8b13f8d2fe80c4de0304442992c76ffc4a45db5c935efd883644bd302fd",
+				"buttons": 34,
+				"events": "b8a76059f3b094485d682eb59b8bec07ff9d19ed52d6f7256cc84300641ae521",
+				"foes": 3,
+				"hash": "faa187e2a4c7cd04cec64e69d061ab5d4badd589704103d9f9fcd4d6332ba3b1",
 				"heartstone_health": 20,
 				"tick": 16800,
 				"towers": 13,
-				"wave": 15
+				"wave": 14
 			},
 			{
-				"buttons": 155,
-				"events": "c68e8a787f9db457bd075bd1ced7cb0d7180d28513d254b05d9dbea4dd4cd977",
-				"foes": 9,
-				"hash": "67e00247f743cf2378541bbdfc7238588b53d3d4fb12985753f4c51a6ee931fb",
+				"buttons": 55,
+				"events": "afe6a392bd874e50f389ebe5b8a891c923d261c0abf5d7e2e01330f8e3b99174",
+				"foes": 24,
+				"hash": "00baa3caca4b9c0aec4fdaa421cf82c016d34a4819dabdae67dd38cd4d3d934b",
 				"heartstone_health": 20,
 				"tick": 17400,
 				"towers": 13,
 				"wave": 15
 			},
 			{
-				"buttons": 236,
-				"events": "06d5935ff398650f4ec6e31f45d6beb1c74711ab9c05ba8c61a4e97fe4a98452",
+				"buttons": 61,
+				"events": "b8021608d30af81be432af19c6db311a9f8d92f7c1a24dc47751b6977593f5c8",
 				"foes": 15,
-				"hash": "7e429a3db7529d83b53d93f755dc3693a9bc6d0305339bee237856b7cc2ecdf9",
+				"hash": "9aed926dfab3c0adf356071689a36b92d39b7abc24e6b840a20a81fab7661ce0",
 				"heartstone_health": 20,
 				"tick": 18000,
 				"towers": 13,
-				"wave": 16
+				"wave": 15
 			},
 			{
-				"buttons": 427,
-				"events": "233fb165eeb914072909cf3c1faf2b7d24c21fe38d6ee34db1a5e80f3aef1a22",
-				"foes": 10,
-				"hash": "ac9835b69635e8fed0f14dcd156452e0fb786bec99387c10bbb78999259c4904",
+				"buttons": 99,
+				"events": "2227299d5c2a93315a0d95d0d46c633f50e65feaeedd8768cbb9a2ab6273105e",
+				"foes": 4,
+				"hash": "032c8b93ce20449a1beb266727170fa997f7d489da4dd0241aab347f34e31917",
 				"heartstone_health": 20,
 				"tick": 18600,
 				"towers": 13,
-				"wave": 16
+				"wave": 15
 			},
 			{
-				"buttons": 579,
-				"events": "c334828affbd7feee5bc4d58c1e23a63b83eda0359819db0e7b9db3f3897b02c",
-				"foes": 2,
-				"hash": "4aa194397bcf378ccc3332217ed48d9ccad4af0a1a41c83d945c93fe886fd0b5",
+				"buttons": 364,
+				"events": "b01e1f7020bd3d05e0d0195dec1ad599a998cef7a977780a08b99f2e55c55a79",
+				"foes": 20,
+				"hash": "37a62f667a80da8a3ad6da1515b086366252317e7b38296e592d3282f021f5ba",
 				"heartstone_health": 20,
 				"tick": 19200,
 				"towers": 13,
 				"wave": 16
 			},
 			{
-				"buttons": 768,
-				"events": "943656b994feef28bd5702d0b25099cbd60403d5e07f889feb11e0043191d212",
-				"foes": 24,
-				"hash": "478707acffc24eb01be979c0821abcb86369f2253ab594b469ede93e4f039d3b",
+				"buttons": 652,
+				"events": "76141a0cdb65d767fc32c4e2edce926558b1305115a6c2b7e6d425f82e8efe5e",
+				"foes": 5,
+				"hash": "833a48b7bfb32b08503f55056eaa6ec5523f400efab1b535e527dc4ca6f59728",
 				"heartstone_health": 20,
 				"tick": 19800,
 				"towers": 13,
 				"wave": 17
 			},
 			{
-				"buttons": 917,
-				"events": "f5c3f05d5c3563d4a63f0d5b19985bf01360088cff52f24337ab324cf014c14d",
-				"foes": 12,
-				"hash": "346fcab45697263d8765794085d1ba92c5cbfd308d11d7ae6a3adbe69637182d",
+				"buttons": 837,
+				"events": "317a94c3c97df8cb8130852b27597fdf33e7d8289e4cfff94f735b5afffc9e8e",
+				"foes": 18,
+				"hash": "3caf3c40e78eb2ae56495d442f416261ce9dc20055a40cef1e6fbdf06c05da2e",
 				"heartstone_health": 20,
 				"tick": 20400,
 				"towers": 13,
 				"wave": 17
 			},
 			{
-				"buttons": 1088,
-				"events": "d972505a0ea2ade66550f796a133a30b569a258ec1ff2b356ff2e98edfb3a2b4",
-				"foes": 3,
-				"hash": "b763f16f54658d77891ff0eec8caf57911382e44c36e32375f04d1e5087495ef",
+				"buttons": 992,
+				"events": "9e4901b5d68586477e7f9c39e17ac0926b56ff459c6c6f06e28b8d06113cc647",
+				"foes": 4,
+				"hash": "0da5decbd64f7d9568ced327b9a3df0e2068e7da6a9255e1f2f9858ff209587c",
 				"heartstone_health": 20,
 				"tick": 21000,
 				"towers": 13,
 				"wave": 17
 			},
 			{
-				"buttons": 1267,
-				"events": "7e3658238f7cdf9305385dc47a9e580a51fa642eb2ebdc4131574f012b1286da",
-				"foes": 15,
-				"hash": "17b268b9e05157506aa07a6e7979445b40645185600d5f3c4bbccf411da9c8ee",
+				"buttons": 1198,
+				"events": "4c76c3384aaf2fbc871fefcf5f6218d37e4e7dd88d7a98367af8ff1c3989bc99",
+				"foes": 27,
+				"hash": "6c9907fd3d4804d7bcdfe13e7e272c21a43680630ca46b4b1ef6d5460126474e",
 				"heartstone_health": 20,
 				"tick": 21600,
 				"towers": 13,
 				"wave": 18
 			},
 			{
-				"buttons": 1478,
-				"events": "de21ec1b4c1374320327b97ab9c704102ab934bab12682bbb6155ecdfd0ce237",
-				"foes": 10,
-				"hash": "6a606151e7c087d5a176cd491b3b7474751480782b06650a0d60b7e64261714d",
+				"buttons": 1437,
+				"events": "3eee87ef610fef18c148db1997611ac786e8c53215769b64f0d49761576bd6ea",
+				"foes": 11,
+				"hash": "097c4f07481cd4db511842f2b6ebccbccf0645631d329fac67136ab505e4f2d2",
 				"heartstone_health": 20,
 				"tick": 22200,
 				"towers": 13,
 				"wave": 18
 			},
 			{
-				"buttons": 1638,
-				"events": "e084da3c45f22aff7ac4a39b87cc3a5b7314622a28e7678e0e4bdde2cdee76c2",
-				"foes": 2,
-				"hash": "219f3f2021747d6c4ec31bc843c13f85aaa68f6449626cb2a828266b38385690",
-				"heartstone_health": 20,
+				"buttons": 1686,
+				"events": "e2b20ad3ced53a8dd911c37a4daf35373b5a1598992b920cca9e67a319b7f8ea",
+				"foes": 12,
+				"hash": "5b5deb1a6ac3d70ce886be708bde69d067cb833b6a3522eca61465f79044e0d6",
+				"heartstone_health": 16,
 				"tick": 22800,
 				"towers": 13,
-				"wave": 18
+				"wave": 19
 			},
 			{
-				"buttons": 1873,
-				"events": "80d4258741c54ae12f4bcdee634a02d899efb013d44e97f87ca8e900b96c3e05",
-				"foes": 29,
-				"hash": "3949a07889b0d3df1431982a1c670723109325b2a666206decf7a7d939907bdb",
-				"heartstone_health": 20,
+				"buttons": 1924,
+				"events": "cb9add472db5b24d6f896e8e77cbe9d65b2b02508cc2106591f391ff9ee005f8",
+				"foes": 12,
+				"hash": "d27629b3807c544bb86264464548ccf4fab1f7dd5fb7e1ff71286340d916face",
+				"heartstone_health": 16,
 				"tick": 23400,
 				"towers": 13,
 				"wave": 19
 			},
 			{
-				"buttons": 2013,
-				"events": "8a01ac71cbc37cf5864b19485b903e2ec1ee9b21ad2557bdbbb464b9a10f4e00",
-				"foes": 12,
-				"hash": "7750c8573ee100f1f6929953cfb7538e99a8dedf4186d7c1c5b286e8b4eb5862",
-				"heartstone_health": 20,
+				"buttons": 2062,
+				"events": "58dfd2d2b1e7d4d54e3ebc73c4b87a1e82ac0d9df82ae104f6e52c39411f6cf9",
+				"foes": 3,
+				"hash": "aeca34cb3691aab5c1121a2df3128c82487480c32b389821d79c3b7d5d7e9711",
+				"heartstone_health": 16,
 				"tick": 24000,
 				"towers": 13,
 				"wave": 19
 			},
 			{
-				"buttons": 2113,
-				"events": "80a2205c2a2718ea98c309f655ac3c13e501066dad8921a8ea1a0cf12633ecbe",
-				"foes": 7,
-				"hash": "5a98ba579358ec55ac118cf05fca4f4bf13adece7dd3d6be1127ba47b9467668",
-				"heartstone_health": 20,
+				"buttons": 2214,
+				"events": "50a090c29fd08b067130661159b0fad4ab227219038c9fe77ab1b8cbbb114e41",
+				"foes": 39,
+				"hash": "0dea904a194f8f0d18f0baa796d2475675f1b777e1d87441292f5456295f48c4",
+				"heartstone_health": 16,
 				"tick": 24600,
 				"towers": 13,
-				"wave": 19
+				"wave": 20
 			},
 			{
-				"buttons": 2233,
-				"events": "8e83c6caa9240d0c934eea596adcf46ca4ca58d490a8a2dc407496bd7e15ed09",
-				"foes": 1,
-				"hash": "4f42c78db14900c02b0276ea943b66dd2da53522a8ad38f5147ee918e83df83e",
-				"heartstone_health": 20,
+				"buttons": 2416,
+				"events": "f9d2f21b42de381ddc05df3c95fa2744a1a2d4d9b57fe5f64daf70a505bab9d6",
+				"foes": 19,
+				"hash": "bfa754bbd6460c2a782d57b6f14dfdcb88d60bb9b749b00f4c834396964874ba",
+				"heartstone_health": 16,
 				"tick": 25200,
 				"towers": 13,
-				"wave": 19
+				"wave": 20
 			},
 			{
-				"buttons": 2541,
-				"events": "2c8c7ccd9871aca6dd34873c5d110c896c70a62565ef344bfe0176078a76248e",
-				"foes": 20,
-				"hash": "f31a5d9c53f2e0de3004037b9f43aa3a67787185a6bfa7ad9cceffb79034b544",
-				"heartstone_health": 20,
+				"buttons": 2605,
+				"events": "abb60ca8c21676cbd0ac93b52f347001c291aa68ad99532d4b424e6390d04415",
+				"foes": 9,
+				"hash": "22b18b946c82c1908e3fe2e9a8170d2f1ec3eaf1083b70f86cc4e713127c6f3c",
+				"heartstone_health": 14,
 				"tick": 25800,
 				"towers": 13,
 				"wave": 20
 			},
 			{
-				"buttons": 2619,
-				"events": "8ff44088c3074362d547184ca4e14b2faa80098f91e9193eff1af24625470a24",
-				"foes": 12,
-				"hash": "63a83768f75f05d0710d4d6066781471b42e2b7cf251b41e24cdc31773051e4a",
-				"heartstone_health": 20,
+				"buttons": 2710,
+				"events": "1a07ccb41c90a722380ff6cb75da88cb9e7992f0cc284680b217850e1959810c",
+				"foes": 3,
+				"hash": "a5e063176b4a9f75d3fc125f18041321073ce9bce8453cf116255dcbc620e109",
+				"heartstone_health": 12,
 				"tick": 26400,
 				"towers": 13,
 				"wave": 20
 			},
 			{
-				"buttons": 2745,
-				"events": "109d3d3294e24e93155527e65c6803627e1a06051e20daa76f0c58ae68d18b32",
-				"foes": 6,
-				"hash": "10051479206ccad36f18c6fb2ddccb7717846d84adfc1dbbffcea696949bad9e",
-				"heartstone_health": 20,
+				"buttons": 2710,
+				"events": "4f9ccc2bde69561582c5055a205a5985445ef15c5731d49459ab97e10ee9cfbd",
+				"foes": 1,
+				"hash": "0aeb6faebf5e03c6ea14c6bce140d03cac8adcc2cdf4a3b4ab09f601d26269b5",
+				"heartstone_health": 8,
 				"tick": 27000,
-				"towers": 13,
-				"wave": 20
-			},
-			{
-				"buttons": 2850,
-				"events": "849c04f1825a4b0e0ecc3bb8d5992b52667bbd727ab7a655e8e1abc893f1388e",
-				"foes": 1,
-				"hash": "73e05e0641b663e42ab05421acfd85e66fceaa42f53d1231081a9fffbf72198d",
-				"heartstone_health": 20,
-				"tick": 27600,
-				"towers": 13,
-				"wave": 20
-			},
-			{
-				"buttons": 2850,
-				"events": "834bc13017b1f5eaa4ef397f7153fb1fdb08a850bf0aa8e7992d9177bc649e76",
-				"foes": 1,
-				"hash": "8870e9466c034e1dc9c4127f1fc5c3dd7610015b6741c989bcc3603e23c77898",
-				"heartstone_health": 20,
-				"tick": 28200,
 				"towers": 13,
 				"wave": 20
 			}
@@ -487,8 +467,8 @@
 				0,
 				"build",
 				"spoolGuard",
-				3,
-				1
+				10,
+				2
 			],
 			[
 				0,
@@ -498,308 +478,308 @@
 				1,
 				"build",
 				"thimbleMortar",
-				9,
+				4,
+				6
+			],
+			[
+				336,
+				"launch_wave"
+			],
+			[
+				498,
+				"build",
+				"prismSpire",
+				1,
 				3
 			],
 			[
-				431,
+				618,
+				"build",
+				"spoolGuard",
+				4,
+				3
+			],
+			[
+				618,
 				"launch_wave"
 			],
 			[
-				609,
-				"build",
-				"prismSpire",
-				6,
-				4
-			],
-			[
-				914,
+				888,
 				"build",
 				"spoolGuard",
-				3,
+				10,
 				6
 			],
 			[
-				914,
+				989,
 				"launch_wave"
 			],
 			[
-				1183,
-				"build",
-				"spoolGuard",
-				9,
-				6
-			],
-			[
-				1342,
-				"launch_wave"
-			],
-			[
-				1897,
+				1315,
 				"build",
 				"thimbleMortar",
-				6,
-				1
+				7,
+				2
 			],
 			[
-				2522,
+				1903,
 				"launch_wave"
 			],
 			[
-				3534,
+				2858,
 				"build",
 				"prismSpire",
-				0,
+				13,
+				3
+			],
+			[
+				3416,
+				"build",
+				"spoolGuard",
+				1,
+				6
+			],
+			[
+				4102,
+				"build",
+				"spoolGuard",
+				7,
 				7
 			],
 			[
-				4146,
-				"build",
-				"spoolGuard",
-				11,
-				0
-			],
-			[
-				4361,
-				"build",
-				"spoolGuard",
-				0,
-				3
-			],
-			[
-				4791,
+				4368,
 				"launch_wave"
 			],
 			[
-				4840,
+				4556,
 				"build",
 				"thimbleMortar",
-				14,
-				3
-			],
-			[
-				5780,
-				"build",
-				"prismSpire",
 				12,
-				7
-			],
-			[
-				5791,
-				"launch_wave"
-			],
-			[
-				5883,
-				"build",
-				"spoolGuard",
-				3,
 				9
 			],
 			[
-				6106,
+				5630,
+				"build",
+				"prismSpire",
+				2,
+				0
+			],
+			[
+				5630,
+				"launch_wave"
+			],
+			[
+				5827,
 				"build",
 				"spoolGuard",
-				0,
+				13,
 				0
 			],
 			[
-				6824,
+				6151,
+				"build",
+				"spoolGuard",
+				14,
+				6
+			],
+			[
+				7066,
 				"upgrade",
 				0
 			],
 			[
-				7008,
+				7066,
 				"launch_wave"
 			],
 			[
-				7125,
+				7322,
 				"upgrade",
 				25
 			],
 			[
-				7265,
+				7663,
 				"upgrade",
-				38
+				39
 			],
 			[
-				7714,
+				8336,
 				"upgrade",
 				86
 			],
 			[
-				8364,
+				8534,
+				"launch_wave"
+			],
+			[
+				8684,
 				"upgrade",
 				87
 			],
 			[
-				8364,
-				"launch_wave"
-			],
-			[
-				8548,
+				8870,
 				"upgrade",
-				117
+				128
 			],
 			[
-				8811,
+				9279,
 				"upgrade",
 				133
 			],
 			[
-				9478,
+				9733,
 				"upgrade",
 				1
 			],
 			[
-				9906,
-				"upgrade",
-				21
-			],
-			[
-				9906,
+				9733,
 				"launch_wave"
 			],
 			[
-				10317,
+				10112,
+				"upgrade",
+				22
+			],
+			[
+				10817,
 				"upgrade",
 				57
 			],
 			[
-				10797,
+				11467,
 				"upgrade",
 				85
 			],
 			[
-				12326,
+				12285,
 				"upgrade",
-				89
+				100
 			],
 			[
-				12327,
+				12367,
 				"upgrade",
 				109
 			],
 			[
-				12386,
+				12367,
 				"launch_wave"
 			],
 			[
-				12594,
+				12841,
 				"upgrade",
 				0
 			],
 			[
-				12859,
+				13218,
 				"upgrade",
 				25
 			],
 			[
-				13274,
-				"upgrade",
-				38
-			],
-			[
-				13420,
+				13505,
 				"launch_wave"
 			],
 			[
-				13666,
+				13628,
+				"upgrade",
+				39
+			],
+			[
+				13990,
 				"upgrade",
 				86
 			],
 			[
-				13995,
+				14302,
 				"upgrade",
 				87
 			],
 			[
-				14236,
-				"upgrade",
-				117
-			],
-			[
-				14236,
+				14302,
 				"launch_wave"
 			],
 			[
-				14523,
+				14613,
+				"upgrade",
+				128
+			],
+			[
+				14980,
 				"upgrade",
 				133
 			],
 			[
-				14991,
+				15707,
 				"upgrade",
 				1
 			],
 			[
-				15419,
+				15707,
 				"launch_wave"
 			],
 			[
-				15582,
+				16225,
 				"upgrade",
-				21
+				22
 			],
 			[
-				15922,
+				16762,
 				"upgrade",
 				57
 			],
 			[
-				16322,
+				17010,
+				"launch_wave"
+			],
+			[
+				17205,
 				"upgrade",
 				85
 			],
 			[
-				16322,
-				"launch_wave"
-			],
-			[
-				16812,
+				17746,
 				"upgrade",
-				89
+				100
 			],
 			[
-				17407,
+				18241,
 				"upgrade",
 				109
 			],
 			[
-				17798,
+				18803,
 				"launch_wave"
 			],
 			[
-				19473,
+				19770,
 				"launch_wave"
 			],
 			[
-				21311,
+				21162,
 				"launch_wave"
 			],
 			[
-				23020,
+				22654,
 				"launch_wave"
 			],
 			[
-				25227,
+				24298,
 				"launch_wave"
 			]
 		],
 		"final": {
-			"buttons": 3103,
-			"events": "ff2dac5962430e316fd9b3b437894d978fb3a03dbb471bc22c56b78bd1757465",
+			"buttons": 2939,
+			"events": "52cd91e7fd5f740b81084eb4ee5a0e703009f0dd811d817f8f0cc01f224a0d25",
 			"foes": 0,
-			"hash": "3b86951add9483b71c0642cac004c7df3dd91f6f2f912599346003414c3ae9a6",
-			"heartstone_health": 20,
-			"tick": 28382,
+			"hash": "1a1dde386813f0e60b19bd4873a86de04277427d3ee438541a9d5ac428eb904f",
+			"heartstone_health": 4,
+			"tick": 27177,
 			"towers": 13,
 			"wave": 20
 		},
 		"max_waves": 20,
 		"outcome": "won",
 		"profile": "mix",
-		"seed": 3,
-		"ticks": 28382
+		"seed": 7,
+		"ticks": 27177
 	},
 	{
 		"checkpoints": [
@@ -815,493 +795,383 @@
 			},
 			{
 				"buttons": 19,
-				"events": "2bdc51636ed72285c6bcae98f5356bb98da22ea0abcdd4c3f02dc82cd04ae6ee",
+				"events": "944cdcd9ba77ec6dc5ba6add7b7a2d00dc71a97d8087bf0423d37c34994f73ad",
 				"foes": 1,
-				"hash": "ff1dcfa82a650b9511c09e00c8e652d68c9563c8a9842a98697a6c996644c6fd",
+				"hash": "d4f0f9b40113a8bf731e38b634f6f115a7e76eaea5bd24de19353381b6d10d87",
 				"heartstone_health": 20,
 				"tick": 600,
 				"towers": 5,
 				"wave": 2
 			},
 			{
-				"buttons": 6,
-				"events": "966837540ef9d25b2fe23cabbdb718b38769d6d67b2be1dee8740d604081ec7e",
-				"foes": 1,
-				"hash": "96f643682680d344f5ba19f0f5cedaf49ef6c81037256461021aef42638a894d",
+				"buttons": 35,
+				"events": "e1ec3bf51280de15f73962c40f8318b99187854ad302cfb2e2c3e14ebe2cd7d1",
+				"foes": 5,
+				"hash": "45ee20e59e17b8358be6cdd4c6c39652f2d09ddcac89666e58d257c67bbd4243",
 				"heartstone_health": 20,
 				"tick": 1200,
 				"towers": 7,
-				"wave": 3
+				"wave": 4
 			},
 			{
-				"buttons": 9,
-				"events": "354ca8347c8ca981cd08d6e219cfcb9e224c68a5e056b0081084dc16344254f4",
-				"foes": 9,
-				"hash": "68c31a0b9127bccf9b9bd340b6a51358ee9ca6bfd66a7bafa4f9247af91d3630",
+				"buttons": 38,
+				"events": "18e54961cc4938550bc036b4cfa2f7e04990e9f249f1ba069abbbe4bcd891b13",
+				"foes": 4,
+				"hash": "14589baffde73d77dc50aed951dc2a42a3dc7c8d65067f45a448fe76863bfef9",
 				"heartstone_health": 20,
 				"tick": 1800,
 				"towers": 8,
 				"wave": 4
 			},
 			{
-				"buttons": 38,
-				"events": "d775b7e66ed7df8ba4222b04efed1189b1486dbab8b6429c734df326cdd283b9",
-				"foes": 4,
-				"hash": "3eaa9cb4391b480e24754e5e9ff13da3025a161a8c10ae06f7c52c3b8e991e7b",
+				"buttons": 1,
+				"events": "0974992a74afd56694088504a658a78ed62121070e912b6c9a98879b42c049d6",
+				"foes": 3,
+				"hash": "d586e1bfdf0d40bed4a11b63fbd53f1a3644312e9af9185f3584de8b4bceaec4",
 				"heartstone_health": 20,
 				"tick": 2400,
-				"towers": 8,
+				"towers": 9,
 				"wave": 4
 			},
 			{
-				"buttons": 17,
-				"events": "f7a235bea40bda57dbc42de5ea33bb3a1f8f40862a1052790dca1b4ddf6b5bf1",
-				"foes": 11,
-				"hash": "a9b04a5a69cddd5032f11cdabc05c898950f50a9593ba9dc9745e23886080d10",
+				"buttons": 21,
+				"events": "9efcbd9792fc7ac8b17101f419776879a00db02bcb025f717e0c1bf87a340df0",
+				"foes": 22,
+				"hash": "37a170425fb11f073a4b98d58bb1d34e9975dc8fbb22eb3dc8b00c5c7b183f5f",
 				"heartstone_health": 20,
 				"tick": 3000,
 				"towers": 10,
 				"wave": 5
 			},
 			{
-				"buttons": 41,
-				"events": "8fa621cb2b6ea8ef0821039cb4d734f0e693cecc10ed6520193c3d0b983a1ca8",
-				"foes": 13,
-				"hash": "fe6e9cb05d092d3be70ba204a2d2a4ed6af154f3779c625186c762f6678f1bd0",
+				"buttons": 5,
+				"events": "ae34449b658344a5993bce233d31c84e8434700ff187b7770fdee52e90216987",
+				"foes": 12,
+				"hash": "b530cee3000c6c5ca821b1143cf7560c7594fd0d4c036c66369e3eb56ab6dd7d",
 				"heartstone_health": 20,
 				"tick": 3600,
-				"towers": 10,
-				"wave": 5
-			},
-			{
-				"buttons": 47,
-				"events": "2d946d31b2eb2922f3898035659c061803b1453632a1710f0fdd6f84733595b2",
-				"foes": 9,
-				"hash": "c0297f8709a2249926edfedf3467435503051a5bfa890663a99f4304bb0ba8dc",
-				"heartstone_health": 20,
-				"tick": 4200,
 				"towers": 11,
 				"wave": 5
 			},
 			{
+				"buttons": 11,
+				"events": "3cfb20bd2f86429dad7555d255dd8d02e506cbbc20c221b51f9c5e197af9eb96",
+				"foes": 8,
+				"hash": "05d3014d502b737520762fa333e8e26a682f9529aa5d7ce03bd0d33668323ca6",
+				"heartstone_health": 20,
+				"tick": 4200,
+				"towers": 12,
+				"wave": 5
+			},
+			{
 				"buttons": 49,
-				"events": "eef9fda2f612d1c42004f9aaba1f7162540e8ee457aeaf62788f2d9c9d712b89",
+				"events": "3a18134d83ea093a5aa390528633a3d08e3a4050fb115009418fe9f29e4ecfcd",
 				"foes": 1,
-				"hash": "1b28aae18aec88d04d734ff0cb1ca9895e9b9db6772f07460be326221e9d499a",
+				"hash": "33b4515e1fca8fd3ca06c6d95ba7e71723e129a98a715d9b8879410d1313f288",
 				"heartstone_health": 20,
 				"tick": 4800,
 				"towers": 12,
 				"wave": 5
 			},
 			{
-				"buttons": 52,
-				"events": "1f014177542115880f826ef5cd21713b41fb92c58037e88e3d81b707e5a66d3f",
-				"foes": 4,
-				"hash": "decb7b39d3c34301769592fdc4f4bcf4e89811068989a3de12bf203de66cffc5",
-				"heartstone_health": 20,
+				"buttons": 10,
+				"events": "c02cd3fc132c3ce92183fc47b2397ffb1a25bc5e0994e1c0fc9e916924bff92b",
+				"foes": 6,
+				"hash": "dfe537f230d86e9944c6157c6c03880c5f057390cfa67d157943d3b828f31cb5",
+				"heartstone_health": 18,
 				"tick": 5400,
 				"towers": 12,
 				"wave": 6
 			},
 			{
-				"buttons": 20,
-				"events": "03a7c24b6d2f98d866766e5613bad3bf78a6b0e649b01d7909818c8347b34f67",
-				"foes": 2,
-				"hash": "1fd5c01ff20d5ccb2582a02c19b9e57ceb875a59d69fdee07ce6886970eb324b",
-				"heartstone_health": 20,
+				"buttons": 52,
+				"events": "8b5bc24f4e7ac6712d3bcd825dbb9ae2195c0de0f68db9cfd57a2721408e2cef",
+				"foes": 3,
+				"hash": "6808e8dbb71c619269c5aef4c8ba334e9cc8543dee199bf8a65d1d09c4931cc1",
+				"heartstone_health": 18,
 				"tick": 6000,
 				"towers": 12,
 				"wave": 6
 			},
 			{
-				"buttons": 37,
-				"events": "e9afb06f34c664148cdca4e6e7c3f3cf7aaa86b3588ed5b68ed443fc52de51d7",
-				"foes": 6,
-				"hash": "57bcf8682092610d6fb4979864a457a6fba3cbbf1169ae65fb78c0008fb88b3a",
-				"heartstone_health": 20,
+				"buttons": 13,
+				"events": "5d6359d519e568c6fd7c8b2ba781dd46cbdbedab47c7a37a1671625bd4573ffd",
+				"foes": 5,
+				"hash": "c9e16c97797811242a3456ced9d03464e5c76895f42d19710e491ff8a04b86b5",
+				"heartstone_health": 18,
 				"tick": 6600,
 				"towers": 12,
 				"wave": 7
 			},
 			{
-				"buttons": 26,
-				"events": "26a2145625798d833695b1685a840eb4bbe6154b9ef544e21fc2e93f4d07c636",
-				"foes": 2,
-				"hash": "352910d95ef9d3d1cbc66849dec9348f704a0e35d06b3fabba8118785d201c9d",
-				"heartstone_health": 20,
+				"buttons": 57,
+				"events": "cc330648d3a401d3b20e6a4a9d5994974abfe61ee20e09884ffe806dfd5532a8",
+				"foes": 3,
+				"hash": "09266030d833ca5c573cf1942529248006efdb01df21854cb11a6e9b80803c5b",
+				"heartstone_health": 18,
 				"tick": 7200,
 				"towers": 12,
 				"wave": 7
 			},
 			{
-				"buttons": 57,
-				"events": "30070df5303d6225f425b11665c9619310566bc318f3d263c500524582c20a32",
-				"foes": 17,
-				"hash": "cac344ad7e10aeca5c93c2b1fa7de26405205aa0b8841044c47defe8aadbb90b",
-				"heartstone_health": 20,
+				"buttons": 31,
+				"events": "f7e879567791eee7c0fefa275bfd5247fe53191c6c772951576ac8f45072ac7b",
+				"foes": 10,
+				"hash": "8f7c53d0e0885b828110e2e0ca953cdaf972e0b7c7408126f8357760a71a0168",
+				"heartstone_health": 18,
 				"tick": 7800,
 				"towers": 12,
 				"wave": 8
 			},
 			{
-				"buttons": 12,
-				"events": "d100e21b96e346bcc0774e1a83c920037391caa64aa1a9588b33bae7a03bebb2",
-				"foes": 4,
-				"hash": "55555608e88e7b54765696b754c3dafcc4f1c22e3fe16d723be9137a2f8e66bd",
-				"heartstone_health": 20,
+				"buttons": 13,
+				"events": "4b57ebeac38faecc68c30fdc2b9523c0e9a996ee4723d2a31fcbb86453e496e2",
+				"foes": 3,
+				"hash": "5769b244a16f5f560bc92f4d841bee490b2ce3d01ac30de484c51a59f33f4b6b",
+				"heartstone_health": 18,
 				"tick": 8400,
 				"towers": 12,
 				"wave": 8
 			},
 			{
-				"buttons": 46,
-				"events": "49ef722e95e4bd9e899daf2b4dea35c21d5de9a34441edd07fcceb5ccdb9a343",
+				"buttons": 50,
+				"events": "475c5ce3df20d4f3113ed40580ab0dd8beeba2a3b2c0795a82fc8032fe8ad8ee",
 				"foes": 12,
-				"hash": "9f7bb22aea3eff260349cf270427d7d20e3332647732fb0f5c896bff216582b1",
-				"heartstone_health": 20,
+				"hash": "4ddb9ef456dd6b67cf24b506eff1bf3b374cc0560bb8e04079bc960cfc9bc038",
+				"heartstone_health": 18,
 				"tick": 9000,
 				"towers": 12,
 				"wave": 9
 			},
 			{
-				"buttons": 24,
-				"events": "b75473d97ef75f9ddb82f06b284acb902999abae7ba35f8168cd95d51ed37a12",
+				"buttons": 10,
+				"events": "61883915ed675cbe69de3ed7068eaa2f9f04eb92b7cebff67101a442cee62e82",
 				"foes": 5,
-				"hash": "ea64b30fde91a9344ce538ea97e698a66cc74dd934f53ec47853072a2d2572f0",
-				"heartstone_health": 20,
+				"hash": "b1e3b50b022a30597cf1040015677be3e08055139aae8d3cef42483350d4b224",
+				"heartstone_health": 18,
 				"tick": 9600,
 				"towers": 12,
 				"wave": 9
 			},
 			{
-				"buttons": 46,
-				"events": "e8166d6e2fe37d805a4cab36842436540d224c25a55cbc27dcc7d08054910a5f",
-				"foes": 8,
-				"hash": "02af5293d1dc32d321c9db553a2549e916d1d331db978f8696ccda79bcf4d7e3",
-				"heartstone_health": 20,
+				"buttons": 27,
+				"events": "206eaf0717b450af08264c53985aed8a2b3ad77f9c917d7ca72f3f106bd0b5a6",
+				"foes": 4,
+				"hash": "22dae9025fb47bf4a731cae7bc884182f90bb3cff60ed3d52f4aa4b2091396b6",
+				"heartstone_health": 18,
 				"tick": 10200,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 57,
-				"events": "5af0b57b99e2516a2f66ca2f3f7d59381dea0dda221af695f4343bd5fc8b1908",
-				"foes": 7,
-				"hash": "f585ec41ff9dccc4ca35ffef8aa276e88a7a557ca4ab768f0490dfb2bbccfe7d",
-				"heartstone_health": 20,
+				"buttons": 75,
+				"events": "e7a396b4fafca277f5a4cecf9ca60e60f958c67f0a8e45bea310e9ab535244a0",
+				"foes": 5,
+				"hash": "c74a865b1e7e296aff3af4bb14eab39eb13f34eb01c32fdf73fd0d8eabaa1bdd",
+				"heartstone_health": 18,
 				"tick": 10800,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 43,
-				"events": "1c952f59b383807ab211f2a7c57af0083785efe8c6fbb859684fcb940ac4cd75",
+				"buttons": 29,
+				"events": "c0bb21426044fa648c55423109e918bb8092521f059730fb89293acbbe70566e",
 				"foes": 1,
-				"hash": "b31eeab0f2bd74b37f1318a148bed45f71dd7f56d724f9cebe2a14b205c61109",
-				"heartstone_health": 20,
+				"hash": "ab804b5b035edb2014a703015081a0ec27b0278f7fefb8237b69a07371b4b27f",
+				"heartstone_health": 18,
 				"tick": 11400,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 27,
-				"events": "004a1752811744147d7703bc42b0f8bd30c592c46b81858fb991642a74800f78",
-				"foes": 3,
-				"hash": "68d9138f7bea2e08201f5ea36350c1cb31978b7fe1d25e288ce2f5dd3268327b",
-				"heartstone_health": 20,
+				"buttons": 64,
+				"events": "3d9fe94ea2c9d7a34f188f080bce281c0eea3bcb7c1978c28739f7b22b4b507e",
+				"foes": 2,
+				"hash": "c8f4207fc8b467dd88e68818e6f27e60df34de25dd09a6ff2c00a28077b9a9af",
+				"heartstone_health": 18,
 				"tick": 12000,
 				"towers": 12,
-				"wave": 11
+				"wave": 10
 			},
 			{
-				"buttons": 60,
-				"events": "fefc5ed61ec854abb05dbfa8445c92f62434c5355fa57053e5b2f8a38d8c70a1",
-				"foes": 7,
-				"hash": "c9f22a5a8a41d97a39e5952198443849a47ebae0c4c3e20a9acbfb9aad06b250",
-				"heartstone_health": 20,
+				"buttons": 38,
+				"events": "a9ef3c0125519cf2da86a937f42d0eb6d73ab43417b4dc0315a62489cc46c029",
+				"foes": 9,
+				"hash": "bb06e54d538ba4f352b607635a95f2e1b69ecafe18625a1240950966ba019e65",
+				"heartstone_health": 17,
 				"tick": 12600,
 				"towers": 12,
 				"wave": 11
 			},
 			{
-				"buttons": 30,
-				"events": "d18674919e9065fa71a6dbdd7d943d968d20338bd26106e2155c7cafb83de0c5",
-				"foes": 2,
-				"hash": "1bc3b015f6adc6d3fb63443acc3014e8dfd80603654f53a9391e2a399d7f84c2",
-				"heartstone_health": 20,
+				"buttons": 57,
+				"events": "6c2a4eeab1cf2e9c5f8d742d34e977858252655406e2ab89bcd7be3d20e0369f",
+				"foes": 5,
+				"hash": "107562f070ab006c884b1c2bc4ba9e0fa1fe18c2dc257d516523f86e4febf41c",
+				"heartstone_health": 17,
 				"tick": 13200,
 				"towers": 12,
-				"wave": 11
+				"wave": 12
 			},
 			{
-				"buttons": 107,
-				"events": "8836282505c3c4a16802b590cc8c83ae906cf266d926e47c994628124d332b08",
-				"foes": 12,
-				"hash": "46b8d3fee785dec724a9c47269c76035f4ceaef83a3845e45f0566ecbb05d8a1",
-				"heartstone_health": 20,
+				"buttons": 106,
+				"events": "90427dc21295dc4dc2f8a3b0b08a9bf3073a6490801a9ac8621d35fb806b614a",
+				"foes": 2,
+				"hash": "858782caa46b049686e451dda8612b9797bd9f802460ed961026091e68afa086",
+				"heartstone_health": 17,
 				"tick": 13800,
 				"towers": 12,
 				"wave": 12
 			},
 			{
-				"buttons": 19,
-				"events": "4a6913f107d151fc99f5c9ba477d2ba5aa93f120e6e552c3492dc567dc7c07ea",
-				"foes": 2,
-				"hash": "57c34e0976c4a14520664645d7290578058dfb0ed55441eb27077d04e139ab22",
-				"heartstone_health": 20,
+				"buttons": 194,
+				"events": "05afbaed411092ff4cd675ff4b7d36dc82bb2bd9c0ac5186a18bba4476e29681",
+				"foes": 3,
+				"hash": "b66e224466b58eabdd8ef3cce6dd4ec58b1f32b9f892a76e785679a8092f3268",
+				"heartstone_health": 17,
 				"tick": 14400,
 				"towers": 12,
-				"wave": 12
+				"wave": 13
 			},
 			{
-				"buttons": 134,
-				"events": "b481b85f6668e28280d1be6ae3f9de86876f533ea25a686e4ab6e9de04f99547",
-				"foes": 10,
-				"hash": "e29fb1bfc3e340ec689ceee7e542adea473cc2fadab0b6c03f77620d716df65b",
-				"heartstone_health": 20,
+				"buttons": 353,
+				"events": "0cdef465429b3b54f5ec027ee2693fba5c06baef77f7df132ae782eac8110db1",
+				"foes": 23,
+				"hash": "c3400a63d8dea1f46c22c2950ccf77dbc26be801f59236bcaf3cdb9cc484239b",
+				"heartstone_health": 17,
 				"tick": 15000,
 				"towers": 12,
-				"wave": 13
+				"wave": 14
 			},
 			{
-				"buttons": 234,
-				"events": "22212580632373480bf1e7a412839b4c5bf6e6f8e8684e4950f15874262a6c2f",
-				"foes": 2,
-				"hash": "a6d83c9aa3155cb6e5b34fd2cedd611a5badfb89f485d91e36c63673a56d52f1",
-				"heartstone_health": 20,
+				"buttons": 547,
+				"events": "6036824c60352504ee4e8fb3b1c2f65bfef017de7cc0f322ed37f4523979a9a6",
+				"foes": 7,
+				"hash": "8cac7b5efd57b36d0f482c5bd334d7295919eff238563d57c0b1625522fb31ee",
+				"heartstone_health": 17,
 				"tick": 15600,
 				"towers": 12,
-				"wave": 13
+				"wave": 14
 			},
 			{
-				"buttons": 435,
-				"events": "bcb6ed97754daadce729883721096a1504560a8a0343a0b119f358952b441f58",
-				"foes": 21,
-				"hash": "3267e772e49ea53f716c91c9626d2e11f36606ee3071eebc34f64c4bc1e0376f",
-				"heartstone_health": 20,
+				"buttons": 601,
+				"events": "e98d535d99a5f68b2730bf7f33be4767a948020b21c0e4d11290521d1fb6052d",
+				"foes": 4,
+				"hash": "929e7b4d9b754b197cbb3fba177eafc99ded25de77a630711c09cfd4d0945c82",
+				"heartstone_health": 17,
 				"tick": 16200,
 				"towers": 12,
 				"wave": 14
 			},
 			{
-				"buttons": 534,
-				"events": "710c9eff744a90feb31e2c94f809abd840cf8983ccce35ac79be88bc65ee63ed",
-				"foes": 9,
-				"hash": "91396c2d9d09a407d5cfab892933bcac813f6e63802ca2ca917683b29bc0d145",
-				"heartstone_health": 20,
+				"buttons": 745,
+				"events": "48524adfbc789d049ee1350c16ca1caa17f6a222e2809bf74fd4404d320832ad",
+				"foes": 20,
+				"hash": "cfc4d551e0fd012e6fef5703dd12c772c46819166a3ee3c580dcb31ff2c3d61e",
+				"heartstone_health": 17,
 				"tick": 16800,
 				"towers": 12,
-				"wave": 14
+				"wave": 15
 			},
 			{
-				"buttons": 660,
-				"events": "a080479d24ce52baba7426590d19bbccb04fd9cd7cfea55f8d5c817d7f4c47e0",
-				"foes": 2,
-				"hash": "94cb303ec9b227ff30f1cb46c93cc0c7c607670f182b2aad397d5acee7aeebed",
-				"heartstone_health": 20,
+				"buttons": 942,
+				"events": "6a0bdc8f481fe3a44cee2c984113b7768ece8db83df313511691501398f4c1ae",
+				"foes": 23,
+				"hash": "498c028f0c4006a6a7b3483400cb468c4a7097db47509c24fe5ee42fce3c2a34",
+				"heartstone_health": 17,
 				"tick": 17400,
 				"towers": 12,
-				"wave": 14
+				"wave": 15
 			},
 			{
-				"buttons": 851,
-				"events": "41b8785adf4ccc7c5bba4bfdd7a6371d3a4d1c01a5311d70c27a9939699fcc25",
-				"foes": 38,
-				"hash": "2ffcb3f28db54097e4f2fe829fc3cc10140bd494e8529697753d041996984e73",
-				"heartstone_health": 20,
+				"buttons": 1140,
+				"events": "f44c65a91fc0be1c87ff9e9201f24e8f24b2403c19c25791a6a1b9fe10f2abea",
+				"foes": 7,
+				"hash": "14aeda8f80d0fea42787941c4a3fe94b6811f89ec2ae0097364c28ec4504214c",
+				"heartstone_health": 17,
 				"tick": 18000,
 				"towers": 12,
 				"wave": 15
 			},
 			{
-				"buttons": 929,
-				"events": "34ee9e4e4c57fecb8b4fc68d05bbe4e698839b34332c678478cd888b5be69eea",
-				"foes": 20,
-				"hash": "90b7c9e9a6fe629d4a3eed6c84da27588c6ac4ff330a56e3f27561672b85c502",
-				"heartstone_health": 20,
+				"buttons": 1375,
+				"events": "3467e9e7a67d2e15c2d8f59f0c24d6e50cc475db7443df11ed41bd9872ba22f8",
+				"foes": 15,
+				"hash": "8122875b8bf0f126218bd3ab675fc9f2e8a2309e0a9b56a0b949f8ab17b40d43",
+				"heartstone_health": 9,
 				"tick": 18600,
 				"towers": 12,
-				"wave": 15
+				"wave": 16
 			},
 			{
-				"buttons": 1127,
-				"events": "f0402cc585ad4ff03397aa81180cff7e47148220121c14ab26ce430be8dbe873",
+				"buttons": 1535,
+				"events": "8e7c3ab71fd0f53fb5ffa7a47cc1713d0c8acc3825ed4454f61a8910c8533d2c",
 				"foes": 9,
-				"hash": "c89edc049fa453d3603cbb330ce1a14820715d3296fbaa897e3ab97bc81c1aad",
-				"heartstone_health": 20,
+				"hash": "2fa685a04ef7fbd88cad53343c8a2e9263b9475d94447f92f4409e385af2dbf6",
+				"heartstone_health": 9,
 				"tick": 19200,
 				"towers": 12,
-				"wave": 15
+				"wave": 16
 			},
 			{
-				"buttons": 1340,
-				"events": "267dd7a4f65e73fe49f61d6e4373d7b3a10db2424a58f85fa8db86530229b1e3",
-				"foes": 12,
-				"hash": "2d002ecc54a31dae4088d49a3ef6b7cf3a636d35641860b420f18bfffe37c3b3",
-				"heartstone_health": 20,
+				"buttons": 1687,
+				"events": "623d4960f10cd89b2dc7e75634845c4e37f4c81d01812df6ef715c2b5b3a6492",
+				"foes": 1,
+				"hash": "e6be6f5e87b0efc78d55184b431ed4e5faba30fc1fa5d177ecff0316f588089e",
+				"heartstone_health": 9,
 				"tick": 19800,
 				"towers": 12,
 				"wave": 16
 			},
 			{
-				"buttons": 1504,
-				"events": "028c3e4b39cc542ac54c310c4b76b0f35db5be41352b0c2768203668a9bf7e2d",
-				"foes": 17,
-				"hash": "a29d611dc9661dc1863235b03183634a74274681732b791b2bb6c3f5041bd57d",
-				"heartstone_health": 20,
+				"buttons": 1946,
+				"events": "485dca33f7baad039b8374c7bea56ad5d2501b6d8c6eef0b5bc1fb8be4a4de7a",
+				"foes": 16,
+				"hash": "f925297fb2014614bcfa9699271912fb1a406f2871744e513c44379cc9c4f600",
+				"heartstone_health": 8,
 				"tick": 20400,
 				"towers": 12,
-				"wave": 16
+				"wave": 17
 			},
 			{
-				"buttons": 1611,
-				"events": "c292c9a4494436b6c2e65c96cdbf680df1bbcca1142df93bc66f3a132ac3736a",
-				"foes": 10,
-				"hash": "aa61d6f6822780880a770b70ef751246f639555eab3819ec1e7654f00719cbd3",
-				"heartstone_health": 20,
+				"buttons": 2033,
+				"events": "75432887fe74c48bee4a5884e8b8a77c64cd869df66fbb99a61c26d91af4f2a5",
+				"foes": 8,
+				"hash": "bfb444360f9937c6ad079e5a42eb06c0e1256c74cc314326e1e5f56c770ac8c7",
+				"heartstone_health": 8,
 				"tick": 21000,
 				"towers": 12,
-				"wave": 16
+				"wave": 17
 			},
 			{
-				"buttons": 1858,
-				"events": "b9a3c646d9ea62fbe64be3795d0b240bf850ec88ed7f1206da5ba5f53262214e",
-				"foes": 20,
-				"hash": "022c952982a1c80fb71ba2ec9672f2e8b64b1e12825bb626d33ba488026a78a7",
-				"heartstone_health": 20,
+				"buttons": 2109,
+				"events": "e7aa179eb1947297322f65d589c407b082059f125951c80b1e2fba2cbce453f3",
+				"foes": 4,
+				"hash": "3e029a8030cf4443f0fda54220bd0386f30fa2aa566254589362e8be0b559000",
+				"heartstone_health": 8,
 				"tick": 21600,
 				"towers": 12,
 				"wave": 17
 			},
 			{
-				"buttons": 2081,
-				"events": "76fc2e9cca9a31770f9d8652a1acbe1070dd4a6dbf1852ef7cca5631c4f80554",
-				"foes": 11,
-				"hash": "571c0d4d60a449dde04a6982d5f215136c8566ce124b214a4c6541fa3d961c41",
-				"heartstone_health": 20,
+				"buttons": 2291,
+				"events": "67f8883aa50a73fff6b4298491947ad5cd12127626af658aba9e4b7203143984",
+				"foes": 26,
+				"hash": "49e5d5af41417e53bdf20f9a8853494fce8561b11244b43b8a58b0dfd1db7e6f",
+				"heartstone_health": 3,
 				"tick": 22200,
 				"towers": 12,
-				"wave": 17
+				"wave": 18
 			},
 			{
-				"buttons": 2195,
-				"events": "947fb76628a53edf003bd368eeb073711c469b2c1818b502c3caa73502d47ce8",
-				"foes": 5,
-				"hash": "91ec38421bd53f309e047e3d6350daf9faca7cdce07bb4b3d2e129d4c2f48ff6",
-				"heartstone_health": 20,
+				"buttons": 2480,
+				"events": "8f99dc1b7af8c9e50d5a7af8b2f2f40b4454c520b830607d7e7638c7e79eb935",
+				"foes": 11,
+				"hash": "7745435e5fa9a2df65618d37023ca7578e0ca4036a7fe3c0fdb5eaa18a000628",
+				"heartstone_health": 2,
 				"tick": 22800,
 				"towers": 12,
-				"wave": 17
-			},
-			{
-				"buttons": 2271,
-				"events": "f97dd2331d6a180752318dc46e5f64a305279f8653384d815dbbb6a5e1e3d584",
-				"foes": 1,
-				"hash": "1c92647bb6ed35dc845b5a549d95e18b4ad2c021aaa11f805464373dbae0272c",
-				"heartstone_health": 20,
-				"tick": 23400,
-				"towers": 12,
-				"wave": 17
-			},
-			{
-				"buttons": 2510,
-				"events": "1fa1b61a62ea2806c1db6365355caa69d92c98deb79080fd1aa11a7123bd9484",
-				"foes": 21,
-				"hash": "4ce83095972f01b9a39f08f7815a0c53c0ce7f650b47a098aaf68c9c8c1aa910",
-				"heartstone_health": 18,
-				"tick": 24000,
-				"towers": 12,
 				"wave": 18
-			},
-			{
-				"buttons": 2586,
-				"events": "7a169ea6db7c0eccd1d75dcb67ea6c7868eb27a4240fba749c89eaad0ec36434",
-				"foes": 13,
-				"hash": "517e5e3178a7e13c9c1ab81618b8c5ab34e0c12051a6dc39eec9be9cd2c79fdf",
-				"heartstone_health": 18,
-				"tick": 24600,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 2726,
-				"events": "b35c944410a1de67b35788d9fe6282bbefc24117fa439afd1d6e6e418d39b7a5",
-				"foes": 6,
-				"hash": "76ea1860cef2167e94443065a163e3ff5c85b3f4175a65e6cf57aba673667d4b",
-				"heartstone_health": 18,
-				"tick": 25200,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 2881,
-				"events": "c078851c3c47610ea448d588924d6976a48b748bd81579e193e87bcd6b68943b",
-				"foes": 14,
-				"hash": "b7c0a5ee7decab42969f9c7b29b5710ff3812338221b5a40cad02526034ff44b",
-				"heartstone_health": 12,
-				"tick": 25800,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 3057,
-				"events": "0c52c13f067ee11e6fc6ac64a6e4765fc702cece81c15f4b12d7a59de29403f3",
-				"foes": 18,
-				"hash": "ad4cf8a4a87b4f13243c633ca380ac6b0c7586ddd55e183b8a207a27fccd7e2d",
-				"heartstone_health": 12,
-				"tick": 26400,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 3143,
-				"events": "b3366f7fff4983d21aed6841629dc40b288db850177deee5a477563f91895b58",
-				"foes": 13,
-				"hash": "428404a404039cb1ca7243fcd0de7dc6b5db8d9ddd3f76ca8e0f0dac1366a2b9",
-				"heartstone_health": 12,
-				"tick": 27000,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 3263,
-				"events": "94b022782065d802a4075a005be66b8f2c57130106ac7e89bbb5d297e26163c8",
-				"foes": 7,
-				"hash": "39c3d6fe5933259535ebbbc66b82a570d347aed95896317f964513638346222c",
-				"heartstone_health": 12,
-				"tick": 27600,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 3472,
-				"events": "dc8906621b58ec18f502b0b8e88b5bb8180fd1b350e6cb51f5f4eb822ede6366",
-				"foes": 21,
-				"hash": "b671bbef9ac1172df276145c4255a220dea50c27a106703cb0198dce27c7fa00",
-				"heartstone_health": 8,
-				"tick": 28200,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 3651,
-				"events": "58e581b21f06916f33c5731e49eef255c10ad4722481d60e1d4fbb98f24fdf53",
-				"foes": 20,
-				"hash": "e339c21bc6d783af2ab0b770dc986150c93949df5988b6bcab8c26a7e95e2a3e",
-				"heartstone_health": 8,
-				"tick": 28800,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 3714,
-				"events": "40d6a94dfb3ffae943bc60b640584a73b3f3156321ec8ca1e5589cabafa15d47",
-				"foes": 17,
-				"hash": "11713d1b54a9a6caebe00f2858bacb87957b6d28de6bed02de2282453377716b",
-				"heartstone_health": 8,
-				"tick": 29400,
-				"towers": 12,
-				"wave": 20
 			}
 		],
 		"commands": [
@@ -1320,8 +1190,8 @@
 				1,
 				"build",
 				"spoolGuard",
-				8,
-				6
+				4,
+				4
 			],
 			[
 				2,
@@ -1331,7 +1201,7 @@
 				3
 			],
 			[
-				110,
+				102,
 				"build",
 				"spoolGuard",
 				11,
@@ -1342,269 +1212,261 @@
 				"launch_wave"
 			],
 			[
-				373,
+				386,
 				"build",
 				"spoolGuard",
-				7,
-				2
+				8,
+				8
 			],
 			[
-				697,
+				722,
 				"build",
 				"spoolGuard",
-				14,
-				3
-			],
-			[
-				697,
-				"launch_wave"
-			],
-			[
-				1098,
-				"build",
-				"spoolGuard",
-				14,
-				6
-			],
-			[
-				1229,
-				"launch_wave"
-			],
-			[
-				1522,
-				"build",
-				"spoolGuard",
-				10,
-				9
-			],
-			[
-				2419,
-				"build",
-				"spoolGuard",
-				0,
+				1,
 				0
 			],
 			[
-				2685,
+				722,
+				"launch_wave"
+			],
+			[
+				1031,
+				"build",
+				"spoolGuard",
+				14,
+				2
+			],
+			[
+				1065,
+				"launch_wave"
+			],
+			[
+				1328,
+				"build",
+				"spoolGuard",
+				14,
+				5
+			],
+			[
+				2102,
 				"build",
 				"spoolGuard",
 				11,
-				0
+				9
 			],
 			[
-				2685,
-				"launch_wave"
-			],
-			[
-				3601,
-				"build",
-				"spoolGuard",
-				4,
-				2
-			],
-			[
-				4210,
+				2518,
 				"build",
 				"spoolGuard",
 				3,
 				8
 			],
 			[
-				4613,
+				2518,
+				"launch_wave"
+			],
+			[
+				3323,
+				"build",
+				"spoolGuard",
+				8,
+				0
+			],
+			[
+				4164,
+				"build",
+				"spoolGuard",
+				5,
+				1
+			],
+			[
+				4534,
 				"upgrade",
 				0
 			],
 			[
-				4821,
+				4943,
 				"upgrade",
 				1
 			],
 			[
-				4821,
+				4943,
 				"launch_wave"
 			],
 			[
-				5130,
+				5307,
 				"upgrade",
 				2
 			],
 			[
-				5798,
+				6219,
 				"upgrade",
 				10
 			],
 			[
-				6155,
+				6478,
 				"upgrade",
 				18
 			],
 			[
-				6155,
+				6478,
 				"launch_wave"
 			],
 			[
-				6496,
+				6869,
 				"upgrade",
 				27
 			],
 			[
-				7065,
+				7258,
 				"upgrade",
-				42
+				40
 			],
 			[
-				7552,
+				7635,
 				"upgrade",
 				57
 			],
 			[
-				7552,
+				7635,
 				"launch_wave"
 			],
 			[
-				7820,
+				7911,
 				"upgrade",
 				60
 			],
 			[
-				8033,
+				8232,
 				"upgrade",
 				61
 			],
 			[
-				8678,
+				8583,
 				"upgrade",
 				89
 			],
 			[
-				8678,
+				8583,
 				"launch_wave"
 			],
 			[
-				8757,
+				8829,
 				"upgrade",
 				90
 			],
 			[
-				9538,
+				9537,
 				"upgrade",
 				0
 			],
 			[
-				9951,
+				10027,
 				"upgrade",
 				1
 			],
 			[
-				9951,
+				10027,
 				"launch_wave"
 			],
 			[
-				10476,
+				10497,
 				"upgrade",
 				2
 			],
 			[
-				11000,
+				10960,
 				"upgrade",
 				10
 			],
 			[
-				11882,
+				11939,
 				"upgrade",
 				18
 			],
 			[
-				11932,
+				12019,
+				"launch_wave"
+			],
+			[
+				12077,
 				"upgrade",
 				27
 			],
 			[
-				11932,
-				"launch_wave"
-			],
-			[
-				12371,
+				12417,
 				"upgrade",
-				42
+				40
 			],
 			[
-				13052,
+				12793,
 				"upgrade",
 				57
 			],
 			[
-				13272,
+				12824,
 				"launch_wave"
 			],
 			[
-				13416,
+				13005,
 				"upgrade",
 				60
 			],
 			[
-				13813,
+				13368,
 				"upgrade",
 				61
 			],
 			[
-				14314,
+				13804,
 				"upgrade",
 				89
 			],
 			[
-				14620,
+				13819,
 				"launch_wave"
 			],
 			[
-				14701,
+				13966,
 				"upgrade",
 				90
 			],
 			[
-				15725,
+				14648,
 				"launch_wave"
 			],
 			[
-				17499,
+				16554,
 				"launch_wave"
 			],
 			[
-				19738,
+				18196,
 				"launch_wave"
 			],
 			[
-				21496,
+				19904,
 				"launch_wave"
 			],
 			[
-				23448,
-				"launch_wave"
-			],
-			[
-				25613,
-				"launch_wave"
-			],
-			[
-				27872,
+				21884,
 				"launch_wave"
 			]
 		],
 		"final": {
-			"buttons": 3798,
-			"events": "f7fd4ad5421d28462df389555084c0ecf153ff5e07bd4706f10ca2e0bb9e50f0",
-			"foes": 9,
-			"hash": "d8c3897215b3f950d2868527da44d0944e45566b1cef3ebdd316fcc0f3119d55",
+			"buttons": 2620,
+			"events": "47db0bebe1c912376bd2e5431a49fbfa3c0580b1794c713867d962a2d45bb423",
+			"foes": 3,
+			"hash": "4314de16774fa93d4bcde77a93b7b5f19a010861797de428fd98a2acb55bfd73",
 			"heartstone_health": 0,
-			"tick": 29880,
+			"tick": 23307,
 			"towers": 12,
-			"wave": 20
+			"wave": 18
 		},
 		"max_waves": 20,
 		"outcome": "lost",
 		"profile": "spoolOnly",
 		"seed": 1,
-		"ticks": 29880
+		"ticks": 23307
 	},
 	{
 		"checkpoints": [
@@ -1622,37 +1484,37 @@
 				"buttons": 20,
 				"events": "9ee237fc73d610ef0d942932d81dec60655f8cd399577f1d9140781b558b66d4",
 				"foes": 5,
-				"hash": "5c7780e529b4fa0f6c6e9f53c03ab536109831f097ce2cb2dd14cdac0648d6b8",
+				"hash": "f38c4a7c3205b43ea8b8f1eb70bf2ea5c61e65c7db26bb8e38aa73b414b297ad",
 				"heartstone_health": 20,
 				"tick": 600,
 				"towers": 2,
 				"wave": 1
 			},
 			{
-				"buttons": 51,
-				"events": "5a2e6e45ff422e5121545579c9a4dd8b3c6e0e7913e45ff7f70fbd9a7a0a09db",
-				"foes": 1,
-				"hash": "f0f43562673cf4e319463c1c030a7a0abaab2f43b3e8bc3a9607b9aa24bbed48",
+				"buttons": 43,
+				"events": "b3c18b33ca3821659e2acb8e0d08b98c376d04744e83a0e065a8cbf80551377e",
+				"foes": 3,
+				"hash": "c197cc5c67e3e2b6bd670dce3be8d17ccbee6a4a643e3d59bc0306bd95c03ca5",
 				"heartstone_health": 20,
 				"tick": 1200,
 				"towers": 3,
 				"wave": 2
 			},
 			{
-				"buttons": 32,
-				"events": "c9cee01d9876edc42b0c6530e586c072248197bfa37cd071afe1feab371a4dfb",
-				"foes": 2,
-				"hash": "830f5f557dd86af7a0ecee37e6cf0f7a7ab52450a1bceb96aa1689804d5f429d",
+				"buttons": 24,
+				"events": "d757a436ecd811affb007e3f7c3ff8054673d40852a4d5a8a2b5fc7fedf7b459",
+				"foes": 4,
+				"hash": "08c6e5f407909f6582d0a280186f708021176cbc9a5595cfc4eaa79f282c41db",
 				"heartstone_health": 20,
 				"tick": 1800,
 				"towers": 4,
 				"wave": 3
 			},
 			{
-				"buttons": 15,
-				"events": "c96799afe8cab9faf85b38c9d445443718194444f0d1362ea77b4fc9feaf8e3f",
-				"foes": 5,
-				"hash": "6582e705a2736cf56b7216e6923a94b586a37e314754ae6d0ddaafb5bb43633f",
+				"buttons": 7,
+				"events": "d45e0e31daabc70d0f4a0a76e8b51658aa4b4efcd3e3d80e835b4f962572c40c",
+				"foes": 7,
+				"hash": "7a49846295dc47f8bafabef9fda6c7a43d9d09cae7f12ab7b47151dd9d4028f7",
 				"heartstone_health": 20,
 				"tick": 2400,
 				"towers": 5,
@@ -1660,9 +1522,9 @@
 			},
 			{
 				"buttons": 19,
-				"events": "b7c5e1a852625780c14cc941c630273ba770a30473bbb55c1fecd64a54841395",
+				"events": "6842ac5ca60812b2833ee1d23ebf813bf40d4b0ee97753cc1a06e846562c0d4a",
 				"foes": 4,
-				"hash": "65cca9d9ad3ba1eff272a77af9c63ab56ce3f435a3b8601bd6bf14fccfd49a14",
+				"hash": "e0d0ea92fa22395dff7b45bdb44e544476f6db977d92159796af272c5af59efe",
 				"heartstone_health": 20,
 				"tick": 3000,
 				"towers": 5,
@@ -1670,9 +1532,9 @@
 			},
 			{
 				"buttons": 32,
-				"events": "b29f52617d15e6a4ee66466eb1a3a6116120d4802243867f58b5c028f011bea4",
+				"events": "81c86daae30a6efe39834b32229e3068e57ec68d5af3c512baa4f58317f92435",
 				"foes": 3,
-				"hash": "0e9162e93004b5635ef5ad48232ae314cb4f8e1480302f7654efe0c5b1c12fac",
+				"hash": "2aa1b65207f1008df3acee114a20a3258d36c22168c7b477cd3645a89a184c75",
 				"heartstone_health": 20,
 				"tick": 3600,
 				"towers": 5,
@@ -1680,9 +1542,9 @@
 			},
 			{
 				"buttons": 8,
-				"events": "65fa5acf534e271e4f2d1703f5e73d6d20868f2c9f387dffeea55adde1e85ca7",
+				"events": "809fa1b7c82e9d14f9c6184cc6c5127cb1cba77547dd52066ad9c5dc2626de44",
 				"foes": 1,
-				"hash": "32bb2584e46c9f474e796849eba4570c8d85a7c3abc7a7d2ad009816e457b3ae",
+				"hash": "13409fa97414eb71f29b01a244625015b3d1228313a9247838e9a1ad767ede5b",
 				"heartstone_health": 20,
 				"tick": 4200,
 				"towers": 6,
@@ -1690,9 +1552,9 @@
 			},
 			{
 				"buttons": 68,
-				"events": "a6bb635b9f1e64556f143024559e56ec5edf4f748c54136fdebc640798dbc7b8",
-				"foes": 13,
-				"hash": "687050864da925da4a5c06b329f4131b748365b533e12e7c3088341e0c38063e",
+				"events": "9e574c78e74ffdecd2f18a6ca2e41eb56304596838fbafa1f79596c811262c4a",
+				"foes": 14,
+				"hash": "8fa98372b3566a14ae26dfd5ed743e71746ebf1e3232fbdc3e3ba41ad998cb6b",
 				"heartstone_health": 20,
 				"tick": 4800,
 				"towers": 6,
@@ -1700,9 +1562,9 @@
 			},
 			{
 				"buttons": 86,
-				"events": "2b2c089843f44b6189146c1b19872bdd62731b4757989281302ad4b1b78d6c2a",
+				"events": "f3cd2a838de3a60cb7ac0c87008700d5489683c331a6e8ca503c7904c26ded67",
 				"foes": 6,
-				"hash": "a363086603e9f11258fe462e174ba0c6221a553ebb7fca14b0d725cd1093a66d",
+				"hash": "e7f5d5fa826d0e20564880f936e0d254e9b97260caaa3f26b6848a4547c77f54",
 				"heartstone_health": 20,
 				"tick": 5400,
 				"towers": 6,
@@ -1710,9 +1572,9 @@
 			},
 			{
 				"buttons": 24,
-				"events": "b34dbb85867eb37744b39693361f38ad495548890da2391c144a9892ec05338d",
+				"events": "f11b18856ddc5d0fc5ece356513660858a6aae24d75e5c78608d5a36ea0e80d6",
 				"foes": 4,
-				"hash": "21fb40e6c8d784d8d83e64c564f8b62659f7908c53057d4257456ac95cdc0b84",
+				"hash": "1add2ee366d94b1e083c5d0eae4d4af7e08402d0471ec4dedce30d525c136213",
 				"heartstone_health": 20,
 				"tick": 6000,
 				"towers": 7,
@@ -1720,69 +1582,69 @@
 			},
 			{
 				"buttons": 52,
-				"events": "05c47be4e7d537a28c0d8cf9c6013731e29e178c4ded6dfe2c205dc75ad0546c",
+				"events": "0c79cd840bf78d9fff13055da50d100a73f55662518f4a915131ab1ccdfdecc6",
 				"foes": 2,
-				"hash": "83ac3f44416ff4f068fa0073a84b76938607533986d91641cb67b5944cf3f449",
+				"hash": "88152110d32e8331e95d0958eb5cd31320adde6129e24532a1b69cd63ba388fc",
 				"heartstone_health": 20,
 				"tick": 6600,
 				"towers": 7,
 				"wave": 5
 			},
 			{
-				"buttons": 47,
-				"events": "1a06ee85fc49f31dca63eb58d2907c6054912a0f2e2af195c6bbb8580e49dd1f",
-				"foes": 9,
-				"hash": "e3ee048d225889418b0c3ea6191499fc197705a7f83e79dce063bb7df28b0365",
+				"buttons": 5,
+				"events": "dc2489fbd427a1de668ca26d9b379cff9cde756b1a42bec4e47f779debbe4ebf",
+				"foes": 8,
+				"hash": "6aeac80089da219e0ce73b1fb89a0f6ef44d5d047ae48e3a803652927d902adc",
 				"heartstone_health": 20,
 				"tick": 7200,
-				"towers": 8,
+				"towers": 9,
 				"wave": 6
 			},
 			{
 				"buttons": 25,
-				"events": "37a083912f7c475ccf7643f28c3d757fa604c8fcf6d73685ea493fca35efeeab",
+				"events": "e4b6362e5532696c9a4e0ef5dccf94acce59dd0ee9379ef734098c6e0db2a7ff",
 				"foes": 5,
-				"hash": "94de4d818df31468c64b1c34538f85a9bea15116a23958ea1853ab885afac43c",
+				"hash": "7cbe8a8badd77e434caac820b5f0674da5b6d8b98870ab84392392fadcdcc8d3",
 				"heartstone_health": 20,
 				"tick": 7800,
 				"towers": 9,
 				"wave": 6
 			},
 			{
-				"buttons": 39,
-				"events": "4ff2d7b1d75d5706fe1ca204cbb360a1ce933cf70b6ff4f33bc9030c68a7bb2b",
-				"foes": 4,
-				"hash": "22239a437a98147e46fa469597323eadd2b3f966b9f97e38f4ca14be5697f148",
+				"buttons": 53,
+				"events": "605d6b66773513ed225cdd73e03e7bc66088fdb486bd2dc3201d645b6df5c170",
+				"foes": 3,
+				"hash": "305d50f134e2523a1f765798b544363f61928521fe8533bc0a03ef00137c6f9f",
 				"heartstone_health": 20,
 				"tick": 8400,
 				"towers": 9,
 				"wave": 6
 			},
 			{
-				"buttons": 67,
-				"events": "3bfddce1c0e609df40191f79c48d05b5daffc4e04d2fba8dfa3eea371daa012d",
-				"foes": 2,
-				"hash": "a6c8f007231f2f21b30cdde9d6872e5ef49edb02e62e060db2006c81909b1c25",
+				"buttons": 81,
+				"events": "2520eb3330d136168355e5df5337d6a4d284b348aaae661457a54eff688dc764",
+				"foes": 1,
+				"hash": "7ee78d0d6e418e76d2e18c61e0ed83c2e9c18eea96adac08ce633887f2ed6837",
 				"heartstone_health": 20,
 				"tick": 9000,
 				"towers": 9,
 				"wave": 6
 			},
 			{
-				"buttons": 68,
-				"events": "26064a908df873ea6567f8cd953b154fca98b1f0aefbebc50c7b1ad35dcc582c",
-				"foes": 13,
-				"hash": "8b70d722948cf6eb582baa8035d3aa2f6737a7d871cf8de1ac484d293b71ed80",
+				"buttons": 17,
+				"events": "7d4686f62444380e126b4c21f2b99807d6a0ca7e3d1ba18ffc7285889167e8da",
+				"foes": 5,
+				"hash": "3adea348f33c4fbe264fd04c3abd886ace459dbf48aae1ea0732851319998271",
 				"heartstone_health": 20,
 				"tick": 9600,
-				"towers": 10,
+				"towers": 11,
 				"wave": 7
 			},
 			{
 				"buttons": 17,
-				"events": "fadf658846fe781028cc9f32dfa3e1995e570ef593879e479c34136cd93259ae",
+				"events": "9aad31fabac2dc59dad93334b76cac244791f74e3a60387a31da49ce079382cf",
 				"foes": 5,
-				"hash": "81e3dd74d2de65ad558684cb96913049d30ab1aed53dd8d8b85164c96c7071c7",
+				"hash": "7cb37c23ccee1b3d67296881769cd165e90af3df3002ffd0c72151b78070fc3b",
 				"heartstone_health": 20,
 				"tick": 10200,
 				"towers": 11,
@@ -1790,511 +1652,481 @@
 			},
 			{
 				"buttons": 32,
-				"events": "4ce574a8b5d31aa4144ad4b707a802a15b00f3f4e082eda7b51d5c68aee834a2",
+				"events": "731bf24a01f52b73d6aed7a310e2bc3f7d7462c43d0733f0dd6b46179b65256a",
 				"foes": 4,
-				"hash": "99570dc3f5a47e1ba95c01d9b869ab6ffeef698913ed2545f1e80af261d44565",
+				"hash": "fc4cbfcef00c02c5e5d9112cf6c8a436a6d952884f5e7f6a05230a2371133c89",
 				"heartstone_health": 20,
 				"tick": 10800,
 				"towers": 11,
 				"wave": 7
 			},
 			{
-				"buttons": 27,
-				"events": "dbc93140db0a981df44dafc3783f87f35d9a7959c5808e8cb689fd664074af2b",
-				"foes": 1,
-				"hash": "19b451aa8c21a72eef1e5da05a83a9a6a1b3ee911a94b7f1890a02c0cff72af5",
+				"buttons": 23,
+				"events": "31a913926a900d5faeb9a904cb0b98076b8a3c11e2972a94b1936723e4327e5f",
+				"foes": 11,
+				"hash": "4ffd3d4ddf236d43d60184faf554aaf9d013877b7889e2e0e9bd966e33c37075",
 				"heartstone_health": 20,
 				"tick": 11400,
 				"towers": 12,
-				"wave": 7
+				"wave": 8
 			},
 			{
-				"buttons": 48,
-				"events": "7b00dd118d23fcadde26f50646aaf5721319553270f1d252c4d04a5bfb0f4f37",
-				"foes": 6,
-				"hash": "025e47dfa99cef6e82b9e243dd6ee18662af53c534e8ea9418f4cc359695c86d",
+				"buttons": 13,
+				"events": "68d80b376604f4108710b38cbbb9920c458e62599bc056c7fb7f982e77ec7189",
+				"foes": 3,
+				"hash": "5be2c91284d9340b3aa1c0bbf5247c89d2e3b68cb763c662235b9d272043138b",
 				"heartstone_health": 20,
 				"tick": 12000,
 				"towers": 12,
 				"wave": 8
 			},
 			{
-				"buttons": 28,
-				"events": "5cd7b8295f875987cd8d9b05fa18f8f1b1c309629b3b6793953eb19d576115e3",
-				"foes": 2,
-				"hash": "ed9407fe0b9fce991c9383a0861bad9a7996c292cc2aa8b707a0b93e981be7c8",
+				"buttons": 34,
+				"events": "fe30a9207f7a5193a5cb8b86d51799e13a0751e67a705794b23ea5b5f0e1fe34",
+				"foes": 13,
+				"hash": "3cf6658ffc5c7c10d196e8a6827fba04071b621612dd6f93c424aaf54029110c",
 				"heartstone_health": 20,
 				"tick": 12600,
 				"towers": 12,
-				"wave": 8
+				"wave": 9
 			},
 			{
-				"buttons": 52,
-				"events": "e0e99631b3372952b473cbfa7750435f9deb84973b6c4a255235a007da30ce9e",
-				"foes": 16,
-				"hash": "d288ba48b1451d503f87e05158386ccaf396bec13381ff9dd271ff30da922d58",
+				"buttons": 60,
+				"events": "1043f7053a1a2bdfbc2daf81798632938f2bb690aac0b486c0bf887d9ad2fa14",
+				"foes": 5,
+				"hash": "4bda263ef3d340a78975821c26253e335ee32a32009567aa32d84cd516f21ee1",
 				"heartstone_health": 20,
 				"tick": 13200,
 				"towers": 12,
 				"wave": 9
 			},
 			{
-				"buttons": 60,
-				"events": "486ac9db90dfd2e0a8bd118e6f28a30720913ac7d635c969d3d29c013b202062",
-				"foes": 5,
-				"hash": "5568500c9df9d9348d8fe7495fa8caf93da45e6278e705b06c5f579ae3bd941c",
+				"buttons": 0,
+				"events": "279803d73bd058f8d9ff6cf5c511d2c68b0aeeb9babab2b60f2e96e8e420ce13",
+				"foes": 3,
+				"hash": "aa93bd273b934cf9f528b709455a4802ceb2c8f9f8e5bf67ba2018ecdb9999f2",
 				"heartstone_health": 20,
 				"tick": 13800,
 				"towers": 12,
 				"wave": 9
 			},
 			{
-				"buttons": 15,
-				"events": "47e387b973b14f2deb2729b725ba51d625d5bc754a1d702af0e65bf6624adb15",
-				"foes": 2,
-				"hash": "c9e478ff90aa7180ea4205c128daf3ac5166e5b5ea31a2110490e00aa8cf97ed",
+				"buttons": 83,
+				"events": "7f31df7f4f6601d791d950e92a7b2a17e60057717d05a6014ec44afe74452fdf",
+				"foes": 6,
+				"hash": "f7339e9aab2c54092ba1a34b605878897b989b2ef1542bba1a9c7022a1d3be15",
 				"heartstone_health": 20,
 				"tick": 14400,
 				"towers": 12,
-				"wave": 9
+				"wave": 10
 			},
 			{
-				"buttons": 8,
-				"events": "ef8624fb4dd4764e88b1fb61af75de6f8b0aa2c0bef20ab89f9bf610f678074a",
-				"foes": 12,
-				"hash": "6b67d1717114daceb11fd46a51b93e287365b4a4698585ab3875b3ea7b737d5c",
-				"heartstone_health": 20,
+				"buttons": 33,
+				"events": "a15f8264626b66c6c01f3775feda461d0c5575f4ee5f9fcadb12caf09d388340",
+				"foes": 5,
+				"hash": "49658848752b1fc77d433e275262564b7cc62a89db34a2b78d615eebcca4bcb9",
+				"heartstone_health": 19,
 				"tick": 15000,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 42,
-				"events": "47554ad63af98fc4b46aaaab6cc014a61fc3daa5060f09df38f74a27752ab038",
-				"foes": 5,
-				"hash": "aa1756b69ff008bc9f621595ff0f8685256d926e1960ef3012c1cd345aad3a7c",
-				"heartstone_health": 20,
+				"buttons": 65,
+				"events": "ca4b57bc311ebf8c7af2b5243fc0c1f214d0f1e7f92d39ee1b3316b82f05a6fa",
+				"foes": 3,
+				"hash": "97a27135745a66e17fbb6882a315ed32db88c55e4fab3aed3723ed3c5517fe50",
+				"heartstone_health": 19,
 				"tick": 15600,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 74,
-				"events": "12403c94e8b0ee04b15eac4547f014e0ee911ead2d81e75a60c41a3b3dad6265",
-				"foes": 3,
-				"hash": "876ede3989304201e3a03efccf93b1e6185d1506c74220305c7cf2555955812f",
-				"heartstone_health": 20,
+				"buttons": 7,
+				"events": "642a62bdf6c7ccae5a6724c3f937069adc10d96fc1628a6c17d733b6bb5bdc3d",
+				"foes": 1,
+				"hash": "64f580229077f4059100570a1f433ab1b64f1ea6cf9c5f65013a4b674620b908",
+				"heartstone_health": 19,
 				"tick": 16200,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 16,
-				"events": "294589d7dfebed2c3071566738832ce21c688cd6c5051edf1b5c7353928c0db8",
+				"buttons": 7,
+				"events": "160ed001e176a576113c6991c358bbd918a9586f771f67b902e6657d778c9250",
 				"foes": 1,
-				"hash": "32d05ae46a817ae4dea3780a4ab7e20d6440861cdd674b4b19a9a8629ed1d34e",
-				"heartstone_health": 20,
+				"hash": "00eba71f7650dc84a2a5229060f8b62f7d5289d5445b64aa98d1b4b84cd3743f",
+				"heartstone_health": 19,
 				"tick": 16800,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 16,
-				"events": "35bcfc5ae39b1531f71ea4053a463852f83300034636346ee3c97c5a646fb097",
+				"buttons": 7,
+				"events": "7c496e98f66a9ecf8b7556a59012192408142b10e72a3464f0ecfc8246511683",
 				"foes": 1,
-				"hash": "c60d02d25ae608ad54803ada79923fb314f59da651dba5eb5bdd5ae20776c135",
-				"heartstone_health": 20,
+				"hash": "b92af8028ff915ccada67004ac2b4a1a8f37c3a6332280ef58d2ddaa6e540e7a",
+				"heartstone_health": 19,
 				"tick": 17400,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 16,
-				"events": "d9c3dde107458f82a660298771a4b20fcd2853daec25bb2591e0bd73c26f8b3f",
-				"foes": 1,
-				"hash": "611ff1ad79343ea6099fbdc56b4ed0226201c9f013a704209264c72609033221",
-				"heartstone_health": 20,
+				"buttons": 52,
+				"events": "ffba105a4a5160781c9c2c2f9b82a7dccfc9e157e1195f1820d04250f35b191d",
+				"foes": 4,
+				"hash": "7c3788360e8d4b16ef8458f574f0044bca3f9bb7492814e81856aa9802fa33bb",
+				"heartstone_health": 19,
 				"tick": 18000,
 				"towers": 12,
 				"wave": 10
 			},
 			{
-				"buttons": 61,
-				"events": "c6717fe9785f3aa59f65e1edcd2ec6c67e2a919b486b4aa3c2387c1abdb69134",
-				"foes": 4,
-				"hash": "6b8ad9f0ec9f10189e4f9ff0ad033e8f483ba47df1a77bbeade17a6ae1b4d9c3",
-				"heartstone_health": 20,
+				"buttons": 13,
+				"events": "760880d18418d6de035bab7e1e07e2560311eb7f06a264467550f7af838f9293",
+				"foes": 14,
+				"hash": "35c2c31fa7d47dcb79a78821320de9498bee26e5a0b8b4bff6d32e53b8f8fb84",
+				"heartstone_health": 17,
 				"tick": 18600,
 				"towers": 12,
-				"wave": 10
+				"wave": 11
 			},
 			{
-				"buttons": 12,
-				"events": "1c552a4179991718e0ef1747cb733b93ce5f7fb600dd3c62344e0ae70a540bab",
-				"foes": 14,
-				"hash": "acf829a4b8ba1b3fa4351799b5332a7974184741f73fe3d885b3efba1637f2e8",
-				"heartstone_health": 16,
+				"buttons": 78,
+				"events": "583979f37d60d5a2e3e7ba34d85a370ea69b136f5ade0183f5de6c5d1ab7eb90",
+				"foes": 4,
+				"hash": "0f187aa11afd73830fbea3ff2984714f44da55135fcc7398d28a903b09a190f1",
+				"heartstone_health": 17,
 				"tick": 19200,
 				"towers": 12,
 				"wave": 11
 			},
 			{
-				"buttons": 77,
-				"events": "6e13eab6889253774eb76c42f039c6cf8fc9abfe412cf8f93983db59cacf3265",
-				"foes": 4,
-				"hash": "bd3a3c4d493b97c88b6ee07e864b30ff05fa29e5f9149c7dcdfae7c7eb58df89",
-				"heartstone_health": 16,
+				"buttons": 16,
+				"events": "3fe006dba66c3df869958d923d568f41f08137a3536373cdd4bd6d15ed5bed38",
+				"foes": 1,
+				"hash": "294372e62911fbb2e2b05eba0a6feeb4de263ede55675adcec2413c947fa43fe",
+				"heartstone_health": 17,
 				"tick": 19800,
 				"towers": 12,
 				"wave": 11
 			},
 			{
-				"buttons": 15,
-				"events": "4f1989d2f6d76463ef5c41fe62b836ffd5ed832a497cdd01b6e2426b40ce6997",
-				"foes": 1,
-				"hash": "17425edcc56b22c93f0190a60130e62f11fe81daf13305b9b16eb94faaca885a",
-				"heartstone_health": 16,
+				"buttons": 58,
+				"events": "8262ffcf201b9e2de5d7d5b68ac6bda75b5c4bc993e2ac45cb61694ff6ad7a99",
+				"foes": 17,
+				"hash": "c639b48903691d95f60c2a18e533889e35740d641111b35737aefa8e495bda9b",
+				"heartstone_health": 17,
 				"tick": 20400,
 				"towers": 12,
-				"wave": 11
+				"wave": 12
 			},
 			{
-				"buttons": 107,
-				"events": "e98c5acda4aabe3931c20581c95e43e21757b2fd5b45e011b136e6bc98e2c6e4",
-				"foes": 12,
-				"hash": "afc8676602ea381dc5e215f8e72c19cb84bce2c492e07b149e9b78212a714395",
-				"heartstone_health": 16,
+				"buttons": 14,
+				"events": "df60f4617b1c88b013412b363678913525fc87c3d5f27f6f2b7105f44102cc14",
+				"foes": 7,
+				"hash": "3e798d27e1f558610efcb126acdfa8db9ae0768f706aac41a63c504115cca526",
+				"heartstone_health": 17,
 				"tick": 21000,
 				"towers": 12,
 				"wave": 12
 			},
 			{
-				"buttons": 13,
-				"events": "f7741526f8637b458fd332224494269a2940b95eef45ce2d65989fbde3b5fd24",
-				"foes": 7,
-				"hash": "83f31447aab37b59a6431dc59ef11421d1cc1867f3f2e0569ed7f463104d3e2b",
-				"heartstone_health": 16,
+				"buttons": 62,
+				"events": "86d4ef7b51f6b5f2ab61ea0aa27d967a2e71734f8e96d33c751e661cb63c3045",
+				"foes": 1,
+				"hash": "740e52447bda90b8e370db89ebe63958b1400dede6c71f2cde421499c6683985",
+				"heartstone_health": 17,
 				"tick": 21600,
 				"towers": 12,
-				"wave": 12
+				"wave": 13
 			},
 			{
-				"buttons": 81,
-				"events": "cf0cbf30edf73181b7b2828ab15c840970287a616acb8b763bea22f893da4650",
-				"foes": 3,
-				"hash": "640fb773349acd4641aee512f7845df58007391fc6916c2a1887843e4773c3fa",
-				"heartstone_health": 16,
+				"buttons": 49,
+				"events": "f88c6e75760ff334d0196214a60c2722f0c322427425289aedca165319a41a44",
+				"foes": 11,
+				"hash": "756097bade695410f6d562303bbef6f9151a9b8d3be81d0c9cc2a82c7b752671",
+				"heartstone_health": 17,
 				"tick": 22200,
 				"towers": 12,
-				"wave": 12
+				"wave": 13
 			},
 			{
-				"buttons": 117,
-				"events": "a330de070e8b47a36c1295115560accf72bb7cf9f34e3bc8af6a8da8061ff759",
-				"foes": 26,
-				"hash": "be3620d2329f28fcf3beba0173d541ea5e87d79b23cdc63e6946c5be6a932597",
-				"heartstone_health": 16,
+				"buttons": 83,
+				"events": "66a6f80ef955d4cb3cb4916ddcf5db0d0c0e1e7e8272da57b8b0cf89acc79da7",
+				"foes": 9,
+				"hash": "b9f53b2da2471ca1850714e0885aa6adcb90e36154cedcc496fa559c130d5875",
+				"heartstone_health": 17,
 				"tick": 22800,
 				"towers": 12,
 				"wave": 13
 			},
 			{
-				"buttons": 65,
-				"events": "215c33f087a0f2c3d409ddfa49a9f184d968aeeafbd32fb07cd2e118c36711d0",
-				"foes": 10,
-				"hash": "99fbc4c611b94d5e07015bb7e60224ce45d34b4299736f84535aae2924de52e5",
-				"heartstone_health": 16,
+				"buttons": 117,
+				"events": "713685d8084fe2d0cb0a5aa3b729ccff2056c1aedfd9a339b9550573ae15365a",
+				"foes": 3,
+				"hash": "c16de184b75baa5ae79fd6af3fa54d95bea61ce71fb3eb78267361672053d609",
+				"heartstone_health": 17,
 				"tick": 23400,
 				"towers": 12,
-				"wave": 13
+				"wave": 14
 			},
 			{
-				"buttons": 150,
-				"events": "421792a10bc95dd43ef4cb786528dab9fe4b54650fdad2508676dc0429402dc6",
-				"foes": 5,
-				"hash": "9136f50f24b0372ac3e625447274029ca1eeedeae85f1591520bfb0d922eeb96",
-				"heartstone_health": 16,
+				"buttons": 100,
+				"events": "b2854876e47583c7f8a7f67c29cabfdf25f064e00d04295219ad4c09ac64937c",
+				"foes": 15,
+				"hash": "b9d303844c18f3ee9348fdea62fcc1fae65d1ce55c7fad4316b2dae620a111f9",
+				"heartstone_health": 17,
 				"tick": 24000,
 				"towers": 12,
-				"wave": 13
+				"wave": 14
 			},
 			{
-				"buttons": 156,
-				"events": "4e0a3bc6ac1db10d1c75a8240a0f7a49dee39bbab571c954fce62351a51d1921",
-				"foes": 17,
-				"hash": "ba46d2c2ef508ea03bd4bd4c26309b7b2117fe58e461da3a6f069218982acd90",
-				"heartstone_health": 16,
+				"buttons": 21,
+				"events": "5fbcf196a87f95ef5de4cd91c67edda2ad22c9a45de03bec778ed1c3534122cc",
+				"foes": 4,
+				"hash": "444ff990e8da0191b66ceac88cf9054b202081c17f2bc42ffe39a08209ba9262",
+				"heartstone_health": 17,
 				"tick": 24600,
 				"towers": 12,
 				"wave": 14
 			},
 			{
-				"buttons": 144,
-				"events": "c61f06d69528fe114e6b192a1ed816f201e20caab1e50e3859b581bfde7a48a5",
-				"foes": 6,
-				"hash": "0aa2b0f2c5d5467adcdac43fe1cd735a08389385629f4dcd68e1ee7aed34600c",
-				"heartstone_health": 16,
+				"buttons": 32,
+				"events": "30cb6740ba656ba6344d1bfbbeffed27685006f92b5d5ca7e7024a86fa08237b",
+				"foes": 35,
+				"hash": "c47f2b96b182b6dbdfdde036327fb2b8e352721a60185ee73d5b0c9286d929c7",
+				"heartstone_health": 17,
 				"tick": 25200,
 				"towers": 12,
-				"wave": 14
+				"wave": 15
 			},
 			{
-				"buttons": 135,
-				"events": "5117add40b93e1b22b7b2b3b4ca06dd7148fb625ba61da7c34974cc324bf2002",
-				"foes": 12,
-				"hash": "7ff0510e6efc7062205a9e834fae940b60e18ae6896546861331cc7f8df5fc86",
-				"heartstone_health": 16,
+				"buttons": 139,
+				"events": "a40d554a41932b63891b738cf665e92a59d0dda0151f963f21177cf2e70dfb9f",
+				"foes": 24,
+				"hash": "df6f50d8af4d05a79e0aa6bdb5901a1e3be5b1a175d06bd6c4cf9c74ebdffdf2",
+				"heartstone_health": 17,
 				"tick": 25800,
 				"towers": 12,
 				"wave": 15
 			},
 			{
-				"buttons": 83,
-				"events": "6f84ddd5d2ac82c25a2c944e202ef9e7edabbd74016801c4c8f465b11cb3601c",
-				"foes": 40,
-				"hash": "df9a0d8a26646cc4522f94a48cba9e0ef2a16416f801dcdd3509cee2dddada6e",
-				"heartstone_health": 16,
+				"buttons": 135,
+				"events": "1b16aa51eff9a50e32961533f4f6059a7301fc4f75e556c152f276acd19939ce",
+				"foes": 12,
+				"hash": "39f87e7fbc6a2354febfdee96bca117779c5a7661173f360446972b4d5858c17",
+				"heartstone_health": 17,
 				"tick": 26400,
 				"towers": 12,
 				"wave": 15
 			},
 			{
-				"buttons": 150,
-				"events": "f3e65322b382b2095392f6224d4056eeb6f17fec071e01f689563c05eb65bfc3",
-				"foes": 20,
-				"hash": "e015f26d35be256467a25e285402beb4b80378524013dae8d33004ec8390a886",
-				"heartstone_health": 16,
+				"buttons": 119,
+				"events": "0cd83e8c1d405bbc768e5739832e3488573138716616daa1c618087e618a4f60",
+				"foes": 4,
+				"hash": "41fd26b451099f370103ccc662a939ef895a9828f0f0bce61624cdb923d0ed6c",
+				"heartstone_health": 17,
 				"tick": 27000,
 				"towers": 12,
 				"wave": 15
 			},
 			{
-				"buttons": 152,
-				"events": "973463914637650949347d8d86c700ce6dee440f0d4b1cc9101766cfb43c91c1",
-				"foes": 11,
-				"hash": "0be3bf4364c917fccb8d3ec43357eae3d16ba22d3f6ff0b093a6b137ce9a4634",
-				"heartstone_health": 16,
+				"buttons": 242,
+				"events": "07092df46f80f530981b9e2989886506c97a60af3ce133b6f3148356eab2745d",
+				"foes": 17,
+				"hash": "86d0122d9a92c9e69943519d722032092e3e0be371c2a796770035ee385e035c",
+				"heartstone_health": 17,
 				"tick": 27600,
 				"towers": 12,
-				"wave": 15
+				"wave": 16
 			},
 			{
-				"buttons": 154,
-				"events": "db54d0d5499c42b4baa92480673a15c0a78d029b44ea2a8dc31107d46bd34fc6",
-				"foes": 2,
-				"hash": "a4ac7660818ce6737ab35e65d42a0d0521203adcc385d9a39ddb1916beba8aae",
-				"heartstone_health": 16,
+				"buttons": 320,
+				"events": "984a10e7cfae9ee49ca0e7790fdb106c8ea53528adfcfd6d63e9ee8c364ae89b",
+				"foes": 9,
+				"hash": "6aa533cef636a24d5d63d5c6c44d93c35bc53717fb35fba396aaeab8342473f5",
+				"heartstone_health": 17,
 				"tick": 28200,
 				"towers": 12,
-				"wave": 15
+				"wave": 16
 			},
 			{
-				"buttons": 275,
-				"events": "d201ff1da44a55e3a3cf5c582b98333f11f242ac38c0c0f0b6081241b6a24a11",
-				"foes": 12,
-				"hash": "7bd95fcdfd5e9b6cf1cf77a61f054f1c64e436adf90d6d934ea0c0ce672abd85",
-				"heartstone_health": 16,
+				"buttons": 472,
+				"events": "a30c5fbbae4ffe18bbf91b1fc3832c15046e641394380b3192fa1a5b907d8d6e",
+				"foes": 1,
+				"hash": "4d00a06ba55d0f681e1e6f8bcb2a30bba3e7c6266358c28dfecbb42474a669db",
+				"heartstone_health": 17,
 				"tick": 28800,
 				"towers": 12,
 				"wave": 16
 			},
 			{
-				"buttons": 319,
-				"events": "6ca0d664d8ff739a29e68a6dee5bb817870d1ceba555f2e470c7a7cb9ac3fcad",
-				"foes": 9,
-				"hash": "200949b7a0d2e6d21b171137463353cdcbb8298ab6fbc9581ac441c7fd19b508",
+				"buttons": 715,
+				"events": "85328321211b4059abe8c310ae45f07342b5ec26db32a5f369fa65247e72271e",
+				"foes": 18,
+				"hash": "95a32a8b886eca51f2a4c2a7ecd8280b00e4e6945707053b465d0b63fc8d63e1",
 				"heartstone_health": 16,
 				"tick": 29400,
 				"towers": 12,
-				"wave": 16
+				"wave": 17
 			},
 			{
-				"buttons": 471,
-				"events": "a172c9d18e662b81f0471e234d40bf1e2ae7eec5ca972bb6cca4ac5125ae8a1c",
-				"foes": 1,
-				"hash": "c5ab4678602a65f4e640b521fcca7bb8ccbaaab81ab62e3e2df5091736a20d4f",
+				"buttons": 812,
+				"events": "94e720d3633c9d092c401fb6ee9d73583e13811d13ca9e73dca4a9a9b770461d",
+				"foes": 9,
+				"hash": "56d2d132502fd0ac2275a5fe127237536c53788c406e3fafccc6506220a05139",
 				"heartstone_health": 16,
 				"tick": 30000,
 				"towers": 12,
-				"wave": 16
+				"wave": 17
 			},
 			{
-				"buttons": 635,
-				"events": "1f63e1f34a881952404a3f57bbd82c11cd2542784519249c1afd14a322226fa1",
-				"foes": 30,
-				"hash": "054a56c390e96e9e35ff708f473ec5b440588eb2d829e175c4bb7ccb86f8ad17",
+				"buttons": 1038,
+				"events": "977913283b95890df3f34dcbd0f0924e85275540c5a270abd651b2186bcb55b6",
+				"foes": 9,
+				"hash": "ce18e2502f19ba4863fdf5cbdab1a915a1067038d98b74aa54e612250e8cfd39",
 				"heartstone_health": 16,
 				"tick": 30600,
 				"towers": 12,
-				"wave": 17
+				"wave": 18
 			},
 			{
-				"buttons": 773,
-				"events": "165e6f9ee964564e3a062669142378301d347d97b94519e87e41479a1f49a840",
-				"foes": 11,
-				"hash": "7059bf6ee5043992b271fb752356081baf00d4de6909e63b29d0cbcae044549c",
-				"heartstone_health": 15,
+				"buttons": 1229,
+				"events": "83cb8a8f9ec4a27e92f59d8b5682532de6a449fcf596b3cf32ee463ac83e7f82",
+				"foes": 19,
+				"hash": "a214587a3664af77f29434daaf6ad6209e4367572faca4552ff55daad39641ae",
+				"heartstone_health": 16,
 				"tick": 31200,
 				"towers": 12,
-				"wave": 17
+				"wave": 18
 			},
 			{
-				"buttons": 906,
-				"events": "f1856147969fb0642ca9d4b0fb122c75aa83d52cc8758513b2eaaccbb4ae725a",
-				"foes": 4,
-				"hash": "843d1af6b7bb4c3d2bdab2973a5159eb2164f691802543b894371008bc5c1cbe",
-				"heartstone_health": 15,
+				"buttons": 1310,
+				"events": "4bc3ad3ae3400f3f22f010bcd6d0bda5486e838c550a546a16533652962f7b6b",
+				"foes": 11,
+				"hash": "d286ea1392d495bda91c7c4b4b29cb53ac4f506fa32754e66af758c4bb2978e8",
+				"heartstone_health": 16,
 				"tick": 31800,
 				"towers": 12,
-				"wave": 17
+				"wave": 18
 			},
 			{
-				"buttons": 1093,
-				"events": "19e6fecaf891ec9750978835aebdedbc6063cc8eb78e52a8d2c24262d0734982",
-				"foes": 16,
-				"hash": "323ce505ce29f9dd4325aebe1a27883e89fb56cb671eedf2d6dd3c58ed47dc17",
-				"heartstone_health": 15,
+				"buttons": 1390,
+				"events": "244836755d6959d8e4e206b80d94966043b01ea2b9db52bd899d62605f78ef69",
+				"foes": 7,
+				"hash": "d19c6922514a89b654a4db1b5cde94cd451109610836f328c710e5e9647e56ef",
+				"heartstone_health": 16,
 				"tick": 32400,
 				"towers": 12,
 				"wave": 18
 			},
 			{
-				"buttons": 1269,
-				"events": "6cc1043fa10fdb6384260acce8a24f410f8b4302810692bad35b9d12fffeac9c",
-				"foes": 13,
-				"hash": "4e08c704e47a50026b530fbc0c2a4aa0c09b33a4456d9c14c1c4e15b045790ff",
-				"heartstone_health": 15,
+				"buttons": 1593,
+				"events": "9be2e29917972d3301e64c43269928bc43d76dc19a7030490e67679e08390363",
+				"foes": 17,
+				"hash": "7c3dd2a7afd0451ed4303303b8fce6a53917385921cef725e76d259de425ee0d",
+				"heartstone_health": 16,
 				"tick": 33000,
 				"towers": 12,
-				"wave": 18
+				"wave": 19
 			},
 			{
-				"buttons": 1329,
-				"events": "a5f5b80b3af024409a2d53f895925c8d2d7a69bbf473d4fbd64ec87f0090cce1",
-				"foes": 10,
-				"hash": "8fb98f7ae8ad1dc7cdf9eb60c3324cf606cb31417989284084d5cbd2063da33b",
+				"buttons": 1755,
+				"events": "b2504ddfefea9fbefd924d497897d81063ca1b5affa9ec36dc25a39d130da020",
+				"foes": 23,
+				"hash": "f0d802119eb47c9eeb3063af3b91aaf5b7d20f608a7034175a7a0eb7371aafe5",
 				"heartstone_health": 15,
 				"tick": 33600,
 				"towers": 12,
-				"wave": 18
+				"wave": 19
 			},
 			{
-				"buttons": 1429,
-				"events": "a16110d8d2834d0c9c6f9af0130514345c4aaddcb59279fdf4a9b460b5c8f888",
-				"foes": 5,
-				"hash": "dc8754014dc888422a2c9458ec58b19d7d35bce51352a6128e368f2fc78659f1",
-				"heartstone_health": 15,
+				"buttons": 1807,
+				"events": "f17116b89fd8214cf17bc22afa30bfb976e81d212b19e6e718878640debdef0e",
+				"foes": 18,
+				"hash": "7d1de7960a1100d79592d45fd96ecfa693c4334921ff3bbc2bbe4a0547fd6cce",
+				"heartstone_health": 14,
 				"tick": 34200,
 				"towers": 12,
-				"wave": 18
+				"wave": 19
 			},
 			{
-				"buttons": 1609,
-				"events": "42c21fe6b120e52d103555022fd56ba9e82e70ea43bedf1cbca5d8c5ba8be727",
-				"foes": 26,
-				"hash": "6373aa847bdaa3a03344e8fa829721307250487463af29ebd948b87d86900ffc",
-				"heartstone_health": 15,
+				"buttons": 1947,
+				"events": "dddd38094093e4b16ed8570c0bae4df4b10c726c2c6e0437776d83e4782b2155",
+				"foes": 11,
+				"hash": "6777c666f68e530780f1ff7d317a4ddb9d799571184fa36a7db0c51ed7c0fc38",
+				"heartstone_health": 14,
 				"tick": 34800,
 				"towers": 12,
 				"wave": 19
 			},
 			{
-				"buttons": 1777,
-				"events": "bcdba7028f47969452468976d525645495eca721e48809d51da3119036ce256c",
-				"foes": 20,
-				"hash": "cd88872acca90f44f44cd871e0a49ca25b951d14c8c5ce358fd5d2981ca09a3c",
+				"buttons": 2226,
+				"events": "dd3a094ba89ab233d99a8fe5135d9c7c4de73be85c5df861f6f7a95d2deaf8ff",
+				"foes": 24,
+				"hash": "715b1c5ca5ed0ccc752cd37728ff10a2c1fd363d7580f9948677ad4c043e2978",
 				"heartstone_health": 14,
 				"tick": 35400,
 				"towers": 12,
-				"wave": 19
+				"wave": 20
 			},
 			{
-				"buttons": 1817,
-				"events": "947c41a69cdbdec0660fb4efacb791c25292f0ac6b00aa280aa228ca3172386f",
-				"foes": 18,
-				"hash": "841678290ce5dde8e2a08dc77512d2ef27bd54769816902432a77e87b649de35",
-				"heartstone_health": 14,
+				"buttons": 2410,
+				"events": "d48da37b4b08dde1bc1551b833ab253f6bd89bbfb6f51d6ac1e8ee978e27da86",
+				"foes": 22,
+				"hash": "526a6b8025349cdbed4dafa31c18ea63fd46d82cc1e8a50ac806643f2759540b",
+				"heartstone_health": 11,
 				"tick": 36000,
 				"towers": 12,
-				"wave": 19
+				"wave": 20
 			},
 			{
-				"buttons": 1957,
-				"events": "db7b8e1af2732eadec92ac70e97611c0481bed69e1b75b175db7c81f08e1bc9a",
-				"foes": 11,
-				"hash": "e665d051784b0a59e014c49d1fb5c417467893ad6a3167fbfc89119b052b3e83",
-				"heartstone_health": 14,
+				"buttons": 2449,
+				"events": "12175abee8061df9748fbca3e49fe8ec7956435352d9104117d767a1a960288f",
+				"foes": 18,
+				"hash": "ad8b4d8da23bfe7ced8940f0bb3799a087e7612c477c3068d2b528181a959769",
+				"heartstone_health": 11,
 				"tick": 36600,
 				"towers": 12,
-				"wave": 19
+				"wave": 20
 			},
 			{
-				"buttons": 2230,
-				"events": "7503f64280b0bbb06663e628eb5d4889cf1f26ea25877467b5cfc4ed21dcbd3c",
-				"foes": 1,
-				"hash": "a5eedc8830c1b9f250f8a496a846b3e3ded534a6b33c9cf96b2826b452187a80",
-				"heartstone_health": 14,
+				"buttons": 2701,
+				"events": "cf1f3a2d825a65267abaf7a759c36f06ab029807b17ac63e93777682a3583c54",
+				"foes": 6,
+				"hash": "b39c81938ff323b50c876b8ff7caccbc3ee0e26aba96b97284d327befda02ee1",
+				"heartstone_health": 11,
 				"tick": 37200,
 				"towers": 12,
 				"wave": 20
 			},
 			{
-				"buttons": 2357,
-				"events": "6733913e21157eb848ddae0816c24f70ac20791ef693f92e35af4143d60efdae",
-				"foes": 31,
-				"hash": "2c88f10f3b8d7542ad594fef5cc6cb3e953649e03dc567b58191d4d8b983b72d",
-				"heartstone_health": 12,
+				"buttons": 2806,
+				"events": "8b300a727f6d0c263ffc78459663f0614171c1e45f89ea6d5590ca87ac45b4de",
+				"foes": 1,
+				"hash": "50cf5fb96addf57fad10ba5ab46e1eb29d26116e0e4430482761aa5e9a7f8011",
+				"heartstone_health": 11,
 				"tick": 37800,
 				"towers": 12,
 				"wave": 20
 			},
 			{
-				"buttons": 2438,
-				"events": "824f7dd004a9a6dc682226736e9907b2cfd2ae76d428c78b293b7bf2e553f198",
-				"foes": 19,
-				"hash": "07493e73883395e92084723bc1e3404469bf145ed295e66e0712f7bad2b9d07d",
+				"buttons": 2806,
+				"events": "126a14ff9434a3464080905ecc1768048bd9b529d30f8a82486759189c9183af",
+				"foes": 1,
+				"hash": "4a65749ffcd3dd155cf1e6212483ff1aca97632ee7af0f4b78b2d9c3deeb40aa",
 				"heartstone_health": 11,
 				"tick": 38400,
 				"towers": 12,
 				"wave": 20
 			},
 			{
-				"buttons": 2627,
-				"events": "dbf77fd6a7a152cdb38884453cd4ae8bc1ded935462ec873e93777a7097eb030",
-				"foes": 10,
-				"hash": "0c110cbfc5cea6131889902edb84af321f1e50af4f30825427f00891fbaeb75c",
+				"buttons": 2806,
+				"events": "79c439143227be80cf7faec58854b4eb48ea0fe47d462cee9b84e9b28422f803",
+				"foes": 1,
+				"hash": "af29b3b099560163767c946aa890c302a7e62a257dcc4a9711c22a5972284af6",
 				"heartstone_health": 11,
 				"tick": 39000,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2816,
-				"events": "7648d82777e707a3c9ca0e48c80342c6acfbf5cc9f506945496e2c3bea6a66dc",
-				"foes": 1,
-				"hash": "a2d4dafd7976d55b9785989d16804bc38fd8e4e5a4e2e81acd26d99c03f75676",
-				"heartstone_health": 11,
-				"tick": 39600,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2816,
-				"events": "778ee7435c969b09c4487c54b272402d47527c367d3649b1f4c35d3eb2329cab",
-				"foes": 1,
-				"hash": "fc9413de5790d40ad30a0c0d74f7691e067596615dac2cd9617324653b963911",
-				"heartstone_health": 11,
-				"tick": 40200,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2816,
-				"events": "b621c87027982c6a189e7acc6bec90573441047ca504be8b87fad487e57d09e5",
-				"foes": 1,
-				"hash": "2c44ad42af2d4fc7d52c527d73629acad6fda9cdfa7828cb33a91f53d2a03258",
-				"heartstone_health": 11,
-				"tick": 40800,
 				"towers": 12,
 				"wave": 20
 			}
@@ -2330,268 +2162,268 @@
 				"launch_wave"
 			],
 			[
-				1273,
+				1325,
 				"launch_wave"
 			],
 			[
-				1562,
+				1614,
 				"build",
 				"thimbleMortar",
 				11,
 				4
 			],
 			[
-				1902,
+				1954,
 				"launch_wave"
 			],
 			[
-				2317,
+				2379,
 				"build",
 				"thimbleMortar",
 				3,
 				7
 			],
 			[
-				4147,
+				4146,
 				"build",
 				"spoolGuard",
 				8,
 				7
 			],
 			[
-				4238,
+				4203,
 				"launch_wave"
 			],
 			[
-				5647,
+				5662,
 				"build",
 				"thimbleMortar",
 				8,
 				0
 			],
 			[
-				6903,
+				6834,
 				"build",
 				"thimbleMortar",
 				0,
 				3
 			],
 			[
-				6903,
+				6834,
 				"launch_wave"
 			],
 			[
-				7253,
+				7178,
 				"build",
 				"spoolGuard",
 				14,
 				5
 			],
 			[
-				9236,
+				9050,
 				"build",
 				"thimbleMortar",
 				0,
 				6
 			],
 			[
-				9236,
+				9050,
 				"launch_wave"
 			],
 			[
-				9767,
+				9531,
 				"build",
 				"thimbleMortar",
 				11,
 				0
 			],
 			[
-				11239,
+				11031,
 				"build",
 				"spoolGuard",
 				14,
 				8
 			],
 			[
-				11424,
+				11056,
 				"upgrade",
 				12
 			],
 			[
-				11424,
+				11056,
 				"launch_wave"
 			],
 			[
-				11755,
+				11312,
 				"upgrade",
 				57
 			],
 			[
-				12364,
+				11987,
 				"upgrade",
 				105
 			],
 			[
-				12876,
+				12408,
 				"upgrade",
 				132
 			],
 			[
-				12876,
+				12408,
 				"launch_wave"
 			],
 			[
-				13352,
+				12965,
 				"upgrade",
 				0
 			],
 			[
-				14082,
+				13643,
 				"upgrade",
 				1
 			],
 			[
-				14734,
+				14196,
 				"launch_wave"
 			],
 			[
-				14967,
+				14429,
 				"upgrade",
 				37
 			],
 			[
-				15362,
+				14830,
 				"upgrade",
 				56
 			],
 			[
-				16326,
+				15763,
 				"upgrade",
 				85
 			],
 			[
-				18546,
+				17986,
 				"upgrade",
 				86
 			],
 			[
-				18648,
+				18094,
 				"upgrade",
 				108
 			],
 			[
-				18648,
+				18094,
 				"launch_wave"
 			],
 			[
-				19107,
+				18524,
 				"upgrade",
 				131
 			],
 			[
-				20370,
+				19454,
 				"upgrade",
 				12
 			],
 			[
-				20734,
+				19892,
 				"launch_wave"
 			],
 			[
-				21028,
+				20179,
 				"upgrade",
 				57
 			],
 			[
-				21561,
+				20739,
 				"upgrade",
 				105
 			],
 			[
-				22376,
+				21540,
 				"upgrade",
 				132
 			],
 			[
-				22402,
+				21574,
 				"launch_wave"
 			],
 			[
-				22923,
+				22061,
 				"upgrade",
 				0
 			],
 			[
-				24190,
+				23236,
 				"upgrade",
 				1
 			],
 			[
-				24285,
+				23362,
 				"launch_wave"
 			],
 			[
-				24609,
+				23698,
 				"upgrade",
 				37
 			],
 			[
-				25274,
+				24355,
 				"upgrade",
 				56
 			],
 			[
-				25747,
+				24784,
 				"launch_wave"
 			],
 			[
-				26033,
+				25058,
 				"upgrade",
 				85
 			],
 			[
-				27015,
+				26019,
 				"upgrade",
 				86
 			],
 			[
-				27607,
+				26549,
 				"upgrade",
 				108
 			],
 			[
-				28207,
+				27173,
 				"upgrade",
 				131
 			],
 			[
-				28285,
+				27226,
 				"launch_wave"
 			],
 			[
-				30154,
+				28848,
 				"launch_wave"
 			],
 			[
-				32073,
+				30514,
 				"launch_wave"
 			],
 			[
-				34466,
+				32797,
 				"launch_wave"
 			],
 			[
-				37187,
+				35218,
 				"launch_wave"
 			]
 		],
 		"final": {
-			"buttons": 2871,
-			"events": "bee18f023054741017ab281b2127d5b34fac6b5f2cc1a642b753e23e7d7645cf",
+			"buttons": 2861,
+			"events": "311a1bcba777be8e0f01ce94788ea1d25d0569f433575066e0add24d87ce8cd7",
 			"foes": 0,
-			"hash": "ede851b595b91123c21f6d5e1c3a944aabf1136b7d74e51cf046a7994926161e",
+			"hash": "6a8e2de7ec808e02f95d38e663875c6b4948cc764bb0e706a143526799495347",
 			"heartstone_health": 5,
-			"tick": 41164,
+			"tick": 39195,
 			"towers": 12,
 			"wave": 20
 		},
@@ -2599,7 +2431,7 @@
 		"outcome": "won",
 		"profile": "mortarHeavy",
 		"seed": 4,
-		"ticks": 41164
+		"ticks": 39195
 	},
 	{
 		"checkpoints": [
@@ -2614,40 +2446,40 @@
 				"wave": 0
 			},
 			{
-				"buttons": 97,
-				"events": "9a9e22b6db0d5c6358558365605ae3fa677363bf17e615c8029abd25f1186fc7",
-				"foes": 2,
-				"hash": "a2df18fc47ac94c33edd258a8de35dc7adb5a861655ab095bc8f1bcd05fd3d40",
+				"buttons": 76,
+				"events": "b0b5d89bca7c5b541d43ae446fdcf53491092f27428568a2fbfff0df7cba2c60",
+				"foes": 1,
+				"hash": "8ae421752ee5b0397e83600e80a49cbe9850e0fcb5da65aeaca7ff28279eb3bb",
 				"heartstone_health": 20,
 				"tick": 600,
 				"towers": 2,
-				"wave": 2
+				"wave": 1
 			},
 			{
-				"buttons": 25,
-				"events": "9360142b762c13cb90612d9466e7bfeb320c7d89bec53562b9bba70f35bb1f8d",
-				"foes": 5,
-				"hash": "6adbc711d06010365266679c458e01348fa7dd6bb361d9ae1dcc0675ab807fbc",
+				"buttons": 21,
+				"events": "20f6dcfd0be59bee914bf769ee1eb2048e642a5b779441a4ae5ff97657799ca7",
+				"foes": 6,
+				"hash": "2b272878c3c73025b6cdfae1d0b0c621c5a7a64fab66d15c137b9c653090394b",
 				"heartstone_health": 20,
 				"tick": 1200,
 				"towers": 3,
 				"wave": 2
 			},
 			{
-				"buttons": 0,
-				"events": "ec0e22a62f19afa204b4ba209be5149a8065f1c1e22daedbbce4a29ff5e46bbb",
-				"foes": 5,
-				"hash": "5f1804152cb9c333c70e544b803558dfc2bf8fdff4c1f22a5cfcb25520a05f97",
+				"buttons": 22,
+				"events": "1232708b035aabc4c3b76edcc6d290a0d11fb4b54992dc88575b1668e821a06d",
+				"foes": 7,
+				"hash": "6a71fb17d4a6b3c2710ef51cbd0f8f0e8d0e303dd49c9c60855d9c8a4480a6d5",
 				"heartstone_health": 20,
 				"tick": 1800,
-				"towers": 5,
+				"towers": 4,
 				"wave": 3
 			},
 			{
-				"buttons": 65,
-				"events": "7a5e47200aa23db5088ed1e64062c3dee8dbd60a23de7720bec45bd50cff5389",
-				"foes": 10,
-				"hash": "6a6a84ff49084106a1f6ecbc9892758582b8e58587e4ccd503dbfdf8067af932",
+				"buttons": 41,
+				"events": "9163054fff9507dacb17690c799d1a3230df6a0305dec82581cc562949e76565",
+				"foes": 14,
+				"hash": "913e3260849b9dcb83e7fbf2a6c51ea9e00b0ae10cf7e9e27d5f02a86fc1742c",
 				"heartstone_health": 20,
 				"tick": 2400,
 				"towers": 5,
@@ -2655,532 +2487,542 @@
 			},
 			{
 				"buttons": 89,
-				"events": "7f4f729c1bc95baf564d14440e369832fa0e515e4471b0ff52d01fae81c744b3",
+				"events": "1d17f599f7ce31aadb5344f39165fa9c61981c73dd93007b005ca7b893a39f25",
 				"foes": 4,
-				"hash": "62d89edede9dc3b5e501a6d2ba8a849d9fd325e9de224a8abfaa18c80c971d79",
+				"hash": "2719aaefafa741fc06fdc482a7bd14ab533baf39bd7eeaae94a8fe8a4b6ac371",
 				"heartstone_health": 20,
 				"tick": 3000,
 				"towers": 5,
 				"wave": 4
 			},
 			{
-				"buttons": 74,
-				"events": "809863c8f92b3ba868a256a0ae4174e9c0291a78a3f39a29519549477de826b5",
-				"foes": 5,
-				"hash": "d45580c4be5d5d4bd027f34485d6b8161fe496501edcd1a5735220ac9f0648d0",
+				"buttons": 12,
+				"events": "5aca7b675d7d4d47d8ab92f556817adf533d971a9c27345a8c70d9f230a5fec9",
+				"foes": 3,
+				"hash": "cbb33303c6c6611ae1ebf2fd2d0045e370e913c68c68de558932dab5019b8799",
 				"heartstone_health": 20,
 				"tick": 3600,
 				"towers": 6,
-				"wave": 5
+				"wave": 4
 			},
 			{
-				"buttons": 92,
-				"events": "ad5d07f1fc151495fc7c6ec2f7446dc19acc160acc096069bf3c6fe778eb5908",
-				"foes": 15,
-				"hash": "633bd987824de650a4bce9eb8882f16b2d75e3eb9ad44e5f1169a8e99f74fa6a",
+				"buttons": 74,
+				"events": "f84c32d9102143bd8d6d8941c13853cdcdcaab166fd38f5bca8b605567fa13c0",
+				"foes": 13,
+				"hash": "bb7ef16ee307a579ae3d83951affa12fd15abd24b4ab81bc44b352cea5370d3b",
 				"heartstone_health": 20,
 				"tick": 4200,
 				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 8,
-				"events": "895bde4b80c4d1263056ac185bed5964523043840efec04d1957c1c40e74f6a3",
-				"foes": 10,
-				"hash": "96ec1e44003d197a91b6a88eab8ea64d03bdddcf4da2a5b13b84cdfcfcc6eb3e",
+				"buttons": 96,
+				"events": "bed6e96297bb6141b89b03be7be4d9b8ab0fc1038306dcf259731169e8afd8c6",
+				"foes": 16,
+				"hash": "2729af71ad5ae23915f2537f7a7a4a638bf1bfd4dee56f22cb90e35303f6b202",
 				"heartstone_health": 20,
 				"tick": 4800,
+				"towers": 6,
+				"wave": 5
+			},
+			{
+				"buttons": 22,
+				"events": "e9e515f87026c43a3e9b3258cf5f797cbaecaa86a8803be788d2cf4f5c9e36cd",
+				"foes": 9,
+				"hash": "c1f85110935ce528bad1b71d8a823dc0f5749b516813dc0cd7a55b0c052b6c15",
+				"heartstone_health": 20,
+				"tick": 5400,
 				"towers": 7,
 				"wave": 5
 			},
 			{
-				"buttons": 28,
-				"events": "b1f9016d0b14f239140709df1cefa147f5ac9834f0ee2c71e14e8423868e7e0a",
-				"foes": 5,
-				"hash": "b97ac0e934f6f00be50e55fffbe876001b69893fec8c0af7dd55f80f8779f254",
-				"heartstone_health": 20,
-				"tick": 5400,
-				"towers": 8,
-				"wave": 5
-			},
-			{
-				"buttons": 34,
-				"events": "f96a58a26eea78de125d74f8f8cadff774971dae9941bac473f1c90480be3d30",
-				"foes": 1,
-				"hash": "b76f9e823a05667969ff7db4a7dfe497063d295fec7f916a60a4c4ac4506a8a3",
+				"buttons": 6,
+				"events": "a4283d571b4c968d03899cc82d58acc9daaaa5cd6daf7d860c26515180e68c28",
+				"foes": 3,
+				"hash": "193aa6cd7b211146d0cfc39d1748a9e25738e5991e508071e38917c249824a4f",
 				"heartstone_health": 20,
 				"tick": 6000,
 				"towers": 9,
 				"wave": 5
 			},
 			{
-				"buttons": 85,
-				"events": "398738fa1fd7391e8ed8f0b2e6f49ba480750db0614acd1de1cd09768e3b773c",
-				"foes": 9,
-				"hash": "a8dad13a883c1b890668875dff84d211cf6dbc8dab6cbfcd617359727cd1431e",
+				"buttons": 73,
+				"events": "3c0bb1b1be6ef94a5bbe59364eb0145ee1e16cc8e2c1943d17c50ba2ea31e207",
+				"foes": 4,
+				"hash": "81d6a9bb228c5114b0b5dd5ca2a7bfb4ed08520c1fb4e4a1e6b42a4630934e92",
 				"heartstone_health": 20,
 				"tick": 6600,
 				"towers": 9,
 				"wave": 6
 			},
 			{
-				"buttons": 45,
-				"events": "395652d1619ffbf7a579d6274d84454b12125440e64377be516f4212dde2c28e",
-				"foes": 7,
-				"hash": "05e7d043f751951a3e0193117828575b683983e7379e1e94d3d9037404ec1709",
+				"buttons": 3,
+				"events": "48e9a58b1cbcf19c97181da1ad2fd16496bddb4367ea7a93ab95cb5554566f8f",
+				"foes": 15,
+				"hash": "8f20d882cf36b5df0718271645588afc1ef5232235c7f464d118db05d7816fed",
 				"heartstone_health": 20,
 				"tick": 7200,
 				"towers": 10,
 				"wave": 6
 			},
 			{
-				"buttons": 15,
-				"events": "4bde76ed113ab24018236877d1ee54e51a308d0953a93fe8cbfce1ae4fb5ce7c",
-				"foes": 2,
-				"hash": "1fe9bf3146862a50308e29a5b9fc04845095407670de37bcfbd60c5320ea031a",
+				"buttons": 45,
+				"events": "6424c2f73808aa7285ce26615c3ccc75f6216cc2fc1137f79280d0909436aa6a",
+				"foes": 7,
+				"hash": "2c6bdf4d5f9dba6c21b0f9bd26579266b0e4d0e91e72b9916405eea622e0ab2d",
 				"heartstone_health": 20,
 				"tick": 7800,
+				"towers": 10,
+				"wave": 6
+			},
+			{
+				"buttons": 15,
+				"events": "7ce2740b91e68290c17566dab58d32ea52b86ff89e3346a807fecc6710da6a37",
+				"foes": 2,
+				"hash": "da791eead874d76a07a47094a0ba2fa342598bd82c78a87948737e989da8be16",
+				"heartstone_health": 20,
+				"tick": 8400,
 				"towers": 11,
 				"wave": 6
 			},
 			{
-				"buttons": 32,
-				"events": "aa67b2394105720ad53ac620fbb407946acfe50a523948c00874bd0f89287239",
-				"foes": 11,
-				"hash": "3897e3328d6303bcc496bbd5d0755b793972b300d1b0c72dd436275c437d95dd",
-				"heartstone_health": 20,
-				"tick": 8400,
-				"towers": 12,
-				"wave": 7
-			},
-			{
-				"buttons": 42,
-				"events": "997bfffe6093f0cd24dd6a922c11f05bde66d62807c484c46c28bd76554e4e21",
-				"foes": 6,
-				"hash": "94443ad036437e13dd8172bae6dca7bc3e2f22ecb14dca72a63db0db46b84d22",
+				"buttons": 40,
+				"events": "2dd56d47907cbfa56f53b35de0b72f68f3bdf53d3ea3e613c1a381c1bd90e4ab",
+				"foes": 16,
+				"hash": "2db7152dc5fcdb2f9a071a1ee98bc45c0d65a0f250c538d7222b87b2e5cdf93a",
 				"heartstone_health": 20,
 				"tick": 9000,
 				"towers": 12,
 				"wave": 7
 			},
 			{
-				"buttons": 42,
-				"events": "e007e391628ed143612ddbaefcbac283443778a6bf694dadfca39f3bed2fc77f",
-				"foes": 2,
-				"hash": "ac60f3fd39e667ae59b8dca2a5f6ec3097359e0a76927392761981979e0d1780",
+				"buttons": 37,
+				"events": "055436fb3220519311ffba9d0d5b2392ac3239a1bb3192737915fa3f942ac758",
+				"foes": 7,
+				"hash": "f7a8e9d62221579867baa5fc4805507bfb0668bde4a849c71e4b3667b1c52ae2",
 				"heartstone_health": 20,
 				"tick": 9600,
-				"towers": 12,
+				"towers": 13,
 				"wave": 7
 			},
 			{
-				"buttons": 58,
-				"events": "4133fb773203328fe67a2bf07860ab22ea0beeac7ecc0b750a677dd0d2401564",
-				"foes": 12,
-				"hash": "b36292fceaf7e3c27b886dd28ea281b1936dbd18a23272fbe9632c71eb40ac71",
+				"buttons": 67,
+				"events": "7d63e3dd6ba9f8f0d522edbc20bf5c83900e992025ffbc588bad97d2e6896445",
+				"foes": 5,
+				"hash": "ac9f47cc1a21a4e8aea7c8477ebb4dea9c2b2214124621dc50c3823b3d50cf7a",
 				"heartstone_health": 20,
 				"tick": 10200,
-				"towers": 12,
-				"wave": 8
+				"towers": 13,
+				"wave": 7
 			},
 			{
-				"buttons": 18,
-				"events": "8aea008b8845db748dd8926dd7e5ec3a52ea921fe49aa9055c391a5d732a3a1e",
-				"foes": 4,
-				"hash": "f03bc705a2803b6db9498763c0d3d6b02d4f0671dbe69e4756975719b9a7fb6b",
+				"buttons": 46,
+				"events": "b05cb5f1bc665915b12d9e1f2368a297770c0ffbf9c24ab67597e85b4559032a",
+				"foes": 10,
+				"hash": "30f07210a01c1e29ae86d902d7ab536d2c947eba5bfcefccbffee31a908d11b5",
 				"heartstone_health": 20,
 				"tick": 10800,
-				"towers": 12,
+				"towers": 14,
 				"wave": 8
 			},
 			{
-				"buttons": 10,
-				"events": "3886d109cc5f0ba03c4a77f0cecf9cd89ce71f715859b5b30b9477c3a3144bbb",
-				"foes": 13,
-				"hash": "86a3301ba88018e74150abe39ee22f38a3ac01d6b8ab526230cf62399c1a60d9",
+				"buttons": 43,
+				"events": "158bfd5e84942341777efc506cb6293026a0b3fd56449b725e31f24c6e09c9cc",
+				"foes": 9,
+				"hash": "dc345a6828ba454229ab9906a677c04721ddc12494656fac2a0c4c3fa21545dd",
 				"heartstone_health": 20,
 				"tick": 11400,
-				"towers": 12,
-				"wave": 9
+				"towers": 14,
+				"wave": 8
 			},
 			{
-				"buttons": 70,
-				"events": "87068f10963e319b7904fef479925b6f92b2b4d4ca3a978de0eb9e68a4685311",
-				"foes": 3,
-				"hash": "f1d9a2a752f62461312a980ee3eff6150e34e2a6b804a476e580b3849a13de06",
+				"buttons": 28,
+				"events": "0ee691c7ecd79401cf7d0313bc9ea2edd614c7438d9148df1a93797c4da8c212",
+				"foes": 6,
+				"hash": "3f4d3b03202c351f537a6b43926481c07be75e6b8be3930893ba58b532f33fe7",
 				"heartstone_health": 20,
 				"tick": 12000,
-				"towers": 12,
+				"towers": 14,
+				"wave": 8
+			},
+			{
+				"buttons": 47,
+				"events": "ed30192c458dfeee12a4faedd2f96749b5d201eca0cdcb6a59cfe29843484149",
+				"foes": 20,
+				"hash": "399012b62d0a7a9c27cd36de1521d3cb19cb67b7b07e3da682f69fc6aaf8eb03",
+				"heartstone_health": 20,
+				"tick": 12600,
+				"towers": 14,
 				"wave": 9
 			},
 			{
-				"buttons": 67,
-				"events": "b6130ea445fa51892c257ba85b555f58da332ff12b59c28538ab8dc091c28159",
-				"foes": 10,
-				"hash": "f3806b7c7dd2960cbd643d7cda662b7ead68101969cb0f70c4d4a645aae76e45",
-				"heartstone_health": 20,
-				"tick": 12600,
-				"towers": 12,
-				"wave": 10
-			},
-			{
-				"buttons": 13,
-				"events": "79ac55464ff5c8ebca1ca932825ff22096c946e273632e0f920f938b287671fd",
-				"foes": 9,
-				"hash": "350d23a082f840c42e751afd2c0fe009794a196cc005dc790851e07b06165c59",
+				"buttons": 35,
+				"events": "c221a5e15eaf9118a1d7c683b3fb4339bf38c3c9525b9ac5835bbd8dff45a414",
+				"foes": 4,
+				"hash": "6aaad674a9f7813b6bddde8606e49e22fbaca0a74368511b93e87ecd3d16dc71",
 				"heartstone_health": 20,
 				"tick": 13200,
-				"towers": 12,
-				"wave": 10
+				"towers": 14,
+				"wave": 9
 			},
 			{
-				"buttons": 61,
-				"events": "a12610abbdb9bdf3cd440a804ea32f6092d5254662222ba539d15a7b0cca9106",
-				"foes": 6,
-				"hash": "2a2e01abc10b75e0ebfec9285368a4e1e5db2578b36d6a9fc11b68fef3932b61",
+				"buttons": 65,
+				"events": "4b24ec001768ae778518fe2b40820e26452b580849fc06b81b265975c2956562",
+				"foes": 2,
+				"hash": "29b507032d3463b58f75e4d869536f76228df881f77d8f7ab45316f8457cc490",
 				"heartstone_health": 20,
 				"tick": 13800,
-				"towers": 12,
-				"wave": 10
+				"towers": 14,
+				"wave": 9
 			},
 			{
-				"buttons": 51,
-				"events": "97aa19fed2dc0b5befb0edc3857653c00a2f22f6a086f263ea1953240779b899",
-				"foes": 1,
-				"hash": "6dd924fc8c21ca284ed9be358c0935e9ff7a233b04d3e2557089eadbab54c149",
+				"buttons": 72,
+				"events": "0be74ce63c5cef255f6e4a58937690b10ccb33be47119e6f274ef382999538c5",
+				"foes": 20,
+				"hash": "e3f1f5b7f3b2f54b03755d10476adb0af67548804efea50240dff56f6bedaaff",
 				"heartstone_health": 20,
 				"tick": 14400,
-				"towers": 12,
+				"towers": 14,
 				"wave": 10
 			},
 			{
-				"buttons": 51,
-				"events": "2508a7c12013b66052ccf3dbc1d21e49631220ddc2ad41ea11a3e4e073fac0ca",
-				"foes": 1,
-				"hash": "a0aec144808a310600fc6507264efc7b0d2b16cba2e4b8d8da65f8e9ba741de3",
+				"buttons": 83,
+				"events": "944c7c7fcd96e2260829b549a4bcec157b324dd2e28308384cd04e9371b64562",
+				"foes": 9,
+				"hash": "32abb11f96d322a09868b1219dfdb9324e274527d68360dcc9c9077a8c1a39a0",
 				"heartstone_health": 20,
 				"tick": 15000,
-				"towers": 12,
+				"towers": 14,
 				"wave": 10
 			},
 			{
-				"buttons": 1,
-				"events": "82a46dee6c5bef5a510e95be3ed605644a66f72623a912b2b083a47e95f90a67",
-				"foes": 16,
-				"hash": "9b6a3c8764c0506246cfea410b3c104e8fb4766dc772585d576d48d5e9cdde19",
+				"buttons": 57,
+				"events": "06793c1fe0cb1e35c41228bf27c2c464e022cb578d469bfad53e8983e881baca",
+				"foes": 5,
+				"hash": "54f4ac769777b5c5e3824f665d37016bdeefc91e5195dba49a13cacf7bb2aac6",
 				"heartstone_health": 20,
 				"tick": 15600,
-				"towers": 12,
-				"wave": 11
+				"towers": 14,
+				"wave": 10
 			},
 			{
-				"buttons": 106,
-				"events": "fa3d430b50768f4d95609f456df7c9b18088103f61ef3db6a9b81a66d9b654eb",
-				"foes": 6,
-				"hash": "ba707f1b1e65a550e13c08028bc4c04803ab57a35da6e73a73fb7a4736238c50",
+				"buttons": 31,
+				"events": "a17f551040bfe891992fed4d2d65b7f60bded76012768322869db7ac65742322",
+				"foes": 1,
+				"hash": "fbf57f4bc85446d35ceb41ec83a8543e24207b2b54fd58294469e5c4a51ba191",
 				"heartstone_health": 20,
 				"tick": 16200,
-				"towers": 12,
+				"towers": 14,
+				"wave": 10
+			},
+			{
+				"buttons": 31,
+				"events": "a80cd5df96eed9d34450cf761a80ba1e54697a1d8897a0e51ee4cfb3012e7cd2",
+				"foes": 1,
+				"hash": "cd6f8c26dd5ee52c68d29e49b479c9999a9fa0450f45fc71889d709154f90a7b",
+				"heartstone_health": 20,
+				"tick": 16800,
+				"towers": 14,
+				"wave": 10
+			},
+			{
+				"buttons": 80,
+				"events": "3e2fe573f66a79b1350960e5e9918f4ea0e3b02233cd6ef314ccd45e4c565378",
+				"foes": 17,
+				"hash": "28cabec0b28e4fe2194394cb9f673d8e178bab1b3360198e7845c33e7d2c3e90",
+				"heartstone_health": 20,
+				"tick": 17400,
+				"towers": 14,
 				"wave": 11
 			},
 			{
-				"buttons": 56,
-				"events": "7892e4d74f70f18108e0140c814100b66793bbde9c10ab892ef326e3b3005797",
-				"foes": 13,
-				"hash": "0a7ef6271b44c9cba4426091a18638af22f0deb7400e4b528842d8170890902b",
+				"buttons": 98,
+				"events": "7ddf2ae05262070b958aba62c79019af23f90a0a52504531f835a7765c920595",
+				"foes": 9,
+				"hash": "92af9229868e301fe91d83a0d2bbbd14fef5f966b2ab15e69a3b65842dd82b3f",
 				"heartstone_health": 20,
-				"tick": 16800,
-				"towers": 12,
-				"wave": 12
+				"tick": 18000,
+				"towers": 14,
+				"wave": 11
 			},
 			{
 				"buttons": 100,
-				"events": "6c0ea895e4081a122f22d9fda2e7bb58d91aa2c27ec1ca808a4bfb139d62364b",
-				"foes": 9,
-				"hash": "eab62324c5b0972db32d98318025a6a089a7309be31083c57d21c1e69857716f",
-				"heartstone_health": 20,
-				"tick": 17400,
-				"towers": 12,
-				"wave": 12
-			},
-			{
-				"buttons": 59,
-				"events": "9ef9bc3769ff5b0a9ac6e179b5d4270ece13c5bc30ff29d9c40bf1e5d1db25e1",
+				"events": "a45fe2e7d7410769e83558b2d593bce652546709ff2afd8c11021c0f5954b3ff",
 				"foes": 2,
-				"hash": "acbb95edb043c4208188c2fb79429c1dadc56e9a17563ce5cbd953ca5051ee1d",
-				"heartstone_health": 20,
-				"tick": 18000,
-				"towers": 12,
-				"wave": 12
-			},
-			{
-				"buttons": 104,
-				"events": "83aef6e94a9f30be08eac78918479c021adec349d8a8588b35fe4d29cb4ac00e",
-				"foes": 14,
-				"hash": "fbc499d07486b39d17c105ffa3182b40d7ac96924d24d5c3fd7653e9b5376b56",
+				"hash": "812cb063ff63813b20edf35caa8f6a26f26953a17f53083aff3ca55163e1620e",
 				"heartstone_health": 20,
 				"tick": 18600,
-				"towers": 12,
-				"wave": 13
+				"towers": 14,
+				"wave": 11
 			},
 			{
-				"buttons": 42,
-				"events": "8015424d092600576f8be38fdea42236fa332d0beee89bcaebe071ecd148eed1",
-				"foes": 4,
-				"hash": "f8107924e73e54e6b77f9d054cd6a726acca3d37df370719a73053602b4ff675",
+				"buttons": 101,
+				"events": "a82946164a7010aff56d0dba29333ff5f00c431ff520271fa1932361dc101d53",
+				"foes": 25,
+				"hash": "009d215fca478b0b6f4e8e57c32a9f848773c1480dab4d80921e94c18c43fb74",
 				"heartstone_health": 20,
 				"tick": 19200,
-				"towers": 12,
+				"towers": 14,
+				"wave": 12
+			},
+			{
+				"buttons": 106,
+				"events": "ae88412d9c5141a71e14da36281d1186610243ca6a477073b7a768e422c81e08",
+				"foes": 11,
+				"hash": "41dbcde6ccf91987946a04f6e0f08e1fddb2f2a23538267b52aca0efe63aff17",
+				"heartstone_health": 20,
+				"tick": 19800,
+				"towers": 14,
+				"wave": 12
+			},
+			{
+				"buttons": 22,
+				"events": "b426fcaf802ace61a477d9e7f562d5fba307e8a35542bac22c0626bdffdfb241",
+				"foes": 3,
+				"hash": "1e5b4d6f48d7b832475424f613f43e8dc7b41371306213f886066889d9d67a68",
+				"heartstone_health": 20,
+				"tick": 20400,
+				"towers": 14,
+				"wave": 12
+			},
+			{
+				"buttons": 44,
+				"events": "1a12c174138876a872ce3d72d9e8079f300580bf8e5593d9519a0ae1e5b4333e",
+				"foes": 10,
+				"hash": "704a4af62c78dd1c1dc36cac3b7b02ca04e68245eae0ac890a81ab197739f5a7",
+				"heartstone_health": 20,
+				"tick": 21000,
+				"towers": 14,
 				"wave": 13
 			},
 			{
-				"buttons": 11,
-				"events": "aba395fa904803589117210aaea91aa6a89af5b8f9cd4d9c57f4ef938f6da0fc",
-				"foes": 10,
-				"hash": "8a101f511ab2eca35abe57fd8fd921671869a913c39ff6650d8f40593a4e822a",
-				"heartstone_health": 20,
-				"tick": 19800,
-				"towers": 12,
-				"wave": 14
-			},
-			{
-				"buttons": 60,
-				"events": "4e983528f6d53fe8c07ce74368835c5a47abc0893d7024edfa0af0101602c06b",
-				"foes": 3,
-				"hash": "287c7ae68bdad13a469d96070bd43c3e24ed87926e17b25756dd00fe026538db",
-				"heartstone_health": 20,
-				"tick": 20400,
-				"towers": 12,
-				"wave": 14
-			},
-			{
-				"buttons": 53,
-				"events": "a5c5ad0277fae029f6f3c8625d4a57916c3985b98c8786c9d9f8de2c36927c2c",
-				"foes": 38,
-				"hash": "827a96288b66a8dde12002e3679e8f9c0adbceed689bc40ce6247fcac3855884",
-				"heartstone_health": 20,
-				"tick": 21000,
-				"towers": 12,
-				"wave": 15
-			},
-			{
-				"buttons": 172,
-				"events": "60682fe6eedb9b7b8b5db18dd67187fe34a5287901e0be20aa4481489f1106b2",
-				"foes": 20,
-				"hash": "56d453efdeb12a05a3a329a89fa2ff9cb194e4d3b4478d0b9dc85e26b3880228",
+				"buttons": 88,
+				"events": "a216ce3beb16dbc81ba0eb76c7b9f9f1cf2f15a70765f4bdccbfe6eec465a489",
+				"foes": 6,
+				"hash": "6c62ba987daa540ee96c5a57ba80a43c02d1772bda7e9a7447ab3c2316475f08",
 				"heartstone_health": 20,
 				"tick": 21600,
-				"towers": 12,
-				"wave": 15
+				"towers": 14,
+				"wave": 13
 			},
 			{
-				"buttons": 334,
-				"events": "93f67076838692f6bceb5de74bded2fc47cf47ba0f3db7938e673f021c1be2f9",
-				"foes": 11,
-				"hash": "7b71b01e785b9a7ba6a7b00e67403438a152538afdd342d3541665b1f44f737b",
+				"buttons": 81,
+				"events": "ee436a83b747c4009fc0261839145a76cac574d71a566a1d4e4d6eb579d6d559",
+				"foes": 3,
+				"hash": "da5adf28484adb9500cbdc022821a62c150d5c53c1b75ea801e17a588faa75bb",
 				"heartstone_health": 20,
 				"tick": 22200,
-				"towers": 12,
+				"towers": 14,
+				"wave": 14
+			},
+			{
+				"buttons": 158,
+				"events": "b1acd80ca4a398154acec173f0d0e97a1b5c3f23dced2efd3cef63fb468a7bef",
+				"foes": 2,
+				"hash": "c2d1360936d1291e85f265f361f042a4c05fafc2e7dbdb267c90339c8476162c",
+				"heartstone_health": 20,
+				"tick": 22800,
+				"towers": 14,
+				"wave": 14
+			},
+			{
+				"buttons": 149,
+				"events": "0818559f021d46f617a1e990b67f39fc69ba42281b31542d4670757f22a02457",
+				"foes": 37,
+				"hash": "c631c42ca36ac1b5420ea70e7e91fb5bb079f5e1b03bfa374fb9c4e6f246e982",
+				"heartstone_health": 20,
+				"tick": 23400,
+				"towers": 14,
 				"wave": 15
 			},
 			{
-				"buttons": 623,
-				"events": "9b7efb367591b4f6f711e81e9c08eb163bfbc869c4c9e9c5cc0c194bfd79f746",
-				"foes": 4,
-				"hash": "2b70a1b9446c435edabb85da8c4f28d712e9325f361dd17a3e3e01bd340aab72",
-				"heartstone_health": 20,
-				"tick": 22800,
-				"towers": 12,
-				"wave": 16
-			},
-			{
-				"buttons": 814,
-				"events": "5c3b20adc7ea60709724e3187588c0511851476deafaafd41ffafe420d3498b9",
-				"foes": 8,
-				"hash": "f04fa2ac711e53b43602bd7e9e04ad5318289632166d1edbd89e9f554b8641d5",
-				"heartstone_health": 20,
-				"tick": 23400,
-				"towers": 12,
-				"wave": 16
-			},
-			{
-				"buttons": 871,
-				"events": "a6ceaf24dbf4bd11b5662fec9df9d86b45e42333ec376f7ac6484798addaca79",
-				"foes": 5,
-				"hash": "2971e22be55315b246823f899b42b22dd977044b45ae99807a9c9aae549cd02b",
+				"buttons": 146,
+				"events": "addabd3e28800b8be79f4e616a57134593bbae7eae63f3ae558b577507da12f6",
+				"foes": 17,
+				"hash": "200a35b10015996c4fab1d4c370c0d9e98506d7690d300388e0fdd3973eccc0b",
 				"heartstone_health": 20,
 				"tick": 24000,
-				"towers": 12,
+				"towers": 14,
+				"wave": 15
+			},
+			{
+				"buttons": 78,
+				"events": "9b29627b30a2641986a1a60542370256f3ec30ee22bb6479ca855c8ee5c7f820",
+				"foes": 3,
+				"hash": "c490331d5b5d3c52e2e42cacb9e77fa60a44e23e5b6f39fd3a0dbea4d904dede",
+				"heartstone_health": 20,
+				"tick": 24600,
+				"towers": 14,
+				"wave": 15
+			},
+			{
+				"buttons": 167,
+				"events": "dd78d96ac933f66157d1ef835805c17d2262e779d1167299b52c810ac1b8b196",
+				"foes": 16,
+				"hash": "47262ebaab8d96b00e35a945b4cbc6dd4780549bbddbc3d0007c52e63c13462f",
+				"heartstone_health": 20,
+				"tick": 25200,
+				"towers": 14,
 				"wave": 16
 			},
 			{
-				"buttons": 1056,
-				"events": "492e4af80b77a56184dca02d10e34d421d14efb4bd74dc706ba63124cc5fb322",
-				"foes": 23,
-				"hash": "99be5a5db0d73236fdf45efcf124258a37a09eee9d19341fb2cf5751bd00d3c3",
-				"heartstone_health": 20,
-				"tick": 24600,
-				"towers": 12,
-				"wave": 17
-			},
-			{
-				"buttons": 1253,
-				"events": "639a31d2617f473f92a85b592cd74be62a263dd376cde2f0c94c56e372387112",
-				"foes": 12,
-				"hash": "f5167f5f63610360d51a79131f0a07f67c12e0e3d8fddfb3456dd2da47ca2677",
-				"heartstone_health": 20,
-				"tick": 25200,
-				"towers": 12,
-				"wave": 17
-			},
-			{
-				"buttons": 1310,
-				"events": "89aacbde43fca4c863e53c0999c0bcd620999687fc9ae2d9cb836398a57b3b5f",
-				"foes": 9,
-				"hash": "8f11e17692bdd61ff91477f262fbc647fd7667c9971262b559f250cd57dc878c",
+				"buttons": 292,
+				"events": "eb0464e642b6c21c8616f888c588808d4b4c741629aa68abcf71a6334e2dbd9c",
+				"foes": 6,
+				"hash": "9ea9115ba33052e00d956afe28b93e82f441901ab38d9d5dacccefcbac017759",
 				"heartstone_health": 20,
 				"tick": 25800,
-				"towers": 12,
+				"towers": 14,
+				"wave": 16
+			},
+			{
+				"buttons": 481,
+				"events": "b580c32c8822ba35b4268ca24320f73b98eaf3eb3259eb5629a495bd04422104",
+				"foes": 24,
+				"hash": "1e87a1513e544da42e43d1cacc22213b88b419ff8baa35c10db0f06d46ee7a4e",
+				"heartstone_health": 20,
+				"tick": 26400,
+				"towers": 14,
 				"wave": 17
 			},
 			{
-				"buttons": 1530,
-				"events": "78c0eee7143e8cf00a9bc7df2e9a7eb377a66b08dc030f57baece15cf21dbed7",
-				"foes": 5,
-				"hash": "572cba575ec47eb456f05386245b61b6849e865674ae12318659587961686b40",
-				"heartstone_health": 20,
-				"tick": 26400,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 1750,
-				"events": "b9a707af4255ca9c9fe652247493c77a8a69327871cf6be4d321edfea8087258",
-				"foes": 16,
-				"hash": "d90de46998aa44e0c0d795bb38a27e2e5d134bab136005022370571209037d98",
+				"buttons": 693,
+				"events": "a453f0f5c8629cb2094c4f090eb2bbb038e219bd321c355ad2c561c9bb8370e9",
+				"foes": 12,
+				"hash": "b9bb5d2a1b9d4369209bad1e76b8d073890e6ed9adff220476136bfda7fe9946",
 				"heartstone_health": 20,
 				"tick": 27000,
-				"towers": 12,
-				"wave": 18
+				"towers": 14,
+				"wave": 17
 			},
 			{
-				"buttons": 1816,
-				"events": "690bde84a5dab0e1d5392528aa270a5a9ec307a728f0d9f4b5c2aa825ce87b55",
-				"foes": 12,
-				"hash": "25a36a0821f0398e2c75dc4275f6aa41141d93f96d7ed12b2c325a9522bc9422",
+				"buttons": 788,
+				"events": "0eb11ee50eb17566e934be40482a5ec870be67fb42d5d7961ee4bdb28254f693",
+				"foes": 7,
+				"hash": "30d1b5f58793a8c50dae59d13bf1bc95b04e7b28c807fda1a838408faedb88ee",
 				"heartstone_health": 20,
 				"tick": 27600,
-				"towers": 12,
-				"wave": 18
+				"towers": 14,
+				"wave": 17
 			},
 			{
-				"buttons": 1916,
-				"events": "14dbf385bb86560bdd283594360d122c5d6353cdcb3a7b7bf7ba474dfc02d23e",
-				"foes": 7,
-				"hash": "44d1847d4cb9e14e9de80e306a058c3b16e9ead8cde016cd00aab18dace1736e",
+				"buttons": 1037,
+				"events": "b8a64a2b512ec8936e08d919352874a4b23ffca3376e69d360052911a428917f",
+				"foes": 19,
+				"hash": "402617621c02dc3905cbbf1294fe42fd670e237571df6da7900beea971f01f2d",
 				"heartstone_health": 20,
 				"tick": 28200,
-				"towers": 12,
+				"towers": 14,
 				"wave": 18
 			},
 			{
-				"buttons": 2157,
-				"events": "758466a64d8726517613e4754205d3b87a577835780d39159127abc31222c86c",
-				"foes": 29,
-				"hash": "09aa429268622d0712068f5d9df88470828292b2a2501a2cf5248befada311d4",
+				"buttons": 1196,
+				"events": "28ce989ea2d7023e5038537fccfadc86d9f501aa00527a5d5d7e86381b938a70",
+				"foes": 15,
+				"hash": "5ccd9404ba55a02a2bb7ec27701fd5af92a3fccf152028a488530567e1ef48b5",
 				"heartstone_health": 20,
 				"tick": 28800,
-				"towers": 12,
+				"towers": 14,
+				"wave": 18
+			},
+			{
+				"buttons": 1316,
+				"events": "8d779658b16a33b680a487985ce664db036ad522a9d28be1004318a9455d15f1",
+				"foes": 9,
+				"hash": "d1afb5ed304271f12666f380d476a80cf24282c272823a002846d08f41f13c63",
+				"heartstone_health": 20,
+				"tick": 29400,
+				"towers": 14,
+				"wave": 18
+			},
+			{
+				"buttons": 1456,
+				"events": "6744a48e1d720a164636038747fb53dcd878bf8dadcc910a13d17bc06d22042b",
+				"foes": 2,
+				"hash": "8ba9a93a2b342278066b045c3d4a9d92969bf689195fcbfe069b1adf6cae9a73",
+				"heartstone_health": 20,
+				"tick": 30000,
+				"towers": 14,
+				"wave": 18
+			},
+			{
+				"buttons": 1672,
+				"events": "95accfdb22dcfe06aadc1ab72a3393f12f97749a80348750d4ae62f9a88cc8bf",
+				"foes": 32,
+				"hash": "8b0de3a4ecef2a3b22d7ca43199f9d63cf30c149dda99ad348450571daa014b4",
+				"heartstone_health": 20,
+				"tick": 30600,
+				"towers": 14,
 				"wave": 19
 			},
 			{
-				"buttons": 2339,
-				"events": "7206ff3809b73f4fa0825ea3d5bfb44689e46b8c675b9c1a7efa41c73a813e7b",
-				"foes": 16,
-				"hash": "2701126abbd90b6742812b0a3a69b04a34c2a203fe5a0c17b3e6f09f17544e8b",
+				"buttons": 1839,
+				"events": "081e64a7bf4a4e6adf8ca3a8fd3a2adad36422e127a3f1302969bba3ee559f67",
+				"foes": 13,
+				"hash": "06dd7249ac9ef5f5dfcea949374dcb353ea73e45a80e33bffe6c8bdbfa12076a",
 				"heartstone_health": 20,
-				"tick": 29400,
-				"towers": 12,
+				"tick": 31200,
+				"towers": 14,
 				"wave": 19
+			},
+			{
+				"buttons": 2019,
+				"events": "412b70906967a754ae1ad5faa9b7fbec5884f671468ed5da9cf503ed87d5cf2c",
+				"foes": 4,
+				"hash": "a57774e4725ccd3efd4399f911920a0ae9addc45fc99d8e1067cf30710de615d",
+				"heartstone_health": 20,
+				"tick": 31800,
+				"towers": 14,
+				"wave": 19
+			},
+			{
+				"buttons": 2253,
+				"events": "3737475ae166a21334fefbc3c6dd4b23a3eeaee7317876052866367d2bbe6194",
+				"foes": 31,
+				"hash": "949fc4e6baaf15998fda80a7d917209e3975bd7b6401c2b232ae6414a2921240",
+				"heartstone_health": 20,
+				"tick": 32400,
+				"towers": 14,
+				"wave": 20
 			},
 			{
 				"buttons": 2399,
-				"events": "b3c948f1ae10e8e09ae6369148c86ba6099c17cca05300bd502b0a77645a87c6",
-				"foes": 13,
-				"hash": "dd94cfac64ea3fe9b768586d7fb4fd3c6b766a0bc1504b1c8e9ed77338f411a0",
-				"heartstone_health": 20,
-				"tick": 30000,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 2559,
-				"events": "1a3057c7181f5b38e1c1a1ed533871e6aaea320b6ab2100361d949799c9df0f8",
-				"foes": 5,
-				"hash": "5304f39ac42fbc31960b5d539c275300e17a0cc9abcac55410b9e2d86b83475f",
-				"heartstone_health": 20,
-				"tick": 30600,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 2772,
-				"events": "4214b56a606c5e580d7f5cc9a7d3770508e0e6326c291de9545178febff3f80d",
-				"foes": 30,
-				"hash": "1411c0e5c7255a4cc9d21a16a3a15296a9cf47763a01aced886b7102f95c10d8",
-				"heartstone_health": 20,
-				"tick": 31200,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2959,
-				"events": "929341b85c81c5ed81cff12c3952677ff290d7cd082b556ffd2533ef0f585206",
+				"events": "bcbdf8dd646627d1a5830337b68a0a1767c32d62ad270121d36a2f00ac568358",
 				"foes": 18,
-				"hash": "1ee944ef3141b4e4d8096e8ca0a13fb1f3f1d883316e6a874a69ed17659e3910",
-				"heartstone_health": 20,
-				"tick": 31800,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 3043,
-				"events": "1194f180bb3bc49554da880b25afe33b68ce427088890b32c2a39698d729ecd7",
-				"foes": 14,
-				"hash": "6925cb6e76abd2896cf0de98dfd72f8b5c0c1ed2a02e9b796fb10a9a7dbb08ba",
-				"heartstone_health": 20,
-				"tick": 32400,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 3232,
-				"events": "e2665b39f318bedfc93a3d804201aa277a4ebd47be39acc85d4d3b52754934bb",
-				"foes": 5,
-				"hash": "a17ab40734b770307e03f25a48e0ecc5b590205a635672d7b842c833672b5faa",
+				"hash": "706b3abf851bb5cd60c708eac849503eafa12067ae296af93457e30fd327c3fc",
 				"heartstone_health": 20,
 				"tick": 33000,
-				"towers": 12,
+				"towers": 14,
 				"wave": 20
 			},
 			{
-				"buttons": 3274,
-				"events": "a53dc4d5f77cc97c7d2402b59ebe94080c26d134abde37b20a04e87931422d7d",
-				"foes": 1,
-				"hash": "1c3680dd8c52baeabd9aa51c4ae83c1a1e34f5335ceb661ad85b710a5e7e663d",
-				"heartstone_health": 16,
+				"buttons": 2567,
+				"events": "4bf87068036ee262cc86592c5cb455befb9fe3e3374b458ee14ab6115a81e6d6",
+				"foes": 10,
+				"hash": "2c4fa2f8b2bc9d13285dc3146a815e93183de650dde26a8fca686eb08ac204b9",
+				"heartstone_health": 20,
 				"tick": 33600,
-				"towers": 12,
+				"towers": 14,
 				"wave": 20
 			},
 			{
-				"buttons": 3274,
-				"events": "c6102bf1cfb6184184315c8490c4bf97ab3d03f92ca24a720c5d3e0e478ad4c9",
-				"foes": 1,
-				"hash": "f4068a1171d06e134d0b6e1ba6c8975670b32c6efee4dcfd9421f0bce0bd541d",
-				"heartstone_health": 16,
+				"buttons": 2735,
+				"events": "eb60df5431da6355fed7d81c90515f6c132cd8d82d3bfb165bcb0adeeba91df7",
+				"foes": 2,
+				"hash": "a41f90ce902e824f59db0a1553d9e06fec0c2d415b59ba20ad232c2f7e1a7e8b",
+				"heartstone_health": 20,
 				"tick": 34200,
-				"towers": 12,
+				"towers": 14,
+				"wave": 20
+			},
+			{
+				"buttons": 2735,
+				"events": "3a30f916ab6847c8bf05537515e1a878c42e4081d5b3fc054a0efa56b817a40c",
+				"foes": 1,
+				"hash": "c660e8f02ae8658ab631dcbfd9586cddd059d2b134fefaeccf8d532ca59883d9",
+				"heartstone_health": 18,
+				"tick": 34800,
+				"towers": 14,
 				"wave": 20
 			}
 		],
@@ -3189,8 +3031,8 @@
 				0,
 				"build",
 				"spoolGuard",
-				7,
-				1
+				10,
+				6
 			],
 			[
 				0,
@@ -3200,291 +3042,325 @@
 				1,
 				"build",
 				"thimbleMortar",
-				10,
-				6
+				7,
+				2
 			],
 			[
-				583,
+				608,
 				"launch_wave"
 			],
 			[
-				928,
+				956,
 				"build",
 				"prismSpire",
 				10,
 				3
 			],
 			[
-				1378,
-				"build",
-				"spoolGuard",
-				3,
-				5
-			],
-			[
-				1378,
-				"launch_wave"
-			],
-			[
-				1785,
+				1471,
 				"build",
 				"spoolGuard",
 				7,
 				5
 			],
 			[
-				2055,
+				1471,
 				"launch_wave"
 			],
 			[
-				3102,
+				2077,
 				"build",
-				"thimbleMortar",
+				"spoolGuard",
 				10,
 				0
 			],
 			[
-				3552,
+				2171,
 				"launch_wave"
 			],
 			[
-				4408,
+				3570,
+				"build",
+				"thimbleMortar",
+				0,
+				1
+			],
+			[
+				3899,
+				"launch_wave"
+			],
+			[
+				4867,
 				"build",
 				"prismSpire",
+				0,
+				4
+			],
+			[
+				5560,
+				"build",
+				"spoolGuard",
 				13,
+				4
+			],
+			[
+				5958,
+				"build",
+				"spoolGuard",
+				11,
+				9
+			],
+			[
+				6486,
+				"launch_wave"
+			],
+			[
+				7158,
+				"build",
+				"thimbleMortar",
+				14,
 				0
 			],
 			[
-				5082,
+				8214,
 				"build",
-				"spoolGuard",
-				0,
-				2
+				"prismSpire",
+				1,
+				9
 			],
 			[
-				5512,
+				8648,
 				"build",
 				"spoolGuard",
-				0,
-				5
+				7,
+				8
 			],
 			[
-				6204,
+				8648,
 				"launch_wave"
 			],
 			[
-				6801,
+				9061,
 				"build",
-				"thimbleMortar",
-				13,
+				"spoolGuard",
+				4,
 				6
 			],
 			[
-				7707,
+				10271,
 				"build",
-				"prismSpire",
-				0,
+				"thimbleMortar",
+				4,
 				9
 			],
 			[
-				8222,
-				"build",
-				"spoolGuard",
-				9,
-				9
-			],
-			[
-				8222,
-				"launch_wave"
-			],
-			[
-				8559,
+				10511,
 				"upgrade",
 				0
 			],
 			[
-				9363,
+				10511,
+				"launch_wave"
+			],
+			[
+				10969,
 				"upgrade",
 				25
 			],
 			[
-				9696,
+				11956,
 				"upgrade",
 				40
 			],
 			[
-				9696,
-				"launch_wave"
-			],
-			[
-				9859,
+				12181,
 				"upgrade",
 				86
 			],
 			[
-				10237,
+				12390,
 				"upgrade",
 				87
 			],
 			[
-				10696,
+				12390,
+				"launch_wave"
+			],
+			[
+				12695,
 				"upgrade",
 				110
 			],
 			[
-				11112,
+				12862,
+				"upgrade",
+				133
+			],
+			[
+				14020,
 				"upgrade",
 				1
 			],
 			[
-				11112,
+				14020,
 				"launch_wave"
 			],
 			[
-				11382,
+				14466,
 				"upgrade",
 				20
 			],
 			[
-				12234,
+				15257,
 				"upgrade",
 				57
 			],
 			[
-				12459,
-				"launch_wave"
-			],
-			[
-				12694,
+				15794,
 				"upgrade",
 				85
 			],
 			[
-				13190,
+				17070,
 				"upgrade",
 				108
 			],
 			[
-				13919,
+				17129,
 				"upgrade",
 				109
 			],
 			[
-				15091,
+				17141,
+				"launch_wave"
+			],
+			[
+				17477,
+				"upgrade",
+				134
+			],
+			[
+				18094,
 				"upgrade",
 				0
 			],
 			[
-				15162,
+				18775,
 				"upgrade",
 				25
 			],
 			[
-				15162,
+				18856,
 				"launch_wave"
 			],
 			[
-				15556,
+				19205,
 				"upgrade",
 				40
 			],
 			[
-				16242,
+				19865,
 				"upgrade",
 				86
 			],
 			[
-				16581,
+				20308,
 				"upgrade",
 				87
 			],
 			[
-				16581,
-				"launch_wave"
-			],
-			[
-				16926,
+				20606,
 				"upgrade",
 				110
 			],
 			[
-				17761,
+				20606,
+				"launch_wave"
+			],
+			[
+				20920,
+				"upgrade",
+				133
+			],
+			[
+				22005,
 				"upgrade",
 				1
 			],
 			[
-				18231,
+				22085,
 				"launch_wave"
 			],
 			[
-				18370,
+				22449,
 				"upgrade",
 				20
 			],
 			[
-				18887,
+				22939,
 				"upgrade",
 				57
 			],
 			[
-				19605,
+				23014,
 				"launch_wave"
 			],
 			[
-				19659,
+				23406,
 				"upgrade",
 				85
 			],
 			[
-				20182,
+				24097,
 				"upgrade",
 				108
 			],
 			[
-				20669,
-				"launch_wave"
-			],
-			[
-				20756,
+				24444,
 				"upgrade",
 				109
 			],
 			[
-				22637,
+				24793,
+				"upgrade",
+				134
+			],
+			[
+				24793,
 				"launch_wave"
 			],
 			[
-				24369,
+				26158,
 				"launch_wave"
 			],
 			[
-				26375,
+				28001,
 				"launch_wave"
 			],
 			[
-				28530,
+				30133,
 				"launch_wave"
 			],
 			[
-				30916,
+				32046,
 				"launch_wave"
 			]
 		],
 		"final": {
-			"buttons": 3503,
-			"events": "7ec5d16b6e87f6b86e9ee47167abd0980047e06c96ee00fb3005c775a9f44d8f",
+			"buttons": 2964,
+			"events": "1b92458403778d6588ab782cc2fe408f2a7017e308bf0d0e03e99dbc8571443e",
 			"foes": 0,
-			"hash": "de7e23006f58a57dd232805d10743105335ce0102b0e6d2577e587e12c64d51a",
-			"heartstone_health": 12,
-			"tick": 34230,
-			"towers": 12,
+			"hash": "826bde33b46148b70d33a5dbe0534a2147fc9247484838ea3490da7f12fea083",
+			"heartstone_health": 14,
+			"tick": 35347,
+			"towers": 14,
 			"wave": 20
 		},
 		"max_waves": 20,
 		"outcome": "won",
 		"profile": "mix",
 		"seed": 5,
-		"ticks": 34230
+		"ticks": 35347
 	},
 	{
 		"checkpoints": [
@@ -3500,81 +3376,91 @@
 			},
 			{
 				"buttons": 87,
-				"events": "4897331d42361fba552b117b8799f05af42929410ad8894c859b3932ea3359c4",
-				"foes": 9,
-				"hash": "a7078f4d7fdd04253884e16c50ba5a16525776d92d818263134211affccb519f",
+				"events": "1a6d4c2722f01cf9e74ebe6105a268b57fdc3b4ad4c38994679b3a1a0624b3dc",
+				"foes": 7,
+				"hash": "8f345713ce1b2305c9af9f638ef4792bfd115733452270eb809e673eeed8a4fb",
 				"heartstone_health": 20,
 				"tick": 600,
 				"towers": 2,
 				"wave": 2
 			},
 			{
-				"buttons": 70,
-				"events": "611b98c45b242c5cf32330c59390d6646133a62daf248caf95ad74d48915a97d",
-				"foes": 8,
-				"hash": "c4d112fca586f6bdea72e201302f74b01fb82b72ab747fca9dcd4b33250c1615",
+				"buttons": 66,
+				"events": "6707e7f3c59b2c1f88cd3964b36a2ff7e3528d4ae17cd86ad624f25dae1a6a14",
+				"foes": 9,
+				"hash": "a6dd3dcc53b0aad81fd8a05843f9c983dcb7ebe0c4e77d5cb80e399c5bd95614",
 				"heartstone_health": 20,
 				"tick": 1200,
 				"towers": 3,
 				"wave": 3
 			},
 			{
-				"buttons": 1,
-				"events": "d8f587015c4a6d32dd75202a4f57883426fa3bfc7a0a415728dcdf7bf712cc78",
+				"buttons": 47,
+				"events": "73f8d5882e5ff3074824b26917683547f39f689248e0a9f48cac9a7065313b84",
 				"foes": 8,
-				"hash": "7e3b7d9048e88107bff1a2b8d82641a2ecc962c7aada79c9b40dd1d844ad27e2",
+				"hash": "e41e47874906ea0796e2e00e5125db311f538b76bfb34b1d719145d60dcb96c0",
 				"heartstone_health": 20,
 				"tick": 1800,
+				"towers": 4,
+				"wave": 4
+			},
+			{
+				"buttons": 46,
+				"events": "72cc453f476135436e7e0e60a2f62285d1a2b6505b9a90b4432bc7122a385c28",
+				"foes": 2,
+				"hash": "2be9a5103fdcd2cdb82d9fc58275e561c39f26296c29431918780d1c488fc3c9",
+				"heartstone_health": 20,
+				"tick": 2400,
 				"towers": 5,
 				"wave": 4
 			},
 			{
-				"buttons": 95,
-				"events": "eb3992691c83f2a855c3bc0be0eaa59cbfd174cd641ab14201d8ad018f9dd891",
-				"foes": 5,
-				"hash": "ed100bc8a23ddea1191accaedc37d4335fb3e94e4f3eaf55892cf802f4cba83e",
-				"heartstone_health": 20,
-				"tick": 2400,
-				"towers": 5,
-				"wave": 5
-			},
-			{
-				"buttons": 29,
-				"events": "cc1031c7b76eb3153e3af281f3cb3612a9c7d5e783d22f8a0d8ff71d7c53615b",
-				"foes": 16,
-				"hash": "b2f55fc49835628cc014509346e8473c08798763e7a0ec5d24cefb257459a5b9",
+				"buttons": 7,
+				"events": "dfa2b9e447c496b3ee268775058135843dd9833f7144b5feae7843d7814703c7",
+				"foes": 14,
+				"hash": "6acfd07e293f052b33258b797f694dd2891988aac68aa4f53b4ab74d7fb154b9",
 				"heartstone_health": 20,
 				"tick": 3000,
 				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 9,
-				"events": "44a191bbe511d6adfee248198de2188966a67ddaf00257a34623487529c676db",
-				"foes": 6,
-				"hash": "a0beaaa481431ee40503105c9048f8ff9d9b187c570d6bbc1a5c1fd9b336d44b",
+				"buttons": 53,
+				"events": "55f30eceba164153ddc49c5662dfdc3cf38c00fbed85e8bc6019b5b2f289d725",
+				"foes": 10,
+				"hash": "59c96c47da1ee132de739ad96906438fc355f179aefd8b9b147cbf560f1a4520",
 				"heartstone_health": 20,
 				"tick": 3600,
-				"towers": 7,
+				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 76,
-				"events": "c4825aa44846b93f83a7a2936bf24b38f66f3447d4a364fd03c2b76edbdc7b11",
-				"foes": 7,
-				"hash": "91cd061bc6263e0900bbf865187cc2e8faf62bd2db64410dd12ca033eaa4cc9b",
+				"buttons": 15,
+				"events": "2859e57ee79d012d8f8dc8dc2baa8fed6e19dbe6773aad934537d1464e2e8a34",
+				"foes": 2,
+				"hash": "61ff7ed4ee47fecad8ab566e1d90a6d017329c4ce03744ecb4457d72f5e11412",
 				"heartstone_health": 20,
 				"tick": 4200,
 				"towers": 8,
+				"wave": 5
+			},
+			{
+				"buttons": 0,
+				"events": "d95abc9982641bf57c17be751175dfb29b6d7ed01e14b441a767f76de7bbcb78",
+				"foes": 7,
+				"hash": "c51eaeadf3f9178cc10ad8f96c016e0c7df72bc542c7a189d6b688d50a050255",
+				"heartstone_health": 20,
+				"tick": 4800,
+				"towers": 9,
 				"wave": 6
 			},
 			{
 				"buttons": 74,
-				"events": "2166c3871199b6c44a6b4c06ca149fecc0c67cf3591ca5f10033bb7d5a7ddb4f",
+				"events": "1dc7095aed4da8e3c4c4ab7491add7a5170e1fa16dc3685455d8cfcb58e44473",
 				"foes": 1,
-				"hash": "15d81a5009391208f74d887f4e31236050a5677575b5884d83c5b324215071cb",
+				"hash": "0aedd0b7fa612b42fdb37e44ea00ebc41b42d6062c636b9b3a590c85f3023934",
 				"heartstone_health": 20,
-				"tick": 4800,
+				"tick": 5400,
 				"towers": 9,
 				"wave": 6
 			}
@@ -3599,69 +3485,69 @@
 				3
 			],
 			[
-				430,
+				436,
 				"launch_wave"
 			],
 			[
-				669,
+				695,
 				"build",
 				"prismSpire",
 				6,
 				4
 			],
 			[
-				920,
+				931,
 				"launch_wave"
 			],
 			[
-				1362,
+				1427,
 				"build",
 				"prismSpire",
 				3,
 				6
 			],
 			[
-				1432,
+				1483,
 				"launch_wave"
 			],
 			[
-				1767,
+				1860,
 				"build",
 				"spoolGuard",
 				9,
 				6
 			],
 			[
-				2259,
+				2500,
 				"launch_wave"
 			],
 			[
-				2562,
+				2845,
 				"build",
 				"prismSpire",
 				6,
 				1
 			],
 			[
-				3524,
+				3872,
 				"build",
 				"prismSpire",
 				0,
 				7
 			],
 			[
-				3671,
+				4088,
 				"build",
 				"spoolGuard",
 				11,
 				0
 			],
 			[
-				4057,
+				4504,
 				"launch_wave"
 			],
 			[
-				4319,
+				4798,
 				"build",
 				"prismSpire",
 				0,
@@ -3670,11 +3556,11 @@
 		],
 		"final": {
 			"buttons": 115,
-			"events": "406b3695cb983fa7aff116787ceccdc46adde34462b340c412be1b1c2e381765",
+			"events": "dc27c99706d771cad8f51438847dffe9e71dc895a583326254c766a2384bd241",
 			"foes": 0,
-			"hash": "1919f23de97a4a3439eb6d0352b6541feda85a5ec0f9ec94564b2fcc7eebf00b",
+			"hash": "9d69d6b11f7751d65930bf1a80413445247570fd56975c136af4872615995bb0",
 			"heartstone_health": 20,
-			"tick": 4856,
+			"tick": 5410,
 			"towers": 9,
 			"wave": 6
 		},
@@ -3682,7 +3568,7 @@
 		"outcome": "stopped",
 		"profile": "prismHeavy",
 		"seed": 3,
-		"ticks": 4856
+		"ticks": 5410
 	},
 	{
 		"checkpoints": [
@@ -3697,10 +3583,10 @@
 				"wave": 0
 			},
 			{
-				"buttons": 29,
-				"events": "1413a6e36c896616904ced2bb50bc88b6a801f760c86d2f4ad4d9df9434a418c",
-				"foes": 4,
-				"hash": "dfa037bcad1479cf5e2c955d71663114442c92a7d4eda9287800832415fbe4d8",
+				"buttons": 17,
+				"events": "57352e4c2f53067e504fdb2bb7e4f39bc89052768a0bd54b896fcf23c3b60ed8",
+				"foes": 7,
+				"hash": "6a30e884df75a157aa4cfb2d4150cf7a92334a3420cee6d445818d2709016d49",
 				"heartstone_health": 20,
 				"tick": 600,
 				"towers": 3,
@@ -3708,463 +3594,373 @@
 			},
 			{
 				"buttons": 36,
-				"events": "80d81e86fea50e55578434b15a8cd967e8f29532b9acbf76b4973a091bc0665f",
+				"events": "879994fdbea42c753d3ae235120488da01c7e9ee77c843c69779d3b51f1781c6",
 				"foes": 8,
-				"hash": "38b5ddf3aaf1d843c728ef720ce220508527571e728509d84a413f046911d0d6",
+				"hash": "6d20415feecd55e6f7402f0cee8101981e1615dac143b395d014c8fe37573906",
 				"heartstone_health": 20,
 				"tick": 1200,
 				"towers": 5,
 				"wave": 4
 			},
 			{
-				"buttons": 11,
-				"events": "b48e5bab25dd28ecfe7c0a8d42795de1b8555b1ec8bd528761ec83c88984b5fa",
-				"foes": 2,
-				"hash": "18c15341f06f23f8ca2a303f7f5d975f5af16df63f9c49b3da5725f91bf33b0a",
+				"buttons": 88,
+				"events": "e0741625a066306d1297e70500b2d73669a505380cea0f8769ec0880f9a4c2e3",
+				"foes": 3,
+				"hash": "5ebd76fe3a2a0a1185db4bfa2ab40d52548ab1fa35b07cdcd720c807cf3d245a",
 				"heartstone_health": 20,
 				"tick": 1800,
-				"towers": 6,
+				"towers": 5,
 				"wave": 4
 			},
 			{
-				"buttons": 68,
-				"events": "a632b7f8a3d7b2e0896dbd65e29777ca7cb237ce56ec2e3921fcca8670644bb7",
-				"foes": 18,
-				"hash": "98c96bd05a4ba9a697055c0f6366c9be5ff18137f2c323e736a92e68fc4a015b",
+				"buttons": 60,
+				"events": "234bef7fab199309cc812871eac9039e829866cd1126e771dbe8c111027d4e2b",
+				"foes": 9,
+				"hash": "a4b0d6009c4f1ad2b21452afd9fafba89a2f8d9d74b74eab4098417a56f3a8b1",
 				"heartstone_health": 20,
 				"tick": 2400,
 				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 96,
-				"events": "262f2b3efbe689c5dc776178b06d2ff56c9e548daafc4855228b6ae2db0e7574",
-				"foes": 9,
-				"hash": "9ec823037a1274b02dc31187634f4eb53267345c3d90137ff4cf913385631506",
+				"buttons": 84,
+				"events": "42ffbc1e6d31446da985725984a876a9ff1bfb5996b224047d1505d3c298b250",
+				"foes": 15,
+				"hash": "0966d450b74146abc575a426dcd442d285192a22b2e5d35c34572657e3ad0794",
 				"heartstone_health": 20,
 				"tick": 3000,
 				"towers": 6,
 				"wave": 5
 			},
 			{
-				"buttons": 82,
-				"events": "c9794214c3fc643ea4fdff40515a1f8c8b5147e87a400bfc8619ef51f56ff1c0",
-				"foes": 2,
-				"hash": "dd07e3ded62db1ff4c7710367f6c02576bd0676040cf47655d6b8dd21fce206a",
+				"buttons": 12,
+				"events": "2d931a2eaee6b0476e42b34b32ccbcd22b7f093890755559be1b238a99891b52",
+				"foes": 7,
+				"hash": "da9632c34c47a4d71846d9c0bcde001313943d64c9908745c49bba44897852d3",
 				"heartstone_health": 20,
 				"tick": 3600,
 				"towers": 7,
 				"wave": 5
 			},
 			{
-				"buttons": 35,
-				"events": "55d1af24850d45d8cd209e7f2cd4b25e598f447c70f060d688eea76ec0ef27b1",
+				"buttons": 96,
+				"events": "a29868095e0ad51adce16dd760cb9c0259d24586e71d3fbfc0d1a3cc3d9e4c51",
 				"foes": 1,
-				"hash": "0f03a31abe2fbb86d0afebe0ac8f4808898c29419a190770457844f6634aaec1",
+				"hash": "29b38e446a34fef18948acba279fec17cf344d65ffae233ae1d3352b74975375",
 				"heartstone_health": 20,
 				"tick": 4200,
-				"towers": 8,
-				"wave": 6
+				"towers": 7,
+				"wave": 5
 			},
 			{
-				"buttons": 35,
-				"events": "e87302869b6b49642760b6029d9d54b5173fc2b5ff653dae6e9abf8f1f4f0ad0",
-				"foes": 10,
-				"hash": "3f9851d0fa41ac305fa8701453338afd2320e5a55b1cfd761527073bf696c690",
+				"buttons": 13,
+				"events": "52241e21b0d49d5ac41adaad33b6cdd4e8db1e793e030d147aca571b31914c07",
+				"foes": 12,
+				"hash": "dbb892ed50a8ccf48238dae8c8065e8648c23471ce0d734b95259e37d3f15fa6",
 				"heartstone_health": 20,
 				"tick": 4800,
 				"towers": 9,
 				"wave": 6
 			},
 			{
-				"buttons": 62,
-				"events": "1932908b1a445191ac9e3069d8eeac6c1a6472bc6e463b3415a5e68fcc5af750",
-				"foes": 3,
-				"hash": "6d8cf264b7506a79170e73a8a59696b390f8848cf32f9dc77a51486eb584ce6e",
+				"buttons": 69,
+				"events": "269ecead6e3dd71d50a9f5d0a827ebe4555519d83553589bdab6c8e391eb2c10",
+				"foes": 4,
+				"hash": "30fb774a9be520fce11c6cce03359720cb0a9b6466923e7b171c0f32407f2aa5",
 				"heartstone_health": 20,
 				"tick": 5400,
+				"towers": 9,
+				"wave": 6
+			},
+			{
+				"buttons": 62,
+				"events": "d06551b1865f55e8e56ed6b881764ec43ec249721b32f791c48b0288ae5c0aa2",
+				"foes": 3,
+				"hash": "b275eb4490e72445556f33b9998401160f5c3cabddc2c4abc3b35d4fdea31f93",
+				"heartstone_health": 20,
+				"tick": 6000,
 				"towers": 10,
 				"wave": 7
 			},
 			{
 				"buttons": 37,
-				"events": "b2824edfbe200a950df824920da610c213d786c5400e877bf20b8a96bc732e87",
+				"events": "34f6252a36d48fa634595487d83d41d7576dbde7b3ccdedec2e1e5da4879adcb",
 				"foes": 5,
-				"hash": "d48b76a68f950c05490af1c4c901a44740b84130d320b4acf81c7ae56f938049",
+				"hash": "8bbc3e31839c87a4ef4965fa01ca0d3c772ab6c80aa7841515831bf2449ac778",
 				"heartstone_health": 20,
-				"tick": 6000,
+				"tick": 6600,
 				"towers": 11,
 				"wave": 7
 			},
 			{
-				"buttons": 47,
-				"events": "34a2253b3fa66452833a864a6b00e7532f93033b25816bdb62c0bf3a6df2f071",
-				"foes": 1,
-				"hash": "6cdd3e2fa7a1517dbc693d53a074f94d3d9a20067d6238c24d79dd6f26ef34e1",
+				"buttons": 2,
+				"events": "0e4101fe91d2617b11318c76a918d1a0252c2b5e7d4f007d115240f6e2e18ba5",
+				"foes": 4,
+				"hash": "0276e4354a75703c7af5a2a506e4ce6a098c27859cf4f1d2a3b25cc9af2864c2",
 				"heartstone_health": 20,
-				"tick": 6600,
+				"tick": 7200,
+				"towers": 12,
+				"wave": 7
+			},
+			{
+				"buttons": 47,
+				"events": "e6557e932427440eb9b1ef77056050eb5c95ed1ec63a711dcbec9bec75a15c21",
+				"foes": 1,
+				"hash": "1a6115ac76ae4bad964689800e9858b53d10f65989f97d7c1ec08093a5ea3b43",
+				"heartstone_health": 20,
+				"tick": 7800,
 				"towers": 12,
 				"wave": 7
 			},
 			{
 				"buttons": 1,
-				"events": "38101f8c9b78f4724cbdac11b67ea202b8ca8cbe1dca38983b60868af5c859e6",
-				"foes": 8,
-				"hash": "b9a14e8efea54b36dccb9609bcb869c00f8c83bde4e855c921800f344f20ae83",
+				"events": "c4163d3f1b9b84db1b7ad694c519a0355c6da97ec7790109cd723e3d56e170ca",
+				"foes": 7,
+				"hash": "eced4967eff8842588e2d381d4cbac086c0baa20e935d9fef0db68f012bcdd0a",
 				"heartstone_health": 20,
-				"tick": 7200,
-				"towers": 12,
+				"tick": 8400,
+				"towers": 13,
 				"wave": 8
 			},
 			{
-				"buttons": 49,
-				"events": "7e2f4222580a776970d4a113b2127ee8dedc9ada90c13c6949843edd485440dc",
-				"foes": 14,
-				"hash": "731c3fdbc28a4e43fc7e8b219d91be84190e463baf2e5ba3c040af8d654afb0b",
+				"buttons": 53,
+				"events": "9122c18a98bea5e7b58882ab4cf4b12421e4f550577d8e82ebf238b0f873b3dd",
+				"foes": 2,
+				"hash": "e409a4f131f91dac69d4ee139a512bda645d054b46a495658330561406a1779c",
 				"heartstone_health": 20,
-				"tick": 7800,
-				"towers": 12,
+				"tick": 9000,
+				"towers": 13,
+				"wave": 8
+			},
+			{
+				"buttons": 17,
+				"events": "c6a4c51524d9a4429c52d3f2d86462a6f3b3f58475c31e9edc917bb803b5baf7",
+				"foes": 11,
+				"hash": "e50a73bb9239fa753e865fe272e949653981760a6d9918a9f0576d1c731e3c6d",
+				"heartstone_health": 20,
+				"tick": 9600,
+				"towers": 13,
 				"wave": 9
 			},
 			{
 				"buttons": 5,
-				"events": "304e8928c27aa8fe875b896a0fe346d33bd00c1e8b776d473fcb81bd3644981e",
-				"foes": 9,
-				"hash": "666fe157b38110c856fa5011d977ca1b22043062a5474d587ebaae0b1f312b24",
-				"heartstone_health": 20,
-				"tick": 8400,
-				"towers": 12,
-				"wave": 9
-			},
-			{
-				"buttons": 65,
-				"events": "6c5ae2098b0a3b4d160528e497fbca223126f510cb6867e1eeac984da6494fe2",
-				"foes": 5,
-				"hash": "185f931e18df2aa9cd4478d7f791c5da4409303a41668a1053e9f24c8db85980",
-				"heartstone_health": 20,
-				"tick": 9000,
-				"towers": 12,
-				"wave": 9
-			},
-			{
-				"buttons": 35,
-				"events": "e40f3eaed1e3bdafc0d121e69668d2766f3ff82f5b33eb04cd3f09fe28e8bce7",
-				"foes": 1,
-				"hash": "5f55dfc48ba2ff50e6c9ba726adadc0b2511b1616722457f74d19c9165e4970e",
-				"heartstone_health": 20,
-				"tick": 9600,
-				"towers": 12,
-				"wave": 9
-			},
-			{
-				"buttons": 63,
-				"events": "0c1ea53e4dbb2c2494393cb8d921c6a9ca4168026568e9578eb5c8b52544d51f",
-				"foes": 17,
-				"hash": "fba140243eeffc3615907945b4f4d06bf1ceee84fdbef0608fac1d9d82eda50f",
+				"events": "002fa91197d90c52afdd51b973b5035f9bcee8d0bb31aa9175f3f32f542628c8",
+				"foes": 7,
+				"hash": "e51cae7c7c93c9833720162209e43d487f4f512fb8a0233ef4f5aa765d593011",
 				"heartstone_health": 20,
 				"tick": 10200,
-				"towers": 12,
-				"wave": 10
+				"towers": 13,
+				"wave": 9
 			},
 			{
-				"buttons": 22,
-				"events": "7a3afd712a3847ca2fd094865f81807311127947bdb3a78ee3030ca8f5bf2fa7",
-				"foes": 3,
-				"hash": "225b55e4ecd51146084fe4a4d4a098a7be344e885eddca11795abf2c83466386",
+				"buttons": 50,
+				"events": "fad5269ded6efcc1d6ee9dab7cd869acc09ad1027fc9693510aff3e6e9f90d70",
+				"foes": 4,
+				"hash": "27e22ca67d22d2b78a9a42e78581ed0732ddb58bde9aa8cec557b6008ed0440f",
 				"heartstone_health": 20,
 				"tick": 10800,
-				"towers": 12,
-				"wave": 10
+				"towers": 13,
+				"wave": 9
 			},
 			{
-				"buttons": 54,
-				"events": "caabfe086c27d1af29e20fa0513f74cc9c41174c68edf8daeaca1ce1c17d63eb",
-				"foes": 1,
-				"hash": "71f427bfb46c177d44ad29f98d70481ba344cf6bb3af6f52045861a4e58396dd",
+				"buttons": 53,
+				"events": "a21f9512d7243338dbb4b4207b86eff93a3d4983d1e036d9da402cef8865d158",
+				"foes": 7,
+				"hash": "388eb3b647bc195ca9de3a9db0e8a702ab97fe439c001628d9d2c6b2eca1a95e",
 				"heartstone_health": 20,
 				"tick": 11400,
-				"towers": 12,
+				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 54,
-				"events": "0168b2448b60e53ff7f88f698bb1fbf0ef882a0f5b1d94643914d42aff2bc72e",
-				"foes": 1,
-				"hash": "4eab26317ca92a04b5b0d66e44d1ff19e82160f955025679c9c97899ea5eaa94",
+				"buttons": 18,
+				"events": "d98005cd99e3651e3628c8f091e5ee9b28b7a101b30e4f685042f22500beabc7",
+				"foes": 7,
+				"hash": "678a45d2852892cdae05fa36f2bce8076f22096e8b58ae99fe3bc9d067bdbd9a",
 				"heartstone_health": 20,
 				"tick": 12000,
-				"towers": 12,
+				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 54,
-				"events": "b6cef0f8e8ce97892cb1e2acd20afe1d077b60b21a994f4652b941faef9fd1a5",
-				"foes": 0,
-				"hash": "cace5f96cc296166a3254d6ab731a0a112445e808f4498675fae333b89cbd991",
+				"buttons": 8,
+				"events": "99ac33d62dde0f69637bd0804e78a1247dd0fef636b305df529a000baafa670f",
+				"foes": 2,
+				"hash": "14be2b4acace93628e8b6f50b2a4f8609010ffdedec76fe532818086e7072bc6",
 				"heartstone_health": 20,
 				"tick": 12600,
-				"towers": 12,
+				"towers": 13,
 				"wave": 10
 			},
 			{
-				"buttons": 70,
-				"events": "603b2927824cc9f4483bab71c58f652f255caa99a5084afb2440e3d5c7a4f4b6",
-				"foes": 11,
-				"hash": "013a2c63bef9c6717db9c36a5e6781f6d4a59fd25d7da160ad0a8d87f7feb354",
+				"buttons": 24,
+				"events": "e4ecf775e1aa167913d6aba43afef4a4b46bec4852f2c3f33c6b72579d9dfe4f",
+				"foes": 1,
+				"hash": "06e619903ad695e31c143697aa1ec49b141fdb366fe3ee62805f2196a037fc93",
 				"heartstone_health": 20,
 				"tick": 13200,
-				"towers": 12,
-				"wave": 11
+				"towers": 13,
+				"wave": 10
 			},
 			{
-				"buttons": 56,
-				"events": "5ee434c06cf83f697df337e28845793ac0b9a5034f66cb453d8cfa2e94271069",
-				"foes": 5,
-				"hash": "fcbdc1da43c69ba64ecbfe20a0576e8920bab17cbd8b0f4b3d83a6d1f1eb42af",
+				"buttons": 24,
+				"events": "e767834ec90ce3b9957ab964d9d7323e84ff65afdfb8bcfb0da0d6bedc571532",
+				"foes": 1,
+				"hash": "f937f2634394b54d5e569332d979f07bcd8dee156853d943c3a2c9cb5813268f",
 				"heartstone_health": 20,
 				"tick": 13800,
-				"towers": 12,
+				"towers": 13,
+				"wave": 10
+			},
+			{
+				"buttons": 14,
+				"events": "50704ab23b54df8aeb277faf852e5a13026d2b54599c0da1f9fc973cb63ecc9b",
+				"foes": 13,
+				"hash": "a5ef54c4f84f5e4a1a22dfe4ee7fec9d2ee421ff295aa762f5f3a57e668a22fb",
+				"heartstone_health": 16,
+				"tick": 14400,
+				"towers": 13,
 				"wave": 11
 			},
 			{
-				"buttons": 22,
-				"events": "9f1455feb960885cec500fc853e8611ebd5e4038ba6253a894dcdd763d2c12cd",
-				"foes": 19,
-				"hash": "b99cc0cb5a7ec3d53702799f7ab55725f2f8423f992237561a87dc6201a0fc82",
-				"heartstone_health": 20,
-				"tick": 14400,
-				"towers": 12,
-				"wave": 12
-			},
-			{
-				"buttons": 64,
-				"events": "ce87dc266351088ebb5281b37c7058ffb6930cfda6a2e4931c9dd061cce68487",
-				"foes": 3,
-				"hash": "794216e67379606a31f14a194a4c8de99f960c74c8db28712fc861e5c84f5bb7",
-				"heartstone_health": 20,
+				"buttons": 40,
+				"events": "4d27842a0a36ddb37d0d0c88ca9ee0ae289f51847e0f7cb7dd950883b0c3054b",
+				"foes": 11,
+				"hash": "f75050a5a672823106933322e949a12209daf3ff5c28be9477eec34afd108492",
+				"heartstone_health": 16,
 				"tick": 15000,
-				"towers": 12,
+				"towers": 13,
+				"wave": 11
+			},
+			{
+				"buttons": 42,
+				"events": "f1ac12a0948c76277e9ca859ced0bad3d03059618fc302f22366f4e91999d52f",
+				"foes": 1,
+				"hash": "bc113d9a9a188382066d59ba60307926e73b52c91289eb2c611a80758e8c426f",
+				"heartstone_health": 10,
+				"tick": 15600,
+				"towers": 13,
+				"wave": 11
+			},
+			{
+				"buttons": 12,
+				"events": "30b6e74fd77dc18eb4cf5ef85000c6cbdd0efad4b68e64273c350070330cb3da",
+				"foes": 7,
+				"hash": "51842598501d7cf3147279bbae44411ed79a89edd79c0d1437746d31b8a92612",
+				"heartstone_health": 8,
+				"tick": 16200,
+				"towers": 13,
 				"wave": 12
 			},
 			{
-				"buttons": 55,
-				"events": "0143f5b82f666e7cbc5e4c32e3b3f78d7e397e290658ab1ebe17cabadbaff254",
-				"foes": 20,
-				"hash": "53fd44d7832bba252c933e2d73b6154b82a71439a89e8dddf2107e453de7ed7e",
-				"heartstone_health": 20,
-				"tick": 15600,
-				"towers": 12,
-				"wave": 13
-			},
-			{
-				"buttons": 49,
-				"events": "c5af9abdcffdc7ecebbf296b03141bb0bc3f5444de2e3f447808724ee913d245",
-				"foes": 7,
-				"hash": "f3c78c87ca901b1e37bae0209e89299964208ce757d483db9d07108239114012",
-				"heartstone_health": 20,
-				"tick": 16200,
-				"towers": 12,
-				"wave": 13
-			},
-			{
-				"buttons": 151,
-				"events": "c27e707ed235ef492130512cda4023fe2b546d16bc6843ac86e2ddefe799b44d",
-				"foes": 1,
-				"hash": "81ede7d730f572360df1bce772c1f2d60f785a67957e5cfd9942fad78cd52c0b",
-				"heartstone_health": 20,
-				"tick": 16800,
-				"towers": 12,
-				"wave": 13
-			},
-			{
-				"buttons": 143,
-				"events": "c1c84554be979c669e078eefa4dbb4d46c3ca697b00cd57f4568ed3c36d0d853",
-				"foes": 16,
-				"hash": "ce0e2cd7cd84eede6521e117168dfbe086fc37d15fc20d5240bd2b70181fcff9",
-				"heartstone_health": 20,
-				"tick": 17400,
-				"towers": 12,
-				"wave": 14
-			},
-			{
-				"buttons": 149,
-				"events": "9a395bd8517d5d720d9cda843c83a6b595917b66bce823f4179c4b781adb9742",
+				"buttons": 97,
+				"events": "3834646449a075da8e8bd4c70933d64baad6f0702c83da2c02fb1172061a6cf7",
 				"foes": 2,
-				"hash": "11f72c5fdbe044d98b841299187a4840bf0f2f9413abee21bd5b338bd3c51254",
-				"heartstone_health": 20,
+				"hash": "b6d228ea9dab8ffa48c3a1848f71ac17eb59ce4131734800380dfccba0d75662",
+				"heartstone_health": 8,
+				"tick": 16800,
+				"towers": 13,
+				"wave": 12
+			},
+			{
+				"buttons": 99,
+				"events": "074fe3f85cf6c38670662c174707ac8674eb7426b5389fc76b2053427cde4dee",
+				"foes": 17,
+				"hash": "bc28268aeef8e51fd4718a52d81743df6e38d45062e60879d1f3c679ae534254",
+				"heartstone_health": 8,
+				"tick": 17400,
+				"towers": 13,
+				"wave": 13
+			},
+			{
+				"buttons": 72,
+				"events": "56f105626602241da48597e31e4f8a0976c38ad8473120d512ac3265771d1f23",
+				"foes": 6,
+				"hash": "6f2bfe9f096f601e5136a90114ec24a17f389e5fbd4b18da7efd69134ea6cc13",
+				"heartstone_health": 8,
 				"tick": 18000,
-				"towers": 12,
+				"towers": 13,
+				"wave": 13
+			},
+			{
+				"buttons": 117,
+				"events": "d671f32b8203e79a5754940afa3a40dcbb9940861e8e013f61fc7e3b29e1e0ed",
+				"foes": 18,
+				"hash": "39b3a7975e557203608c4d8b9f3cceb1865a0d4986cc6950f538b79c9d87543d",
+				"heartstone_health": 6,
+				"tick": 18600,
+				"towers": 13,
 				"wave": 14
 			},
 			{
-				"buttons": 142,
-				"events": "308a9aaf954cf188c259a08664e74332816a8afbb09419828770be7c95ce97ba",
-				"foes": 19,
-				"hash": "30c6a8f4e6f463a355b337ac54aa217c86641f09d01a326caa894c913a1b1e62",
-				"heartstone_health": 20,
-				"tick": 18600,
-				"towers": 12,
-				"wave": 15
-			},
-			{
-				"buttons": 104,
-				"events": "d5b395669281ea2e021884ff97ab2519a5a7d1b8113b2ada9415be9a6e755b72",
-				"foes": 18,
-				"hash": "a0fef6fd883abce954043561fac7fcb45b11124905b84ad1e8fd8a8a01d7d03c",
-				"heartstone_health": 20,
-				"tick": 19200,
-				"towers": 12,
-				"wave": 15
-			},
-			{
-				"buttons": 175,
-				"events": "35746cf4b04a9c427817c49946ef9b33ee6148c7bb3e079c0b4262f6471eeecc",
+				"buttons": 156,
+				"events": "f4e2935ca0d493c33173f22b60293d616cb16cbecbc885ff956538958bc23afb",
 				"foes": 1,
-				"hash": "a5bb8f33bb6ac011e884a43f2d9d86994f5e01c0872fa9983ecd4514b8dec39d",
-				"heartstone_health": 20,
+				"hash": "07c10d1a660906d49dcac08f9eda479b83a8287f821317f45d36e861ed725298",
+				"heartstone_health": 6,
+				"tick": 19200,
+				"towers": 13,
+				"wave": 14
+			},
+			{
+				"buttons": 158,
+				"events": "0e3eb5914728a6a998aded09d33abd20b17ef998f96774f0d2ab41e2d97055a3",
+				"foes": 25,
+				"hash": "d02c3ec2c3e3184fea8002838b6fbd2b9690da99b65f3e33cdb0f486e670722d",
+				"heartstone_health": 4,
 				"tick": 19800,
-				"towers": 12,
+				"towers": 13,
 				"wave": 15
 			},
 			{
-				"buttons": 366,
-				"events": "2c479628029a127afad1e503fcf45b8026197925c86ffde0361874f2ba9c8996",
-				"foes": 22,
-				"hash": "bbfc07205f9c129972d0a9f060c007ed3922d46c41b22a41890a3f35fc278110",
-				"heartstone_health": 20,
+				"buttons": 80,
+				"events": "6cbd1a137822869ce75c3573ced906d9f76a14a83578215d662460d27c40961e",
+				"foes": 6,
+				"hash": "c8d737379edfd4651788ed766d4a60cf463dc2dd0cd5a26a566f765558c28e38",
+				"heartstone_health": 3,
 				"tick": 20400,
-				"towers": 12,
-				"wave": 16
+				"towers": 13,
+				"wave": 15
 			},
 			{
-				"buttons": 570,
-				"events": "cc83db2612440dd50f2b3a363380460b1f1781668c7c9dca0b0360b9494097ee",
-				"foes": 3,
-				"hash": "c3a859c3c3d45210623cfaa01c902ea1bafab3a5edca8b237ea448d60ed55ada",
-				"heartstone_health": 20,
+				"buttons": 155,
+				"events": "7d5cfe8cecc7afddb4de963d259dec2d2e48158cae1230fa6ae60511bace1235",
+				"foes": 1,
+				"hash": "932e4f101164fdc3303ffb374e6ae002c816acfb38b7195641ea202ed1e7a5d5",
+				"heartstone_health": 3,
 				"tick": 21000,
-				"towers": 12,
+				"towers": 13,
+				"wave": 15
+			},
+			{
+				"buttons": 82,
+				"events": "f3bc24267bbc3aee38020db1fb2d9da09885d352aaacf1421e9c69e6da1dfe14",
+				"foes": 17,
+				"hash": "a8fb2b803ac5e24a0c7a8c62bfe358be5ab0fdbcf9ab159f797e5492c7cdc8aa",
+				"heartstone_health": 3,
+				"tick": 21600,
+				"towers": 13,
 				"wave": 16
 			},
 			{
-				"buttons": 747,
-				"events": "5cb8e3f5771919d0c3a1c40d22f081aa5c0eea6163987954cd56c776ad4b4cd7",
-				"foes": 32,
-				"hash": "bf9c3c8c015fbb56ddde4dec8589274216301cd8fdbf2a7d69dab86369248cb9",
-				"heartstone_health": 20,
-				"tick": 21600,
-				"towers": 12,
-				"wave": 17
-			},
-			{
-				"buttons": 963,
-				"events": "6abcd8b880ab59ebb48a1449db8f51bb20167136cd8d00cc26c93aa3383f3279",
-				"foes": 6,
-				"hash": "c6003ab04f4e929168d25cf733c7af771fd6eb78934cfe176e5bff29f3f27e76",
-				"heartstone_health": 20,
+				"buttons": 268,
+				"events": "d51d89c43614df1ed6808b75c69e8db598b763fabdb60744b752c85a511e51c3",
+				"foes": 1,
+				"hash": "c19043aab5ce6e05d3d2b437b3064f65407b6e3fa08d5266eb10e41214067506",
+				"heartstone_health": 3,
 				"tick": 22200,
-				"towers": 12,
-				"wave": 17
+				"towers": 13,
+				"wave": 16
 			},
 			{
-				"buttons": 1126,
-				"events": "4f362fabe53db78db43b8ed8b6295083bbd1297a4fccbd930ad3b4e0663c5405",
-				"foes": 10,
-				"hash": "4c085b8b5a5ab91e30fc0d7f813a2d533c6fabbb544a4da6ceb8830d1e70e09a",
-				"heartstone_health": 20,
-				"tick": 22800,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 1340,
-				"events": "962ef5357e91c1891a3763c7acf643b56e2012182531070b35751ffe6d811f70",
-				"foes": 17,
-				"hash": "450fac4fda7957f8c30648752f6f8b1a5f2befd84661a493ad157782619f8754",
-				"heartstone_health": 20,
-				"tick": 23400,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 1420,
-				"events": "1e1930dae4569e1b063672cf5e6e647bfbd5e1f9838ccb7fc44ea7a3895cfad1",
-				"foes": 13,
-				"hash": "dff2140ebb98649e12a9ca184e475bd1bab62032b57e4fb06fa1007fc90f1612",
-				"heartstone_health": 20,
-				"tick": 24000,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 1560,
-				"events": "35c6029aaa4f5d5ddb3024d5153ea8ebfb13b283e6bb9a1f6136ae394ad1775c",
-				"foes": 6,
-				"hash": "ab258aaf200a8ece582b79a1187501399f8ef916a04f884b3686c4ae7378e986",
-				"heartstone_health": 20,
-				"tick": 24600,
-				"towers": 12,
-				"wave": 18
-			},
-			{
-				"buttons": 1740,
-				"events": "ea2bea0c5aceefc362617a877742b7101c39595314ff683ffb9d61f8069967bb",
-				"foes": 30,
-				"hash": "03f58f2c8fbede5f700fff743adfb55fb3995bc5a383ef50ea8da2405624fa70",
-				"heartstone_health": 8,
-				"tick": 25200,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 1881,
-				"events": "5e4fe8fefaa4ff4b029ef96e6deceb575c301d004c2d3cc536da8dee623cb3fe",
-				"foes": 12,
-				"hash": "0249c44c217e399e37e99c543b44576638035d5dfc8a83bf659904c9d577c741",
-				"heartstone_health": 8,
-				"tick": 25800,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 2021,
-				"events": "b968b8a0daa1ab15af8fa56b7ed7418b2f553b150c769b28c1a61036171825a5",
+				"buttons": 334,
+				"events": "2f087e91149b5ff41bb71d116b6f09a4a391e216528171f833e67ad115553289",
 				"foes": 5,
-				"hash": "2afc786fb6f19cebf2df444231ea724efb58882b088ee5893638d9b50c3670fd",
-				"heartstone_health": 8,
-				"tick": 26400,
-				"towers": 12,
-				"wave": 19
-			},
-			{
-				"buttons": 2189,
-				"events": "1553f03fa00245f4f273c69adc6a2be3e6c45eb9d357d24a50dbc3dd4a33c80b",
-				"foes": 31,
-				"hash": "a2ec39eb103aeb6d12295b55af875ba8735a1c610e3262a9b438dc7f81790147",
-				"heartstone_health": 6,
-				"tick": 27000,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2407,
-				"events": "376845e9b151c005845c15a9a19780bcfeac9683ec884f180ffba4324adb4187",
-				"foes": 17,
-				"hash": "ef370f28c973ff6c2babec47c16f3762fcc728d1d21f4b5235b09378d101337c",
-				"heartstone_health": 6,
-				"tick": 27600,
-				"towers": 12,
-				"wave": 20
-			},
-			{
-				"buttons": 2512,
-				"events": "50b63fe56ce853b86ed16a436fdb8d8940e500911e6bfbef24700056188bb9be",
-				"foes": 12,
-				"hash": "530b666fd72cb08b6d65da5a8a71bce2a174a9d2bdf2f4914275a93ea6f6db19",
-				"heartstone_health": 6,
-				"tick": 28200,
-				"towers": 12,
-				"wave": 20
+				"hash": "25e57441081ec931aad4d8a5307d3d258eb092f2cf2f326185aa98d2932da293",
+				"heartstone_health": 3,
+				"tick": 22800,
+				"towers": 13,
+				"wave": 17
 			}
 		],
 		"commands": [
@@ -4183,290 +3979,295 @@
 				1,
 				"build",
 				"thimbleMortar",
-				11,
-				8
+				6,
+				5
 			],
 			[
 				353,
 				"launch_wave"
 			],
 			[
-				457,
+				467,
 				"build",
 				"prismSpire",
-				6,
-				4
+				11,
+				8
 			],
 			[
-				677,
+				737,
 				"build",
 				"spoolGuard",
 				11,
 				5
 			],
 			[
-				677,
+				737,
 				"launch_wave"
 			],
 			[
-				1060,
+				1116,
 				"build",
 				"guardTent",
 				3,
 				7
 			],
 			[
-				1110,
+				1160,
 				"launch_wave"
 			],
 			[
-				1719,
+				1879,
 				"build",
 				"thimbleMortar",
-				3,
-				1
+				0,
+				4
 			],
 			[
-				1999,
+				2179,
 				"launch_wave"
 			],
 			[
-				3108,
+				3583,
 				"build",
 				"messTent",
 				0,
 				9
 			],
 			[
-				4170,
+				4327,
 				"build",
 				"prismSpire",
-				0,
-				4
-			],
-			[
-				4170,
-				"launch_wave"
-			],
-			[
-				4467,
-				"build",
-				"spoolGuard",
 				6,
 				8
 			],
 			[
-				5196,
+				4327,
+				"launch_wave"
+			],
+			[
+				4612,
+				"build",
+				"spoolGuard",
+				2,
+				1
+			],
+			[
+				5604,
 				"build",
 				"thimbleMortar",
 				9,
 				2
 			],
 			[
-				5365,
+				5961,
 				"launch_wave"
 			],
 			[
-				5680,
+				6246,
 				"build",
 				"prismSpire",
 				14,
 				5
 			],
 			[
-				6070,
+				6853,
 				"build",
 				"spoolGuard",
 				14,
 				9
 			],
 			[
-				6637,
+				7805,
+				"build",
+				"guardTent",
+				6,
+				1
+			],
+			[
+				7805,
+				"launch_wave"
+			],
+			[
+				8044,
 				"upgrade",
 				0
 			],
 			[
-				6637,
-				"launch_wave"
-			],
-			[
-				6890,
+				8396,
 				"upgrade",
 				25
 			],
 			[
-				7199,
+				9012,
 				"upgrade",
-				101
+				100
 			],
 			[
-				7532,
+				9121,
+				"launch_wave"
+			],
+			[
+				9322,
 				"upgrade",
 				134
 			],
 			[
-				7682,
-				"launch_wave"
-			],
-			[
-				7902,
+				9538,
 				"upgrade",
 				40
 			],
 			[
-				8286,
+				10194,
+				"upgrade",
+				135
+			],
+			[
+				11181,
 				"upgrade",
 				1
 			],
 			[
-				9211,
-				"upgrade",
-				20
-			],
-			[
-				9661,
+				11209,
 				"launch_wave"
 			],
 			[
-				9878,
+				11679,
+				"upgrade",
+				22
+			],
+			[
+				11900,
 				"upgrade",
 				59
 			],
 			[
-				10243,
+				12531,
 				"upgrade",
 				88
 			],
 			[
-				10676,
+				14222,
 				"upgrade",
 				110
 			],
 			[
-				12543,
+				14270,
 				"upgrade",
 				133
 			],
 			[
-				12566,
+				14270,
+				"launch_wave"
+			],
+			[
+				14754,
 				"upgrade",
 				87
-			],
-			[
-				12600,
-				"launch_wave"
-			],
-			[
-				12978,
-				"upgrade",
-				0
-			],
-			[
-				13460,
-				"upgrade",
-				25
-			],
-			[
-				13962,
-				"upgrade",
-				40
-			],
-			[
-				14106,
-				"launch_wave"
-			],
-			[
-				14348,
-				"upgrade",
-				101
-			],
-			[
-				14675,
-				"upgrade",
-				134
-			],
-			[
-				15153,
-				"launch_wave"
 			],
 			[
 				15300,
 				"upgrade",
+				0
+			],
+			[
+				15685,
+				"launch_wave"
+			],
+			[
+				15880,
+				"upgrade",
+				25
+			],
+			[
+				16121,
+				"upgrade",
+				40
+			],
+			[
+				16825,
+				"upgrade",
+				100
+			],
+			[
+				17012,
+				"launch_wave"
+			],
+			[
+				17464,
+				"upgrade",
+				134
+			],
+			[
+				17780,
+				"upgrade",
+				135
+			],
+			[
+				18229,
+				"upgrade",
 				1
 			],
 			[
-				15959,
-				"upgrade",
-				20
+				18229,
+				"launch_wave"
 			],
 			[
-				17032,
+				18723,
+				"upgrade",
+				22
+			],
+			[
+				19291,
 				"upgrade",
 				59
 			],
 			[
-				17032,
+				19291,
 				"launch_wave"
 			],
 			[
-				17473,
+				19801,
 				"upgrade",
 				87
 			],
 			[
-				18203,
+				20246,
 				"upgrade",
 				88
 			],
 			[
-				18235,
-				"launch_wave"
-			],
-			[
-				18782,
+				21004,
 				"upgrade",
 				110
 			],
 			[
-				19411,
+				21004,
+				"launch_wave"
+			],
+			[
+				21478,
 				"upgrade",
 				133
 			],
 			[
-				19848,
-				"launch_wave"
-			],
-			[
-				21304,
-				"launch_wave"
-			],
-			[
-				22753,
-				"launch_wave"
-			],
-			[
-				24762,
-				"launch_wave"
-			],
-			[
-				26656,
+				22776,
 				"launch_wave"
 			]
 		],
 		"final": {
-			"buttons": 2638,
-			"events": "fbee09a6da26af837920a7dc5c663cc48035e8a3e2a08fe5fc1397b68f105755",
-			"foes": 3,
-			"hash": "cf91b479c8defb8ba8be6006049586a540ca8521e800b4f486c58c781d641ad6",
+			"buttons": 563,
+			"events": "9a7da2f8897d861560da1df34ad81035ba42a8bd9527550e9bf31411e4eca4cf",
+			"foes": 8,
+			"hash": "93766e6f9330e97857c247a2d47380fcc930a9a331ab9dfbccee05dbd426d63c",
 			"heartstone_health": 0,
-			"tick": 28735,
-			"towers": 12,
-			"wave": 20
+			"tick": 23276,
+			"towers": 13,
+			"wave": 17
 		},
 		"max_waves": 20,
 		"outcome": "lost",
 		"profile": "guardMix",
 		"seed": 2,
-		"ticks": 28735
+		"ticks": 23276
 	}
 ]

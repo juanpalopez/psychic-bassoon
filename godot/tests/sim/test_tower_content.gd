@@ -48,10 +48,10 @@ func test_the_numbers_started_from_the_prototype_and_were_tuned_with_the_bot() -
 	# it still hurts the Corrugated Orc's heavier armor), the Mortar its Catapult
 	# (damage trimmed from 32, 56, 96: untrimmed it wins nearly every map)
 	assert_eq(TOWERS.DEFS.spoolGuard.cost, [50, 60, 110])
-	assert_eq(TOWERS.DEFS.spoolGuard.damage, [14, 23, 38])
+	assert_eq(TOWERS.DEFS.spoolGuard.damage, [12, 20, 33])
 	assert_eq(TOWERS.DEFS.spoolGuard.rate, [3.0, 3.6, 4.5])
 	assert_eq(TOWERS.DEFS.thimbleMortar.cost, [90, 90, 160])
-	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [17, 31, 53])
+	assert_eq(TOWERS.DEFS.thimbleMortar.damage, [19, 34, 58])
 	assert_eq(TOWERS.DEFS.thimbleMortar.splash, [0.95, 1.15, 1.35])
 
 
@@ -67,7 +67,7 @@ func test_the_prism_spire_is_a_beam_with_damage_per_second_and_no_rate() -> void
 	assert_false(def.has("rate"))
 	# damage per second, more than doubled from the Storm Spire's damage times its
 	# rate (16, 33, 65) so that a Prism-only build keeps up with the others
-	assert_eq(def.damage, [40, 80, 155])
+	assert_eq(def.damage, [34, 68, 132])
 	assert_eq(def.cost, [100, 90, 160])
 	assert_eq(def.range, [2.3, 2.6, 2.9])
 

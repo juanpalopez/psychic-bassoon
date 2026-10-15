@@ -45,3 +45,12 @@ func test_a_foe_still_on_the_feeder_is_not_held_by_a_post_it_has_not_reached() -
 	foe.distance = game.routes[1].cumulative[game.map.feeder_length + 1] - 0.5
 	GuardKit.tick(game, 1)
 	assert_eq(foe.engaged_guard_id, -1)
+
+
+func test_on_the_old_random_detour_a_foe_of_another_lane_is_never_on_the_main_road() -> void:
+	var game := Game.create(7, 9, 13, true, 1)
+	assert_true(game.random_lanes)
+	assert_gte(game.routes.size(), 2)
+	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 1)
+	foe.distance = 8.0
+	assert_eq(Barracks.main_distance(game, foe), -1.0)

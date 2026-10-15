@@ -28,7 +28,7 @@ func test_most_maps_get_a_second_route() -> void:
 	for map_seed in _seeds:
 		if _map(map_seed).routes.size() == 2:
 			with_second += 1
-	assert_gte(with_second, 50, "at least 5 maps in 6 have room for the feeder")
+	assert_gte(with_second, 40, "at least 2 maps in 3 have room for the feeder")
 
 
 func test_the_main_road_is_the_same_with_or_without_the_second_source() -> void:
@@ -68,6 +68,18 @@ func test_the_feeder_only_touches_the_main_road_at_the_join() -> void:
 				var close := _gap(feeder[i], main[m]) < 2
 				var is_join := i == map.feeder_length - 1 and m == map.join_index
 				assert_false(close and not is_join, "seed %d feeder %d main %d" % [map_seed, i, m])
+
+
+func test_the_join_is_in_the_first_part_of_the_road() -> void:
+	for map_seed in _seeds:
+		var map := _map(map_seed)
+		if map.routes.size() < 2:
+			continue
+		assert_lte(
+			map.join_index * 100,
+			map.path.size() * RULES.FEEDER_JOIN_MAX_PERCENT,
+			"seed %d" % map_seed
+		)
 
 
 func test_the_join_is_well_inside_the_road() -> void:
@@ -134,7 +146,10 @@ func test_the_second_roads_foes_enter_at_the_edge_their_road_starts_on() -> void
 		checked += 1
 		var first_step: float = game.routes[1].cumulative[1]
 		assert_lte(first_step, RULES.CELL_CENTRE + RULES.SPAWN_OFFSET + 1e-9, "seed %d" % map_seed)
-	assert_gt(checked, 40)
+		# and the spawn point is off the board, on the edge the road starts on
+		var spawn_y: float = game.routes[1].ys[0]
+		assert_true(spawn_y < 0.0 or spawn_y > float(RULES.GRID_ROWS), "seed %d" % map_seed)
+	assert_gt(checked, 30)
 
 
 func test_the_feeder_order_comes_from_its_own_stream() -> void:
