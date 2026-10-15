@@ -13,9 +13,10 @@ const EARLY_RULES := preload("res://content/game_rules.gd")
 ## The view a run starts in: the whole board, centred (owner decision, 2026-10-14).
 const START_ZOOM := 0.0
 const MESSAGE_SECONDS := 2.0
-## Where the tower card sits: this far from the right edge, and above the build row.
-const CARD_MARGIN := 20.0
-const CARD_ABOVE := 148.0
+## Where the tower card sits: beside the build menu, this far from it and from the edges.
+const CARD_MARGIN := 14.0
+const MENU_ICON := preload("res://assets/icons/menu.svg")
+const CLOSE_ICON := preload("res://assets/icons/close.svg")
 const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
 ## Pixels of drag that one unit of a trackpad pan gesture stands for.
@@ -39,6 +40,7 @@ var _glow_shown := false
 var _stress_foes := 0
 var _fps := FpsOverlay.new()
 var _guide := GuidePanel.new()
+var _auto := AutoWave.new()
 var _progress := IntroProgress.default()
 # whether the game was paused by the player when an overlay opened over it
 var _paused_before_overlay := false
@@ -52,6 +54,7 @@ var _paused_before_overlay := false
 @onready var _shots: ShotsView = $Shots
 @onready var _guards: GuardsView = $Guards
 @onready var _launch: Button = $Hud/LaunchWave
+@onready var _auto_button: Button = $Hud/AutoWave
 @onready var _top_bar: TopBar = $Hud/TopBar
 @onready var _speed_bar: SpeedBar = $Hud/SpeedBar
 @onready var _game_over: GameOverPanel = $Hud/GameOver
@@ -73,12 +76,17 @@ func _ready() -> void:
 	add_child(_audio)
 	_menu_button.toggled.connect(
 		func(on: bool) -> void:
+			_menu_button.icon = CLOSE_ICON if on else MENU_ICON
 			_next_seed.visible = on
 			_sound.visible = on
 			_how_to_play.visible = on
 			_tower_guide.visible = on
 	)
-	_sound.toggled.connect(func(on: bool) -> void: _audio.set_muted(not on))
+	_sound.toggled.connect(
+		func(on: bool) -> void:
+			_audio.set_muted(not on)
+			_sound.text = "Sound on" if on else "Sound off"
+	)
 	$Hud.add_child(_crow)
 	$Hud.add_child(_guide)
 	$Hud.add_child(_intro)
@@ -102,7 +110,13 @@ func _ready() -> void:
 	_panel.sell_pressed.connect(_on_sell)
 	_panel.spec_pressed.connect(_on_spec)
 	_panel.ability_pressed.connect(_on_ability)
-	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
+	_launch.pressed.connect(
+		func() -> void:
+			# a tap during the Auto countdown starts the wave now, and only once
+			_auto.cancel()
+			Game.submit(_game, Command.launch_wave())
+	)
+	_auto_button.toggled.connect(func(on: bool) -> void: _auto.enabled = on)
 	_gestures.tapped.connect(_on_tap)
 	_gestures.panned.connect(_rig.pan_by_pixels)
 	_gestures.pinched.connect(
@@ -120,6 +134,9 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	var ticks_speed := _speed.ticks_speed()
+	# Auto start counts game time, so it holds while paused and runs faster at 2x and 3x
+	if _auto.advance(_game, delta * float(ticks_speed)):
+		Game.submit(_game, Command.launch_wave())
 	if ticks_speed > 0:
 		Frame.step(_game, _clock, delta, ticks_speed, _before_tick, _after_tick)
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
@@ -132,6 +149,9 @@ func _process(delta: float) -> void:
 	_update_launch_button()
 	_sync_intro()
 	_menu.set_buttons(_game.buttons)
+	if _menu.visible:
+		# the camera may have panned or zoomed since the menu opened
+		_place_menu()
 	_refresh_panel()
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
@@ -279,6 +299,7 @@ func select_cell(cell: Vector2i) -> void:
 		return
 	_highlight.show_block(anchor, footprint, height, FREE_COLOUR)
 	_menu.open_for(anchor, _game.buttons)
+	_place_menu()
 	# the intro moves on only when the build row really opened for a free socket
 	_flow.notify(IntroFlow.Event.SOCKET_SELECTED)
 
@@ -286,6 +307,7 @@ func select_cell(cell: Vector2i) -> void:
 ## Starts a fresh game on a map seed.
 func _start(map_seed: int) -> void:
 	_crow.clear()
+	_auto.cancel()
 	_board.map_seed = map_seed
 	_game = Game.create(map_seed)
 	_clock = Clock.new()
@@ -493,14 +515,41 @@ func _free_sockets() -> Array[Vector2i]:
 	return free
 
 
-## Shows a tower's card above the build row (hover, or press and hold).
+## Shows a tower's card beside the build menu (hover, or press and hold): to its right when
+## there is room, else to its left, and always on screen.
 func _on_info_requested(id: String) -> void:
 	_card.show_for(id)
 	_card.reset_size()
 	var port := get_viewport().get_visible_rect().size
+	var menu := Rect2(_menu.position, _menu.size)
+	var x := menu.end.x + CARD_MARGIN
+	if x + _card.size.x > port.x - CARD_MARGIN:
+		x = menu.position.x - CARD_MARGIN - _card.size.x
 	_card.position = Vector2(
-		port.x - CARD_MARGIN - _card.size.x, port.y - CARD_ABOVE - _card.size.y
+		clampf(x, CARD_MARGIN, maxf(CARD_MARGIN, port.x - CARD_MARGIN - _card.size.x)),
+		clampf(menu.position.y, CARD_MARGIN, maxf(CARD_MARGIN, port.y - CARD_MARGIN - _card.size.y))
 	)
+
+
+## Puts the build menu beside the selected socket as it is drawn now.
+func _place_menu() -> void:
+	if _selected == BoardSpace.NO_CELL:
+		return
+	_menu.place_near(_socket_on_screen(_selected), get_viewport().get_visible_rect().size)
+
+
+## The rectangle a socket block covers on screen: its four top corners, projected.
+func _socket_on_screen(anchor: Vector2i) -> Rect2:
+	var footprint := _game.map.footprint
+	var centre := BoardSpace.footprint_centre(anchor, footprint)
+	centre.y = _board.surface_height(anchor)
+	var half := float(footprint) / 2.0
+	var rect := Rect2(_camera.unproject_position(centre), Vector2.ZERO)
+	for corner in [
+		Vector2(-half, -half), Vector2(half, -half), Vector2(half, half), Vector2(-half, half)
+	]:
+		rect = rect.expand(_camera.unproject_position(centre + Vector3(corner.x, 0.0, corner.y)))
+	return rect
 
 
 ## The guide pauses the game while it is open and gives the pause back as the player had it.
@@ -545,6 +594,10 @@ func _update_launch_button() -> void:
 	elif _game.running:
 		var bonus: int = EARLY_RULES.EARLY_CALL_BASE + _game.wave * EARLY_RULES.EARLY_CALL_PER_WAVE
 		_launch.text = "Call wave %d early (+%d)" % [next, bonus]
+		_launch.disabled = false
+	elif _auto.counting():
+		# Auto start: the button counts down, and a tap starts the wave at once
+		_launch.text = "Wave %d in %d" % [next, _auto.seconds_left()]
 		_launch.disabled = false
 	else:
 		_launch.text = "Start wave %d" % next

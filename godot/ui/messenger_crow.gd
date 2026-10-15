@@ -204,7 +204,9 @@ func _build_view() -> void:
 
 func _build_scroll() -> void:
 	_scroll = PanelContainer.new()
+	_scroll.theme_type_variation = &"Receipt"
 	_scroll.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_scroll)
 	_label = Label.new()
+	_label.theme_type_variation = &"Hand"
 	_scroll.add_child(_label)

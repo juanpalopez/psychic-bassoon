@@ -8,6 +8,8 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-15 | decision | Allow SIL OFL 1.1 fonts in godot/assets, for fonts only | assets | none | CLAUDE.md |
+| 2026-10-15 | decision | Offer Auto start: the next wave starts by itself after a cleared wave | ui | none | GDD |
 | 2026-10-16 | decision | Add a second spawn source that merges into the main road after wave 10 | sim | none |  |
 | 2026-10-16 | decision | Build tier 4 as content data plus two commands, one tower pair per PR | sim | none |  |
 | 2026-10-16 | decision | Record lessons and decisions at the end of relevant tasks | harness | none | CLAUDE.md |

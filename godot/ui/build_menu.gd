@@ -1,6 +1,7 @@
-## A strip along the bottom with one button per tower: its name and what it costs. It opens for a
-## free plot, greys out what the player cannot afford, and announces the choice;
-## it does not touch the game (the scene turns the choice into a command).
+## A strip of kraft paper with one token per tower: its icon, name and what it costs. It opens
+## next to the tapped socket (above it when there is room, else below), fades what the player
+## cannot afford, and announces the choice; it does not touch the game (the scene turns the
+## choice into a command).
 class_name BuildMenu
 extends PanelContainer
 
@@ -10,7 +11,21 @@ signal info_requested(tower: String)
 signal info_cleared
 
 const TOWERS := preload("res://content/towers.gd")
-const BUTTON_SIZE := Vector2(172.0, 96.0)
+const BUTTON_SIZE := Vector2(120.0, 176.0)
+## One token picture per tower id.
+const ICONS := {
+	"spoolGuard": preload("res://assets/icons/tower_spool_guard.svg"),
+	"thimbleMortar": preload("res://assets/icons/tower_thimble_mortar.svg"),
+	"prismSpire": preload("res://assets/icons/tower_prism_spire.svg"),
+	"guardTent": preload("res://assets/icons/tower_guard_tent.svg"),
+	"messTent": preload("res://assets/icons/tower_mess_tent.svg"),
+}
+## Room kept clear for the corner controls above and the Start wave row below, and the
+## gap between the menu and the socket it was opened for.
+const TOP_RESERVE := 112.0
+const BOTTOM_RESERVE := 120.0
+const EDGE_MARGIN := 14.0
+const SOCKET_GAP := 12.0
 ## How long a press must last to count as a hold (a look, not a choice).
 const HOLD_SECONDS := 0.4
 
@@ -26,7 +41,7 @@ var _hold_fired := false
 
 func _ready() -> void:
 	visible = false
-	# one row along the bottom, so the board above it stays in view
+	theme_type_variation = &"Kraft"
 	var box := HBoxContainer.new()
 	add_child(box)
 	_hold_timer = Timer.new()
@@ -39,9 +54,13 @@ func _ready() -> void:
 		var def: Dictionary = TOWERS.DEFS[id]
 		button.text = "%s\n%d" % [def.name, def.cost[0]]
 		button.custom_minimum_size = BUTTON_SIZE
+		button.icon = ICONS.get(id)
+		button.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		button.tooltip_text = def.name
 		# long names wrap inside the fixed width, so five towers fit in one row
 		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		button.theme_type_variation = &"StripButton"
+		button.theme_type_variation = &"TowerToken"
 		button.pressed.connect(_choose.bind(id))
 		button.mouse_entered.connect(_hover.bind(id))
 		button.mouse_exited.connect(func() -> void: info_cleared.emit())
@@ -61,6 +80,25 @@ func open_for(plot: Vector2i, buttons: int) -> void:
 	cell = plot
 	set_buttons(buttons)
 	visible = true
+
+
+## Moves the menu next to a socket drawn at `socket` (its rectangle on screen) in a
+## screen of `port` size.
+func place_near(socket: Rect2, port: Vector2) -> void:
+	reset_size()
+	position = placement(socket, size, port)
+
+
+## Where a menu of `menu_size` goes for a socket drawn at `socket`: centred above it when
+## that leaves the corner controls clear, else below it, and always inside the screen
+## between the top and bottom rows of controls.
+static func placement(socket: Rect2, menu_size: Vector2, port: Vector2) -> Vector2:
+	var x := socket.get_center().x - menu_size.x / 2.0
+	x = clampf(x, EDGE_MARGIN, maxf(EDGE_MARGIN, port.x - EDGE_MARGIN - menu_size.x))
+	var above := socket.position.y - SOCKET_GAP - menu_size.y
+	var y := above if above >= TOP_RESERVE else socket.end.y + SOCKET_GAP
+	y = clampf(y, TOP_RESERVE, maxf(TOP_RESERVE, port.y - BOTTOM_RESERVE - menu_size.y))
+	return Vector2(x, y)
 
 
 func close() -> void:

@@ -25,9 +25,13 @@ func _ready() -> void:
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_title.custom_minimum_size = Vector2(TEXT_WIDTH, 0.0)
+	_title.theme_type_variation = &"Title"
 	_detail.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_detail.theme_type_variation = &"Hand"
+	_play_again.theme_type_variation = &"ActionButton"
 	_play_again.text = "Play again"
 	_play_again.custom_minimum_size = BUTTON_SIZE
+	_play_again.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_play_again.pressed.connect(func() -> void: play_again.emit())
 	box.add_child(_title)
 	box.add_child(_detail)

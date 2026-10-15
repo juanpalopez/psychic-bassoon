@@ -1,13 +1,15 @@
-## Pause, and one button that cycles the speed 1x, 2x, 3x. It does not touch the game: it
-## announces the choice and shows which speed is active.
+## Pause, and one button that cycles the speed 1x, 2x, 3x: square cardstock buttons in the
+## top-right corner. It does not touch the game: it announces the choice and shows which
+## speed is active.
 class_name SpeedBar
 extends HBoxContainer
 
 signal speed_chosen(speed: int)
 signal pause_toggled
 
-const PAUSE_SIZE := Vector2(110.0, 96.0)
-const SPEED_SIZE := Vector2(96.0, 96.0)
+const SQUARE := Vector2(88.0, 88.0)
+const PAUSE_ICON := preload("res://assets/icons/pause.svg")
+const PLAY_ICON := preload("res://assets/icons/play.svg")
 
 var _pause: Button
 var _cycle: Button
@@ -15,10 +17,15 @@ var _speed := GameSpeed.SPEEDS[0]
 
 
 func _ready() -> void:
-	_pause = _add_button("Pause", PAUSE_SIZE)
+	_pause = _add_button("Pause", &"IconButton")
+	_pause.icon = PAUSE_ICON
+	_pause.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	_pause.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_pause.tooltip_text = "Pause"
 	_pause.pressed.connect(func() -> void: pause_toggled.emit())
-	_cycle = _add_button("%dx" % _speed, SPEED_SIZE)
+	_cycle = _add_button("%dx" % _speed, &"SpeedButton")
 	_cycle.toggle_mode = false
+	_cycle.tooltip_text = "Game speed"
 	_cycle.pressed.connect(func() -> void: speed_chosen.emit(next_speed()))
 
 
@@ -34,10 +41,13 @@ func next_speed() -> int:
 	return GameSpeed.SPEEDS[(at + 1) % GameSpeed.SPEEDS.size()]
 
 
-## Shows the speed in use on the speed button, and marks Pause while paused.
+## Shows the speed in use on the speed button, and marks Pause while paused (it then
+## offers to resume).
 func show_speed(speed: GameSpeed) -> void:
 	_speed = speed.speed
 	_pause.button_pressed = speed.paused
+	_pause.icon = PLAY_ICON if speed.paused else PAUSE_ICON
+	_pause.text = "Resume" if speed.paused else "Pause"
 	_cycle.text = "%dx" % _speed
 
 
@@ -48,10 +58,11 @@ func active_labels() -> Array[String]:
 	return result
 
 
-func _add_button(text: String, size: Vector2) -> Button:
+func _add_button(text: String, variation: StringName) -> Button:
 	var button := Button.new()
 	button.text = text
 	button.toggle_mode = true
-	button.custom_minimum_size = size
+	button.theme_type_variation = variation
+	button.custom_minimum_size = SQUARE
 	add_child(button)
 	return button

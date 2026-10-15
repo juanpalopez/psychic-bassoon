@@ -17,7 +17,8 @@ func _ready() -> void:
 	visible = false
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_label.custom_minimum_size.x = 640.0
+	_label.custom_minimum_size.x = 400.0
+	_label.theme_type_variation = &"CardText"
 	add_child(_label)
 
 

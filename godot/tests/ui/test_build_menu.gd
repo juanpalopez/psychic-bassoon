@@ -118,3 +118,33 @@ func test_the_hold_timer_is_wired_to_the_hold_time() -> void:
 	assert_eq(timers.size(), 1)
 	assert_eq((timers[0] as Timer).wait_time, BuildMenu.HOLD_SECONDS)
 	assert_true((timers[0] as Timer).one_shot)
+
+
+func test_it_opens_above_the_socket_when_there_is_room() -> void:
+	var port := Vector2(1280.0, 720.0)
+	var socket := Rect2(600.0, 400.0, 80.0, 60.0)
+	var at := BuildMenu.placement(socket, Vector2(660.0, 200.0), port)
+	assert_eq(at.y, socket.position.y - BuildMenu.SOCKET_GAP - 200.0, "above")
+	assert_eq(at.x + 330.0, socket.get_center().x, "centred on the socket")
+
+
+func test_a_socket_near_the_top_gets_the_menu_below_it() -> void:
+	var port := Vector2(1280.0, 720.0)
+	var socket := Rect2(600.0, 150.0, 80.0, 60.0)
+	var at := BuildMenu.placement(socket, Vector2(660.0, 200.0), port)
+	assert_eq(at.y, socket.end.y + BuildMenu.SOCKET_GAP)
+
+
+func test_the_menu_stays_on_screen_and_clear_of_the_corner_rows() -> void:
+	var port := Vector2(1280.0, 720.0)
+	var menu_size := Vector2(660.0, 200.0)
+	for socket in [
+		Rect2(0.0, 600.0, 60.0, 60.0),
+		Rect2(1240.0, 120.0, 60.0, 60.0),
+		Rect2(640.0, 0.0, 60.0, 60.0)
+	]:
+		var rect := Rect2(BuildMenu.placement(socket, menu_size, port), menu_size)
+		assert_gte(rect.position.x, BuildMenu.EDGE_MARGIN, str(socket))
+		assert_lte(rect.end.x, port.x - BuildMenu.EDGE_MARGIN, str(socket))
+		assert_gte(rect.position.y, BuildMenu.TOP_RESERVE, str(socket))
+		assert_lte(rect.end.y, port.y - BuildMenu.BOTTOM_RESERVE, str(socket))
