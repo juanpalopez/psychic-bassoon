@@ -171,6 +171,16 @@ gh project item-edit --id <ITEM_ID> --project-id PVT_kwHOAE0fRc4Blqiu \
   --field-id <STATUS_FIELD_ID> --single-select-option-id <OPTION_ID>
 ```
 
+### Closing a task
+
+Record what was decided or learnt, so later runs improve (`docs/lessons/README.md` has the templates, the index and how an entry is promoted to a checklist line, a script, a CI check, a skill, a command, an agent, a hook, a mode, an MCP server or a plugin).
+
+1. Ask: did the owner decide anything, did a tool, CI or review surprise us, or did a sweep pick a number? If not, the final message says "Lessons: none".
+2. For each yes, copy a template to `docs/lessons/YYYY-MM-DD-<slug>.md` (at most 3 per task, 25 lines each), fill in the evidence with the exact error text, file:line or link, and set `promote:`. A repeat is promoted now or gets a ticket.
+3. Add the rows to the index in `docs/lessons/README.md`, copy an owner decision into the file that governs it (CLAUDE.md, the GDD, PLAN), and commit the entries in the task's PR.
+4. In the PR body add a "Lessons and decisions" section listing each path with its rule line, comment the same list on the ticket, and end the final message with "Lessons:" and the paths.
+5. Balance sweeps are run by a Haiku agent with a Sonnet agent helping to read the results; design memos and deep reviews use Opus.
+
 ## Naming
 
 Use the GDD's names in code-facing content and the UI (display names only; ids are lowerCamelCase keys). The foe and tower ids are already the GDD's; the Guard Tent's id arrives with it in Phase 7:

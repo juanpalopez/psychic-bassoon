@@ -19,6 +19,10 @@ Closes #
 - [ ] Docs updated if behaviour or rules changed
 - [ ] Adversarial review done at the right tier (see `docs/REVIEW-CHECKLIST.md`) and posted, or skipped by rule; blockers and majors fixed or answered
 
+## Lessons and decisions
+
+<!-- Paths of the entries written in docs/lessons/ with their rule line, or: Lessons: none -->
+
 ## Notes for the reviewer
 
 <!-- Screenshots or a short clip for visual changes; device and fps for performance changes. -->
