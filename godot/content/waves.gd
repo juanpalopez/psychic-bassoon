@@ -10,6 +10,11 @@ const BOSS_FOE := "cardboardGolem"
 
 ## A boss wave every this many waves (it wins over a swarm wave).
 const BOSS_EVERY := 10
+## The support foe: from this wave on a wave holds one Ink Shaman in place of a rolled foe,
+## and one more for every `SHAMAN_EVERY_WAVES` waves after that.
+const SUPPORT_FOE := "inkShaman"
+const SHAMAN_FROM_WAVE := 7
+const SHAMAN_EVERY_WAVES := 5
 ## A goblin swarm wave every this many waves.
 const SWARM_EVERY := 5
 ## A swarm has this many times the foes of a normal wave of its number.

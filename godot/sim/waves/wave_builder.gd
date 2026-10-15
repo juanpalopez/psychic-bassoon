@@ -33,6 +33,7 @@ static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 	for i in count_for(wave):
 		rolls.append(rng.next_float())
 	var orders := compose(wave, rolls)
+	_place_shamans(orders, wave)
 	_space_in_groups(orders, wave, rng)
 	return orders
 
@@ -58,6 +59,20 @@ static func group_sizes(wave: int, total: int, rng: Rng) -> Array[int]:
 		sizes.append(pick)
 		left -= pick
 	return sizes
+
+
+## Puts the wave's Ink Shamans in place of rolled foes, spread evenly through the wave (no
+## random draw, so the waves stream is read as before). The boss escort and the Golem stay.
+static func _place_shamans(orders: Array[SpawnOrder], wave: int) -> void:
+	if wave < WAVES.SHAMAN_FROM_WAVE:
+		return
+	var boss := wave % WAVES.BOSS_EVERY == 0
+	var first := 1 if boss else 0
+	var rolled := orders.size() - first - (1 if boss else 0)
+	var shamans := 1 + (wave - WAVES.SHAMAN_FROM_WAVE) / WAVES.SHAMAN_EVERY_WAVES
+	for k in shamans:
+		var at := first + (k + 1) * rolled / (shamans + 1)
+		orders[at].type = WAVES.SUPPORT_FOE
 
 
 ## Sets the pauses of the rolled foes: `GROUP_SPACING` after a foe inside a group and

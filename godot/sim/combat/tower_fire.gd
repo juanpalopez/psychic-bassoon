@@ -47,14 +47,18 @@ static func reach_of(game: GameState, tower: Tower) -> float:
 
 ## The foe the tower shoots: of the live foes in reach, the one with the least
 ## distance left to walk on its own route (routes differ in length, so the
-## distance walked is not comparable); the foe that spawned first wins a tie.
+## distance walked is not comparable); the foe that spawned first wins a tie. A support foe in
+## reach (the Ink Shaman) is shot before any other.
 static func target_for(game: GameState, tower: Tower) -> Foe:
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	var best: Foe = null
 	var best_left := 0.0
 	for foe in foes_within(game, centre.x, centre.y, reach_of(game, tower)):
 		var left := game.routes[foe.route].total - foe.distance
-		if best == null or left < best_left:
+		var better := best == null or left < best_left
+		if best != null and foe.support != best.support:
+			better = foe.support
+		if better:
 			best = foe
 			best_left = left
 	return best
@@ -92,8 +96,10 @@ static func release_fallen_locks(game: GameState) -> void:
 ## beam's damage per second. No event is emitted: render reads `target_id`.
 static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
 	var target := _locked_foe(game, tower)
-	if target == null:
-		target = target_for(game, tower)
+	var best := target_for(game, tower)
+	# a lock holds, except that a support foe coming into reach takes it from any other foe
+	if target == null or (best != null and best.support and not target.support):
+		target = best
 	tower.target_id = target.id if target != null else -1
 	if target == null:
 		return

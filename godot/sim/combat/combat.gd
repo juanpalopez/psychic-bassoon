@@ -9,6 +9,7 @@ const RULES := preload("res://content/game_rules.gd")
 
 ## Runs the foes' part of one tick.
 static func step(game: GameState) -> void:
+	ShamanAura.step(game)
 	_move_foes(game)
 	Barracks.step(game)
 	TowerFire.step(game)
@@ -44,7 +45,9 @@ static func _move_foes(game: GameState) -> void:
 			continue
 		var held := foe.engaged_guard_id != -1
 		var slowed := foe.slow_timer > RULES.TIMER_EPSILON
-		var walk := foe.speed * (1.0 - foe.slow) if slowed else foe.speed
+		var walk := foe.speed * (1.0 + foe.speed_buff)
+		if slowed:
+			walk *= 1.0 - foe.slow
 		# a held foe does not walk, but a slow on it keeps running out
 		if not held:
 			foe.distance += walk * Game.TICK_SECONDS
