@@ -52,6 +52,16 @@ func test_it_launches_once_until_the_wave_has_started() -> void:
 	assert_true(auto.counting(), "the next cleared wave counts down again")
 
 
+func test_a_tap_during_the_countdown_is_the_only_launch() -> void:
+	var auto := AutoWave.new()
+	auto.enabled = true
+	var game := _idle_game()
+	auto.advance(game, 1.0)
+	auto.launched_by_player()
+	assert_false(auto.advance(game, RULES.AUTO_WAVE_SECONDS * 2.0), "the tap already launched")
+	assert_false(auto.counting())
+
+
 func test_it_never_calls_a_wave_early() -> void:
 	var auto := AutoWave.new()
 	auto.enabled = true

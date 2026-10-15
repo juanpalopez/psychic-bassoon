@@ -113,7 +113,7 @@ func _ready() -> void:
 	_launch.pressed.connect(
 		func() -> void:
 			# a tap during the Auto countdown starts the wave now, and only once
-			_auto.cancel()
+			_auto.launched_by_player()
 			Game.submit(_game, Command.launch_wave())
 	)
 	_auto_button.toggled.connect(func(on: bool) -> void: _auto.enabled = on)

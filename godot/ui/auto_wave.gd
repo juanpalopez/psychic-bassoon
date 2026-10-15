@@ -53,6 +53,13 @@ func cancel() -> void:
 	_fired = false
 
 
+## The player started the wave by hand: drop the countdown, and hold off until that wave is
+## under way, so a tap and the countdown never send two launches.
+func launched_by_player() -> void:
+	_left = -1.0
+	_fired = true
+
+
 func counting() -> bool:
 	return _left >= 0.0
 

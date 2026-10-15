@@ -304,4 +304,20 @@ func test_auto_start_holds_while_paused() -> void:
 	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
 	for frame in 100:
 		main._process(0.05)
-	assert_eq(main.game().wave, 1)
+	var launch := main.get_node("Hud/LaunchWave") as Button
+	assert_string_contains(launch.text, "Wave 2 in 3", "the countdown held")
+	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
+	main._process(0.05)
+	assert_string_contains(launch.text, "Wave 2 in 3", "and goes on from where it was")
+
+
+func test_a_long_frame_counts_no_more_game_time_than_the_clock_runs() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	main.game().wave = 1
+	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
+	main._process(0.05)
+	main._process(5.0)
+	main._process(0.05)
+	assert_eq(main.game().wave, 1, "a 5 s hitch is not 5 s of countdown")
+	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Wave 2 in 3")
