@@ -40,3 +40,11 @@ var attack_interval: float = 0.0
 var attack_cooldown: float = 0.0
 ## Whether a guard can stop it.
 var blockable: bool = true
+## A support foe: towers shoot it first, and it has an aura (radius in cells, heal as a share of
+## max health a second, share more speed for the foes in it).
+var support: bool = false
+var aura_radius: float = 0.0
+var aura_heal: float = 0.0
+var aura_speed: float = 0.0
+## The share more speed an Ink Shaman's aura gives this foe this tick (0 outside any aura).
+var speed_buff: float = 0.0

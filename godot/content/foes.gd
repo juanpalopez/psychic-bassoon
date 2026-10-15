@@ -2,12 +2,12 @@
 ## so they start from the prototype's table (`web-three-final:src/content/enemies.ts`): the
 ## Scrap Goblin is the Scamp (swarm), the Corrugated Orc the Ironclad (armored)
 ## and the Cardboard Golem the Warlord (boss). The prototype's mid-tier Raider has
-## no counterpart in the GDD and is dropped. Flying (Razor Moth) and support (Ink
-## Shaman) foes arrive in Phase 7. Data only. The Corrugated Orc's armor is 6 (the
+## no counterpart in the GDD and is dropped. The support foe (Ink Shaman) is here; flying
+## (Razor Moth) arrives in Phase 7. Data only. The Corrugated Orc's armor is 6 (the
 ## prototype's Ironclad had 4): see the interim balance in `docs/BALANCE.md`.
 extends RefCounted
 
-const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"]
+const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem", "inkShaman"]
 
 ## Per foe: `name`, `hp`, `speed` (cells per second), `reward` (Buttons for a kill),
 ## `armor` (cuts physical damage), `resist` (cuts magic damage; no foe has any yet),
@@ -16,7 +16,9 @@ const FOE_IDS: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"
 ## per blow, `attack_interval` (seconds between blows) and `blockable` (whether a
 ## guard can stop it; the Golem is not blockable). The Golem also names what it
 ## splits into when destroyed: `splits_into`, `split_count` of them,
-## `split_spacing` cells apart along the route, behind it.
+## `split_spacing` cells apart along the route, behind it. A support foe (the Ink Shaman) has
+## `support` (towers shoot it first) and an aura: `aura_radius` (cells), `aura_heal` (a share
+## of max health a second) and `aura_speed` (a share more speed; auras do not add up).
 const DEFS := {
 	"scrapGoblin":
 	{
@@ -62,5 +64,23 @@ const DEFS := {
 		"splits_into": "scrapGoblin",
 		"split_count": 4,
 		"split_spacing": 0.4,
+	},
+	"inkShaman":
+	{
+		"name": "Ink Shaman",
+		"hp": 60,
+		"speed": 0.9,
+		"reward": 10,
+		"armor": 0,
+		"resist": 0,
+		"radius": 0.3,
+		"leak": 1,
+		"attack_damage": 6,
+		"attack_interval": 1.2,
+		"blockable": true,
+		"support": true,
+		"aura_radius": 1.6,
+		"aura_heal": 0.04,
+		"aura_speed": 0.25,
 	},
 }
