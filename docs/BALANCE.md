@@ -335,7 +335,7 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 - The board is 16 columns by 11 rows (176 cells). The road is about 45 cells long on average (22 by 16: about 76), and a map has 12 to 15 sockets in the rules, but in practice 12 on about three maps in four (3,000 seeds: 12 sockets 2,181, 13 664, 14 131, 15 24): the spaced greedy pass runs out of room before the drawn target. Single-cell sockets (`SOCKET_MAX_SINGLE_CELL`, the frozen 9 by 13 golden) keep 22.
 - Foes are 25 percent slower: Scrap Goblin 2.13 to 1.6, Corrugated Orc 0.76 to 0.57, Cardboard Golem 0.56 to 0.42 cells a second.
 - Towers: Spool Guard damage 13, 21, 35 to 14, 23, 38; Thimble Mortar damage 22, 40, 68 to 15, 28, 48 (it won 15 of 16 maps otherwise); Prism Spire unchanged.
-- Replay goldens regenerated (the mix game moved to seed 3 so a won run stays in; the guard mix game to seed 2, the first seed that builds both tents); the socket-blocks golden regenerated for the new board.
+- Replay goldens regenerated (the mix game moved to seed 3 so a won run stays in, later seed 7 after the second source; the guard mix game to seed 2, the first seed that builds both tents); the socket-blocks golden regenerated for the new board.
 
 **The sweeps** (16 seeds, 20 waves, all five strategies; wins out of 16, the band is 4 to 9; raw files `docs/balance/map-v3-*.txt`):
 
@@ -358,3 +358,23 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 **New finding: the Kitchen Mess Tent is hard to place on the small board.** The guard mix builds a Mess Tent in 3 of 16 seeds in a whole run, and in 2 of 8 within its first 60 steps, because a socket must be near the guards' post. The tent-flow tests now look over several seeds. Left for the owner: a wider aura, or a placement rule that puts the Guard Tent where a Mess Tent socket is near.
 
 The golden for the guard mix is seed 2 (it builds both tents); the CI game-time check plays the guard mix on seed 4, which wins at these numbers (it played seed 2, which now loses at wave 20). A wave-20 clear is what the check needs to time a whole game.
+
+## A second spawn source after wave 10 (2026-10-16, #268)
+
+Owner decision: a second road from another edge joins the main road, and from wave 11 each wave's groups alternate between the two sources. About 87 percent of seeds have room for it (260 of 300 checked); the rest keep one road and play as before. The main road and waves 1 to 10 do not change.
+
+**What changed** (`godot/sim`, `godot/content`): a feeder road along a row from the top or bottom edge to the first main-road cell on that row (its own random stream, `Streams.SECOND_SOURCE`; the first feeder that leaves room for 12 sockets); `routes[1]` is the feeder then the main road from the join; `WaveBuilder` gives each group of waves 11 and later a route (0, 1, 0, 1...), with no new random draw; guards hold second-route foes once they are on the main road (`Barracks.main_distance`); the sockets, the replay goldens and the socket-block golden moved with the new road cells.
+
+**Sweep** (16 seeds, 20 waves; wins out of 16, band 4 to 9; raw file `docs/balance/second-source-sweep-seeds-1-16.txt` with its command in the header). A first sweep was thrown away: a review found that a second road from the bottom edge spawned its foes above the top edge (they crossed the whole board), which `Route.build` now handles (a test pins the first segment of every second route).
+
+The join point first drifted late on the main road, so the second road met the foes after most of the fight. `FEEDER_JOIN_MAX_PERCENT` now caps the join at 65 percent of the main road (74 percent of seeds still get a second road). That made the towers much stronger against the second road, so the first numbers (Mortar 17, 31, 53; Prism 40, 80, 155; Spool 14, 23, 38) won 11 to 13 maps for four strategies. A second sweep (raw file `docs/balance/second-source-sweep-seeds-1-16.txt`, command in its header) tried four damage sets.
+
+| Spool dmg | Mortar dmg | Prism dmg | Spool | Mortar | Prism | Mix | Guard mix |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| 14, 23, 38 | 17, 31, 53 | 40, 80, 155 | 12 | 5 | 11 | 13 | 10 |
+| 12, 20, 33 (chosen) | 19, 34, 58 | 34, 68, 132 | 5 | 4 | 5 | 9 | 6 |
+| 12, 21, 34 | 19, 34, 58 | 36, 72, 140 | 5 | 5 | 10 | 11 | 6 |
+| 13, 21, 35 | 20, 36, 62 | 36, 72, 140 | 9 | 6 | 10 | 12 | 8 |
+| 12, 20, 33 | 20, 36, 62 | 36, 72, 140 | 5 | 5 | 9 | 12 | 8 |
+
+**The chosen numbers** put all five strategies in the band (Spool 5, Mortar 4, Prism 5, Mix 9, Guard mix 6 of 16). The Spool Guard and the Prism Spire lose about 14 and 15 percent damage, the Thimble Mortar gains 12 percent. The sockets move on every map that gets a second road (its cells are road), so the early waves play differently even though the road and waves 1 to 10 do not change. The replay goldens were regenerated (the mix game now plays seed 7, a won run with two routes).

@@ -124,7 +124,7 @@ func test_no_wave_can_be_launched_after_the_win_wave() -> void:
 
 
 func test_the_scripted_bot_wins_a_20_wave_run() -> void:
-	var result := BotRunner.play(3, PROFILES.PROFILES.mix, 20)
+	var result := BotRunner.play(7, PROFILES.PROFILES.mix, 20)
 	assert_eq(result.waves_cleared, 20)
 	assert_true(result.won)
 	assert_false(result.over)

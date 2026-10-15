@@ -18,7 +18,8 @@ func before_all() -> void:
 
 
 func _landscape(map_seed: int, with_detour: bool = false) -> GameMap:
-	return MapGen.generate(map_seed, COLS, ROWS, with_detour, 1)
+	# the plain road: the second source has its own tests (test_second_source.gd)
+	return MapGen.generate(map_seed, COLS, ROWS, with_detour, 1, false)
 
 
 func test_the_content_names_both_board_sizes() -> void:
@@ -174,7 +175,8 @@ func test_the_game_builds_the_gdd_board_by_default() -> void:
 	assert_eq([game.map.cols, game.map.rows], [COLS, ROWS])
 	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [COLS, ROWS])
 	assert_eq(game.map.footprint, 2)
-	assert_eq(game.routes.size(), 1, "one road, no detour")
+	assert_between(game.routes.size(), 1, 2, "the main road, and a feeder when it fits")
+	assert_false(game.random_lanes, "foes do not pick a lane at random")
 	assert_false(RULES.GAME_DETOUR)
 
 

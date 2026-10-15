@@ -12,7 +12,9 @@ const WAVES := preload("res://content/waves.gd")
 ## command; it draws the wave's foes from the waves stream.
 static func start(game: GameState) -> void:
 	var spawner := Spawner.new()
-	spawner.queue = WaveBuilder.build(game.wave, game.rng)
+	# a second spawn source splits the waves; the old random detour does not
+	var sources := 1 if game.random_lanes else game.routes.size()
+	spawner.queue = WaveBuilder.build(game.wave, game.rng, sources)
 	spawner.timer = WAVES.FIRST_SPAWN_DELAY
 	spawner.wave = game.wave
 	game.spawners.append(spawner)
@@ -24,7 +26,7 @@ static func step_spawners(game: GameState) -> void:
 		spawner.timer -= Game.TICK_SECONDS
 		while spawner.timer <= 0.0 and not spawner.queue.is_empty():
 			var order: SpawnOrder = spawner.queue.pop_front()
-			FoeSpawner.spawn(game, order.type, spawner.wave)
+			FoeSpawner.spawn(game, order.type, spawner.wave, order.route)
 			spawner.timer += order.gap
 	var finished := false
 	for spawner in game.spawners:

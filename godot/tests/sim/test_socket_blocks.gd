@@ -82,8 +82,10 @@ func test_every_block_has_a_cell_within_reach_of_the_road() -> void:
 		for anchor in map.sockets:
 			var best := 1000
 			for cell in _cells_of(map, anchor):
-				for road_cell in map.path:
-					best = mini(best, maxi(absi(road_cell.x - cell.x), absi(road_cell.y - cell.y)))
+				for route in map.routes:
+					for road_cell in route:
+						var gap := maxi(absi(road_cell.x - cell.x), absi(road_cell.y - cell.y))
+						best = mini(best, gap)
 			assert_lte(best, RULES.SOCKET_REACH, "seed %d at %s" % [map_seed, anchor])
 
 

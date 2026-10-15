@@ -30,6 +30,12 @@ var foes: Array[Foe] = []
 var spawners: Array[Spawner] = []
 ## Random stream for wave composition, separate from the map's.
 var rng: Rng = null
+## With a second spawn source: how much further along `routes[1]` a point of the main road
+## is than along `routes[0]` (the second route's feeder is the extra length).
+var second_offset: float = 0.0
+## Whether a foe with no route given draws one at random (the detour of the old fixtures);
+## otherwise it walks the main road.
+var random_lanes: bool = false
 ## Random stream that picks which route each foe takes.
 var route_rng: Rng = null
 var next_id: int = 0

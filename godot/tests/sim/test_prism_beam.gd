@@ -2,6 +2,13 @@
 ## it a little every tick, with no shots, until the foe falls or leaves reach.
 extends GutTest
 
+const TOWERS := preload("res://content/towers.gd")
+
+
+## The beam's damage a second at a level, read from the content.
+func _dps(level: int = 0) -> float:
+	return float(TOWERS.DEFS.prismSpire.damage[level])
+
 
 func _hp_lost(foe: Foe, from: float) -> float:
 	return from - foe.hp
@@ -12,13 +19,13 @@ func test_the_beam_deals_its_damage_per_second_spread_over_the_ticks() -> void:
 	var foe := TowerFireKit.foe(scene.game, scene.near, "cardboardGolem")
 	var start := foe.hp
 	Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 42.0 / 30.0, 1e-12, "one tick of 42 a second")
+	assert_almost_eq(_hp_lost(foe, start), _dps() / 30.0, 1e-12, "one tick of a second's damage")
 	for i in 29:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 42.0, 1e-9, "a second of beam")
+	assert_almost_eq(_hp_lost(foe, start), _dps(), 1e-9, "a second of beam")
 	for i in 60:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 126.0, 1e-9, "three seconds")
+	assert_almost_eq(_hp_lost(foe, start), _dps() * 3.0, 1e-9, "three seconds")
 
 
 func test_a_higher_level_hits_harder() -> void:
@@ -31,7 +38,7 @@ func test_a_higher_level_hits_harder() -> void:
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9)
+	assert_almost_eq(_hp_lost(foe, start), _dps(1), 1e-9)
 
 
 func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
@@ -40,14 +47,20 @@ func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
 	var start := orc_a.hp
 	for i in 30:
 		Game.tick(prism.game)
-	assert_almost_eq(_hp_lost(orc_a, start), 42.0, 1e-9, "the whole 42 a second")
+	assert_almost_eq(_hp_lost(orc_a, start), _dps(), 1e-9, "the whole damage a second")
 	var spool := TowerFireKit.scene("spoolGuard")
 	var orc_b := TowerFireKit.foe(spool.game, spool.near, "corrugatedOrc")
 	for i in 30:
 		Game.tick(spool.game)
-	# 3 shots a second of 14 against 6 armor: 8 each, 24 a second of 42 on paper
-	assert_almost_eq(_hp_lost(orc_b, start), 24.0, 1e-9)
-	assert_lt(_hp_lost(orc_b, start) / 42.0, 0.6, "armor ate over 40% of the Spool Guard")
+	# shots a second of the Spool Guard's damage, each less the orc's armor
+	var spool_def: Dictionary = TOWERS.DEFS.spoolGuard
+	var armor := float(FoeStats.for_wave("corrugatedOrc", 1).armor)
+	var shots: float = spool_def.rate[0]
+	var damage: float = spool_def.damage[0]
+	assert_almost_eq(_hp_lost(orc_b, start), (damage - armor) * shots, 1e-9)
+	assert_lt(
+		_hp_lost(orc_b, start) / (damage * shots), 0.6, "armor ate over 40% of the Spool Guard"
+	)
 
 
 func test_the_beam_locks_the_foe_nearest_the_heartstone() -> void:
@@ -135,7 +148,7 @@ func test_two_beams_on_one_foe_add_up() -> void:
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9)
+	assert_almost_eq(_hp_lost(foe, start), _dps() * 2.0, 1e-9)
 
 
 func test_a_lock_is_released_the_tick_another_tower_kills_the_foe() -> void:
@@ -157,12 +170,12 @@ func test_defence_is_taken_off_the_beams_damage_per_second_not_per_tick() -> voi
 	var start := foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 41.0, 1e-9, "42 a second less 1 resist")
+	assert_almost_eq(_hp_lost(foe, start), _dps() - 1.0, 1e-9, "a second less 1 resist")
 	foe.resist = 40
 	start = foe.hp
 	for i in 30:
 		Game.tick(scene.game)
-	assert_almost_eq(_hp_lost(foe, start), 10.5, 1e-9, "the floor is a quarter of 42")
+	assert_almost_eq(_hp_lost(foe, start), _dps() / 4.0, 1e-9, "the floor is a quarter")
 
 
 func test_an_upgrade_while_locked_keeps_the_lock_and_hits_harder() -> void:
@@ -176,7 +189,7 @@ func test_an_upgrade_while_locked_keeps_the_lock_and_hits_harder() -> void:
 	for i in 30:
 		Game.tick(scene.game)
 	assert_eq(scene.tower.target_id, foe.id)
-	assert_almost_eq(_hp_lost(foe, start), 84.0, 1e-9, "level 2 beam, 84 a second")
+	assert_almost_eq(_hp_lost(foe, start), _dps(1), 1e-9, "a level 2 beam")
 
 
 func test_selling_a_locked_tower_stops_the_beam() -> void:

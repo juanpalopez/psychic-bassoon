@@ -6,6 +6,8 @@ extends RefCounted
 var type: String = ""
 ## Seconds to wait after this foe.
 var gap: float = 0.0
+## The route it walks (an index into `GameState.routes`), or -1 to let the game choose.
+var route: int = -1
 
 
 static func of(foe: String, pause: float) -> SpawnOrder:

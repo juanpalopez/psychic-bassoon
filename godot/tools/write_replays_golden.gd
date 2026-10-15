@@ -9,7 +9,7 @@ extends SceneTree
 ## Seed, bot profile and waves: a won run, a lost run, and each strategy (the last
 ## one builds Guard Tents and a Mess Tent, so the barracks tick path is covered).
 const GAMES := [
-	[3, "mix", 20],
+	[7, "mix", 20],
 	[1, "spoolOnly", 20],
 	[4, "mortarHeavy", 20],
 	[5, "mix", 20],

@@ -28,14 +28,14 @@ static func is_swarm(wave: int) -> bool:
 
 ## Draws one float per foe from the waves stream, lists the wave, then draws one float
 ## per group to cut the foes into groups (see `group_sizes`).
-static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
+static func build(wave: int, rng: Rng, routes: int = 1) -> Array[SpawnOrder]:
 	var rolls: Array[float] = []
 	for i in count_for(wave):
 		rolls.append(rng.next_float())
 	var orders := compose(wave, rolls)
 	_place_shamans(orders, wave)
 	_place_moths(orders, wave)
-	_space_in_groups(orders, wave, rng)
+	_space_in_groups(orders, wave, rng, routes)
 	return orders
 
 
@@ -98,7 +98,9 @@ static func _place_moths(orders: Array[SpawnOrder], wave: int) -> void:
 ## Sets the pauses of the rolled foes: `GROUP_SPACING` after a foe inside a group and
 ## the wave's group pause after the last foe of a group. The boss escort in front and
 ## the Golem behind keep their own pauses.
-static func _space_in_groups(orders: Array[SpawnOrder], wave: int, rng: Rng) -> void:
+static func _space_in_groups(
+	orders: Array[SpawnOrder], wave: int, rng: Rng, routes: int = 1
+) -> void:
 	var boss := wave % WAVES.BOSS_EVERY == 0
 	var first := 1 if boss else 0
 	var end := orders.size() - 1 if boss else orders.size()
@@ -106,11 +108,16 @@ static func _space_in_groups(orders: Array[SpawnOrder], wave: int, rng: Rng) -> 
 		WAVES.GROUP_PAUSE_MIN, WAVES.GROUP_PAUSE_BASE - float(wave) * WAVES.GROUP_PAUSE_PER_WAVE
 	)
 	var index := first
+	var split := routes > 1 and wave > WAVES.SECOND_SOURCE_AFTER_WAVE
+	var group := 0
 	for size in group_sizes(wave, end - first, rng):
 		for i in size:
 			orders[index].gap = WAVES.GROUP_SPACING
+			if split:
+				orders[index].route = group % routes
 			index += 1
 		orders[index - 1].gap = pause
+		group += 1
 
 
 ## Lists a wave from the rolls of its foes (`count_for(wave)` of them, one per
