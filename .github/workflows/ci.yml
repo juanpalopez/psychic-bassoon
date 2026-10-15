@@ -183,7 +183,7 @@ jobs:
         run: |
           start=$SECONDS
           "$GODOT" --headless --path godot -s tools/balance_run.gd -- \
-            --seeds=2 --profiles=guardMix --waves=20 | tee game.log
+            --seeds=4 --profiles=guardMix --waves=20 | tee game.log
           elapsed=$((SECONDS - start))
           echo "A whole bot game took ${elapsed} s (budget ${BUDGET_SECONDS} s)"
           if ! grep -q "median waves cleared: 20" game.log; then

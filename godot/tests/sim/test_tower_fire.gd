@@ -16,7 +16,7 @@ func test_a_foe_in_reach_is_hit_and_the_shot_is_reported() -> void:
 	var scene := TowerFireKit.scene()
 	var foe := TowerFireKit.foe(scene.game, scene.near)
 	Game.tick(scene.game)
-	assert_eq(foe.hp, 7.0, "20 hp less 13 physical damage, no armor")
+	assert_eq(foe.hp, 6.0, "20 hp less 14 physical damage, no armor")
 	var shots := TowerFireKit.kinds(scene.game, GameEvent.Kind.TOWER_FIRED)
 	assert_eq(shots.size(), 1)
 	assert_eq(shots[0].tower_id, scene.tower.id)
@@ -90,7 +90,7 @@ func test_the_foe_nearest_the_heartstone_is_the_target() -> void:
 	var behind := TowerFireKit.foe(scene.game, scene.near - 0.3)
 	var ahead := TowerFireKit.foe(scene.game, scene.near + 0.3)
 	Game.tick(scene.game)
-	assert_eq(ahead.hp, 7.0)
+	assert_eq(ahead.hp, 6.0)
 	assert_eq(behind.hp, 20.0)
 
 
@@ -100,7 +100,7 @@ func test_a_tie_goes_to_the_foe_that_spawned_first() -> void:
 	var second := TowerFireKit.foe(scene.game, scene.near)
 	assert_lt(first.id, second.id)
 	Game.tick(scene.game)
-	assert_eq(first.hp, 7.0)
+	assert_eq(first.hp, 6.0)
 	assert_eq(second.hp, 20.0)
 
 
@@ -167,9 +167,9 @@ func test_a_mortar_shell_hurts_every_foe_within_its_splash() -> void:
 	var centre := Vector2(target.x, target.y)
 	assert_gt(centre.distance_to(Vector2(far.x, far.y)), 0.95, "outside the blast")
 	Game.tick(game)
-	# 22 physical damage against 6 armor
-	assert_eq(target.hp, 130.0 - 16.0)
-	assert_eq(beside.hp, 130.0 - 16.0)
+	# 15 physical damage against 6 armor
+	assert_eq(target.hp, 130.0 - 9.0)
+	assert_eq(beside.hp, 130.0 - 9.0)
 	assert_eq(far.hp, 130.0)
 	var shots := TowerFireKit.kinds(game, GameEvent.Kind.TOWER_FIRED)
 	assert_eq(shots.size(), 1)

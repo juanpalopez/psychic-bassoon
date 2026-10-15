@@ -45,9 +45,9 @@ func test_the_beam_ignores_armor_where_a_spool_guard_loses_some_to_it() -> void:
 	var orc_b := TowerFireKit.foe(spool.game, spool.near, "corrugatedOrc")
 	for i in 30:
 		Game.tick(spool.game)
-	# 3 shots a second of 13 against 6 armor: 7 each, 21 a second of 39 on paper
-	assert_almost_eq(_hp_lost(orc_b, start), 21.0, 1e-9)
-	assert_lt(_hp_lost(orc_b, start) / 39.0, 0.6, "armor ate over 40% of the Spool Guard")
+	# 3 shots a second of 14 against 6 armor: 8 each, 24 a second of 42 on paper
+	assert_almost_eq(_hp_lost(orc_b, start), 24.0, 1e-9)
+	assert_lt(_hp_lost(orc_b, start) / 42.0, 0.6, "armor ate over 40% of the Spool Guard")
 
 
 func test_the_beam_locks_the_foe_nearest_the_heartstone() -> void:

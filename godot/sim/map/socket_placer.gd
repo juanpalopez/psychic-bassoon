@@ -17,14 +17,15 @@ const RULES := preload("res://content/map_rules.gd")
 ## `map.elevation` (one level for all the cells of a block) for the map's seed.
 ## Returns false, leaving the map without sockets, when the road leaves room for
 ## fewer than `SOCKET_MIN` of them: the generator then draws another road. That
-## happens on about 0.1% of the roads of the game board (22 by 16, one road, 2x2
-## blocks: 2 of 3,000 seeds), on about 0.4% with a detour (11 of 3,000), and
-## often on small boards (20 by 14: 3% to 7%).
+## happened on about 0.1% of the roads of the old game board (22 by 16, one road, 2x2
+## blocks: 2 of 3,000 seeds; not measured on 16 by 11), on about 0.4% with a detour
+## (11 of 3,000), and often on small boards (20 by 14: 3% to 7%).
 static func place(map: GameMap) -> bool:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
 	_shuffle(candidates, rng)
-	var target: int = RULES.SOCKET_MIN + rng.next_int(RULES.SOCKET_MAX - RULES.SOCKET_MIN + 1)
+	var most: int = RULES.SOCKET_MAX_SINGLE_CELL if map.footprint == 1 else RULES.SOCKET_MAX
+	var target: int = RULES.SOCKET_MIN + rng.next_int(most - RULES.SOCKET_MIN + 1)
 	var chosen: Array[Vector2i] = []
 	for cell in candidates:
 		if chosen.size() >= target:

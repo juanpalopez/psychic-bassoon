@@ -129,20 +129,26 @@ func test_a_mess_tent_out_of_reach_gives_the_guards_nothing() -> void:
 
 func test_a_high_socket_reaches_further_like_a_towers_range_does() -> void:
 	var reach: float = TOWERS.DEFS.messTent.range[0]
-	var window := func(entry: Array, level: int) -> bool:
-		return entry[2] == level and entry[1] > reach + 0.02 and entry[1] < reach * 1.15 - 0.02
-	var game := GuardKit.find_game(
-		func(sockets: Array) -> bool:
-			var high := false
-			for entry in sockets:
-				high = high or window.call(entry, 2)
-			return high
-	)
-	assert_not_null(game, "some seed has a level 2 socket just beyond a level 1 aura")
+	# the aura is checked against each guard's own post, so measure to the first guard's
 	var spot := Vector2i(-1, -1)
-	for entry in GuardKit.sockets_by_distance(game):
-		if window.call(entry, 2):
-			spot = entry[0]
+	var game: GameState = null
+	for map_seed in range(1, 400):
+		var candidate := GuardKit.game_with_tent(map_seed)
+		var at := candidate.routes[0].position_at(candidate.guards[0].post)
+		for anchor in candidate.map.sockets:
+			if anchor == Vector2i(candidate.towers[0].col, candidate.towers[0].row):
+				continue
+			var gap := candidate.map.socket_centre(anchor).distance_to(Vector2(at.x, at.y))
+			if (
+				candidate.map.elevation_at(anchor) == 2
+				and gap > reach + 0.02
+				and gap < reach * 1.15 - 0.02
+			):
+				spot = anchor
+				game = candidate
+		if game != null:
+			break
+	assert_not_null(game, "some seed has a level 2 socket just beyond a level 1 aura")
 	GameTestKit.run(game, [Command.build("messTent", spot.x, spot.y)])
 	GuardKit.tick(game, 1)
 	assert_gt(

@@ -1,0 +1,18 @@
+{"sub:foes#1": ["\"speed\": 2.13", "\"speed\": 1.81"], "sub:foes#2": ["\"speed\": 0.76", "\"speed\": 0.65"], "sub:foes#3": ["\"speed\": 0.56", "\"speed\": 0.48"], "sub:towers#1": ["\"damage\": [13, 21, 35]", "\"damage\": [14, 23, 38]"], "sub:towers#2": ["\"damage\": [22, 40, 68]", "\"damage\": [16, 30, 51]"], "sub:towers#3": ["\"damage\": [42, 84, 163]", "\"damage\": [44, 88, 171]"]}
+  spoolOnly    cleared [16, 17, 17, 17, 18, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 20] died_on [17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] heart 0.6 buttons_left 2962
+  mortarHeavy  cleared [6, 6, 7, 8, 8, 9, 9, 9, 18, 18, 19, 19, 19, 19, 19, 20] died_on [7, 7, 8, 9, 9, 10, 10, 10, 19, 19, 20, 20, 20, 20, 20] heart 0.4 buttons_left 1195
+  prismHeavy   cleared [17, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] heart 2.6 buttons_left 2289
+  mix          cleared [17, 17, 18, 18, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20] heart 1.8 buttons_left 2610
+  guardMix     cleared [14, 16, 17, 17, 18, 18, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20] died_on [15, 17, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] heart 0.8 buttons_left 2124
+{"sub:foes#1": ["\"speed\": 2.13", "\"speed\": 1.81"], "sub:foes#2": ["\"speed\": 0.76", "\"speed\": 0.65"], "sub:foes#3": ["\"speed\": 0.56", "\"speed\": 0.48"], "sub:towers#1": ["\"damage\": [13, 21, 35]", "\"damage\": [14, 23, 38]"], "sub:towers#2": ["\"damage\": [22, 40, 68]", "\"damage\": [14, 26, 44]"], "sub:towers#3": ["\"damage\": [42, 84, 163]", "\"damage\": [44, 88, 171]"]}
+  spoolOnly    cleared [16, 17, 17, 17, 18, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 20] died_on [17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] heart 0.6 buttons_left 2962
+  mortarHeavy  cleared [4, 5, 5, 6, 6, 7, 7, 7, 7, 7, 7, 9, 9, 10, 14, 18] died_on [5, 6, 6, 7, 7, 8, 8, 8, 8, 8, 8, 10, 10, 11, 15, 19] heart 0.0 buttons_left 141
+  prismHeavy   cleared [17, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] heart 2.6 buttons_left 2289
+  mix          cleared [16, 17, 17, 18, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20] died_on [17, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] heart 0.5 buttons_left 2466
+  guardMix     cleared [14, 14, 16, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 19, 19, 20] died_on [15, 15, 17, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] heart 0.5 buttons_left 1890
+{"sub:foes#1": ["\"speed\": 2.13", "\"speed\": 1.60"], "sub:foes#2": ["\"speed\": 0.76", "\"speed\": 0.57"], "sub:foes#3": ["\"speed\": 0.56", "\"speed\": 0.42"], "sub:towers#1": ["\"damage\": [13, 21, 35]", "\"damage\": [14, 23, 38]"], "sub:towers#2": ["\"damage\": [22, 40, 68]", "\"damage\": [16, 30, 51]"], "sub:towers#3": ["\"damage\": [42, 84, 163]", "\"damage\": [44, 88, 171]"]}
+  spoolOnly    cleared [17, 17, 18, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.3 buttons_left 3272
+  mortarHeavy  cleared [6, 6, 9, 9, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [7, 7, 10, 10, 20, 20, 20] heart 3.2 buttons_left 1947
+  prismHeavy   cleared [18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [19, 19, 20, 20, 20] heart 5.9 buttons_left 2592
+  mix          cleared [17, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [18, 19, 20, 20] heart 8.2 buttons_left 2927
+  guardMix     cleared [17, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [18, 20, 20, 20, 20, 20, 20, 20] heart 4.6 buttons_left 2695
