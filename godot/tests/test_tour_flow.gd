@@ -80,3 +80,63 @@ func test_every_tour_target_is_a_control_in_the_hud() -> void:
 	for step in preload("res://content/guide.gd").TOUR_STEPS:
 		if step.target != "":
 			assert_true(main.get_node("Hud").get_node_or_null(step.target) is Control, step.target)
+
+
+func test_the_guide_with_a_player_pause_keeps_the_pause() -> void:
+	var main := await _main()
+	main._speed.paused = true
+	main.get_node("Hud/TowerGuide").pressed.emit()
+	(_node(main, GuidePanel) as GuidePanel).close_button().pressed.emit()
+	assert_true(main._speed.paused)
+
+
+func test_the_game_waits_until_both_overlays_are_closed() -> void:
+	var main := await _main()
+	var tour := _node(main, Tour) as Tour
+	var guide := _node(main, GuidePanel) as GuidePanel
+	main.get_node("Hud/HowToPlay").pressed.emit()
+	main.get_node("Hud/TowerGuide").pressed.emit()
+	tour.skip_button().pressed.emit()
+	assert_eq(main._speed.ticks_speed(), 0, "the guide is still open")
+	guide.close_button().pressed.emit()
+	assert_gt(main._speed.ticks_speed(), 0)
+
+
+func test_a_restart_behind_an_overlay_stays_paused() -> void:
+	var main := await _main()
+	main.get_node("Hud/HowToPlay").pressed.emit()
+	main._start(main.game().seed + 1)
+	assert_eq(main._speed.ticks_speed(), 0)
+	(_node(main, Tour) as Tour).skip_button().pressed.emit()
+	assert_gt(main._speed.ticks_speed(), 0)
+
+
+func _targeted_steps() -> Array[int]:
+	var steps: Array[int] = []
+	var all: Array = preload("res://content/guide.gd").TOUR_STEPS
+	for i in all.size():
+		if all[i].target != "":
+			steps.append(i)
+	return steps
+
+
+func test_the_card_never_covers_the_control_it_outlines() -> void:
+	for size in [Vector2i(1280, 720), Vector2i(1558, 720), Vector2i(1366, 1024)]:
+		var port := SubViewport.new()
+		port.size = size
+		add_child_autofree(port)
+		var main := MAIN_SCENE.instantiate()
+		port.add_child(main)
+		main.set_process(false)
+		await get_tree().process_frame
+		var tour := _node(main, Tour) as Tour
+		main.get_node("Hud/HowToPlay").pressed.emit()
+		await get_tree().process_frame
+		for step in _targeted_steps():
+			tour.go_to(step)
+			await get_tree().process_frame
+			if tour.highlight_visible():
+				assert_false(
+					tour.card_rect().intersects(tour.highlight_rect()),
+					"step %d at %s" % [step, size]
+				)

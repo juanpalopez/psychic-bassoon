@@ -84,7 +84,7 @@ const TOWERS := {
 	{
 		"role": "Magic beam that ignores armor.",
 		"strong": "The answer to Corrugated Orcs and the Cardboard Golem.",
-		"weak": "Costly, with a short reach, and it does little against swarms.",
+		"weak": "Costly, and its reach is modest, so it is best saved for armored foes.",
 		"tip": "Keep one covering the long stretch before the Heartstone.",
 	},
 	"guardTent":

@@ -10,6 +10,8 @@ const GUIDE := preload("res://content/guide.gd")
 const THEME := preload("res://ui/hud_theme.tres")
 const CARD_HALF_WIDTH := 380.0
 const CARD_HALF_HEIGHT := 170.0
+## The card moves this far off the middle, away from the control a step outlines.
+const CARD_SHIFT := 60.0
 const BUTTON_SIZE := Vector2(160.0, 96.0)
 const OUTLINE_GROW := 8.0
 
@@ -17,9 +19,11 @@ const OUTLINE_GROW := 8.0
 var target_resolver: Callable = _find_target
 
 var _index := 0
+var _target_name := ""
 var _open := false
 var _dim: Panel
 var _highlight: Panel
+var _card: PanelContainer
 var _title := Label.new()
 var _body := Label.new()
 var _counter := Label.new()
@@ -111,6 +115,11 @@ func skip_button() -> Button:
 	return _skip
 
 
+## The card's rectangle, for tests.
+func card_rect() -> Rect2:
+	return Rect2(_card.global_position, _card.size)
+
+
 func highlight_visible() -> bool:
 	return _highlight.visible
 
@@ -123,6 +132,8 @@ func highlight_rect() -> Rect2:
 func _fit() -> void:
 	position = Vector2.ZERO
 	size = get_viewport_rect().size
+	if _open:
+		_outline(_target_name)
 
 
 func _finish() -> void:
@@ -132,13 +143,24 @@ func _finish() -> void:
 
 
 func _outline(target_name: String) -> void:
+	_target_name = target_name
 	var target: Control = target_resolver.call(target_name) if target_name != "" else null
-	_highlight.visible = target != null
-	if target == null:
+	# a control that is hidden (the Start wave button while a wave comes out) is not outlined
+	_highlight.visible = target != null and target.is_visible_in_tree()
+	_shift_card(0.0)
+	if not _highlight.visible:
 		return
 	var rect := Rect2(target.global_position, target.size).grow(OUTLINE_GROW)
 	_highlight.global_position = rect.position
 	_highlight.size = rect.size
+	# a control in the top half sends the card down, one in the bottom half sends it up
+	var in_top_half := rect.get_center().y < size.y / 2.0
+	_shift_card(CARD_SHIFT if in_top_half else -CARD_SHIFT)
+
+
+func _shift_card(by: float) -> void:
+	_card.offset_top = -CARD_HALF_HEIGHT + by
+	_card.offset_bottom = CARD_HALF_HEIGHT + by
 
 
 func _find_target(target_name: String) -> Control:
@@ -147,6 +169,7 @@ func _find_target(target_name: String) -> Control:
 
 func _build_card() -> void:
 	var card := PanelContainer.new()
+	_card = card
 	card.theme_type_variation = &"Card"
 	card.anchor_left = 0.5
 	card.anchor_right = 0.5

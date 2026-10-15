@@ -25,3 +25,9 @@ func test_marking_the_tour_seen_is_remembered_by_the_store() -> void:
 	progress.mark_seen()
 	assert_true(progress.seen())
 	assert_true(memory.seen)
+
+
+func test_a_browser_that_will_not_store_still_stops_the_tour_for_the_session() -> void:
+	var progress := TourProgress.new(func() -> bool: return false, func() -> void: pass)
+	progress.mark_seen()
+	assert_true(progress.seen())

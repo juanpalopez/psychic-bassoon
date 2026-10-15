@@ -266,6 +266,7 @@ func _start(map_seed: int) -> void:
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
 	_speed = GameSpeed.new()
+	_speed.paused = _tour.is_open() or _guide.is_open()
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_update_launch_button()
 
@@ -361,8 +362,6 @@ func _show_message(text: String) -> void:
 	_message.visible = true
 
 
-## The `seed` query parameter of the page as an int, or null when there is none
-## (or it is not a whole number of at most 16 characters).
 ## The page's `?tour=` value ("0" turns the first-time tour off), or "".
 func _tour_param() -> String:
 	if not OS.has_feature("web"):
@@ -402,10 +401,15 @@ func _pause_for_overlay(opening: bool) -> void:
 		if not _tour.is_open() and not _guide.is_open():
 			_paused_before_overlay = _speed.paused
 		_speed.paused = true
+	elif _tour.is_open() or _guide.is_open():
+		# the other overlay is still open: the game keeps waiting
+		_speed.paused = true
 	else:
 		_speed.paused = _paused_before_overlay
 
 
+## The `seed` query parameter of the page as an int, or null when there is none
+## (or it is not a whole number of at most 16 characters).
 func _seed_from_url() -> Variant:
 	if not OS.has_feature("web"):
 		return null

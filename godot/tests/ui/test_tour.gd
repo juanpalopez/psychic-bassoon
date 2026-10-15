@@ -95,3 +95,18 @@ func test_it_covers_the_whole_viewport_when_started() -> void:
 	tour.start()
 	assert_eq(tour.size, tour.get_viewport_rect().size)
 	assert_eq(tour.position, Vector2.ZERO)
+
+
+func test_a_hidden_target_is_not_outlined() -> void:
+	var tour := _tour()
+	var target := Control.new()
+	target.size = Vector2(120.0, 96.0)
+	add_child_autofree(target)
+	target.visible = false
+	tour.target_resolver = func(_path: String) -> Control: return target
+	tour.start()
+	tour.go_to(_first_step_with_target())
+	assert_false(tour.highlight_visible(), "no frame over a button that is not there")
+	target.visible = true
+	tour.go_to(_first_step_with_target())
+	assert_true(tour.highlight_visible())

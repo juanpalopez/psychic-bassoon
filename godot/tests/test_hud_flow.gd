@@ -95,7 +95,10 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 	# the scene closes the overlay on a frame when the game is not over
 	main.set_process(false)
 	await get_tree().process_frame
-	if shown == "Menu":
+	if shown == "GameOver+Menu":
+		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
+		(main.get_node("Hud/GameOver") as GameOverPanel).show_for(1)
+	elif shown == "Menu":
 		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 	elif shown == "Message":
 		var message := main.get_node("Hud/Message") as Label
@@ -122,7 +125,9 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 	# 1558x720 is an 844x390 phone: expand stretch widens the 1280x720 canvas
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
-		for shown in ["", "GameOver", "BuildMenu", "TowerPanel", "Message", "Menu"]:
+		for shown in [
+			"", "GameOver", "BuildMenu", "TowerPanel", "Message", "Menu", "GameOver+Menu"
+		]:
 			var rects := await _hud_rects(size.x, size.y, shown)
 			var names := rects.keys()
 			# the web page's Full screen button floats over the top-right corner

@@ -16,6 +16,7 @@ const CLOSE_SIZE := Vector2(200.0, 96.0)
 var _entries: Array[Label] = []
 var _close := Button.new()
 var _card: PanelContainer
+var _open := false
 
 
 func _ready() -> void:
@@ -54,6 +55,7 @@ func _ready() -> void:
 	_close.custom_minimum_size = CLOSE_SIZE
 	_close.pressed.connect(
 		func() -> void:
+			_open = false
 			visible = false
 			closed.emit()
 	)
@@ -61,6 +63,7 @@ func _ready() -> void:
 
 
 func open() -> void:
+	_open = true
 	visible = true
 	_fit()
 
@@ -75,7 +78,7 @@ func _fit() -> void:
 
 
 func is_open() -> bool:
-	return visible
+	return _open
 
 
 func entry_count() -> int:

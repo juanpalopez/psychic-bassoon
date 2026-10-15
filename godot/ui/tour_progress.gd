@@ -8,6 +8,8 @@ const FILE := "user://progress.cfg"
 
 var _read: Callable
 var _write: Callable
+# a browser that refuses to store (private mode) still stops asking in the same session
+var _seen_now := false
 
 
 func _init(read: Callable, write: Callable) -> void:
@@ -42,8 +44,9 @@ static func default() -> TourProgress:
 
 
 func seen() -> bool:
-	return _read.call()
+	return _seen_now or _read.call()
 
 
 func mark_seen() -> void:
+	_seen_now = true
 	_write.call()
