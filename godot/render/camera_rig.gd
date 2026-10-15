@@ -7,7 +7,7 @@
 ## pans, within the board and rubber-banding back after release. The field of
 ## view is about 20 degrees, landscape.
 ##
-## `fit_distance`, `pitch_for`, `closest_distance`, `pan_limit` and `rubber` are
+## `fit_distance`, `pitch_for`, `closest_distance`, `footprint`, `pan_bounds` and `rubber` are
 ## plain maths so they can be tested; `frame` places the camera for a screen
 ## shape and is called again when the window changes.
 class_name CameraRig
@@ -20,11 +20,10 @@ const MAX_PITCH := 62.0
 const MIN_PITCH := 56.0
 ## How wide a cell is, in pixels of the 720 px canvas, at the closest zoom.
 const CLOSEST_CELL_PIXELS := 100.0
-## How far the target may leave the centre, as a share of the board's half size
-## at full zoom; zoomed out there is nothing to pan.
-const PAN_LIMIT_SHARE := 0.9
 ## Overscroll that gets through while dragging past the edge (the rest is damped).
 const RUBBER := 0.35
+## No pinch centre given: the zoom does not move the view.
+const NO_CENTRE := Vector2(-1.0, -1.0)
 ## One mouse wheel notch.
 const WHEEL_STEP := 0.08
 ## How strongly a pinch factor moves the zoom (per doubling of the finger gap).
@@ -58,11 +57,11 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	var limit := pan_limit(zoom)
+	var range := pan_range()
 	if _holding:
-		pan = Vector2(rubber(_pan_raw.x, limit.x), rubber(_pan_raw.y, limit.y))
+		pan = _rubbered(_pan_raw, range)
 	else:
-		_pan_raw = _pan_raw.clamp(-limit, limit)
+		_pan_raw = _pan_raw.clamp(range.position, range.end)
 		var before := pan
 		pan = pan.lerp(_pan_raw, 1.0 - exp(-SPRING * delta))
 		if pan.distance_to(before) < 1e-7:
@@ -105,16 +104,49 @@ static func closest_distance(fov_degrees: float, viewport_height: float, fit: fl
 	return minf(distance, fit)
 
 
-## How far the camera target may leave the centre of the board at this zoom.
-static func pan_limit(zoom_value: float) -> Vector2:
-	return BoardSpace.size() / 2.0 * PAN_LIMIT_SHARE * clampf(zoom_value, 0.0, 1.0)
+## The part of the ground the screen shows when the camera targets the middle of the board
+## (pan 0): the box around where the four corners of the screen meet the ground.
+static func footprint(
+	distance: float, pitch_degrees: float, fov_degrees_value: float, aspect: float
+) -> Rect2:
+	var pitch := deg_to_rad(pitch_degrees)
+	var position := Vector3(0.0, sin(pitch) * distance, cos(pitch) * distance)
+	var basis := Basis.from_euler(Vector3(-pitch, 0.0, 0.0))
+	var tan_v := tan(deg_to_rad(fov_degrees_value) / 2.0)
+	var low := Vector2(INF, INF)
+	var high := Vector2(-INF, -INF)
+	for corner in [Vector2(-1.0, -1.0), Vector2(1.0, -1.0), Vector2(-1.0, 1.0), Vector2(1.0, 1.0)]:
+		var direction := basis * Vector3(corner.x * tan_v * aspect, corner.y * tan_v, -1.0)
+		if direction.y >= -1e-6:
+			continue
+		var hit := position + direction * (-position.y / direction.y)
+		low = Vector2(minf(low.x, hit.x), minf(low.y, hit.z))
+		high = Vector2(maxf(high.x, hit.x), maxf(high.y, hit.z))
+	return Rect2(low, high - low)
 
 
-## A value past `limit` is damped: only `RUBBER` of the overshoot gets through.
-static func rubber(value: float, limit: float) -> float:
-	if absf(value) <= limit:
-		return value
-	return signf(value) * (limit + (absf(value) - limit) * RUBBER)
+## The pans (the camera target, x and z) that keep the whole screen over the board: the board's
+## half size less what the screen shows each way. An axis where the screen shows more than the
+## board has nothing to pan, so its range is the single point 0.
+static func pan_bounds(board_half: Vector2, foot: Rect2) -> Rect2:
+	var low := -board_half - foot.position
+	var high := board_half - foot.end
+	if low.x > high.x:
+		low.x = 0.0
+		high.x = 0.0
+	if low.y > high.y:
+		low.y = 0.0
+		high.y = 0.0
+	return Rect2(low, high - low)
+
+
+## A value outside `low` to `high` is damped: only `RUBBER` of the overshoot gets through.
+static func rubber(value: float, low: float, high: float) -> float:
+	if value > high:
+		return high + (value - high) * RUBBER
+	if value < low:
+		return low - (low - value) * RUBBER
+	return value
 
 
 ## The camera this rig places.
@@ -137,9 +169,34 @@ func set_zoom(value: float) -> void:
 	_place()
 
 
-## A pinch: spreading (factor above 1) zooms in, closing zooms out.
-func zoom_by(factor: float) -> void:
+## A pinch: spreading (factor above 1) zooms in, closing zooms out. Given the middle of the
+## fingers in screen pixels, the point of the board under them stays under them.
+func zoom_by(factor: float, centre: Vector2 = NO_CENTRE) -> void:
+	var pinned := centre != NO_CENTRE
+	var before := ground_under(centre) if pinned else Vector2.ZERO
 	set_zoom(zoom + log(maxf(factor, 1e-6)) / log(2.0) * PINCH_SENSITIVITY)
+	if pinned:
+		_pan_raw += before - ground_under(centre)
+		var range := pan_range()
+		pan = _rubbered(_pan_raw, range) if _holding else _pan_raw.clamp(range.position, range.end)
+		_place()
+
+
+## The ground point (x and z) under a screen pixel.
+func ground_under(pixel: Vector2) -> Vector2:
+	var camera_node := camera()
+	var origin := camera_node.project_ray_origin(pixel)
+	var direction := camera_node.project_ray_normal(pixel)
+	if direction.y >= -1e-6:
+		return Vector2(origin.x, origin.z)
+	var hit := origin + direction * (-origin.y / direction.y)
+	return Vector2(hit.x, hit.z)
+
+
+## The pans allowed now: the whole screen stays over the board.
+func pan_range() -> Rect2:
+	var foot := footprint(_distance(), pitch_for(zoom), fov_degrees, _aspect)
+	return pan_bounds(BoardSpace.size() / 2.0, foot)
 
 
 ## Mouse wheel notches: positive zooms in.
@@ -155,14 +212,19 @@ func pan_by_pixels(delta: Vector2) -> void:
 	var foreshortening := sin(deg_to_rad(pitch_for(zoom)))
 	_pan_raw.x -= delta.x * ground_per_pixel
 	_pan_raw.y -= delta.y * ground_per_pixel / foreshortening
-	var limit := pan_limit(zoom)
-	pan = Vector2(rubber(_pan_raw.x, limit.x), rubber(_pan_raw.y, limit.y))
+	pan = _rubbered(_pan_raw, pan_range())
 	_place()
 
 
 ## The finger let go: the view settles back inside the board.
 func release_pan() -> void:
 	_holding = false
+
+
+func _rubbered(raw: Vector2, range: Rect2) -> Vector2:
+	return Vector2(
+		rubber(raw.x, range.position.x, range.end.x), rubber(raw.y, range.position.y, range.end.y)
+	)
 
 
 ## Camera distance from its target at the current zoom.

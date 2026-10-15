@@ -220,7 +220,8 @@ func test_a_trackpad_pan_moves_the_view_and_settles() -> void:
 	assert_lt(rig.pan.x, 0.0)
 	for i in 120:
 		rig._process(1.0 / 60.0)
-	assert_lte(absf(rig.pan.x), CameraRig.pan_limit(1.0).x + 1e-6)
+	assert_lte(rig.pan.x, rig.pan_range().end.x + 1e-6)
+	assert_gte(rig.pan.x, rig.pan_range().position.x - 1e-6)
 
 
 func test_letting_go_over_a_button_does_not_leave_a_finger_stuck() -> void:
@@ -238,8 +239,9 @@ func test_letting_go_over_a_button_does_not_leave_a_finger_stuck() -> void:
 	# the camera is let go: the overscroll springs back inside the board
 	for i in 180:
 		rig._process(1.0 / 60.0)
-	var limit := CameraRig.pan_limit(1.0)
-	assert_lte(absf(rig.pan.x), limit.x + 1e-3, "the view settled")
+	var range := rig.pan_range()
+	assert_gte(rig.pan.x, range.position.x - 1e-3, "the view settled")
+	assert_lte(rig.pan.x, range.end.x + 1e-3, "the view settled")
 	# the next touch is a clean tap, not a pinch against a ghost finger
 	var game: GameState = main.game()
 	var camera := rig.camera()

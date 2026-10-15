@@ -142,19 +142,64 @@ func test_a_pinch_that_spreads_zooms_in() -> void:
 
 
 func test_there_is_nothing_to_pan_when_the_whole_board_is_in_view() -> void:
-	assert_eq(CameraRig.pan_limit(0.0), Vector2.ZERO)
-	var wide := CameraRig.pan_limit(1.0)
-	assert_gt(wide.x, 0.0)
-	assert_gt(wide.y, 0.0)
-	assert_lte(wide.x, BoardSpace.size().x / 2.0)
-	assert_lte(wide.y, BoardSpace.size().y / 2.0)
+	var rig := _phone_rig()
+	var range := rig.pan_range()
+	assert_eq(range.position, Vector2.ZERO)
+	assert_eq(range.end, Vector2.ZERO)
+
+
+func test_zoomed_in_there_is_room_to_pan_but_the_view_never_leaves_the_board() -> void:
+	var rig := _phone_rig()
+	rig.set_zoom(1.0)
+	var range := rig.pan_range()
+	assert_lt(range.position.x, 0.0)
+	assert_gt(range.end.x, 0.0)
+	assert_lt(range.position.y, 0.0)
+	assert_gt(range.end.y, 0.0)
+	# at every corner of the allowed pans, the whole screen still looks at the board
+	var half := BoardSpace.size() / 2.0
+	for x in [range.position.x, range.end.x]:
+		for y in [range.position.y, range.end.y]:
+			rig.pan = Vector2(x, y)
+			rig._pan_raw = rig.pan
+			rig._place()
+			for corner in [
+				Vector2(0.0, 0.0), Vector2(1.0, 0.0), Vector2(0.0, 1.0), Vector2(1.0, 1.0)
+			]:
+				var ground := rig.ground_under(corner * rig.get_viewport().get_visible_rect().size)
+				assert_lte(absf(ground.x), half.x + 1e-3, "x at pan %s" % [Vector2(x, y)])
+				assert_lte(absf(ground.y), half.y + 1e-3, "z at pan %s" % [Vector2(x, y)])
+
+
+func test_the_footprint_and_bounds_maths() -> void:
+	var foot := Rect2(Vector2(-3.0, -2.0), Vector2(6.0, 5.0))
+	var bounds := CameraRig.pan_bounds(Vector2(10.0, 8.0), foot)
+	assert_eq(bounds.position, Vector2(-7.0, -6.0))
+	assert_eq(bounds.end, Vector2(7.0, 5.0))
+	# a view wider than the board has nothing to pan on that axis
+	var wide := CameraRig.pan_bounds(Vector2(2.0, 8.0), foot)
+	assert_eq(wide.position.x, 0.0)
+	assert_eq(wide.end.x, 0.0)
 
 
 func test_rubber_band_lets_you_overscroll_a_little() -> void:
-	assert_eq(CameraRig.rubber(2.0, 5.0), 2.0)
-	assert_eq(CameraRig.rubber(-5.0, 5.0), -5.0)
-	assert_almost_eq(CameraRig.rubber(9.0, 5.0), 5.0 + 4.0 * CameraRig.RUBBER, 1e-9)
-	assert_almost_eq(CameraRig.rubber(-9.0, 5.0), -(5.0 + 4.0 * CameraRig.RUBBER), 1e-9)
+	assert_eq(CameraRig.rubber(2.0, -5.0, 5.0), 2.0)
+	assert_eq(CameraRig.rubber(-5.0, -5.0, 5.0), -5.0)
+	assert_almost_eq(CameraRig.rubber(9.0, -5.0, 5.0), 5.0 + 4.0 * CameraRig.RUBBER, 1e-9)
+	assert_almost_eq(CameraRig.rubber(-9.0, -5.0, 5.0), -(5.0 + 4.0 * CameraRig.RUBBER), 1e-9)
+	assert_almost_eq(CameraRig.rubber(1.0, 2.0, 6.0), 2.0 - 1.0 * CameraRig.RUBBER, 1e-9)
+
+
+func test_a_pinch_keeps_the_point_under_the_fingers_where_it_was() -> void:
+	var rig := _phone_rig()
+	rig.set_zoom(0.5)
+	var centre := rig.get_viewport().get_visible_rect().size * Vector2(0.5, 0.4)
+	var before := rig.ground_under(centre)
+	rig.zoom_by(1.3, centre)
+	var after := rig.ground_under(centre)
+	assert_gt(rig.zoom, 0.5)
+	assert_almost_eq(after.x, before.x, 1e-3)
+	assert_almost_eq(after.y, before.y, 1e-3)
 
 
 func test_dragging_moves_the_scene_with_the_finger() -> void:
@@ -174,14 +219,14 @@ func test_a_pan_stays_near_the_board_and_springs_back_after_release() -> void:
 	var rig := _phone_rig()
 	rig.set_zoom(1.0)
 	rig.pan_by_pixels(Vector2(-2000.0, 0.0))
-	var limit := CameraRig.pan_limit(1.0)
+	var range := rig.pan_range()
 	# held: overscroll is damped, not unlimited
-	assert_gt(rig.pan.x, limit.x)
-	assert_lt(rig.pan.x, limit.x * 3.0)
+	assert_gt(rig.pan.x, range.end.x)
+	assert_lt(rig.pan.x, rig._pan_raw.x, "damped, not following the finger all the way")
 	rig.release_pan()
 	for i in 120:
 		rig._process(1.0 / 60.0)
-	assert_almost_eq(rig.pan.x, limit.x, 1e-3)
+	assert_almost_eq(rig.pan.x, range.end.x, 1e-3)
 
 
 func test_zooming_out_pulls_a_panned_view_back_to_the_middle() -> void:
