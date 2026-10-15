@@ -80,7 +80,7 @@ fixtures/    frozen JSON from the retired TypeScript sim for the ported core (pr
 
 ## UI
 
-- The HUD is built from Godot `Control` nodes with one Theme resource that mirrors the Claude Design tokens. Never hard-code colours in scenes or scripts.
+- The HUD is built from Godot `Control` nodes with one Theme resource that mirrors the Claude Design tokens. The Theme is written by `godot/tools/build_hud_theme.gd` (the tokens live at its top); change the tokens there and rerun it rather than editing `ui/hud_theme.tres` by hand. Never hard-code colours in scenes or scripts.
 - The game is landscape only (owner decision). A phone held upright shows a "turn your phone" prompt (in the web export's HTML shell) and the game pauses. Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px.
 - Respect reduced motion: read the setting through one platform adapter (on the web, `prefers-reduced-motion` via the HTML shell and `JavaScriptBridge`; on iOS Godot may have no API for Reduce Motion, so plan an in-game setting or a small native plugin) and turn off screen shake and reduce particle effects. The landscape prompt and fullscreen button live in the web shell only.
 - Start audio only after the first tap (browsers block it before).
@@ -131,7 +131,7 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
 - Open each PR with `gh pr create` using a conforming title (`gh stack submit --auto` generates titles that fail `PR checks`), then run `gh stack submit` to link them.
 - Merge from the bottom of the stack up, and run `gh stack sync` afterwards.
-- Assets: only GLB (meshopt-compressed where it helps) in `godot/assets/`; sources go in `assets-src/` (Git LFS). Record every asset in `assets/CREDITS.md` with its source and licence. Allowed sources: CC0 packs (the row says CC0) and the owner's original models (the row says `Owned by the owner (all rights reserved)`; the owner keeps the rights, and CI checks that each row says one of the two). Do not use copyrighted characters, third-party images, brands or real people's likeness as a reference. Anything else needs the owner's say-so.
+- Assets: only GLB (meshopt-compressed where it helps) in `godot/assets/`; sources go in `assets-src/` (Git LFS). Record every asset in `assets/CREDITS.md` with its source and licence. Allowed sources: CC0 packs (the row says CC0), the owner's original models (the row says `Owned by the owner (all rights reserved)`; the owner keeps the rights), and, for fonts only, SIL OFL 1.1 faces (the row says `SIL OFL 1.1`, licence text in `assets/licenses/`; owner decision, 2026-10-15). CI checks that each row says one of these. Do not use copyrighted characters, third-party images, brands or real people's likeness as a reference. Anything else needs the owner's say-so.
 - Before drawing final reference sheets, shortlist CC0 packs and list the gaps in `docs/art/GAPS.md`. Sheets for pack-sourced units follow what the packs can supply; gaps are kitbashed from pack parts or built from primitives. Check each pack's licence file; if it is not clearly CC0, don't use it. The owner's foe models are built to the unit's triangle budget in Blender, baked to one 512 px map per foe with colours matched to the shared palette, and checked for a distinct zoomed-out silhouette before they replace a placeholder.
 
 ## CI/CD and releases

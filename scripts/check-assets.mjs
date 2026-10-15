@@ -60,15 +60,23 @@ for (const path of listed) {
 }
 
 // CC0 for packs, or the owner's own models, which the owner keeps the rights to.
+// Fonts may also be SIL OFL 1.1 (owner decision, 2026-10-15), and only fonts: the
+// licence lets a game embed them, and no CC0 face fits the papercraft HUD.
 // Only the licence column counts, and it has to start with the licence (a row that
 // says "CC BY 4.0, not CC0" is not CC0).
 const OWNED = /^\s*Owned by the owner \(all rights reserved\)/;
+const OFL = /^\s*SIL OFL 1\.1\b/;
 for (const [, path, rest] of rows) {
   // columns: | file | source | licence | edits |
   const licence = (rest ?? '').split('|')[2] ?? '';
-  if (!/^\s*CC0\b/i.test(licence) && !OWNED.test(licence)) {
+  const font = path.startsWith('fonts/');
+  if (
+    !/^\s*CC0\b/i.test(licence) &&
+    !OWNED.test(licence) &&
+    !(font && OFL.test(licence))
+  ) {
     errors.push(
-      `${path}: the credits row does not say CC0 or 'Owned by the owner (all rights reserved)'`
+      `${path}: the credits row does not say CC0 or 'Owned by the owner (all rights reserved)'${font ? " or 'SIL OFL 1.1'" : ''}`
     );
   }
 }
