@@ -10,7 +10,7 @@ test('the Godot export starts and renders a canvas', async ({page}) => {
     if (message.type() === 'error') errors.push(message.text());
   });
 
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   await expect(page.locator('#status')).toBeHidden({timeout: 60_000});
   // set by main.gd once the scene is built, so the engine really ran
   await page.waitForFunction(
@@ -38,7 +38,7 @@ test('the Godot export starts and renders a canvas', async ({page}) => {
 
 test('an upright phone is asked to turn', async ({page}) => {
   await page.setViewportSize({width: 390, height: 780});
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   await expect(page.locator('#rotate')).toBeVisible();
 });
 
@@ -46,7 +46,7 @@ test('the shell offers full screen and links a manifest', async ({
   page,
   request,
 }) => {
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   const button = page.locator('#fullscreen');
   await expect(button).toBeVisible();
   const box = await button.boundingBox();
@@ -63,7 +63,7 @@ test('the shell offers full screen and links a manifest', async ({
 });
 
 test('full screen can be entered and left', async ({page}) => {
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   const button = page.locator('#fullscreen');
   await button.click();
   await expect
@@ -87,7 +87,7 @@ test('without the Fullscreen API the button shows the install hint', async ({
       value: undefined,
     });
   });
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   await expect(page.locator('#installHint')).toBeHidden();
   await page.locator('#fullscreen').click();
   await expect(page.locator('#installHint')).toBeVisible();
@@ -101,7 +101,7 @@ test('an installed app shows no full screen button', async ({page}) => {
         ? ({...original(query), matches: true} as MediaQueryList)
         : original(query);
   });
-  await page.goto('/index.html');
+  await page.goto('/index.html?tour=0');
   await expect(page.locator('#fullscreen')).toBeHidden();
 });
 
@@ -126,7 +126,7 @@ test('a tap with a touch id other than 0 selects a socket', async ({
     isMobile: true,
   });
   const page = await context.newPage();
-  await page.goto(`${baseURL}/index.html`);
+  await page.goto(`${baseURL}/index.html?tour=0`);
   await page.waitForFunction(
     () => (window as unknown as {gameReady?: boolean}).gameReady,
     undefined,
@@ -153,4 +153,35 @@ test('a tap with a touch id other than 0 selects a socket', async ({
   );
   expect(selected).not.toBe('-1,-1');
   await context.close();
+});
+
+// The first-time tour opens by itself on a fresh browser, and stays closed once it was seen.
+test('the tour opens on a first visit and not after it was seen', async ({
+  browser,
+}) => {
+  const open = async (seen: boolean) => {
+    const context = await browser.newContext({
+      viewport: {width: 844, height: 390},
+    });
+    const page = await context.newPage();
+    if (seen) {
+      await page.addInitScript(() =>
+        localStorage.setItem('papercraft_tour_seen', '1')
+      );
+    }
+    await page.goto('/index.html');
+    await page.waitForFunction(
+      () => (window as unknown as {gameReady?: boolean}).gameReady,
+      undefined,
+      {timeout: 60_000}
+    );
+    const tourOpen = await page.evaluate(
+      () =>
+        (window as unknown as {gameTourOpen?: boolean}).gameTourOpen === true
+    );
+    await context.close();
+    return tourOpen;
+  };
+  expect(await open(false)).toBe(true);
+  expect(await open(true)).toBe(false);
 });

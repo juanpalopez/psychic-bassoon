@@ -101,6 +101,32 @@ toggle_mode = true
 button_pressed = true
 text = "Sound"
 
+[node name="HowToPlay" type="Button" parent="Hud"]
+visible = false
+theme = ExtResource("10_theme")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -516.0
+offset_top = 324.0
+offset_right = -276.0
+offset_bottom = 420.0
+grow_horizontal = 0
+custom_minimum_size = Vector2(240, 96)
+text = "How to play"
+
+[node name="TowerGuide" type="Button" parent="Hud"]
+visible = false
+theme = ExtResource("10_theme")
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -260.0
+offset_top = 324.0
+offset_right = -20.0
+offset_bottom = 420.0
+grow_horizontal = 0
+custom_minimum_size = Vector2(240, 96)
+text = "Tower guide"
+
 [node name="LaunchWave" type="Button" parent="Hud"]
 theme = ExtResource("10_theme")
 custom_minimum_size = Vector2(260, 96)

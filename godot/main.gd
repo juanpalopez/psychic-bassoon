@@ -27,6 +27,11 @@ var _fingers := TouchFingers.new()
 var _speed := GameSpeed.new()
 var _audio := AudioPlayer.new()
 var _crow := MessengerCrow.new()
+var _tour := Tour.new()
+var _guide := GuidePanel.new()
+var _progress := TourProgress.default()
+# whether the game was paused by the player when an overlay opened over it
+var _paused_before_overlay := false
 
 @onready var _board: Board = $Board
 @onready var _rig: CameraRig = $CameraRig
@@ -47,6 +52,8 @@ var _crow := MessengerCrow.new()
 @onready var _next_seed: Button = $Hud/NextSeed
 @onready var _sound: Button = $Hud/Sound
 @onready var _menu_button: Button = $Hud/MenuButton
+@onready var _how_to_play: Button = $Hud/HowToPlay
+@onready var _tower_guide: Button = $Hud/TowerGuide
 
 
 func _ready() -> void:
@@ -58,9 +65,17 @@ func _ready() -> void:
 		func(on: bool) -> void:
 			_next_seed.visible = on
 			_sound.visible = on
+			_how_to_play.visible = on
+			_tower_guide.visible = on
 	)
 	_sound.toggled.connect(func(on: bool) -> void: _audio.set_muted(not on))
 	$Hud.add_child(_crow)
+	$Hud.add_child(_guide)
+	$Hud.add_child(_tour)
+	_tour.finished.connect(_on_tour_finished)
+	_guide.closed.connect(func() -> void: _pause_for_overlay(false))
+	_how_to_play.pressed.connect(_start_tour)
+	_tower_guide.pressed.connect(_open_guide)
 	_next_seed.pressed.connect(func() -> void: _start(_game.seed + 1))
 	_menu.tower_chosen.connect(_on_tower_chosen)
 	_speed_bar.speed_chosen.connect(_on_speed_chosen)
@@ -74,6 +89,8 @@ func _ready() -> void:
 	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
+	if TourProgress.wanted(_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"):
+		_start_tour()
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.gameReady = true")
 
@@ -346,6 +363,49 @@ func _show_message(text: String) -> void:
 
 ## The `seed` query parameter of the page as an int, or null when there is none
 ## (or it is not a whole number of at most 16 characters).
+## The page's `?tour=` value ("0" turns the first-time tour off), or "".
+func _tour_param() -> String:
+	if not OS.has_feature("web"):
+		return ""
+	var value: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('tour')")
+	return value if value is String and (value as String).length() <= 4 else ""
+
+
+## Opens the tour over the game, which waits.
+func _start_tour() -> void:
+	_pause_for_overlay(true)
+	_tour.start()
+	_tell_page_tour(true)
+
+
+## The browser smoke test reads whether the tour is open.
+func _tell_page_tour(open: bool) -> void:
+	if OS.has_feature("web"):
+		JavaScriptBridge.eval("window.gameTourOpen = %s" % str(open))
+
+
+func _on_tour_finished() -> void:
+	_progress.mark_seen()
+	_pause_for_overlay(false)
+	_tell_page_tour(false)
+
+
+func _open_guide() -> void:
+	_pause_for_overlay(true)
+	_guide.open()
+
+
+## An overlay (the tour or the guide) pauses the game while it is open and gives the
+## pause back as the player had it.
+func _pause_for_overlay(opening: bool) -> void:
+	if opening:
+		if not _tour.is_open() and not _guide.is_open():
+			_paused_before_overlay = _speed.paused
+		_speed.paused = true
+	else:
+		_speed.paused = _paused_before_overlay
+
+
 func _seed_from_url() -> Variant:
 	if not OS.has_feature("web"):
 		return null
