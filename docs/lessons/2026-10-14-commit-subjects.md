@@ -9,7 +9,7 @@ promoted-to:
 # Keep commit subjects at most 72 characters and use an allowed scope
 
 ## What happened
-PR checks rejected several of our commits: the subject was 74 to 76 characters, or the scope was `e2e`, which is not an allowed scope.
+PR checks rejected several of our commits: the subject was 74 to 76 characters, or the scope was `e2e` (and later `lessons`), which is not an allowed scope.
 
 ## Evidence
 `PR checks` job `Conventional Commits`: `Not a valid Conventional Commit: fix(render): unlock audio again on release, stop effects on mute, test without the clock`; PRs #250, #252, #257, #263.
