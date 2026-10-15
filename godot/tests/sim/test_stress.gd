@@ -76,3 +76,14 @@ func test_a_target_of_zero_does_nothing() -> void:
 	Stress.top_up(game, 0)
 	assert_eq(game.foes.size(), 0)
 	assert_eq(game.events.size(), 0)
+
+
+func test_after_a_loss_the_crowd_refills_one_foe_a_tick_at_the_spawn_point() -> void:
+	var game := Game.create(1)
+	Stress.top_up(game, 10)
+	for i in 4:
+		game.foes[i].alive = false
+	var before := game.foes.size()
+	Stress.top_up(game, 10)
+	assert_eq(game.foes.size(), before + 1, "one new foe, not four")
+	assert_eq(game.foes[game.foes.size() - 1].distance, 0.0, "at the spawn point")

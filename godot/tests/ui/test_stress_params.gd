@@ -22,3 +22,8 @@ func test_fps_is_on_when_the_parameter_is_there_unless_it_says_zero() -> void:
 	assert_true(StressParams.fps_on("1"))
 	assert_false(StressParams.fps_on(null))
 	assert_false(StressParams.fps_on("0"))
+
+
+func test_leading_zeros_count_but_a_long_string_does_not() -> void:
+	assert_eq(StressParams.foes("080"), 80)
+	assert_eq(StressParams.foes("0000080"), 0, "more than six characters is ignored")

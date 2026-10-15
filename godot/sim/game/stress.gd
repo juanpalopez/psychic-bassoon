@@ -2,6 +2,8 @@
 ## part of a game: a page parameter turns it on and the scene calls `top_up` before each tick.
 ## The foes are real ones made by the sim's own spawner, so the cost on screen is the real
 ## cost. It draws no random numbers and keeps the Heartstone alive, so a crowd is repeatable.
+## It runs before the tick, and a tick starts by clearing the events, so the FOE_SPAWNED events
+## of these foes are dropped on purpose: nothing in the phone check reads them.
 class_name Stress
 extends RefCounted
 
