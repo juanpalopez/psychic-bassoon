@@ -1,6 +1,8 @@
 ## The panel for a selected tower: its name, level and stats, and Upgrade and Sell.
 extends GutTest
 
+const TOWERS := preload("res://content/towers.gd")
+
 
 func _tower(type: String, level: int, invested: int) -> Tower:
 	var tower := Tower.new()
@@ -36,18 +38,20 @@ func test_it_names_the_tower_and_its_level() -> void:
 func test_it_shows_the_levels_stats_from_the_content() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("spoolGuard", 1, 110), 0)
-	# level 2 Spool Guard: damage 23, range 2.6, rate 3.6
-	assert_string_contains(panel.stats_text(), "23")
-	assert_string_contains(panel.stats_text(), "2.6")
-	assert_string_contains(panel.stats_text(), "3.6")
+	# level 2 Spool Guard: its damage, range and rate from the content
+	var def: Dictionary = TOWERS.DEFS.spoolGuard
+	assert_string_contains(panel.stats_text(), str(def.damage[1]))
+	assert_string_contains(panel.stats_text(), str(def.range[1]))
+	assert_string_contains(panel.stats_text(), str(def.rate[1]))
 
 
 func test_a_beam_tower_shows_damage_per_second_and_no_rate() -> void:
 	var panel := _panel()
 	panel.show_tower(_tower("prismSpire", 1, 210), 0)
-	# level 2 Prism Spire: 84 damage per second, range 2.6
-	assert_string_contains(panel.stats_text(), "84/s")
-	assert_string_contains(panel.stats_text(), "2.6")
+	# level 2 Prism Spire: its damage per second and range from the content
+	var def: Dictionary = TOWERS.DEFS.prismSpire
+	assert_string_contains(panel.stats_text(), "%d/s" % def.damage[1])
+	assert_string_contains(panel.stats_text(), str(def.range[1]))
 	assert_false(panel.stats_text().contains("Rate"))
 
 

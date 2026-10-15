@@ -295,7 +295,7 @@ static func _feeder_on_row(
 	var last := cells.size() - 1
 	for n in cells.size():
 		for m in path.size():
-			var close := _gap(cells[n], path[m]) < 2
+			var close := _gap(cells[n], path[m]) < RULES.FEEDER_CLEARANCE
 			if close and not (n == last and m == join_index):
 				return {}
 	return {"cells": cells, "join_index": join_index}

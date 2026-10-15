@@ -121,3 +121,33 @@ func _two_route_game() -> GameState:
 		if game.routes.size() == 2:
 			return game
 	return null
+
+
+func test_the_second_roads_foes_enter_at_the_edge_their_road_starts_on() -> void:
+	# a road from the bottom edge starts below the board, not above it (it once started above
+	# the top edge and crossed the whole board)
+	var checked := 0
+	for map_seed in _seeds:
+		var game := Game.create(map_seed)
+		if game.routes.size() < 2:
+			continue
+		checked += 1
+		var first_step: float = game.routes[1].cumulative[1]
+		assert_lte(first_step, RULES.CELL_CENTRE + RULES.SPAWN_OFFSET + 1e-9, "seed %d" % map_seed)
+	assert_gt(checked, 40)
+
+
+func test_the_feeder_order_comes_from_its_own_stream() -> void:
+	# the shuffle is drawn from `Streams.SECOND_SOURCE`: another stream gives another order
+	var differing := 0
+	for map_seed in _seeds:
+		var path := MapGen._try_path(
+			Rng.derive(map_seed, Streams.MAP), RULES.GRID_ROWS, RULES.GRID_COLS
+		)
+		if path.is_empty():
+			continue
+		var a := MapGen._feeders(path, Rng.derive(map_seed, Streams.SECOND_SOURCE), 11, 16)
+		var b := MapGen._feeders(path, Rng.derive(map_seed + 1, Streams.SECOND_SOURCE), 11, 16)
+		if a.size() > 3 and a != b:
+			differing += 1
+	assert_gt(differing, 10, "the order depends on the stream")

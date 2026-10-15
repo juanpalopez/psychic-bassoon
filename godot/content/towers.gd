@@ -71,7 +71,7 @@ const DEFS := {
 		"name": "Prism Spire",
 		"damage_type": "magic",
 		"cost": [100, 90, 160],
-		"damage": [38, 76, 147],
+		"damage": [40, 80, 155],
 		"range": [2.3, 2.6, 2.9],
 		"beam": true,
 		"anti_air": true,

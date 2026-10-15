@@ -361,17 +361,18 @@ The golden for the guard mix is seed 2 (it builds both tents); the CI game-time 
 
 ## A second spawn source after wave 10 (2026-10-16, #268)
 
-Owner decision: a second road from another edge joins the main road, and from wave 11 each wave's groups alternate between the two sources. About 87 percent of seeds have room for it (261 of 300); the rest keep one road and play as before. The main road and waves 1 to 10 do not change.
+Owner decision: a second road from another edge joins the main road, and from wave 11 each wave's groups alternate between the two sources. About 87 percent of seeds have room for it (260 of 300 checked); the rest keep one road and play as before. The main road and waves 1 to 10 do not change.
 
 **What changed** (`godot/sim`, `godot/content`): a feeder road along a row from the top or bottom edge to the first main-road cell on that row (its own random stream, `Streams.SECOND_SOURCE`; the first feeder that leaves room for 12 sockets); `routes[1]` is the feeder then the main road from the join; `WaveBuilder` gives each group of waves 11 and later a route (0, 1, 0, 1...), with no new random draw; guards hold second-route foes once they are on the main road (`Barracks.main_distance`); the sockets, the replay goldens and the socket-block golden moved with the new road cells.
 
-**Sweep** (16 seeds, 20 waves; wins out of 16, band 4 to 9; raw files `docs/balance/second-source-*.txt`):
+**Sweep** (16 seeds, 20 waves; wins out of 16, band 4 to 9; raw file `docs/balance/second-source-sweep-seeds-1-16.txt` with its command in the header). A first sweep was thrown away: a review found that a second road from the bottom edge spawned its foes above the top edge (they crossed the whole board), which `Route.build` now handles (a test pins the first segment of every second route).
 
 | Config | Spool | Mortar | Prism | Mix | Guard mix |
 | --- | --- | --- | --- | --- | --- |
-| Map v3 numbers with the second source | 8 | 3 | 10 | 11 | 7 |
-| Mortar 17, 31, 53; Prism 38, 76, 147 (chosen) | 8 | 7 | 8 | 11 | 8 |
-| Mortar 18, 34, 58; Prism 39, 78, 152 | 8 | 10 | 10 | 12 | 11 |
-| Mortar 17, 31, 53; Prism 40, 80, 155 | 8 | 7 | 10 | 11 | 10 |
+| Map v3 numbers (Mortar 15, 28, 48; Prism 42, 84, 163) | 5 | 3 | 7 | 8 | 6 |
+| Mortar 17, 31, 53; Prism 38, 76, 147 | 5 | 6 | 4 | 8 | 7 |
+| Mortar 17, 31, 53; Prism 40, 80, 155 (chosen) | 5 | 6 | 6 | 9 | 8 |
+| Mortar 18, 34, 58; Prism 39, 78, 152 | 5 | 9 | 6 | 10 | 9 |
+| Mortar 19, 34, 58; Prism 38, 76, 147 | 5 | 10 | 4 | 10 | 9 |
 
-The Mortar lost most maps on early waves (5 to 12, before the second road opens) because the new road cells moved the sockets, so it got a +13 percent damage buff (15, 28, 48 to 17, 31, 53) and the Prism Spire a -10 percent trim (42, 84, 163 to 38, 76, 147). Four of five strategies sit in the band (Spool 8, Mortar 7, Prism 8, Guard mix 8); the Mix wins 11 of 16 (69 percent), above the band, as before.
+The sockets move on every map that gets a second road (its cells are road, so a block cannot sit on them), so the early waves play differently even though the road and the waves 1 to 10 do not change: the Thimble Mortar lost more maps with the Map v3 numbers (3 of 16), so it gained 13 percent damage (15, 28, 48 to 17, 31, 53) and the Prism Spire lost 5 percent (42, 84, 163 to 40, 80, 155). All five strategies are in the band (Spool 5, Mortar 6, Prism 6, Mix 9, Guard mix 8); the Mix and the Guard mix are at the top of it.

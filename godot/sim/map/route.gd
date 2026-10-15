@@ -23,11 +23,16 @@ static func build(cells: Array[Vector2i]) -> Route:
 	var route := Route.new()
 	# the spawn point sits off the board edge the road enters from: above the top
 	# row for a road that starts by going down, left of the first column for one
-	# that starts by going right
+	# that starts by going right, below the bottom row for one that starts by going up
+	# (the second road may enter from the bottom edge)
 	var goes_right := cells.size() > 1 and cells[1].x > cells[0].x
+	var goes_up := cells.size() > 1 and cells[1].y < cells[0].y
 	if goes_right:
 		route.xs.append(-RULES.SPAWN_OFFSET)
 		route.ys.append(float(cells[0].y) + RULES.CELL_CENTRE)
+	elif goes_up:
+		route.xs.append(float(cells[0].x) + RULES.CELL_CENTRE)
+		route.ys.append(float(cells[0].y) + 1.0 + RULES.SPAWN_OFFSET)
 	else:
 		route.xs.append(float(cells[0].x) + RULES.CELL_CENTRE)
 		route.ys.append(-RULES.SPAWN_OFFSET)

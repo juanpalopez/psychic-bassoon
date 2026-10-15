@@ -1,0 +1,32 @@
+# Command: python3 scripts/balance_sweep.py '<5 configs, see sweep6 table in docs/BALANCE.md>' 1,2,...,16 15 (worktree feat/sim-second-source, after the bottom-edge spawn fix)
+# Config order: chosen numbers as in the tree (Mortar 17,31,53; Prism 38,76,147), Map v3 numbers (15,28,48; 42,84,163), (18,34,58; 39,78,152), (17,31,53; 40,80,155), (19,34,58; 38,76,147)
+{}
+  spoolOnly    cleared [13, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.0 buttons_left 3042
+  mortarHeavy  cleared [6, 7, 9, 10, 10, 14, 15, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [7, 8, 10, 11, 11, 15, 16, 20, 20, 20] heart 2.6 buttons_left 1410
+  prismHeavy   cleared [11, 14, 16, 16, 17, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20] died_on [12, 15, 17, 17, 18, 19, 19, 20, 20, 20, 20, 20] heart 1.8 buttons_left 1742
+  mix          cleared [11, 16, 17, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 19, 19, 20, 20, 20] heart 5.6 buttons_left 2399
+  guardMix     cleared [11, 14, 14, 16, 17, 17, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [12, 15, 15, 17, 18, 18, 20, 20, 20] heart 2.5 buttons_left 1910
+{"sub:towers#2": ["\"damage\": [17, 31, 53]", "\"damage\": [15, 28, 48]"], "sub:towers#3": ["\"damage\": [38, 76, 147]", "\"damage\": [42, 84, 163]"]}
+  spoolOnly    cleared [13, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.0 buttons_left 3042
+  mortarHeavy  cleared [4, 6, 6, 7, 9, 10, 10, 11, 11, 14, 17, 19, 19, 20, 20, 20] died_on [5, 7, 7, 8, 10, 11, 11, 12, 12, 15, 18, 20, 20] heart 1.2 buttons_left 882
+  prismHeavy   cleared [11, 16, 17, 17, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 18, 19, 19, 20, 20, 20] heart 4.1 buttons_left 2020
+  mix          cleared [11, 16, 17, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 19, 19, 20, 20, 20] heart 5.3 buttons_left 2419
+  guardMix     cleared [11, 14, 15, 16, 17, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [12, 15, 16, 17, 18, 19, 20, 20, 20, 20] heart 2.7 buttons_left 1966
+{"sub:towers#2": ["\"damage\": [17, 31, 53]", "\"damage\": [18, 34, 58]"], "sub:towers#3": ["\"damage\": [38, 76, 147]", "\"damage\": [39, 78, 152]"]}
+  spoolOnly    cleared [13, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.0 buttons_left 3042
+  mortarHeavy  cleared [6, 9, 9, 10, 10, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [7, 10, 10, 11, 11, 19, 20] heart 4.6 buttons_left 1697
+  prismHeavy   cleared [11, 16, 17, 17, 17, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 18, 18, 19, 20, 20, 20, 20] heart 2.9 buttons_left 1936
+  mix          cleared [11, 17, 18, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 18, 19, 19, 19, 20] heart 7.7 buttons_left 2531
+  guardMix     cleared [11, 16, 17, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 19, 19, 20, 20] heart 4.6 buttons_left 2230
+{"sub:towers#2": ["\"damage\": [17, 31, 53]", "\"damage\": [17, 31, 53]"], "sub:towers#3": ["\"damage\": [38, 76, 147]", "\"damage\": [40, 80, 155]"]}
+  spoolOnly    cleared [13, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.0 buttons_left 3042
+  mortarHeavy  cleared [6, 7, 9, 10, 10, 14, 15, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [7, 8, 10, 11, 11, 15, 16, 20, 20, 20] heart 2.6 buttons_left 1410
+  prismHeavy   cleared [11, 16, 17, 17, 17, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 18, 18, 19, 20, 20, 20, 20] heart 3.2 buttons_left 1948
+  mix          cleared [11, 17, 17, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 18, 18, 19, 19, 20, 20] heart 6.3 buttons_left 2478
+  guardMix     cleared [11, 14, 15, 16, 17, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 15, 16, 17, 18, 19, 20, 20] heart 3.6 buttons_left 1990
+{"sub:towers#2": ["\"damage\": [17, 31, 53]", "\"damage\": [19, 34, 58]"], "sub:towers#3": ["\"damage\": [38, 76, 147]", "\"damage\": [38, 76, 147]"]}
+  spoolOnly    cleared [13, 17, 17, 18, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20] died_on [14, 18, 18, 19, 19, 19, 20, 20, 20, 20, 20] heart 2.0 buttons_left 3042
+  mortarHeavy  cleared [6, 10, 10, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [7, 11, 11, 19, 19, 20] heart 5.7 buttons_left 1991
+  prismHeavy   cleared [11, 14, 16, 16, 17, 18, 18, 19, 19, 19, 19, 19, 20, 20, 20, 20] died_on [12, 15, 17, 17, 18, 19, 19, 20, 20, 20, 20, 20] heart 1.8 buttons_left 1742
+  mix          cleared [11, 17, 18, 18, 18, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 18, 19, 19, 19, 20] heart 7.4 buttons_left 2529
+  guardMix     cleared [11, 16, 17, 18, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [12, 17, 18, 19, 19, 20, 20] heart 4.4 buttons_left 2205

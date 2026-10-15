@@ -67,7 +67,7 @@ func test_the_prism_spire_is_a_beam_with_damage_per_second_and_no_rate() -> void
 	assert_false(def.has("rate"))
 	# damage per second, more than doubled from the Storm Spire's damage times its
 	# rate (16, 33, 65) so that a Prism-only build keeps up with the others
-	assert_eq(def.damage, [38, 76, 147])
+	assert_eq(def.damage, [40, 80, 155])
 	assert_eq(def.cost, [100, 90, 160])
 	assert_eq(def.range, [2.3, 2.6, 2.9])
 

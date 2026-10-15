@@ -24,6 +24,8 @@ const GAME_SECOND_SOURCE := true
 const FEEDER_MIN_CELLS := 3
 const FEEDER_JOIN_MARGIN := 6
 const FEEDER_ROW_MARGIN := 2
+## The feeder stays this far (in steps along the grid) from every main-road cell but the join.
+const FEEDER_CLEARANCE := 2
 
 ## Give up and retry when the path is shorter than rows + this many cells.
 const MIN_EXTRA_CELLS := 16

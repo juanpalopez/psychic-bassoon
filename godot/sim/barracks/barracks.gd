@@ -151,17 +151,20 @@ static func _held_foe(game: GameState, guard: Guard) -> Foe:
 	return null
 
 
-## The blockable, free foe nearest the guard's post that has walked up to it.
 ## How far along the main route the foe is, or -1 when it is not on the main road yet: a foe
 ## of the second route is on it from the join on, `second_offset` further along its own route.
+## On the old random detour (`random_lanes`) a foe of another lane is never on the main road.
 static func main_distance(game: GameState, foe: Foe) -> float:
 	if foe.route == 0:
 		return foe.distance
+	if game.random_lanes:
+		return -1.0
 	if foe.distance < game.routes[foe.route].cumulative[game.map.feeder_length + 1]:
 		return -1.0
 	return foe.distance - game.second_offset
 
 
+## The blockable, free foe nearest the guard's post that has walked up to it.
 static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 	var best: Foe = null
 	var best_along := -1.0
