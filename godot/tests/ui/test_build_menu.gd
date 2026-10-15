@@ -135,6 +135,18 @@ func test_a_socket_near_the_top_gets_the_menu_below_it() -> void:
 	assert_eq(at.y, socket.end.y + BuildMenu.SOCKET_GAP)
 
 
+func test_a_socket_in_the_middle_band_gets_the_menu_beside_it() -> void:
+	var port := Vector2(1280.0, 720.0)
+	var menu_size := Vector2(660.0, 210.0)
+	# too low for the menu above it, too high for the menu below it
+	for socket in [Rect2(1000.0, 300.0, 90.0, 90.0), Rect2(100.0, 300.0, 90.0, 90.0)]:
+		var rect := Rect2(BuildMenu.placement(socket, menu_size, port), menu_size)
+		assert_false(rect.intersects(socket), "beside %s, not on it" % socket)
+		assert_gte(rect.position.y, BuildMenu.TOP_RESERVE)
+		assert_lte(rect.end.y, port.y - BuildMenu.BOTTOM_RESERVE)
+		assert_true(Rect2(Vector2.ZERO, port).encloses(rect))
+
+
 func test_the_menu_stays_on_screen_and_clear_of_the_corner_rows() -> void:
 	var port := Vector2(1280.0, 720.0)
 	var menu_size := Vector2(660.0, 200.0)

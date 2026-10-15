@@ -90,15 +90,28 @@ func place_near(socket: Rect2, port: Vector2) -> void:
 
 
 ## Where a menu of `menu_size` goes for a socket drawn at `socket`: centred above it when
-## that leaves the corner controls clear, else below it, and always inside the screen
-## between the top and bottom rows of controls.
+## that leaves the corner controls clear, else below it, else (a socket in the middle band)
+## beside it; always inside the screen between the top and bottom rows of controls.
 static func placement(socket: Rect2, menu_size: Vector2, port: Vector2) -> Vector2:
-	var x := socket.get_center().x - menu_size.x / 2.0
-	x = clampf(x, EDGE_MARGIN, maxf(EDGE_MARGIN, port.x - EDGE_MARGIN - menu_size.x))
+	var centred := socket.get_center().x - menu_size.x / 2.0
+	centred = clampf(centred, EDGE_MARGIN, maxf(EDGE_MARGIN, port.x - EDGE_MARGIN - menu_size.x))
+	var lowest := maxf(TOP_RESERVE, port.y - BOTTOM_RESERVE - menu_size.y)
 	var above := socket.position.y - SOCKET_GAP - menu_size.y
-	var y := above if above >= TOP_RESERVE else socket.end.y + SOCKET_GAP
-	y = clampf(y, TOP_RESERVE, maxf(TOP_RESERVE, port.y - BOTTOM_RESERVE - menu_size.y))
-	return Vector2(x, y)
+	if above >= TOP_RESERVE:
+		return Vector2(centred, above)
+	# a socket under the top row still gets its menu below that row
+	var below := maxf(socket.end.y + SOCKET_GAP, TOP_RESERVE)
+	if below <= lowest:
+		return Vector2(centred, below)
+	var level := clampf(socket.get_center().y - menu_size.y / 2.0, TOP_RESERVE, lowest)
+	var right := socket.end.x + SOCKET_GAP
+	if right + menu_size.x <= port.x - EDGE_MARGIN:
+		return Vector2(right, level)
+	var left := socket.position.x - SOCKET_GAP - menu_size.x
+	if left >= EDGE_MARGIN:
+		return Vector2(left, level)
+	# a screen too small for any of these: below, pushed up as far as the rows allow
+	return Vector2(centred, clampf(below, TOP_RESERVE, lowest))
 
 
 func close() -> void:
