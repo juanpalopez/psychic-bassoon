@@ -49,6 +49,8 @@ var _aspect := 16.0 / 9.0
 var _fit := 0.0
 var _pan_raw := Vector2.ZERO
 var _holding := false
+var _range := Rect2()
+var _range_key := Vector4(-1.0, -1.0, -1.0, -1.0)
 
 
 func _ready() -> void:
@@ -195,8 +197,13 @@ func ground_under(pixel: Vector2) -> Vector2:
 
 ## The pans allowed now: the whole screen stays over the board.
 func pan_range() -> Rect2:
-	var foot := footprint(_distance(), pitch_for(zoom), fov_degrees, _aspect)
-	return pan_bounds(BoardSpace.size() / 2.0, foot)
+	# the range only changes with the zoom, the screen shape, the fit and the canvas height
+	var key := Vector4(zoom, _aspect, _fit, canvas_height)
+	if key != _range_key:
+		_range_key = key
+		var foot := footprint(_distance(), pitch_for(zoom), fov_degrees, _aspect)
+		_range = pan_bounds(BoardSpace.size() / 2.0, foot)
+	return _range
 
 
 ## Mouse wheel notches: positive zooms in.

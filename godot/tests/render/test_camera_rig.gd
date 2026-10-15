@@ -148,27 +148,43 @@ func test_there_is_nothing_to_pan_when_the_whole_board_is_in_view() -> void:
 	assert_eq(range.end, Vector2.ZERO)
 
 
+## A rig in a viewport of its own, so the test does not depend on the window size.
+func _rig_in(width: int, height: int) -> CameraRig:
+	var port := SubViewport.new()
+	port.size = Vector2i(width, height)
+	add_child_autofree(port)
+	var rig := CameraRig.new()
+	rig.canvas_height = float(height)
+	port.add_child(rig)
+	rig.frame(float(width) / float(height))
+	return rig
+
+
 func test_zoomed_in_there_is_room_to_pan_but_the_view_never_leaves_the_board() -> void:
-	var rig := _phone_rig()
-	rig.set_zoom(1.0)
-	var range := rig.pan_range()
-	assert_lt(range.position.x, 0.0)
-	assert_gt(range.end.x, 0.0)
-	assert_lt(range.position.y, 0.0)
-	assert_gt(range.end.y, 0.0)
-	# at every corner of the allowed pans, the whole screen still looks at the board
 	var half := BoardSpace.size() / 2.0
-	for x in [range.position.x, range.end.x]:
-		for y in [range.position.y, range.end.y]:
-			rig.pan = Vector2(x, y)
-			rig._pan_raw = rig.pan
-			rig._place()
-			for corner in [
-				Vector2(0.0, 0.0), Vector2(1.0, 0.0), Vector2(0.0, 1.0), Vector2(1.0, 1.0)
-			]:
-				var ground := rig.ground_under(corner * rig.get_viewport().get_visible_rect().size)
-				assert_lte(absf(ground.x), half.x + 1e-3, "x at pan %s" % [Vector2(x, y)])
-				assert_lte(absf(ground.y), half.y + 1e-3, "z at pan %s" % [Vector2(x, y)])
+	for shape in [Vector2i(1280, 720), Vector2i(1558, 720), Vector2i(1024, 768)]:
+		for zoom_level in [0.5, 1.0]:
+			var rig := _rig_in(shape.x, shape.y)
+			rig.set_zoom(zoom_level)
+			var range := rig.pan_range()
+			if zoom_level == 1.0:
+				# closest, a view always has some room to pan, along at least one axis
+				assert_true(range.size.x > 0.0 or range.size.y > 0.0, "room to pan at %s" % shape)
+			# at every corner of the allowed pans, the whole screen still looks at the board
+			var size := Vector2(shape)
+			for x in [range.position.x, range.end.x]:
+				for y in [range.position.y, range.end.y]:
+					rig.pan = Vector2(x, y)
+					rig._pan_raw = rig.pan
+					rig._place()
+					for corner in [Vector2.ZERO, Vector2(1.0, 0.0), Vector2(0.0, 1.0), Vector2.ONE]:
+						var ground := rig.ground_under(corner * size)
+						var where := "%s zoom %s pan %s" % [shape, zoom_level, Vector2(x, y)]
+						# an axis where the screen shows more than the board has no range to keep
+						if range.size.x > 0.0:
+							assert_lte(absf(ground.x), half.x + 1e-3, "x at " + where)
+						if range.size.y > 0.0:
+							assert_lte(absf(ground.y), half.y + 1e-3, "z at " + where)
 
 
 func test_the_footprint_and_bounds_maths() -> void:
