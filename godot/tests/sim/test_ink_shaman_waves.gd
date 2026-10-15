@@ -12,6 +12,14 @@ func _count(orders: Array[SpawnOrder]) -> int:
 	return count
 
 
+func _positions(orders: Array[SpawnOrder], type: String) -> Array[int]:
+	var found: Array[int] = []
+	for i in orders.size():
+		if orders[i].type == type:
+			found.append(i)
+	return found
+
+
 func _build(wave: int) -> Array[SpawnOrder]:
 	return WaveBuilder.build(wave, Rng.derive(42, Streams.WAVES))
 
@@ -60,3 +68,20 @@ func test_a_boss_wave_keeps_its_escort_and_golem() -> void:
 	var orders := _build(10)
 	assert_eq(orders[0].type, "corrugatedOrc")
 	assert_eq(orders[orders.size() - 1].type, "cardboardGolem")
+
+
+func test_in_a_boss_wave_the_shamans_sit_between_the_escort_and_the_golem() -> void:
+	for wave in [10, 20]:
+		var orders := _build(wave)
+		var shamans := _positions(orders, WAVES.SUPPORT_FOE)
+		assert_gte(shamans.size(), 1, "wave %d" % wave)
+		for at in shamans:
+			assert_gt(at, 0, "not the escort, wave %d" % wave)
+			assert_lt(at, orders.size() - 1, "not the Golem, wave %d" % wave)
+		# the same even spread as any wave, shifted past the escort
+		var rolled := orders.size() - 2
+		var count: int = 1 + (wave - WAVES.SHAMAN_FROM_WAVE) / WAVES.SHAMAN_EVERY_WAVES
+		for k in count:
+			assert_eq(
+				shamans[k], 1 + (k + 1) * rolled / (count + 1), "wave %d shaman %d" % [wave, k]
+			)

@@ -96,8 +96,10 @@ static func release_fallen_locks(game: GameState) -> void:
 ## beam's damage per second. No event is emitted: render reads `target_id`.
 static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
 	var target := _locked_foe(game, tower)
-	if target == null:
-		target = target_for(game, tower)
+	var best := target_for(game, tower)
+	# a lock holds, except that a support foe coming into reach takes it from any other foe
+	if target == null or (best != null and best.support and not target.support):
+		target = best
 	tower.target_id = target.id if target != null else -1
 	if target == null:
 		return

@@ -1,6 +1,8 @@
 ## The Ink Shaman's aura, applied at the start of each tick before the foes walk: every other
 ## foe within a shaman's radius heals a share of its max health a second and walks faster by
-## the strongest aura over it (auras do not add up). The shaman does not buff itself.
+## the strongest aura over it (auras do not add up). A shaman does not buff itself, but one
+## shaman buffs and heals another. It runs first in `Combat.step`, so a foe healed this tick can
+## still be hit by a tower this tick.
 class_name ShamanAura
 extends RefCounted
 

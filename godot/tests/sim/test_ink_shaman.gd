@@ -136,3 +136,40 @@ func test_the_stats_scale_with_the_wave_like_any_foe() -> void:
 	var late := FoeStats.for_wave("inkShaman", 15)
 	assert_gt(late.hp, early.hp)
 	assert_gt(late.speed, early.speed)
+
+
+func test_a_beam_switches_to_a_shaman_that_comes_into_reach() -> void:
+	var scene := TowerFireKit.scene("prismSpire")
+	var game: GameState = scene.game
+	var tank := TowerFireKit.foe(game, scene.near, "cardboardGolem")
+	tank.hp = 1.0e9
+	tank.max_hp = 1.0e9
+	TowerFire._beam(game, scene.tower, TowerFire.TOWERS.DEFS.prismSpire)
+	assert_eq(scene.tower.target_id, tank.id, "locked on the golem")
+	var shaman := TowerFireKit.foe(game, scene.near - 0.3, "inkShaman")
+	TowerFire._beam(game, scene.tower, TowerFire.TOWERS.DEFS.prismSpire)
+	assert_eq(scene.tower.target_id, shaman.id, "the support foe takes the lock")
+
+
+func test_the_dead_are_not_healed() -> void:
+	var game := _game()
+	_foe(game, "inkShaman", 6.0)
+	var dead := _foe(game, "corrugatedOrc", 6.2)
+	dead.hp = 10.0
+	dead.alive = false
+	ShamanAura.step(game)
+	assert_eq(dead.hp, 10.0)
+
+
+func test_a_shaman_heals_another_shaman_but_not_itself() -> void:
+	var game := _game()
+	var a := _foe(game, "inkShaman", 6.0)
+	var b := _foe(game, "inkShaman", 6.2)
+	a.hp = 10.0
+	b.hp = 10.0
+	ShamanAura.step(game)
+	assert_gt(a.hp, 10.0, "healed by the other")
+	assert_gt(b.hp, 10.0)
+	assert_almost_eq(
+		a.hp, 10.0 + a.max_hp * FOES.DEFS.inkShaman.aura_heal * Game.TICK_SECONDS, 1e-9
+	)
