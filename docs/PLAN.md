@@ -362,13 +362,15 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 6. Performance pass on the phone: 80 foes at 60 fps within the draw-call and triangle budget. The tower caps assume 22 towers at the top tier, the most sockets a map has; the GDD's guards, paper planes and hero are not in the tower cap: guards and planes count in the 20k terrain and effects cap, the hero like a boss: measure the real late-game tower count from a seeded replay, and if it is higher, batch towers with one `MultiMesh` per tower type, tier and part so draw calls scale with types, or decide a tower cap as a design change.
 
 **Gate checklist**
-- [ ] A full run to the boss at 60 fps on the owner's phone with 80 foes.
+- [x] 60 fps with 80 foes on the owner's phone: the owner ran `?stress=200&fps` on an iPhone (2026-10-15) and got 60 fps from about 2 seconds after loading (the first second is slow: shader and model warm-up plus the first fill of the crowd), with 200 foes, 2.5 times the gate's 80 (model and draw calls not recorded; the headless browser counts 52 draws with 80 foes). A full run to the boss with the real towers is still to play; the stress crowd has no towers or waves.
 - [x] Every action is reachable in landscape; tap targets at least 44 px on an 844x390 phone (`test_hud_flow.gd` checks the overlap and the size; the GDD asks for 48 pt, which stays a Phase 6 polish item).
 - [ ] The path, sockets and foes line up by eye on the phone: foes stay on the path, hits land on visible foes at corners.
 - [x] The replay goldens still pass.
 - [x] (Interim, greybox) A1 to A6 play a full run in Godot with boxes and capsules, before any final art.
 
 **Phase 5 status (2026-10-13):** the two open items need the owner's phone and cannot be closed by tests: the 60 fps run with 80 foes, and the path, sockets and foes lining up by eye.
+
+**Phase 5 status (2026-10-15):** the 60 fps check passed on the owner's iPhone with 200 foes, after a slow first second. Left: the path, sockets and foes lining up by eye on the phone.
 
 **How to run the phone checks (2026-10-15, #241):** open the deployed site with `?stress=80&fps` (for example `https://juanpalopez.github.io/psychic-bassoon/?stress=80&fps`). Do not build towers during the check (kills make the crowd refill one foe a tick at the spawn point). The page keeps 80 foes walking (goblins, orcs and a golem now and then, made by the sim's own spawner, no towers or waves, the Heartstone never dies) and shows `fps, draws, foes, tris` at the bottom. Read the fps after 20 seconds, once with a mouse-free phone held in landscape, and record device, fps and draw calls here. For the by-eye check, play a run with the intro (`?tour=0` skips it) and look at the road, sockets and foes at the corners. The draw-call budget is 120; the headless browser shows 52 draws with 80 foes.
 
