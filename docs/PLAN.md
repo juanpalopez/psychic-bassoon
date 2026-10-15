@@ -135,7 +135,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Audio | Godot `AudioStreamPlayer`, started after the first tap on web | Browsers block sound before a user gesture |
 | CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, Godot web export, size budget, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
-- **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that only zooms; a run starts with the whole board in view and there is no follow camera (owner, 2026-10-14).
+- **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers (the view stays over the board); a run starts with the whole board in view and there is no follow camera (owner, 2026-10-14).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
 - **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Bright desk lighting on a cutting mat (see Art direction).
 - **Input.** A tap ray-casts the ground plane to a cell, a socket or a tower, and sends a command. No direct state changes.

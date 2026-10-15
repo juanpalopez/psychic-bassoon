@@ -103,7 +103,9 @@ func _ready() -> void:
 	_launch.pressed.connect(func() -> void: Game.submit(_game, Command.launch_wave()))
 	_gestures.tapped.connect(_on_tap)
 	_gestures.panned.connect(_rig.pan_by_pixels)
-	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
+	_gestures.pinched.connect(
+		func(factor: float, centre: Vector2) -> void: _rig.zoom_by(factor, centre)
+	)
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
 	# the phone check plays without the intro
@@ -171,7 +173,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		if pointer != TouchFingers.MOUSE:
 			_gestures.move(pointer, drag.position)
 	elif event is InputEventMagnifyGesture:
-		_rig.zoom_by((event as InputEventMagnifyGesture).factor)
+		var magnify := event as InputEventMagnifyGesture
+		_rig.zoom_by(magnify.factor, magnify.position)
 	elif event is InputEventPanGesture:
 		# a two-finger trackpad swipe moves the scene; it springs back if it overshoots
 		_rig.pan_by_pixels((event as InputEventPanGesture).delta * PAN_GESTURE_PIXELS)
