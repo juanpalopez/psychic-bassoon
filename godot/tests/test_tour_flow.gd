@@ -2,6 +2,7 @@
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
+const GUIDE := preload("res://content/guide.gd")
 
 
 func _main() -> Node:
@@ -77,7 +78,7 @@ func test_the_tower_guide_opens_pauses_and_closes() -> void:
 
 func test_every_tour_target_is_a_control_in_the_hud() -> void:
 	var main := await _main()
-	for step in preload("res://content/guide.gd").TOUR_STEPS:
+	for step in GUIDE.TOUR_STEPS:
 		if step.target != "":
 			assert_true(main.get_node("Hud").get_node_or_null(step.target) is Control, step.target)
 
@@ -113,7 +114,7 @@ func test_a_restart_behind_an_overlay_stays_paused() -> void:
 
 func _targeted_steps() -> Array[int]:
 	var steps: Array[int] = []
-	var all: Array = preload("res://content/guide.gd").TOUR_STEPS
+	var all: Array = GUIDE.TOUR_STEPS
 	for i in all.size():
 		if all[i].target != "":
 			steps.append(i)
