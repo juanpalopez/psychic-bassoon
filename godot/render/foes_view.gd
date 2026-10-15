@@ -23,6 +23,7 @@ const COLOURS := {
 	"corrugatedOrc": Color("b5834a"),
 	"cardboardGolem": Color("8a6a43"),
 	"inkShaman": Color("5b5a8a"),
+	"razorMoth": Color("d9c7e0"),
 }
 const FALLBACK_COLOUR := Color("cccccc")
 ## The foes drawn with a model from `godot/assets/models/enemies` instead of a capsule
@@ -34,6 +35,7 @@ const MODELS := {
 	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 1.2},
 	"cardboardGolem": {"path": "res://assets/models/enemies/cardboard_golem.glb", "height": 2.0},
 	"inkShaman": {"path": "res://assets/models/enemies/ink_shaman.glb", "height": 1.0},
+	"razorMoth": {"path": "res://assets/models/enemies/razor_moth.glb", "height": 0.8},
 }
 ## A foe that has not moved yet faces along the road, towards +x.
 const DEFAULT_YAW := PI / 2.0

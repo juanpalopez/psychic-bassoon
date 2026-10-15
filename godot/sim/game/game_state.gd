@@ -9,6 +9,9 @@ var map: GameMap = null
 var route: Route = null
 ## Every route from the spawn to the Heartstone; foes pick one.
 var routes: Array[Route] = []
+## The straight line a flying foe takes for each route, from where the route starts to the middle
+## of the Heartstone (same index as `routes`).
+var air_routes: Array[Route] = []
 var tick_count: int = 0
 var buttons: int = 0
 var heartstone_health: int = 0

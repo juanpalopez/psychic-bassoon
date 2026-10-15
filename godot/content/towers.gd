@@ -41,6 +41,8 @@ const TOWER_IDS: Array[String] = [
 ## Per tower: `name`, `damage_type` ("physical", "magic" or "true"), `cost`,
 ## `damage` (per shot, or per second for a beam), `range` (cells) and, for a
 ## tower that fires shots, `rate` (shots per second).
+## A tower with `anti_air` can hit flying foes (the Spool Guard and the Prism Spire); the Thimble
+## Mortar's shells and a guard's blows cannot.
 ## The Thimble Mortar also has `splash` (blast radius, cells). The Prism Spire is
 ## a continuous beam: `beam` is true and it has no `rate`.
 const DEFS := {
@@ -52,6 +54,7 @@ const DEFS := {
 		"damage": [14, 23, 38],
 		"range": [2.3, 2.6, 3.0],
 		"rate": [3.0, 3.6, 4.5],
+		"anti_air": true,
 	},
 	"thimbleMortar":
 	{
@@ -71,6 +74,7 @@ const DEFS := {
 		"damage": [42, 84, 163],
 		"range": [2.3, 2.6, 2.9],
 		"beam": true,
+		"anti_air": true,
 	},
 	"guardTent":
 	{

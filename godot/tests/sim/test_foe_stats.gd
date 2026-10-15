@@ -9,7 +9,10 @@ const WAVES := preload("res://content/waves.gd")
 func test_the_ground_foes_have_the_gdd_roles() -> void:
 	assert_eq(
 		FOES.FOE_IDS,
-		["scrapGoblin", "corrugatedOrc", "cardboardGolem", "inkShaman"] as Array[String]
+		(
+			["scrapGoblin", "corrugatedOrc", "cardboardGolem", "inkShaman", "razorMoth"]
+			as Array[String]
+		)
 	)
 	# swarm: fast and frail; armored: slow and tough; boss: huge and slower still
 	var goblin: Dictionary = FOES.DEFS.scrapGoblin

@@ -46,5 +46,7 @@ var support: bool = false
 var aura_radius: float = 0.0
 var aura_heal: float = 0.0
 var aura_speed: float = 0.0
+## A flying foe walks `GameState.air_routes[route]`, a straight line, and ignores guards.
+var flying: bool = false
 ## The share more speed an Ink Shaman's aura gives this foe this tick (0 outside any aura).
 var speed_buff: float = 0.0

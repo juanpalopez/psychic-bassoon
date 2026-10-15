@@ -15,6 +15,12 @@ const BOSS_EVERY := 10
 const SUPPORT_FOE := "inkShaman"
 const SHAMAN_FROM_WAVE := 7
 const SHAMAN_EVERY_WAVES := 5
+## The flying foe: from this wave on a share of the rolled foes (at least `MOTH_MIN`, `MOTH_PERCENT`
+## of the wave) are Razor Moths, spread through the wave between the Ink Shamans.
+const AIR_FOE := "razorMoth"
+const MOTH_FROM_WAVE := 9
+const MOTH_PERCENT := 12
+const MOTH_MIN := 2
 ## A goblin swarm wave every this many waves.
 const SWARM_EVERY := 5
 ## A swarm has this many times the foes of a normal wave of its number.

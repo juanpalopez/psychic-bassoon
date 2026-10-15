@@ -27,6 +27,12 @@ static func create(
 	for cells in game.map.routes:
 		game.routes.append(Route.build(cells))
 	game.route = game.routes[0]
+	var block := game.map.heartstone
+	var heart_x := float(block.position.x) + float(block.size.x) / 2.0
+	var heart_y := float(block.position.y) + float(block.size.y) / 2.0
+	for route in game.routes:
+		var start := route.position_at(0.0)
+		game.air_routes.append(Route.straight(start.x, start.y, heart_x, heart_y))
 	game.buttons = RULES.START_BUTTONS
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)
