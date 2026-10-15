@@ -59,7 +59,7 @@ static func _move_foes(game: GameState) -> void:
 				foe.slow_timer = 0.0
 		if held:
 			continue
-		var route := game.routes[foe.route]
+		var route := (game.air_routes if foe.flying else game.routes)[foe.route]
 		if foe.distance >= route.total:
 			foe.alive = false
 			game.heartstone_health = maxi(0, game.heartstone_health - foe.leak)

@@ -43,6 +43,21 @@ static func build(cells: Array[Vector2i]) -> Route:
 	return route
 
 
+## A straight line from one point to another (the flight of a flying foe).
+static func straight(from_x: float, from_y: float, to_x: float, to_y: float) -> Route:
+	var route := Route.new()
+	route.xs.append(from_x)
+	route.ys.append(from_y)
+	route.xs.append(to_x)
+	route.ys.append(to_y)
+	var dx := to_x - from_x
+	var dy := to_y - from_y
+	route.cumulative.append(0.0)
+	route.cumulative.append(sqrt(dx * dx + dy * dy))
+	route.total = route.cumulative[1]
+	return route
+
+
 ## Position `along` cells from the spawn point, clamped to the route.
 func position_at(along: float) -> RoutePoint:
 	var i := 0

@@ -34,6 +34,7 @@ static func build(wave: int, rng: Rng) -> Array[SpawnOrder]:
 		rolls.append(rng.next_float())
 	var orders := compose(wave, rolls)
 	_place_shamans(orders, wave)
+	_place_moths(orders, wave)
 	_space_in_groups(orders, wave, rng)
 	return orders
 
@@ -73,6 +74,22 @@ static func _place_shamans(orders: Array[SpawnOrder], wave: int) -> void:
 	for k in shamans:
 		var at := first + (k + 1) * rolled / (shamans + 1)
 		orders[at].type = WAVES.SUPPORT_FOE
+
+
+## Puts the wave's Razor Moths in place of rolled goblins and orcs, spread evenly between the
+## shamans (no random draw). The boss escort and the Golem stay.
+static func _place_moths(orders: Array[SpawnOrder], wave: int) -> void:
+	if wave < WAVES.MOTH_FROM_WAVE:
+		return
+	var boss := wave % WAVES.BOSS_EVERY == 0
+	var first := 1 if boss else 0
+	var rolled := orders.size() - first - (1 if boss else 0)
+	var moths := maxi(WAVES.MOTH_MIN, rolled * WAVES.MOTH_PERCENT / 100)
+	for k in moths:
+		var at := first + (2 * k + 1) * rolled / (2 * moths)
+		while orders[at].type == WAVES.SUPPORT_FOE and at < first + rolled - 1:
+			at += 1
+		orders[at].type = WAVES.AIR_FOE
 
 
 ## Sets the pauses of the rolled foes: `GROUP_SPACING` after a foe inside a group and

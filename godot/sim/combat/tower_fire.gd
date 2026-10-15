@@ -54,7 +54,9 @@ static func target_for(game: GameState, tower: Tower) -> Foe:
 	var best: Foe = null
 	var best_left := 0.0
 	for foe in foes_within(game, centre.x, centre.y, reach_of(game, tower)):
-		var left := game.routes[foe.route].total - foe.distance
+		if not can_hit(TOWERS.DEFS[tower.type], foe):
+			continue
+		var left := (game.air_routes if foe.flying else game.routes)[foe.route].total - foe.distance
 		var better := best == null or left < best_left
 		if best != null and foe.support != best.support:
 			better = foe.support
@@ -62,6 +64,11 @@ static func target_for(game: GameState, tower: Tower) -> Foe:
 			best = foe
 			best_left = left
 	return best
+
+
+## Whether a tower of this kind can hit the foe: only an anti-air tower hits a flying one.
+static func can_hit(def: Dictionary, foe: Foe) -> bool:
+	return not foe.flying or bool(def.get("anti_air", false))
 
 
 ## The live foes whose centre is within `radius` of a point, in spawn order.
@@ -115,7 +122,7 @@ static func _locked_foe(game: GameState, tower: Tower) -> Foe:
 	var reach := reach_of(game, tower)
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	for foe in foes_within(game, centre.x, centre.y, reach):
-		if foe.id == tower.target_id:
+		if foe.id == tower.target_id and can_hit(TOWERS.DEFS[tower.type], foe):
 			return foe
 	return null
 
@@ -138,4 +145,5 @@ static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -
 		return
 	# find who is in the blast before the first hit can change anything
 	for foe in foes_within(game, target.x, target.y, splash):
-		Damage.apply(game, foe, amount, kind)
+		if can_hit(def, foe):
+			Damage.apply(game, foe, amount, kind)
