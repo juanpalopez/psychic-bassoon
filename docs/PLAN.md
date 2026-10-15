@@ -30,7 +30,7 @@ The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Ho
 
 **Loop.** Scout and build (spend Buttons, the currency, on pre-etched sockets) → engage the wave (call it early for bonus income) → combat (targeting priorities, hero commands, drop-scraps, spells powered by regenerating PVA Ink / Crafting Energy) → rewards (Golden Staples from remaining Heartstone health, spent in a workshop tech tree on permanent skills, base stats and new origami blueprints).
 
-**Maps.** A seeded cutting-mat board of 1 m tiles, **22 columns by 16 rows (352 cells), landscape** (GDD update, 2026-10-12; it was 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 22 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
+**Maps.** A seeded cutting-mat board of 1 m tiles, **16 columns by 11 rows (176 cells), landscape** (owner, 2026-10-14, Map v3 #255: 22 by 16 showed too many cells at a readable unit size; before that 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 15 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
 
 **Towers.** Four archetypes, each with tiers 1 to 3 (linear damage, range and fire-rate upgrades) and a tier 4 that splits into two specialisations, each with one active and one passive ability.
 
@@ -62,7 +62,7 @@ The ids in the code are stable keys; the GDD renames what the player sees and ad
 | Warlord | Cardboard Golem |
 | (none) | Razor Moth (flying), Ink Shaman (support), the hero, the spells, the tech tree |
 | Heartstone, lives | The Heartstone's health (the Heartstone returns in the 2026-10-12 GDD; the code says `heartstone_health`) |
-| Free plots on every non-road cell | 12 to 22 sockets |
+| Free plots on every non-road cell | 12 to 15 sockets (mostly 12 in practice) |
 | Gold | Buttons (in a run), Golden Staples (between runs) |
 
 ### Gaps in the GDD
@@ -135,7 +135,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Audio | Godot `AudioStreamPlayer`, started after the first tap on web | Browsers block sound before a user gesture |
 | CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, Godot web export, size budget, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
-- **Camera.** Perspective `Camera3D`, about 35° field of view, landscape framing, pitched about 55° down by default; the GDD asks for one-finger pan with rubber-band edges and a two-finger pinch that zooms and tilts between 30° and 65°.
+- **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that only zooms; a run starts with the whole board in view and there is no follow camera (owner, 2026-10-14).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
 - **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Bright desk lighting on a cutting mat (see Art direction).
 - **Input.** A tap ray-casts the ground plane to a cell, a socket or a tower, and sends a command. No direct state changes.
@@ -258,7 +258,7 @@ From the 2D prototype (the ported base) to the GDD design.
 
 | Area | Prototype | Papercraft Kingdom Defense |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded cutting-mat board of 22×16 cells with three levels, 12 to 22 sockets of 2x2 cells, a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
+| Map | Random path on a 9×13 grid | Seeded cutting-mat board of 16×11 cells (was 22×16) with three levels, 12 to 15 sockets of 2x2 cells (the generator gives 12 on about three maps in four), a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
 | Building | Any free cell | Pre-etched sockets; a radial context menu |
 | Towers | 4 types, 3 levels | 4 archetypes, tiers 1 to 3 plus a tier 4 specialisation each (8 specialisations) with an active and a passive ability; targeting priorities |
 | Foes | Scout, walker, tank, boss | Scrap Goblin, Razor Moth (flying), Corrugated Orc, Ink Shaman (support), Cardboard Golem (boss) |
