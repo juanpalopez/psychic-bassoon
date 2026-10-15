@@ -187,3 +187,25 @@ test('the tour opens on a first visit and not after it was seen', async ({
   expect(await open(false)).toBe(true);
   expect(await open(true)).toBe(false);
 });
+
+// The phone check: ?stress=80 keeps about 80 foes walking and ?fps shows the overlay.
+test('the stress parameter keeps about 80 foes on the board', async ({
+  page,
+}) => {
+  await page.goto('/index.html?stress=80&fps');
+  await page.waitForFunction(
+    () => (window as unknown as {gameReady?: boolean}).gameReady,
+    undefined,
+    {timeout: 60_000}
+  );
+  // the overlay reports the foe count to the page a few times a second
+  await page.waitForFunction(
+    () => ((window as unknown as {gameFoes?: number}).gameFoes ?? 0) >= 70,
+    undefined,
+    {timeout: 30_000}
+  );
+  const tourOpen = await page.evaluate(
+    () => (window as unknown as {gameTourOpen?: boolean}).gameTourOpen === true
+  );
+  expect(tourOpen).toBe(false);
+});

@@ -35,6 +35,9 @@ var _intro := IntroView.new()
 var _glow := SocketGlow.new()
 var _card := TowerCard.new()
 var _glow_shown := false
+## How many foes the phone check keeps walking (the `?stress=` page parameter), 0 for none.
+var _stress_foes := 0
+var _fps := FpsOverlay.new()
 var _guide := GuidePanel.new()
 var _progress := IntroProgress.default()
 # whether the game was paused by the player when an overlay opened over it
@@ -82,6 +85,8 @@ func _ready() -> void:
 	_intro.bind(_flow)
 	_flow.finished.connect(_on_intro_finished)
 	$Hud.add_child(_card)
+	$Hud.add_child(_fps)
+	_read_phone_check_params()
 	add_child(_glow)
 	_menu.info_requested.connect(_on_info_requested)
 	_menu.info_cleared.connect(_card.hide_card)
@@ -101,9 +106,9 @@ func _ready() -> void:
 	_gestures.pinched.connect(func(factor: float, _centre: Vector2) -> void: _rig.zoom_by(factor))
 	_gestures.ended.connect(_rig.release_pan)
 	# the browser smoke test waits for this flag
-	if IntroProgress.wanted(
-		_progress.seen(), _tour_param(), DisplayServer.get_name() == "headless"
-	):
+	# the phone check plays without the intro
+	var tour_param := "0" if _stress_foes > 0 else _tour_param()
+	if IntroProgress.wanted(_progress.seen(), tour_param, DisplayServer.get_name() == "headless"):
 		_start_intro()
 	if OS.has_feature("web"):
 		JavaScriptBridge.eval("window.gameReady = true")
@@ -112,7 +117,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	var ticks_speed := _speed.ticks_speed()
 	if ticks_speed > 0:
-		Frame.step(_game, _clock, delta, ticks_speed, Callable(), _after_tick)
+		Frame.step(_game, _clock, delta, ticks_speed, _before_tick, _after_tick)
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
 	_guards.update(_game)
@@ -367,6 +372,22 @@ func _tell_intro(event: GameEvent) -> void:
 		_flow.skip()
 
 
+## The phone check tops the crowd up before each tick.
+func _before_tick(game: GameState) -> void:
+	Stress.top_up(game, _stress_foes)
+
+
+## Turns on the phone check from the page: `?stress=80` and `?fps`.
+func _read_phone_check_params() -> void:
+	_stress_foes = StressParams.foes(_url_param("stress"))
+	if StressParams.fps_on(_url_param("fps")):
+		_fps.enable(_count_foes)
+
+
+func _count_foes() -> int:
+	return _game.foes.size()
+
+
 ## Reads what the tick reported: a refused command becomes a short message.
 func _after_tick(game: GameState) -> void:
 	for event in game.events:
@@ -398,12 +419,18 @@ func _show_message(text: String) -> void:
 	_message.visible = true
 
 
-## The page's `?tour=` value ("0" turns the first-time tour off), or "".
+## The page's `?tour=` value ("0" turns the first-visit intro off), or "".
 func _tour_param() -> String:
-	if not OS.has_feature("web"):
-		return ""
-	var value: Variant = JavaScriptBridge.eval("new URLSearchParams(location.search).get('tour')")
+	var value: Variant = _url_param("tour")
 	return value if value is String and (value as String).length() <= 4 else ""
+
+
+## One query parameter of the page as a String (empty for `?name`), or null when it is absent
+## or the game is not on the web.
+func _url_param(param_name: String) -> Variant:
+	if not OS.has_feature("web"):
+		return null
+	return JavaScriptBridge.eval("new URLSearchParams(location.search).get('%s')" % param_name)
 
 
 ## Starts the intro wave: speech bubbles on the map, sockets glowing, Skip always there.
