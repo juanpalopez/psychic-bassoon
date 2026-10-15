@@ -167,9 +167,9 @@ func test_a_mortar_shell_hurts_every_foe_within_its_splash() -> void:
 	var centre := Vector2(target.x, target.y)
 	assert_gt(centre.distance_to(Vector2(far.x, far.y)), 0.95, "outside the blast")
 	Game.tick(game)
-	# 15 physical damage against 6 armor
-	assert_eq(target.hp, 130.0 - 9.0)
-	assert_eq(beside.hp, 130.0 - 9.0)
+	# 17 physical damage against 6 armor
+	assert_eq(target.hp, 130.0 - 11.0)
+	assert_eq(beside.hp, 130.0 - 11.0)
 	assert_eq(far.hp, 130.0)
 	var shots := TowerFireKit.kinds(game, GameEvent.Kind.TOWER_FIRED)
 	assert_eq(shots.size(), 1)

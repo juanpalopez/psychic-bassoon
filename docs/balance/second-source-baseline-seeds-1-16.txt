@@ -1,0 +1,6 @@
+{}
+  spoolOnly    cleared [17, 17, 18, 18, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20] died_on [18, 18, 19, 19, 20, 20, 20, 20] heart 3.5 buttons_left 3343
+  mortarHeavy  cleared [4, 6, 6, 7, 9, 10, 11, 17, 19, 19, 19, 19, 19, 20, 20, 20] died_on [5, 7, 7, 8, 10, 11, 12, 18, 20, 20, 20, 20, 20] heart 1.6 buttons_left 1283
+  prismHeavy   cleared [16, 17, 17, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 18, 18, 20, 20, 20] heart 6.5 buttons_left 2347
+  mix          cleared [16, 17, 18, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20] died_on [17, 18, 19, 20, 20] heart 7.8 buttons_left 2696
+  guardMix     cleared [14, 15, 16, 17, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20] died_on [15, 16, 17, 18, 20, 20, 20, 20, 20] heart 4.8 buttons_left 2217

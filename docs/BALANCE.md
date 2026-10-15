@@ -358,3 +358,20 @@ The owner found 22 by 16 showed too many cells at a readable unit size (a Kingdo
 **New finding: the Kitchen Mess Tent is hard to place on the small board.** The guard mix builds a Mess Tent in 3 of 16 seeds in a whole run, and in 2 of 8 within its first 60 steps, because a socket must be near the guards' post. The tent-flow tests now look over several seeds. Left for the owner: a wider aura, or a placement rule that puts the Guard Tent where a Mess Tent socket is near.
 
 The golden for the guard mix is seed 2 (it builds both tents); the CI game-time check plays the guard mix on seed 4, which wins at these numbers (it played seed 2, which now loses at wave 20). A wave-20 clear is what the check needs to time a whole game.
+
+## A second spawn source after wave 10 (2026-10-16, #268)
+
+Owner decision: a second road from another edge joins the main road, and from wave 11 each wave's groups alternate between the two sources. About 87 percent of seeds have room for it (261 of 300); the rest keep one road and play as before. The main road and waves 1 to 10 do not change.
+
+**What changed** (`godot/sim`, `godot/content`): a feeder road along a row from the top or bottom edge to the first main-road cell on that row (its own random stream, `Streams.SECOND_SOURCE`; the first feeder that leaves room for 12 sockets); `routes[1]` is the feeder then the main road from the join; `WaveBuilder` gives each group of waves 11 and later a route (0, 1, 0, 1...), with no new random draw; guards hold second-route foes once they are on the main road (`Barracks.main_distance`); the sockets, the replay goldens and the socket-block golden moved with the new road cells.
+
+**Sweep** (16 seeds, 20 waves; wins out of 16, band 4 to 9; raw files `docs/balance/second-source-*.txt`):
+
+| Config | Spool | Mortar | Prism | Mix | Guard mix |
+| --- | --- | --- | --- | --- | --- |
+| Map v3 numbers with the second source | 8 | 3 | 10 | 11 | 7 |
+| Mortar 17, 31, 53; Prism 38, 76, 147 (chosen) | 8 | 7 | 8 | 11 | 8 |
+| Mortar 18, 34, 58; Prism 39, 78, 152 | 8 | 10 | 10 | 12 | 11 |
+| Mortar 17, 31, 53; Prism 40, 80, 155 | 8 | 7 | 10 | 11 | 10 |
+
+The Mortar lost most maps on early waves (5 to 12, before the second road opens) because the new road cells moved the sockets, so it got a +13 percent damage buff (15, 28, 48 to 17, 31, 53) and the Prism Spire a -10 percent trim (42, 84, 163 to 38, 76, 147). Four of five strategies sit in the band (Spool 8, Mortar 7, Prism 8, Guard mix 8); the Mix wins 11 of 16 (69 percent), above the band, as before.
