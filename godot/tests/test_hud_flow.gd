@@ -109,6 +109,13 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 		var tower := Tower.new()
 		tower.type = "thimbleMortar"
 		(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+	elif shown == "TowerPanel spec choice" or shown == "TowerPanel ability":
+		var tower := Tower.new()
+		tower.type = "spoolGuard"
+		tower.level = 2
+		if shown == "TowerPanel ability":
+			tower.spec = "crossbowBallista"
+		(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 1000)
 	elif shown != "":
 		var panel := main.get_node("Hud/" + shown) as Control
 		if panel is GameOverPanel:
@@ -127,7 +134,15 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 	# 1558x720 is an 844x390 phone: expand stretch widens the 1280x720 canvas
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
 		for shown in [
-			"", "GameOver", "BuildMenu", "TowerPanel", "Message", "Menu", "GameOver+Menu"
+			"",
+			"GameOver",
+			"BuildMenu",
+			"TowerPanel",
+			"TowerPanel spec choice",
+			"TowerPanel ability",
+			"Message",
+			"Menu",
+			"GameOver+Menu"
 		]:
 			var rects := await _hud_rects(size.x, size.y, shown)
 			var names := rects.keys()
@@ -152,7 +167,15 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> void:
 	# the 1558x720 canvas is drawn at 390/720 of its size on that phone
 	var scale := 390.0 / 720.0
-	for shown in ["", "GameOver", "BuildMenu", "TowerPanel", "Menu"]:
+	for shown in [
+		"",
+		"GameOver",
+		"BuildMenu",
+		"TowerPanel",
+		"TowerPanel spec choice",
+		"TowerPanel ability",
+		"Menu"
+	]:
 		var port := SubViewport.new()
 		port.size = Vector2i(1558, 720)
 		add_child_autofree(port)
@@ -168,6 +191,13 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 			var tower := Tower.new()
 			tower.type = "thimbleMortar"
 			(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+		elif shown == "TowerPanel spec choice" or shown == "TowerPanel ability":
+			var tower := Tower.new()
+			tower.type = "spoolGuard"
+			tower.level = 2
+			if shown == "TowerPanel ability":
+				tower.spec = "crossbowBallista"
+			(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 1000)
 		elif shown == "Menu":
 			(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 		await get_tree().process_frame
@@ -179,7 +209,15 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 				assert_gte(button.get_global_rect().size.y * scale, 44.0, button.text)
 				assert_gte(button.get_global_rect().size.x * scale, 44.0, button.text)
 		# Menu, Pause, speed and Start wave; a panel or the open Menu adds its own buttons
-		var expected := {"": 4, "GameOver": 5, "BuildMenu": 9, "TowerPanel": 6, "Menu": 6}
+		var expected := {
+			"": 4,
+			"GameOver": 5,
+			"BuildMenu": 9,
+			"TowerPanel": 6,
+			"TowerPanel spec choice": 3,
+			"TowerPanel ability": 3,
+			"Menu": 6
+		}
 		assert_gte(checked, int(expected[shown]), shown)
 
 

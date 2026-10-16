@@ -41,6 +41,7 @@ func _ready() -> void:
 	for label in [_title, _stats]:
 		words.add_child(label)
 	_upgrade.theme_type_variation = &"ActionButton"
+	_ability.theme_type_variation = &"ActionButton"
 	_upgrade.icon = COIN
 	_upgrade.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(_upgrade)
@@ -130,7 +131,8 @@ func refresh() -> void:
 		_show_specs(specs)
 	if chosen:
 		var spec := SPECS.find(_tower.type, _tower.spec)
-		_title.text += "  " + spec.name
+		# on the stats line: a longer title would widen the strip over Start wave
+		_stats.text += "\n" + spec.name
 		_ability.text = "%s\n%s" % [spec.active.name, _cooldown_text(_tower.ability_cooldown)]
 		_ability.disabled = _tower.ability_cooldown > 0.0
 	_sell.text = "Sell +%d" % TowerInfo.refund(_tower)
@@ -169,6 +171,7 @@ func _show_specs(specs: Array) -> void:
 	while _spec_buttons.size() < specs.size():
 		var button := Button.new()
 		button.custom_minimum_size = BUTTON_SIZE
+		button.theme_type_variation = &"ActionButton"
 		var index := _spec_buttons.size()
 		button.pressed.connect(
 			func() -> void: spec_pressed.emit(_tower.id, SPECS.for_tower(_tower.type)[index].id)
