@@ -128,16 +128,29 @@ static func damage_bonus(game: GameState, foe: Foe, kind: Damage.Kind) -> float:
 ## Aviary does not widen its own reach). "Next to" is within the passive's `gap` cells of its block.
 static func recon_bonus(game: GameState, tower: Tower) -> float:
 	var best := 0.0
-	var here := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	var here := Vector2.ZERO
+	var placed := false
 	for other in game.towers:
-		var passive := passive_of(other)
-		if other == tower or passive.get("kind", "") != "recon" or float(passive.bonus) <= best:
+		# this runs for every reach: most towers have no spec, so skip them first
+		if other == tower or other.spec == "":
 			continue
+		var passive := passive_of(other)
+		if passive.get("kind", "") != "recon" or float(passive.bonus) <= best:
+			continue
+		if not placed:
+			here = game.map.socket_centre(Vector2i(tower.col, tower.row))
+			placed = true
 		var there := game.map.socket_centre(Vector2i(other.col, other.row))
-		var reach := float(game.map.footprint) + float(passive.gap)
-		if absf(there.x - here.x) <= reach and absf(there.y - here.y) <= reach:
+		if adjacent(here, there, float(game.map.footprint), float(passive.gap)):
 			best = float(passive.bonus)
 	return best
+
+
+## Whether two blocks of `footprint` cells, with these centres, lie within `gap` cells of each other
+## on both axes (diagonal neighbours count; a block just past the gap on one axis does not).
+static func adjacent(a: Vector2, b: Vector2, footprint: float, gap: float) -> bool:
+	var reach := footprint + gap
+	return absf(a.x - b.x) <= reach and absf(a.y - b.y) <= reach
 
 
 ## Corrosive Light: a beam that burns a foe strips a share of its armor each second, up to a cap.

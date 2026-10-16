@@ -67,6 +67,17 @@ func test_the_content_gives_the_spool_guard_a_second_spec() -> void:
 	assert_eq(specs[1].active.kind, "squadron")
 
 
+func test_adjacent_blocks_are_within_the_gap_on_both_axes() -> void:
+	var a := Vector2(2.0, 1.0)
+	# footprint 2 and gap 1: up to 3 cells between centres on each axis
+	assert_true(Specs.adjacent(a, Vector2(2.0, 4.0), 2.0, 1.0), "straight below, exactly the gap")
+	assert_true(Specs.adjacent(a, Vector2(5.0, 4.0), 2.0, 1.0), "diagonal")
+	assert_false(Specs.adjacent(a, Vector2(2.0, 4.01), 2.0, 1.0), "just past the gap")
+	assert_false(Specs.adjacent(a, Vector2(6.0, 1.0), 2.0, 1.0), "past it on one axis only")
+	assert_true(Specs.adjacent(a, Vector2(4.0, 2.0), 1.0, 1.0), "a 1-cell footprint map")
+	assert_false(Specs.adjacent(a, Vector2(4.5, 2.0), 1.0, 1.0))
+
+
 func test_high_recon_widens_the_reach_of_a_tower_next_to_the_aviary_only() -> void:
 	var scene := _scene()
 	var game := scene.game
@@ -79,13 +90,14 @@ func test_high_recon_widens_the_reach_of_a_tower_next_to_the_aviary_only() -> vo
 		* game.map.range_multiplier(Vector2i(neighbour.col, neighbour.row))
 	)
 	assert_almost_eq(TowerFire.reach_of(game, neighbour), base * (1.0 + bonus), 1e-9)
+	# a tower of no spec and a tower far away: no bonus
 	if sockets[1] != Vector2i(-1, -1):
 		var stranger := _tower_at(game, "thimbleMortar", sockets[1], 1)
 		var plain: float = (
 			float(TOWERS.DEFS.thimbleMortar.range[1])
 			* game.map.range_multiplier(Vector2i(stranger.col, stranger.row))
 		)
-		assert_almost_eq(TowerFire.reach_of(game, stranger), plain, 1e-9, "not adjacent")
+		assert_almost_eq(TowerFire.reach_of(game, stranger), plain, 1e-9, "across the board")
 	var own: float = (
 		float(TOWERS.DEFS.spoolGuard.range[2])
 		* game.map.range_multiplier(Vector2i(scene.tower.col, scene.tower.row))
@@ -189,3 +201,40 @@ func test_the_aviary_scenario_matches_its_golden() -> void:
 	# JSON turns whole numbers into floats, so compare after the same round trip
 	var round_trip = JSON.parse_string(JSON.stringify(SpecScenario.play_aviary(), "\t", true))
 	assert_eq(round_trip, JSON.parse_string(file.get_as_text()))
+
+
+func test_a_bomb_carries_frostbite_from_a_cryo_spire() -> void:
+	var scene := _scene()
+	var game := scene.game
+	var foe := _tough(game, scene.near)
+	foe.freeze_timer = 3.0
+	var spire := _tower_at(game, "prismSpire", Vector2i(scene.tower.col, scene.tower.row), 2)
+	spire.spec = "cryoOrigamiSpire"
+	var bonus: float = SPECS.find("prismSpire", "cryoOrigamiSpire").passive.bonus
+	var zone := Zone.new()
+	zone.tower_id = scene.tower.id
+	zone.damage = 18.0
+	zone.splash = 0.1
+	var before := foe.hp
+	Zones._bomb(game, zone, foe)
+	assert_almost_eq(before - foe.hp, (18.0 - float(foe.armor)) * (1.0 + bonus), 1e-6)
+
+
+func test_a_plane_skips_a_foe_an_earlier_bomb_of_the_drop_killed() -> void:
+	var scene := _scene()
+	var game := scene.game
+	var lead := _tough(game, scene.near + 0.4)
+	lead.hp = 1.0
+	var rear := _tough(game, scene.near - 0.4)
+	Game.submit(game, Command.activate(scene.tower.id))
+	Game.tick(game)
+	var bombs: Array[GameEvent] = []
+	for i in 40:
+		Game.tick(game)
+		bombs.append_array(TowerFireKit.kinds(game, GameEvent.Kind.TOWER_FIRED))
+	assert_lt(rear.hp, rear.max_hp, "the survivors still get bombed")
+	var on_lead := 0
+	for event in bombs:
+		if event.foe_id == lead.id:
+			on_lead += 1
+	assert_eq(on_lead, 1, "one bomb killed the lead and none fell on it afterwards")

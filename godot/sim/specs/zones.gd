@@ -154,7 +154,12 @@ static func _patrol(game: GameState, zone: Zone) -> void:
 	if foes.is_empty():
 		return
 	for plane in zone.planes:
-		_bomb(game, zone, foes[plane % foes.size()])
+		# a plane whose foe an earlier bomb of this drop killed takes the next one standing
+		for step in foes.size():
+			var target := foes[(plane + step) % foes.size()]
+			if target.alive:
+				_bomb(game, zone, target)
+				break
 
 
 static func _bomb(game: GameState, zone: Zone, target: Foe) -> void:

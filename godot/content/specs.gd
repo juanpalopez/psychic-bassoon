@@ -27,7 +27,8 @@
 ## every other tower whose block lies within `gap` cells of the Aviary's (the strongest bonus
 ## applies, they do not add up); Squadron Launch sends `planes` planes over everything within the
 ## Aviary's reach for `seconds`: every `every` seconds each plane drops a bomb of `damage` (a
-## `splash` blast) on a different foe, the one furthest along the road first, flyers included.
+## `splash` blast) on a different foe, the one furthest along the road first (a support foe is
+## not preferred), flyers included.
 ##
 ## Glitter Cannon (Thimble Mortar, Spec A): Shrapnel Spread adds `bonus` (a share) to the blast
 ## radius; Confetti Burst fires a shell at the target that does `damage` to every foe within

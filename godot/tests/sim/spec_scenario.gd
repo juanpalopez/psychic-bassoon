@@ -59,10 +59,10 @@ static func play_mortar(spec: String) -> Array:
 
 ## The Spool Guard's Aviary: the squadron over a line of foes, a neighbour tower in recon.
 static func play_aviary() -> Array:
-	return play_tower("spoolGuard", "paperPlaneAviary")
+	return play_tower("spoolGuard", "paperPlaneAviary", true)
 
 
-static func play_tower(tower_type: String, spec: String) -> Array:
+static func play_tower(tower_type: String, spec: String, with_neighbour: bool = false) -> Array:
 	var scene := TowerFireKit.scene(tower_type)
 	var game := scene.game
 	game.buttons = 10000
@@ -77,6 +77,13 @@ static func play_tower(tower_type: String, spec: String) -> Array:
 		foe.speed = 0.5
 		foe.hp = 100000.0
 		foe.max_hp = 100000.0
+	if with_neighbour:
+		# a Thimble Mortar on the nearest other plot, so High Recon is in the golden
+		for socket in game.map.sockets:
+			if socket != Vector2i(scene.tower.col, scene.tower.row):
+				Game.submit(game, Command.build("thimbleMortar", socket.x, socket.y))
+				Game.tick(game)
+				break
 	var events := ReplayKit.EventDigest.new()
 	var out := []
 	Game.submit(game, Command.activate(scene.tower.id))
