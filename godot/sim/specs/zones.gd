@@ -1,5 +1,6 @@
-## Runs the zones abilities opened. An Ink Vortex pulls each foe inside its radius, on the
-## zone's route, towards the zone's centre along that route, at a fixed pace. A heavy foe,
+## Runs the zones abilities opened. An Ink Vortex pulls each foe inside its radius, on the main
+## road (either spawn source), towards the zone's centre along the road, at a fixed pace. A
+## heavy foe,
 ## a foe a guard holds and a flying foe are not pulled. The zone ends when its time runs out.
 class_name Zones
 extends RefCounted
@@ -19,7 +20,8 @@ static func open_vortex(
 	zone.x = centre.x
 	zone.y = centre.y
 	zone.route = centre.route
-	zone.distance = centre.distance
+	# where it sits along the main road, so foes of either spawn source are pulled the same way
+	zone.distance = Barracks.main_distance(game, centre)
 	zone.radius = radius
 	zone.pull = pull
 	zone.timer = seconds
@@ -56,11 +58,12 @@ static func _pull(game: GameState, zone: Zone) -> void:
 	for foe in game.foes:
 		if not foe.alive or foe.heavy or foe.flying or foe.engaged_guard_id != -1:
 			continue
-		if foe.route != zone.route:
+		var along := Barracks.main_distance(game, foe)
+		if along < 0.0:
 			continue
 		var dx := foe.x - zone.x
 		var dy := foe.y - zone.y
 		if dx * dx + dy * dy > limit:
 			continue
-		var gap := zone.distance - foe.distance
+		var gap := zone.distance - along
 		foe.distance += clampf(gap, -step_length, step_length)

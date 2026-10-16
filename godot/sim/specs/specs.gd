@@ -189,10 +189,13 @@ static func _flash_freeze(game: GameState, tower: Tower, active: Dictionary) -> 
 	return true
 
 
-## Ink Vortex: opens a well at the tower's target. Returns false when there is no target.
+## Ink Vortex: opens a well at the tower's best ground target on the main road. Returns false when
+## there is none.
 static func _ink_vortex(game: GameState, tower: Tower, active: Dictionary) -> bool:
-	var target := TowerFire.target_for(game, tower)
-	if target == null:
+	# the well sits on the road, so a flying foe is never its centre; a foe still on the
+	# second road's feeder has no place on the main road yet
+	var target := TowerFire.target_for(game, tower, true)
+	if target == null or Barracks.main_distance(game, target) < 0.0:
 		return false
 	Zones.open_vortex(
 		game, tower, target, float(active.radius), float(active.pull), float(active.seconds)

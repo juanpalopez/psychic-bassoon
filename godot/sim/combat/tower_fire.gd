@@ -48,13 +48,13 @@ static func reach_of(game: GameState, tower: Tower) -> float:
 ## The foe the tower shoots: of the live foes in reach, the one with the least
 ## distance left to walk on its own route (routes differ in length, so the
 ## distance walked is not comparable); the foe that spawned first wins a tie. A support foe in
-## reach (the Ink Shaman) is shot before any other.
-static func target_for(game: GameState, tower: Tower) -> Foe:
+## reach (the Ink Shaman) is shot before any other. With `ground_only` a flying foe is never chosen.
+static func target_for(game: GameState, tower: Tower, ground_only: bool = false) -> Foe:
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	var best: Foe = null
 	var best_left := 0.0
 	for foe in foes_within(game, centre.x, centre.y, reach_of(game, tower)):
-		if not can_hit(TOWERS.DEFS[tower.type], foe):
+		if not can_hit(TOWERS.DEFS[tower.type], foe) or (ground_only and foe.flying):
 			continue
 		var left := (game.air_routes if foe.flying else game.routes)[foe.route].total - foe.distance
 		var better := best == null or left < best_left

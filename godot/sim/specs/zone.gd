@@ -6,7 +6,8 @@ extends RefCounted
 var id: int = 0
 var kind: String = ""
 var tower_id: int = 0
-## The centre on the board, in cells, and where it sits along `route`.
+## The centre on the board, in cells, the route of the foe it opened on and where it sits
+## along the main road.
 var x: float = 0.0
 var y: float = 0.0
 var route: int = 0

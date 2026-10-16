@@ -247,6 +247,143 @@ func test_ink_vortex_leaves_heavy_held_and_flying_foes_alone() -> void:
 	assert_eq(held.distance, held_at, "a held foe stays held")
 
 
+func test_ink_vortex_opens_on_a_ground_foe_even_when_a_flyer_is_nearer_the_heartstone() -> void:
+	var scene := _scene(BLOT)
+	var game := scene.game
+	scene.tower.cooldown = 1000.0
+	var ground := TowerFireKit.foe(game, scene.near, "corrugatedOrc")
+	ground.speed = 0.0
+	var moth := FoeSpawner.spawn(game, "razorMoth", 1, 0)
+	moth.speed = 0.0
+	moth.distance = 99.0
+	var centre := _centre(scene)
+	moth.x = centre.x
+	moth.y = centre.y
+	assert_eq(TowerFire.target_for(game, scene.tower), moth, "the plain target is the moth")
+	Game.submit(game, Command.activate(scene.tower.id))
+	Game.tick(game)
+	assert_eq(game.zones.size(), 1)
+	assert_almost_eq(game.zones[0].distance, scene.near, 1e-6, "the well sits on the ground foe")
+	var moth_at := moth.distance
+	for i in 20:
+		Game.tick(game)
+	assert_gte(moth.distance, moth_at, "a flyer is never pulled (it only flies on)")
+
+
+func test_ink_vortex_with_only_a_flyer_in_reach_is_refused() -> void:
+	var scene := _scene(BLOT)
+	var game := scene.game
+	var moth := FoeSpawner.spawn(game, "razorMoth", 1, 0)
+	moth.speed = 0.0
+	var centre := _centre(scene)
+	moth.x = centre.x
+	moth.y = centre.y
+	Game.submit(game, Command.activate(scene.tower.id))
+	Game.tick(game)
+	assert_eq(
+		_kinds(game, GameEvent.Kind.COMMAND_REJECTED)[0].reason, GameEvent.RejectReason.NO_TARGET
+	)
+	assert_eq(game.zones.size(), 0)
+
+
+func test_ink_vortex_pulls_a_foe_of_the_second_spawn_source_on_the_main_road() -> void:
+	var found := false
+	for map_seed in range(1, 40):
+		var probe := Game.create(map_seed)
+		if probe.routes.size() < 2 or probe.random_lanes:
+			continue
+		var scene := TowerFireKit.scene("prismSpire", map_seed)
+		var game := scene.game
+		game.buttons = 100000
+		Game.submit(game, Command.upgrade(scene.tower.id))
+		Game.submit(game, Command.upgrade(scene.tower.id))
+		Game.tick(game)
+		Game.submit(game, Command.choose_spec(scene.tower.id, BLOT))
+		Game.tick(game)
+		scene.tower.cooldown = 1000.0
+		var target := TowerFireKit.foe(game, scene.near + 0.4, "corrugatedOrc")
+		target.speed = 0.0
+		var second := FoeSpawner.spawn(game, "corrugatedOrc", 1, 1)
+		second.speed = 0.0
+		second.hp = 1.0e9
+		second.max_hp = 1.0e9
+		# on the main road, 0.4 cells behind the target, as a second-source foe stands
+		second.distance = scene.near - 0.4 + game.second_offset
+		if second.distance < game.routes[1].cumulative[game.map.feeder_length + 1]:
+			continue  # this map's well would sit before the join
+		var at := game.routes[1].position_at(second.distance)
+		second.x = at.x
+		second.y = at.y
+		Game.submit(game, Command.activate(scene.tower.id))
+		Game.tick(game)
+		if game.zones.is_empty():
+			continue
+		var before := second.distance
+		for i in 30:
+			Game.tick(game)
+		assert_gt(second.distance, before, "pulled along the shared road, seed %d" % map_seed)
+		found = true
+		break
+	assert_true(found, "a map with a second spawn source was found")
+
+
+func test_a_held_foe_keeps_its_freeze_running_out() -> void:
+	var game := GuardKit.game_with_tent()
+	var foe := GuardKit.foe_before_post(game, "corrugatedOrc", 0.0)
+	foe.hp = 1.0e9
+	foe.max_hp = 1.0e9
+	GuardKit.tick(game, 3)
+	assert_ne(foe.engaged_guard_id, -1)
+	foe.freeze_timer = 1.0
+	GuardKit.tick(game, 40)
+	assert_eq(foe.freeze_timer, 0.0)
+
+
+func test_frostbite_reaches_the_mortar_and_the_skewer_and_only_physical_damage() -> void:
+	var scene := _scene(CRYO)
+	var game := scene.game
+	var bonus: float = SPECS.find("prismSpire", CRYO).passive.bonus
+	var foe := TowerFireKit.foe(game, scene.near, "corrugatedOrc")
+	foe.hp = 1.0e9
+	foe.max_hp = 1.0e9
+	var base := Specs.damage_bonus(game, foe, Damage.Kind.PHYSICAL)
+	assert_eq(base, 0.0, "not slowed yet")
+	foe.freeze_timer = 3.0
+	assert_almost_eq(Specs.damage_bonus(game, foe, Damage.Kind.PHYSICAL), bonus, 1e-9)
+	assert_eq(Specs.damage_bonus(game, foe, Damage.Kind.MAGIC), 0.0, "physical only")
+	assert_eq(Specs.damage_bonus(game, foe, Damage.Kind.TRUE), 0.0)
+	# a Thimble Mortar shell into the frozen foe
+	var mortar := Tower.new()
+	mortar.id = 901
+	mortar.type = "thimbleMortar"
+	mortar.level = 2
+	mortar.col = scene.tower.col
+	mortar.row = scene.tower.row
+	game.towers.append(mortar)
+	var hp := foe.hp
+	TowerFire._fire(game, mortar, TOWERS.DEFS.thimbleMortar, foe)
+	assert_almost_eq(hp - foe.hp, (58.0 - 6.0) * (1.0 + bonus), 1e-6)
+	# a Heavy Skewer into the frozen foe
+	var bolt_tower := Tower.new()
+	bolt_tower.id = 902
+	bolt_tower.type = "spoolGuard"
+	bolt_tower.level = 2
+	bolt_tower.spec = "crossbowBallista"
+	bolt_tower.col = scene.tower.col
+	bolt_tower.row = scene.tower.row
+	game.towers.append(bolt_tower)
+	foe.hp = 1.0e9
+	var centre := _centre(scene)
+	foe.x = centre.x + 1.0
+	foe.y = centre.y
+	var active: Dictionary = SPECS.find("spoolGuard", "crossbowBallista").active
+	assert_true(Specs._skewer(game, bolt_tower, active))
+	var armor_left := 6.0 * 0.6
+	assert_almost_eq(
+		1.0e9 - foe.hp, (float(active.damage) - armor_left) * (1.0 + bonus), 1e-3, "the skewer too"
+	)
+
+
 func test_ink_vortex_needs_a_target_and_cools_down() -> void:
 	var scene := _scene(BLOT)
 	Game.submit(scene.game, Command.activate(scene.tower.id))

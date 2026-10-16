@@ -19,8 +19,9 @@
 ## Blot Singularity (Spec B): Corrosive Light strips `per_second` of a foe's armor each
 ## second its beam burns it, up to `max` (the strip stays on the foe); Ink Vortex opens a
 ## well for `seconds` at the target that pulls foes within `radius` cells of its centre along
-## their road at `pull` cells a second. Foes that are `heavy`, held by a guard or flying are
-## not pulled.
+## the main road at `pull` cells a second (foes of the second spawn source too, once they have
+## joined it). Foes that are `heavy`, held by a guard or flying are
+## not pulled. A well stays open if its tower is sold.
 const DEFS := {
 	"spoolGuard":
 	[
