@@ -140,10 +140,11 @@ static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -
 	game.events.append(event)
 	var kind := Damage.kind_named(def.damage_type)
 	var amount := float(def.damage[tower.level])
+	var ignore := Specs.armor_ignore(tower)
 	if splash <= 0.0:
-		Damage.apply(game, target, amount, kind)
+		Damage.apply(game, target, amount, kind, ignore)
 		return
 	# find who is in the blast before the first hit can change anything
 	for foe in foes_within(game, target.x, target.y, splash):
 		if can_hit(def, foe):
-			Damage.apply(game, foe, amount, kind)
+			Damage.apply(game, foe, amount, kind, ignore)

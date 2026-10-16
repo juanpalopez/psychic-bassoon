@@ -5,8 +5,11 @@ extends PanelContainer
 
 signal upgrade_pressed(tower_id: int)
 signal sell_pressed(tower_id: int)
+signal spec_pressed(tower_id: int, spec_id: String)
+signal ability_pressed(tower_id: int)
 
 const TOWERS := preload("res://content/towers.gd")
+const SPECS := preload("res://content/specs.gd")
 const BUTTON_SIZE := Vector2(200.0, 96.0)
 
 var _tower: Tower
@@ -17,6 +20,11 @@ var _title := Label.new()
 var _stats := Label.new()
 var _upgrade := Button.new()
 var _sell := Button.new()
+## Level 3 with no spec yet: one button per spec to choose from.
+var _specs := HBoxContainer.new()
+var _spec_buttons: Array[Button] = []
+## With a spec chosen: the active ability, with its cooldown.
+var _ability := Button.new()
 
 
 func _ready() -> void:
@@ -29,9 +37,13 @@ func _ready() -> void:
 	row.add_child(words)
 	for label in [_title, _stats]:
 		words.add_child(label)
-	for button in [_upgrade, _sell]:
+	row.add_child(_upgrade)
+	row.add_child(_specs)
+	row.add_child(_ability)
+	row.add_child(_sell)
+	for button in [_upgrade, _sell, _ability]:
 		button.custom_minimum_size = BUTTON_SIZE
-		row.add_child(button)
+	_ability.pressed.connect(func() -> void: ability_pressed.emit(_tower.id))
 	_upgrade.pressed.connect(func() -> void: upgrade_pressed.emit(_tower.id))
 	_sell.pressed.connect(func() -> void: sell_pressed.emit(_tower.id))
 
@@ -95,13 +107,26 @@ func refresh() -> void:
 		_stats.text = (
 			"Damage %d  Range %s  Rate %s/s" % [def.damage[level], reach, def.rate[level]]
 		)
+	var specs := SPECS.for_tower(_tower.type)
 	var cost := TowerInfo.next_cost(_tower)
+	var choosing := cost < 0 and _tower.spec == "" and not specs.is_empty()
+	var chosen := _tower.spec != ""
+	_upgrade.visible = not choosing and not chosen
+	_specs.visible = choosing
+	_ability.visible = chosen
 	if cost < 0:
 		_upgrade.text = "Max level"
 		_upgrade.disabled = true
 	else:
 		_upgrade.text = "Upgrade  %d" % cost
 		_upgrade.disabled = cost > _buttons
+	if choosing:
+		_show_specs(specs)
+	if chosen:
+		var spec := SPECS.find(_tower.type, _tower.spec)
+		_title.text += "  " + spec.name
+		_ability.text = "%s\n%s" % [spec.active.name, _cooldown_text(_tower.ability_cooldown)]
+		_ability.disabled = _tower.ability_cooldown > 0.0
 	_sell.text = "Sell  +%d" % TowerInfo.refund(_tower)
 
 
@@ -119,3 +144,34 @@ func upgrade_button() -> Button:
 
 func sell_button() -> Button:
 	return _sell
+
+
+func spec_buttons() -> Array[Button]:
+	return _spec_buttons
+
+
+func ability_button() -> Button:
+	return _ability
+
+
+static func _cooldown_text(seconds: float) -> String:
+	return "Ready" if seconds <= 0.0 else "%d s" % int(ceil(seconds))
+
+
+## One button per spec, named with its cost; made on first use and reused.
+func _show_specs(specs: Array) -> void:
+	while _spec_buttons.size() < specs.size():
+		var button := Button.new()
+		button.custom_minimum_size = BUTTON_SIZE
+		var index := _spec_buttons.size()
+		button.pressed.connect(
+			func() -> void: spec_pressed.emit(_tower.id, SPECS.for_tower(_tower.type)[index].id)
+		)
+		_specs.add_child(button)
+		_spec_buttons.append(button)
+	for i in _spec_buttons.size():
+		var button := _spec_buttons[i]
+		button.visible = i < specs.size()
+		if i < specs.size():
+			button.text = "%s\n%d" % [specs[i].name, specs[i].cost]
+			button.disabled = int(specs[i].cost) > _buttons

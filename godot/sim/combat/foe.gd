@@ -50,3 +50,6 @@ var aura_speed: float = 0.0
 var flying: bool = false
 ## The share more speed an Ink Shaman's aura gives this foe this tick (0 outside any aura).
 var speed_buff: float = 0.0
+## Bleed: true damage a second while `bleed_timer` runs.
+var bleed_dps: float = 0.0
+var bleed_timer: float = 0.0

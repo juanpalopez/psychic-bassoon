@@ -21,13 +21,16 @@ static func kind_named(name: String) -> Kind:
 
 
 ## What `amount` of damage of `kind` comes to against `foe`'s defences.
-static func after_defence(foe: Foe, amount: float, kind: Kind) -> float:
+## `armor_ignore` is the share of a physical hit's armor the hit goes through.
+static func after_defence(foe: Foe, amount: float, kind: Kind, armor_ignore: float = 0.0) -> float:
 	# written so that NaN counts as no damage
 	if not (amount > 0.0):
 		return 0.0
 	match kind:
 		Kind.PHYSICAL:
-			return maxf(amount * RULES.MIN_DAMAGE_FRACTION, amount - float(foe.armor))
+			return maxf(
+				amount * RULES.MIN_DAMAGE_FRACTION, amount - float(foe.armor) * (1.0 - armor_ignore)
+			)
 		Kind.MAGIC:
 			return maxf(amount * RULES.MIN_DAMAGE_FRACTION, amount - float(foe.resist))
 	return amount
@@ -35,8 +38,10 @@ static func after_defence(foe: Foe, amount: float, kind: Kind) -> float:
 
 ## Hurts `foe` and returns the hp it lost (never more than it had). A foe that
 ## has already fallen takes nothing.
-static func apply(game: GameState, foe: Foe, amount: float, kind: Kind) -> float:
-	return _hurt(game, foe, after_defence(foe, amount, kind))
+static func apply(
+	game: GameState, foe: Foe, amount: float, kind: Kind, armor_ignore: float = 0.0
+) -> float:
+	return _hurt(game, foe, after_defence(foe, amount, kind, armor_ignore))
 
 
 ## A beam's share of a tick: the defence is taken off the damage per second, as

@@ -22,6 +22,8 @@ const GUARD_POST_STEP := 0.05
 ## 1/3 s minus ten 1/30 s ticks is not exactly 0 in floating point, and would cost
 ## a whole tick.
 const TIMER_EPSILON := 1e-9
+## Distances in cells closer than this count as no distance (no direction to aim along).
+const DISTANCE_EPSILON := 1e-9
 ## Armor never cuts a hit below this share of its damage.
 const MIN_DAMAGE_FRACTION := 0.25
 ## Calling a wave early pays `EARLY_CALL_BASE + wave * EARLY_CALL_PER_WAVE`.

@@ -34,7 +34,9 @@ static func snapshot(game: GameState) -> Dictionary:
 				tower.row,
 				tower.invested,
 				tower.cooldown,
-				tower.target_id
+				tower.target_id,
+				tower.spec,
+				tower.ability_cooldown
 			]
 		)
 	var foes := []
@@ -53,7 +55,9 @@ static func snapshot(game: GameState) -> Dictionary:
 				foe.x,
 				foe.y,
 				foe.engaged_guard_id,
-				foe.attack_cooldown
+				foe.attack_cooldown,
+				foe.bleed_dps,
+				foe.bleed_timer
 			]
 		)
 	var guards := []

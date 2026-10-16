@@ -9,6 +9,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-16 | decision | Add a second spawn source that merges into the main road after wave 10 | sim | none |  |
+| 2026-10-16 | decision | Build tier 4 as content data plus two commands, one tower pair per PR | sim | none |  |
 | 2026-10-16 | decision | Record lessons and decisions at the end of relevant tasks | harness | none | CLAUDE.md |
 | 2026-10-16 | lesson | Derive the pan limit from the ground footprint, not from a share of the board | render | none |  |
 | 2026-10-16 | lesson | Keep tests on content constants, not copies of balance numbers | balance | checklist |  |
