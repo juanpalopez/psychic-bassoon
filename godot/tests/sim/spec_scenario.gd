@@ -5,6 +5,8 @@
 class_name SpecScenario
 extends RefCounted
 
+const SPECS := preload("res://content/specs.gd")
+
 const GOLDEN_PATH := "res://tests/goldens/specs.json"
 const PRISM_GOLDEN_PATH := "res://tests/goldens/specs_prism.json"
 const MORTAR_GOLDEN_PATH := "res://tests/goldens/specs_mortar.json"
@@ -78,12 +80,19 @@ static func play_tower(tower_type: String, spec: String, with_neighbour: bool = 
 		foe.hp = 100000.0
 		foe.max_hp = 100000.0
 	if with_neighbour:
-		# a Thimble Mortar on the nearest other plot, so High Recon is in the golden
+		# a Thimble Mortar on a plot next to the Aviary, so High Recon is in the golden
+		var gap: float = SPECS.find("spoolGuard", "paperPlaneAviary").passive.gap
+		var here := game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
 		for socket in game.map.sockets:
-			if socket != Vector2i(scene.tower.col, scene.tower.row):
+			var there := game.map.socket_centre(socket)
+			if (
+				socket != Vector2i(scene.tower.col, scene.tower.row)
+				and Specs.adjacent(here, there, float(game.map.footprint), gap)
+			):
 				Game.submit(game, Command.build("thimbleMortar", socket.x, socket.y))
 				Game.tick(game)
 				break
+		assert(game.towers.size() == 2, "the aviary scenario needs a plot next to the Aviary")
 	var events := ReplayKit.EventDigest.new()
 	var out := []
 	Game.submit(game, Command.activate(scene.tower.id))
