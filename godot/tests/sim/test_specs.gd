@@ -216,7 +216,7 @@ func test_the_skewer_hits_five_foes_in_a_band_nearest_first_for_full_damage_and_
 	Game.submit(scene.game, Command.activate(scene.tower.id))
 	Game.tick(scene.game)
 	var armor := float(line[0].armor)
-	var lost: float = float(active.damage) - armor * (1.0 - 0.4)
+	var lost: float = float(active.damage) - armor * (1.0 - float(spec.passive.share))
 	var bled: float = float(active.bleed_dps) * Game.TICK_SECONDS
 	for foe in [line[0], line[1], line[2], line[3], edge_in]:
 		assert_almost_eq(foe.max_hp - foe.hp, lost + bled, 1e-6)

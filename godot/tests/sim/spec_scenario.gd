@@ -31,6 +31,9 @@ static func play() -> Array:
 	var out := []
 	Game.submit(game, Command.activate(scene.tower.id))
 	for tick in TICKS:
+		if tick == 60:
+			# the cooldown is still running: this is refused and the golden pins the refusal
+			Game.submit(game, Command.activate(scene.tower.id))
 		if tick % CHECKPOINT_EVERY == 0:
 			out.append(ReplayKit.checkpoint(game, events))
 		Game.tick(game)
