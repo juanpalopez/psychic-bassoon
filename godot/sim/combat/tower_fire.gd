@@ -113,6 +113,7 @@ static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
 	var per_second := float(def.damage[tower.level])
 	var kind := Damage.kind_named(def.damage_type)
 	Damage.apply_beam(game, target, per_second, kind, Game.TICK_SECONDS)
+	Specs.corrode(tower, target)
 
 
 ## The foe the tower is locked on, if it is still alive and within reach.
@@ -142,9 +143,9 @@ static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -
 	var amount := float(def.damage[tower.level])
 	var ignore := Specs.armor_ignore(tower)
 	if splash <= 0.0:
-		Damage.apply(game, target, amount, kind, ignore)
+		Damage.apply(game, target, amount, kind, ignore, Specs.damage_bonus(game, target, kind))
 		return
 	# find who is in the blast before the first hit can change anything
 	for foe in foes_within(game, target.x, target.y, splash):
 		if can_hit(def, foe):
-			Damage.apply(game, foe, amount, kind, ignore)
+			Damage.apply(game, foe, amount, kind, ignore, Specs.damage_bonus(game, foe, kind))

@@ -68,6 +68,7 @@ const DEFS := {
 		"splits_into": "scrapGoblin",
 		"split_count": 4,
 		"split_spacing": 0.4,
+		"heavy": true,
 	},
 	"inkShaman":
 	{

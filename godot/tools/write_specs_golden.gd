@@ -15,4 +15,16 @@ func _init() -> void:
 	file.store_string(JSON.stringify(SpecScenario.play(), "\t", true) + "\n")
 	file.close()
 	print("wrote %s" % SpecScenario.GOLDEN_PATH)
+	var prism := FileAccess.open(SpecScenario.PRISM_GOLDEN_PATH, FileAccess.WRITE)
+	if prism == null:
+		push_error("cannot write %s" % SpecScenario.PRISM_GOLDEN_PATH)
+		quit(1)
+		return
+	var both := {
+		"cryoOrigamiSpire": SpecScenario.play_prism("cryoOrigamiSpire"),
+		"blotSingularity": SpecScenario.play_prism("blotSingularity"),
+	}
+	prism.store_string(JSON.stringify(both, "\t", true) + "\n")
+	prism.close()
+	print("wrote %s" % SpecScenario.PRISM_GOLDEN_PATH)
 	quit()

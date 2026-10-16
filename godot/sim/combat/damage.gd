@@ -28,9 +28,8 @@ static func after_defence(foe: Foe, amount: float, kind: Kind, armor_ignore: flo
 		return 0.0
 	match kind:
 		Kind.PHYSICAL:
-			return maxf(
-				amount * RULES.MIN_DAMAGE_FRACTION, amount - float(foe.armor) * (1.0 - armor_ignore)
-			)
+			var armor := float(foe.armor) * (1.0 - foe.armor_strip) * (1.0 - armor_ignore)
+			return maxf(amount * RULES.MIN_DAMAGE_FRACTION, amount - armor)
 		Kind.MAGIC:
 			return maxf(amount * RULES.MIN_DAMAGE_FRACTION, amount - float(foe.resist))
 	return amount
@@ -38,10 +37,16 @@ static func after_defence(foe: Foe, amount: float, kind: Kind, armor_ignore: flo
 
 ## Hurts `foe` and returns the hp it lost (never more than it had). A foe that
 ## has already fallen takes nothing.
+## `bonus` is a share added to the damage dealt after defence (Frostbite).
 static func apply(
-	game: GameState, foe: Foe, amount: float, kind: Kind, armor_ignore: float = 0.0
+	game: GameState,
+	foe: Foe,
+	amount: float,
+	kind: Kind,
+	armor_ignore: float = 0.0,
+	bonus: float = 0.0
 ) -> float:
-	return _hurt(game, foe, after_defence(foe, amount, kind, armor_ignore))
+	return _hurt(game, foe, after_defence(foe, amount, kind, armor_ignore) * (1.0 + bonus))
 
 
 ## A beam's share of a tick: the defence is taken off the damage per second, as

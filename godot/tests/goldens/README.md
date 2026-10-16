@@ -8,6 +8,7 @@ Regression data written by the GDScript sim itself, not by the TypeScript sim (w
 | `socket_blocks.json` | `godot --headless --path godot -s tools/write_socket_blocks_golden.gd` | for 8 seeds on the 22 by 16 board, the 2x2 socket anchors, their levels and the Heartstone's footprint |
 | `replays.json` | `godot --headless --path godot -s tools/write_replays_golden.gd` | 5 whole games played by the scripted bot (won, lost and stopped runs, each strategy): the seed, the commands with their ticks, a checkpoint every 20 seconds of play and the final state |
 | `specs.json` | `godot --headless --path godot -s tools/write_specs_golden.gd` | one fixed tier 4 scenario (a Crossbow Ballista and its skewer on a line of Orcs): checkpoints every second with the same hashes |
+| `specs_prism.json` | same tool | the two Prism Spire specs (Flash Freeze with Frostbite; Ink Vortex with Corrosive Light) on a line of foes with a Golem among them, checkpoints every second |
 
 ## How a replay golden works
 

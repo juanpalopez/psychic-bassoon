@@ -24,6 +24,8 @@ var won: bool = false
 var towers: Array[Tower] = []
 ## The guards of the Guard Tents, in the order they were raised.
 var guards: Array[Guard] = []
+## Areas an ability opened that act for a while (Ink Vortex), in the order they opened.
+var zones: Array[Zone] = []
 ## Foes on the board, in the order they spawned.
 var foes: Array[Foe] = []
 ## Waves still releasing foes.

@@ -22,6 +22,8 @@ enum Kind {
 	FOE_ENGAGED,
 	SPEC_CHOSEN,
 	ABILITY_USED,
+	ZONE_OPENED,
+	ZONE_CLOSED,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.

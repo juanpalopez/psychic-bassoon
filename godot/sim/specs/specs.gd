@@ -50,6 +50,10 @@ static func activate(game: GameState, command: Command) -> void:
 	match active.kind:
 		"skewer":
 			used = _skewer(game, tower, active)
+		"flash_freeze":
+			used = _flash_freeze(game, tower, active)
+		"ink_vortex":
+			used = _ink_vortex(game, tower, active)
 	if not used:
 		return Game.reject(game, command, GameEvent.RejectReason.NO_TARGET)
 	tower.ability_cooldown = float(active.cooldown)
@@ -62,12 +66,52 @@ static func tick_cooldowns(game: GameState) -> void:
 			tower.ability_cooldown = maxf(0.0, tower.ability_cooldown - Game.TICK_SECONDS)
 
 
+## The tower's spec passive, or an empty dictionary without a spec.
+static func passive_of(tower: Tower) -> Dictionary:
+	if tower.spec == "":
+		return {}
+	return SPECS.find(tower.type, tower.spec).passive
+
+
 ## The share of a foe's armor that this tower's shots ignore (0 without the passive).
 static func armor_ignore(tower: Tower) -> float:
-	if tower.spec == "":
+	var passive := passive_of(tower)
+	return float(passive.share) if passive.get("kind", "") == "armor_ignore" else 0.0
+
+
+## Frostbite: the share added to physical damage dealt to a foe that is slowed or frozen while it
+## stands inside the reach of a Cryo-Origami Spire. The strongest bonus applies; they do not add up.
+static func frostbite_bonus(game: GameState, foe: Foe) -> float:
+	var slowed := foe.slow_timer > RULES.TIMER_EPSILON or foe.freeze_timer > RULES.TIMER_EPSILON
+	if not slowed:
 		return 0.0
-	var passive: Dictionary = SPECS.find(tower.type, tower.spec).passive
-	return float(passive.share) if passive.kind == "armor_ignore" else 0.0
+	var best := 0.0
+	for tower in game.towers:
+		var passive := passive_of(tower)
+		if passive.get("kind", "") != "frostbite" or float(passive.bonus) <= best:
+			continue
+		var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+		var reach := TowerFire.reach_of(game, tower)
+		var dx := foe.x - centre.x
+		var dy := foe.y - centre.y
+		if dx * dx + dy * dy <= reach * reach:
+			best = float(passive.bonus)
+	return best
+
+
+## The share added to a tower's damage of this kind against this foe (Frostbite hits physical only).
+static func damage_bonus(game: GameState, foe: Foe, kind: Damage.Kind) -> float:
+	return frostbite_bonus(game, foe) if kind == Damage.Kind.PHYSICAL else 0.0
+
+
+## Corrosive Light: a beam that burns a foe strips a share of its armor each second, up to a cap.
+static func corrode(tower: Tower, foe: Foe) -> void:
+	var passive := passive_of(tower)
+	if passive.get("kind", "") != "corrode":
+		return
+	foe.armor_strip = minf(
+		float(passive.max), foe.armor_strip + float(passive.per_second) * Game.TICK_SECONDS
+	)
 
 
 ## Heavy Skewer: a bolt from the tower through its target, as far as the tower
@@ -109,7 +153,7 @@ static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	var count := mini(hit.size(), int(active.max_hits))
 	for i in count:
 		var foe := hit[i]
-		Damage.apply(game, foe, float(active.damage), kind, ignore)
+		Damage.apply(game, foe, float(active.damage), kind, ignore, damage_bonus(game, foe, kind))
 		if foe.alive:
 			Status.apply_bleed(foe, float(active.bleed_dps), float(active.bleed_seconds))
 	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
@@ -119,5 +163,45 @@ static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	event.y = target.y
 	event.x2 = centre.x + dir_x * reach
 	event.y2 = centre.y + dir_y * reach
+	game.events.append(event)
+	return true
+
+
+## Flash Freeze: every foe in reach the tower can hit freezes for the active's seconds. Returns
+## false when no foe is in reach.
+static func _flash_freeze(game: GameState, tower: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, tower)
+	if target == null:
+		return false
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	var reach := TowerFire.reach_of(game, tower)
+	var def: Dictionary = TOWERS.DEFS[tower.type]
+	for foe in TowerFire.foes_within(game, centre.x, centre.y, reach):
+		if TowerFire.can_hit(def, foe):
+			foe.freeze_timer = maxf(foe.freeze_timer, float(active.seconds))
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tower.id
+	event.foe_id = target.id
+	event.x = centre.x
+	event.y = centre.y
+	event.splash = reach
+	game.events.append(event)
+	return true
+
+
+## Ink Vortex: opens a well at the tower's target. Returns false when there is no target.
+static func _ink_vortex(game: GameState, tower: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, tower)
+	if target == null:
+		return false
+	Zones.open_vortex(
+		game, tower, target, float(active.radius), float(active.pull), float(active.seconds)
+	)
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tower.id
+	event.foe_id = target.id
+	event.x = target.x
+	event.y = target.y
+	event.splash = float(active.radius)
 	game.events.append(event)
 	return true

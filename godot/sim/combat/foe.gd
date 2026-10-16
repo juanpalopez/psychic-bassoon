@@ -53,3 +53,9 @@ var speed_buff: float = 0.0
 ## Bleed: true damage a second while `bleed_timer` runs.
 var bleed_dps: float = 0.0
 var bleed_timer: float = 0.0
+## Share of its armor stripped away (0 to 1), kept by the foe (Blot Singularity's Corrosive Light).
+var armor_strip: float = 0.0
+## Seconds left frozen in wax (Flash Freeze): it does not walk and does not strike.
+var freeze_timer: float = 0.0
+## A heavy foe is not pulled by an Ink Vortex.
+var heavy: bool = false
