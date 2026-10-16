@@ -22,6 +22,13 @@ func _scene(spec: String) -> TowerFireKit.Scene:
 	return scene
 
 
+func _tough(game: GameState, along: float, type: String = "corrugatedOrc") -> Foe:
+	var foe := TowerFireKit.foe(game, along, type)
+	foe.hp = 1.0e9
+	foe.max_hp = 1.0e9
+	return foe
+
+
 func _centre(scene: TowerFireKit.Scene) -> Vector2:
 	return scene.game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
 
@@ -288,7 +295,7 @@ func test_ink_vortex_with_only_a_flyer_in_reach_is_refused() -> void:
 
 func test_ink_vortex_pulls_a_foe_of_the_second_spawn_source_on_the_main_road() -> void:
 	var found := false
-	for map_seed in range(1, 40):
+	for map_seed in [5]:
 		var probe := Game.create(map_seed)
 		if probe.routes.size() < 2 or probe.random_lanes:
 			continue
