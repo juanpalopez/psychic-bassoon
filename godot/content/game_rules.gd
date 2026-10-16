@@ -29,6 +29,9 @@ const MIN_DAMAGE_FRACTION := 0.25
 ## Calling a wave early pays `EARLY_CALL_BASE + wave * EARLY_CALL_PER_WAVE`.
 const EARLY_CALL_BASE := 10
 const EARLY_CALL_PER_WAVE := 2
+## With Auto start on, the next wave starts this many seconds (game time) after one is
+## cleared. Only the HUD reads it; the sim never starts a wave by itself.
+const AUTO_WAVE_SECONDS := 3.0
 ## Clearing a wave pays `WAVE_CLEAR_BASE + wave * WAVE_CLEAR_PER_WAVE`.
 const WAVE_CLEAR_BASE := 15
 const WAVE_CLEAR_PER_WAVE := 2

@@ -10,7 +10,8 @@ signal ability_pressed(tower_id: int)
 
 const TOWERS := preload("res://content/towers.gd")
 const SPECS := preload("res://content/specs.gd")
-const BUTTON_SIZE := Vector2(200.0, 96.0)
+const BUTTON_SIZE := Vector2(190.0, 88.0)
+const COIN := preload("res://assets/icons/coin.svg")
 
 var _tower: Tower
 var _buttons := 0
@@ -35,8 +36,14 @@ func _ready() -> void:
 	var words := VBoxContainer.new()
 	words.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(words)
+	_title.theme_type_variation = &"Title"
+	_stats.theme_type_variation = &"Caption"
 	for label in [_title, _stats]:
 		words.add_child(label)
+	_upgrade.theme_type_variation = &"ActionButton"
+	_ability.theme_type_variation = &"ActionButton"
+	_upgrade.icon = COIN
+	_upgrade.icon_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(_upgrade)
 	row.add_child(_specs)
 	row.add_child(_ability)
@@ -118,16 +125,17 @@ func refresh() -> void:
 		_upgrade.text = "Max level"
 		_upgrade.disabled = true
 	else:
-		_upgrade.text = "Upgrade  %d" % cost
+		_upgrade.text = "Upgrade %d" % cost
 		_upgrade.disabled = cost > _buttons
 	if choosing:
 		_show_specs(specs)
 	if chosen:
 		var spec := SPECS.find(_tower.type, _tower.spec)
-		_title.text += "  " + spec.name
+		# on the stats line: a longer title would widen the strip over Start wave
+		_stats.text += "\n" + spec.name
 		_ability.text = "%s\n%s" % [spec.active.name, _cooldown_text(_tower.ability_cooldown)]
 		_ability.disabled = _tower.ability_cooldown > 0.0
-	_sell.text = "Sell  +%d" % TowerInfo.refund(_tower)
+	_sell.text = "Sell +%d" % TowerInfo.refund(_tower)
 
 
 func title_text() -> String:
@@ -163,6 +171,7 @@ func _show_specs(specs: Array) -> void:
 	while _spec_buttons.size() < specs.size():
 		var button := Button.new()
 		button.custom_minimum_size = BUTTON_SIZE
+		button.theme_type_variation = &"ActionButton"
 		var index := _spec_buttons.size()
 		button.pressed.connect(
 			func() -> void: spec_pressed.emit(_tower.id, SPECS.for_tower(_tower.type)[index].id)

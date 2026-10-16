@@ -1,29 +1,62 @@
-## The stats chip: Buttons, Heartstone health and wave, one label each.
+## The stats chip, a taped cardstock tag in the top-left corner: Buttons, Heartstone health
+## and wave, each with its icon.
 class_name TopBar
-extends HBoxContainer
+extends PanelContainer
 
 const RULES := preload("res://content/game_rules.gd")
+const COIN := preload("res://assets/icons/coin.svg")
+const HEART := preload("res://assets/icons/heart.svg")
 
-var _labels: Array[Label] = []
+var _buttons := Label.new()
+var _heartstone := Label.new()
+var _wave := Label.new()
+var _of_waves := Label.new()
+var _texts: Array[String] = ["", "", ""]
 
 
 func _ready() -> void:
-	for i in 3:
-		var label := Label.new()
-		add_child(label)
-		_labels.append(label)
+	theme_type_variation = &"Chip"
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	add_child(row)
+	_add_stat(row, COIN, "Buttons", _buttons)
+	row.add_child(VSeparator.new())
+	_add_stat(row, HEART, "Heartstone health", _heartstone)
+	row.add_child(VSeparator.new())
+	var word := Label.new()
+	word.text = "WAVE"
+	word.theme_type_variation = &"Caption"
+	row.add_child(word)
+	_wave.theme_type_variation = &"ChipNumber"
+	row.add_child(_wave)
+	_of_waves.theme_type_variation = &"Caption"
+	row.add_child(_of_waves)
 
 
 ## Reads the game's numbers; call it whenever they may have changed.
 func show_state(game: GameState) -> void:
-	_labels[0].text = "Buttons %d" % game.buttons
-	_labels[1].text = "Heartstone %d" % game.heartstone_health
-	_labels[2].text = "Wave %d/%d" % [game.wave, RULES.WIN_WAVE]
+	_buttons.text = str(game.buttons)
+	_heartstone.text = str(game.heartstone_health)
+	_wave.text = str(game.wave)
+	_of_waves.text = "/ %d" % RULES.WIN_WAVE
+	_texts = [
+		"Buttons %d" % game.buttons,
+		"Heartstone %d" % game.heartstone_health,
+		"Wave %d/%d" % [game.wave, RULES.WIN_WAVE],
+	]
 
 
-## The text of each label, in order.
+## What each stat says, in words, in order (the chip itself shows icons and numbers).
 func texts() -> Array[String]:
-	var result: Array[String] = []
-	for label in _labels:
-		result.append(label.text)
-	return result
+	return _texts.duplicate()
+
+
+func _add_stat(row: HBoxContainer, icon: Texture2D, label: String, number: Label) -> void:
+	var picture := TextureRect.new()
+	picture.texture = icon
+	picture.tooltip_text = label
+	picture.stretch_mode = TextureRect.STRETCH_KEEP_CENTERED
+	row.add_child(picture)
+	number.theme_type_variation = &"ChipNumber"
+	row.add_child(number)

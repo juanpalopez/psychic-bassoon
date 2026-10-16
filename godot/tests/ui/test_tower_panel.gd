@@ -135,7 +135,7 @@ func test_a_chosen_spec_shows_the_ability_with_its_cooldown() -> void:
 	panel.show_tower(tower, 0)
 	assert_false(panel.upgrade_button().visible)
 	assert_true(panel.ability_button().visible)
-	assert_string_contains(panel.title_text(), "Crossbow Ballista")
+	assert_string_contains(panel.stats_text(), "Crossbow Ballista")
 	assert_string_contains(panel.ability_button().text, "Ready")
 	assert_false(panel.ability_button().disabled)
 	tower.ability_cooldown = 4.2

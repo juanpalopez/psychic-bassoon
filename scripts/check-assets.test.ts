@@ -135,6 +135,39 @@ describe('check-assets script', () => {
     expect(run().status).toBe(0);
   });
 
+  it('accepts an SIL OFL 1.1 font, but only under fonts/', () => {
+    mkdirSync(join(assets, 'fonts'), {recursive: true});
+    writeFileSync(join(assets, 'fonts', 'a.ttf'), 'ttf');
+    writeFileSync(
+      credits,
+      '| `fonts/a.ttf` | Google Fonts | SIL OFL 1.1 (assets/licenses/OFL-A.txt) | none |\n'
+    );
+    expect(run().status).toBe(0);
+  });
+
+  it('refuses the OFL for a file under fonts/ that is not a font', () => {
+    mkdirSync(join(assets, 'fonts'), {recursive: true});
+    writeFileSync(join(assets, 'fonts', 'goblin.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `fonts/goblin.glb` | Someone | SIL OFL 1.1 | none |\n'
+    );
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
+  });
+
+  it('refuses the OFL for anything that is not a font', () => {
+    writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
+    writeFileSync(
+      credits,
+      '| `models/kit/a.glb` | Someone | SIL OFL 1.1 | none |\n'
+    );
+    const result = run();
+    expect(result.status).toBe(1);
+    expect(result.output).toContain('does not say CC0');
+  });
+
   it('no longer accepts a Meshy output', () => {
     writeFileSync(join(assets, 'models', 'kit', 'a.glb'), 'glb');
     writeFileSync(

@@ -2,6 +2,7 @@
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
+const RULES := preload("res://content/game_rules.gd")
 ## The web shell's Full screen button, in canvas pixels at its largest: about
 ## 104x52 CSS px, drawn on an 844x390 phone where a canvas pixel is 0.54 px.
 const WEB_BUTTON := Vector2(200.0, 100.0)
@@ -108,6 +109,13 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 		var tower := Tower.new()
 		tower.type = "thimbleMortar"
 		(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+	elif shown == "TowerPanel spec choice" or shown == "TowerPanel ability":
+		var tower := Tower.new()
+		tower.type = "spoolGuard"
+		tower.level = 2
+		if shown == "TowerPanel ability":
+			tower.spec = "crossbowBallista"
+		(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 1000)
 	elif shown != "":
 		var panel := main.get_node("Hud/" + shown) as Control
 		if panel is GameOverPanel:
@@ -126,7 +134,15 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 	# 1558x720 is an 844x390 phone: expand stretch widens the 1280x720 canvas
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
 		for shown in [
-			"", "GameOver", "BuildMenu", "TowerPanel", "Message", "Menu", "GameOver+Menu"
+			"",
+			"GameOver",
+			"BuildMenu",
+			"TowerPanel",
+			"TowerPanel spec choice",
+			"TowerPanel ability",
+			"Message",
+			"Menu",
+			"GameOver+Menu"
 		]:
 			var rects := await _hud_rects(size.x, size.y, shown)
 			var names := rects.keys()
@@ -151,7 +167,15 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> void:
 	# the 1558x720 canvas is drawn at 390/720 of its size on that phone
 	var scale := 390.0 / 720.0
-	for shown in ["", "GameOver", "BuildMenu", "TowerPanel", "Menu"]:
+	for shown in [
+		"",
+		"GameOver",
+		"BuildMenu",
+		"TowerPanel",
+		"TowerPanel spec choice",
+		"TowerPanel ability",
+		"Menu"
+	]:
 		var port := SubViewport.new()
 		port.size = Vector2i(1558, 720)
 		add_child_autofree(port)
@@ -167,6 +191,13 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 			var tower := Tower.new()
 			tower.type = "thimbleMortar"
 			(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 100)
+		elif shown == "TowerPanel spec choice" or shown == "TowerPanel ability":
+			var tower := Tower.new()
+			tower.type = "spoolGuard"
+			tower.level = 2
+			if shown == "TowerPanel ability":
+				tower.spec = "crossbowBallista"
+			(main.get_node("Hud/TowerPanel") as TowerPanel).show_tower(tower, 1000)
 		elif shown == "Menu":
 			(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 		await get_tree().process_frame
@@ -178,7 +209,15 @@ func test_every_visible_hud_button_is_at_least_44_px_on_a_844x390_phone() -> voi
 				assert_gte(button.get_global_rect().size.y * scale, 44.0, button.text)
 				assert_gte(button.get_global_rect().size.x * scale, 44.0, button.text)
 		# Menu, Pause, speed and Start wave; a panel or the open Menu adds its own buttons
-		var expected := {"": 4, "GameOver": 5, "BuildMenu": 9, "TowerPanel": 6, "Menu": 6}
+		var expected := {
+			"": 4,
+			"GameOver": 5,
+			"BuildMenu": 9,
+			"TowerPanel": 6,
+			"TowerPanel spec choice": 3,
+			"TowerPanel ability": 3,
+			"Menu": 6
+		}
 		assert_gte(checked, int(expected[shown]), shown)
 
 
@@ -216,13 +255,59 @@ func test_a_won_game_shows_the_victory_overlay_and_play_again_starts_afresh() ->
 	assert_false(overlay.visible)
 
 
-func test_the_build_menu_is_a_low_strip_not_a_block_over_the_map() -> void:
+func test_the_tower_panel_is_a_low_strip_not_a_block_over_the_map() -> void:
 	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
-		for panel in ["BuildMenu", "TowerPanel"]:
-			var rects := await _hud_rects(size.x, size.y, panel)
-			var rect: Rect2 = rects[panel]
-			assert_lte(rect.size.y, 140.0, "%s is %s tall at %s" % [panel, rect.size.y, size])
-			assert_gte(rect.end.y, float(size.y) - 40.0, "%s sits along the bottom" % panel)
+		var rects := await _hud_rects(size.x, size.y, "TowerPanel")
+		var rect: Rect2 = rects["TowerPanel"]
+		assert_lte(rect.size.y, 140.0, "TowerPanel is %s tall at %s" % [rect.size.y, size])
+		assert_gte(rect.end.y, float(size.y) - 40.0, "TowerPanel sits along the bottom")
+
+
+## Tapping each socket opens the build menu beside it, clear of the corner controls, on 40
+## maps at the base size and a few on a phone.
+func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() -> void:
+	var cases := []
+	for map_seed in range(1, 41):
+		cases.append([Vector2i(1280, 720), map_seed])
+	for map_seed in [1, 2, 3, 5, 8]:
+		cases.append([Vector2i(1558, 720), map_seed])
+	for case in cases:
+		var size: Vector2i = case[0]
+		var port := SubViewport.new()
+		port.size = size
+		add_child_autofree(port)
+		var main := MAIN_SCENE.instantiate()
+		port.add_child(main)
+		main.set_process(false)
+		await get_tree().process_frame
+		main._start(case[1])
+		var hud := main.get_node("Hud")
+		var menu := hud.get_node("BuildMenu") as BuildMenu
+		var menu_button := hud.get_node("MenuButton") as Button
+		for anchor in main.game().map.sockets:
+			# the Menu's dropdown is open when the player taps the board
+			menu_button.button_pressed = true
+			main.select_cell(anchor)
+			await get_tree().process_frame
+			assert_true(menu.visible)
+			assert_false((hud.get_node("NextSeed") as Control).visible, "the dropdown closed")
+			var rect := menu.get_global_rect()
+			assert_true(Rect2(Vector2.ZERO, Vector2(size)).encloses(rect), "on screen")
+			for other in ["TopBar", "SpeedBar", "MenuButton", "LaunchWave", "AutoWave"]:
+				var other_rect := (hud.get_node(other) as Control).get_global_rect()
+				assert_false(
+					rect.intersects(other_rect),
+					"menu for %s over %s on seed %d at %s" % [anchor, other, case[1], size]
+				)
+			var socket: Rect2 = main._socket_on_screen(anchor)
+			assert_false(
+				rect.intersects(socket),
+				"the menu covers the socket %s on seed %d at %s" % [anchor, case[1], size]
+			)
+			var gap := maxf(rect.position.y - socket.end.y, socket.position.y - rect.end.y)
+			# a socket under the top row has its menu just below that row
+			var most := maxf(2.0 * BuildMenu.SOCKET_GAP, BuildMenu.TOP_RESERVE - socket.end.y)
+			assert_lte(gap, most + 1.0, "next to %s" % anchor)
 
 
 func test_the_menu_button_shows_next_seed_and_sound() -> void:
@@ -245,3 +330,63 @@ func test_a_speed_press_while_paused_resumes_at_that_speed() -> void:
 	assert_eq(main._speed.ticks_speed(), 0)
 	bar.buttons()[1].pressed.emit()
 	assert_eq(main._speed.ticks_speed(), 2, "choosing a speed resumes")
+
+
+func test_auto_start_counts_down_on_the_button_and_then_starts_the_wave() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	var auto := main.get_node("Hud/AutoWave") as Button
+	var launch := main.get_node("Hud/LaunchWave") as Button
+	auto.button_pressed = true
+	main._process(0.05)
+	assert_string_contains(launch.text, "Start wave 1", "wave 1 waits for the player")
+	# as if wave 1 had been played and cleared
+	main.game().wave = 1
+	main._process(0.05)
+	assert_string_contains(launch.text, "Wave 2 in 3")
+	for frame in 70:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "the countdown started wave 2")
+
+
+func test_auto_start_holds_while_paused() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	main.game().wave = 1
+	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
+	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
+	for frame in 100:
+		main._process(0.05)
+	var launch := main.get_node("Hud/LaunchWave") as Button
+	assert_string_contains(launch.text, "Wave 2 in 3", "the countdown held")
+	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
+	for frame in 70:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "unpaused, the countdown runs out")
+
+
+func test_a_tap_during_the_countdown_launches_the_wave_once() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	main.game().wave = 1
+	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
+	# one frame before the countdown runs out: the tap and the countdown must not both launch
+	for frame in int(RULES.AUTO_WAVE_SECONDS / 0.05) - 1:
+		main._process(0.05)
+	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
+	for frame in 80:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "one wave, not two")
+	assert_false((main.get_node("Hud/Message") as Label).visible, "no refused second launch")
+
+
+func test_a_long_frame_counts_no_more_game_time_than_the_clock_runs() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	main.game().wave = 1
+	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
+	main._process(0.05)
+	main._process(5.0)
+	main._process(0.05)
+	assert_eq(main.game().wave, 1, "a 5 s hitch is not 5 s of countdown")
+	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Wave 2 in 3")
