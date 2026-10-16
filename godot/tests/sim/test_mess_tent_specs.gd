@@ -193,3 +193,127 @@ func test_the_mess_scenarios_match_their_golden() -> void:
 	# JSON turns whole numbers into floats, so compare after the same round trip
 	var round_trip = JSON.parse_string(JSON.stringify(played, "\t", true))
 	assert_eq(round_trip, JSON.parse_string(file.get_as_text()))
+
+
+func _wound(game: GameState) -> Guard:
+	var guard: Guard = game.guards[0]
+	guard.hp = 10.0
+	return guard
+
+
+func test_hardtack_adds_hp_to_a_wounded_guard_and_clamps_without_healing_when_it_goes() -> void:
+	var game := GuardKit.game_with_both(0)
+	var mess := mess_of(game)
+	game.buttons = 100000
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.tick(game)
+	var guard := _wound(game)
+	var base := guard.base_max_hp
+	var bonus: float = SPECS.find("messTent", RATIONS).passive.bonus
+	Game.submit(game, Command.choose_spec(mess.id, RATIONS))
+	Game.tick(game)
+	# regeneration may add a little, but the hardtack hp comes on top, not as a full heal
+	assert_almost_eq(guard.hp, 10.0 + base * bonus, 3.0)
+	assert_lt(guard.hp, guard.max_hp)
+	# the bonus goes: the hp is clamped to the new max, never raised
+	guard.hp = guard.max_hp
+	Game.submit(game, Command.sell(mess.id))
+	Game.tick(game)
+	Game.tick(game)
+	assert_almost_eq(guard.max_hp, base, 1e-9)
+	assert_lte(guard.hp, base)
+	var hurt := _wound(game)
+	Game.tick(game)
+	assert_lt(hurt.hp, 20.0, "losing the bonus did not heal a wounded guard")
+
+
+func test_a_tent_upgrade_while_boosted_keeps_the_hardtack_bonus() -> void:
+	var bonus: float = SPECS.find("messTent", RATIONS).passive.bonus
+	var game := GuardKit.game_with_both(0)
+	var mess := mess_of(game)
+	game.buttons = 100000
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.tick(game)
+	Game.submit(game, Command.choose_spec(mess.id, RATIONS))
+	Game.tick(game)
+	Game.tick(game)
+	Game.submit(game, Command.upgrade(GuardKit.tent(game).id))
+	Game.tick(game)
+	Game.tick(game)
+	var level_two: float = float(TOWERS.DEFS.guardTent.guard_hp[1])
+	assert_almost_eq(game.guards[0].max_hp, level_two * (1.0 + bonus), 1e-9)
+
+
+func test_fortified_feast_does_not_reach_a_guard_posted_outside_the_aura() -> void:
+	var game := _game_with(RATIONS)
+	var far: Guard = game.guards[1]
+	# post it at the point of the road farthest from the tent
+	var centre := game.map.socket_centre(Vector2i(mess_of(game).col, mess_of(game).row))
+	var farthest := 0.0
+	var farthest_gap := -1.0
+	var along := 0.0
+	while along <= game.routes[0].total:
+		var at := game.routes[0].position_at(along)
+		var gap := Vector2(at.x, at.y).distance_to(centre)
+		if gap > farthest_gap:
+			farthest_gap = gap
+			farthest = along
+		along += 0.25
+	far.post = farthest
+	assert_gt(farthest_gap, TowerFire.reach_of(game, mess_of(game)), "the road leaves the aura")
+	Game.submit(game, Command.activate(mess_of(game).id))
+	Game.tick(game)
+	assert_gt(game.guards[0].shield_hp, 0.0)
+	assert_eq(far.shield_hp, 0.0, "out of the aura, no shield")
+
+
+func test_sugar_rush_and_hardtack_from_two_tents_each_take_the_strongest_once() -> void:
+	var game := _game_with(FRENZY)
+	var rush: float = SPECS.find("messTent", FRENZY).passive.bonus
+	var bonus: float = SPECS.find("messTent", RATIONS).passive.bonus
+	var first := mess_of(game)
+	var twin := Tower.new()
+	twin.id = 951
+	twin.type = "messTent"
+	twin.level = 2
+	twin.spec = FRENZY
+	twin.col = first.col
+	twin.row = first.row
+	game.towers.append(twin)
+	var rations := Tower.new()
+	rations.id = 952
+	rations.type = "messTent"
+	rations.level = 2
+	rations.spec = RATIONS
+	rations.col = first.col
+	rations.row = first.row
+	game.towers.append(rations)
+	var aura: float = TOWERS.DEFS.messTent.guard_speed_bonus[2]
+	GuardKit.tick(game, 1)
+	var guard: Guard = game.guards[0]
+	assert_almost_eq(guard.speed_bonus, aura + rush, 1e-9, "two rush tents add once")
+	assert_almost_eq(guard.max_hp, guard.base_max_hp * (1.0 + bonus), 1e-9, "and hardtack too")
+
+
+func test_boiling_broth_centres_on_a_ground_foe_even_when_a_flyer_is_further_along() -> void:
+	var game := _game_with(FRENZY)
+	var lead := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
+	lead.hp = 1.0e9
+	lead.max_hp = 1.0e9
+	for guard in game.guards:
+		guard.alive = false
+	var moth := FoeSpawner.spawn(game, "razorMoth", 1, 0)
+	moth.speed = 0.0
+	moth.distance = 99.0
+	moth.hp = 1.0e9
+	moth.max_hp = 1.0e9
+	var centre := game.map.socket_centre(Vector2i(mess_of(game).col, mess_of(game).row))
+	moth.x = centre.x
+	moth.y = centre.y
+	Game.submit(game, Command.activate(mess_of(game).id))
+	Game.tick(game)
+	var used := GuardKit.events_of(game, GameEvent.Kind.ABILITY_USED)
+	assert_eq(used.size(), 1)
+	assert_eq(used[0].foe_id, lead.id)

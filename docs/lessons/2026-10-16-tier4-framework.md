@@ -49,6 +49,8 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - Sugar Rush: +25 percent attack speed for guards in the aura (added once to the aura's own bonus). The GDD's movement speed and hero are not built; guards do not walk.
 - Boiling Broth Splash: 45 magic damage and a 40 percent slow for 5 s on every ground foe within 1.5 cells of the ground target in the tent's reach.
 
+- Corrugated Plating reflects the whole blow even when a Fortified Feast shield soaked it (the blow landed on the guard). A Feast shield outlives the sale of the Mess Tent until its seconds run out.
+
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
 - The Haiku sweep agent will need spec profiles in the bot and a way to run one profile across seeds (PR 7).
