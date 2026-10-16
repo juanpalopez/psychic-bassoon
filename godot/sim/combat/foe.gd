@@ -59,3 +59,8 @@ var armor_strip: float = 0.0
 var freeze_timer: float = 0.0
 ## A heavy foe is not pulled by an Ink Vortex.
 var heavy: bool = false
+## Share of its melee blows it misses while `blind_timer` runs, and the tally that decides which
+## blows miss (each blow adds `blind`; a whole tally is a miss and costs 1).
+var blind: float = 0.0
+var blind_timer: float = 0.0
+var miss_tally: float = 0.0

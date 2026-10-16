@@ -27,4 +27,16 @@ func _init() -> void:
 	prism.store_string(JSON.stringify(both, "\t", true) + "\n")
 	prism.close()
 	print("wrote %s" % SpecScenario.PRISM_GOLDEN_PATH)
+	var mortar := FileAccess.open(SpecScenario.MORTAR_GOLDEN_PATH, FileAccess.WRITE)
+	if mortar == null:
+		push_error("cannot write %s" % SpecScenario.MORTAR_GOLDEN_PATH)
+		quit(1)
+		return
+	var shells := {
+		"glitterCannon": SpecScenario.play_mortar("glitterCannon"),
+		"stickyGlueMortar": SpecScenario.play_mortar("stickyGlueMortar"),
+	}
+	mortar.store_string(JSON.stringify(shells, "\t", true) + "\n")
+	mortar.close()
+	print("wrote %s" % SpecScenario.MORTAR_GOLDEN_PATH)
 	quit()

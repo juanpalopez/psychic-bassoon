@@ -76,6 +76,9 @@ var x2: float = 0.0
 var y2: float = 0.0
 ## SPEC_CHOSEN: the spec id.
 var spec: String = ""
+## ZONE_OPENED and ZONE_CLOSED: which zone ("ink_vortex" or "pool") and its id, to pair the two.
+var zone_id: int = 0
+var zone_kind: String = ""
 ## Only FOE_KILLED, TOWER_FIRED and ABILITY_USED set `x` and `y`; they are 0.0 on every other event.
 ## COMMAND_REJECTED: the command and the reason.
 var command: Command = null

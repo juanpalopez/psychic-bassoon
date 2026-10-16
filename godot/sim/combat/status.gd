@@ -38,6 +38,30 @@ static func apply_bleed(foe: Foe, dps: float, seconds: float) -> void:
 	foe.bleed_timer = seconds
 
 
+## Counts every blind down by a tick; it ends with its last blind blow window, not a tick later.
+static func step_blind(game: GameState) -> void:
+	for foe in game.foes:
+		if foe.blind_timer <= RULES.TIMER_EPSILON:
+			continue
+		foe.blind_timer -= Game.TICK_SECONDS
+		if foe.blind_timer <= RULES.TIMER_EPSILON:
+			foe.blind = 0.0
+			foe.blind_timer = 0.0
+			foe.miss_tally = 0.0
+
+
+## Blinds `foe` for `seconds`: it misses a `share` of its melee blows. A stronger or equal blind
+## replaces a weaker one and restarts the timer.
+static func apply_blind(foe: Foe, share: float, seconds: float) -> void:
+	if not (share > 0.0 and seconds > RULES.TIMER_EPSILON):
+		return
+	var active := foe.blind_timer > RULES.TIMER_EPSILON
+	if active and share < foe.blind:
+		return
+	foe.blind = minf(share, 1.0)
+	foe.blind_timer = seconds
+
+
 ## A tick of every bleed: true damage for the tick, then the timer runs down.
 ## The bleed ends with its last bleeding step, not a tick later.
 static func step_bleed(game: GameState) -> void:

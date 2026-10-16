@@ -22,6 +22,14 @@
 ## the main road at `pull` cells a second (foes of the second spawn source too, once they have
 ## joined it). Foes that are `heavy`, held by a guard or flying are
 ## not pulled. A well stays open if its tower is sold.
+##
+## Glitter Cannon (Thimble Mortar, Spec A): Shrapnel Spread adds `bonus` (a share) to the blast
+## radius; Confetti Burst fires a shell at the target that does `damage` to every foe within
+## `radius` cells and blinds them for `seconds`: a blinded foe misses `blind` (a share) of its
+## melee blows (counted, never random: every blow adds the share to a tally and a whole tally is
+## a miss). Sticky Glue Mortar (Spec B): PVA Deluge slows every foe within `radius` cells of the
+## target by `slow` (a share) for `seconds`; Lingering Residue leaves a pool where each shell
+## lands, as wide as the blast, that slows ground foes by `slow` for `seconds`.
 const DEFS := {
 	"spoolGuard":
 	[
@@ -71,6 +79,42 @@ const DEFS := {
 				"seconds": 5.0,
 				"radius": 1.5,
 				"pull": 1.2,
+			},
+		},
+	],
+	"thimbleMortar":
+	[
+		{
+			"id": "glitterCannon",
+			"name": "Glitter Cannon",
+			"cost": 160,
+			"card": "A wider blast, and a shell of confetti that blinds a whole crowd.",
+			"passive": {"kind": "splash_bonus", "bonus": 0.35},
+			"active":
+			{
+				"kind": "confetti_burst",
+				"name": "Confetti Burst",
+				"cooldown": 22.0,
+				"radius": 2.0,
+				"damage": 60.0,
+				"blind": 0.4,
+				"seconds": 6.0,
+			},
+		},
+		{
+			"id": "stickyGlueMortar",
+			"name": "Sticky Glue Mortar",
+			"cost": 160,
+			"card": "Shells leave sticky pools, and a deluge of PVA glue pins a whole crowd.",
+			"passive": {"kind": "residue", "slow": 0.35, "seconds": 4.0},
+			"active":
+			{
+				"kind": "pva_deluge",
+				"name": "PVA Deluge",
+				"cooldown": 24.0,
+				"radius": 2.0,
+				"slow": 0.7,
+				"seconds": 6.0,
 			},
 		},
 	],

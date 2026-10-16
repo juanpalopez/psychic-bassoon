@@ -7,6 +7,7 @@ extends RefCounted
 
 const GOLDEN_PATH := "res://tests/goldens/specs.json"
 const PRISM_GOLDEN_PATH := "res://tests/goldens/specs_prism.json"
+const MORTAR_GOLDEN_PATH := "res://tests/goldens/specs_mortar.json"
 const CHECKPOINT_EVERY := 30
 const TICKS := 180
 
@@ -47,7 +48,16 @@ static func play() -> Array:
 ## `spec` is "cryoOrigamiSpire" (Flash Freeze) or "blotSingularity" (Ink Vortex and Corrosive
 ## Light). Foes stand on the road near the spire; a Cardboard Golem is among them.
 static func play_prism(spec: String) -> Array:
-	var scene := TowerFireKit.scene("prismSpire")
+	return play_tower("prismSpire", spec)
+
+
+## The same for a mortar spec ("glitterCannon" or "stickyGlueMortar").
+static func play_mortar(spec: String) -> Array:
+	return play_tower("thimbleMortar", spec)
+
+
+static func play_tower(tower_type: String, spec: String) -> Array:
+	var scene := TowerFireKit.scene(tower_type)
 	var game := scene.game
 	game.buttons = 10000
 	Game.submit(game, Command.upgrade(scene.tower.id))

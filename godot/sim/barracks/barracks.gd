@@ -206,7 +206,8 @@ static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 		var blow := maxf(
 			foe.attack_damage * RULES.MIN_DAMAGE_FRACTION, foe.attack_damage - float(guard.armor)
 		)
-		guard.hp -= blow
+		if not _blind_miss(foe):
+			guard.hp -= blow
 	if not foe.alive:
 		_free(foe, guard)
 	elif guard.hp <= 0.0:
@@ -216,6 +217,18 @@ static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 		var def: Dictionary = TOWERS.DEFS[_tent_of(game, guard).type]
 		guard.respawn_timer = float(def.respawn[_tent_of(game, guard).level])
 		_announce(game, GameEvent.Kind.GUARD_FELL, guard)
+
+
+## Whether a blind foe's blow misses: each blow adds its blind share to a tally and a whole tally
+## is a miss, so the misses are exactly the share and no random number is drawn.
+static func _blind_miss(foe: Foe) -> bool:
+	if foe.blind <= 0.0:
+		return false
+	foe.miss_tally += foe.blind
+	if foe.miss_tally >= 1.0 - RULES.TIMER_EPSILON:
+		foe.miss_tally -= 1.0
+		return true
+	return false
 
 
 static func _free(foe: Foe, guard: Guard) -> void:

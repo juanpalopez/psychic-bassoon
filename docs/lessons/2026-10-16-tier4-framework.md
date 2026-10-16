@@ -27,6 +27,12 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - Ink Vortex pulls foes of the target's route inside its radius along their road towards the target's place at 1.2 cells a second for 5 s; heavy foes (the Cardboard Golem), foes a guard holds and flying foes are not pulled.
 - A frozen foe does not walk and does not strike a guard; the guard keeps hitting it.
 
+## Readings chosen for the Thimble Mortar pair (owner may overrule)
+- Confetti Burst also does 60 physical damage to every foe in a 2-cell blast (a shell); the GDD only names the blind. A blinded foe misses 40 percent of its melee blows by a counted tally (each blow adds 0.4; a whole tally is a miss), never by a random number.
+- PVA Deluge slows every foe in a 2-cell area by 70 percent for 6 s.
+- Lingering Residue: every shell leaves a pool as wide as the blast that slows ground foes by 35 percent for 4 s; there is no burning (the GDD says "burning/slowing"). Pools and wells stay open if their tower is sold.
+- Shrapnel Spread widens the blast of the Glitter Cannon's shells by 35 percent. It never widens a pool (pools belong to the other spec) or Confetti Burst's own 2-cell blast: a deliberate reading.
+
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
 - The Haiku sweep agent will need spec profiles in the bot and a way to run one profile across seeds (PR 7).

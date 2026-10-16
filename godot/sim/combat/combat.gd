@@ -16,6 +16,7 @@ static func step(game: GameState) -> void:
 	Barracks.step(game)
 	TowerFire.step(game)
 	Status.step_bleed(game)
+	Status.step_blind(game)
 	TowerFire.release_fallen_locks(game)
 	_remove_the_fallen(game)
 	if game.heartstone_health <= 0 and not game.over:

@@ -131,7 +131,7 @@ static func _locked_foe(game: GameState, tower: Tower) -> Foe:
 static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -> void:
 	var splash := 0.0
 	if def.has("splash"):
-		splash = float(def.splash[tower.level])
+		splash = float(def.splash[tower.level]) * (1.0 + Specs.splash_bonus(tower))
 	var event := GameEvent.of(GameEvent.Kind.TOWER_FIRED)
 	event.tower_id = tower.id
 	event.foe_id = target.id
@@ -149,3 +149,4 @@ static func _fire(game: GameState, tower: Tower, def: Dictionary, target: Foe) -
 	for foe in foes_within(game, target.x, target.y, splash):
 		if can_hit(def, foe):
 			Damage.apply(game, foe, amount, kind, ignore, Specs.damage_bonus(game, foe, kind))
+	Specs.leave_residue(game, tower, target, splash)
