@@ -21,6 +21,12 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - One generic effect interpreter in content: too much machinery for eight specs.
 - Aiming an active with a tapped cell: the replay and bot need a cell choice; added later if play shows a need.
 
+## Readings chosen for the Prism Spire pair (owner may overrule)
+- Frostbite applies to physical damage from towers on a slowed or frozen foe that stands inside the Cryo-Origami spire's reach (not board wide); the strongest bonus applies, they do not add up; it is a share of the damage dealt after armor.
+- Corrosive Light strips 2 percent of a foe's armor per second the beam burns it, up to 50 percent, and the strip stays on the foe.
+- Ink Vortex pulls foes of the target's route inside its radius along their road towards the target's place at 1.2 cells a second for 5 s; heavy foes (the Cardboard Golem), foes a guard holds and flying foes are not pulled.
+- A frozen foe does not walk and does not strike a guard; the guard keeps hitting it.
+
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
 - The Haiku sweep agent will need spec profiles in the bot and a way to run one profile across seeds (PR 7).

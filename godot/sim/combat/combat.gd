@@ -11,6 +11,7 @@ const RULES := preload("res://content/game_rules.gd")
 static func step(game: GameState) -> void:
 	Specs.tick_cooldowns(game)
 	ShamanAura.step(game)
+	Zones.step(game)
 	_move_foes(game)
 	Barracks.step(game)
 	TowerFire.step(game)
@@ -46,12 +47,13 @@ static func _move_foes(game: GameState) -> void:
 		if not foe.alive:
 			continue
 		var held := foe.engaged_guard_id != -1
+		var frozen := foe.freeze_timer > RULES.TIMER_EPSILON
 		var slowed := foe.slow_timer > RULES.TIMER_EPSILON
 		var walk := foe.speed * (1.0 + foe.speed_buff)
 		if slowed:
 			walk *= 1.0 - foe.slow
-		# a held foe does not walk, but a slow on it keeps running out
-		if not held:
+		# a held or frozen foe does not walk, but a slow on it keeps running out
+		if not held and not frozen:
 			foe.distance += walk * Game.TICK_SECONDS
 		if slowed:
 			foe.slow_timer -= Game.TICK_SECONDS
@@ -59,6 +61,10 @@ static func _move_foes(game: GameState) -> void:
 			if foe.slow_timer <= RULES.TIMER_EPSILON:
 				foe.slow = 0.0
 				foe.slow_timer = 0.0
+		if frozen:
+			foe.freeze_timer -= Game.TICK_SECONDS
+			if foe.freeze_timer <= RULES.TIMER_EPSILON:
+				foe.freeze_timer = 0.0
 		if held:
 			continue
 		var route := (game.air_routes if foe.flying else game.routes)[foe.route]

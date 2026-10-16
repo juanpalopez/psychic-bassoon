@@ -198,7 +198,9 @@ static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 	if guard.cooldown <= RULES.TIMER_EPSILON:
 		guard.cooldown += guard.interval / (1.0 + guard.speed_bonus)
 		Damage.apply(game, foe, guard.damage, Damage.Kind.PHYSICAL)
-	foe.attack_cooldown -= Game.TICK_SECONDS
+	# a frozen foe does not strike, and its next blow waits for the ice to go
+	if foe.freeze_timer <= RULES.TIMER_EPSILON:
+		foe.attack_cooldown -= Game.TICK_SECONDS
 	if foe.attack_cooldown <= RULES.TIMER_EPSILON and foe.alive:
 		foe.attack_cooldown += foe.attack_interval
 		var blow := maxf(

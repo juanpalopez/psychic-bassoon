@@ -36,6 +36,7 @@ static func spawn(game: GameState, type: String, wave: int, route: int = -1) -> 
 	foe.blockable = bool(base.blockable)
 	foe.support = bool(base.get("support", false))
 	foe.flying = bool(base.get("flying", false))
+	foe.heavy = bool(base.get("heavy", false))
 	foe.aura_radius = float(base.get("aura_radius", 0.0))
 	foe.aura_heal = float(base.get("aura_heal", 0.0))
 	foe.aura_speed = float(base.get("aura_speed", 0.0))

@@ -12,6 +12,16 @@
 ## its target, through up to `max_hits` foes within `width` cells of the line (plus
 ## the foe's own radius), nearest first, for `damage` each, and leaves a bleed of
 ## `bleed_dps` true damage a second for `bleed_seconds`.
+##
+## Cryo-Origami Spire (Prism Spire, Spec A): Frostbite adds `bonus` (a share) to the damage
+## physical towers deal to a slowed or frozen foe inside the spire's reach (the strongest
+## bonus applies, they do not add up); Flash Freeze freezes every foe in reach for `seconds`.
+## Blot Singularity (Spec B): Corrosive Light strips `per_second` of a foe's armor each
+## second its beam burns it, up to `max` (the strip stays on the foe); Ink Vortex opens a
+## well for `seconds` at the target that pulls foes within `radius` cells of its centre along
+## the main road at `pull` cells a second (foes of the second spawn source too, once they have
+## joined it). Foes that are `heavy`, held by a guard or flying are
+## not pulled. A well stays open if its tower is sold.
 const DEFS := {
 	"spoolGuard":
 	[
@@ -31,6 +41,36 @@ const DEFS := {
 				"width": 0.3,
 				"bleed_dps": 8.0,
 				"bleed_seconds": 4.0,
+			},
+		},
+	],
+	"prismSpire":
+	[
+		{
+			"id": "cryoOrigamiSpire",
+			"name": "Cryo-Origami Spire",
+			"cost": 160,
+			"card":
+			"A cold burst sets a whole crowd in paraffin wax; the frozen take more from every shot.",
+			"passive": {"kind": "frostbite", "bonus": 0.2},
+			"active":
+			{"kind": "flash_freeze", "name": "Flash Freeze", "cooldown": 25.0, "seconds": 3.0},
+		},
+		{
+			"id": "blotSingularity",
+			"name": "Blot Singularity",
+			"cost": 160,
+			"card":
+			"A spreading ink blot drags the light ones into a heap and eats the armor off whoever it burns.",
+			"passive": {"kind": "corrode", "per_second": 0.02, "max": 0.5},
+			"active":
+			{
+				"kind": "ink_vortex",
+				"name": "Ink Vortex",
+				"cooldown": 30.0,
+				"seconds": 5.0,
+				"radius": 1.5,
+				"pull": 1.2,
 			},
 		},
 	],
