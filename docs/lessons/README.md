@@ -8,6 +8,9 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-16 | decision | Skip graphify for now | tooling | none | |
+| 2026-10-16 | lesson | Keep reusable tools in the repo, not in the shared scratchpad | harness | script | scripts/balance_wins.py, scripts/run-gut.sh |
+| 2026-10-16 | lesson | Run the whole GUT suite before every push | ci | script | scripts/run-gut.sh |
 | 2026-10-15 | decision | Allow SIL OFL 1.1 fonts in godot/assets, for fonts only | assets | none | CLAUDE.md |
 | 2026-10-15 | decision | Offer Auto start: the next wave starts by itself after a cleared wave | ui | none | GDD |
 | 2026-10-16 | decision | Add a second spawn source that merges into the main road after wave 10 | sim | none |  |
