@@ -94,7 +94,7 @@ func open_for(plot: Vector2i, buttons: int) -> void:
 ## Moves the menu next to a socket drawn at `socket` (its rectangle on screen) in a
 ## screen of `port` size: the full menu where it fits, else the compact one, and as a last
 ## resort (a socket that fills the middle of the screen) the side that crowds the corner
-## rows least, but never over the socket.
+## rows least, off the socket unless the screen is too short to keep it off.
 func place_near(socket: Rect2, port: Vector2) -> void:
 	_socket = socket
 	_port = port

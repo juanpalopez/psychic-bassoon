@@ -176,6 +176,23 @@ func test_the_last_resort_is_never_over_the_socket() -> void:
 	var rect := Rect2(BuildMenu.placement(huge, menu_size, port), menu_size)
 	assert_false(rect.intersects(huge))
 	assert_true(Rect2(Vector2.ZERO, port).encloses(rect))
+	# below crowds the bottom row by 52 px, above the top row by 64: below wins
+	assert_eq(rect.position.y, huge.end.y + BuildMenu.SOCKET_GAP)
+
+
+func test_the_menu_never_reaches_the_right_edge_margin() -> void:
+	var port := Vector2(1280.0, 720.0)
+	var menu_size := Vector2(660.0, 210.0)
+	# beside it on the right would end 5 px inside the edge margin
+	var socket := Rect2(510.0, 320.0, 89.0, 90.0)
+	var rect := Rect2(BuildMenu.placement(socket, menu_size, port), menu_size)
+	assert_lte(rect.end.x, port.x - BuildMenu.EDGE_MARGIN)
+
+
+func test_a_menu_taller_than_the_room_between_the_rows_fits_nowhere() -> void:
+	var port := Vector2(1280.0, 400.0)
+	var socket := Rect2(100.0, 150.0, 80.0, 60.0)
+	assert_null(BuildMenu.fitting_place(socket, Vector2(600.0, 210.0), port))
 
 
 func test_the_menu_stays_on_screen_and_clear_of_the_corner_rows() -> void:

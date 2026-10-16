@@ -2,6 +2,7 @@
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
+const RULES := preload("res://content/game_rules.gd")
 ## The web shell's Full screen button, in canvas pixels at its largest: about
 ## 104x52 CSS px, drawn on an 844x390 phone where a canvas pixel is 0.54 px.
 const WEB_BUTTON := Vector2(200.0, 100.0)
@@ -331,7 +332,8 @@ func test_a_tap_during_the_countdown_launches_the_wave_once() -> void:
 	main._start(main.game().seed)
 	main.game().wave = 1
 	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
-	for frame in 30:
+	# one frame before the countdown runs out: the tap and the countdown must not both launch
+	for frame in int(RULES.AUTO_WAVE_SECONDS / 0.05) - 1:
 		main._process(0.05)
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	for frame in 80:
