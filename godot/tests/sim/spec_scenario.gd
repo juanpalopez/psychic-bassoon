@@ -8,6 +8,7 @@ extends RefCounted
 const GOLDEN_PATH := "res://tests/goldens/specs.json"
 const PRISM_GOLDEN_PATH := "res://tests/goldens/specs_prism.json"
 const MORTAR_GOLDEN_PATH := "res://tests/goldens/specs_mortar.json"
+const AVIARY_GOLDEN_PATH := "res://tests/goldens/specs_aviary.json"
 const CHECKPOINT_EVERY := 30
 const TICKS := 180
 
@@ -54,6 +55,11 @@ static func play_prism(spec: String) -> Array:
 ## The same for a mortar spec ("glitterCannon" or "stickyGlueMortar").
 static func play_mortar(spec: String) -> Array:
 	return play_tower("thimbleMortar", spec)
+
+
+## The Spool Guard's Aviary: the squadron over a line of foes, a neighbour tower in recon.
+static func play_aviary() -> Array:
+	return play_tower("spoolGuard", "paperPlaneAviary")
 
 
 static func play_tower(tower_type: String, spec: String) -> Array:

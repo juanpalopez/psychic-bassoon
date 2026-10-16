@@ -33,6 +33,10 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - Lingering Residue: every shell leaves a pool as wide as the blast that slows ground foes by 35 percent for 4 s; there is no burning (the GDD says "burning/slowing"). Pools and wells stay open if their tower is sold.
 - Shrapnel Spread widens the blast of the Glitter Cannon's shells by 35 percent. It never widens a pool (pools belong to the other spec) or Confetti Burst's own 2-cell blast: a deliberate reading.
 
+## Readings chosen for the Aviary (owner may overrule)
+- High Recon: "adjacent" means the block of the other tower lies within 1 cell of the Aviary's block (centres within the footprint plus 1 on both axes); the strongest bonus applies; the Aviary's own reach is not widened. The range ring in the UI does not show the bonus yet (tracked with #286).
+- Squadron Launch: the planes patrol the Aviary's reach for 10 s; each second each of the 3 planes bombs a different foe (the one furthest along its road first, flyers included) for 18 physical damage in a 0.6-cell blast, with Frostbite.
+
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
 - The Haiku sweep agent will need spec profiles in the bot and a way to run one profile across seeds (PR 7).

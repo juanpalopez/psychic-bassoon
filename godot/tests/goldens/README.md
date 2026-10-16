@@ -10,6 +10,7 @@ Regression data written by the GDScript sim itself, not by the TypeScript sim (w
 | `specs.json` | `godot --headless --path godot -s tools/write_specs_golden.gd` | one fixed tier 4 scenario (a Crossbow Ballista and its skewer on a line of Orcs): checkpoints every second with the same hashes |
 | `specs_prism.json` | same tool | the two Prism Spire specs (Flash Freeze with Frostbite; Ink Vortex with Corrosive Light) on a line of foes with a Golem among them, checkpoints every second |
 | `specs_mortar.json` | same tool | the two Thimble Mortar specs (Confetti Burst with Shrapnel Spread; PVA Deluge with Lingering Residue) on a line of foes, checkpoints every second |
+| `specs_aviary.json` | same tool | the Paper-Plane Aviary (Squadron Launch over a line of foes), checkpoints every second |
 
 ## How a replay golden works
 

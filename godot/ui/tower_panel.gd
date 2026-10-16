@@ -11,6 +11,7 @@ signal ability_pressed(tower_id: int)
 const TOWERS := preload("res://content/towers.gd")
 const SPECS := preload("res://content/specs.gd")
 const BUTTON_SIZE := Vector2(190.0, 88.0)
+const SPEC_BUTTON_SIZE := Vector2(130.0, 88.0)
 const COIN := preload("res://assets/icons/coin.svg")
 
 var _tower: Tower
@@ -170,7 +171,9 @@ static func _cooldown_text(seconds: float) -> String:
 func _show_specs(specs: Array) -> void:
 	while _spec_buttons.size() < specs.size():
 		var button := Button.new()
-		button.custom_minimum_size = BUTTON_SIZE
+		# two long spec names must fit the strip beside the stats: narrower buttons, wrapped names
+		button.custom_minimum_size = SPEC_BUTTON_SIZE
+		button.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		button.theme_type_variation = &"ActionButton"
 		var index := _spec_buttons.size()
 		button.pressed.connect(

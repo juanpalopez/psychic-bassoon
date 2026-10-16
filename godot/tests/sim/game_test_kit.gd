@@ -96,6 +96,11 @@ static func snapshot(game: GameState) -> Dictionary:
 				zone.radius,
 				zone.pull,
 				zone.slow,
+				zone.planes,
+				zone.damage,
+				zone.splash,
+				zone.every,
+				zone.clock,
 				zone.timer
 			]
 		)

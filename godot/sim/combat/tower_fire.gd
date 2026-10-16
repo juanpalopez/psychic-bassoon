@@ -42,7 +42,8 @@ static func step(game: GameState) -> void:
 ## elevation of its socket.
 static func reach_of(game: GameState, tower: Tower) -> float:
 	var base: float = TOWERS.DEFS[tower.type].range[tower.level]
-	return base * game.map.range_multiplier(Vector2i(tower.col, tower.row))
+	var seen := 1.0 + Specs.recon_bonus(game, tower)
+	return base * game.map.range_multiplier(Vector2i(tower.col, tower.row)) * seen
 
 
 ## The foe the tower shoots: of the live foes in reach, the one with the least

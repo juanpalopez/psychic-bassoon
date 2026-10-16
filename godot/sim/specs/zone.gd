@@ -17,5 +17,12 @@ var radius: float = 0.0
 var pull: float = 0.0
 ## Share of speed a pool takes from the ground foes inside it.
 var slow: float = 0.0
+## A squadron: planes, bomb damage and blast radius, the seconds between drops and the time to
+## the next one.
+var planes: int = 0
+var damage: float = 0.0
+var splash: float = 0.0
+var every: float = 0.0
+var clock: float = 0.0
 ## Seconds left.
 var timer: float = 0.0
