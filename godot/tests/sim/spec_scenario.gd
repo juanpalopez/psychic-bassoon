@@ -12,6 +12,7 @@ const PRISM_GOLDEN_PATH := "res://tests/goldens/specs_prism.json"
 const MORTAR_GOLDEN_PATH := "res://tests/goldens/specs_mortar.json"
 const AVIARY_GOLDEN_PATH := "res://tests/goldens/specs_aviary.json"
 const GUARD_GOLDEN_PATH := "res://tests/goldens/specs_guard.json"
+const MESS_GOLDEN_PATH := "res://tests/goldens/specs_mess.json"
 const CHECKPOINT_EVERY := 30
 const TICKS := 180
 
@@ -125,6 +126,33 @@ static func play_guard(spec: String) -> Array:
 	var events := ReplayKit.EventDigest.new()
 	var out := []
 	Game.submit(game, Command.activate(tent.id))
+	for tick in 300:
+		if tick % CHECKPOINT_EVERY == 0:
+			out.append(ReplayKit.checkpoint(game, events))
+		Game.tick(game)
+		events.fold(game)
+	out.append(ReplayKit.checkpoint(game, events))
+	return out
+
+
+## A Guard Tent and a Mess Tent at the top level near its guards, the Mess Tent with a spec
+## ("ironRations" or "gourmetFrenzy"), foes walking up, the active used once, then play.
+static func play_mess(spec: String) -> Array:
+	var game := GuardKit.game_with_both(0)
+	var mess: Tower = game.towers[1]
+	game.buttons = 10000
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.submit(game, Command.upgrade(mess.id))
+	Game.tick(game)
+	Game.submit(game, Command.choose_spec(mess.id, spec))
+	Game.tick(game)
+	for step in 3:
+		var foe := GuardKit.foe_before_post(game, "corrugatedOrc", 0.2 + 0.5 * float(step))
+		foe.hp = 100000.0
+		foe.max_hp = 100000.0
+	var events := ReplayKit.EventDigest.new()
+	var out := []
+	Game.submit(game, Command.activate(mess.id))
 	for tick in 300:
 		if tick % CHECKPOINT_EVERY == 0:
 			out.append(ReplayKit.checkpoint(game, events))

@@ -12,6 +12,7 @@ Regression data written by the GDScript sim itself, not by the TypeScript sim (w
 | `specs_mortar.json` | same tool | the two Thimble Mortar specs (Confetti Burst with Shrapnel Spread; PVA Deluge with Lingering Residue) on a line of foes, checkpoints every second |
 | `specs_aviary.json` | same tool | the Paper-Plane Aviary (Squadron Launch over a line of foes), checkpoints every second |
 | `specs_guard.json` | same tool | the two Guard Tent specs (Shield Wall with Corrugated Plating; Precision Snipe with Paper Cuts) on a Golem and Orcs at the guards' post, checkpoints every second |
+| `specs_mess.json` | same tool | the two Kitchen Mess Tent specs (Fortified Feast with Hardtack; Boiling Broth with Sugar Rush) beside a Guard Tent, checkpoints every second |
 
 ## How a replay golden works
 

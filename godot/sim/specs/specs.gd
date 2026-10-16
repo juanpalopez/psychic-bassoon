@@ -54,6 +54,10 @@ static func activate(game: GameState, command: Command) -> void:
 			used = _flash_freeze(game, tower, active)
 		"ink_vortex":
 			used = _ink_vortex(game, tower, active)
+		"fortified_feast":
+			used = _fortified_feast(game, tower, active)
+		"boiling_broth":
+			used = _boiling_broth(game, tower, active)
 		"shield_wall":
 			used = _shield_wall(game, tower, active)
 		"precision_snipe":
@@ -165,6 +169,16 @@ static func guard_armor(guard: Guard, tent: Tower) -> float:
 		if not spec.is_empty() and spec.active.kind == "shield_wall":
 			armor *= float(spec.active.armor_mult)
 	return armor
+
+
+## A blow on a guard: the Fortified Feast shield soaks what it can first. Returns what is left
+## for the guard's hp.
+static func guard_absorb(guard: Guard, blow: float) -> float:
+	if guard.shield_hp <= 0.0:
+		return blow
+	var soaked := minf(guard.shield_hp, blow)
+	guard.shield_hp -= soaked
+	return blow - soaked
 
 
 ## Corrugated Plating: a blow that landed on a guard comes back as true damage to the attacker.
@@ -393,5 +407,61 @@ static func _precision_snipe(game: GameState, tent: Tower, active: Dictionary) -
 	event.foe_id = best.id
 	event.x = best.x
 	event.y = best.y
+	game.events.append(event)
+	return true
+
+
+## The guards on their feet whose post lies inside the Mess Tent's aura.
+static func _guards_in_aura(game: GameState, mess: Tower) -> Array[Guard]:
+	var found: Array[Guard] = []
+	var centre := game.map.socket_centre(Vector2i(mess.col, mess.row))
+	var reach := TowerFire.reach_of(game, mess)
+	for guard in game.guards:
+		if not guard.alive:
+			continue
+		var at := game.routes[0].position_at(guard.post)
+		var dx := at.x - centre.x
+		var dy := at.y - centre.y
+		if dx * dx + dy * dy <= reach * reach:
+			found.append(guard)
+	return found
+
+
+## Fortified Feast: every guard in the aura gets a shield for a while. False without a guard there.
+static func _fortified_feast(game: GameState, mess: Tower, active: Dictionary) -> bool:
+	var fed := _guards_in_aura(game, mess)
+	if fed.is_empty():
+		return false
+	for guard in fed:
+		guard.shield_hp = float(active.shield)
+		guard.shield_timer = float(active.seconds)
+	var centre := game.map.socket_centre(Vector2i(mess.col, mess.row))
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = mess.id
+	event.x = centre.x
+	event.y = centre.y
+	event.splash = TowerFire.reach_of(game, mess)
+	game.events.append(event)
+	return true
+
+
+## Boiling Broth Splash: scalding stew on the ground target's place burns and slows every ground
+## foe around it. False when no ground foe is in reach.
+static func _boiling_broth(game: GameState, mess: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, mess, true)
+	if target == null:
+		return false
+	for foe in TowerFire.foes_within(game, target.x, target.y, float(active.radius)):
+		if foe.flying:
+			continue
+		Damage.apply(game, foe, float(active.damage), Damage.Kind.MAGIC)
+		if foe.alive:
+			Status.apply_slow(foe, float(active.slow), float(active.seconds))
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = mess.id
+	event.foe_id = target.id
+	event.x = target.x
+	event.y = target.y
+	event.splash = float(active.radius)
 	game.events.append(event)
 	return true

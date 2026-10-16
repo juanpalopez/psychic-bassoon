@@ -59,4 +59,16 @@ func _init() -> void:
 	guard.store_string(JSON.stringify(tents, "\t", true) + "\n")
 	guard.close()
 	print("wrote %s" % SpecScenario.GUARD_GOLDEN_PATH)
+	var mess := FileAccess.open(SpecScenario.MESS_GOLDEN_PATH, FileAccess.WRITE)
+	if mess == null:
+		push_error("cannot write %s" % SpecScenario.MESS_GOLDEN_PATH)
+		quit(1)
+		return
+	var halls := {
+		"ironRations": SpecScenario.play_mess("ironRations"),
+		"gourmetFrenzy": SpecScenario.play_mess("gourmetFrenzy"),
+	}
+	mess.store_string(JSON.stringify(halls, "\t", true) + "\n")
+	mess.close()
+	print("wrote %s" % SpecScenario.MESS_GOLDEN_PATH)
 	quit()

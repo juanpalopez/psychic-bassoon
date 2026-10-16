@@ -83,6 +83,11 @@ static func step(game: GameState) -> void:
 		return
 	_apply_auras(game)
 	for guard in game.guards:
+		if guard.shield_timer > 0.0:
+			guard.shield_timer = maxf(0.0, guard.shield_timer - Game.TICK_SECONDS)
+			if guard.shield_timer <= RULES.TIMER_EPSILON:
+				guard.shield_timer = 0.0
+				guard.shield_hp = 0.0
 		if guard.wall_timer > 0.0:
 			guard.wall_timer = maxf(0.0, guard.wall_timer - Game.TICK_SECONDS)
 			if guard.wall_timer <= RULES.TIMER_EPSILON:
@@ -115,23 +120,58 @@ static func _apply_auras(game: GameState) -> void:
 	for guard in game.guards:
 		guard.speed_bonus = 0.0
 		guard.regen_bonus = 0.0
-		if tents.is_empty():
+		var toughness := 0.0
+		var rush := 0.0
+		if not tents.is_empty():
+			var held := _aura_bonuses(game, guard, tents)
+			toughness = held[0]
+			rush = held[1]
+		guard.speed_bonus += rush
+		_set_toughness(guard, toughness)
+
+
+## The strongest Mess Tent aura over a guard's post gives its speed and regeneration (set on the
+## guard) and returns the spec bonuses: `[Hardtack hp share, Sugar Rush attack speed share]`.
+static func _aura_bonuses(game: GameState, guard: Guard, tents: Array[Tower]) -> Array[float]:
+	var toughness := 0.0
+	var rush := 0.0
+	var at := game.routes[0].position_at(guard.post)
+	for tent in tents:
+		var def: Dictionary = TOWERS.DEFS[tent.type]
+		var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
+		var dx := at.x - centre.x
+		var dy := at.y - centre.y
+		var reach := TowerFire.reach_of(game, tent)
+		if dx * dx + dy * dy > reach * reach:
 			continue
-		var at := game.routes[0].position_at(guard.post)
-		for tent in tents:
-			var def: Dictionary = TOWERS.DEFS[tent.type]
-			var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
-			var dx := at.x - centre.x
-			var dy := at.y - centre.y
-			var reach := TowerFire.reach_of(game, tent)
-			if dx * dx + dy * dy > reach * reach:
-				continue
-			guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))
-			guard.regen_bonus = maxf(guard.regen_bonus, float(def.guard_regen_bonus[tent.level]))
+		guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))
+		guard.regen_bonus = maxf(guard.regen_bonus, float(def.guard_regen_bonus[tent.level]))
+		var passive := Specs.passive_of(tent)
+		match passive.get("kind", ""):
+			"hardtack":
+				toughness = maxf(toughness, float(passive.bonus))
+			"sugar_rush":
+				rush = maxf(rush, float(passive.bonus))
+	return [toughness, rush]
+
+
+## Hardtack Toughness: the guard's max hp follows the share; added hp comes with it, and when the
+## share goes the hp is clamped to the new max (never healed).
+static func _set_toughness(guard: Guard, share: float) -> void:
+	if share == guard.hp_bonus:
+		return
+	guard.hp_bonus = share
+	var max_hp := guard.base_max_hp * (1.0 + share)
+	var added := max_hp - guard.max_hp
+	guard.max_hp = max_hp
+	if added > 0.0 and guard.alive:
+		guard.hp += added
+	guard.hp = minf(guard.hp, guard.max_hp)
 
 
 static func _set_level(guard: Guard, def: Dictionary, level: int) -> void:
-	guard.max_hp = float(def.guard_hp[level])
+	guard.base_max_hp = float(def.guard_hp[level])
+	guard.max_hp = guard.base_max_hp * (1.0 + guard.hp_bonus)
 	guard.armor = int(def.guard_armor[level])
 	guard.damage = float(def.guard_damage[level])
 	guard.interval = float(def.guard_interval[level])
@@ -214,7 +254,7 @@ static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 			foe.attack_damage - Specs.guard_armor(guard, tent)
 		)
 		if not _blind_miss(foe):
-			guard.hp -= blow
+			guard.hp -= Specs.guard_absorb(guard, blow)
 			Specs.guard_hurt(game, tent, foe, blow)
 	# a guard at 0 hp falls even when its blow was answered by a reflection that killed the foe
 	if guard.hp <= 0.0:
