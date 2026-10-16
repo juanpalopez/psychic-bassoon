@@ -11,6 +11,7 @@ const GOLDEN_PATH := "res://tests/goldens/specs.json"
 const PRISM_GOLDEN_PATH := "res://tests/goldens/specs_prism.json"
 const MORTAR_GOLDEN_PATH := "res://tests/goldens/specs_mortar.json"
 const AVIARY_GOLDEN_PATH := "res://tests/goldens/specs_aviary.json"
+const GUARD_GOLDEN_PATH := "res://tests/goldens/specs_guard.json"
 const CHECKPOINT_EVERY := 30
 const TICKS := 180
 
@@ -97,6 +98,34 @@ static func play_tower(tower_type: String, spec: String, with_neighbour: bool = 
 	var out := []
 	Game.submit(game, Command.activate(scene.tower.id))
 	for tick in 240:
+		if tick % CHECKPOINT_EVERY == 0:
+			out.append(ReplayKit.checkpoint(game, events))
+		Game.tick(game)
+		events.fold(game)
+	out.append(ReplayKit.checkpoint(game, events))
+	return out
+
+
+## A Guard Tent at the top level with a spec ("cardboardKnights" or "scissorRogues"), a Golem and
+## Orcs walking up to its guards, the active used once, then play.
+static func play_guard(spec: String) -> Array:
+	var game := GuardKit.game_with_tent()
+	var tent := GuardKit.tent(game)
+	game.buttons = 10000
+	Game.submit(game, Command.upgrade(tent.id))
+	Game.submit(game, Command.upgrade(tent.id))
+	Game.tick(game)
+	Game.submit(game, Command.choose_spec(tent.id, spec))
+	Game.tick(game)
+	for step in 4:
+		var type := "cardboardGolem" if step == 2 else "corrugatedOrc"
+		var foe := GuardKit.foe_before_post(game, type, 0.2 + 0.5 * float(step))
+		foe.hp = 100000.0
+		foe.max_hp = 100000.0
+	var events := ReplayKit.EventDigest.new()
+	var out := []
+	Game.submit(game, Command.activate(tent.id))
+	for tick in 300:
 		if tick % CHECKPOINT_EVERY == 0:
 			out.append(ReplayKit.checkpoint(game, events))
 		Game.tick(game)

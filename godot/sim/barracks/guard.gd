@@ -26,3 +26,5 @@ var alive: bool = true
 var respawn_timer: float = 0.0
 ## The foe it holds (its id), or -1.
 var foe_id: int = -1
+## Seconds left of a Shield Wall: the guard's armor is multiplied while it runs.
+var wall_timer: float = 0.0

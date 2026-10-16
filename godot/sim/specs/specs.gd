@@ -54,6 +54,10 @@ static func activate(game: GameState, command: Command) -> void:
 			used = _flash_freeze(game, tower, active)
 		"ink_vortex":
 			used = _ink_vortex(game, tower, active)
+		"shield_wall":
+			used = _shield_wall(game, tower, active)
+		"precision_snipe":
+			used = _precision_snipe(game, tower, active)
 		"squadron":
 			used = _squadron(game, tower, active)
 		"confetti_burst":
@@ -151,6 +155,33 @@ static func recon_bonus(game: GameState, tower: Tower) -> float:
 static func adjacent(a: Vector2, b: Vector2, footprint: float, gap: float) -> bool:
 	var reach := footprint + gap
 	return absf(a.x - b.x) <= reach and absf(a.y - b.y) <= reach
+
+
+## A guard's armor: its own, multiplied while a Shield Wall of its tent runs.
+static func guard_armor(guard: Guard, tent: Tower) -> float:
+	var armor := float(guard.armor)
+	if guard.wall_timer > 0.0 and tent != null:
+		var spec := SPECS.find(tent.type, tent.spec)
+		if not spec.is_empty() and spec.active.kind == "shield_wall":
+			armor *= float(spec.active.armor_mult)
+	return armor
+
+
+## Corrugated Plating: a blow that landed on a guard comes back as true damage to the attacker.
+static func guard_hurt(game: GameState, tent: Tower, foe: Foe, blow: float) -> void:
+	var passive := passive_of(tent) if tent != null else {}
+	if passive.get("kind", "") == "plating":
+		Damage.apply(game, foe, blow * float(passive.share), Damage.Kind.TRUE)
+
+
+## Paper Cuts: a foe a guard struck is slowed a step more, up to a few steps, for a while.
+static func guard_struck(_game: GameState, tent: Tower, foe: Foe) -> void:
+	var passive := passive_of(tent) if tent != null else {}
+	if passive.get("kind", "") != "paper_cuts" or not foe.alive:
+		return
+	foe.cut_stacks = mini(foe.cut_stacks + 1, int(passive.max_stacks))
+	foe.cut_slow = float(passive.slow)
+	foe.cut_timer = float(passive.seconds)
 
 
 ## Corrosive Light: a beam that burns a foe strips a share of its armor each second, up to a cap.
@@ -313,5 +344,54 @@ static func _squadron(game: GameState, tower: Tower, active: Dictionary) -> bool
 	event.x = centre.x
 	event.y = centre.y
 	event.splash = TowerFire.reach_of(game, tower)
+	game.events.append(event)
+	return true
+
+
+## Shield Wall: the tent's guards double their armor for a while. Returns false when none stands.
+static func _shield_wall(game: GameState, tent: Tower, active: Dictionary) -> bool:
+	var any := false
+	for guard in game.guards:
+		if guard.tent_id == tent.id and guard.alive:
+			any = true
+	if not any:
+		return false
+	for guard in game.guards:
+		if guard.tent_id == tent.id:
+			guard.wall_timer = float(active.seconds)
+	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tent.id
+	event.x = centre.x
+	event.y = centre.y
+	event.splash = TowerFire.reach_of(game, tent)
+	game.events.append(event)
+	return true
+
+
+## Precision Snipe: a guard leaps at the ground foe with the most hp in the tent's reach (the
+## first to spawn on a tie) for true damage. Returns false without a guard on its feet or a foe.
+static func _precision_snipe(game: GameState, tent: Tower, active: Dictionary) -> bool:
+	var any := false
+	for guard in game.guards:
+		if guard.tent_id == tent.id and guard.alive:
+			any = true
+	if not any:
+		return false
+	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
+	var best: Foe = null
+	for foe in TowerFire.foes_within(game, centre.x, centre.y, TowerFire.reach_of(game, tent)):
+		if foe.flying:
+			continue
+		if best == null or foe.hp > best.hp:
+			best = foe
+	if best == null:
+		return false
+	Damage.apply(game, best, float(active.damage), Damage.Kind.TRUE)
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tent.id
+	event.foe_id = best.id
+	event.x = best.x
+	event.y = best.y
 	game.events.append(event)
 	return true

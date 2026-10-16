@@ -53,6 +53,8 @@ static func _move_foes(game: GameState) -> void:
 		var walk := foe.speed * (1.0 + foe.speed_buff)
 		if slowed:
 			walk *= 1.0 - foe.slow
+		if foe.cut_stacks > 0:
+			walk *= 1.0 - foe.cut_slow * float(foe.cut_stacks)
 		# a held or frozen foe does not walk, but a slow on it keeps running out
 		if not held and not frozen:
 			foe.distance += walk * Game.TICK_SECONDS
@@ -62,6 +64,12 @@ static func _move_foes(game: GameState) -> void:
 			if foe.slow_timer <= RULES.TIMER_EPSILON:
 				foe.slow = 0.0
 				foe.slow_timer = 0.0
+		if foe.cut_timer > RULES.TIMER_EPSILON:
+			foe.cut_timer -= Game.TICK_SECONDS
+			if foe.cut_timer <= RULES.TIMER_EPSILON:
+				foe.cut_stacks = 0
+				foe.cut_slow = 0.0
+				foe.cut_timer = 0.0
 		if frozen:
 			foe.freeze_timer -= Game.TICK_SECONDS
 			if foe.freeze_timer <= RULES.TIMER_EPSILON:

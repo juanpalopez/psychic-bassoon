@@ -47,4 +47,16 @@ func _init() -> void:
 	aviary.store_string(JSON.stringify(SpecScenario.play_aviary(), "\t", true) + "\n")
 	aviary.close()
 	print("wrote %s" % SpecScenario.AVIARY_GOLDEN_PATH)
+	var guard := FileAccess.open(SpecScenario.GUARD_GOLDEN_PATH, FileAccess.WRITE)
+	if guard == null:
+		push_error("cannot write %s" % SpecScenario.GUARD_GOLDEN_PATH)
+		quit(1)
+		return
+	var tents := {
+		"cardboardKnights": SpecScenario.play_guard("cardboardKnights"),
+		"scissorRogues": SpecScenario.play_guard("scissorRogues"),
+	}
+	guard.store_string(JSON.stringify(tents, "\t", true) + "\n")
+	guard.close()
+	print("wrote %s" % SpecScenario.GUARD_GOLDEN_PATH)
 	quit()

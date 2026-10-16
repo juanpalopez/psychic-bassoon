@@ -30,6 +30,13 @@
 ## `splash` blast) on a different foe, the one furthest along the road first (a support foe is
 ## not preferred), flyers included.
 ##
+## Cardboard Knights (Guard Tent, Spec A): Corrugated Plating throws back `share` of every blow that
+## lands on a guard as true damage to the attacker; Shield Wall multiplies the armor of the tent's
+## guards by `armor_mult` for `seconds` (the GDD's knockback immunity does nothing: foes have no
+## knockback). Scissor Rogues (Spec B): Paper Cuts slows a foe a guard hits by `slow` (a share) per
+## hit, up to `max_stacks`, and the cuts wear off `seconds` after the last hit; Precision Snipe
+## strikes the ground foe with the most hp in the tent's reach for `damage` true damage.
+##
 ## Glitter Cannon (Thimble Mortar, Spec A): Shrapnel Spread adds `bonus` (a share) to the blast
 ## radius; Confetti Burst fires a shell at the target that does `damage` to every foe within
 ## `radius` cells and blinds them for `seconds`: a blinded foe misses `blind` (a share) of its
@@ -75,6 +82,39 @@ const DEFS := {
 				"planes": 3,
 				"damage": 18.0,
 				"splash": 0.6,
+			},
+		},
+	],
+	"guardTent":
+	[
+		{
+			"id": "cardboardKnights",
+			"name": "Cardboard Knights",
+			"cost": 150,
+			"card": "Armored guards that throw part of every blow back at the attacker.",
+			"passive": {"kind": "plating", "share": 0.15},
+			"active":
+			{
+				"kind": "shield_wall",
+				"name": "Shield Wall",
+				"cooldown": 30.0,
+				"seconds": 8.0,
+				"armor_mult": 2.0
+			},
+		},
+		{
+			"id": "scissorRogues",
+			"name": "Scissor Rogues",
+			"cost": 150,
+			"card":
+			"Quick blades that slow whoever they cut, and a leap that finishes the toughest foe.",
+			"passive": {"kind": "paper_cuts", "slow": 0.1, "max_stacks": 3, "seconds": 4.0},
+			"active":
+			{
+				"kind": "precision_snipe",
+				"name": "Precision Snipe",
+				"cooldown": 20.0,
+				"damage": 200.0
 			},
 		},
 	],
