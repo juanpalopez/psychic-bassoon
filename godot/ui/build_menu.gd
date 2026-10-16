@@ -12,6 +12,8 @@ signal info_cleared
 
 const TOWERS := preload("res://content/towers.gd")
 const BUTTON_SIZE := Vector2(120.0, 176.0)
+## The compact tokens (icon and cost only) used where the full menu fits nowhere near a socket.
+const COMPACT_SIZE := Vector2(104.0, 124.0)
 ## One token picture per tower id.
 const ICONS := {
 	"spoolGuard": preload("res://assets/icons/tower_spool_guard.svg"),
@@ -31,17 +33,24 @@ const HOLD_SECONDS := 0.4
 
 ## The plot the menu was opened for.
 var cell := BoardSpace.NO_CELL
+## True while the tokens show only icon and cost (the names are in the tooltip and the card).
+var compact := false
 
 var _tower_buttons: Array[Button] = []
 var _buttons := 0
 var _hold_timer: Timer
 var _held_id := ""
 var _hold_fired := false
+# the socket the menu was last placed by, to place it again when its size settles
+var _socket := Rect2()
+var _port := Vector2.ZERO
 
 
 func _ready() -> void:
 	visible = false
 	theme_type_variation = &"Kraft"
+	# wrapped names settle their height a layout pass later: place the menu again then
+	resized.connect(_settle)
 	var box := HBoxContainer.new()
 	add_child(box)
 	_hold_timer = Timer.new()
@@ -83,16 +92,63 @@ func open_for(plot: Vector2i, buttons: int) -> void:
 
 
 ## Moves the menu next to a socket drawn at `socket` (its rectangle on screen) in a
-## screen of `port` size.
+## screen of `port` size: the full menu where it fits, else the compact one, and as a last
+## resort (a socket that fills the middle of the screen) the side that crowds the corner
+## rows least, but never over the socket.
 func place_near(socket: Rect2, port: Vector2) -> void:
-	reset_size()
+	_socket = socket
+	_port = port
+	for small in [false, true]:
+		set_compact(small)
+		reset_size()
+		var at: Variant = fitting_place(socket, size, port)
+		if at != null:
+			position = at
+			return
 	position = placement(socket, size, port)
 
 
-## Where a menu of `menu_size` goes for a socket drawn at `socket`: centred above it when
-## that leaves the corner controls clear, else below it, else (a socket in the middle band)
-## beside it; always inside the screen between the top and bottom rows of controls.
+func _settle() -> void:
+	if _port == Vector2.ZERO:
+		return
+	var at: Variant = fitting_place(_socket, size, _port)
+	position = at if at != null else placement(_socket, size, _port)
+
+
+## Shows the tokens with or without their names.
+func set_compact(on: bool) -> void:
+	compact = on
+	for i in _tower_buttons.size():
+		var def: Dictionary = TOWERS.DEFS[TOWERS.TOWER_IDS[i]]
+		var button := _tower_buttons[i]
+		button.text = str(def.cost[0]) if on else "%s\n%d" % [def.name, def.cost[0]]
+		button.custom_minimum_size = COMPACT_SIZE if on else BUTTON_SIZE
+
+
+## Where a menu of `menu_size` goes for a socket drawn at `socket`, or the first spot that
+## fits: always on screen between the rows of corner controls.
 static func placement(socket: Rect2, menu_size: Vector2, port: Vector2) -> Vector2:
+	var at: Variant = fitting_place(socket, menu_size, port)
+	if at != null:
+		return at
+	# nothing fits between the rows: the side (above or below) that crowds them least
+	var centred := socket.get_center().x - menu_size.x / 2.0
+	centred = clampf(centred, EDGE_MARGIN, maxf(EDGE_MARGIN, port.x - EDGE_MARGIN - menu_size.x))
+	var above := socket.position.y - SOCKET_GAP - menu_size.y
+	var below := socket.end.y + SOCKET_GAP
+	var lowest := port.y - BOTTOM_RESERVE - menu_size.y
+	var y := above if TOP_RESERVE - above <= below - lowest else below
+	return Vector2(
+		centred, clampf(y, EDGE_MARGIN, maxf(EDGE_MARGIN, port.y - EDGE_MARGIN - menu_size.y))
+	)
+
+
+## A spot next to the socket that keeps the menu between the rows of corner controls and off
+## the socket: centred above it, else below it, else beside it (right, then left); null when
+## none fits.
+static func fitting_place(socket: Rect2, menu_size: Vector2, port: Vector2) -> Variant:
+	if menu_size.y > port.y - BOTTOM_RESERVE - TOP_RESERVE:
+		return null
 	var centred := socket.get_center().x - menu_size.x / 2.0
 	centred = clampf(centred, EDGE_MARGIN, maxf(EDGE_MARGIN, port.x - EDGE_MARGIN - menu_size.x))
 	var lowest := maxf(TOP_RESERVE, port.y - BOTTOM_RESERVE - menu_size.y)
@@ -110,8 +166,7 @@ static func placement(socket: Rect2, menu_size: Vector2, port: Vector2) -> Vecto
 	var left := socket.position.x - SOCKET_GAP - menu_size.x
 	if left >= EDGE_MARGIN:
 		return Vector2(left, level)
-	# a screen too small for any of these: below, pushed up as far as the rows allow
-	return Vector2(centred, clampf(below, TOP_RESERVE, lowest))
+	return null
 
 
 func close() -> void:

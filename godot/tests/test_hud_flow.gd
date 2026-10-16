@@ -224,9 +224,16 @@ func test_the_tower_panel_is_a_low_strip_not_a_block_over_the_map() -> void:
 		assert_gte(rect.end.y, float(size.y) - 40.0, "TowerPanel sits along the bottom")
 
 
-## Tapping each socket opens the build menu beside it, clear of the corner controls.
+## Tapping each socket opens the build menu beside it, clear of the corner controls, on 40
+## maps at the base size and a few on a phone.
 func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() -> void:
-	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
+	var cases := []
+	for map_seed in range(1, 41):
+		cases.append([Vector2i(1280, 720), map_seed])
+	for map_seed in [1, 2, 3, 5, 8]:
+		cases.append([Vector2i(1558, 720), map_seed])
+	for case in cases:
+		var size: Vector2i = case[0]
 		var port := SubViewport.new()
 		port.size = size
 		add_child_autofree(port)
@@ -234,6 +241,7 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 		port.add_child(main)
 		main.set_process(false)
 		await get_tree().process_frame
+		main._start(case[1])
 		var hud := main.get_node("Hud")
 		var menu := hud.get_node("BuildMenu") as BuildMenu
 		var menu_button := hud.get_node("MenuButton") as Button
@@ -249,12 +257,18 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 			for other in ["TopBar", "SpeedBar", "MenuButton", "LaunchWave", "AutoWave"]:
 				var other_rect := (hud.get_node(other) as Control).get_global_rect()
 				assert_false(
-					rect.intersects(other_rect), "menu for %s over %s at %s" % [anchor, other, size]
+					rect.intersects(other_rect),
+					"menu for %s over %s on seed %d at %s" % [anchor, other, case[1], size]
 				)
 			var socket: Rect2 = main._socket_on_screen(anchor)
-			assert_false(rect.intersects(socket), "the menu covers the socket %s" % anchor)
+			assert_false(
+				rect.intersects(socket),
+				"the menu covers the socket %s on seed %d at %s" % [anchor, case[1], size]
+			)
 			var gap := maxf(rect.position.y - socket.end.y, socket.position.y - rect.end.y)
-			assert_lte(gap, 2.0 * BuildMenu.SOCKET_GAP + 1.0, "next to %s" % anchor)
+			# a socket under the top row has its menu just below that row
+			var most := maxf(2.0 * BuildMenu.SOCKET_GAP, BuildMenu.TOP_RESERVE - socket.end.y)
+			assert_lte(gap, most + 1.0, "next to %s" % anchor)
 
 
 func test_the_menu_button_shows_next_seed_and_sound() -> void:
@@ -307,8 +321,23 @@ func test_auto_start_holds_while_paused() -> void:
 	var launch := main.get_node("Hud/LaunchWave") as Button
 	assert_string_contains(launch.text, "Wave 2 in 3", "the countdown held")
 	(main.get_node("Hud/SpeedBar") as SpeedBar).buttons()[0].pressed.emit()
-	main._process(0.05)
-	assert_string_contains(launch.text, "Wave 2 in 3", "and goes on from where it was")
+	for frame in 70:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "unpaused, the countdown runs out")
+
+
+func test_a_tap_during_the_countdown_launches_the_wave_once() -> void:
+	var main := await _main()
+	main._start(main.game().seed)
+	main.game().wave = 1
+	(main.get_node("Hud/AutoWave") as Button).button_pressed = true
+	for frame in 30:
+		main._process(0.05)
+	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
+	for frame in 80:
+		main._process(0.05)
+	assert_eq(main.game().wave, 2, "one wave, not two")
+	assert_false((main.get_node("Hud/Message") as Label).visible, "no refused second launch")
 
 
 func test_a_long_frame_counts_no_more_game_time_than_the_clock_runs() -> void:
