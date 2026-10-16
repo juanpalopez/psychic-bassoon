@@ -83,6 +83,10 @@ static func snapshot(game: GameState) -> Dictionary:
 				guard.alive,
 				guard.respawn_timer,
 				guard.foe_id,
+				guard.base_max_hp,
+				guard.hp_bonus,
+				guard.shield_hp,
+				guard.shield_timer,
 				guard.wall_timer
 			]
 		)

@@ -28,3 +28,9 @@ var respawn_timer: float = 0.0
 var foe_id: int = -1
 ## Seconds left of a Shield Wall: the guard's armor is multiplied while it runs.
 var wall_timer: float = 0.0
+## The hp of the level before any Hardtack bonus, the share the aura adds now, and a Fortified
+## Feast shield (hp it soaks) with the seconds it has left.
+var base_max_hp: float = 0.0
+var hp_bonus: float = 0.0
+var shield_hp: float = 0.0
+var shield_timer: float = 0.0

@@ -37,6 +37,14 @@
 ## hit, up to `max_stacks`, and the cuts wear off `seconds` after the last hit; Precision Snipe
 ## strikes the ground foe with the most hp in the tent's reach for `damage` true damage.
 ##
+## Iron Rations (Kitchen Mess Tent, Spec A): Hardtack Toughness adds `bonus` (a share) to the max hp
+## of the guards inside the tent's aura (the added hp comes with it; when the bonus goes the hp is
+## clamped, never healed; auras do not add up); Fortified Feast gives each of those guards a
+## `shield` that soaks blows before hp for `seconds`. Gourmet Frenzy (Spec B): Sugar Rush adds
+## `bonus` to the attack speed of guards in the aura (no hero is built yet, and guards do not
+## walk); Boiling Broth Splash splashes the ground target and every ground foe within `radius`
+## cells with `damage` magic damage and a `slow` for `seconds`.
+##
 ## Glitter Cannon (Thimble Mortar, Spec A): Shrapnel Spread adds `bonus` (a share) to the blast
 ## radius; Confetti Burst fires a shell at the target that does `damage` to every foe within
 ## `radius` cells and blinds them for `seconds`: a blinded foe misses `blind` (a share) of its
@@ -82,6 +90,41 @@ const DEFS := {
 				"planes": 3,
 				"damage": 18.0,
 				"splash": 0.6,
+			},
+		},
+	],
+	"messTent":
+	[
+		{
+			"id": "ironRations",
+			"name": "Iron Rations",
+			"cost": 150,
+			"card": "Hardtack for the guards and a feast that wraps them in a shield.",
+			"passive": {"kind": "hardtack", "bonus": 0.3},
+			"active":
+			{
+				"kind": "fortified_feast",
+				"name": "Fortified Feast",
+				"cooldown": 30.0,
+				"seconds": 10.0,
+				"shield": 120.0
+			},
+		},
+		{
+			"id": "gourmetFrenzy",
+			"name": "Gourmet Frenzy",
+			"cost": 150,
+			"card": "A sugar rush for the guards and a splash of scalding stew on the road.",
+			"passive": {"kind": "sugar_rush", "bonus": 0.25},
+			"active":
+			{
+				"kind": "boiling_broth",
+				"name": "Boiling Broth Splash",
+				"cooldown": 22.0,
+				"radius": 1.5,
+				"damage": 45.0,
+				"slow": 0.4,
+				"seconds": 5.0,
 			},
 		},
 	],
