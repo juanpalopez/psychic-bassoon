@@ -304,3 +304,24 @@ func test_the_guard_scenarios_match_their_golden() -> void:
 	# JSON turns whole numbers into floats, so compare after the same round trip
 	var round_trip = JSON.parse_string(JSON.stringify(played, "\t", true))
 	assert_eq(round_trip, JSON.parse_string(file.get_as_text()))
+
+
+func test_a_guard_that_rises_mid_wall_keeps_the_rest_of_it() -> void:
+	var game := _game_with(KNIGHTS)
+	var fallen: Guard = game.guards[0]
+	fallen.alive = false
+	fallen.respawn_timer = 1.0
+	Game.submit(game, Command.activate(GuardKit.tent(game).id))
+	Game.tick(game)
+	assert_gt(fallen.wall_timer, 0.0, "the wall is set on the whole company, fallen or not")
+	GuardKit.tick(game, 45)
+	assert_true(fallen.alive, "it rose")
+	assert_gt(fallen.wall_timer, 0.0, "and still has the rest of the wall")
+
+
+func test_a_dead_foe_is_not_cut() -> void:
+	var game := _game_with(ROGUES)
+	var foe := Foe.new()
+	foe.alive = false
+	Specs.guard_struck(game, GuardKit.tent(game), foe)
+	assert_eq(foe.cut_stacks, 0)
