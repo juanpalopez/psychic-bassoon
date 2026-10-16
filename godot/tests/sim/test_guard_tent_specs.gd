@@ -197,3 +197,110 @@ func test_the_same_commands_give_the_same_game_for_both_guard_specs() -> void:
 			GuardKit.tick(game, 400)
 			snapshots.append(GameTestKit.snapshot(game))
 		assert_eq(snapshots[0], snapshots[1], spec)
+
+
+func test_a_guard_that_the_blow_drops_to_zero_falls_even_if_the_reflection_kills_the_foe() -> void:
+	var game := _game_with(KNIGHTS)
+	var held := _held(game)
+	var foe: Foe = held[0]
+	var guard: Guard = held[1]
+	guard.hp = 0.5
+	foe.hp = 0.01
+	foe.max_hp = 0.01
+	foe.attack_cooldown = 0.0
+	guard.cooldown = 1000.0
+	GuardKit.tick(game, 1)
+	assert_false(foe.alive, "the reflection killed it")
+	assert_false(guard.alive, "and the guard still fell")
+	assert_eq(guard.hp, 0.0)
+	assert_eq(GuardKit.events_of(game, GameEvent.Kind.GUARD_FELL).size(), 1)
+	assert_gt(guard.respawn_timer, 0.0)
+
+
+func test_precision_snipe_prefers_the_first_to_spawn_on_a_tie_and_skips_a_foe_out_of_reach(
+) -> void:
+	var game := _game_with(ROGUES)
+	var first := GuardKit.foe_before_post(game, "cardboardGolem", 0.3)
+	var second := GuardKit.foe_before_post(game, "cardboardGolem", 0.3)
+	for guard in game.guards:
+		guard.cooldown = 1000.0
+	var tent := GuardKit.tent(game)
+	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
+	var distant := GuardKit.foe_before_post(game, "cardboardGolem", 0.3)
+	distant.hp = first.hp + 100.0
+	distant.x = centre.x + 90.0
+	distant.y = centre.y
+	var active: Dictionary = SPECS.find("guardTent", ROGUES).active
+	var before := first.hp
+	Game.submit(game, Command.activate(tent.id))
+	Game.tick(game)
+	assert_almost_eq(before - first.hp, float(active.damage), 1e-6, "the first to spawn")
+	assert_eq(second.hp, before)
+	assert_gt(distant.hp, before, "out of reach, so never chosen")
+
+
+func test_the_wall_is_over_when_its_seconds_are_up_and_the_next_blow_has_normal_armor() -> void:
+	var game := _game_with(KNIGHTS)
+	var active: Dictionary = SPECS.find("guardTent", KNIGHTS).active
+	var held := _held(game)
+	var foe: Foe = held[0]
+	var guard: Guard = held[1]
+	foe.attack_cooldown = 1000.0
+	guard.cooldown = 1000.0
+	Game.submit(game, Command.activate(GuardKit.tent(game).id))
+	GuardKit.tick(game, int(float(active.seconds) * 30.0) + 2)
+	assert_eq(guard.wall_timer, 0.0)
+	var before := guard.hp
+	foe.attack_cooldown = 0.0
+	GuardKit.tick(game, 1)
+	var normal := foe.attack_damage - float(guard.armor)
+	assert_almost_eq(before - guard.hp, normal, 1e-6)
+
+
+func test_paper_cuts_wear_off_four_seconds_after_the_last_hit_not_the_first() -> void:
+	var game := _game_with(ROGUES)
+	var passive: Dictionary = SPECS.find("guardTent", ROGUES).passive
+	var held := _held(game)
+	var foe: Foe = held[0]
+	var guard: Guard = held[1]
+	foe.attack_cooldown = 1000.0
+	guard.interval = 1000.0  # it strikes only when this test says so
+	guard.cooldown = 0.0
+	GuardKit.tick(game, 1)
+	GuardKit.tick(game, 60)
+	guard.cooldown = 0.0
+	GuardKit.tick(game, 1)
+	GuardKit.tick(game, int((float(passive.seconds) - 1.0) * 30.0))
+	assert_gt(foe.cut_stacks, 0, "the second hit renewed the cuts")
+	guard.cooldown = 1000.0
+	GuardKit.tick(game, 60)
+	assert_eq(foe.cut_stacks, 0)
+
+
+func test_cuts_combine_with_a_slow_and_never_reverse_a_foe() -> void:
+	var passive: Dictionary = SPECS.find("guardTent", ROGUES).passive
+	assert_lt(float(passive.slow) * float(passive.max_stacks), 1.0)
+	var game := _game_with(ROGUES)
+	var foe := GuardKit.foe_before_post(game, "corrugatedOrc", 3.0)
+	foe.hp = 1.0e9
+	foe.max_hp = 1.0e9
+	foe.cut_stacks = 3
+	foe.cut_slow = float(passive.slow)
+	foe.cut_timer = 100.0
+	Status.apply_slow(foe, 0.5, 100.0)
+	var before := foe.distance
+	GuardKit.tick(game, 1)
+	var pace := foe.speed * (1.0 - 0.5) * (1.0 - float(passive.slow) * 3.0)
+	assert_almost_eq(foe.distance - before, pace * Game.TICK_SECONDS, 1e-9)
+
+
+func test_the_guard_scenarios_match_their_golden() -> void:
+	var file := FileAccess.open(SpecScenario.GUARD_GOLDEN_PATH, FileAccess.READ)
+	assert_not_null(file, "run tools/write_specs_golden.gd")
+	var played := {
+		"cardboardKnights": SpecScenario.play_guard("cardboardKnights"),
+		"scissorRogues": SpecScenario.play_guard("scissorRogues"),
+	}
+	# JSON turns whole numbers into floats, so compare after the same round trip
+	var round_trip = JSON.parse_string(JSON.stringify(played, "\t", true))
+	assert_eq(round_trip, JSON.parse_string(file.get_as_text()))

@@ -41,7 +41,7 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - Shield Wall doubles the armor of the tent's guards for 8 s; the GDD's knockback immunity does nothing because foes have no knockback.
 - Corrugated Plating throws back 15 percent of each blow that lands (after armor) as true damage to the attacker; a missed blow (blind) reflects nothing.
 - Precision Snipe is 200 true damage on the ground foe with the most hp in the tent's reach; it needs a guard on its feet.
-- Paper Cuts: each guard hit takes 10 percent of the foe's pace, three stacks at most, wearing off 4 s after the last hit. A held foe does not walk, so the cut matters once it is freed.
+- Paper Cuts: each guard hit takes 10 percent of the foe's pace, three stacks at most, wearing off 4 s after the last hit. The cut timer keeps running while a foe is held, so only the last 4 s of cuts survive a long hold, and the wall also reaches a guard that rises mid-wall.
 
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
