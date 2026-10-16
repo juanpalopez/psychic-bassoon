@@ -64,3 +64,8 @@ var heavy: bool = false
 var blind: float = 0.0
 var blind_timer: float = 0.0
 var miss_tally: float = 0.0
+## Paper Cuts: stacks of a speed cut (each takes `cut_slow` of the pace) and the seconds until they
+## wear off.
+var cut_stacks: int = 0
+var cut_slow: float = 0.0
+var cut_timer: float = 0.0

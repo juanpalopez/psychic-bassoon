@@ -37,6 +37,12 @@ The GDD gives each tower two specialisations with a passive and an active. Eight
 - High Recon: "adjacent" means the block of the other tower lies within 1 cell of the Aviary's block (centres within the footprint plus 1 on both axes); the strongest bonus applies; the Aviary's own reach is not widened. The range ring in the UI does not show the bonus yet (tracked with #286).
 - Squadron Launch: the planes patrol the Aviary's reach for 10 s; each second each of the 3 planes bombs a different foe (the one furthest along its road first, flyers included) for 18 physical damage in a 0.6-cell blast, with Frostbite.
 
+## Readings chosen for the Guard Tent pair (owner may overrule)
+- Shield Wall doubles the armor of the tent's guards for 8 s; the GDD's knockback immunity does nothing because foes have no knockback.
+- Corrugated Plating throws back 15 percent of each blow that lands (after armor) as true damage to the attacker; a missed blow (blind) reflects nothing.
+- Precision Snipe is 200 true damage on the ground foe with the most hp in the tent's reach; it needs a guard on its feet.
+- Paper Cuts: each guard hit takes 10 percent of the foe's pace, three stacks at most, wearing off 4 s after the last hit. A held foe does not walk, so the cut matters once it is freed.
+
 ## Consequences
 - Open readings for the owner (the GDD is vague): "aligned" is within a width of the line from the tower through its target; Frostbite's scope (inside the spire's reach or board wide); heroes in Sugar Rush; burning pools.
 - The Haiku sweep agent will need spec profiles in the bot and a way to run one profile across seeds (PR 7).

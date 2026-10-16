@@ -83,6 +83,10 @@ static func step(game: GameState) -> void:
 		return
 	_apply_auras(game)
 	for guard in game.guards:
+		if guard.wall_timer > 0.0:
+			guard.wall_timer = maxf(0.0, guard.wall_timer - Game.TICK_SECONDS)
+			if guard.wall_timer <= RULES.TIMER_EPSILON:
+				guard.wall_timer = 0.0
 		var tent := _tent_of(game, guard)
 		var def: Dictionary = TOWERS.DEFS[tent.type]
 		if not guard.alive:
@@ -198,16 +202,19 @@ static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 	if guard.cooldown <= RULES.TIMER_EPSILON:
 		guard.cooldown += guard.interval / (1.0 + guard.speed_bonus)
 		Damage.apply(game, foe, guard.damage, Damage.Kind.PHYSICAL)
+		Specs.guard_struck(game, _tent_of(game, guard), foe)
 	# a frozen foe does not strike, and its next blow waits for the ice to go
 	if foe.freeze_timer <= RULES.TIMER_EPSILON:
 		foe.attack_cooldown -= Game.TICK_SECONDS
 	if foe.attack_cooldown <= RULES.TIMER_EPSILON and foe.alive:
 		foe.attack_cooldown += foe.attack_interval
 		var blow := maxf(
-			foe.attack_damage * RULES.MIN_DAMAGE_FRACTION, foe.attack_damage - float(guard.armor)
+			foe.attack_damage * RULES.MIN_DAMAGE_FRACTION,
+			foe.attack_damage - Specs.guard_armor(guard, _tent_of(game, guard))
 		)
 		if not _blind_miss(foe):
 			guard.hp -= blow
+			Specs.guard_hurt(game, _tent_of(game, guard), foe, blow)
 	if not foe.alive:
 		_free(foe, guard)
 	elif guard.hp <= 0.0:
