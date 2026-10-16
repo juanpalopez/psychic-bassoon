@@ -54,6 +54,10 @@ static func activate(game: GameState, command: Command) -> void:
 			used = _flash_freeze(game, tower, active)
 		"ink_vortex":
 			used = _ink_vortex(game, tower, active)
+		"confetti_burst":
+			used = _confetti_burst(game, tower, active)
+		"pva_deluge":
+			used = _pva_deluge(game, tower, active)
 	if not used:
 		return Game.reject(game, command, GameEvent.RejectReason.NO_TARGET)
 	tower.ability_cooldown = float(active.cooldown)
@@ -97,6 +101,20 @@ static func frostbite_bonus(game: GameState, foe: Foe) -> float:
 		if dx * dx + dy * dy <= reach * reach:
 			best = float(passive.bonus)
 	return best
+
+
+## Shrapnel Spread: the share added to a shell's blast radius (0 without the passive).
+static func splash_bonus(tower: Tower) -> float:
+	var passive := passive_of(tower)
+	return float(passive.bonus) if passive.get("kind", "") == "splash_bonus" else 0.0
+
+
+## Lingering Residue: a shell of this tower leaves a pool where it lands, as wide as the blast.
+static func leave_residue(game: GameState, tower: Tower, at: Foe, radius: float) -> void:
+	var passive := passive_of(tower)
+	if passive.get("kind", "") != "residue":
+		return
+	Zones.open_pool(game, tower, at, radius, float(passive.slow), float(passive.seconds))
 
 
 ## The share added to a tower's damage of this kind against this foe (Frostbite hits physical only).
@@ -208,3 +226,44 @@ static func _ink_vortex(game: GameState, tower: Tower, active: Dictionary) -> bo
 	event.splash = float(active.radius)
 	game.events.append(event)
 	return true
+
+
+## Confetti Burst: a shell at the target that hurts and blinds every foe in its blast.
+static func _confetti_burst(game: GameState, tower: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, tower)
+	if target == null:
+		return false
+	var def: Dictionary = TOWERS.DEFS[tower.type]
+	var kind := Damage.kind_named(def.damage_type)
+	var ignore := armor_ignore(tower)
+	for foe in TowerFire.foes_within(game, target.x, target.y, float(active.radius)):
+		if not TowerFire.can_hit(def, foe):
+			continue
+		Damage.apply(game, foe, float(active.damage), kind, ignore, damage_bonus(game, foe, kind))
+		if foe.alive:
+			Status.apply_blind(foe, float(active.blind), float(active.seconds))
+	_announce(game, tower, target, float(active.radius))
+	return true
+
+
+## PVA Deluge: every foe in the area around the target is slowed hard for a while.
+static func _pva_deluge(game: GameState, tower: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, tower)
+	if target == null:
+		return false
+	var def: Dictionary = TOWERS.DEFS[tower.type]
+	for foe in TowerFire.foes_within(game, target.x, target.y, float(active.radius)):
+		if TowerFire.can_hit(def, foe):
+			Status.apply_slow(foe, float(active.slow), float(active.seconds))
+	_announce(game, tower, target, float(active.radius))
+	return true
+
+
+static func _announce(game: GameState, tower: Tower, target: Foe, radius: float) -> void:
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tower.id
+	event.foe_id = target.id
+	event.x = target.x
+	event.y = target.y
+	event.splash = radius
+	game.events.append(event)

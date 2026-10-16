@@ -15,5 +15,7 @@ var distance: float = 0.0
 var radius: float = 0.0
 ## Cells a second a foe is pulled along its road.
 var pull: float = 0.0
+## Share of speed a pool takes from the ground foes inside it.
+var slow: float = 0.0
 ## Seconds left.
 var timer: float = 0.0

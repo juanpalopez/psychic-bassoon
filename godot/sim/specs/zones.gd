@@ -26,12 +26,38 @@ static func open_vortex(
 	zone.pull = pull
 	zone.timer = seconds
 	game.zones.append(zone)
-	var event := GameEvent.of(GameEvent.Kind.ZONE_OPENED)
-	event.tower_id = tower.id
+	game.events.append(_announce(GameEvent.Kind.ZONE_OPENED, zone))
+
+
+## Opens a pool where a shell landed: ground foes inside it are slowed while it lasts.
+static func open_pool(
+	game: GameState, tower: Tower, at: Foe, radius: float, slow: float, seconds: float
+) -> void:
+	var zone := Zone.new()
+	zone.id = game.next_id
+	game.next_id += 1
+	zone.kind = "pool"
+	zone.tower_id = tower.id
+	zone.x = at.x
+	zone.y = at.y
+	zone.route = at.route
+	zone.distance = at.distance
+	zone.radius = radius
+	zone.slow = slow
+	zone.timer = seconds
+	game.zones.append(zone)
+	game.events.append(_announce(GameEvent.Kind.ZONE_OPENED, zone))
+
+
+static func _announce(kind: GameEvent.Kind, zone: Zone) -> GameEvent:
+	var event := GameEvent.of(kind)
+	event.tower_id = zone.tower_id
+	event.zone_id = zone.id
+	event.zone_kind = zone.kind
 	event.x = zone.x
 	event.y = zone.y
-	event.splash = radius
-	game.events.append(event)
+	event.splash = zone.radius
+	return event
 
 
 static func step(game: GameState) -> void:
@@ -39,14 +65,13 @@ static func step(game: GameState) -> void:
 		return
 	var open: Array[Zone] = []
 	for zone in game.zones:
-		_pull(game, zone)
+		if zone.kind == "pool":
+			_soak(game, zone)
+		else:
+			_pull(game, zone)
 		zone.timer -= Game.TICK_SECONDS
 		if zone.timer <= RULES.TIMER_EPSILON:
-			var event := GameEvent.of(GameEvent.Kind.ZONE_CLOSED)
-			event.tower_id = zone.tower_id
-			event.x = zone.x
-			event.y = zone.y
-			game.events.append(event)
+			game.events.append(_announce(GameEvent.Kind.ZONE_CLOSED, zone))
 		else:
 			open.append(zone)
 	game.zones = open
@@ -67,3 +92,19 @@ static func _pull(game: GameState, zone: Zone) -> void:
 			continue
 		var gap := zone.distance - along
 		foe.distance += clampf(gap, -step_length, step_length)
+
+
+## A pool slows each ground foe inside it; the slow is short (`POOL_REFRESH_SECONDS`) and
+## renewed each tick, so it lingers about that long after the foe leaves or the pool closes.
+static func _soak(game: GameState, zone: Zone) -> void:
+	var limit := zone.radius * zone.radius
+	for foe in game.foes:
+		if not foe.alive or foe.flying:
+			continue
+		var dx := foe.x - zone.x
+		var dy := foe.y - zone.y
+		if dx * dx + dy * dy <= limit:
+			# a longer, equal or stronger slow already on the foe is left alone
+			if foe.slow >= zone.slow and foe.slow_timer > RULES.POOL_REFRESH_SECONDS:
+				continue
+			Status.apply_slow(foe, zone.slow, RULES.POOL_REFRESH_SECONDS)

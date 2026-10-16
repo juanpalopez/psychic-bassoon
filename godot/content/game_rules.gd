@@ -24,6 +24,8 @@ const GUARD_POST_STEP := 0.05
 const TIMER_EPSILON := 1e-9
 ## Distances in cells closer than this count as no distance (no direction to aim along).
 const DISTANCE_EPSILON := 1e-9
+## A pool renews its slow on a foe each tick; the slow lasts this long after the last renewal.
+const POOL_REFRESH_SECONDS := 0.2
 ## Armor never cuts a hit below this share of its damage.
 const MIN_DAMAGE_FRACTION := 0.25
 ## Calling a wave early pays `EARLY_CALL_BASE + wave * EARLY_CALL_PER_WAVE`.

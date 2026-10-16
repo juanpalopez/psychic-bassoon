@@ -59,7 +59,10 @@ static func snapshot(game: GameState) -> Dictionary:
 				foe.bleed_dps,
 				foe.bleed_timer,
 				foe.armor_strip,
-				foe.freeze_timer
+				foe.freeze_timer,
+				foe.blind,
+				foe.blind_timer,
+				foe.miss_tally
 			]
 		)
 	var guards := []
@@ -92,6 +95,7 @@ static func snapshot(game: GameState) -> Dictionary:
 				zone.distance,
 				zone.radius,
 				zone.pull,
+				zone.slow,
 				zone.timer
 			]
 		)
