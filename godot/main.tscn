@@ -19,22 +19,28 @@
 [ext_resource type="Texture2D" path="res://assets/icons/flag.svg" id="17_flag_icon"]
 [ext_resource type="Texture2D" path="res://assets/icons/auto.svg" id="18_auto_icon"]
 
-[sub_resource type="Environment" id="Environment_dusk"]
+[sub_resource type="Environment" id="Environment_desk"]
 background_mode = 1
-background_color = Color(0.043, 0.071, 0.125, 1)
+background_color = Color(0.16, 0.11, 0.075, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.435, 0.51, 0.753, 1)
-ambient_light_energy = 0.8
+ambient_light_color = Color(0.62, 0.68, 0.8, 1)
+ambient_light_energy = 0.7
+tonemap_mode = 4
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_dusk")
+environment = SubResource("Environment_desk")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-55, -30, 0)
-light_color = Color(1, 0.79, 0.54, 1)
+rotation_degrees = Vector3(-42, -121.5, 0)
+light_color = Color(1, 0.86, 0.7, 1)
+light_energy = 1.1
+shadow_enabled = true
+shadow_blur = 1.5
+directional_shadow_mode = 0
+directional_shadow_max_distance = 45.0
 
 [node name="Board" type="Node3D" parent="."]
 script = ExtResource("2_board")

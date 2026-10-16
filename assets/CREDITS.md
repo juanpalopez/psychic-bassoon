@@ -20,21 +20,31 @@ The greybox draws primitives, except the owner's models below. When a model is a
 | `models/towers/prism_spire.glb` | Original, the owner (greybox Prism Spire, 256 triangles, static) | Owned by the owner (all rights reserved) | none |
 | `models/towers/guard_tent.glb` | Original, the owner (greybox Guard Tent, 68 triangles, static) | Owned by the owner (all rights reserved) | none |
 | `models/towers/kitchen_mess_tent.glb` | Original, the owner (greybox Kitchen Mess Tent, 184 triangles, static) | Owned by the owner (all rights reserved) | none |
-| `models/towers/heartstone.glb` | Original, the owner (greybox Heartstone, 196 triangles, static) | Owned by the owner (all rights reserved) | none |
+| `models/towers/heartstone.glb` | Original, the owner (papercraft origami Heartstone, 92 triangles, static; `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
 | `models/terrain/overlay_bridge_deck.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
 | `models/terrain/overlay_bridge_rail.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
 | `models/terrain/overlay_glue_puddle.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
 | `models/terrain/overlay_socket_built_2x2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/overlay_socket_empty_2x2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/overlay_socket_empty_2x2.glb` | Original, the owner (papercraft pencil circle, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
 | `models/terrain/overlay_tape_trap.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/skirt_desk.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/skirt_eraser.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/skirt_pencil.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/terrain_cardboard_l1.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/skirt_desk.glb` | Original, the owner (papercraft desk tile, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/skirt_eraser.glb` | Original, the owner (papercraft desk tile with an eraser, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/skirt_pencil.glb` | Original, the owner (papercraft desk tile with a pencil, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/terrain_cardboard_l1.glb` | Original, the owner (papercraft corrugated cardboard rise, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
 | `models/terrain/terrain_foil_river.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/terrain_lane.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/terrain_mat.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
-| `models/terrain/terrain_paperboard_l2.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
+| `models/terrain/terrain_lane.glb` | Original, the owner (papercraft cutting mat tile under the tape, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/terrain_mat.glb` | Original, the owner (papercraft cutting mat tile, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/terrain_paperboard_l2.glb` | Original, the owner (papercraft grey board cliff, `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/blot_spawn.glb` | Original, the owner (papercraft spilled ink and bottle at a spawn), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_tree_pine.glb` | Original, the owner (papercraft folded pine tree), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_tree_round.glb` | Original, the owner (papercraft folded round tree), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_shrub.glb` | Original, the owner (papercraft folded leaves), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_grass.glb` | Original, the owner (papercraft grass fringe), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_flowers.glb` | Original, the owner (papercraft flowers), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_buttons.glb` | Original, the owner (papercraft buttons), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_pins.glb` | Original, the owner (papercraft push pins), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_glue.glb` | Original, the owner (papercraft PVA glue spill), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
+| `models/terrain/decor_scrap.glb` | Original, the owner (papercraft newspaper scrap), `assets-src/papercraft/godot_kit.py` | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
 | `audio/music/music_tier1_planning.ogg` | Original, the owner (greybox music, generated by the owner, converted from wav to ogg) | Owned by the owner (all rights reserved) | wav to ogg (Vorbis q4) |
 | `audio/music/music_tier2_wave.ogg` | Original, the owner (greybox music, generated by the owner, converted from wav to ogg) | Owned by the owner (all rights reserved) | wav to ogg (Vorbis q4) |
 | `audio/music/music_tier3_boss.ogg` | Original, the owner (greybox music, generated by the owner, converted from wav to ogg) | Owned by the owner (all rights reserved) | wav to ogg (Vorbis q4) |
@@ -51,6 +61,15 @@ The greybox draws primitives, except the owner's models below. When a model is a
 | `audio/sfx/sfx_twang_spool_guard.ogg` | Original, the owner (greybox sound effect, generated by the owner, converted from wav to ogg) | Owned by the owner (all rights reserved) | wav to ogg (Vorbis q4) |
 | `audio/sfx/sfx_twang_thimble_mortar.ogg` | Original, the owner (greybox sound effect, generated by the owner, converted from wav to ogg) | Owned by the owner (all rights reserved) | wav to ogg (Vorbis q4) |
 | `models/ui/messenger_crow.glb` | Original, the owner (greybox Messenger Crow, 438 triangles, static) | Owned by the owner (all rights reserved) | none |
+
+## Textures
+
+Generated with numpy for the papercraft shaders in `render/paper/` (seamless noise and cut marks; `assets-src/papercraft/textures.py`).
+
+| File | Source | Licence | Edits |
+| --- | --- | --- | --- |
+| `textures/paper/paper_noise.png` | Original, the owner (seamless paper fibre, blotch, speck and crinkle noise) | Owned by the owner (all rights reserved) | read by `render/paper_look.gd` |
+| `textures/paper/mat_cuts.png` | Original, the owner (seamless healed cut marks for the cutting mat) | Owned by the owner (all rights reserved) | read by `render/paper_look.gd` |
 
 ## Fonts
 
