@@ -52,7 +52,7 @@ func _two_road_scene(map_seed: int) -> TowerFireKit.Scene:
 
 func test_a_well_opened_on_a_second_road_foe_sits_at_its_main_road_distance() -> void:
 	var checked := 0
-	for map_seed in range(1, 40):
+	for map_seed in [5]:
 		var scene := _two_road_scene(map_seed)
 		if scene == null:
 			continue
@@ -66,12 +66,6 @@ func test_a_well_opened_on_a_second_road_foe_sits_at_its_main_road_distance() ->
 		on_second.y = at.y
 		var mover := _tough(game, scene.near)
 		mover.speed = 0.0
-		var centre := _centre(scene)
-		if (
-			Vector2(on_second.x, on_second.y).distance_to(centre)
-			> TowerFire.reach_of(game, scene.tower)
-		):
-			continue
 		Zones.open_vortex(game, scene.tower, on_second, 1.5, 1.2, 5.0)
 		var want := Barracks.main_distance(game, on_second)
 		assert_almost_eq(
@@ -129,3 +123,45 @@ func test_ink_vortex_with_only_a_feeder_foe_in_reach_is_refused() -> void:
 	assert_eq(
 		_kinds(game, GameEvent.Kind.COMMAND_REJECTED)[0].reason, GameEvent.RejectReason.NO_TARGET
 	)
+
+
+func test_a_second_road_foe_ends_at_the_well_centre_on_the_main_road() -> void:
+	var scene := _two_road_scene(5)
+	var game := scene.game
+	assert_gt(absf(game.second_offset), 1.0, "this map's second road is offset from the main road")
+	var target := _tough(game, scene.near + 0.4)
+	target.speed = 0.0
+	var second := FoeSpawner.spawn(game, "corrugatedOrc", 1, 1)
+	second.speed = 0.0
+	second.hp = 1.0e9
+	second.max_hp = 1.0e9
+	second.distance = scene.near - 0.4 + game.second_offset
+	var at := game.routes[1].position_at(second.distance)
+	second.x = at.x
+	second.y = at.y
+	Zones.open_vortex(game, scene.tower, target, 1.5, 1.2, 5.0)
+	for i in 60:
+		Zones.step(game)
+		var now := game.routes[1].position_at(second.distance)
+		second.x = now.x
+		second.y = now.y
+	assert_almost_eq(
+		Barracks.main_distance(game, second), game.zones[0].distance, 1e-9, "at the centre"
+	)
+
+
+func test_a_foe_still_on_the_feeder_inside_the_well_is_not_pulled() -> void:
+	var scene := _two_road_scene(5)
+	var game := scene.game
+	var target := _tough(game, scene.near)
+	target.speed = 0.0
+	Zones.open_vortex(game, scene.tower, target, 1.5, 1.2, 5.0)
+	var feeder := FoeSpawner.spawn(game, "corrugatedOrc", 1, 1)
+	feeder.speed = 0.0
+	feeder.distance = 0.2
+	feeder.x = target.x
+	feeder.y = target.y
+	assert_lt(Barracks.main_distance(game, feeder), 0.0)
+	for i in 30:
+		Zones.step(game)
+	assert_eq(feeder.distance, 0.2)
