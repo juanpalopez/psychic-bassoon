@@ -23,6 +23,13 @@
 ## joined it). Foes that are `heavy`, held by a guard or flying are
 ## not pulled. A well stays open if its tower is sold.
 ##
+## Paper-Plane Aviary (Spool Guard, Spec B): High Recon adds `bonus` (a share) to the reach of
+## every other tower whose block lies within `gap` cells of the Aviary's (the strongest bonus
+## applies, they do not add up); Squadron Launch sends `planes` planes over everything within the
+## Aviary's reach for `seconds`: every `every` seconds each plane drops a bomb of `damage` (a
+## `splash` blast) on a different foe, the one furthest along the road first (a support foe is
+## not preferred), flyers included.
+##
 ## Glitter Cannon (Thimble Mortar, Spec A): Shrapnel Spread adds `bonus` (a share) to the blast
 ## radius; Confetti Burst fires a shell at the target that does `damage` to every foe within
 ## `radius` cells and blinds them for `seconds`: a blinded foe misses `blind` (a share) of its
@@ -49,6 +56,25 @@ const DEFS := {
 				"width": 0.3,
 				"bleed_dps": 8.0,
 				"bleed_seconds": 4.0,
+			},
+		},
+		{
+			"id": "paperPlaneAviary",
+			"name": "Paper-Plane Aviary",
+			"cost": 140,
+			"card":
+			"Paper planes patrol the road and rain dart bombs; adjacent towers see further.",
+			"passive": {"kind": "recon", "bonus": 0.2, "gap": 1.0},
+			"active":
+			{
+				"kind": "squadron",
+				"name": "Squadron Launch",
+				"cooldown": 28.0,
+				"seconds": 10.0,
+				"every": 1.0,
+				"planes": 3,
+				"damage": 18.0,
+				"splash": 0.6,
 			},
 		},
 	],

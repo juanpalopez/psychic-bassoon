@@ -39,4 +39,12 @@ func _init() -> void:
 	mortar.store_string(JSON.stringify(shells, "\t", true) + "\n")
 	mortar.close()
 	print("wrote %s" % SpecScenario.MORTAR_GOLDEN_PATH)
+	var aviary := FileAccess.open(SpecScenario.AVIARY_GOLDEN_PATH, FileAccess.WRITE)
+	if aviary == null:
+		push_error("cannot write %s" % SpecScenario.AVIARY_GOLDEN_PATH)
+		quit(1)
+		return
+	aviary.store_string(JSON.stringify(SpecScenario.play_aviary(), "\t", true) + "\n")
+	aviary.close()
+	print("wrote %s" % SpecScenario.AVIARY_GOLDEN_PATH)
 	quit()

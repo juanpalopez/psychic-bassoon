@@ -60,15 +60,39 @@ static func _announce(kind: GameEvent.Kind, zone: Zone) -> GameEvent:
 	return event
 
 
+## Opens a squadron over the tower's reach. The planes patrol there and bomb on a clock.
+static func open_squadron(game: GameState, tower: Tower, active: Dictionary) -> void:
+	var zone := Zone.new()
+	zone.id = game.next_id
+	game.next_id += 1
+	zone.kind = "squadron"
+	zone.tower_id = tower.id
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	zone.x = centre.x
+	zone.y = centre.y
+	zone.radius = TowerFire.reach_of(game, tower)
+	zone.planes = int(active.planes)
+	zone.damage = float(active.damage)
+	zone.splash = float(active.splash)
+	zone.every = float(active.every)
+	zone.clock = zone.every
+	zone.timer = float(active.seconds)
+	game.zones.append(zone)
+	game.events.append(_announce(GameEvent.Kind.ZONE_OPENED, zone))
+
+
 static func step(game: GameState) -> void:
 	if game.zones.is_empty():
 		return
 	var open: Array[Zone] = []
 	for zone in game.zones:
-		if zone.kind == "pool":
-			_soak(game, zone)
-		else:
-			_pull(game, zone)
+		match zone.kind:
+			"pool":
+				_soak(game, zone)
+			"squadron":
+				_patrol(game, zone)
+			_:
+				_pull(game, zone)
 		zone.timer -= Game.TICK_SECONDS
 		if zone.timer <= RULES.TIMER_EPSILON:
 			game.events.append(_announce(GameEvent.Kind.ZONE_CLOSED, zone))
@@ -108,3 +132,44 @@ static func _soak(game: GameState, zone: Zone) -> void:
 			if foe.slow >= zone.slow and foe.slow_timer > RULES.POOL_REFRESH_SECONDS:
 				continue
 			Status.apply_slow(foe, zone.slow, RULES.POOL_REFRESH_SECONDS)
+
+
+## A squadron drops its bombs when its clock runs out: plane `i` bombs the `i`th foe in the patrol,
+## the one furthest along its road first (the planes share the foes round when there are fewer).
+static func _patrol(game: GameState, zone: Zone) -> void:
+	zone.clock -= Game.TICK_SECONDS
+	if zone.clock > RULES.TIMER_EPSILON:
+		return
+	zone.clock += zone.every
+	var foes: Array[Foe] = []
+	var left: Array[float] = []
+	for foe in TowerFire.foes_within(game, zone.x, zone.y, zone.radius):
+		var route := (game.air_routes if foe.flying else game.routes)[foe.route]
+		var remaining := route.total - foe.distance
+		var at := foes.size()
+		while at > 0 and left[at - 1] > remaining:
+			at -= 1
+		foes.insert(at, foe)
+		left.insert(at, remaining)
+	if foes.is_empty():
+		return
+	for plane in zone.planes:
+		# a plane whose foe an earlier bomb of this drop killed takes the next one standing
+		for step in foes.size():
+			var target := foes[(plane + step) % foes.size()]
+			if target.alive:
+				_bomb(game, zone, target)
+				break
+
+
+static func _bomb(game: GameState, zone: Zone, target: Foe) -> void:
+	var event := GameEvent.of(GameEvent.Kind.TOWER_FIRED)
+	event.tower_id = zone.tower_id
+	event.foe_id = target.id
+	event.x = target.x
+	event.y = target.y
+	event.splash = zone.splash
+	game.events.append(event)
+	for foe in TowerFire.foes_within(game, target.x, target.y, zone.splash):
+		var bonus := Specs.damage_bonus(game, foe, Damage.Kind.PHYSICAL)
+		Damage.apply(game, foe, zone.damage, Damage.Kind.PHYSICAL, 0.0, bonus)

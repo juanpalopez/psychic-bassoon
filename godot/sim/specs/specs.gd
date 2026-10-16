@@ -54,6 +54,8 @@ static func activate(game: GameState, command: Command) -> void:
 			used = _flash_freeze(game, tower, active)
 		"ink_vortex":
 			used = _ink_vortex(game, tower, active)
+		"squadron":
+			used = _squadron(game, tower, active)
 		"confetti_burst":
 			used = _confetti_burst(game, tower, active)
 		"pva_deluge":
@@ -120,6 +122,35 @@ static func leave_residue(game: GameState, tower: Tower, at: Foe, radius: float)
 ## The share added to a tower's damage of this kind against this foe (Frostbite hits physical only).
 static func damage_bonus(game: GameState, foe: Foe, kind: Damage.Kind) -> float:
 	return frostbite_bonus(game, foe) if kind == Damage.Kind.PHYSICAL else 0.0
+
+
+## High Recon: the share added to a tower's reach by an Aviary next to it (the strongest applies; an
+## Aviary does not widen its own reach). "Next to" is within the passive's `gap` cells of its block.
+static func recon_bonus(game: GameState, tower: Tower) -> float:
+	var best := 0.0
+	var here := Vector2.ZERO
+	var placed := false
+	for other in game.towers:
+		# this runs for every reach: most towers have no spec, so skip them first
+		if other == tower or other.spec == "":
+			continue
+		var passive := passive_of(other)
+		if passive.get("kind", "") != "recon" or float(passive.bonus) <= best:
+			continue
+		if not placed:
+			here = game.map.socket_centre(Vector2i(tower.col, tower.row))
+			placed = true
+		var there := game.map.socket_centre(Vector2i(other.col, other.row))
+		if adjacent(here, there, float(game.map.footprint), float(passive.gap)):
+			best = float(passive.bonus)
+	return best
+
+
+## Whether two blocks of `footprint` cells, with these centres, lie within `gap` cells of each other
+## on both axes (diagonal neighbours count; a block just past the gap on one axis does not).
+static func adjacent(a: Vector2, b: Vector2, footprint: float, gap: float) -> bool:
+	var reach := footprint + gap
+	return absf(a.x - b.x) <= reach and absf(a.y - b.y) <= reach
 
 
 ## Corrosive Light: a beam that burns a foe strips a share of its armor each second, up to a cap.
@@ -267,3 +298,20 @@ static func _announce(game: GameState, tower: Tower, target: Foe, radius: float)
 	event.y = target.y
 	event.splash = radius
 	game.events.append(event)
+
+
+## Squadron Launch: the planes take off when a foe is in reach to bomb. Returns false when none is.
+static func _squadron(game: GameState, tower: Tower, active: Dictionary) -> bool:
+	var target := TowerFire.target_for(game, tower)
+	if target == null:
+		return false
+	Zones.open_squadron(game, tower, active)
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = tower.id
+	event.foe_id = target.id
+	event.x = centre.x
+	event.y = centre.y
+	event.splash = TowerFire.reach_of(game, tower)
+	game.events.append(event)
+	return true
