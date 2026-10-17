@@ -13,6 +13,8 @@
 class_name CameraRig
 extends Node3D
 
+## Metres to the near clip plane.
+const CAMERA_NEAR := 1.0
 ## The narrowest screen the rig frames for (a hidden canvas reports no size).
 const MIN_ASPECT := 0.5
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
@@ -155,6 +157,9 @@ static func rubber(value: float, low: float, high: float) -> float:
 func camera() -> Camera3D:
 	if _camera == null:
 		_camera = Camera3D.new()
+		# the camera sits tens of metres up; the default 5 cm near plane wastes depth precision
+		# and made close, stacked paper layers flicker on WebGL
+		_camera.near = CAMERA_NEAR
 		add_child(_camera)
 	return _camera
 

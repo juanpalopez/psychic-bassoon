@@ -1,12 +1,15 @@
-## The board drawn from the real map with the owner's terrain models.
+## The board drawn from the real map in the papercraft look.
 ##
-## The paper mat under plain ground (and level 0 sockets), the lane under every road
-## cell, a cardboard or paperboard rise under a socket block on elevation 1 or 2, an
-## etched overlay on each socket, and a desk skirt two tiles thick around the board
-## (with the odd eraser and pencil). One MultiMesh per model, so the board is a handful
-## of draw calls. A missing model falls back to a plain coloured box. Set `map_seed`
-## (also in the editor: this is a `@tool` script) and the board rebuilds from
-## `MapGen.generate`. It only reads the map.
+## The cutting mat under plain ground, the lane cells and level 0 sockets, masking tape
+## laid along every road, a corrugated cardboard or laminated grey board rise under a socket
+## block on elevation 1 or 2, a pencil circle on each socket, spilled Blot ink at each spawn,
+## a desk skirt two tiles thick around the board (with the odd eraser and pencil), and paper
+## trees, shrubs and desk clutter scattered where nothing is played. The look comes from
+## `PaperLook`. One MultiMesh per model, so the board is a handful of draw calls. A missing
+## model falls back to a plain coloured box. Set `map_seed` (also in the editor: this is a
+## `@tool` script) and the board rebuilds from `MapGen.generate`. It only reads the map, and
+## every random-looking choice comes from a hash of the cell and the seed, so the same seed
+## always looks the same.
 @tool
 class_name Board
 extends Node3D
@@ -30,6 +33,32 @@ const OVERLAY_COLOUR := Color("f4efe0")
 const DESK_COLOUR := Color("1c2b22")
 const SPAWN_COLOUR := Color("c0392b")
 const HEARTSTONE_COLOUR := Color("2ee6d6")
+## The box that stands in for the spilled ink when its model is missing.
+const SPAWN_BOX := Vector3(0.7, 0.9, 0.7)
+const SPAWN_MODEL := "res://assets/models/terrain/blot_spawn.glb"
+## The decor scattered on the board and the desk: model, cells from the road it must keep
+## (Chebyshev), the share of eligible cells that get one, and the cells it keeps off a socket
+## block and the Heartstone (a tree or shrub leans a metre or more past its cell, so a cell next
+## door would stand over a built tower; flat grass and flowers may sit beside one).
+const DECOR := {
+	"Trees": ["decor_tree_pine", 2, 0.4, 2],
+	"RoundTrees": ["decor_tree_round", 2, 0.25, 2],
+	"Shrubs": ["decor_shrub", 1, 0.35, 2],
+	"Grass": ["decor_grass", 1, 0.45, 1],
+	"Flowers": ["decor_flowers", 1, 0.14, 1],
+	"MatButtons": ["decor_buttons", 1, 0.05, 2],
+}
+## Clutter on the desk skirt: model and its share of the plain desk tiles.
+const CLUTTER := {
+	"DeskButtons": ["decor_buttons", 0.1],
+	"Pins": ["decor_pins", 0.08],
+	"Glue": ["decor_glue", 0.06],
+	"Scraps": ["decor_scrap", 0.08],
+}
+## The decor tall enough to cast a shadow worth its draw call; flat things cast none.
+const CASTS_SHADOW: Array[String] = ["Trees", "RoundTrees", "Shrubs"]
+## The desk sits this far below the mat (the mat's thickness).
+const DESK_TOP := -0.12
 ## The owner's greybox Heartstone and how much of its footprint's width it fills.
 const HEARTSTONE_MODEL := "res://assets/models/towers/heartstone.glb"
 const HEARTSTONE_FILL := 0.9
@@ -49,6 +78,13 @@ var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
 ## The cells of the desk skirt, off the grid, kept for the same reason.
 var skirt_cells: Array[Vector2i] = []
+## The board cells that hold decor, by decor name (the keys of DECOR).
+var decor_cells := {}
+## The desk cells that got clutter.
+var clutter_cells: Array[Vector2i] = []
+## Every spilled-ink spawn drawn (the first is `spawn_marker`).
+var spawn_count: int = 0
+var _desk_cells: Array[Vector2i] = []
 # what rebuild() made, so it never frees a node someone else put under the board
 var _built: Array[Node] = []
 # the transform of every socket tile, kept because the headless renderer cannot
@@ -68,9 +104,15 @@ func rebuild() -> void:
 	_built.clear()
 	_socket_transforms.clear()
 	skirt_cells.clear()
+	decor_cells.clear()
+	clutter_cells.clear()
+	_desk_cells.clear()
 	map = MapGen.generate(map_seed)
+	PaperLook.set_board(Vector2(float(map.cols), float(map.rows)) / 2.0)
 	_add_tiles()
+	_add_tape()
 	_add_markers()
+	_add_decor()
 
 
 ## The height of the top of a cell: the lane is a hair above the mat, and a socket
@@ -144,9 +186,11 @@ func _tiles(
 ) -> MultiMeshInstance3D:
 	var multimesh := MultiMesh.new()
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
-	var mesh := ModelLoader.mesh(TERRAIN + model + ".glb")
+	var mesh := PaperLook.dress(ModelLoader.mesh(TERRAIN + model + ".glb"))
 	var instance := MultiMeshInstance3D.new()
 	instance.name = node_name
+	if node_name in ["Mat", "Lane", "SocketOverlays", "Desk"]:
+		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	if mesh == null:
 		var box := BoxMesh.new()
 		box.size = Vector3(float(span), fallback_height, float(span))
@@ -160,7 +204,8 @@ func _tiles(
 	for i in cells.size():
 		var at := BoardSpace.footprint_centre(cells[i], span)
 		at.y = surface_height(cells[i]) if node_name == "SocketOverlays" else 0.0
-		var tile := Transform3D(Basis.IDENTITY, at)
+		var basis := _outward(cells[i]) if node_name == "Paperboard" else Basis.IDENTITY
+		var tile := Transform3D(basis, at)
 		multimesh.set_instance_transform(i, tile)
 		if node_name == "SocketOverlays":
 			_socket_transforms.append(tile)
@@ -186,6 +231,7 @@ func _add_skirt() -> void:
 				pencils.append(Vector2i(col, row))
 			else:
 				plain.append(Vector2i(col, row))
+	_desk_cells = plain
 	_add(_skirt_tiles("Desk", plain, "skirt_desk", 0.15))
 	_add(_skirt_tiles("Erasers", erasers, "skirt_eraser", 0.23))
 	_add(_skirt_tiles("Pencils", pencils, "skirt_pencil", 0.23))
@@ -209,7 +255,26 @@ func _skirt_tiles(
 func _add_markers() -> void:
 	var start := map.path[0]
 	var span := map.heartstone.size.x
-	spawn_marker = _marker("Spawn", start, 1, SPAWN_COLOUR, Vector3(0.7, 0.9, 0.7))
+	spawn_marker = _marker("Spawn", start, 1, SPAWN_COLOUR, SPAWN_BOX)
+	_use_spawn_model(spawn_marker, map.path)
+	spawn_count = 1
+	# the other spawn sources live under one node, so the board's children stay the same
+	var others := Node3D.new()
+	others.name = "OtherSpawns"
+	for route in map.routes:
+		if route[0] != start:
+			var extra := MeshInstance3D.new()
+			extra.position = BoardSpace.cell_to_world(route[0].x, route[0].y)
+			# the box stands in when the model file is missing, as for the first spawn
+			var box := BoxMesh.new()
+			box.size = SPAWN_BOX
+			extra.mesh = box
+			extra.material_override = _material(SPAWN_COLOUR)
+			extra.position.y = box.size.y / 2.0
+			_use_spawn_model(extra, route)
+			others.add_child(extra)
+			spawn_count += 1
+	_add(others)
 	heartstone_marker = _marker(
 		"Heartstone",
 		map.heartstone.position,
@@ -223,7 +288,7 @@ func _add_markers() -> void:
 ## The owner's Heartstone model instead of the box, as wide as most of its footprint and
 ## standing on the ground; a missing file leaves the box.
 func _use_heartstone_model(span: int) -> void:
-	var mesh := ModelLoader.mesh(HEARTSTONE_MODEL)
+	var mesh := PaperLook.dress(ModelLoader.mesh(HEARTSTONE_MODEL))
 	if mesh == null:
 		return
 	var box := mesh.get_aabb()
@@ -246,6 +311,181 @@ func _marker(
 	marker.material_override = _material(colour)
 	_add(marker)
 	return marker
+
+
+## The turn that faces a paperboard tile's stepped-in sides away from the middle of its
+## block (the model steps in on its +x and +z sides).
+func _outward(cell: Vector2i) -> Basis:
+	var inside := cell - map.socket_anchor_at(cell)
+	var east := inside.x * 2 >= map.footprint
+	var south := inside.y * 2 >= map.footprint
+	var quarter := 0
+	if east and not south:
+		quarter = 1
+	elif not east and not south:
+		quarter = 2
+	elif not east and south:
+		quarter = 3
+	return Basis(Vector3.UP, float(quarter) * PI / 2.0)
+
+
+## The spilled ink and its bottle at the start of `route`, the bottle lying off the board.
+func _use_spawn_model(marker: MeshInstance3D, route: Array) -> void:
+	var mesh := PaperLook.dress(ModelLoader.mesh(SPAWN_MODEL))
+	if mesh == null:
+		return
+	var inward := Vector2(route[1] - route[0])
+	marker.mesh = mesh
+	marker.material_override = null
+	marker.position.y = 0.0
+	marker.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	marker.rotation = Vector3(0.0, atan2(-inward.y, inward.x), 0.0)
+
+
+## Masking tape along every road (see TapeBuilder).
+func _add_tape() -> void:
+	var tape := MeshInstance3D.new()
+	tape.name = "Tape"
+	tape.mesh = TapeBuilder.build(map.routes, map_seed)
+	tape.material_override = PaperLook.material("masking_tape")
+	tape.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_add(tape)
+
+
+## Paper trees, shrubs, grass and flowers on the open mat, and clutter on the desk. A cell
+## gets decor only when it is plain ground far enough from the road and its own clearance
+## off the socket blocks and the Heartstone; which decor, where in the cell and how it is
+## turned come from a hash of the cell and the seed.
+func _add_decor() -> void:
+	var road := {}
+	for route in map.routes:
+		for cell in route:
+			road[cell] = true
+	var blocked := {}
+	for anchor in map.sockets:
+		for dy in map.footprint:
+			for dx in map.footprint:
+				blocked[anchor + Vector2i(dx, dy)] = true
+	var heart := map.heartstone
+	for dy in heart.size.y:
+		for dx in heart.size.x:
+			blocked[heart.position + Vector2i(dx, dy)] = true
+	var placed := {}
+	for key in DECOR:
+		placed[key] = []
+		decor_cells[key] = [] as Array[Vector2i]
+	for row in map.rows:
+		for col in map.cols:
+			var cell := Vector2i(col, row)
+			if road.has(cell) or blocked.has(cell):
+				continue
+			var from_road := _distance_to(cell, road)
+			var from_blocked := _distance_to(cell, blocked)
+			var tree := CellHash.of(col, row, map_seed, 10)
+			if (
+				from_road >= 2
+				and from_blocked >= DECOR["Trees"][3]
+				and tree < DECOR["Trees"][2] + DECOR["RoundTrees"][2]
+			):
+				var key := "Trees" if tree < DECOR["Trees"][2] else "RoundTrees"
+				_place(placed, key, cell, 0.0, 0.9, 1.25)
+				continue
+			if (
+				from_road >= DECOR["Shrubs"][1]
+				and from_blocked >= DECOR["Shrubs"][3]
+				and CellHash.of(col, row, map_seed, 11) < DECOR["Shrubs"][2]
+			):
+				_place(placed, "Shrubs", cell, 0.0, 0.8, 1.2)
+			for key in ["Grass", "Flowers", "MatButtons"]:
+				var salt: int = 12 + DECOR.keys().find(key)
+				if (
+					from_road >= DECOR[key][1]
+					and from_blocked >= DECOR[key][3]
+					and CellHash.of(col, row, map_seed, salt) < DECOR[key][2]
+				):
+					_place(placed, key, cell, 0.0, 0.8, 1.2)
+	var decor := Node3D.new()
+	decor.name = "Decor"
+	for key in DECOR:
+		decor.add_child(_scatter(key, DECOR[key][0], placed[key]))
+	var clutter := {}
+	for key in CLUTTER:
+		clutter[key] = []
+	var bottles := _bottle_cells()
+	for cell in _desk_cells:
+		if bottles.has(cell):
+			continue
+		var pick := CellHash.of(cell.x, cell.y, map_seed, 20)
+		var share := 0.0
+		for key in CLUTTER:
+			share += CLUTTER[key][1]
+			if pick < share:
+				clutter[key].append(_spot(cell, DESK_TOP, 0.8, 1.1, 21))
+				clutter_cells.append(cell)
+				break
+	for key in CLUTTER:
+		decor.add_child(_scatter(key, CLUTTER[key][0], clutter[key]))
+	_add(decor)
+
+
+## Records decor `key` in `cell` with a hashed offset, turn and size.
+func _place(
+	placed: Dictionary, key: String, cell: Vector2i, y: float, small: float, big: float
+) -> void:
+	placed[key].append(_spot(cell, y, small, big, 30 + DECOR.keys().find(key)))
+	decor_cells[key].append(cell)
+
+
+## A transform somewhere inside `cell`, turned and sized by the hash of the cell.
+func _spot(cell: Vector2i, y: float, small: float, big: float, salt: int) -> Transform3D:
+	var at := BoardSpace.cell_to_world(cell.x, cell.y)
+	at.x += (CellHash.of(cell.x, cell.y, map_seed, salt) - 0.5) * 0.5
+	at.z += (CellHash.of(cell.x, cell.y, map_seed, salt + 50) - 0.5) * 0.5
+	at.y = y
+	var turn := CellHash.of(cell.x, cell.y, map_seed, salt + 100) * TAU
+	var size := lerpf(small, big, CellHash.of(cell.x, cell.y, map_seed, salt + 150))
+	return Transform3D(Basis(Vector3.UP, turn).scaled(Vector3.ONE * size), at)
+
+
+## One MultiMesh of a decor model at the given transforms.
+func _scatter(node_name: String, model: String, spots: Array) -> MultiMeshInstance3D:
+	var instance := MultiMeshInstance3D.new()
+	instance.name = node_name
+	var multimesh := MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	var mesh := PaperLook.dress(ModelLoader.mesh(TERRAIN + model + ".glb"))
+	if mesh == null:
+		mesh = BoxMesh.new()
+		spots = []
+	if not node_name in CASTS_SHADOW:
+		instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	multimesh.mesh = mesh
+	multimesh.instance_count = spots.size()
+	for i in spots.size():
+		multimesh.set_instance_transform(i, spots[i])
+	instance.multimesh = multimesh
+	return instance
+
+
+## The desk cells under the ink bottles, which keep their desk clear.
+func _bottle_cells() -> Dictionary:
+	var cells := {}
+	for route in map.routes:
+		var out: Vector2i = route[0] - route[1]
+		for step in [1, 2]:
+			cells[route[0] + out * step] = true
+			cells[route[0] + out * step + Vector2i(out.y, out.x)] = true
+			cells[route[0] + out * step - Vector2i(out.y, out.x)] = true
+	return cells
+
+
+## How many cells (Chebyshev) from `cell` to the nearest cell in `cells`, at most 9.
+func _distance_to(cell: Vector2i, cells: Dictionary) -> int:
+	var best := 9
+	for other in cells:
+		var d: Vector2i = (other - cell).abs()
+		best = mini(best, maxi(d.x, d.y))
+	return best
 
 
 func _add(node: Node) -> void:

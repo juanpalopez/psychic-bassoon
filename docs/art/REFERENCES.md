@@ -10,7 +10,7 @@ Mood and layout references for the art direction. They are never shipped in the 
 
 **What we take from it**
 
-- **Road:** curved, with worn grassy edges. Drawn by the renderer as a ribbon (up to 1.25 cells) over the unchanged 1-cell grid (see Phase 5 in `docs/PLAN.md`).
+- **Road:** superseded. The road is masking tape on the cutting mat, not a ribbon (owner, 2026-10-17; see `docs/lessons/2026-10-17-papercraft-board-look.md`).
 - **Plots:** round stone bases with a row of small amber lights for the tower level.
 - **Look:** dusk light, amber torches along the road, cyan, violet and yellow crystal glows, dark moss and slate ground.
 - **HUD:** lives, gold and wave counter top left, tower buttons with costs bottom left, pause top right. The ability bar bottom right is not planned. The HUD design itself is Claude Design's job (Phase 6).
