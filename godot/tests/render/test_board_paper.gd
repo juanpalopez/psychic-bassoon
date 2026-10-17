@@ -161,6 +161,33 @@ func test_decor_keeps_off_the_road_the_sockets_and_the_heartstone() -> void:
 				assert_gte(_distance(cell, road), keep, "%s at %s, seed %d" % [key, cell, map_seed])
 
 
+func test_decor_keeps_clear_of_the_sockets_and_the_heartstone_by_its_reach() -> void:
+	for map_seed in [1, 7, 7920, 15839]:
+		var board := _board(map_seed)
+		var blocked := {}
+		for anchor in board.map.sockets:
+			for dy in board.map.footprint:
+				for dx in board.map.footprint:
+					blocked[anchor + Vector2i(dx, dy)] = true
+		var heart := board.map.heartstone
+		for dy in heart.size.y:
+			for dx in heart.size.x:
+				blocked[heart.position + Vector2i(dx, dy)] = true
+		for key in board.decor_cells:
+			for cell in board.decor_cells[key]:
+				assert_gte(
+					_distance(cell, blocked),
+					2,
+					"%s at %s over a socket or the Heartstone, seed %d" % [key, cell, map_seed]
+				)
+
+
+func test_the_camera_near_plane_is_not_the_engine_default() -> void:
+	var rig := CameraRig.new()
+	add_child_autofree(rig)
+	assert_gte(rig.camera().near, 1.0)
+
+
 func test_the_same_seed_scatters_the_same_decor() -> void:
 	assert_eq(_board(42).decor_cells, _board(42).decor_cells)
 
@@ -257,5 +284,5 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var counts := {"drawn": 0, "shadows": 0}
 		_surfaces(_board(map_seed), counts)
-		assert_lte(counts["drawn"], 32, "seed %d: surfaces drawn" % map_seed)
-		assert_lte(counts["shadows"], 12, "seed %d: surfaces in the shadow map" % map_seed)
+		assert_lte(counts["drawn"], 26, "seed %d: surfaces drawn" % map_seed)
+		assert_lte(counts["shadows"], 10, "seed %d: surfaces in the shadow map" % map_seed)

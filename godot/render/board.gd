@@ -36,6 +36,9 @@ const HEARTSTONE_COLOUR := Color("2ee6d6")
 const SPAWN_MODEL := "res://assets/models/terrain/blot_spawn.glb"
 ## The decor scattered on the board and the desk: model, cells from the road it must keep
 ## (Chebyshev), and the share of eligible cells that get one.
+## Cells of clearance decor keeps from a socket block and the Heartstone: a tree leans a metre
+## or more past its cell, so a cell next door would stand over a built tower.
+const DECOR_CLEARANCE := 2
 const DECOR := {
 	"Trees": ["decor_tree_pine", 2, 0.4],
 	"RoundTrees": ["decor_tree_round", 2, 0.25],
@@ -258,6 +261,12 @@ func _add_markers() -> void:
 		if route[0] != start:
 			var extra := MeshInstance3D.new()
 			extra.position = BoardSpace.cell_to_world(route[0].x, route[0].y)
+			# the box stands in when the model file is missing, as for the first spawn
+			var box := BoxMesh.new()
+			box.size = Vector3(0.7, 0.9, 0.7)
+			extra.mesh = box
+			extra.material_override = _material(SPAWN_COLOUR)
+			extra.position.y = box.size.y / 2.0
 			_use_spawn_model(extra, route)
 			others.add_child(extra)
 			spawn_count += 1
@@ -340,9 +349,9 @@ func _add_tape() -> void:
 
 
 ## Paper trees, shrubs, grass and flowers on the open mat, and clutter on the desk. A cell
-## gets decor only when it is plain ground far enough from the road (trees also keep off the
-## socket blocks and the Heartstone); which decor, where in the cell and how it is turned
-## come from a hash of the cell and the seed.
+## gets decor only when it is plain ground far enough from the road and `DECOR_CLEARANCE` cells
+## off the socket blocks and the Heartstone; which decor, where in the cell and how it is
+## turned come from a hash of the cell and the seed.
 func _add_decor() -> void:
 	var road := {}
 	for route in map.routes:
@@ -368,12 +377,10 @@ func _add_decor() -> void:
 				continue
 			var from_road := _distance_to(cell, road)
 			var from_blocked := _distance_to(cell, blocked)
+			if from_blocked < DECOR_CLEARANCE:
+				continue
 			var tree := CellHash.of(col, row, map_seed, 10)
-			if (
-				from_road >= 2
-				and from_blocked >= 1
-				and tree < DECOR["Trees"][2] + DECOR["RoundTrees"][2]
-			):
+			if from_road >= 2 and tree < DECOR["Trees"][2] + DECOR["RoundTrees"][2]:
 				var key := "Trees" if tree < DECOR["Trees"][2] else "RoundTrees"
 				_place(placed, key, cell, 0.0, 0.9, 1.25)
 				continue
@@ -459,6 +466,7 @@ func _bottle_cells() -> Dictionary:
 		for step in [1, 2]:
 			cells[route[0] + out * step] = true
 			cells[route[0] + out * step + Vector2i(out.y, out.x)] = true
+			cells[route[0] + out * step - Vector2i(out.y, out.x)] = true
 	return cells
 
 
