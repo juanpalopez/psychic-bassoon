@@ -2,6 +2,8 @@
 ## played, the same look for the same seed, and few extra draw calls.
 extends GutTest
 
+const RULES := preload("res://content/map_rules.gd")
+
 
 func _board(map_seed: int) -> Board:
 	var board := Board.new()
@@ -26,24 +28,74 @@ func _distance(cell: Vector2i, cells: Dictionary) -> int:
 	return best
 
 
-func test_tape_covers_every_road_cell() -> void:
+## Whether the drawn tape covers a point on the ground (its triangles seen from above).
+func _taped(faces: PackedVector3Array, x: float, z: float) -> bool:
+	var point := Vector2(x, z)
+	for i in range(0, faces.size(), 3):
+		var a := Vector2(faces[i].x, faces[i].z)
+		var b := Vector2(faces[i + 1].x, faces[i + 1].z)
+		var c := Vector2(faces[i + 2].x, faces[i + 2].z)
+		if _inside(point, a, b, c):
+			return true
+	return false
+
+
+## Whether `p` lies in the triangle, its edges included (a point on the diagonal shared by
+## two triangles of a quad counts as covered).
+func _inside(p: Vector2, a: Vector2, b: Vector2, c: Vector2) -> bool:
+	var d1 := (p - b).cross(a - b)
+	var d2 := (p - c).cross(b - c)
+	var d3 := (p - a).cross(c - a)
+	var below := d1 < -1e-6 or d2 < -1e-6 or d3 < -1e-6
+	var above := d1 > 1e-6 or d2 > 1e-6 or d3 > 1e-6
+	return not (below and above)
+
+
+## The road cells whose middle and four points 0.3 from it are not all under the tape.
+func _bare_cells(faces: PackedVector3Array, routes: Array) -> Array[Vector2i]:
+	var bare: Array[Vector2i] = []
+	for route in routes:
+		for cell in route:
+			var at := BoardSpace.cell_to_world(cell.x, cell.y)
+			for offset in [
+				Vector2.ZERO, Vector2(0.3, 0), Vector2(-0.3, 0), Vector2(0, 0.3), Vector2(0, -0.3)
+			]:
+				if not _taped(faces, at.x + offset.x, at.z + offset.y):
+					bare.append(cell)
+					break
+	return bare
+
+
+func test_the_drawn_tape_covers_every_road_cell() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
-		var bare: Array[Vector2i] = []
-		for cell in _road(board):
-			var at := BoardSpace.cell_to_world(cell.x, cell.y)
-			var covered := false
-			for strip in board.tape_strips:
-				covered = covered or strip.has_point(Vector2(at.x, at.z))
-			if not covered:
-				bare.append(cell)
-		assert_eq(bare, [] as Array[Vector2i], "seed %d: road cells without tape" % map_seed)
+		var faces := (board.get_node("Tape") as MeshInstance3D).mesh.get_faces()
+		assert_eq(_bare_cells(faces, board.map.routes), [] as Array[Vector2i], "seed %d" % map_seed)
+
+
+func test_tape_covers_a_detour_that_leaves_the_road_and_joins_it_again() -> void:
+	var checked := 0
+	for map_seed in range(1, 40):
+		var map := MapGen.generate(map_seed, RULES.GRID_COLS, RULES.GRID_ROWS, true)
+		if map.routes.size() < 2 or map.routes[1][0] != map.routes[0][0]:
+			continue
+		var faces := TapeBuilder.build(map.routes, map_seed).get_faces()
+		assert_eq(_bare_cells(faces, map.routes), [] as Array[Vector2i], "seed %d" % map_seed)
+		checked += 1
+		if checked == 3:
+			break
+	assert_gt(checked, 0, "found a map whose detour starts on the main road")
 
 
 func test_the_tape_lies_on_the_mat_under_the_road_height() -> void:
 	var box := (_board(1).get_node("Tape") as MeshInstance3D).mesh.get_aabb()
-	assert_gt(box.position.y, 0.0, "above the mat")
+	assert_almost_eq(box.position.y, TapeBuilder.HEIGHT, 1e-6, "above the mat")
 	assert_lt(box.end.y, Board.ROAD_HEIGHT, "under where foes walk")
+	assert_lt(
+		TapeBuilder.HEIGHT + TapeBuilder.STEP * float(TapeBuilder.LAYERS - 1),
+		Board.ROAD_HEIGHT,
+		"every layer under the road height"
+	)
 
 
 func test_decor_keeps_off_the_road_the_sockets_and_the_heartstone() -> void:

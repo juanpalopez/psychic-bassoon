@@ -14,9 +14,6 @@ void vertex() {
 }
 
 void fragment() {
-	if (!FRONT_FACING) {
-		NORMAL = -NORMAL;
-	}
 	ALBEDO = ink;
 	ROUGHNESS = 0.06;
 	SPECULAR = 0.9;

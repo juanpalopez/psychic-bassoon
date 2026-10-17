@@ -16,9 +16,6 @@ void vertex() {
 }
 
 void fragment() {
-	if (!FRONT_FACING) {
-		NORMAL = -NORMAL;
-	}
 	vec4 n = texture(paper_noise, world_pos.xz * 1.3 + vec2(world_pos.y * 0.7));
 	ALBEDO = colour * (0.9 + 0.2 * n.r);
 	ROUGHNESS = 0.85;

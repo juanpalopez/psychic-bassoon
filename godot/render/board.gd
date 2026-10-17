@@ -33,14 +33,6 @@ const OVERLAY_COLOUR := Color("f4efe0")
 const DESK_COLOUR := Color("1c2b22")
 const SPAWN_COLOUR := Color("c0392b")
 const HEARTSTONE_COLOUR := Color("2ee6d6")
-## The masking tape along the road: its width, the height of its first strip (later strips
-## lie a hair higher where they overlap) and how far a strip runs past its last cell.
-const TAPE_WIDTH := 0.84
-const TAPE_HEIGHT := 0.004
-const TAPE_STEP := 0.0012
-const TAPE_OVERRUN := 0.46
-## How far the first strip of a road runs back from its first cell, into the spilled ink.
-const TAPE_LEAD_IN := 0.8
 const SPAWN_MODEL := "res://assets/models/terrain/blot_spawn.glb"
 ## The decor scattered on the board and the desk: model, cells from the road it must keep
 ## (Chebyshev), and the share of eligible cells that get one.
@@ -82,8 +74,6 @@ var spawn_marker: MeshInstance3D
 var heartstone_marker: MeshInstance3D
 ## The cells of the desk skirt, off the grid, kept for the same reason.
 var skirt_cells: Array[Vector2i] = []
-## Each strip of masking tape as the rectangle it covers on the ground (x across, y in depth).
-var tape_strips: Array[Rect2] = []
 ## The board cells that hold decor, by decor name (the keys of DECOR).
 var decor_cells := {}
 ## Every spilled-ink spawn drawn (the first is `spawn_marker`).
@@ -108,7 +98,6 @@ func rebuild() -> void:
 	_built.clear()
 	_socket_transforms.clear()
 	skirt_cells.clear()
-	tape_strips.clear()
 	decor_cells.clear()
 	_desk_cells.clear()
 	map = MapGen.generate(map_seed)
@@ -340,112 +329,14 @@ func _use_spawn_model(marker: MeshInstance3D, route: Array) -> void:
 	marker.rotation = Vector3(0.0, atan2(-inward.y, inward.x), 0.0)
 
 
-## Masking tape along every road: one strip per straight run, each running a little past
-## its ends so that strips overlap at the corners, with torn ends and a slight wobble. A
-## road that joins one already taped stops at the join.
+## Masking tape along every road (see TapeBuilder).
 func _add_tape() -> void:
-	var taped := {}
-	var surface := SurfaceTool.new()
-	surface.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var strip := 0
-	for route in map.routes:
-		var cells: Array[Vector2i] = []
-		for i in route.size():
-			cells.append(route[i])
-			if taped.has(route[i]) and i > 0:
-				break
-		for run in _runs(cells):
-			var lead := TAPE_LEAD_IN if run[0] == 0 else TAPE_OVERRUN
-			_tape_strip(surface, cells[run[0]], cells[run[1]], lead, strip)
-			strip += 1
-		for cell in cells:
-			taped[cell] = true
-	surface.generate_tangents()
 	var tape := MeshInstance3D.new()
 	tape.name = "Tape"
-	tape.mesh = surface.commit()
+	tape.mesh = TapeBuilder.build(map.routes, map_seed)
 	tape.material_override = PaperLook.material("masking_tape")
 	tape.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	_add(tape)
-
-
-## The straight runs of a list of cells, as [first index, last index] pairs; a corner cell
-## ends one run and starts the next.
-func _runs(cells: Array[Vector2i]) -> Array:
-	var runs := []
-	var first := 0
-	for i in range(1, cells.size() - 1):
-		if cells[i + 1] - cells[i] != cells[i] - cells[i - 1]:
-			runs.append([first, i])
-			first = i
-	runs.append([first, cells.size() - 1])
-	return runs
-
-
-## One strip of tape from the centre of `from` to the centre of `to` (a straight run),
-## starting `lead` before it and ending TAPE_OVERRUN after it.
-func _tape_strip(
-	surface: SurfaceTool, from: Vector2i, to: Vector2i, lead: float, index: int
-) -> void:
-	var start := BoardSpace.cell_to_world(from.x, from.y)
-	var end := BoardSpace.cell_to_world(to.x, to.y)
-	var along := (end - start).normalized() if from != to else Vector3.RIGHT
-	start -= along * lead
-	end += along * TAPE_OVERRUN
-	var across := along.cross(Vector3.UP)
-	var half := TAPE_WIDTH / 2.0
-	var lo := Vector2(minf(start.x, end.x), minf(start.z, end.z))
-	var hi := Vector2(maxf(start.x, end.x), maxf(start.z, end.z))
-	var pad := Vector2(absf(across.x), absf(across.z)) * half
-	tape_strips.append(Rect2(lo - pad, hi - lo + pad * 2.0))
-	var y := TAPE_HEIGHT + TAPE_STEP * float(index % 3)
-	var length := start.distance_to(end)
-	var steps := maxi(1, int(ceil(length / 0.5)))
-	var u0 := _hash01(from.x, from.y, map_seed, index) * 9.0
-	var rows: Array = []
-	for k in steps + 1:
-		var t := float(k) / float(steps)
-		var centre := start.lerp(end, t)
-		var left := half + (_hash01(k, index, map_seed, 1) - 0.5) * 0.012
-		var right := half + (_hash01(k, index, map_seed, 2) - 0.5) * 0.012
-		rows.append([centre + across * left, centre - across * right, u0 + length * t])
-	for k in steps:
-		_tape_quad(surface, rows[k], rows[k + 1], y)
-	_tape_end(surface, rows[0], -along, y, index, 3)
-	_tape_end(surface, rows[steps], along, y, index, 4)
-
-
-func _tape_quad(surface: SurfaceTool, a: Array, b: Array, y: float) -> void:
-	var points := [a[0], a[1], b[1], b[0]]
-	var uvs := [Vector2(a[2], 1.0), Vector2(a[2], 0.0), Vector2(b[2], 0.0), Vector2(b[2], 1.0)]
-	for i in [0, 1, 2, 0, 2, 3]:
-		surface.set_normal(Vector3.UP)
-		surface.set_uv(uvs[i])
-		var point: Vector3 = points[i]
-		surface.add_vertex(Vector3(point.x, y, point.z))
-
-
-## A torn end on a strip's edge row: a fan of five ragged points pushed out along `out`.
-func _tape_end(
-	surface: SurfaceTool, edge: Array, out: Vector3, y: float, index: int, salt: int
-) -> void:
-	var left: Vector3 = edge[0]
-	var right: Vector3 = edge[1]
-	var u: float = edge[2]
-	var centre := (left + right) / 2.0 + out * 0.03
-	var fringe: Array[Vector3] = [left]
-	for j in range(1, 6):
-		var t := float(j) / 6.0
-		fringe.append(
-			left.lerp(right, t) + out * (0.015 + _hash01(index, j, map_seed, salt) * 0.06)
-		)
-	fringe.append(right)
-	for j in fringe.size() - 1:
-		for point: Vector3 in [centre, fringe[j], fringe[j + 1]]:
-			var v := 1.0 - (point - left).dot((right - left).normalized()) / TAPE_WIDTH
-			surface.set_normal(Vector3.UP)
-			surface.set_uv(Vector2(u, clampf(v, 0.0, 1.0)))
-			surface.add_vertex(Vector3(point.x, y, point.z))
 
 
 ## Paper trees, shrubs, grass and flowers on the open mat, and clutter on the desk. A cell
@@ -477,7 +368,7 @@ func _add_decor() -> void:
 				continue
 			var from_road := _distance_to(cell, road)
 			var from_blocked := _distance_to(cell, blocked)
-			var tree := _hash01(col, row, map_seed, 10)
+			var tree := CellHash.of(col, row, map_seed, 10)
 			if (
 				from_road >= 2
 				and from_blocked >= 1
@@ -488,12 +379,15 @@ func _add_decor() -> void:
 				continue
 			if (
 				from_road >= DECOR["Shrubs"][1]
-				and _hash01(col, row, map_seed, 11) < DECOR["Shrubs"][2]
+				and CellHash.of(col, row, map_seed, 11) < DECOR["Shrubs"][2]
 			):
 				_place(placed, "Shrubs", cell, 0.0, 0.8, 1.2)
 			for key in ["Grass", "Flowers", "MatButtons"]:
 				var salt: int = 12 + DECOR.keys().find(key)
-				if from_road >= DECOR[key][1] and _hash01(col, row, map_seed, salt) < DECOR[key][2]:
+				if (
+					from_road >= DECOR[key][1]
+					and CellHash.of(col, row, map_seed, salt) < DECOR[key][2]
+				):
 					_place(placed, key, cell, 0.0, 0.8, 1.2)
 	var decor := Node3D.new()
 	decor.name = "Decor"
@@ -506,7 +400,7 @@ func _add_decor() -> void:
 	for cell in _desk_cells:
 		if bottles.has(cell):
 			continue
-		var pick := _hash01(cell.x, cell.y, map_seed, 20)
+		var pick := CellHash.of(cell.x, cell.y, map_seed, 20)
 		var share := 0.0
 		for key in CLUTTER:
 			share += CLUTTER[key][1]
@@ -529,11 +423,11 @@ func _place(
 ## A transform somewhere inside `cell`, turned and sized by the hash of the cell.
 func _spot(cell: Vector2i, y: float, small: float, big: float, salt: int) -> Transform3D:
 	var at := BoardSpace.cell_to_world(cell.x, cell.y)
-	at.x += (_hash01(cell.x, cell.y, map_seed, salt) - 0.5) * 0.5
-	at.z += (_hash01(cell.x, cell.y, map_seed, salt + 50) - 0.5) * 0.5
+	at.x += (CellHash.of(cell.x, cell.y, map_seed, salt) - 0.5) * 0.5
+	at.z += (CellHash.of(cell.x, cell.y, map_seed, salt + 50) - 0.5) * 0.5
 	at.y = y
-	var turn := _hash01(cell.x, cell.y, map_seed, salt + 100) * TAU
-	var size := lerpf(small, big, _hash01(cell.x, cell.y, map_seed, salt + 150))
+	var turn := CellHash.of(cell.x, cell.y, map_seed, salt + 100) * TAU
+	var size := lerpf(small, big, CellHash.of(cell.x, cell.y, map_seed, salt + 150))
 	return Transform3D(Basis(Vector3.UP, turn).scaled(Vector3.ONE * size), at)
 
 
@@ -575,14 +469,6 @@ func _distance_to(cell: Vector2i, cells: Dictionary) -> int:
 		var d: Vector2i = (other - cell).abs()
 		best = mini(best, maxi(d.x, d.y))
 	return best
-
-
-## A number from 0 to 1 that only depends on its four arguments.
-static func _hash01(a: int, b: int, c: int, salt: int) -> float:
-	var h := (a * 73856093) ^ (b * 19349663) ^ (c * 83492791) ^ (salt * 2654435761)
-	h = (h ^ (h >> 13)) * 1274126177
-	h = h ^ (h >> 16)
-	return float(h & 0xFFFFFF) / 16777216.0
 
 
 func _add(node: Node) -> void:
