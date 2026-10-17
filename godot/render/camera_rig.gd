@@ -13,9 +13,9 @@
 class_name CameraRig
 extends Node3D
 
-## The narrowest screen the rig frames for (a hidden canvas reports no size).
 ## Metres to the near clip plane.
 const CAMERA_NEAR := 1.0
+## The narrowest screen the rig frames for (a hidden canvas reports no size).
 const MIN_ASPECT := 0.5
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
 const MAX_PITCH := 62.0

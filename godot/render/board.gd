@@ -33,19 +33,20 @@ const OVERLAY_COLOUR := Color("f4efe0")
 const DESK_COLOUR := Color("1c2b22")
 const SPAWN_COLOUR := Color("c0392b")
 const HEARTSTONE_COLOUR := Color("2ee6d6")
+## The box that stands in for the spilled ink when its model is missing.
+const SPAWN_BOX := Vector3(0.7, 0.9, 0.7)
 const SPAWN_MODEL := "res://assets/models/terrain/blot_spawn.glb"
 ## The decor scattered on the board and the desk: model, cells from the road it must keep
-## (Chebyshev), and the share of eligible cells that get one.
-## Cells of clearance decor keeps from a socket block and the Heartstone: a tree leans a metre
-## or more past its cell, so a cell next door would stand over a built tower.
-const DECOR_CLEARANCE := 2
+## (Chebyshev), the share of eligible cells that get one, and the cells it keeps off a socket
+## block and the Heartstone (a tree or shrub leans a metre or more past its cell, so a cell next
+## door would stand over a built tower; flat grass and flowers may sit beside one).
 const DECOR := {
-	"Trees": ["decor_tree_pine", 2, 0.4],
-	"RoundTrees": ["decor_tree_round", 2, 0.25],
-	"Shrubs": ["decor_shrub", 1, 0.35],
-	"Grass": ["decor_grass", 1, 0.45],
-	"Flowers": ["decor_flowers", 1, 0.14],
-	"MatButtons": ["decor_buttons", 1, 0.05],
+	"Trees": ["decor_tree_pine", 2, 0.4, 2],
+	"RoundTrees": ["decor_tree_round", 2, 0.25, 2],
+	"Shrubs": ["decor_shrub", 1, 0.35, 2],
+	"Grass": ["decor_grass", 1, 0.45, 1],
+	"Flowers": ["decor_flowers", 1, 0.14, 1],
+	"MatButtons": ["decor_buttons", 1, 0.05, 2],
 }
 ## Clutter on the desk skirt: model and its share of the plain desk tiles.
 const CLUTTER := {
@@ -79,6 +80,8 @@ var heartstone_marker: MeshInstance3D
 var skirt_cells: Array[Vector2i] = []
 ## The board cells that hold decor, by decor name (the keys of DECOR).
 var decor_cells := {}
+## The desk cells that got clutter.
+var clutter_cells: Array[Vector2i] = []
 ## Every spilled-ink spawn drawn (the first is `spawn_marker`).
 var spawn_count: int = 0
 var _desk_cells: Array[Vector2i] = []
@@ -102,6 +105,7 @@ func rebuild() -> void:
 	_socket_transforms.clear()
 	skirt_cells.clear()
 	decor_cells.clear()
+	clutter_cells.clear()
 	_desk_cells.clear()
 	map = MapGen.generate(map_seed)
 	PaperLook.set_board(Vector2(float(map.cols), float(map.rows)) / 2.0)
@@ -251,7 +255,7 @@ func _skirt_tiles(
 func _add_markers() -> void:
 	var start := map.path[0]
 	var span := map.heartstone.size.x
-	spawn_marker = _marker("Spawn", start, 1, SPAWN_COLOUR, Vector3(0.7, 0.9, 0.7))
+	spawn_marker = _marker("Spawn", start, 1, SPAWN_COLOUR, SPAWN_BOX)
 	_use_spawn_model(spawn_marker, map.path)
 	spawn_count = 1
 	# the other spawn sources live under one node, so the board's children stay the same
@@ -263,7 +267,7 @@ func _add_markers() -> void:
 			extra.position = BoardSpace.cell_to_world(route[0].x, route[0].y)
 			# the box stands in when the model file is missing, as for the first spawn
 			var box := BoxMesh.new()
-			box.size = Vector3(0.7, 0.9, 0.7)
+			box.size = SPAWN_BOX
 			extra.mesh = box
 			extra.material_override = _material(SPAWN_COLOUR)
 			extra.position.y = box.size.y / 2.0
@@ -349,7 +353,7 @@ func _add_tape() -> void:
 
 
 ## Paper trees, shrubs, grass and flowers on the open mat, and clutter on the desk. A cell
-## gets decor only when it is plain ground far enough from the road and `DECOR_CLEARANCE` cells
+## gets decor only when it is plain ground far enough from the road and its own clearance
 ## off the socket blocks and the Heartstone; which decor, where in the cell and how it is
 ## turned come from a hash of the cell and the seed.
 func _add_decor() -> void:
@@ -377,15 +381,18 @@ func _add_decor() -> void:
 				continue
 			var from_road := _distance_to(cell, road)
 			var from_blocked := _distance_to(cell, blocked)
-			if from_blocked < DECOR_CLEARANCE:
-				continue
 			var tree := CellHash.of(col, row, map_seed, 10)
-			if from_road >= 2 and tree < DECOR["Trees"][2] + DECOR["RoundTrees"][2]:
+			if (
+				from_road >= 2
+				and from_blocked >= DECOR["Trees"][3]
+				and tree < DECOR["Trees"][2] + DECOR["RoundTrees"][2]
+			):
 				var key := "Trees" if tree < DECOR["Trees"][2] else "RoundTrees"
 				_place(placed, key, cell, 0.0, 0.9, 1.25)
 				continue
 			if (
 				from_road >= DECOR["Shrubs"][1]
+				and from_blocked >= DECOR["Shrubs"][3]
 				and CellHash.of(col, row, map_seed, 11) < DECOR["Shrubs"][2]
 			):
 				_place(placed, "Shrubs", cell, 0.0, 0.8, 1.2)
@@ -393,6 +400,7 @@ func _add_decor() -> void:
 				var salt: int = 12 + DECOR.keys().find(key)
 				if (
 					from_road >= DECOR[key][1]
+					and from_blocked >= DECOR[key][3]
 					and CellHash.of(col, row, map_seed, salt) < DECOR[key][2]
 				):
 					_place(placed, key, cell, 0.0, 0.8, 1.2)
@@ -413,6 +421,7 @@ func _add_decor() -> void:
 			share += CLUTTER[key][1]
 			if pick < share:
 				clutter[key].append(_spot(cell, DESK_TOP, 0.8, 1.1, 21))
+				clutter_cells.append(cell)
 				break
 	for key in CLUTTER:
 		decor.add_child(_scatter(key, CLUTTER[key][0], clutter[key]))

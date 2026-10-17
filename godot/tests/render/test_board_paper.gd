@@ -162,24 +162,73 @@ func test_decor_keeps_off_the_road_the_sockets_and_the_heartstone() -> void:
 
 
 func test_decor_keeps_clear_of_the_sockets_and_the_heartstone_by_its_reach() -> void:
+	# the reach in cells is written out here, not read from Board.DECOR
+	var reach := {
+		"Trees": 2, "RoundTrees": 2, "Shrubs": 2, "MatButtons": 2, "Grass": 1, "Flowers": 1
+	}
 	for map_seed in [1, 7, 7920, 15839]:
 		var board := _board(map_seed)
-		var blocked := {}
-		for anchor in board.map.sockets:
-			for dy in board.map.footprint:
-				for dx in board.map.footprint:
-					blocked[anchor + Vector2i(dx, dy)] = true
-		var heart := board.map.heartstone
-		for dy in heart.size.y:
-			for dx in heart.size.x:
-				blocked[heart.position + Vector2i(dx, dy)] = true
+		var blocked := _blocked(board)
 		for key in board.decor_cells:
 			for cell in board.decor_cells[key]:
 				assert_gte(
 					_distance(cell, blocked),
-					2,
+					reach[key],
 					"%s at %s over a socket or the Heartstone, seed %d" % [key, cell, map_seed]
 				)
+
+
+func _blocked(board: Board) -> Dictionary:
+	var blocked := {}
+	for anchor in board.map.sockets:
+		for dy in board.map.footprint:
+			for dx in board.map.footprint:
+				blocked[anchor + Vector2i(dx, dy)] = true
+	var heart := board.map.heartstone
+	for dy in heart.size.y:
+		for dx in heart.size.x:
+			blocked[heart.position + Vector2i(dx, dy)] = true
+	return blocked
+
+
+func test_every_seed_keeps_a_good_amount_of_decor() -> void:
+	for map_seed in [1, 7, 42, 7920, 15839]:
+		var board := _board(map_seed)
+		var total := 0
+		for key in board.decor_cells:
+			total += board.decor_cells[key].size()
+		assert_gte(total, 20, "seed %d is not left bare" % map_seed)
+
+
+func test_no_desk_clutter_stands_where_a_spawn_bottle_lies() -> void:
+	for map_seed in [1, 7920, 15839]:
+		var board := _board(map_seed)
+		var bottles: Dictionary = board._bottle_cells()
+		for route in board.map.routes:
+			var out: Vector2i = route[0] - route[1]
+			var side := Vector2i(out.y, out.x)
+			for step in [1, 2]:
+				var middle: Vector2i = route[0] + out * step
+				assert_true(bottles.has(middle), "the bottle's middle, seed %d" % map_seed)
+				assert_true(bottles.has(middle + side), "one side, seed %d" % map_seed)
+				assert_true(bottles.has(middle - side), "the other side, seed %d" % map_seed)
+		for cell in board.clutter_cells:
+			assert_false(
+				bottles.has(cell), "clutter on a bottle cell %s, seed %d" % [cell, map_seed]
+			)
+
+
+func test_the_tape_stays_off_the_middle_of_every_socket_cell() -> void:
+	for map_seed in [1, 7, 7920, 15839]:
+		var board := _board(map_seed)
+		var faces := (board.get_node("Tape") as MeshInstance3D).mesh.get_faces()
+		for anchor in board.map.sockets:
+			for dy in board.map.footprint:
+				for dx in board.map.footprint:
+					var at := BoardSpace.cell_to_world(anchor.x + dx, anchor.y + dy)
+					assert_false(
+						_taped(faces, at.x, at.z), "tape over a socket, seed %d" % map_seed
+					)
 
 
 func test_the_camera_near_plane_is_not_the_engine_default() -> void:
