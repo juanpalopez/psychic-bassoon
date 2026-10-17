@@ -56,6 +56,30 @@ func test_all_bars_are_one_multimesh_with_a_back_and_a_fill_each() -> void:
 	assert_gt(bars.drawn_position(0).y, 2.0, "above the head")
 
 
+func test_the_fill_keeps_its_left_edge_on_the_bars_left_edge() -> void:
+	var bars := FoeBars.new()
+	add_child_autofree(bars)
+	bars.begin()
+	for health in [1.0, 0.6, 0.1]:
+		bars.add(Vector3.ZERO, health, "scrapGoblin")
+	bars.finish()
+	var inner := FoeBars.bar_size("scrapGoblin").x - 2.0 * FoeBars.BORDER
+	for i in 3:
+		var left := bars.drawn_fill_shift(i) - bars.drawn_fill_width(i) / 2.0
+		assert_almost_eq(left, -inner / 2.0, 1e-6, "bar %d" % i)
+
+
+func test_the_fill_is_tall_enough_to_read_on_a_phone() -> void:
+	# a cell is at least 40 px wide on screen: the fill must be about 4 px tall or more
+	var size := FoeBars.bar_size("scrapGoblin")
+	assert_gte((size.y - 2.0 * FoeBars.BORDER) * 40.0, 4.0)
+
+
+func test_the_colour_midway_is_the_middle_of_low_and_full() -> void:
+	var want := FoeBars.LOW_COLOUR.lerp(FoeBars.FULL_COLOUR, 0.5)
+	assert_eq(FoeBars.fill_colour(0.5), want)
+
+
 func test_begin_clears_and_extra_bars_are_dropped() -> void:
 	var bars := FoeBars.new()
 	add_child_autofree(bars)

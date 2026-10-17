@@ -227,3 +227,17 @@ func test_hurt_foes_get_a_bar_and_healthy_or_dying_ones_do_not() -> void:
 	]
 	view.update(_game_with(foes), 1.0)
 	assert_eq(_bars(view).bar_count(), 2)
+
+
+func test_a_bar_is_as_wide_as_the_foes_share_of_health_and_a_boss_bar_is_bigger() -> void:
+	var view := _view()
+	var foes: Array[Foe] = [
+		_foe(0, "scrapGoblin", 4.5, 3.5, 5, 20), _foe(1, "cardboardGolem", 2.5, 6.5, 100, 400)
+	]
+	view.update(_game_with(foes), 1.0)
+	var bars := _bars(view)
+	var inner := FoeBars.bar_size("scrapGoblin").x - 2.0 * FoeBars.BORDER
+	var boss_inner := FoeBars.bar_size("cardboardGolem").x - 2.0 * FoeBars.BORDER
+	assert_almost_eq(bars.drawn_fill_width(0), inner * 0.25, 1e-6)
+	assert_almost_eq(bars.drawn_fill_width(1), boss_inner * 0.25, 1e-6)
+	assert_gt(bars.drawn_fill_width(1), bars.drawn_fill_width(0), "the boss bar is wider")

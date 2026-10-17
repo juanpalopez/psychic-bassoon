@@ -7,16 +7,16 @@ class_name FoeBars
 extends MultiMeshInstance3D
 
 const SHADER := preload("res://render/paper/foe_bar.gdshader")
-## Bars drawn at most; more foes than this get none.
+## Bars drawn at most (80 foes is the target, so 160 covers a hurt crowd); more get none.
 const MAX_BARS := 160
 ## A bar's size in cells (width, height), for a foe and for a boss.
-const FOE_SIZE := Vector2(0.7, 0.1)
-const BOSS_SIZE := Vector2(1.5, 0.18)
+const FOE_SIZE := Vector2(0.7, 0.16)
+const BOSS_SIZE := Vector2(1.5, 0.26)
 const BOSS_TYPES: Array[String] = ["cardboardGolem"]
 ## How far above a foe's head the bar's centre floats, in cells.
 const LIFT := 0.2
 ## The fill is a little smaller than the back, so the back reads as a border (cells).
-const BORDER := 0.03
+const BORDER := 0.015
 ## How far towards the camera the fill sits, so it is not hidden by the back.
 const FILL_NEAR := 0.03
 const BACK_COLOUR := Board.DESK_COLOUR
@@ -27,6 +27,7 @@ var _bars := 0
 # what was last written, kept so a headless test can read it back
 var _positions: Array[Vector3] = []
 var _fill_widths: Array[float] = []
+var _fill_shifts: Array[float] = []
 
 
 func _init() -> void:
@@ -82,6 +83,7 @@ func begin() -> void:
 	_bars = 0
 	_positions.clear()
 	_fill_widths.clear()
+	_fill_shifts.clear()
 
 
 ## Adds a bar over a foe whose head is at `head` (world), `health_share` of its health left.
@@ -104,7 +106,9 @@ func add(head: Vector3, health_share: float, type: String) -> void:
 	)
 	multimesh.set_instance_color(back + 1, fill_colour(health_share))
 	# slide the fill so its left edge stays on the bar's left edge
-	multimesh.set_instance_custom_data(back + 1, Color(-(inner - width) / 2.0, FILL_NEAR, 0.0, 0.0))
+	var shift := -(inner - width) / 2.0
+	multimesh.set_instance_custom_data(back + 1, Color(shift, FILL_NEAR, 0.0, 0.0))
+	_fill_shifts.append(shift)
 	_positions.append(at)
 	_fill_widths.append(width)
 	_bars += 1
@@ -128,3 +132,8 @@ func drawn_position(index: int) -> Vector3:
 ## The width of bar `index`'s fill, in cells.
 func drawn_fill_width(index: int) -> float:
 	return _fill_widths[index]
+
+
+## How far bar `index`'s fill is slid along the bar from its centre, in cells.
+func drawn_fill_shift(index: int) -> float:
+	return _fill_shifts[index]

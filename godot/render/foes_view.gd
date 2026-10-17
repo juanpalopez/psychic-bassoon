@@ -205,11 +205,11 @@ func update(game: GameState, alpha: float) -> void:
 			head_y = GROUND + float(model.height)
 			_drawn_yaws[foe.type][index] = yaw
 		multimesh.set_instance_transform(index, Transform3D(basis, position))
-		var health := float(foe.hp) / maxf(float(foe.max_hp), 1.0)
+		var health := FoeBars.share(float(foe.hp), float(foe.max_hp))
 		var base: Color = (
 			Color.WHITE if _models.has(foe.type) else COLOURS.get(foe.type, FALLBACK_COLOUR)
 		)
-		var colour := base.darkened(HURT_DARKEN * (1.0 - clampf(health, 0.0, 1.0)))
+		var colour := base.darkened(HURT_DARKEN * (1.0 - health))
 		multimesh.set_instance_color(index, colour)
 		_drawn_positions[foe.type][index] = position
 		_drawn_scales[foe.type][index] = scale
