@@ -87,6 +87,54 @@ func test_tape_covers_a_detour_that_leaves_the_road_and_joins_it_again() -> void
 	assert_gt(checked, 0, "found a map whose detour starts on the main road")
 
 
+func test_every_tape_triangle_faces_up_the_same_way() -> void:
+	for map in _tape_maps():
+		var faces: PackedVector3Array = TapeBuilder.build(map[1].routes, map[0]).get_faces()
+		var signs := {}
+		for i in range(0, faces.size(), 3):
+			var normal := (faces[i + 1] - faces[i]).cross(faces[i + 2] - faces[i])
+			signs[signf(normal.y)] = true
+		assert_eq(signs.keys(), [signs.keys()[0]], "seed %d winds both ways" % map[0])
+		assert_false(signs.has(0.0), "seed %d has a flat-on-edge triangle" % map[0])
+
+
+func test_overlapping_tape_strips_never_share_a_height() -> void:
+	for map in _tape_maps():
+		var faces: PackedVector3Array = TapeBuilder.build(map[1].routes, map[0]).get_faces()
+		var fights: Array[Vector2] = []
+		for route in map[1].routes:
+			for cell: Vector2i in route:
+				var centre := BoardSpace.cell_to_world(cell.x, cell.y)
+				for dx in [-0.41, -0.207, 0.013, 0.229, 0.437]:
+					for dz in [-0.43, -0.211, 0.017, 0.233, 0.419]:
+						var point := Vector2(centre.x + dx, centre.z + dz)
+						var heights := {}
+						for i in range(0, faces.size(), 3):
+							var a := Vector2(faces[i].x, faces[i].z)
+							var b := Vector2(faces[i + 1].x, faces[i + 1].z)
+							var c := Vector2(faces[i + 2].x, faces[i + 2].z)
+							if Geometry2D.point_is_inside_triangle(point, a, b, c):
+								var y := snappedf(faces[i].y, 1e-5)
+								if heights.has(y):
+									fights.append(point)
+								heights[y] = true
+		assert_eq(fights, [] as Array[Vector2], "seed %d z-fights" % map[0])
+
+
+## Seeds and maps to check the tape on: the three usual boards and up to three with a detour.
+func _tape_maps() -> Array:
+	var maps := []
+	for map_seed in [1, 7920, 15839]:
+		maps.append([map_seed, MapGen.generate(map_seed, RULES.GRID_COLS, RULES.GRID_ROWS)])
+	var detours := 0
+	for map_seed in range(1, 40):
+		var map := MapGen.generate(map_seed, RULES.GRID_COLS, RULES.GRID_ROWS, true)
+		if map.routes.size() >= 2 and detours < 3:
+			maps.append([map_seed, map])
+			detours += 1
+	return maps
+
+
 func test_the_tape_lies_on_the_mat_under_the_road_height() -> void:
 	var box := (_board(1).get_node("Tape") as MeshInstance3D).mesh.get_aabb()
 	assert_almost_eq(box.position.y, TapeBuilder.HEIGHT, 1e-6, "above the mat")

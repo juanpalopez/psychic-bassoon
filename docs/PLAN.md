@@ -151,7 +151,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 - **Palette.** Cutting-mat green and kraft brown for the board and the defenders, white pencil outlines for sockets, saturated purple for everything the Blot touches, one accent colour per tower.
 - **Animation.** Characters and projectiles step at 12 fps like stop-motion (stepped keyframes, no continuous interpolation) while the camera renders at 60.
 - **Readability.** Silhouette and material tell the foe type (newsprint goblin, tissue-and-wire moth, cardboard orc, filter-paper shaman, shipping-box golem); each tier adds a visible part; tier 4 shows its specialisation.
-- **Reference.** `docs/art/reference-wide-road.jpg` was a reference for the earlier fantasy look and is superseded: keep it only for HUD placement (lives, gold, wave counter, tower buttons). The road is masking tape on the cutting mat (owner, 2026-10-17; the dirt ribbon of #147 is dropped): one strip per straight run of each route, built at load time, with paper trees, shrubs and desk clutter scattered where nothing is played (`docs/lessons/2026-10-17-papercraft-board-look.md`).
+- **Reference.** `docs/art/reference-wide-road.jpg` was a reference for the earlier fantasy look and is superseded: keep it only for HUD placement (lives, gold, wave counter, tower buttons). The road is masking tape on the cutting mat (owner, 2026-10-17; the dirt ribbon of #147 is dropped): taped once per stretch of road, one strip per straight run, built at load time, with paper trees, shrubs and desk clutter scattered where nothing is played (`docs/lessons/2026-10-17-papercraft-board-look.md`).
 
 **Asset pipeline**
 
