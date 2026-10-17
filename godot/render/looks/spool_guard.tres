@@ -7,4 +7,5 @@ script = ExtResource("1_look")
 body_colour = Color(0, 0.737, 0.831, 1)
 pip_colour = Color(0.9, 1, 1, 1)
 model_path = "res://assets/models/towers/spool_guard.glb"
-model_scale = 0.6
+model_scale = 1.0
+aims = true

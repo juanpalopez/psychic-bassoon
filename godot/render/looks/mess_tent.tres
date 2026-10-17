@@ -7,4 +7,4 @@ script = ExtResource("1_look")
 body_colour = Color(0.298, 0.686, 0.314, 1)
 pip_colour = Color(0.9, 1, 0.9, 1)
 model_path = "res://assets/models/towers/kitchen_mess_tent.glb"
-model_scale = 0.55
+model_scale = 1.0
