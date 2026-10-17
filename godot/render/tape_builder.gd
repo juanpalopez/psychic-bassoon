@@ -9,8 +9,9 @@ class_name TapeBuilder
 extends RefCounted
 
 const WIDTH := 0.84
-## The height of the first strip; later strips lie a step higher where they overlap, all
-## under Board.ROAD_HEIGHT. A step is a few depth-buffer steps at the camera's distance.
+## The height of the lowest layer. Strips that overlap take different layers (`_free_layer`),
+## a step apart, all under Board.ROAD_HEIGHT; a step is a few depth-buffer steps at the
+## camera's distance.
 const HEIGHT := 0.004
 const STEP := 0.0018
 const LAYERS := 4
