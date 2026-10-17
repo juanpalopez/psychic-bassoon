@@ -56,6 +56,8 @@ var _models := {}
 ## The way each foe last walked (radians about the vertical axis), by foe id.
 var _yaws := {}
 var _drawn_yaws := {}
+## The health bars over the hurt foes (one MultiMesh for all of them).
+var _bars: FoeBars
 
 
 func _init(models: Dictionary = MODELS) -> void:
@@ -67,7 +69,12 @@ func _init(models: Dictionary = MODELS) -> void:
 		if mesh != null:
 			var box := mesh.get_aabb()
 			var scale := float(models[type].height) / box.size.y
-			_models[type] = {"mesh": mesh, "scale": scale, "foot": -box.position.y * scale}
+			_models[type] = {
+				"mesh": mesh,
+				"scale": scale,
+				"foot": -box.position.y * scale,
+				"height": float(models[type].height),
+			}
 			_make_tintable(mesh)
 			multimesh.mesh = mesh
 		else:
@@ -92,6 +99,8 @@ func _init(models: Dictionary = MODELS) -> void:
 		_drawn_scales[type] = _filled(0.0)
 		_drawn_colours[type] = _filled(Color.WHITE)
 		_drawn_yaws[type] = _filled(0.0)
+	_bars = FoeBars.new()
+	add_child(_bars)
 
 
 ## A list of `MAX_PER_TYPE` copies of `value`.
@@ -145,6 +154,8 @@ func reset() -> void:
 	_previous.clear()
 	_current.clear()
 	_yaws.clear()
+	_bars.begin()
+	_bars.finish()
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = 0
 
@@ -165,6 +176,7 @@ func update(game: GameState, alpha: float) -> void:
 	var blend := clampf(alpha, 0.0, 1.0)
 	for type in _used:
 		_used[type] = 0
+	_bars.begin()
 	for foe in game.foes:
 		var multimesh: MultiMesh = _multimeshes.get(foe.type)
 		if multimesh == null:
@@ -180,6 +192,7 @@ func update(game: GameState, alpha: float) -> void:
 		var scale := foe.radius / CAPSULE_RADIUS
 		var basis := Basis.from_scale(Vector3(scale, scale, scale))
 		position.y = GROUND + CAPSULE_HEIGHT * scale / 2.0
+		var head_y := GROUND + CAPSULE_HEIGHT * scale
 		if _models.has(foe.type):
 			var model: Dictionary = _models[foe.type]
 			var walked := to - from
@@ -189,6 +202,7 @@ func update(game: GameState, alpha: float) -> void:
 			scale = model.scale
 			basis = Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(scale, scale, scale))
 			position.y = GROUND + float(model.foot)
+			head_y = GROUND + float(model.height)
 			_drawn_yaws[foe.type][index] = yaw
 		multimesh.set_instance_transform(index, Transform3D(basis, position))
 		var health := float(foe.hp) / maxf(float(foe.max_hp), 1.0)
@@ -200,6 +214,9 @@ func update(game: GameState, alpha: float) -> void:
 		_drawn_positions[foe.type][index] = position
 		_drawn_scales[foe.type][index] = scale
 		_drawn_colours[foe.type][index] = colour
+		if FoeBars.is_shown(foe.hp, foe.max_hp, foe.alive):
+			_bars.add(Vector3(position.x, head_y, position.z), health, foe.type)
+	_bars.finish()
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = _used[type]
 

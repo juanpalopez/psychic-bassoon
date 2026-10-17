@@ -39,13 +39,13 @@ func _at(view: FoesView, type: String, index: int) -> Vector3:
 
 func test_there_is_one_multimesh_per_foe_type_and_no_node_per_foe() -> void:
 	var view := _view()
-	assert_eq(view.get_child_count(), FOES.FOE_IDS.size())
+	assert_eq(view.get_child_count(), FOES.FOE_IDS.size() + 1, "the types and the bars")
 	for type in FOES.FOE_IDS:
 		assert_true(view.get_node(type) is MultiMeshInstance3D, type)
 		assert_eq(_multimesh(view, type).instance_count, FoesView.MAX_PER_TYPE)
 		assert_eq(view.visible_count(type), 0)
 	view.update(_game_with([_foe(0, "scrapGoblin", 4.5, 3.5)] as Array[Foe]), 1.0)
-	assert_eq(view.get_child_count(), FOES.FOE_IDS.size(), "still no node per foe")
+	assert_eq(view.get_child_count(), FOES.FOE_IDS.size() + 1, "still no node per foe")
 
 
 func test_each_foe_is_drawn_in_its_types_multimesh() -> void:
@@ -209,3 +209,21 @@ func test_a_foe_that_appears_mid_run_starts_in_place_beside_a_walking_one() -> v
 	assert_almost_eq(_at(view, "scrapGoblin", 0).x, BoardSpace.point_to_world(4.5, 3.0).x, 1e-5)
 	assert_almost_eq(_at(view, "scrapGoblin", 1).x, BoardSpace.point_to_world(2.5, 0.5).x, 1e-5)
 	assert_almost_eq(_at(view, "scrapGoblin", 1).z, BoardSpace.point_to_world(2.5, 0.5).z, 1e-5)
+
+
+func _bars(view: FoesView) -> FoeBars:
+	return view.get_node("HealthBars") as FoeBars
+
+
+func test_hurt_foes_get_a_bar_and_healthy_or_dying_ones_do_not() -> void:
+	var view := _view()
+	var dying := _foe(2, "scrapGoblin", 4.5, 5.5, 5, 20)
+	dying.alive = false
+	var foes: Array[Foe] = [
+		_foe(0, "scrapGoblin", 4.5, 3.5, 20, 20),
+		_foe(1, "scrapGoblin", 4.5, 4.5, 10, 20),
+		dying,
+		_foe(3, "cardboardGolem", 2.5, 6.5, 100, 400),
+	]
+	view.update(_game_with(foes), 1.0)
+	assert_eq(_bars(view).bar_count(), 2)
