@@ -23,6 +23,8 @@ var _next_voice := 0
 var _last_msec := {}
 var _confirmed := false
 var _music_starts := 0
+## A tune was chosen while muted and has not been started.
+var _music_stale := false
 
 
 func _ready() -> void:
@@ -59,6 +61,9 @@ func set_muted(value: bool) -> void:
 	_muted = value
 	if _music != null:
 		_music.stream_paused = value
+		# a tune chosen while muted was never started; start it now
+		if not value and _music_stale:
+			_apply_music()
 	if value:
 		for voice in _voices:
 			voice.stop()
@@ -81,9 +86,9 @@ func any_voice_playing() -> bool:
 	return false
 
 
-## Whether the music player is paused (by the mute).
+## Whether the music is held back by the mute: paused, or chosen and not started yet.
 func is_music_paused() -> bool:
-	return _music.stream_paused
+	return _music.stream_paused or (_muted and _music_stale)
 
 
 ## How many effects started (the throttled and muted ones do not count).
@@ -126,12 +131,20 @@ func _apply_music() -> void:
 	var stream := _load("music/music_" + _music_key)
 	if stream is AudioStreamOggVorbis:
 		(stream as AudioStreamOggVorbis).loop = true
+	if _muted:
+		# starting the player even for an instant is audible on the web, so a muted game
+		# only remembers the tune and starts it when the sound comes back
+		_music.stop()
+		_music.stream = stream
+		_music.stream_paused = true
+		_music_stale = true
+		return
+	_music_stale = false
 	_music.stream = stream
 	if stream != null:
 		_music_starts += 1
 		_music.play()
-	# play() clears a pause, so the mute is applied after it
-	_music.stream_paused = _muted
+	_music.stream_paused = false
 
 
 func _load(name: String) -> AudioStream:

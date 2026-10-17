@@ -70,6 +70,32 @@ func test_muting_silences_sounds_and_pauses_the_music() -> void:
 	assert_eq(player.playing_music(), "tier3_boss")
 
 
+func test_a_tune_chosen_while_muted_is_not_started_until_the_sound_returns() -> void:
+	var player := _player()
+	player.unlock()
+	player.set_music("tier1_planning")
+	player.set_muted(true)
+	var starts := player.music_starts()
+	player.set_music("tier2_wave")
+	player.set_music("tier1_planning")
+	player.set_music("tier3_boss")
+	assert_eq(player.music_starts(), starts, "no tune starts while muted, not even for an instant")
+	assert_false(player._music.playing, "nothing is playing")
+	player.set_muted(false)
+	assert_eq(player.music_starts(), starts + 1, "the current tune starts once on unmute")
+	assert_eq(player.playing_music(), "tier3_boss")
+
+
+func test_unmuting_without_a_new_tune_resumes_instead_of_restarting() -> void:
+	var player := _player()
+	player.unlock()
+	player.set_music("tier2_wave")
+	var starts := player.music_starts()
+	player.set_muted(true)
+	player.set_muted(false)
+	assert_eq(player.music_starts(), starts, "the same tune resumes where it paused")
+
+
 func test_muting_stops_effects_already_playing() -> void:
 	var player := _player()
 	player.unlock()
