@@ -22,18 +22,92 @@ func test_one_guard_is_drawn_for_each_live_guard_at_its_post() -> void:
 		assert_true(view.is_shown(guard.id))
 
 
-func test_a_fallen_guard_is_hidden_and_comes_back_with_the_raise() -> void:
+func test_a_fallen_guard_falls_then_is_hidden_and_comes_back_with_the_raise() -> void:
 	var game := GuardKit.game_with_tent()
 	var view := _view()
 	view.update(game)
 	var guard: Guard = game.guards[0]
 	guard.alive = false
 	view.update(game)
-	assert_false(view.is_shown(guard.id))
+	assert_eq(view.state_of(guard.id), "fall")
+	assert_eq(view.clip_of(guard.id), "fall")
+	assert_true(view.is_shown(guard.id), "drawn while it falls")
+	view.advance(GuardsView.FALL_SECONDS + 0.01)
+	assert_false(view.is_shown(guard.id), "hidden once the fall is over")
 	assert_true(view.is_shown(game.guards[1].id))
 	guard.alive = true
 	view.update(game)
 	assert_true(view.is_shown(guard.id))
+	assert_eq(view.clip_of(guard.id), "rise", "it springs back up")
+	assert_eq(view.state_of(guard.id), "idle")
+
+
+func test_the_health_bar_stays_square_to_the_camera_as_the_guard_turns() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var bar := view.get_child(0).get_node("Bar") as Node3D
+	assert_almost_eq(bar.global_transform.basis.x.dot(Vector3.RIGHT), 1.0, 1e-6)
+
+
+func test_the_guard_parts_stand_in_place_when_each_clip_starts() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var model := view.get_child(0).get_node("Model")
+	var fresh := ModelLoader.scene(GuardsView.MODEL).instantiate()
+	var player := StopMotion.player_of(model)
+	for clip in ["idle", "strike", "fall"]:
+		player.play(clip)
+		player.seek(0.0, true)
+		for part_name in ["Guard_Body", "Guard_SwordArm", "Guard_ShieldArm"]:
+			var part := model.find_child(part_name) as Node3D
+			var rest := fresh.find_child(part_name) as Node3D
+			assert_almost_eq(
+				part.position.distance_to(rest.position), 0.0, 1e-3, "%s %s" % [clip, part_name]
+			)
+	fresh.free()
+
+
+func test_a_guard_is_the_papercraft_model_and_idles() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	for guard in game.guards:
+		assert_eq(view.clip_of(guard.id), "idle")
+	var model := view.get_child(0).get_node_or_null("Model")
+	assert_not_null(model, "the guard model, not the capsule")
+
+
+func test_a_guard_holding_a_foe_strikes_until_it_is_free() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var guard: Guard = game.guards[0]
+	guard.foe_id = 7
+	view.update(game)
+	assert_eq(view.clip_of(guard.id), "strike")
+	view.update(game)
+	assert_eq(view.clip_of(guard.id), "strike", "the strike keeps looping")
+	guard.foe_id = -1
+	view.update(game)
+	assert_eq(view.clip_of(guard.id), "idle")
+
+
+func test_a_guard_faces_up_the_road() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var guard: Guard = game.guards[0]
+	var route: Route = game.routes[0]
+	var here := route.position_at(guard.post)
+	var ahead := route.position_at(guard.post - GuardsView.LOOK_AHEAD)
+	var toward := (
+		BoardSpace.point_to_world(ahead.x, ahead.y) - BoardSpace.point_to_world(here.x, here.y)
+	)
+	var model := view.get_child(0).get_node("Model") as Node3D
+	var facing := model.global_transform.basis.z
+	assert_gt(facing.dot(toward.normalized()), 0.99)
 
 
 func test_the_health_bar_follows_the_guards_health() -> void:
