@@ -105,6 +105,39 @@ func test_the_clips_step_like_stop_motion() -> void:
 				)
 
 
+func test_the_clips_are_keyed_twelve_times_a_second() -> void:
+	for id in TOWERS.TOWER_IDS:
+		var player := StopMotion.player_of(_view(0, id))
+		for clip in player.get_animation_list():
+			var animation := player.get_animation(clip)
+			for track in animation.get_track_count():
+				for k in animation.track_get_key_count(track):
+					var frames := animation.track_get_key_time(track, k) * 12.0
+					assert_almost_eq(frames, roundf(frames), 1e-3, "%s %s key %d" % [id, clip, k])
+
+
+func test_the_parts_stand_where_the_model_puts_them_when_a_clip_starts() -> void:
+	# a part a clip leaves alone must not drop to the model's origin (Godot resets channels
+	# that some clip keys when the playing clip has no track for them)
+	for id in TOWERS.TOWER_IDS:
+		var look := TowerLooks.for_type(id)
+		var fresh := ModelLoader.scene(look.model_path).instantiate()
+		var view := _view(0, id)
+		var player := StopMotion.player_of(view)
+		for clip in ["idle", ACTIONS[id]]:
+			player.play(clip)
+			player.seek(0.0, true)
+			for part in _meshes(view.get_node("Model")):
+				var rest := fresh.find_child(part.name) as Node3D
+				assert_almost_eq(
+					part.position.distance_to(rest.position),
+					0.0,
+					1e-3,
+					"%s %s %s" % [id, clip, part.name]
+				)
+		fresh.free()
+
+
 func test_a_shooting_tower_plays_its_shot_then_idles_again() -> void:
 	var view := _view(0, "thimbleMortar")
 	view.fire(view.global_position + Vector3(3, 0, 0))
@@ -116,23 +149,24 @@ func test_a_shooting_tower_plays_its_shot_then_idles_again() -> void:
 	assert_eq(view.clip(), "idle")
 
 
-func test_an_aiming_tower_turns_its_head_to_what_it_shot() -> void:
+func test_an_aiming_tower_turns_to_what_it_shot_and_keeps_its_aim_while_it_fires() -> void:
 	for id in ["spoolGuard", "thimbleMortar"]:
 		var view := _view(0, id)
-		var head := StopMotion.part(view, "_Head")
-		assert_not_null(head, id)
+		var aim := StopMotion.part(view, "_Aim")
+		assert_not_null(aim, id)
+		var player := StopMotion.player_of(view)
 		view.fire(view.global_position + Vector3(4, 0, 0))
-		assert_almost_eq(head.rotation.y, PI / 2.0, 1e-4, "%s faces +x" % id)
+		player.advance(1.0 / 12.0)
+		assert_almost_eq(aim.rotation.y, PI / 2.0, 1e-4, "%s faces +x while it fires" % id)
 		view.fire(view.global_position + Vector3(0, 0, -4))
-		assert_almost_eq(absf(head.rotation.y), PI, 1e-4, "%s faces -z" % id)
+		player.advance(3.0 / 12.0)
+		assert_almost_eq(absf(aim.rotation.y), PI, 1e-4, "%s faces -z" % id)
 
 
-func test_a_tower_that_does_not_aim_keeps_its_head() -> void:
-	var view := _view(0, "prismSpire")
-	var head := StopMotion.part(view, "_Head")
-	var before := head.rotation
-	view.fire(view.global_position + Vector3(4, 0, 0))
-	assert_almost_eq(head.rotation.y, before.y, 1e-6)
+func test_a_tower_that_does_not_aim_has_no_aim_pivot() -> void:
+	for id in ["prismSpire", "guardTent", "messTent"]:
+		assert_null(StopMotion.part(_view(0, id), "_Aim"), id)
+		assert_false(TowerLooks.for_type(id).aims, id)
 
 
 func test_the_model_grows_a_little_each_tier() -> void:

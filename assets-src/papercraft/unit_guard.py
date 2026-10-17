@@ -85,7 +85,7 @@ def build_guard(c, at, name="Guard", facing=0.0):
 
 def anim_guard(name="Guard", key="guard"):
     B, S, H = name + "_Body", name + "_SwordArm", name + "_ShieldArm"
-    CLIPS[key] = [("idle", 24, True), ("strike", 8, True), ("strike2", 8, True), ("fall", 12, False), ("rise", 8, False)]
+    CLIPS[key] = [("idle", 24, True), ("strike", 8, True), ("fall", 12, False), ("rise", 8, False)]
     track(key, "idle", B, [(f, (0, 0, 0.012 * abs(math.sin(math.tau * f / 24))), (0, 2.5 * math.sin(math.tau * f / 24), 0), None) for f in range(24)])
     track(key, "idle", S, [(f, None, (6 * math.sin(math.tau * f / 24 + 1), 0, 0), None) for f in range(24)])
     track(key, "idle", H, [(f, None, (-4 * math.sin(math.tau * f / 24), 0, 0), None) for f in range(24)])
@@ -94,8 +94,7 @@ def anim_guard(name="Guard", key="guard"):
     bk = [(0, None, None, None), (2, (0, 0.02, 0), (-4, 0, 0), None), (3, (0, -0.07, 0), (10, 0, 0), None),
           (4, (0, -0.05, 0), (7, 0, 0), None), (6, (0, -0.01, 0), (2, 0, 0), None), (7, None, None, None)]
     hk = [(0, None, None, None), (2, None, (-10, 0, 0), None), (3, None, (14, 0, 0), None), (6, None, None, None)]
-    for clip in ("strike", "strike2"):
-        track(key, clip, S, sk); track(key, clip, B, bk); track(key, clip, H, hk)
+    track(key, "strike", S, sk); track(key, "strike", B, bk); track(key, "strike", H, hk)
     # fall: knocked flat on its back like a cut-out, a little bounce, arms flung out
     track(key, "fall", B, [(0, None, None, None), (1, (0, 0.03, 0.02), (-25, 0, 0), None), (2, (0, 0.06, 0.0), (-60, 0, 0), None),
                            (3, (0, 0.08, 0.0), (-88, 0, 0), None), (4, (0, 0.08, 0.03), (-80, 0, 0), None),

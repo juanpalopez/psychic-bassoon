@@ -9,7 +9,7 @@ PS_TOP = 1.95       # top of the tube
 PS_MARBLE = 2.40    # marble centre
 
 
-def rolled_tube(p, z0, z1, r0, r1, col, edge, turns=1.06, segs=28, rows=4, grow=0.012):
+def rolled_tube(p, z0, z1, r0, r1, col, edge, turns=1.06, segs=24, rows=4, grow=0.012):
     """A sheet rolled into a tube: the radius grows a little each turn so the outer edge
     overlaps, leaving a real seam; both sides drawn (the inside darker)."""
     n = int(segs * turns)
@@ -55,7 +55,7 @@ def build_prism_spire(c, at):
     rolled_tube(b, 0.15, PS_TOP, 0.37, 0.31, BLUE, BLUE_E)
     # yellow paper bands, each with its own seam
     for (z, hgt, r) in ((0.32, 0.12, 0.372), (1.36, 0.10, 0.335), (1.80, 0.08, 0.322)):
-        rolled_tube(b, z, z + hgt, r + 0.006, r + 0.004, GOLD, GOLD_E, turns=1.04, segs=28, rows=1, grow=0.008)
+        rolled_tube(b, z, z + hgt, r + 0.006, r + 0.004, GOLD, GOLD_E, turns=1.04, segs=24, rows=1, grow=0.008)
     # the crown: the top of the roll cut into points, folded outward
     pts = 10
     for k in range(pts):
@@ -96,15 +96,15 @@ def build_prism_spire(c, at):
                 rad = 0.24 * (1 - u) + rad * u
                 z = 0.03 * (1 - u) + z * u
             pts.append((rad * math.cos(a), rad * math.sin(a), z))
-        h.tube(pts, 0.016, 6, WIRE, "PK_MetalVC")
+        h.tube(pts, 0.016, 5, WIRE, "PK_MetalVC")
         h.sphere(pts[-1], 0.022, 6, 4, WIRE, "PK_MetalVC")
     head = rest(h.build(c, (0, 0, PS_TOP), base))
 
     # ---------------- Marble ----------------
     m = Part("PrismSpire_Marble")
-    m.sphere((0, 0, 0), 0.25, 16, 10, (1, 1, 1, 0), "PK_Glass")
+    m.sphere((0, 0, 0), 0.25, 14, 8, (1, 1, 1, 0), "PK_Glass")
     # the cat's-eye vane: a twisted ribbon through the middle, glowing
-    rows = 8
+    rows = 6
     for k in range(rows):
         t0 = k / rows; t1 = (k + 1) / rows
         def V(t, side):

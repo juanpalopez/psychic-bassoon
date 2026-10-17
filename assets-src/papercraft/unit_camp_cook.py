@@ -98,7 +98,7 @@ def build_camp_cook(c, at, name="CampCook", facing=0.0):
 
 def anim_camp_cook(name="CampCook", key="camp_cook"):
     B, L, W = name + "_Body", name + "_LadleArm", name + "_BowlArm"
-    CLIPS[key] = [("idle", 24, True), ("walk", 12, True), ("walk2", 12, True), ("attack", 8, True), ("splash", 12, False),
+    CLIPS[key] = [("idle", 24, True), ("walk", 12, True), ("attack", 8, True), ("splash", 12, False),
                   ("fall", 12, False), ("rise", 8, False)]
     # idle: stirs the bowl with little circles of the ladle, a contented sway
     track(key, "idle", L, [(f, None, (25 + 10 * math.cos(math.tau * f / 8), 0, 30 + 12 * math.sin(math.tau * f / 8)), None) for f in range(24)])
@@ -109,10 +109,9 @@ def anim_camp_cook(name="CampCook", key="camp_cook"):
     for f in range(12):
         ph = math.tau * f / 12
         wk.append((f, (0, 0, 0.03 * abs(math.sin(ph))), (0, 8 * math.sin(ph), 4 * math.sin(ph)), None))
-    for clip in ("walk", "walk2"):
-        track(key, clip, B, wk)
-        track(key, clip, L, [(f, None, (-25 * math.sin(math.tau * f / 12), 0, 0), None) for f in range(12)])
-        track(key, clip, W, [(f, None, (25 * math.sin(math.tau * f / 12), 0, 0), None) for f in range(12)])
+    track(key, "walk", B, wk)
+    track(key, "walk", L, [(f, None, (-25 * math.sin(math.tau * f / 12), 0, 0), None) for f in range(12)])
+    track(key, "walk", W, [(f, None, (25 * math.sin(math.tau * f / 12), 0, 0), None) for f in range(12)])
     # attack: a ladle bonk over the head
     track(key, "attack", L, [(0, None, None, None), (1, None, (-70, 0, 10), None), (2, None, (-120, 0, 15), None),
                              (3, None, (40, 0, 0), None), (4, None, (30, 0, 0), None), (6, None, (5, 0, 0), None), (7, None, None, None)])

@@ -60,8 +60,10 @@ func update(game: GameState) -> void:
 		node.position = Vector3(world.x, GROUND, world.z)
 		var ahead := route.position_at(maxf(guard.post - LOOK_AHEAD, 0.0))
 		var toward := BoardSpace.point_to_world(ahead.x, ahead.y) - world
+		var turned := node.get_child(0) as Node3D
 		if toward.length() > 1e-6:
-			node.rotation.y = atan2(toward.x, toward.z)
+			# the model turns; the root and its health bar stay square to the camera
+			turned.rotation.y = atan2(toward.x, toward.z)
 		_follow(guard, node)
 		var bar := node.get_node("Bar") as Node3D
 		bar.visible = guard.alive
@@ -170,6 +172,7 @@ func _make() -> Node3D:
 	else:
 		# the fallback when the model file is missing
 		var body := MeshInstance3D.new()
+		body.name = "Model"
 		var capsule := CapsuleMesh.new()
 		capsule.radius = BODY_RADIUS
 		capsule.height = BODY_HEIGHT

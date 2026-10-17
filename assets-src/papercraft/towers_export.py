@@ -8,8 +8,9 @@
 #   4 thread, 5 corrugated card) so that a part is one draw call (render/paper/craft_vc);
 # - each clip becomes an NLA track of that name on every part it moves, keyed every frame it
 #   changes at 12 fps with constant interpolation, so glTF gets STEP samplers and Godot plays
-#   it stepped like stop-motion. A clip keys only the channels it changes, so the game can
-#   still turn a Head that a clip does not rotate.
+#   it stepped like stop-motion (import the GLBs at animation/fps=12). Every clip keys every
+#   channel any clip moves (Godot resets the others), and an aiming tower gets an `*_Aim`
+#   empty above its Head that no clip moves, for the game to turn.
 import bpy, math, os
 from mathutils import Vector, Euler
 
@@ -21,6 +22,7 @@ for mod in ("tower_spool_guard.py", "tower_thimble_mortar.py", "tower_prism_spir
             "tower_mess_tent.py", "unit_guard.py", "unit_camp_cook.py"):
     NS["load_tower"](mod)
 GODOT = os.path.normpath(os.path.join(HERE, "..", "..", "godot", "assets", "models"))
+AIMS = ("spool_guard", "thimble_mortar")
 KIND = {"PK_PaperVC": 0, "PK_WoodVC": 1, "PK_MetalVC": 2, "PK_ThreadVC": 4, "PK_Corrugated": 5}
 ITEMS = [
     ("towers/spool_guard.glb", "build_spool_guard", "anim_spool_guard", {}, "spool_guard"),
@@ -61,11 +63,44 @@ def craft(o):
         p.material_index = s
 
 
-def clips_to_nla(objs, key):
+def add_aim_pivot(objs, key):
+    """Give an aiming tower an `*_Aim` empty above its Head, at the Head's rest place. No clip
+    moves it, so the game can turn it to the target while the Head's clips play."""
+    if key not in AIMS:
+        return
     rest = NS["REST"]
+    head_name = next(n for n in objs if n.endswith("_Head"))
+    head = objs[head_name]
+    aim = bpy.data.objects.new(head_name.replace("_Head", "_Aim"), None)
+    head.users_collection[0].objects.link(aim)
+    aim.parent = head.parent
+    aim.location = head.location.copy()
+    aim.rotation_euler = head.rotation_euler.copy()
+    head.parent = aim
+    head.location = (0.0, 0.0, 0.0)
+    head.rotation_euler = (0.0, 0.0, 0.0)
+    rest[head_name] = ((0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
+
+
+def clips_to_nla(objs, key):
+    """Each clip becomes an NLA track named after it on every animated part. Godot's mixer
+    resets a channel that some clip keys to zero when the playing clip leaves it out, so every
+    clip keys every channel that any clip moves on every animated part (at rest when the clip
+    leaves it alone)."""
+    rest = NS["REST"]
+    clips = NS["CLIPS"][key]
+    anims = NS["ANIMS"][key]
+    used = {}
+    for clip, length, loop in clips:
+        for name, keys in anims.get(clip, {}).items():
+            for ch, i in (("location", 1), ("rotation_quaternion", 2), ("scale", 3)):
+                if any(k[i] is not None for k in keys):
+                    used.setdefault(name, set()).add(ch)
     for name, o in objs.items():
         o.rotation_mode = "QUATERNION"
         o.animation_data_clear()
+        if name not in used:
+            continue
         ad = o.animation_data_create()
         rl, rr = Vector(rest[name][0]), rest[name][1]
         def pose(loc, rot, scl):
@@ -73,14 +108,9 @@ def clips_to_nla(objs, key):
             r = rot or (0, 0, 0)
             o.rotation_quaternion = Euler((rr[0] + math.radians(r[0]), rr[1] + math.radians(r[1]), rr[2] + math.radians(r[2])), "XYZ").to_quaternion()
             o.scale = Vector(scl or (1, 1, 1))
-        for clip, length, loop in NS["CLIPS"][key]:
-            keys = NS["ANIMS"][key].get(clip, {}).get(name)
-            if not keys:
-                continue
-            chans = [ch for ch, i in (("location", 1), ("rotation_quaternion", 2), ("scale", 3)) if any(k[i] is not None for k in keys)]
-            if not chans:
-                continue
-            keys = sorted(keys, key=lambda k: k[0])
+        chans = sorted(used[name])
+        for clip, length, loop in clips:
+            keys = sorted(anims.get(clip, {}).get(name) or [(0, None, None, None)], key=lambda k: k[0])
             end = keys[0] if loop else keys[-1]
             if keys[-1][0] < length:
                 keys = keys + [(length, end[1], end[2], end[3])]
@@ -128,16 +158,18 @@ def export_all(only=None):
             NS[anim]()
         for o in objs.values():
             craft(o)
+        add_aim_pivot(objs, key)
         clips_to_nla(objs, key)
         for o in sc.objects:
-            o.select_set(o.name in objs)
+            o.select_set(True)
         bpy.context.view_layer.objects.active = list(objs.values())[0]
         path = os.path.join(GODOT, rel)
         os.makedirs(os.path.dirname(path), exist_ok=True)
         opts = dict(filepath=path, export_format="GLB", use_selection=True, use_active_scene=True, export_yup=True,
                     export_apply=False, export_animations=True, export_animation_mode="NLA_TRACKS",
                     export_force_sampling=False, export_frame_range=False, export_anim_slide_to_zero=False,
-                    export_optimize_animation_size=False, export_bake_animation=False, export_vertex_color="NAME",
+                    export_optimize_animation_size=False, export_optimize_animation_keep_anim_object=True,
+                    export_optimize_animation_keep_anim_armature=True, export_bake_animation=False, export_vertex_color="NAME",
                     export_vertex_color_name="Col", export_all_vertex_colors=False, export_materials="EXPORT",
                     export_cameras=False, export_lights=False, export_texcoords=True, export_normals=True,
                     export_tangents=False, export_morph=False, export_skins=False, export_extras=False,

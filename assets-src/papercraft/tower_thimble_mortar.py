@@ -20,15 +20,15 @@ def build_thimble_mortar(c, at):
     b = Part("ThimbleMortar_Base")
     side = [1, 3, 5]
     b.lathe([(0.0, 0.0), (0.62, 0.0), (0.62, 0.066), (0.612, 0.069), (0.612, 0.131), (0.62, 0.134),
-             (0.62, 0.20), (0.45, 0.20), (0.44, 0.20), (0.0, 0.20)], 28, KRAFT,
+             (0.62, 0.20), (0.45, 0.20), (0.44, 0.20), (0.0, 0.20)], 20, KRAFT,
             colf=None, uv_scale=1.0, smooth=False)
     # recolour/remat the drum sides as corrugated board (rebuilt below with the material)
     b.bm.free(); b = Part("ThimbleMortar_Base")
-    b.lathe([(0.0, 0.0), (0.62, 0.0)], 28, CARD, smooth=False)
-    b.lathe([(0.62, 0.0), (0.62, 0.066)], 28, CARD, "PK_Corrugated", uv_scale=1.0)
-    b.lathe([(0.62, 0.066), (0.612, 0.069), (0.612, 0.131), (0.62, 0.134)], 28, KRAFT_D, uv_scale=1.0)
-    b.lathe([(0.62, 0.134), (0.62, 0.20)], 28, CARD, "PK_Corrugated", uv_scale=1.0)
-    b.lathe([(0.62, 0.20), (0.455, 0.20), (0.44, 0.20), (0.0, 0.20)], 28, KRAFT,
+    b.lathe([(0.0, 0.0), (0.62, 0.0)], 20, CARD, smooth=False)
+    b.lathe([(0.62, 0.0), (0.62, 0.066)], 20, CARD, "PK_Corrugated", uv_scale=1.0)
+    b.lathe([(0.62, 0.066), (0.612, 0.069), (0.612, 0.131), (0.62, 0.134)], 20, KRAFT_D, uv_scale=1.0)
+    b.lathe([(0.62, 0.134), (0.62, 0.20)], 20, CARD, "PK_Corrugated", uv_scale=1.0)
+    b.lathe([(0.62, 0.20), (0.455, 0.20), (0.44, 0.20), (0.0, 0.20)], 20, KRAFT,
             colf=lambda j, i, a: PENCIL if j == 1 else KRAFT, smooth=False)
     # paper pellets piled at the back left
     for k, (x, y, z, r) in enumerate([(-0.40, 0.30, 0.27, 0.075), (-0.27, 0.40, 0.27, 0.07), (-0.47, 0.15, 0.27, 0.07),
@@ -51,7 +51,7 @@ def build_thimble_mortar(c, at):
     # ---------------- Head: copper coin, cheeks, matchstick axle ----------------
     h = Part("ThimbleMortar_Head")
     h.lathe([(0.0, 0.0), (0.40, 0.0), (0.405, 0.012), (0.40, 0.03), (0.37, 0.03), (0.365, 0.026),
-             (0.31, 0.026), (0.305, 0.03), (0.0, 0.03)], 28, COPPER, "PK_MetalVC",
+             (0.31, 0.026), (0.305, 0.03), (0.0, 0.03)], 20, COPPER, "PK_MetalVC",
             colf=lambda j, i, a: COPPER_D if j in (5,) else COPPER, smooth=False)
     TZ = 0.47 * TM_S
     cheek = [(-0.34, 0.03), (0.34, 0.03), (0.17 * TM_S, TZ - 0.02)]
@@ -80,7 +80,7 @@ def build_thimble_mortar(c, at):
         if j <= 13:
             return STEEL
         return STEEL_IN
-    t.lathe(prof, 24, STEEL, "PK_MetalVC", colf=tcol)
+    t.lathe(prof, 20, STEEL, "PK_MetalVC", colf=tcol)
     t.disc(0.19 * TM_S, 0.0, 16, STEEL_IN, mat="PK_MetalVC")
     t.crumple((0.0, 0.0, 0.22 * TM_S), 0.14 * TM_S, NEWS, seed=21, segs=8, rings=6)
     barrel = t.build(c, (0, 0, TZ), head)

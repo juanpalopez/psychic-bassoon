@@ -19,14 +19,14 @@ def build_spool_guard(c, at):
 
     # ---------------- Base: the spool ----------------
     b = Part("SpoolGuard_Base")
-    b.lathe([(0.0, 0.0), (0.60, 0.0), (0.66, 0.035), (0.66, 0.10), (0.61, 0.135), (0.42, 0.145)], 24, WOOD,
+    b.lathe([(0.0, 0.0), (0.60, 0.0), (0.66, 0.035), (0.66, 0.10), (0.61, 0.135), (0.42, 0.145)], 20, WOOD,
             "PK_WoodVC", colf=lambda j, i, a: WOOD_E if j in (1, 2, 3) else WOOD)
     # wound thread: a slight bulge; the windings are drawn by the thread shader
     N = 6; z0, z1 = 0.145, 0.855
     prof = [(0.40 + 0.026 * math.sin(math.pi * k / N), z0 + (z1 - z0) * k / N) for k in range(N + 1)]
-    b.lathe(prof, 24, RED, "PK_ThreadVC")
+    b.lathe(prof, 20, RED, "PK_ThreadVC")
     b.lathe([(0.42, 0.855), (0.61, 0.865), (0.66, 0.90), (0.66, 0.965), (0.60, 1.0), (0.10, 1.0),
-             (0.085, 0.985), (0.085, 0.93), (0.0, 0.93)], 24, WOOD, "PK_WoodVC",
+             (0.085, 0.985), (0.085, 0.93), (0.0, 0.93)], 20, WOOD, "PK_WoodVC",
             colf=lambda j, i, a: HOLE if j >= 5 else (WOOD_E if j in (1, 2, 3) else WOOD))
     # the printed paper label on the top flange: a red rim, a cream band with print
     def label(j, i, a):
@@ -35,7 +35,7 @@ def build_spool_guard(c, at):
         if j == 1:
             return INK if (i % 3 == 0 and -0.4 < math.sin(a)) else CREAM
         return CREAM
-    b.lathe([(0.60, 1.003), (0.565, 1.003), (0.47, 1.003), (0.36, 1.003)], 36, CREAM, colf=label, smooth=False)
+    b.lathe([(0.60, 1.003), (0.565, 1.003), (0.47, 1.003), (0.36, 1.003)], 24, CREAM, colf=label, smooth=False)
     # a loose thread end trailing onto the mat
     pts = []
     for k in range(14):
@@ -55,7 +55,7 @@ def build_spool_guard(c, at):
     # ---------------- Head: button, stock, bow ----------------
     h = Part("SpoolGuard_Head")
     h.lathe([(0.0, 0.0), (0.31, 0.0), (0.33, 0.02), (0.33, 0.045), (0.30, 0.062), (0.26, 0.062),
-             (0.25, 0.05), (0.0, 0.05)], 24, BTN, colf=lambda j, i, a: BTN_L if j in (2, 3, 4) else BTN)
+             (0.25, 0.05), (0.0, 0.05)], 16, BTN, colf=lambda j, i, a: BTN_L if j in (2, 3, 4) else BTN)
     for sx in (-1, 1):
         for sy in (-1, 1):
             h.disc(0.03, 0.0505, 10, BTN_H, M=Matrix.Translation((0.085 * sx, 0.085 * sy, 0)))
@@ -93,7 +93,7 @@ def build_spool_guard(c, at):
         h.tube([P @ Vector((s * 0.465, BY + 0.095, BZ + 0.018)), P @ NOCK], 0.007, 5, PAPER)
     # a rolled-newspaper quiver with spare darts
     Q = G @ Matrix.Translation((0.2, 0.16, 0.06))
-    h.lathe([(0.05, 0.0), (0.05, 0.24), (0.044, 0.24), (0.044, 0.02)], 14, NEWS, M=Q,
+    h.lathe([(0.05, 0.0), (0.05, 0.24), (0.044, 0.24), (0.044, 0.02)], 10, NEWS, M=Q,
             colf=lambda j, i, a: PRINT if (i % 4 == 0 and j == 0) else NEWS)
     for k, (dx, dy) in enumerate([(-0.015, 0.01), (0.015, 0.012), (0.0, -0.016)]):
         p0 = Q @ Vector((dx, dy, 0.16)); p1 = Q @ Vector((dx * 3, dy * 3, 0.32))

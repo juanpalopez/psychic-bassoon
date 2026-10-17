@@ -42,6 +42,33 @@ func test_a_fallen_guard_falls_then_is_hidden_and_comes_back_with_the_raise() ->
 	assert_eq(view.state_of(guard.id), "idle")
 
 
+func test_the_health_bar_stays_square_to_the_camera_as_the_guard_turns() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var bar := view.get_child(0).get_node("Bar") as Node3D
+	assert_almost_eq(bar.global_transform.basis.x.dot(Vector3.RIGHT), 1.0, 1e-6)
+
+
+func test_the_guard_parts_stand_in_place_when_each_clip_starts() -> void:
+	var game := GuardKit.game_with_tent()
+	var view := _view()
+	view.update(game)
+	var model := view.get_child(0).get_node("Model")
+	var fresh := ModelLoader.scene(GuardsView.MODEL).instantiate()
+	var player := StopMotion.player_of(model)
+	for clip in ["idle", "strike", "fall"]:
+		player.play(clip)
+		player.seek(0.0, true)
+		for part_name in ["Guard_Body", "Guard_SwordArm", "Guard_ShieldArm"]:
+			var part := model.find_child(part_name) as Node3D
+			var rest := fresh.find_child(part_name) as Node3D
+			assert_almost_eq(
+				part.position.distance_to(rest.position), 0.0, 1e-3, "%s %s" % [clip, part_name]
+			)
+	fresh.free()
+
+
 func test_a_guard_is_the_papercraft_model_and_idles() -> void:
 	var game := GuardKit.game_with_tent()
 	var view := _view()
@@ -78,8 +105,8 @@ func test_a_guard_faces_up_the_road() -> void:
 	var toward := (
 		BoardSpace.point_to_world(ahead.x, ahead.y) - BoardSpace.point_to_world(here.x, here.y)
 	)
-	var node := view.get_child(0) as Node3D
-	var facing := node.global_transform.basis.z
+	var model := view.get_child(0).get_node("Model") as Node3D
+	var facing := model.global_transform.basis.z
 	assert_gt(facing.dot(toward.normalized()), 0.99)
 
 

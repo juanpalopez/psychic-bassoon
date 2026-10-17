@@ -1,8 +1,8 @@
 ## One tower standing on its cell: its papercraft model, a little bigger each tier, and a pip
 ## on top for each tier reached. The model's parts play stop-motion clips (`StopMotion`): an
 ## idle loop, and its action when the game says so (a shot for the shooting towers, the door
-## for the Guard Tent). A tower whose look `aims` turns its Head to what it shot. It only
-## draws; stats come from `content/`.
+## for the Guard Tent). A tower whose look `aims` turns its `*_Aim` pivot (the empty above
+## its Head, which no clip moves) to what it shot. It only draws; stats come from `content/`.
 class_name TowerView
 extends Node3D
 
@@ -22,7 +22,7 @@ var _height := 0.0
 var _has_model := false
 var _aims := false
 var _player: AnimationPlayer
-var _head: Node3D
+var _aim: Node3D
 var _aim_left := 0.0
 
 @onready var _body: MeshInstance3D = $Body
@@ -43,7 +43,7 @@ func setup(tower: Tower, look: TowerLook, surface_top: float, footprint: int = 1
 		remove_child(old)
 		old.queue_free()
 	_player = null
-	_head = null
+	_aim = null
 	_has_model = false
 	var packed := ModelLoader.scene(look.model_path)
 	var model := packed.instantiate() as Node3D if packed != null else null
@@ -60,7 +60,7 @@ func setup(tower: Tower, look: TowerLook, surface_top: float, footprint: int = 1
 		_height = ModelLoader.bounds(look.model_path).end.y * scale
 		_body.mesh = null
 		_aims = look.aims
-		_head = StopMotion.part(model, "_Head")
+		_aim = StopMotion.part(model, "_Aim")
 		_player = StopMotion.player_of(model)
 		if _player != null:
 			StopMotion.prepare(_player, LOOPS)
@@ -88,12 +88,11 @@ static func height_of(level: int, look: TowerLook) -> float:
 ## The tower shot at `target` (a world position): it turns to it, if it aims, and plays
 ## its shot.
 func fire(target: Vector3) -> void:
-	act("fire")
-	# after the clip starts: starting it puts the parts back where the clip begins
-	if _aims and _head != null:
+	if _aims and _aim != null:
 		var local := to_local(target)
-		_head.rotation.y = atan2(local.x, local.z)
+		_aim.rotation.y = atan2(local.x, local.z)
 	_aim_left = AIM_HOLD
+	act("fire")
 
 
 ## Plays the model's `clip` from its start, when the model has it.

@@ -23,15 +23,23 @@ void vertex() {
 	kind = UV2.x;
 }
 
-// Fine stripes that fade out before they are too small to draw (no shimmer far away).
-float stripes(float x) {
-	float fade = 1.0 - smoothstep(0.35, 0.9, fwidth(x));
+// Fine stripes of `x` that fade out before they are too small to draw (no shimmer far away);
+// `width` is fwidth(x), taken before any branch so the derivative is defined.
+float stripes(float x, float width) {
+	float fade = 1.0 - smoothstep(0.35, 0.9, width);
 	return mix(0.5, 0.5 + 0.5 * sin(x * 6.2831853), fade);
 }
 
 void fragment() {
 	int k = int(kind + 0.5);
 	vec4 n = texture(paper_noise, world_pos.xz * 1.3 + vec2(world_pos.y * 0.7));
+	// every pattern's input and its derivative, before the branches
+	float grain = length(local_pos.xz) * 26.0 + local_pos.y * 3.0 + n.g * 1.5;
+	float winds = local_pos.y * 40.0 + n.r * 0.4;
+	float flutes = UV.x * 30.0;
+	float grain_w = fwidth(grain);
+	float winds_w = fwidth(winds);
+	float flutes_w = fwidth(flutes);
 	vec3 albedo = COLOR.rgb;
 	float rough = 0.85;
 	shine = 0.0;
@@ -39,8 +47,7 @@ void fragment() {
 		albedo *= 0.9 + 0.2 * n.r;
 	} else if (k == 1) {
 		// wood grain: soft rings round the piece's own axis, wobbled by the noise
-		float g = stripes(length(local_pos.xz) * 26.0 + local_pos.y * 3.0 + n.g * 1.5);
-		albedo *= 0.9 + 0.14 * g;
+		albedo *= 0.9 + 0.14 * stripes(grain, grain_w);
 		rough = 0.72;
 	} else if (k == 2 || k == 3) {
 		shine = 1.0;
@@ -54,11 +61,11 @@ void fragment() {
 		}
 	} else if (k == 4) {
 		// thread wound round the spool: fine bands up its height
-		albedo *= 0.55 + 0.5 * stripes(local_pos.y * 40.0 + n.r * 0.4);
+		albedo *= 0.55 + 0.5 * stripes(winds, winds_w);
 		rough = 0.7;
 	} else {
 		// corrugated card seen on its cut edge: the flutes along the edge
-		albedo *= 0.62 + 0.45 * stripes(UV.x * 30.0);
+		albedo *= 0.62 + 0.45 * stripes(flutes, flutes_w);
 	}
 	ALBEDO = albedo;
 	ROUGHNESS = rough;

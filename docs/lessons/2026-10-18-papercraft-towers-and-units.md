@@ -12,10 +12,12 @@ The towers were static greybox models scaled down to fit their blocks, and the g
 
 ## Decision
 - Each tower, the guard and the Camp Cook is built from craft-room objects by `assets-src/papercraft/` scripts (`towers_hd.py`, one file per model, `towers_export.py` writes the GLBs): a thread spool with a lolly-stick crossbow, a dimpled brass thimble mortar, a rolled-paper spire with a glass marble, a striped origami tent, a cardboard-box mess hall, a guard in the tent's stripes with a bottle-cap shield, and a recipe-paper chef with a foil ladle.
-- At most 3 parts a model: a Base (or Body) and two moving parts. A tower's turning part is named `*_Head`; a tower whose look `aims` turns it to what it shot.
-- Clips are data in the scripts and are exported as glTF animations keyed at 12 fps: `idle` and `fire` (`deploy` for the Guard Tent, `serve` for the Mess Tent); the guard has `idle`, `strike`, `fall` and `rise`; the Camp Cook `idle`, `walk`, `attack`, `splash`, `fall` and `rise`. A clip keys only the channels it changes, so the game can still aim a Head that the shot clip does not turn. `StopMotion` sets every track to nearest interpolation, so the clips step.
+- At most 3 parts a model: a Base (or Body) and two moving parts. A tower whose look `aims` (Spool Guard, Thimble Mortar) has an `*_Aim` empty above its `*_Head` that no clip moves; the game turns it to what the tower shot, so the aim holds while the clips play.
+- Clips are data in the scripts and are exported as glTF animations keyed at 12 fps: `idle` and `fire` (`deploy` for the Guard Tent, `serve` for the Mess Tent); the guard has `idle`, `strike`, `fall` and `rise`; the Camp Cook `idle`, `walk`, `attack`, `splash`, `fall` and `rise`. Every clip keys every channel that any clip moves on every animated part (at rest where the clip leaves it alone), because Godot's mixer does not promise to keep a channel that the playing clip has no track for. The GLBs import at `animation/fps=12` with immutable tracks kept, and `StopMotion` sets every track to nearest interpolation, so the clips step at 12 fps.
 - Every part is one surface: the exporter merges all looks into one `PK_Craft` material and writes the look of each face (paper, wood, metal, dimpled metal, thread, corrugated card) into UV2, read by `render/paper/craft_vc.gdshader`. Only the marble's shell is a second surface (`glass.gdshader`).
-- Only a tower's Base casts a shadow; the guard casts none. 22 towers are then at most 66 surfaces and 22 shadow casters.
+- Only a tower's Base casts a shadow; the guard casts none. A tower is 3 surfaces (the Prism Spire 4, its marble shell being the fourth), so 22 towers are at most 88 surfaces and 22 shadow casters.
+- The shooting towers are about 2,000 to 2,100 triangles and the tents 700 to 1,600, so 22 towers stay near the plan's 45k cap.
+- `TowersView` remakes a tower's view only when that tower changes, so the other towers keep their clips and aim; a clip asked for before the view exists (a tent's first guard) plays when it is made.
 - Models are built at their real size (`model_scale` 1.0) and their top tier stays inside the 2x2 block.
 - The guard falls flat and is hidden once its fall is over, and springs back up when it is raised again.
 
@@ -26,5 +28,6 @@ The towers were static greybox models scaled down to fit their blocks, and the g
 
 ## Consequences
 - Tiers 2 and 3 still only grow the model; tier 4 specialisations show no part of their own yet.
+- The Mess Tent's `serve` clip has no game event to play it yet.
 - The Camp Cook model is ready, but the hero is not in the game yet.
 - New looks go into `craft_vc` as a new UV2 kind, not as a new material.
