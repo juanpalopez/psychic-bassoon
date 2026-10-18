@@ -63,9 +63,9 @@ func test_the_fit_with_a_yaw_is_tight() -> void:
 		assert_gt(worst, 1.0, "aspect %f" % aspect)
 
 
-func test_the_yaw_is_a_turn_of_about_40_degrees() -> void:
-	assert_gte(CameraRig.YAW_DEGREES, 35.0)
-	assert_lte(CameraRig.YAW_DEGREES, 45.0)
+func test_the_yaw_is_a_turn_of_about_30_degrees() -> void:
+	assert_gte(CameraRig.YAW_DEGREES, 25.0)
+	assert_lte(CameraRig.YAW_DEGREES, 35.0)
 
 
 func test_a_drag_follows_the_yaw_so_the_view_moves_the_way_the_finger_does() -> void:

@@ -24,7 +24,7 @@ const CAMERA_NEAR := 1.0
 ## The narrowest screen the rig frames for (a hidden canvas reports no size).
 const MIN_ASPECT := 0.5
 ## The turn about the vertical axis (degrees): the camera sits to the +x side of the target.
-const YAW_DEGREES := 40.0
+const YAW_DEGREES := 30.0
 ## The share of the screen (about its centre) that must stay over the board when panning.
 const SCREEN_SHARE_OVER_BOARD := 0.08
 ## The zoom at which the pans are fully open; below it they narrow toward 0 (the whole board).
