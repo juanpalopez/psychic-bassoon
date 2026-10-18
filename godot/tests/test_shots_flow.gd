@@ -1,5 +1,5 @@
-## In the main scene a tower's shot shows up as a line, and a beam as a line
-## that lasts as long as its lock.
+## In the main scene a tower's shot shows up as a dart or a pellet in flight, and a beam
+## lasts as long as its lock.
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
