@@ -71,3 +71,75 @@ const TRESTLE_SIZE := 0.07
 
 ## How far a plank's tone may stray from the plank colour (a share either way).
 const PLANK_TONE := 0.1
+
+## The scenery scatter (#326). It covers the board and a ring `SCATTER_RING` cells past each
+## edge, in five chunks for culling: the board and `SCATTER_CENTRE_MARGIN` cells round it, and a
+## strip on each side beyond that. Ground cover (dirt and grass) and shrubs grow only in the
+## middle chunk; the strips hold the forest and the boulders in lighter meshes.
+const SCATTER_RING := 32
+const SCATTER_CENTRE_MARGIN := 6
+## Past the board, regions come from smooth noise with a value every `OUTSIDE_NOISE_CELL` cells:
+## forest above `OUTSIDE_FOREST_ABOVE` (less `OUTSIDE_FOREST_GROWTH` at full distance, so the
+## forest thickens further out), boulders below `OUTSIDE_ROCKS_BELOW` on a second field, meadow
+## elsewhere. Within `OUTSIDE_CARRY` cells of the edge, a forest or rocks edge cell carries on.
+const OUTSIDE_NOISE_CELL := 6
+const OUTSIDE_FOREST_ABOVE := 0.38
+const OUTSIDE_FOREST_GROWTH := 0.3
+const OUTSIDE_ROCKS_BELOW := 0.16
+const OUTSIDE_CARRY := 3
+## How far out (cells) the scatter reaches its full density and size.
+const OUTSIDE_FULL := 12.0
+
+## Props per cell, by prop and region (MEADOW, FOREST, ROCKS, DIRT) on the board. Past the board
+## the trees grow up to `OUTSIDE_TREE_SCALE` times as big at full distance and come
+## `OUTSIDE_COVER` times as thick (the share of ground they cover), so they are fewer, bigger
+## trees: their count per cell is the table's times the cover over the size squared.
+const DENSITY := {
+	"pine": [0.03, 0.5, 0.1, 0.0],
+	"broadleaf": [0.04, 0.25, 0.0, 0.02],
+	"shrub": [0.04, 0.2, 0.12, 0.08],
+	"boulder": [0.02, 0.02, 0.6, 0.04],
+	"dirt": [0.015, 0.0, 0.03, 0.6],
+	"grass": [0.35, 0.2, 0.3, 0.4],
+}
+const OUTSIDE_COVER := 3.0
+## Each prop's reach on the ground at scale 1 (its footprint radius, cells), and how much further
+## it keeps off the road, a socket or the Heartstone, a bridge and the river. A tree's crown leans
+## over a tower, so trees keep well clear; grass and dirt may lie right against the road bed.
+const FOOTPRINT := {
+	"pine": 0.3,
+	"broadleaf": 0.34,
+	"shrub": 0.2,
+	"boulder": 0.26,
+	"dirt": 0.3,
+	"grass": 0.12,
+}
+const KEEP_OFF_ROAD := {
+	"pine": 0.3, "broadleaf": 0.3, "shrub": 0.1, "boulder": 0.1, "dirt": 0.0, "grass": 0.0
+}
+const KEEP_OFF_SOCKET := {
+	"pine": 0.5, "broadleaf": 0.5, "shrub": 0.15, "boulder": 0.15, "dirt": 0.0, "grass": 0.0
+}
+const KEEP_OFF_BRIDGE := 0.15
+const KEEP_OFF_RIVER := 0.1
+## Size: on the board a prop is drawn at `SCALE_MIN` to `SCALE_MAX`; trees past the board grow up
+## to `OUTSIDE_TREE_SCALE` times that at full distance. A tree's height strays by `TREE_STRETCH`.
+const SCALE_MIN := 0.9
+const SCALE_MAX := 1.3
+const OUTSIDE_TREE_SCALE := 2.4
+const TREE_STRETCH := 0.15
+## How much a prop's instance tint strays (a share either way), so no two read the same.
+const TINT := 0.08
+
+## Prop colours (STYLE.md: grass #6f8f3a / #a39a52 / #4a6a2c, stone #9b8b78 #a89a86 #8c7b68).
+const PINE_COLOUR := Color("4f8c3a")
+const PINE_SHADE := Color("33652e")
+const BROADLEAF_COLOUR := Color("6a9a3a")
+const BROADLEAF_SHADE := Color("4a6a2c")
+const TRUNK_COLOUR := Color("6b4a2e")
+const SHRUB_COLOUR := Color("5a8634")
+const STONE_COLOURS: Array[Color] = [Color("9b8b78"), Color("a89a86"), Color("8c7b68")]
+const DIRT_COLOUR := Color("8c7150")
+const DIRT_EDGE := Color("8f8c4c")
+const GRASS_COLOUR := Color("5f8a30")
+const GRASS_TIP := Color("a3a052")

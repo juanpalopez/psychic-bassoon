@@ -33,6 +33,26 @@ func triangle(a: Vector3, b: Vector3, c: Vector3, colour: Color, centre: Vector3
 		_colours.append(colour)
 
 
+## One facet with a colour at each corner (soft across the face, as on a dirt patch or a blade
+## of grass), its front facing away from `centre`.
+func shaded_triangle(corners: Array[Vector3], colours: Array[Color], centre: Vector3) -> void:
+	var a := corners[0]
+	var b := corners[1]
+	var c := corners[2]
+	var normal := (b - a).cross(c - a)
+	if normal.length_squared() < 1e-14:
+		return
+	normal = normal.normalized()
+	var order: Array[int] = [0, 2, 1]
+	if normal.dot((a + b + c) / 3.0 - centre) < 0.0:
+		normal = -normal
+		order = [0, 1, 2]
+	for k in order:
+		_vertices.append(corners[k])
+		_normals.append(normal)
+		_colours.append(colours[k])
+
+
 ## A flat four-sided facet (two triangles), corners in order round its edge.
 func quad(a: Vector3, b: Vector3, c: Vector3, d: Vector3, colour: Color, centre: Vector3) -> void:
 	triangle(a, b, c, colour, centre)
