@@ -94,7 +94,9 @@ static func generate(
 				with_feeder.append(feeder.route)
 				var map := _assemble(seed, cols, rows, footprint, wide, with_feeder, feeder)
 				if SocketPlacer.place(map, shape.socket_min, shape.socket_max):
+					TerrainGen.build(map)
 					return map
+		TerrainGen.build(plain)
 		return plain
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
 	return null
