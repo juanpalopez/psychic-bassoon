@@ -127,17 +127,17 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Layer | Choice | Why |
 | --- | --- | --- |
 | Engine | Godot 4.x (version pinned at setup), Forward+ on desktop and the Mobile renderer on iOS (2026-10-18; it was Compatibility for the web) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
-| Language | GDScript, typed everywhere | The script language that exports to web in the pinned 4.x |
+| Language | GDScript, typed everywhere | Runs on every export target in the pinned 4.x (it was also the only language for the web build) |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
-| Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, terrain from modular 1 m tiles (a `GridMap` or `MultiMesh` per tile type) with papercraft materials | Few draw calls on a phone |
-| Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the web build |
+| Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, the diorama terrain built from the map at load time in culled chunks with scatter as one `MultiMesh` per prop type (2026-10-18, #324 to #326; it was modular 1 m tiles) | Few draw calls on a phone |
+| Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the Three.js build |
 | HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens; a radial context menu for sockets and towers |
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed (the ported pieces match the TypeScript fixtures) |
 | Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; a headless desktop export in CI (the Playwright smoke test of the web build goes with #318) | Balance, maps and replays stay verifiable |
 | Audio | Godot `AudioStreamPlayer` | Native builds can start sound at once |
-| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, Godot web export, size budget, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
+| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, the Godot web export, size budget and Pages deploy until #318 (then a desktop export and a Pages page that links to releases), tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
-- **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers (the view stays over the board); a run starts with the whole board in view and there is no follow camera (owner, 2026-10-14).
+- **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers; no follow camera (owner, 2026-10-14). On the 32x20 map (owner, 2026-10-18) the camera pans across the map: a run starts near the spawn, the zoom-out limit shows the whole map as an overview (a tap there zooms in first), and pan is clamped to the map plus a scenery margin (#328; it used to start with the whole 16x11 board in view).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
 - **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Warm sunlit diorama with cool magic (see Art direction and `docs/art/STYLE.md`).
 - **Input.** A tap ray-casts the ground plane to a cell, a socket or a tower, and sends a command. No direct state changes.
@@ -147,7 +147,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 
 ## Art direction and Claude Design
 
-**Hand-Folded Fantasy** (owner, 2026-10-18): the rules, palette, materials, lighting and characters are in `docs/art/STYLE.md`, which wins over the older desk-top notes in this section; the look-dev that set it is in `assets-src/diorama_lookdev/` and `docs/art/diorama/`. The earlier direction, kept for its materials and readability rules: **Papercraft stop-motion** (from the GDD): a tactile desk-top diorama. Everything looks cut, folded and glued from recycled office supplies on a green self-healing cutting mat, lit by bright desk light; the corrupted side is wet purple ink.
+**Hand-Folded Fantasy** (owner, 2026-10-18): the rules, palette, materials, lighting and characters are in `docs/art/STYLE.md`, which wins over the older desk-top notes in this section; the look-dev that set it is in `assets-src/diorama_lookdev/` and `docs/art/diorama/`. The earlier direction, kept for its readability rules and the Blot (where it asks for foil, metal or purple specular, STYLE.md's paper-not-plastic rule wins: only water and magic shine): **Papercraft stop-motion** (from the GDD): a tactile desk-top diorama. Everything looks cut, folded and glued from recycled office supplies on a green self-healing cutting mat, lit by bright desk light; the corrupted side is wet purple ink.
 
 - **Materials.** Kraft paper and corrugated cardboard (roughness about 0.85, subtle height maps for the corrugation, detail normal maps for paper fibre), translucent creased edges (subsurface transmission), foil for rivers and armor, tape and PVA glue for hazards. The Blot: a vertex-displacement shader with saturated purple specular for ink-drenched surfaces.
 - **Palette.** Cutting-mat green and kraft brown for the board and the defenders, white pencil outlines for sockets, saturated purple for everything the Blot touches, one accent colour per tower.
@@ -214,7 +214,8 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     ui/                  # HUD scenes and the Theme resource
     assets/              # imported GLB models, audio, textures
     tests/               # GUT tests, including the fixtures for the ported core
-    export_presets.cfg   # iOS and desktop export presets (Godot reads it from the project root; the web preset and shell go with #318)
+    export_presets.cfg   # the web export preset today; iOS and desktop presets from #318 (Godot reads it from the project root)
+    web/                 # the custom HTML shell (landscape prompt, meta tags, loader), removed by #318 and #319
   fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
@@ -355,7 +356,7 @@ Flying foes, support foes, the Guard Tent and blocking, tier 4, the hero, spells
 A1 and A2 can start now (map generation, game state and commands are ported); A3 onward lands as the combat and wave ports merge. **Limits of the exception:** the greybox only calls `Game.create`, `Game.submit` and `Game.tick`, reads state through read-only accessors, and drains events; it never touches `rng`, `route_rng` or `pending`, never assigns to or calls a mutating method on a field of the state (plain reads are allowed until the read-only accessors exist), and it never edits `godot/sim`, `godot/content` numbers or `fixtures/`. Any sim API the greybox needs (a read-only snapshot, the previous foe positions for A3 interpolation, event draining) is added by a Phase 4 sim ticket with GUT tests and deep review, never inside a greybox PR. A CI check rejects `godot/render` and `godot/ui` code that reaches into those fields (added with A1). Each step is built by Claude and read by the owner with the Remote scene tree open, then tweaked in the Inspector. A Godot MCP server that can launch the project, read its output and take screenshots (checked with Godot 4.7) lets Claude see the result without copying logs by hand.
 
 **Work breakdown**
-1. Terrain from the map as modular 1 m tiles (the cutting mat, the cardboard rise, tiered cliffs), sockets as etched circles, spawn and Heartstone markers; the path is drawn as masking tape (decided 2026-10-17, replacing the ribbon idea of #149 and #147). The sim polyline stays the truth for movement, range and hits.
+1. Terrain from the map as modular 1 m tiles (the cutting mat, the cardboard rise, tiered cliffs), sockets as etched circles, spawn and Heartstone markers; the path is drawn as masking tape (decided 2026-10-17, replacing the ribbon idea of #149 and #147). The sim polyline stays the truth for movement, range and hits. _Superseded on 2026-10-18 by the diorama terrain, road beds and scatter (#324 to #326)._
 2. `MultiMesh` foes with interpolation and baked vertex animation sampled at 12 fps (decided by the Scrap Goblin spike, #157), towers with tiers and idle/fire animation, selection highlight and range ring.
 3. Done: camera: landscape framing, one-finger pan with rubber-band edges, two-finger pinch (and the mouse wheel and trackpad pinch) that zooms and tilts between 65° and 30°, a tap that is not a drag; tap picking to a socket, a tower or a cell (the cell decides, not the visible art).
 4. Control-node HUD: Buttons, Heartstone health, wave, the radial context menu (48 pt targets, offset above the finger), speed, pause, next-wave popup, game over, landscape prompt.
@@ -430,9 +431,8 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Gate checklist**
 - [ ] A run earns Golden Staples that survive a restart and change the next run.
-- [ ] Native builds run on at least two real iPhones (TestFlight) and on Mac and PC (the web build was dropped on 2026-10-18).
+- [ ] Native builds run on at least two real iPhones (TestFlight, or local installs while the owner stays on a free Apple ID) and on Mac and PC (the web build was dropped on 2026-10-18).
 - [ ] README and credits complete.
-- [ ] The native iOS build runs on one iPhone.
 
 ## Risks and open questions
 
@@ -440,9 +440,9 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | --- | --- |
 | The Godot web build is too heavy or slow to start on a phone _(retired with the web build, 2026-10-18)_ | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
 | iOS Safari limits (memory, audio, no threads) break the export _(retired with the web build, 2026-10-18)_ | Single-threaded export, Compatibility renderer, test on the real phone every phase; the Three.js build can be redeployed from the tag `web-three-final` if the Godot web build fails on a target phone |
-| The sim changes by accident | GDScript replay goldens with float bits, written by the sim itself; a golden changes only by a reviewed balance change. The ported core keeps its TypeScript fixtures, never regenerated. |
+| The sim changes by accident | GDScript replay goldens with float bits, written by the sim itself; a golden changes only by a reviewed balance change, or by a reviewed sim change that a decision record names (#320 and #321). The ported core keeps its TypeScript fixtures, never regenerated. |
 | Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
-| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
+| The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (an in-game setting, #319; a native plugin may later read the iOS setting); accept the accessibility loss and record it |
 | Part animation and skeletons fight `MultiMesh` (each part or material is another draw call; skinned meshes cannot use MultiMesh) | One MultiMesh per foe type and part, count draw calls in the Phase 5 gate; bake animation into vertex shaders or use a few skinned bosses only |
 | The TypeScript reference outlives its use | Phase 4 step 8 removes `src/` and the unused fixtures once the GDScript combat lands |
 | The greybox (Phase 5) builds on a sim that is still being ported | The greybox only reads snapshots and sends commands; sim API changes are caught by its tests and by CI; the replay goldens decide any disagreement |
@@ -450,13 +450,13 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | The owner's foe models do not read as paper at zoomed-out view | Flat cut-out shapes with fold lines and paper grain baked onto one paper texture, or layered flat shapes in Blender; checked against the silhouette sheets |
 | The path drawing drifts from the sim polyline (foes look off the path or hits look wrong at corners) | The sim polyline decides hits, range and distance; the Phase 5 gate checks the path by eye on the phone |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
-| Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
+| Tap targets get small at full zoom-out | The overview zoom is for reading the map; a tap there zooms in first, and building happens only at a zoom where a 2x2 socket is at least 44 pt (#328) |
 | Godot web export cannot be tested headless in CI _(retired with the web build, 2026-10-18)_ | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
 | A broken `main` reaches GitHub Pages _(retired with the web build, 2026-10-18)_ | `deploy` depends on `ci` passing; protected `main`; roll back by redeploying the last good tag |
 | The GDD is large (hero, spells, tech tree, eight specialisations) and has few numbers | Phase gates and content flags: only the slice in Phase 4 and 5 first; the rest in Phase 7 and 8; every number is tuned by headless runs |
 | New foes and specialisations break the balance | Content flags; the replay goldens keep the base game identical with the flags off; headless balance runs per foe |
 | The diorama (terrain, scatter, post) is too heavy for the Mobile renderer on a phone | Chunked and culled terrain, one `MultiMesh` per prop type, baked contact shading instead of SSAO, a quality setting; measure on the iPhone in each art PR and at the gate (#97) |
-| The 32x20 map makes runs long and taps small | The camera starts near the spawn and pans; the overview zoom keeps 2x2 sockets at least 44 px or taps need a closer zoom (#328); wave pacing re-tuned (#237) |
+| The 32x20 map makes runs long and taps small | The camera starts near the spawn and pans; taps at the overview zoom zoom in first (#328); wave pacing re-tuned (#237) |
 | Curved routes churn the replay goldens | Re-record them once in #321 as a reviewed change; the ported grid path and its frozen fixtures stay untouched |
 | No shareable web link for playtesters | Desktop builds on GitHub Releases; TestFlight once the owner joins the Apple Developer Program |
 

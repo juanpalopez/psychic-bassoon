@@ -1,10 +1,11 @@
-"""Post for the diorama look-dev: what Godot's Compatibility renderer can add after the scene.
+"""Post for the diorama look-dev: what Godot's Environment can add after the scene (written for the
+Compatibility renderer; Forward+ and Mobile can do all of it, Forward+ adds SSAO and volumetric fog).
 Reads a Blender multilayer EXR (linear Combined + Depth) and applies, in order:
   depth fog (exponential, Environment fog), glow (Environment glow: bright parts blurred and
   added), ACES tonemap (Environment tonemap), grading (Environment adjustments: brightness,
   contrast, saturation, plus a warm/cool split that a colour-correction LUT can do), and an
   optional tilt-shift blur by depth (a cheap full-screen pass; its cost needs checking on a phone).
-usage: python3 post.py in.exr out.png [--dof]"""
+usage: python3 post.py in.exr out.png [camera.json] [--dof]"""
 import sys
 import numpy as np
 import OpenEXR

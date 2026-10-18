@@ -1,7 +1,9 @@
 """A larger mock board (24 x 16 cells) with winding roads, for the look-dev only. Same
 conventions as the game's export: Godot world x across, z towards the camera; sockets are 2x2
 blocks [col, row, level]; routes as world (x, z) points every 0.25 m."""
-import json, math, random
+import json, math, os, random
+
+HERE = os.path.dirname(os.path.abspath(__file__))
 
 COLS, ROWS = 24, 16
 
@@ -88,7 +90,7 @@ def build(seed=4):
 
 if __name__ == "__main__":
     b = build()
-    json.dump(b, open("board_large.json", "w"))
+    json.dump(b, open(os.path.join(HERE, "board_large.json"), "w"))
     print(len(b["sockets"]), "sockets;", len(b["routes_world"][0]), "pts")
     import matplotlib
     matplotlib.use("Agg")
@@ -104,4 +106,4 @@ if __name__ == "__main__":
     ax.add_patch(plt.Rectangle((hc[0] - (COLS - 1) / 2 - 0.5, hc[1] - (ROWS - 1) / 2 - 0.5), 2, 2, color="red"))
     ax.add_patch(plt.Rectangle((-COLS / 2, -ROWS / 2), COLS, ROWS, fill=False))
     ax.set_xlim(-15, 15); ax.set_ylim(-11, 11); ax.invert_yaxis(); ax.set_aspect("equal"); ax.grid(alpha=0.3)
-    plt.savefig("board_large.png", dpi=80)
+    plt.savefig(os.path.join(HERE, "board_large.png"), dpi=80)

@@ -7,6 +7,17 @@
 # fog, glow and grading added afterwards from the depth pass. (Written while the game still targeted
 # the web; the game now uses Forward+ and Mobile, see docs/art/STYLE.md.)
 # Blender: X = Godot x, Y = -Godot z, Z = up. 1 unit = 1 cell = 1 m. Run inside Blender 5.2.
+#
+# This file is a library of functions, run from Blender's Python console; it has no main and
+# builds nothing on its own. The mock in docs/art/diorama/ was made in roughly this order (the
+# exact arguments of each render were tuned by hand and not recorded; each render saves its
+# camera next to it as renders/<name>_cam.json):
+#   exec(open("assets-src/diorama_lookdev/diorama_lookdev.py").read())
+#   use_board("board_large"); build_world2(); stage_units()
+#   light_and_camera(...); save_camera("v15_game"); render("v15_game")
+# then, outside Blender: python3 post.py renders/v15_game.exr out.png renders/v15_game_cam.json --dof
+# It loads the desk GLBs from godot/assets/models (decor_pins, decor_scrap), which the diorama
+# scatter (#326) replaces. Renders go to renders/ (ignored by git).
 import bpy, bmesh, math, random, json, os
 from mathutils import Vector, noise, Matrix
 

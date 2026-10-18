@@ -17,8 +17,11 @@ godot --path godot                                   # open or run the project
 godot --headless --path godot --import                # once per fresh checkout, so class_name scripts resolve
 godot --headless --path godot -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit   # GUT tests
 (cd godot && gdformat . && gdlint .)                 # gdtoolkit: format and lint (config in godot/)
-godot --path godot -- --stress=80 --fps             # the phone-check crowd and the fps overlay (flags from #319)
-scripts/ios-run.sh                                   # export the Xcode project, build, install and launch on a connected iPhone (#318)
+godot --path godot -- --stress=80 --fps             # from #319: the phone-check crowd and the fps overlay
+scripts/ios-run.sh                                   # from #318: export the Xcode project, build, install and launch on a connected iPhone
+# Until #318 lands, CI exports and Pages deploys the web build:
+mkdir -p build/web && godot --headless --path godot --export-release "Web" ../build/web/index.html   # web export
+python3 -m http.server -d build/web                  # serve the export; open on a phone over LAN
 ```
 
 Repo checks and tooling (TypeScript and Node):
@@ -26,6 +29,8 @@ Repo checks and tooling (TypeScript and Node):
 ```bash
 pnpm install
 pnpm test         # Vitest (repo scripts)
+pnpm test:e2e:godot   # until #318: Playwright smoke test of the web export in build/web
+pnpm serve        # until #318: serve build/web on your LAN (port 8080), to open on a phone
 pnpm check:assets # godot/assets against assets/CREDITS.md
 pnpm check:fixtures # the frozen fixtures against fixtures/SHA256SUMS
 pnpm lint         # Prettier check + ESLint + tsc --noEmit
@@ -36,7 +41,7 @@ pnpm format       # Prettier --write (run before committing)
 
 - **Work one phase at a time.** Implement only the current phase from `docs/PLAN.md`, then stop and report whether its gate passes. Don't start the next phase or add features from later phases. **Exception (owner, 2026-10-11):** Phase 5 starts now as a greybox, in parallel with the rest of Phase 4. The greybox only reads sim snapshots and sends commands, so it cannot change parity; it never edits `godot/sim` or `fixtures/`. Art, lore and everything else from Phases 6 to 8 still wait, except what the owner opened early: Track B (ticket #157, the Scrap Goblin through the asset pipeline), the Phase 7 content the owner asked for, and the Hand-Folded Fantasy epic (#316, owner 2026-10-18), which runs the Phase 6 art and the Phase 7 map work (#320 to #323) now. Sim API the greybox needs (a read-only snapshot, previous foe positions, event draining) is added by Phase 4 sim tickets with tests and deep review, never inside a greybox PR; `godot/render` and `godot/ui` use only `Game.create`, `Game.submit`, `Game.tick`, read-only accessors and drained events, and never `rng`, `route_rng`, `pending` or field assignments on the state (a CI check enforces it from greybox step A1, ticket #156; it scans `godot/render`, `godot/ui` and `godot/main.gd`; plain reads of state fields are allowed until read-only accessors exist).
 - **The design is the GDD; numbers start from the prototype.** Port before inventing applies only to the ported core (PRNG, road generator, routes), which stays equal to its fixtures (made by the retired TypeScript sim); those fixtures are frozen and never regenerated, and `fixtures/SHA256SUMS` enforces it in CI, and the game state, commands and tick are covered by GUT tests. Foes, towers, combat and economy are designed from `docs/GDD.md` and tested in GDScript; where the GDD gives no number, start from the prototype's (`web-three-final:src/content`) and tune with headless runs. From the combat port on, GDScript replay goldens (written by the sim itself, with float bits) are the regression check.
-- **Keep `main` releasable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for the repo's TypeScript and Node scripts, and `gdformat`, `gdlint`, GUT and a desktop export for Godot (until #318 lands, CI still runs the web export).
+- **Keep `main` releasable.** Run the checks for the code you touched before every commit: `pnpm lint && pnpm test` for the repo's TypeScript and Node scripts, and `gdformat`, `gdlint`, GUT and the web export for Godot (a desktop export once #318 lands).
 
 ## Architecture
 
@@ -68,7 +73,7 @@ fixtures/    frozen JSON from the retired TypeScript sim for the ported core (pr
 
 ## Rendering and performance
 
-- Target: 60 fps with 80 foes on a mid-range phone (measured on the owner's iPhone 15 Pro in a native build). Budget: under 120 draw calls, about 150k triangles in view, DPR capped at 2; provisional for the 32 by 20 map until #97 re-measures it. Renderers: Forward+ on desktop, Mobile on iOS and Android (`rendering_method.mobile`); both must read as the same style (`docs/art/STYLE.md`, Renderers).
+- Target: 60 fps with 80 foes on a mid-range phone (measured on the owner's iPhone 15 Pro in a native build). Budget: under 120 draw calls, about 150k triangles in view, DPR capped at 2; provisional for the 32 by 20 map until #97 re-measures it. Renderers (from #318): Forward+ on desktop, Mobile on iOS and Android (`rendering_method.mobile`); both must read as the same style (`docs/art/STYLE.md`, Renderers). Until #318 lands, `main` still renders with Compatibility (WebGL2) for the web build, so do not depend on Forward+-only effects (SSAO, volumetric fog) before then.
 - One `MultiMeshInstance3D` per foe type. Don't create a node per foe.
 - Camera: perspective, 20° FOV, pitched 62° zoomed out and 56° zoomed in (the pinch only zooms, around the fingers; #313 and #328 settle the range), landscape framing (the board is drawn turned so the road runs left to right; the sim is untouched, one script converts sim cells to world positions), no follow camera. On the 32 by 20 map the camera pans across the map (owner, 2026-10-18): a run starts near the spawn, the zoom-out limit shows the whole map as an overview, cells reach about 100 px wide at the closest zoom, and pan is clamped to the map plus a scenery margin; the world carries on past the map, so the view never shows an edge (#328).
 - Models come from glTF/GLB, in the style of `docs/art/STYLE.md` (squarish not voxel, painterly not flat, paper not plastic, readable at gameplay distance). Sources, in order of preference: the owner's Blender models (`assets-src/blender/`, `assets-src/papercraft/` and the look-dev in `assets-src/diorama_lookdev/`, some made with Claude) and CC0 packs as placeholders. AI mesh generators such as Meshy are not used (owner decision, 2026-10-13: the models were not good enough); a Blender model scripted with Claude counts as the owner's own. Keep a simple fallback mesh for any unit whose file is missing.
@@ -79,12 +84,13 @@ fixtures/    frozen JSON from the retired TypeScript sim for the ported core (pr
 ## UI
 
 - The HUD is built from Godot `Control` nodes with one Theme resource that mirrors the Claude Design tokens. The Theme is written by `godot/tools/build_hud_theme.gd` (the tokens live at its top); change the tokens there and rerun it rather than editing `ui/hud_theme.tres` by hand. Never hard-code colours in scenes or scripts.
-- The game is landscape only (owner decision); the exports lock the orientation (#319). Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 px. Heroes are moved by tapping the hero, then a walkable spot (#335); off-screen foes and the hero show at the screen edge and on a minimap (#329).
-- Respect reduced motion: an in-game Reduce motion setting, saved between runs, read through one platform adapter (a small native plugin may later read the iOS setting), turns off screen shake and reduces particle effects (#319).
+- The game is landscape only (owner decision); the exports lock the orientation (#319; until then the web shell shows a "turn your phone" prompt). Every action is reachable by the thumbs holding the phone, with tap targets of at least 44 pt. The overview zoom of the 32 by 20 map is for reading the map: a tap on a socket or tower there zooms in to it first, and building, upgrading and selling happen only at a zoom where a 2x2 socket is at least 44 pt (#328). Heroes are moved by tapping the hero, then a walkable spot (#335); off-screen foes and the hero show at the screen edge and on a minimap (#329).
+- Respect reduced motion: from #319, an in-game Reduce motion setting, saved between runs, read through one platform adapter (a small native plugin may later read the iOS setting), turns off screen shake and reduces particle effects; until then the web shell reads `prefers-reduced-motion` through `JavaScriptBridge`.
+- Start audio only after the first tap in the web build (browsers block it before); the native builds may drop this with #318.
 
 ## Testing
 
-- Every sim module gets GUT tests: map generation (road valid, routes valid, sockets valid, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed. The ported core is compared with `fixtures/`; from the combat port on, replays are compared with goldens written by the GDScript sim, and a golden changes only by a reviewed balance change.
+- Every sim module gets GUT tests: map generation (road valid, routes valid, sockets valid, reproducible from its seed), wave composition, damage and armor, economy, and a full-run replay from a seed. The ported core is compared with `fixtures/`; from the combat port on, replays are compared with goldens written by the GDScript sim, and a golden changes only by a reviewed balance change, or by a reviewed sim change that a decision record names (the 32 by 20 map in #320 and the curved routes in #321, `docs/lessons/2026-10-18-valley-map.md`; deep tier).
 - Fix the seed in tests; never depend on timing.
 - **TDD where possible.** For `godot/sim` and `godot/content`, write the failing test first, make it pass, then refactor. A bug fix starts with a test that reproduces it. Render and UI code don't need test-first, but logic extracted from them (camera clamping, grid picking, formatting) does.
 - Test the domain through its public commands and snapshots, not internals, so refactors don't break tests.
@@ -133,9 +139,9 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 
 ## CI/CD and releases
 
-- CI runs on every pull request and push to `main`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, the frozen-fixture check, and the Godot job: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), and a desktop export (#318 replaces the web export, its download-size budget and the Playwright smoke test). A red CI blocks merging.
-- CD: the web build is no longer deployed (#318): GitHub Pages serves a short page that links to the latest release. Phone builds are local (`scripts/ios-run.sh`) until TestFlight; the Three.js game is not served any more.
-- Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, exports the desktop builds, and creates a GitHub Release with generated notes from the Conventional Commits and the builds attached.
+- CI runs on every pull request and push to `main`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, the frozen-fixture check, and the Godot job: pinned Godot and export templates (cached), `gdformat --check`, `gdlint`, the sim purity lint, GUT (including the fixtures), the web export with a download-size budget, and the Playwright smoke test on the export; #318 replaces these three with a desktop export. A red CI blocks merging.
+- CD: until #318 lands, every push to `main` deploys the web export to GitHub Pages at the site root. With #318 the web build is no longer deployed: Pages serves a short page that links to the latest release, and phone builds are local (`scripts/ios-run.sh`) until TestFlight. The Three.js game is not served any more.
+- Releases: pushing a version tag (`vMAJOR.MINOR.PATCH`, semantic versioning) runs the release workflow. It re-runs the checks, exports (the web build until #318, the desktop builds after it), and creates a GitHub Release with generated notes from the Conventional Commits and the builds attached.
 - Keep workflows in `.github/workflows/`. Pin action versions and never commit secrets.
 
 ## Tickets

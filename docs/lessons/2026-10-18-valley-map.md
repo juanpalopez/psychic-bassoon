@@ -17,11 +17,9 @@ With the diorama look the owner wants the playable map to feel larger, with road
 - Heroes move anywhere walkable on the map, a little like an RTS (#275, #335).
 
 ## Alternatives considered
-- 24x16 (the mock) or 20x14: the owner picked the bigger valley.
-- Curves drawn only by the render: foes would look off the road at every bend.
+- 24x16 (the mock) or 20x14: the owner picked the bigger valley. Render-only curves: foes look off the road at bends.
 - A drawbridge, a gate or a destructible bridge.
 
 ## Consequences
 - The phone budgets (draw calls, triangles, tower count) are re-set for the bigger map and re-measured on the iPhone (#97).
-- Wave pacing changes with longer roads; the balance pass (#237) runs after #320 and #321.
-- Off-screen foes and the hero need indicators and a minimap (#329).
+- Wave pacing changes with longer roads (balance pass #237 after #320, #321); off-screen foes and the hero need indicators and a minimap (#329).
