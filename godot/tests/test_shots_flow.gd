@@ -93,3 +93,35 @@ func test_at_3x_a_shot_ages_in_game_time() -> void:
 	for i in 4:
 		main._process(0.05)
 	assert_eq((main.get_node("Shots") as ShotsView).visible_shots(), 0)
+
+
+func test_a_foes_bar_shows_its_hit_when_the_dart_lands() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	var scene := TowerFireKit.scene("spoolGuard", 1, false, game)
+	var foe := TowerFireKit.foe(game, scene.near, "cardboardGolem")
+	var foes := main.get_node("Foes") as FoesView
+	main._process(0.05)
+	game.towers[0].cooldown = 100.0
+	assert_lt(foe.hp, foe.max_hp, "the sim has hit it")
+	assert_eq(foes.bar_count(), 0, "the dart is still flying, so no bar yet")
+	for i in 6:
+		main._process(0.05)
+	assert_eq(foes.bar_count(), 1, "the dart has landed")
+
+
+func test_a_killed_foe_stands_until_the_dart_lands() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	var scene := TowerFireKit.scene("spoolGuard", 1, false, game)
+	var foe := TowerFireKit.foe(game, scene.near)
+	foe.hp = 1.0
+	var foes := main.get_node("Foes") as FoesView
+	# a frame with no tick, so the foe has been drawn once before it is shot
+	main._process(0.0)
+	main._process(0.05)
+	assert_true(game.foes.is_empty(), "the sim has killed it")
+	assert_eq(foes.visible_count(foe.type), 1, "it still stands")
+	for i in 6:
+		main._process(0.05)
+	assert_eq(foes.visible_count(foe.type), 0, "it fell as the dart landed")

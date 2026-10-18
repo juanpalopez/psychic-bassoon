@@ -29,6 +29,7 @@ var _message_left := 0.0
 var _gestures := Gestures.new()
 var _fingers := TouchFingers.new()
 var _speed := GameSpeed.new()
+var _hold := HitHold.new()
 var _audio := AudioPlayer.new()
 var _crow := MessengerCrow.new()
 var _flow := IntroFlow.new()
@@ -140,12 +141,16 @@ func _process(delta: float) -> void:
 		Game.submit(_game, Command.launch_wave())
 	if ticks_speed > 0:
 		Frame.step(_game, _clock, delta, ticks_speed, _before_tick, _after_tick)
+	# shots and the hits they hold back age in game time, so at 2x and 3x they keep up
+	var game_seconds := delta * float(ticks_speed)
+	_hold.advance(game_seconds)
+	for i in _hold.take_landed_kills():
+		_audio.play_sfx(SoundMap.EVENT_SOUNDS[GameEvent.Kind.FOE_KILLED])
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
-	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
+	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS, _hold)
 	_guards.update(_game)
 	if ticks_speed > 0:
-		# shots age in game time, so at 2x and 3x they keep up with the hits they show
-		_shots.update(delta * float(ticks_speed))
+		_shots.update(game_seconds)
 	_shots.show_beams(_game, _board.surface_height)
 	_audio.set_music(SoundMap.music_for(_game))
 	_update_launch_button()
@@ -316,6 +321,7 @@ func _start(map_seed: int) -> void:
 	_game = Game.create(map_seed)
 	_clock = Clock.new()
 	_foes.reset()
+	_hold.reset()
 	_guards.reset()
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
@@ -432,7 +438,10 @@ func _count_foes() -> int:
 ## Reads what the tick reported: a refused command becomes a short message.
 func _after_tick(game: GameState) -> void:
 	for event in game.events:
-		_audio.play_sfx(SoundMap.sfx_for(event, game))
+		# a kill whose shot is still flying snaps when the shot lands (see _process)
+		var held := event.kind == GameEvent.Kind.FOE_KILLED and _hold.hold_kill(event.foe_id)
+		if not held:
+			_audio.play_sfx(SoundMap.sfx_for(event, game))
 		_crow.deliver(CrowAlerts.text_for(event))
 		_tell_intro(event)
 		if event.kind == GameEvent.Kind.COMMAND_REJECTED:
@@ -442,19 +451,21 @@ func _after_tick(game: GameState) -> void:
 			_towers.fire(event.tower_id, ShotsView.body_point(event.x, event.y))
 		elif event.kind == GameEvent.Kind.GUARD_RAISED:
 			_towers.act(event.tower_id, "deploy")
+		elif event.kind == GameEvent.Kind.FOE_LEAKED:
+			_hold.release(event.foe_id)
 
 
-## Draws the shot a tower fired this tick, from the tower to where its target stood.
+## Draws the shot a tower fired this tick, from the tower to where its target stood, and
+## holds back what it did to the foes it hit until it is drawn landing.
 func _draw_shot(game: GameState, event: GameEvent) -> void:
 	for tower in game.towers:
 		if tower.id == event.tower_id:
 			var surface := _board.surface_height(Vector2i(tower.col, tower.row))
-			_shots.add_shot(
-				ShotsView.muzzle(tower, surface, game.map.footprint),
-				ShotsView.body_point(event.x, event.y),
-				event.splash,
-				ShotsView.kind_for(tower.type)
-			)
+			var from := ShotsView.muzzle(tower, surface, game.map.footprint)
+			var to := ShotsView.body_point(event.x, event.y)
+			var kind := ShotsView.kind_for(tower.type)
+			_shots.add_shot(from, to, event.splash, kind)
+			_hold.hold(game, event, ShotsView.landing_of(kind, from, to))
 			return
 
 
