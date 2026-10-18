@@ -1,9 +1,12 @@
-## The pans the rig allows: the inner half of the screen stays over the board, the limits do not
+## The pans the rig allows: the middle of the screen stays over the board, the limits do not
 ## jump as the zoom changes, and a pinch keeps the point under the fingers.
 extends GutTest
 
 const SHAPES: Array[Vector2i] = [
 	Vector2i(1280, 720), Vector2i(1024, 768), Vector2i(720, 1280), Vector2i(2160, 720)
+]
+const LANDSCAPE: Array[Vector2i] = [
+	Vector2i(1280, 720), Vector2i(1558, 720), Vector2i(1024, 768), Vector2i(2160, 720)
 ]
 
 
@@ -25,7 +28,7 @@ func _put(rig: CameraRig, at: Vector2) -> void:
 	rig._place()
 
 
-func test_the_inner_half_of_the_screen_stays_over_the_board_at_every_allowed_pan() -> void:
+func test_the_middle_of_the_screen_stays_over_the_board_at_every_allowed_pan() -> void:
 	var half := BoardSpace.size() / 2.0
 	var share := CameraRig.SCREEN_SHARE_OVER_BOARD
 	for shape in [Vector2i(1280, 720), Vector2i(2160, 720), Vector2i(1024, 768)]:
@@ -43,7 +46,7 @@ func test_the_inner_half_of_the_screen_stays_over_the_board_at_every_allowed_pan
 				CameraRig.YAW_DEGREES,
 				share
 			)
-			# an axis can keep the rule only where the inner half of the screen is narrower than the
+			# an axis can keep the rule only where the middle of the screen is narrower than the
 			# board; where it is wider the rule cannot hold, and the range is a single pan
 			var fits_x := foot.size.x < half.x * 2.0
 			var fits_z := foot.size.y < half.y * 2.0
@@ -95,24 +98,64 @@ func test_the_pan_limits_do_not_jump_as_the_zoom_changes() -> void:
 		assert_lte(worst, 0.1, "largest jump in one zoom step at %s" % shape)
 
 
+## Pinches 1.05 off-centre at (0.8w, 0.25h) from the middle of the allowed pans. Returns whether
+## the limits left the pinned point free, and how far it drifted.
+func _pinch(shape: Vector2i, zoom_level: float) -> Dictionary:
+	var rig := _rig_in(shape.x, shape.y)
+	rig.set_zoom(zoom_level)
+	var range := rig.pan_range()
+	_put(rig, range.position + range.size / 2.0)
+	var centre := Vector2(shape) * Vector2(0.8, 0.25)
+	var before := rig.ground_under(centre)
+	rig.zoom_by(1.05, centre)
+	var free := rig.pan.is_equal_approx(rig._pan_raw)
+	if not free:
+		# the limits bind: the view still ends inside them
+		assert_true(rig.pan_range().grow(1e-6).has_point(rig.pan), "inside the limits")
+	return {"free": free, "drift": before.distance_to(rig.ground_under(centre))}
+
+
 func test_a_pinch_keeps_the_point_under_the_fingers_where_it_was() -> void:
-	var unclamped := 0
+	var free := 0
 	for shape in [Vector2i(1280, 720), Vector2i(2160, 720), Vector2i(720, 1280)]:
 		for zoom_level in [0.5, 0.73, 0.9]:
-			var rig := _rig_in(shape.x, shape.y)
-			rig.set_zoom(zoom_level)
-			var range := rig.pan_range()
-			_put(rig, range.position + range.size / 2.0)
-			var centre := Vector2(shape) * Vector2(0.8, 0.25)
-			var before := rig.ground_under(centre)
-			rig.zoom_by(1.05, centre)
-			var after := rig.ground_under(centre)
-			var where := "%s zoom %s" % [shape, zoom_level]
-			if rig.pan.is_equal_approx(rig._pan_raw):
-				unclamped += 1
-				assert_lt(before.distance_to(after), 1e-3, "the point drifted at " + where)
-			else:
-				# the limits bind: the view still ends inside them
-				var now := rig.pan_range()
-				assert_true(now.grow(1e-6).has_point(rig.pan), "inside the limits at " + where)
-	assert_gt(unclamped, 1, "several pinches were free of the limits")
+			var result := _pinch(shape, zoom_level)
+			if result.free:
+				free += 1
+				assert_lt(result.drift, 1e-3, "drift at %s zoom %s" % [shape, zoom_level])
+	assert_gte(free, 7, "at least 7 of the 9 pinches are free of the limits")
+
+
+func test_a_pinch_at_low_zoom_on_a_landscape_screen_keeps_the_point_too() -> void:
+	for shape in LANDSCAPE:
+		for zoom_level in [0.3, 0.45]:
+			var result := _pinch(shape, zoom_level)
+			assert_true(result.free, "free at %s zoom %s" % [shape, zoom_level])
+			assert_lt(result.drift, 1e-3, "drift at %s zoom %s" % [shape, zoom_level])
+
+
+func test_the_screen_centre_reaches_within_a_cell_of_every_board_edge_when_closest() -> void:
+	var need := BoardSpace.size() / 2.0 - Vector2.ONE
+	for shape in [
+		Vector2i(1280, 720),
+		Vector2i(1558, 720),
+		Vector2i(1024, 768),
+		Vector2i(720, 1280),
+		Vector2i(2160, 720)
+	]:
+		var rig := _rig_in(shape.x, shape.y)
+		rig.set_zoom(1.0)
+		var range := rig.pan_range()
+		var where := "%s: %s" % [shape, range]
+		assert_gte(range.end.x, need.x, "right edge, " + where)
+		assert_lte(range.position.x, -need.x, "left edge, " + where)
+		assert_gte(range.end.y, need.y, "near edge, " + where)
+		assert_lte(range.position.y, -need.y, "far edge, " + where)
+
+
+func test_both_axes_have_room_to_pan_by_zoom_0_4_on_landscape_screens() -> void:
+	for shape in LANDSCAPE:
+		var rig := _rig_in(shape.x, shape.y)
+		rig.set_zoom(0.4)
+		var range := rig.pan_range()
+		assert_true(range.size.x > 0.0 and range.size.y > 0.0, "room at %s: %s" % [shape, range])

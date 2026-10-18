@@ -26,9 +26,9 @@ const MIN_ASPECT := 0.5
 ## The turn about the vertical axis (degrees): the camera sits to the +x side of the target.
 const YAW_DEGREES := 40.0
 ## The share of the screen (about its centre) that must stay over the board when panning.
-const SCREEN_SHARE_OVER_BOARD := 0.5
+const SCREEN_SHARE_OVER_BOARD := 0.08
 ## The zoom at which the pans are fully open; below it they narrow toward 0 (the whole board).
-const PAN_RAMP_ZOOM := 0.05
+const PAN_RAMP_ZOOM := 0.5
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
 const MAX_PITCH := 62.0
 const MIN_PITCH := 56.0
@@ -131,7 +131,7 @@ static func closest_distance(fov_degrees: float, viewport_height: float, fit: fl
 
 ## The part of the ground the screen shows when the camera targets the middle of the board
 ## (pan 0) and is turned by `yaw_degrees`: the box around where the four corners of the screen
-## meet the ground. `share` shrinks the screen about its centre first (0.5 is the inner half).
+## meet the ground. `share` shrinks the screen about its centre first (0.08 keeps only its middle).
 ## A pan moves the whole footprint, so a box is exact for keeping its corners over the board.
 static func footprint(
 	distance: float,
@@ -275,8 +275,8 @@ func ground_under(pixel: Vector2) -> Vector2:
 	return Vector2(hit.x, hit.z)
 
 
-## The pans allowed now: the inner `SCREEN_SHARE_OVER_BOARD` of the screen stays over the board,
-## so the board's outer rows can come to the middle of the screen and desk shows only at its edges.
+## The pans allowed now: the middle `SCREEN_SHARE_OVER_BOARD` of the screen stays over the board,
+## so the board's outer rows can come to the middle of the screen and desk shows around it.
 func pan_range() -> Rect2:
 	# the range only changes with the zoom, the screen shape, the fit and the canvas height
 	var key := Vector4(zoom, _aspect, _fit, canvas_height)
