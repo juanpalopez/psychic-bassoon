@@ -1,26 +1,29 @@
 ## The diorama's scenery (#326): forest patches of cone pines and round broadleaf trees, shrubs,
 ## faceted boulders, dirt patches and grass tufts, scattered by the map's regions on the board
 ## and, past it, by a render-only rule (forest and rocks from smooth noise on the map's seed),
-## out to a ring `SCATTER_RING` cells beyond each edge, thicker and taller further out.
+## out to a ring `SCATTER_RING` cells beyond each edge, thicker and taller further out. It reads
+## the diorama's `TerrainField`: the map, the routes, and the ground props stand on.
 ##
 ## No prop's footprint ever covers a socket block, the Heartstone's block, the road bed (its
-## drawn centrelines, carried on past the board), a bridge's deck or the river (carried straight
-## on past the top and bottom edges), and each kind keeps its own extra distance
-## (`DioramaLooks.KEEP_OFF_*`), so trees stand back from the road and the towers.
+## drawn centrelines, carried on past the board), a bridge's deck or the river (the field's,
+## carried on past the board), and each kind keeps its own extra distance
+## (`DioramaLooks.KEEP_OFF_*`), so trees stand back from the road and the towers. A prop stands
+## only where its whole footprint is on one terrace: never in the gorge, never across a cliff.
 ##
-## `build` returns one `MultiMeshInstance3D` per prop kind per chunk: the board and its margin,
-## and four strips round it (which hold only the forest and the boulders, in lighter meshes), so
-## a view near the board culls the strips it does not see. Every choice comes from `CellHash`
-## on the cell and the map's seed, so the same map always gets the same scenery, and nothing
-## reads or moves the game's random streams.
+## `build` returns one `MultiMeshInstance3D` per prop kind per chunk: the board and its margin in
+## two halves (west and east of the board's middle), and the ring round them in two halves (which
+## holds only the forest and the boulders, in lighter meshes), so a view of one end of the board
+## culls the other end's scenery: 18 surfaces, 10 of them in the shadow map. Every choice comes
+## from `CellHash` on the cell and the map's seed, so the same map always gets the same scenery,
+## and nothing reads or moves the game's random streams.
 class_name SceneryScatter
 extends RefCounted
 
 const LOOKS := preload("res://render/diorama/diorama_looks.gd")
-## The chunks: the middle one (the board and its margin) and a strip on each side.
-const CENTRE := "Centre"
-const STRIPS: Array[String] = ["West", "East", "North", "South"]
-## The kinds that grow in the strips past the margin.
+## The chunks: the board and its margin in two halves, and the ring past it in two halves.
+const MIDDLE: Array[String] = ["CentreWest", "CentreEast"]
+const RING: Array[String] = ["RingWest", "RingEast"]
+## The kinds that grow in the ring past the margin.
 const FAR_KINDS: Array[String] = ["pine", "broadleaf", "boulder"]
 ## The node name of each kind's MultiMesh.
 const NAMES := {
@@ -61,49 +64,60 @@ class Placement:
 	var chunk: String
 
 
-## The scenery for `map`, kept off `routes` (the game's `Route`s) and standing on `height_fn`
-## (`height_fn(cell: Vector2i) -> float`, the terrain top at any cell, on or off the board). The
-## node holds one MultiMeshInstance3D per kind per chunk, named like `Pines_Centre`.
-static func build(map: GameMap, routes: Array[Route], height_fn: Callable) -> Node3D:
+## The scenery for a diorama's field. The node holds one MultiMeshInstance3D per kind per chunk,
+## named like `Pines_CentreWest`.
+static func build(field: TerrainField) -> Node3D:
+	return build_from(placements(field), field)
+
+
+## The nodes for `found` (from `placements`) on the field's ground.
+static func build_from(found: Array[Placement], field: TerrainField) -> Node3D:
 	var root := Node3D.new()
 	root.name = "Scenery"
 	var groups := {}
-	for placement in placements(map, routes):
+	for placement in found:
 		var key := "%s_%s" % [NAMES[placement.kind], placement.chunk]
 		if not groups.has(key):
 			groups[key] = []
 		groups[key].append(placement)
 	var keys := groups.keys()
 	keys.sort()
+	var ground := Callable(field, "top_at")
 	for key: String in keys:
 		var group: Array = groups[key]
 		var first: Placement = group[0]
 		var node := MultiMeshInstance3D.new()
 		node.name = key
-		node.multimesh = _multimesh(group, first.kind, first.chunk != CENTRE, height_fn)
-		# ground cover is flat, and the strips stand in the haze, past where shadows are drawn
-		if SceneryProps.GROUND_COVER.has(first.kind) or first.chunk != CENTRE:
+		node.multimesh = _multimesh(group, first.kind, not MIDDLE.has(first.chunk), ground)
+		# only trees and boulders cast: ground cover is flat, a shrub's shadow is lost under it,
+		# and a boulder far out is too small to show one
+		var casts := TREES.has(first.kind) or (first.kind == "boulder" and MIDDLE.has(first.chunk))
+		if not casts:
 			node.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		root.add_child(node)
 	return root
 
 
-## Every prop of the scenery, in a fixed order (by cell, then kind). It needs no heights, so a
-## test can check it against the map alone.
-static func placements(map: GameMap, routes: Array[Route]) -> Array[Placement]:
-	var keep_off := Obstacles.new(map, routes)
+## Every prop of the scenery, in a fixed order (by cell, then kind).
+static func placements(field: TerrainField) -> Array[Placement]:
+	var map := field.map
+	var keep_off := Obstacles.new(field)
 	var found: Array[Placement] = []
 	var ring := LOOKS.SCATTER_RING
 	for row in range(-ring, map.rows + ring):
 		for col in range(-ring, map.cols + ring):
 			var cell := Vector2i(col, row)
+			# nothing stands in the gorge, or on a road cell, a socket or the Heartstone (a
+			# corner cell's outer corner is off the bed but still the road's)
+			if field.is_gorge(cell) or field.guard_at(cell) != TerrainField.GUARD_NONE:
+				continue
 			var out := _distance_out(map, cell)
 			var region := _region(map, cell, out)
 			var chunk := chunk_of(map, Vector2(col, row) + Vector2(0.5, 0.5))
 			var reach := clampf(float(out) / LOOKS.OUTSIDE_FULL, 0.0, 1.0)
 			for k in SceneryProps.KINDS.size():
 				var kind := SceneryProps.KINDS[k]
-				if chunk != CENTRE and not FAR_KINDS.has(kind):
+				if not MIDDLE.has(chunk) and not FAR_KINDS.has(kind):
 					continue
 				var density: float = LOOKS.DENSITY[kind][region]
 				if out > 0 and TREES.has(kind):
@@ -115,24 +129,42 @@ static func placements(map: GameMap, routes: Array[Route]) -> Array[Placement]:
 				for n in count:
 					var placement := _placement(map, cell, kind, k * 8 + n, reach)
 					placement.chunk = chunk
-					if keep_off.clear(placement):
+					if on_one_terrace(field, placement) and keep_off.clear(placement):
 						found.append(placement)
 	return found
 
 
-## The chunk a point (sim cells) falls in: the board and `SCATTER_CENTRE_MARGIN` cells round it,
-## or the strip on its west or east side (the full depth), or north or south of it.
+## True when every cell under a prop's footprint is on the terrace of the cell it stands in (so
+## none is in the gorge and the footprint crosses no cliff).
+static func on_one_terrace(field: TerrainField, placement: Placement) -> bool:
+	var at := placement.at
+	var r := placement.radius
+	var level := field.level_at(Vector2i(floori(at.x), floori(at.y)))
+	if level == TerrainField.GORGE:
+		return false
+	for row in range(floori(at.y - r), floori(at.y + r) + 1):
+		for col in range(floori(at.x - r), floori(at.x + r) + 1):
+			var cell := Vector2i(col, row)
+			var rect := Rect2(Vector2(cell), Vector2.ONE)
+			if at.distance_to(at.clamp(rect.position, rect.end)) >= r:
+				continue
+			if field.level_at(cell) != level:
+				return false
+	return true
+
+
+## The chunk a point (sim cells) falls in: the board and `SCATTER_CENTRE_MARGIN` cells round it
+## (`CentreWest` or `CentreEast` of the board's middle column), or the ring past that margin, in
+## the same two halves (`RingWest`, `RingEast`).
 static func chunk_of(map: GameMap, at: Vector2) -> String:
 	var margin := float(LOOKS.SCATTER_CENTRE_MARGIN)
-	if at.x < -margin:
-		return "West"
-	if at.x >= float(map.cols) + margin:
-		return "East"
-	if at.y < -margin:
-		return "North"
-	if at.y >= float(map.rows) + margin:
-		return "South"
-	return CENTRE
+	var west := at.x < float(map.cols) / 2.0
+	var inside := Rect2(
+		Vector2(-margin, -margin), Vector2(map.cols, map.rows) + Vector2.ONE * 2.0 * margin
+	)
+	if inside.has_point(at):
+		return MIDDLE[0] if west else MIDDLE[1]
+	return RING[0] if west else RING[1]
 
 
 ## How many cells a cell lies outside the board (0 on it), counted along the nearer axis's gap.
@@ -191,7 +223,7 @@ static func _placement(
 	if TREES.has(kind):
 		size *= lerpf(1.0, LOOKS.OUTSIDE_TREE_SCALE, reach)
 	placement.size = size
-	placement.radius = float(LOOKS.FOOTPRINT[kind]) * size
+	placement.radius = SceneryProps.reach(kind) * size
 	placement.turn = TAU * hash.call(SALT_TURN)
 	placement.stretch = 1.0
 	if TREES.has(kind):
@@ -227,12 +259,13 @@ static func _multimesh(group: Array, kind: String, light: bool, height_fn: Calla
 
 ## What the scenery keeps off, bucketed by cell so a prop checks only what is near it: the
 ## road's drawn centrelines (as segments with the bed's half width), and rectangles for the
-## socket blocks, the Heartstone's block, the bridges' decks and the river's cells.
+## socket blocks, the Heartstone's block, the bridges' decks and the river's cells (the field's,
+## carried on past the board).
 class Obstacles:
 	extends RefCounted
 	## Cells round an obstacle that a prop near it may stand in: more than the biggest tree's
-	## footprint (a broadleaf at full size, about 1.1) plus the largest keep-off and the bed's
-	## half width.
+	## footprint (a broadleaf at full size outside, about 1.15 cells) plus the largest keep-off
+	## (0.5) and the bed's half width (0.475).
 	const REACH := 3
 	var _from := PackedVector2Array()
 	var _to := PackedVector2Array()
@@ -241,25 +274,21 @@ class Obstacles:
 	var _rect_kinds: Array[String] = []
 	var _buckets := {}
 
-	func _init(map: GameMap, routes: Array[Route]) -> void:
-		for line in RoadBedBuilder.centrelines(routes):
+	## Everything `field` keeps clear, or nothing for a null field (add to it by hand).
+	func _init(field: TerrainField) -> void:
+		if field == null:
+			return
+		var map := field.map
+		for line in RoadBedBuilder.centrelines(field.routes):
 			for k in line.size() - 1:
-				_add_segment(line[k], line[k + 1])
+				add_segment(line[k], line[k + 1])
 		for anchor in map.sockets:
-			_add_rect(Rect2(Vector2(anchor), Vector2(map.footprint, map.footprint)), "socket")
-		_add_rect(Rect2(map.heartstone), "socket")
+			add_rect(Rect2(Vector2(anchor), Vector2(map.footprint, map.footprint)), "socket")
+		add_rect(Rect2(map.heartstone), "socket")
 		for bridge in map.bridges:
-			_add_rect(RoadBedBuilder.deck_rect(bridge), "bridge")
-		for cell in map.river:
-			_add_rect(Rect2(Vector2(cell), Vector2.ONE), "river")
-		# past the board the river carries straight on from its first and last cells
-		if not map.river.is_empty():
-			var top := map.river[0]
-			var bottom := map.river[map.river.size() - 1]
-			var ring := float(LOOKS.SCATTER_RING)
-			_add_rect(Rect2(Vector2(top.x, -ring), Vector2(1.0, ring + float(top.y))), "river")
-			var below := float(bottom.y + 1)
-			_add_rect(Rect2(Vector2(bottom.x, below), Vector2(1.0, ring)), "river")
+			add_rect(RoadBedBuilder.deck_rect(bridge), "bridge")
+		for cell in field.river:
+			add_rect(Rect2(Vector2(cell), Vector2.ONE), "river")
 
 	## True when `placement`'s footprint, with its kind's keep-off, touches nothing.
 	func clear(placement: Placement) -> bool:
@@ -287,14 +316,16 @@ class Obstacles:
 				return false
 		return true
 
-	func _add_segment(a: Vector2, b: Vector2) -> void:
+	## A stretch of the road bed's middle line.
+	func add_segment(a: Vector2, b: Vector2) -> void:
 		_from.append(a)
 		_to.append(b)
 		var low := Vector2(minf(a.x, b.x), minf(a.y, b.y))
 		var high := Vector2(maxf(a.x, b.x), maxf(a.y, b.y))
 		_bucket(Rect2(low, high - low), _from.size() - 1)
 
-	func _add_rect(rect: Rect2, kind: String) -> void:
+	## A rectangle to keep off: `kind` is "socket", "bridge" or "river".
+	func add_rect(rect: Rect2, kind: String) -> void:
 		_rects.append(rect)
 		_rect_kinds.append(kind)
 		_bucket(rect, -_rects.size())

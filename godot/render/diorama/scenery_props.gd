@@ -1,10 +1,12 @@
 ## The scenery's props, generated as faceted papercraft (docs/art/STYLE.md: "faceted cone pines
 ## and round broadleaf trees, grey-brown boulders split into facets, dirt patches and grass
-## tufts"): flat-shaded facets with their colours in the vertex colours, each prop one surface.
-## A prop stands on its origin, one cell is one unit, and its footprint at scale 1 is
-## `DioramaLooks.FOOTPRINT`. `light` gives the plainer mesh the scenery past the board's margin
-## wears (fewer facets, no trunk). Every mesh is made once and shared; nothing here is random:
-## the facets' jitter comes from `CellHash` on fixed keys, so the props look the same every run.
+## tufts"): flat-shaded facets with their colours (`TerrainPalette`) in the vertex colours, each
+## prop one surface. A prop stands on its origin, one cell is one unit, and it is built to
+## `DioramaLooks.PROP_RADIUS`; its footprint at scale 1 is measured on the meshes (`reach`).
+## `light` gives the plainer mesh the scenery past the board's margin wears (fewer facets, no
+## trunk). Every mesh is made once and shared; nothing here is random: the facets' jitter comes
+## from `CellHash` on fixed keys, so the props look the same every run. Scripted with Claude in
+## code, they count as the owner's own models (CLAUDE.md).
 class_name SceneryProps
 extends RefCounted
 
@@ -42,47 +44,55 @@ static func mesh(kind: String, light: bool) -> ArrayMesh:
 	return made
 
 
+## How far a prop reaches from its foot on the ground at scale 1 (cells): the furthest any vertex
+## of either of its meshes lies from the vertical axis. A placement's footprint is this times its
+## size.
+static func reach(kind: String) -> float:
+	var key := "reach %s" % kind
+	if _meshes.has(key):
+		return _meshes[key]
+	var furthest := 0.0
+	for light: bool in [false, true]:
+		for v: Vector3 in mesh(kind, light).surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:
+			furthest = maxf(furthest, Vector2(v.x, v.z).length())
+	_meshes[key] = furthest
+	return furthest
+
+
 ## How many triangles a prop's mesh has.
 static func triangles(kind: String, light: bool) -> int:
 	return mesh(kind, light).surface_get_array_len(0) / 3
 
 
 ## A cone pine: tiers of folded card, each turned half a facet from the one below and lighter
-## higher up, on a short trunk.
+## higher up, on a short trunk. The light pine has the same outline (as tall, as wide at the foot,
+## the same colours) in two tiers, so the switch at a chunk's edge does not jump.
 static func _pine(facets: FacetMesh, light: bool) -> void:
-	var tiers := 1 if light else 3
-	var sides := 5
-	var reach: float = LOOKS.FOOTPRINT["pine"]
-	var foot := 0.08 if light else 0.16
-	if not light:
-		_trunk(facets, 0.045, foot + 0.05)
-	var climb := 0.95 / float(tiers)
+	var reach: float = LOOKS.PROP_RADIUS["pine"]
+	# each tier: its foot's height, its radius (a share of the reach) and its tip's height
+	var tiers: Array[Vector3] = [
+		Vector3(0.16, 1.0, 0.71), Vector3(0.477, 0.75, 0.947), Vector3(0.793, 0.5, 1.183)
+	]
 	if light:
-		# one tall cone, as high as the full pine
-		var ring := _ring(sides, reach, foot, 0.0, 0)
-		var apex := Vector3(0.0, 1.05, 0.0)
-		for k in sides:
-			var tone := LOOKS.PINE_SHADE.lerp(LOOKS.PINE_COLOUR, 0.6)
-			tone = tone.lightened(0.05 * (_facet(k, 0, 3) + 1.0))
-			facets.triangle(apex, ring[k], ring[(k + 1) % sides], tone, Vector3(0.0, 0.3, 0.0))
-		return
-	for tier in tiers:
-		var share := float(tier) / float(maxi(tiers - 1, 1))
-		var radius := reach * (1.0 - 0.5 * share)
-		var base := foot + climb * float(tier)
-		var apex := Vector3(0.0, base + 0.55 - 0.08 * float(tier), 0.0)
-		var ring := _ring(sides, radius, base, 0.5 * float(tier), 0)
-		var inside := Vector3(0.0, base + 0.1, 0.0)
-		for k in sides:
-			var tone := LOOKS.PINE_SHADE.lerp(LOOKS.PINE_COLOUR, 0.3 + 0.7 * share)
+		tiers = [Vector3(0.08, 1.0, 0.8), Vector3(0.5, 0.65, 1.183)]
+	else:
+		_trunk(facets, 0.045, 0.21)
+	for tier in tiers.size():
+		var shape := tiers[tier]
+		var share := float(tier) / float(tiers.size() - 1)
+		var apex := Vector3(0.0, shape.z, 0.0)
+		var ring := _ring(5, reach * shape.y, shape.x, 0.5 * float(tier), 0)
+		var inside := Vector3(0.0, shape.x + 0.1, 0.0)
+		for k in 5:
+			var tone := TerrainPalette.PINE_SHADE.lerp(TerrainPalette.PINE, 0.3 + 0.7 * share)
 			tone = tone.lightened(0.05 * (_facet(k, tier, 3) + 1.0))
-			facets.triangle(apex, ring[k], ring[(k + 1) % sides], tone, inside)
+			facets.triangle(apex, ring[k], ring[(k + 1) % 5], tone, inside)
 
 
 ## A round broadleaf: a lumpy faceted crown (an icosahedron pulled about), lighter on top, on a
 ## trunk.
 static func _broadleaf(facets: FacetMesh, light: bool) -> void:
-	var reach: float = LOOKS.FOOTPRINT["broadleaf"]
+	var reach: float = LOOKS.PROP_RADIUS["broadleaf"]
 	var middle := Vector3(0.0, 0.6, 0.0)
 	if light:
 		# a five-sided cone of a crown, seen from above, far off
@@ -147,29 +157,29 @@ static func _broadleaf(facets: FacetMesh, light: bool) -> void:
 
 
 static func _crown_tone(up: float, facet: int) -> Color:
-	var tone := LOOKS.BROADLEAF_SHADE.lerp(LOOKS.BROADLEAF_COLOUR, 0.25 + 0.75 * up)
+	var tone := TerrainPalette.BROADLEAF_SHADE.lerp(TerrainPalette.BROADLEAF, 0.25 + 0.75 * up)
 	return tone.lightened(0.05 * _facet(facet, 2, 2))
 
 
 ## A low five-sided dome of a bush, its skirt folded down between the facets of its top.
 static func _shrub(facets: FacetMesh) -> void:
-	var reach: float = LOOKS.FOOTPRINT["shrub"]
+	var reach: float = LOOKS.PROP_RADIUS["shrub"]
 	var foot := _ring(5, reach * 0.8, -0.02, 0.5, 4)
 	var waist := _ring(5, reach, 0.1, 0.0, 5)
 	var top := Vector3(0.0, 0.26, 0.0)
 	var inside := Vector3(0.0, 0.08, 0.0)
 	for k in 5:
 		var j := (k + 1) % 5
-		var lit := LOOKS.SHRUB_COLOUR.lightened(0.06 * _facet(k, 5, 3))
+		var lit := TerrainPalette.SHRUB.lightened(0.06 * _facet(k, 5, 3))
 		facets.triangle(top, waist[k], waist[j], lit, inside)
-		var side := LOOKS.SHRUB_COLOUR.darkened(0.18 + 0.05 * _facet(k, 6, 3))
+		var side := TerrainPalette.SHRUB.darkened(0.18 + 0.05 * _facet(k, 6, 3))
 		facets.triangle(waist[k], foot[k], waist[j], side, inside)
 
 
 ## A boulder split into facets: a jittered ring round a top point, sloping to a wider foot sunk a
 ## little into the ground (after the look-dev `rock`).
 static func _boulder(facets: FacetMesh, light: bool) -> void:
-	var reach: float = LOOKS.FOOTPRINT["boulder"]
+	var reach: float = LOOKS.PROP_RADIUS["boulder"]
 	var sides := 4 if light else 6
 	var inside := Vector3(0.0, 0.08, 0.0)
 	var top := Vector3(0.03, reach * 1.05, -0.02)
@@ -183,7 +193,7 @@ static func _boulder(facets: FacetMesh, light: bool) -> void:
 		var low := angle + PI / float(sides)
 		var wide := reach * (0.9 + 0.12 * CellHash.of(k, sides, 13, 43))
 		foot.append(Vector3(cos(low) * wide, -0.04, sin(low) * wide))
-	var stone: Color = LOOKS.STONE_COLOURS[0]
+	var stone: Color = TerrainPalette.STONES[0]
 	for k in sides:
 		var j := (k + 1) % sides
 		facets.triangle(
@@ -199,7 +209,7 @@ static func _boulder(facets: FacetMesh, light: bool) -> void:
 ## A patch of bare earth lying on the grass: a ragged seven-sided fan, darker in the middle and
 ## fading to the dry grass colour at its edge.
 static func _dirt(facets: FacetMesh) -> void:
-	var reach: float = LOOKS.FOOTPRINT["dirt"]
+	var reach: float = LOOKS.PROP_RADIUS["dirt"]
 	var middle := Vector3(0.0, 0.006, 0.0)
 	var below := Vector3(0.0, -1.0, 0.0)
 	var edge: Array[Vector3] = []
@@ -207,10 +217,10 @@ static func _dirt(facets: FacetMesh) -> void:
 		var angle := TAU * float(k) / 7.0
 		var out := reach * (0.7 + 0.3 * CellHash.of(k, 7, 21, 49))
 		edge.append(Vector3(cos(angle) * out, 0.004, sin(angle) * out))
-	var rim := LOOKS.DIRT_COLOUR.lerp(LOOKS.DIRT_EDGE, 0.7)
+	var rim := TerrainPalette.DIRT_PATCH.lerp(TerrainPalette.DIRT_PATCH_EDGE, 0.7)
 	for k in 7:
 		facets.shaded_triangle(
-			[middle, edge[k], edge[(k + 1) % 7]], [LOOKS.DIRT_COLOUR, rim, rim], below
+			[middle, edge[k], edge[(k + 1) % 7]], [TerrainPalette.DIRT_PATCH, rim, rim], below
 		)
 
 
@@ -223,7 +233,9 @@ static func _grass(facets: FacetMesh) -> void:
 		var root := out * 0.03
 		var tip := out * 0.1 + Vector3(0.0, 0.22 + 0.04 * float(blade), 0.0)
 		var corners: Array[Vector3] = [root - across, root + across, tip]
-		var colours: Array[Color] = [LOOKS.GRASS_COLOUR, LOOKS.GRASS_COLOUR, LOOKS.GRASS_TIP]
+		var colours: Array[Color] = [
+			TerrainPalette.GRASS_BLADE, TerrainPalette.GRASS_BLADE, TerrainPalette.GRASS_TIP
+		]
 		var side := across.cross(Vector3.UP).normalized() * 0.05
 		facets.shaded_triangle(corners, colours, root + side)
 		facets.shaded_triangle(corners, colours, root - side)
@@ -236,7 +248,7 @@ static func _trunk(facets: FacetMesh, half: float, height: float) -> void:
 	var inside := Vector3(0.0, height / 2.0, 0.0)
 	for k in 3:
 		var j := (k + 1) % 3
-		var tone := LOOKS.TRUNK_COLOUR.darkened(0.08 * float(k))
+		var tone := TerrainPalette.TRUNK.darkened(0.08 * float(k))
 		facets.quad(foot[k], foot[j], top[j], top[k], tone, inside)
 
 

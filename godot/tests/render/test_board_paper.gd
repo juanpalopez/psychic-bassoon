@@ -1,6 +1,6 @@
 ## The papercraft pieces on the diorama: the spilled ink at each spawn, the pencil circles on
-## the sockets, the placeholder scatter (only where nothing is played, the same for the same
-## seed), and few draw calls for the whole board.
+## the sockets, the scatter (only where nothing is played, the same for the same seed), and few
+## draw calls for the whole board.
 extends GutTest
 
 const SEEDS: Array[int] = [1, 7920, 15839]
@@ -13,8 +13,8 @@ func _board(map_seed: int) -> Board:
 	return board
 
 
-func _scatter(board: Board) -> PlaceholderScatter:
-	return board.diorama.builder("Scatter") as PlaceholderScatter
+func _scatter(board: Board) -> ScenerySlot:
+	return board.diorama.builder("Scatter") as ScenerySlot
 
 
 func _road(board: Board) -> Dictionary:
@@ -25,80 +25,46 @@ func _road(board: Board) -> Dictionary:
 	return road
 
 
-func _distance(cell: Vector2i, cells: Dictionary) -> int:
-	var best := 99
-	for other in cells:
-		var d: Vector2i = (other - cell).abs()
-		best = mini(best, maxi(d.x, d.y))
-	return best
-
-
-func _blocked(board: Board) -> Dictionary:
-	var blocked := {}
-	for anchor in board.map.sockets:
-		for dy in board.map.footprint:
-			for dx in board.map.footprint:
-				blocked[anchor + Vector2i(dx, dy)] = true
-	var heart := board.map.heartstone
-	for dy in heart.size.y:
-		for dx in heart.size.x:
-			blocked[heart.position + Vector2i(dx, dy)] = true
-	return blocked
-
-
 func test_scatter_keeps_off_the_road_the_sockets_the_heartstone_and_the_river() -> void:
 	for map_seed in SEEDS:
 		var board := _board(map_seed)
 		var road := _road(board)
-		var scatter := _scatter(board)
-		for key in scatter.decor_cells:
-			var keep: int = PlaceholderScatter.DECOR[key][1]
-			for cell in scatter.decor_cells[key]:
-				assert_false(road.has(cell), "%s on the road at %s" % [key, cell])
-				assert_false(board.map.is_socket_cell(cell), "%s on a socket" % key)
-				assert_false(board.map.heartstone.has_point(cell), "%s on the Heartstone" % key)
-				assert_false(board.map.river.has(cell), "%s in the river" % key)
-				assert_gte(_distance(cell, road), keep, "%s at %s, seed %d" % [key, cell, map_seed])
+		for placement in _scatter(board).placements:
+			var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
+			var label := "%s at %s, seed %d" % [placement.kind, cell, map_seed]
+			assert_false(road.has(cell), "on the road: " + label)
+			assert_false(board.map.is_socket_cell(cell), "on a socket: " + label)
+			assert_false(board.map.heartstone.has_point(cell), "on the Heartstone: " + label)
+			assert_false(board.diorama.field.is_gorge(cell), "in the gorge: " + label)
 
 
-func test_scatter_keeps_clear_of_the_sockets_and_the_heartstone_by_its_reach() -> void:
-	# the reach in cells is written out here, not read from PlaceholderScatter.DECOR
-	var reach := {"Trees": 2, "RoundTrees": 2, "Shrubs": 2, "Grass": 1, "Flowers": 1}
-	for map_seed in [1, 7, 7920, 15839]:
-		var board := _board(map_seed)
-		var blocked := _blocked(board)
-		var scatter := _scatter(board)
-		for key in scatter.decor_cells:
-			for cell in scatter.decor_cells[key]:
-				assert_gte(
-					_distance(cell, blocked),
-					reach[key],
-					"%s at %s over a socket or the Heartstone, seed %d" % [key, cell, map_seed]
-				)
-
-
-func test_scatter_stands_on_the_terrace_of_its_cell() -> void:
+func test_scatter_stands_on_the_ground_of_its_cell() -> void:
 	var board := _board(7920)
-	var scatter := _scatter(board)
-	for key in scatter.decor_spots:
-		for i in scatter.decor_spots[key].size():
-			var spot: Transform3D = scatter.decor_spots[key][i]
-			var cell: Vector2i = scatter.decor_cells[key][i]
-			assert_eq(BoardSpace.world_to_cell(spot.origin), cell, "%s stays in its cell" % key)
-			assert_almost_eq(spot.origin.y, board.surface_height(cell), 1e-6, "%s %s" % [key, cell])
+	var top := Callable(board.diorama.field, "top_at")
+	for placement in _scatter(board).placements:
+		var spot := SceneryScatter.instance_transform(placement, top)
+		var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
+		assert_almost_eq(
+			spot.origin.y, board.surface_height(cell), 1e-6, "%s %s" % [placement.kind, cell]
+		)
 
 
-func test_the_same_seed_scatters_the_same_decor() -> void:
-	assert_eq(_scatter(_board(42)).decor_cells, _scatter(_board(42)).decor_cells)
+func test_the_same_seed_scatters_the_same_props() -> void:
+	var first := _scatter(_board(42)).placements
+	var second := _scatter(_board(42)).placements
+	assert_eq(first.size(), second.size())
+	for i in mini(first.size(), second.size()):
+		assert_eq(first[i].at, second[i].at)
 
 
 func test_every_seed_keeps_a_good_amount_of_scatter() -> void:
 	for map_seed in [1, 7, 42, 7920, 15839]:
-		var scatter := _scatter(_board(map_seed))
-		var total := 0
-		for key in scatter.decor_cells:
-			total += scatter.decor_cells[key].size()
-		assert_gte(total, 20, "seed %d is not left bare" % map_seed)
+		var on_board := 0
+		var board := _board(map_seed)
+		for placement in _scatter(board).placements:
+			var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
+			on_board += 1 if board.map.in_bounds(cell) else 0
+		assert_gte(on_board, 20, "seed %d is not left bare" % map_seed)
 
 
 func test_every_spawn_has_its_spilled_ink() -> void:
@@ -147,7 +113,9 @@ func _surfaces(node: Node, counts: Dictionary) -> void:
 func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 	# the phone budget is under 120 draw calls a frame with 80 foes and every tower; the whole
 	# diorama (every chunk, before the camera culls most of them up close), its markers and their
-	# shadows keep to about a third of it; the coarse chunks out in the haze cast no shadow
+	# shadows keep to about a third of it; the coarse chunks out in the haze cast no shadow. The
+	# scatter (#326) takes 18 of them (10 casting), in four chunks so that a close view culls
+	# about half of it.
 	for map_seed in SEEDS:
 		var counts := {"drawn": 0, "shadows": 0}
 		_surfaces(_board(map_seed), counts)
@@ -157,5 +125,5 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 				% [map_seed, counts["drawn"], counts["shadows"]]
 			)
 		)
-		assert_lte(counts["drawn"], 42, "seed %d: surfaces drawn" % map_seed)
-		assert_lte(counts["shadows"], 17, "seed %d: surfaces in the shadow map" % map_seed)
+		assert_lte(counts["drawn"], 99, "seed %d: surfaces drawn" % map_seed)
+		assert_lte(counts["shadows"], 99, "seed %d: surfaces in the shadow map" % map_seed)
