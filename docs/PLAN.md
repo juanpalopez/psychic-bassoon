@@ -4,11 +4,13 @@ Codename: **Project Slag**. The repo is `psychic-bassoon`; the game is **Papercr
 
 _Updated 2026-10-11: the owner adopted the Papercraft Kingdom Defense GDD (`docs/GDD.md`) as the design. Living version: the Claude doc of the same name; the GDD itself lives in the owner's Google Doc._
 
+> **Status (2026-10-18): a new art direction, a bigger map and native platforms (owner).** The look becomes "Hand-Folded Fantasy", a boundless papercraft diorama of a fantasy valley (`docs/art/STYLE.md`); the desk, cutting mat and tape road are dropped, and the lore stays. The map grows to 32x20 cells with curved routes the sim walks, a river with bridges held by guards, and a hero you move across the map. The web build is dropped: iOS first, then macOS, Windows and Linux, on the Forward+ and Mobile renderers; a debug build already runs on the owner's iPhone 15 Pro. Epic #316; decision records `docs/lessons/2026-10-18-hand-folded-fantasy.md`, `2026-10-18-native-only.md` and `2026-10-18-valley-map.md`. Where this plan or `docs/GDD.md` still says cutting mat, desk, tape road, web or Safari in a section below, these decisions win.
+
 > **Status (2026-10-13):** Phases 0 to 4 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired (last build: the tag `web-three-final`). The game moved to the **Godot engine** on 2026-10-10 and the owner adopted the GDD on 2026-10-11: a papercraft stop-motion tower defense with a hero, spells and a tech tree. Phase 4 (the simulation in GDScript) closed on 2026-10-13: the whole sim is in GDScript, deterministic and covered by replay goldens, with the Phase 4 gate checked below. Phase 5 (play in Godot) is a finished greybox (board, picking, foes, towers, HUD, win and lose, speeds) whose gate still waits on two checks on the owner's phone (60 fps with 80 foes, and the road, sockets and foes lining up by eye). Phase 7 content started early at the owner's request: three shooting towers, the Guard Tent and the Kitchen Mess Tent, blocking guards, and bigger swarm waves; flying and support foes, tier 4 specs, the hero and spells are not built. The owner models the art themselves in Blender (Meshy was dropped on 2026-10-13). The target is web first, then native iOS.
 
 ## Vision
 
-Papercraft Kingdom Defense is a tactile, isometric 3D tower defense for phones and tablets, built with Godot 4. You are the Grand Crafter on an old cutting mat, building towers from spools, tents, prisms and thimbles to hold back corrupted stationery. It lives in this repo, deploys to GitHub Pages first and to native iOS later, and doubles as a portfolio piece.
+Papercraft Kingdom Defense is a tactile, isometric 3D tower defense for phones and tablets, built with Godot 4. You are the Grand Crafter defending a folded paper valley, building towers from spools, tents, prisms and thimbles to hold back corrupted stationery. It lives in this repo, ships natively on iOS first and on Mac and PC next (the web build was dropped on 2026-10-18), and doubles as a portfolio piece.
 
 **Pillars**
 
@@ -16,13 +18,13 @@ Papercraft Kingdom Defense is a tactile, isometric 3D tower defense for phones a
 - **Readable at a glance.** Silhouette, material and colour tell you each foe's type and each tower's tier, even zoomed out.
 - **Handmade.** Everything looks cut, folded and glued: kraft paper, cardboard, foil, tape and ink; animation steps at 12 fps like stop-motion while the camera stays smooth.
 - **Tactical, not twitchy.** Pre-etched sockets, a few strong choices per tower, and a hero and spells for the moments that matter.
-- **Every run is a new mat.** Seeded procedural maps that you can replay and share by seed.
+- **Every run is a new valley.** Seeded procedural maps that you can replay and share by seed.
 
 ## Lore
 
 **The War of the Cutting Mat.** In a forgotten corner of an old craft room, an abandoned green self-healing cutting mat holds a thriving miniature civilization of recycled paper strips and cardboard cutouts. Peace ends when The Blot strikes: a bottle of corrupted, magical purple India ink tips over from the high shelves. As the ink seeps into the paper fibre it twists peaceful scraps into jagged monsters that want to shred everything into confetti. You are The Grand Crafter, and your legendary craft artifacts (scissors, glue guns, tape rolls) guide origami defenders and corrugated bastions against the ink-born tide.
 
-The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Hollow King, Castellan Quell) is dropped. Names appear in `godot/content` only; ids are stable keys (see Naming in `CLAUDE.md`).
+The look no longer shows the mat or the craft room (owner, 2026-10-18): the paper folk's kingdom is drawn as a folded fantasy valley, and the story is unchanged. The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Hollow King, Castellan Quell) is dropped. Names appear in `godot/content` only; ids are stable keys (see Naming in `CLAUDE.md`).
 
 ## Design (from the GDD)
 
@@ -30,7 +32,7 @@ The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Ho
 
 **Loop.** Scout and build (spend Buttons, the currency, on pre-etched sockets) → engage the wave (call it early for bonus income) → combat (targeting priorities, hero commands, drop-scraps, spells powered by regenerating PVA Ink / Crafting Energy) → rewards (Golden Staples from remaining Heartstone health, spent in a workshop tech tree on permanent skills, base stats and new origami blueprints).
 
-**Maps.** A seeded cutting-mat board of 1 m tiles, **16 columns by 11 rows (176 cells), landscape** (owner, 2026-10-14, Map v3 #255: 22 by 16 showed too many cells at a readable unit size; before that 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 15 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
+**Maps.** _Superseded in part on 2026-10-18: the map is a 32x20 valley with curved routes, terraces, a river and guarded bridges (#320 to #323), drawn as a diorama, not a mat._ A seeded cutting-mat board of 1 m tiles, **16 columns by 11 rows (176 cells), landscape** (owner, 2026-10-14, Map v3 #255: 22 by 16 showed too many cells at a readable unit size; before that 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 15 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
 
 **Towers.** Four archetypes, each with tiers 1 to 3 (linear damage, range and fire-rate upgrades) and a tier 4 that splits into two specialisations, each with one active and one passive ability.
 
@@ -111,7 +113,7 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 - **Determinism.** The ported pieces still match the TypeScript fixtures bit for bit, and the rules that made that possible stay: GDScript floats are 64-bit like JavaScript's, so results match if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, trig or engine `round`). Traps to port deliberately: `/` between two integers is integer division in GDScript (divide by a float such as `4294967296.0`); JavaScript's `Math.imul` and `>>>` need every value kept in [0, 2^32) and masked after each `*`, `+` and `^`; `Math.round` becomes `int(floor(x + 0.5))`. Fixtures store integers above 2^53 and fingerprints as hex strings and are compared with exact `==` (Godot's `JSON.parse` returns every number as a float).
 - **Different tooling.** gdtoolkit for lint and format, GUT for tests, the Godot CLI for export. CI must download a pinned Godot and its export templates (cache them).
 
-**Native later:** the same project exports to iOS once the web build is solid (Android only if wanted); it needs an Apple Developer account, signing, App Store review and safe-area and input checks, so it is its own phase. Keep game code free of browser-only calls: the web shell (landscape prompt, reduced-motion read) stays outside `godot/sim`, `render` and `ui` logic behind one small adapter, so the iOS build swaps the adapter.
+**Native now (owner, 2026-10-18):** the web build is dropped and the game ships natively (`docs/lessons/2026-10-18-native-only.md`, #318, #319). The history: the same project was to export to iOS once the web build was solid (Android only if wanted); it needs an Apple Developer account, signing, App Store review and safe-area and input checks, so it is its own phase. Keep game code free of browser-only calls: the web shell (landscape prompt, reduced-motion read) stays outside `godot/sim`, `render` and `ui` logic behind one small adapter, so the iOS build swaps the adapter.
 
 ## Tech stack and architecture
 
@@ -124,28 +126,28 @@ Input / HUD taps ──commands──▶          │           ──events─�
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Engine | Godot 4.x (version pinned at setup), Compatibility renderer, single-threaded Web export | WebGL2 and no special server headers, so it runs from GitHub Pages and iOS Safari |
+| Engine | Godot 4.x (version pinned at setup), Forward+ on desktop and the Mobile renderer on iOS (2026-10-18; it was Compatibility for the web) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
 | Language | GDScript, typed everywhere | The script language that exports to web in the pinned 4.x |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
 | Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, terrain from modular 1 m tiles (a `GridMap` or `MultiMesh` per tile type) with papercraft materials | Few draw calls on a phone |
 | Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the web build |
 | HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens; a radial context menu for sockets and towers |
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed (the ported pieces match the TypeScript fixtures) |
-| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; one Playwright smoke test on the exported build | Balance, maps and replays stay verifiable |
-| Audio | Godot `AudioStreamPlayer`, started after the first tap on web | Browsers block sound before a user gesture |
+| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; a headless desktop export in CI (the Playwright smoke test of the web build goes with #318) | Balance, maps and replays stay verifiable |
+| Audio | Godot `AudioStreamPlayer` | Native builds can start sound at once |
 | CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, Godot web export, size budget, Pages deploy, tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
 - **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers (the view stays over the board); a run starts with the whole board in view and there is no follow camera (owner, 2026-10-14).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
-- **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Bright desk lighting on a cutting mat (see Art direction).
+- **Rendering.** One `MultiMesh` per foe type; each tower is its own scene instance. Warm sunlit diorama with cool magic (see Art direction and `docs/art/STYLE.md`).
 - **Input.** A tap ray-casts the ground plane to a cell, a socket or a tower, and sends a command. No direct state changes.
-- **Orientation.** Landscape only: the web page shows a "turn your phone" prompt when upright (custom HTML shell).
+- **Orientation.** Landscape only, locked by the exports (#319).
 
-**Phone performance budget:** 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit (the whole model at that level, not an increment): a foe 800 to 1,200 triangles with its own baked 512 px map; a tower 1,500 to 3,000 triangles on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. These ranges only fit together under worst-case caps for the 150k frame: foes at most 80k in total (80 foes average at most 1,000, so the Scrap Goblin swarm sits at the low end and only a few foes reach 1,200), towers at most 45k in total (22 towers, the most sockets a map has, at the top tier average about 2,050, so top-of-range towers must be few), terrain, scenery and effects at most 20k, one boss at most 5k. A tower is at most 3 mesh parts of one surface each (the Prism Spire's glass marble adds a fourth), so 22 towers are at most 88 of the 120 draw calls plus 22 shadow draws (only a tower's base casts a shadow), and each guard is 3 more (2 a Guard Tent), so a board full of tents is the case the Phase 5 pass must measure (the desk lamp's shadows came with the board look, `docs/lessons/2026-10-17-papercraft-board-look.md`; towers and units: `docs/lessons/2026-10-18-papercraft-towers-and-units.md`). The Phase 5 performance pass checks the caps with the real counts. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
+**Phone performance budget** (provisional for the 32x20 map and the diorama until #97 re-measures it on the iPhone in a native build; triangles count what is in view, so terrain and scatter are built in culled chunks): 60 fps with 80 foes on screen (30 fps fallback with reduced effects); under 120 draw calls and about 150k triangles per frame; DPR capped at 2. Per unit (the whole model at that level, not an increment): a foe 800 to 1,200 triangles with its own baked 512 px map; a tower 1,500 to 3,000 triangles on a shared atlas; a boss 3,000 to 5,000 triangles with a 1,024 px map. These ranges only fit together under worst-case caps for the 150k frame: foes at most 80k in total (80 foes average at most 1,000, so the Scrap Goblin swarm sits at the low end and only a few foes reach 1,200), towers at most 45k in total (22 towers, the most sockets a map has, at the top tier average about 2,050, so top-of-range towers must be few), terrain, scenery and effects at most 20k, one boss at most 5k. A tower is at most 3 mesh parts of one surface each (the Prism Spire's glass marble adds a fourth), so 22 towers are at most 88 of the 120 draw calls plus 22 shadow draws (only a tower's base casts a shadow), and each guard is 3 more (2 a Guard Tent), so a board full of tents is the case the Phase 5 pass must measure (the desk lamp's shadows came with the board look, `docs/lessons/2026-10-17-papercraft-board-look.md`; towers and units: `docs/lessons/2026-10-18-papercraft-towers-and-units.md`). The Phase 5 performance pass checks the caps with the real counts. Download budget to be set after the Phase 3 measurement (the web engine alone is several MB).
 
 ## Art direction and Claude Design
 
-**Papercraft stop-motion** (from the GDD): a tactile desk-top diorama. Everything looks cut, folded and glued from recycled office supplies on a green self-healing cutting mat, lit by bright desk light; the corrupted side is wet purple ink.
+**Hand-Folded Fantasy** (owner, 2026-10-18): the rules, palette, materials, lighting and characters are in `docs/art/STYLE.md`, which wins over the older desk-top notes in this section; the look-dev that set it is in `assets-src/diorama_lookdev/` and `docs/art/diorama/`. The earlier direction, kept for its materials and readability rules: **Papercraft stop-motion** (from the GDD): a tactile desk-top diorama. Everything looks cut, folded and glued from recycled office supplies on a green self-healing cutting mat, lit by bright desk light; the corrupted side is wet purple ink.
 
 - **Materials.** Kraft paper and corrugated cardboard (roughness about 0.85, subtle height maps for the corrugation, detail normal maps for paper fibre), translucent creased edges (subsurface transmission), foil for rivers and armor, tape and PVA glue for hazards. The Blot: a vertex-displacement shader with saturated purple specular for ink-drenched surfaces.
 - **Palette.** Cutting-mat green and kraft brown for the board and the defenders, white pencil outlines for sockets, saturated purple for everything the Blot touches, one accent colour per tower.
@@ -196,7 +198,7 @@ Which units can come from where, and what has to be built. Nothing here is verif
 | Razor Moth, Ink Shaman | Same pipeline | Flying wings (tissue paper and wire) need a flap clip; the Shaman needs a healing aura effect. |
 | Towers (5, tiers 1 to 4; 8 specialisations on four of them) | Blender, built with Claude, from spools, tents, prisms and thimbles | Parts animated in an `AnimationPlayer`, no skeleton, at most 3 mesh parts each. Tier lights or paper tags show the tier; specialisations add a visible part. |
 | Hero (Knight of Cardboard), planes, guards, Mess Tent | The owner's Blender models | The hero is skinned like a boss; paper planes and guards are small `MultiMesh` or scene instances (a guard needs idle, strike, fall and rise clips); the Kitchen Mess Tent is a fifth tower. |
-| Board tiles and props | Blender tiles (cutting mat, cardboard rise, tiered cliffs, foil rivers, tape strips) and CC0 paper textures | Terrain through modular 1 m tiles; sockets as etched circles that become folded cardstock when built. |
+| Terrain and props | The diorama built at load time from the map (terraces, corrugated cliffs, road beds, bridges, river) and the owner's Blender props (trees, rocks, dirt, grass), from the look-dev in `assets-src/diorama_lookdev/` | #324 to #326; one `MultiMesh` per prop type; sockets readable on the terraces. |
 | Effects | Shaders and particles | The Blot shader, glue pools, thumbtacks, confetti, ink vortex, wax freeze; no new models. |
 
 Rule: if a unit's silhouette is not distinct at zoomed-out view, change the model, not the readability pillar.
@@ -212,8 +214,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     ui/                  # HUD scenes and the Theme resource
     assets/              # imported GLB models, audio, textures
     tests/               # GUT tests, including the fixtures for the ported core
-    export_presets.cfg   # web export preset (Godot reads it from the project root)
-    web/                 # the custom HTML shell (landscape prompt, meta tags, loader)
+    export_presets.cfg   # iOS and desktop export presets (Godot reads it from the project root; the web preset and shell go with #318)
   fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
@@ -224,7 +225,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 
 - `godot/sim` never touches the scene tree: no `Node`, no `get_tree`, no `Engine` or `Time` singletons, no `randf`/`randi`. A lint script enforces it.
 - All balance numbers live in `godot/content`.
-- Conventional Commits, small PRs, `main` always deployable to GitHub Pages.
+- Conventional Commits, small PRs, `main` always releasable.
 - Git LFS for binary sources; only compressed GLBs ship.
 - MIT for code; each art source keeps its terms (CC0 packs; the owner's own models stay all rights reserved).
 
@@ -234,7 +235,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
 | `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes to GitHub Pages. The Godot export is served at the root URL. Until the game exists that is the Phase 3 stub scene; the Three.js build is no longer served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
+| `deploy` | Push to `main`, only after `ci` passes | Goes with #318 (the web build is dropped; Pages then serves a short page that links to the latest release). Until then it publishes to GitHub Pages. The Godot export is served at the root URL. Until the game exists that is the Phase 3 stub scene; the Three.js build is no longer served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
 
 **Versions follow phase gates** (semantic versioning, 0.x until launch). The only tag so far is `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
@@ -258,7 +259,7 @@ From the 2D prototype (the ported base) to the GDD design.
 
 | Area | Prototype | Papercraft Kingdom Defense |
 | --- | --- | --- |
-| Map | Random path on a 9×13 grid | Seeded cutting-mat board of 16×11 cells (was 22×16) with three levels, 12 to 15 sockets of 2x2 cells (the generator gives 12 on about three maps in four), a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
+| Map | Random path on a 9×13 grid | A seeded valley of 32×20 cells (owner, 2026-10-18, #320) with curved routes the sim walks (#321), terraces, regions and a river with guarded bridges (#322, #323). Before that: a seeded cutting-mat board of 16×11 cells (was 22×16) with three levels, 12 to 15 sockets of 2x2 cells (the generator gives 12 on about three maps in four), a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
 | Building | Any free cell | Pre-etched sockets; a radial context menu |
 | Towers | 4 types, 3 levels | 4 archetypes, tiers 1 to 3 plus a tier 4 specialisation each (8 specialisations) with an active and a passive ability; targeting priorities |
 | Foes | Scout, walker, tank, boss | Scrap Goblin, Razor Moth (flying), Corrugated Orc, Ink Shaman (support), Cardboard Golem (boss) |
@@ -282,9 +283,9 @@ Each phase ends with a gate that must pass before the next starts (exception: th
 | 3 · Godot foundation | Godot project, pinned version, web export (single-thread), CI (gdlint, gdformat, GUT, export, size), Pages deploy, fixtures exported from the TypeScript sim | An empty Godot scene deploys from `main` and loads on the owner's iPhone Safari; download size measured and budgeted |
 | 4 · Sim in GDScript, designed from the GDD (done 2026-10-13) | PRNG, road generator and routes, game core (done); sockets and elevation, foes and waves, combat core and economy for the first towers and foes, replay goldens, headless run | **The same seed and commands replay to the same result** (goldens), the ported core still matches its fixtures, and `src/` is gone (done) |
 | 5 · Play in Godot (greybox started in parallel with Phase 4, 2026-10-11) | Greybox board, picking, foes, towers, HUD and loop (steps A1 to A6); papercraft terrain tiles, camera pan, pinch and tilt, the radial menu | **A full run to the boss at 60 fps on the owner's phone with 80 foes**, every action reachable in landscape |
-| 6 · Art and ambience (papercraft) | Materials and shaders (kraft, cardboard, mat, foil, tape, the Blot), the Scrap Goblin through the pipeline first, then the other foes, the four towers, board tiles, stop-motion stepping at 12 fps, Claude Design HUD and Theme | All foes and towers use final models, each distinct at zoomed-out view; performance budget met |
-| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, the Kitchen Mess Tent, the Camp Cook, the Messenger Crow, bridges and hazards (rivers, tape, PVA puddles; drawbridges only if the owner confirms them) | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
-| 8 · Meta, polish, launch, native | Golden Staples tech tree and saved progress, audio, performance pass, README with key art; iOS export (Android optional) | Public web build on two real phones; native iOS build on one iPhone |
+| 6 · Art and ambience (Hand-Folded Fantasy) | The diorama terrain, road beds, bridges and scatter; the painterly paper material; lighting and post; the camera and minimap for the big map; the platform switch; the Scrap Goblin through the pipeline first, then the other foes, the hero, the towers and guards in the chunky style; stop-motion stepping at 12 fps; Claude Design HUD and Theme (#316) | All foes, towers, guards and the hero use final models, each distinct at the overview zoom; performance budget met on the iPhone |
+| 7 · Depth (the rest of the GDD) | Razor Moth and anti-air, Ink Shaman, the Guard Tent and blocking, tier 4 specialisations with actives and passives, the hero, global spells and the Toolbox Tray, the Kitchen Mess Tent, the Camp Cook, the Messenger Crow, the 32×20 valley map, curved routes, terraces and the river with bridges held by guards (#320 to #323), hazards (tape, PVA puddles) | Every new element has GUT tests, a replay golden with it on, and a balanced headless run; the owner plays a full set of waves |
+| 8 · Meta, polish, launch, native | Golden Staples tech tree and saved progress, audio, performance pass, README with key art; iOS export (Android optional) | Native builds on two real iPhones (TestFlight) and on Mac and PC |
 
 ## Phase details
 
@@ -372,25 +373,28 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Phase 5 status (2026-10-15):** the 60 fps check passed on the owner's iPhone with 200 foes, after a slow first second. Left: the path, sockets and foes lining up by eye on the phone.
 
-**How to run the phone checks (2026-10-15, #241):** open the deployed site with `?stress=80&fps` (for example `https://juanpalopez.github.io/psychic-bassoon/?stress=80&fps`). Do not build towers during the check (kills make the crowd refill one foe a tick at the spawn point). The page keeps 80 foes walking (goblins, orcs and a golem now and then, made by the sim's own spawner, no towers or waves, the Heartstone never dies) and shows `fps, draws, foes, tris` at the bottom. Read the fps after 20 seconds, once with a mouse-free phone held in landscape, and record device, fps and draw calls here. For the by-eye check, play a run with the intro (`?tour=0` skips it) and look at the road, sockets and foes at the corners. The draw-call budget is 120; the headless browser shows 52 draws with 80 foes.
+**How to run the phone checks (2026-10-15, #241; the web URL goes with #318, and #319 replaces the parameters with `--stress=80 --fps` flags and a debug menu in the native build):** open the deployed site with `?stress=80&fps` (for example `https://juanpalopez.github.io/psychic-bassoon/?stress=80&fps`). Do not build towers during the check (kills make the crowd refill one foe a tick at the spawn point). The page keeps 80 foes walking (goblins, orcs and a golem now and then, made by the sim's own spawner, no towers or waves, the Heartstone never dies) and shows `fps, draws, foes, tris` at the bottom. Read the fps after 20 seconds, once with a mouse-free phone held in landscape, and record device, fps and draw calls here. For the by-eye check, play a run with the intro (`?tour=0` skips it) and look at the road, sockets and foes at the corners. The draw-call budget is 120; the headless browser shows 52 draws with 80 foes.
 
-### Phase 6 · Art and ambience (papercraft)
+### Phase 6 · Art and ambience (Hand-Folded Fantasy)
 
-**Goal:** the final papercraft look, without changing gameplay.
+**Goal:** the final look in the Hand-Folded Fantasy style (`docs/art/STYLE.md`), on native builds, on the bigger valley map. Rescoped on 2026-10-18 (epic #316): the desk-top board (cutting mat, tape road, desk clutter) is replaced by a boundless diorama.
 
 **Work breakdown**
-1. Materials and shaders: kraft paper, cardboard (corrugation, fibre detail), the cutting mat, foil, tape and glue; translucent creased edges; the Blot vertex-displacement shader for ink-drenched surfaces.
-2. The Scrap Goblin through the whole pipeline first (the owner's Blender model, rig, clips including attack, vertex animation at 12 fps; ticket #157), then the Corrugated Orc and the Cardboard Golem. Record each in `assets/CREDITS.md`.
-3. The five towers in Blender, built with Claude or by the owner: spool, Guard Tent, prism, thimble and the Kitchen Mess Tent, with tier parts and the eight specialisations as visible changes, and the guards (idle, strike, fall and rise clips; small instances, not in the tower cap).
-4. Board tiles and props (cutting mat, cardboard rise, cliffs, foil river, tape) and the CC0 paper textures.
-5. Stop-motion stepping at 12 fps for characters and projectiles.
-6. Claude Design: system and tokens first, in the papercraft style, then the HUD, radial menu, Toolbox Tray and workshop screens; build the Godot Theme from them.
-7. Budget re-check.
+1. Rules and reference: the style guide, these plan and `CLAUDE.md` updates, the decision records and the look-dev (#317).
+2. Platforms: drop the web build; export for iOS and desktop on Forward+ and Mobile; `scripts/ios-run.sh` (#318); the web shell's jobs move into the game (#319).
+3. The diorama: terraces built from the map with boundless edges (#324), road beds and bridges along the curved routes (#325), scenery scatter by region (#326).
+4. Look: the painterly paper material (#327), lighting and post (#95).
+5. Camera and navigation for the 32x20 map: pan, start near the spawn, overview zoom (#328, #313); off-screen indicators and a minimap (#329).
+6. Characters in the chunky style: the Scrap Goblin through the whole pipeline first (#157), then the Corrugated Orc (#330), the Cardboard Golem (#331), the Ink Shaman (#332), the Razor Moth (#333) and the Knight of Cardboard (#334). Record each in `assets/CREDITS.md`.
+7. Towers, guards and the Camp Cook restyled to the guide, with tier parts and specialisations as visible changes (#300).
+8. Stop-motion stepping at 12 fps for characters and projectiles (in place since Phase 5).
+9. Claude Design: the HUD and Theme (done in #282), restyled only where the new look needs it.
+10. Budget re-check on the iPhone and the gate (#97).
 
 **Gate checklist**
-- [ ] All foes, towers (tiers 1 to 3) and guards use final models, each distinct at zoomed-out view.
+- [ ] All foes, towers (tiers 1 to 3), guards and the hero use final models in the new style, each distinct at the overview zoom.
 - [ ] Every gap in the asset gap plan has a fallback.
-- [ ] Performance budget still met; the replay goldens still pass.
+- [ ] Performance budget met on the owner's iPhone in a native build (Mobile renderer); the replay goldens still pass.
 
 ### Phase 7 · Depth (the rest of the GDD)
 
@@ -401,9 +405,9 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 2. Support: the Ink Shaman (healing and speed buffs) and a support-first targeting priority.
 3. Blocking and melee: foes attack and units have health; the Guard Tent and its guards (done 2026-10-13, #220, #222; the Kitchen Mess Tent too, #224).
 4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability (framework and the Crossbow Ballista in #273; see `docs/lessons/2026-10-16-tier4-framework.md`).
-5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl).
+5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl), moved anywhere walkable on the map, a little like an RTS (owner, 2026-10-18; #275, #335).
 6. Global spells and the Toolbox Tray: PVA Glue Trap, Falling Thumbtacks, The Crafter's Eraser, with Crafting Energy.
-7. Map depth: foil rivers with popsicle-stick bridges, tape strips, PVA puddles. Drawbridges and levers are dropped (owner, 2026-10-12).
+7. Map depth: the 32x20 valley (#320), curved routes the sim walks (#321), the terrain layer with terraces, regions and a river (#322), bridges held by guards posted on them (#323, owner 2026-10-18), tape strips and PVA puddles (#277). Drawbridges and levers stay dropped (owner, 2026-10-12).
 8. Balance: headless runs for each new foe and tower; each foe needs at least two answers at tier 3 and a third from a specialisation.
 
 **Gate checklist**
@@ -426,7 +430,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Gate checklist**
 - [ ] A run earns Golden Staples that survive a restart and change the next run.
-- [ ] Public web build runs on GitHub Pages on at least two real phones.
+- [ ] Native builds run on at least two real iPhones (TestFlight) and on Mac and PC (the web build was dropped on 2026-10-18).
 - [ ] README and credits complete.
 - [ ] The native iOS build runs on one iPhone.
 
@@ -434,8 +438,8 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 | Risk | Fallback |
 | --- | --- |
-| The Godot web build is too heavy or slow to start on a phone | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
-| iOS Safari limits (memory, audio, no threads) break the export | Single-threaded export, Compatibility renderer, test on the real phone every phase; the Three.js build can be redeployed from the tag `web-three-final` if the Godot web build fails on a target phone |
+| The Godot web build is too heavy or slow to start on a phone _(retired with the web build, 2026-10-18)_ | Measure in Phase 3 before porting; trim export (disable unused modules with a custom build), lazy-load assets, loading screen. If it is still too heavy, fall back to the Three.js build for web and use Godot for native only. |
+| iOS Safari limits (memory, audio, no threads) break the export _(retired with the web build, 2026-10-18)_ | Single-threaded export, Compatibility renderer, test on the real phone every phase; the Three.js build can be redeployed from the tag `web-three-final` if the Godot web build fails on a target phone |
 | The sim changes by accident | GDScript replay goldens with float bits, written by the sim itself; a golden changes only by a reviewed balance change. The ported core keeps its TypeScript fixtures, never regenerated. |
 | Floating-point or integer differences (integer division, 32-bit wrap, rounding) | Use only `+ - * /`, `sqrt`, `floor`; divide by floats; mask integers to 32 bits after every operation; `int(floor(x + 0.5))` for `Math.round`; golden-value tests for the PRNG and `deriveRng`; hex-string fixtures compared with `==` |
 | The DOM HUD is lost (screen readers, text scaling, crisp text, `prefers-reduced-motion`) | Control nodes with a Theme and large text; read reduced motion through one platform adapter (a small `JavaScriptBridge` call in the web shell; an in-game setting or native plugin on iOS); accept the accessibility loss and record it |
@@ -447,18 +451,22 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | The path drawing drifts from the sim polyline (foes look off the path or hits look wrong at corners) | The sim polyline decides hits, range and distance; the Phase 5 gate checks the path by eye on the phone |
 | The angled camera hides foes behind towers | Short towers, outlines, slight camera rotation |
 | Tap targets get small at full zoom-out | Minimum zoom keeps cells readable; the whole board always fits |
-| Godot web export cannot be tested headless in CI | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
-| A broken `main` reaches GitHub Pages | `deploy` depends on `ci` passing; protected `main`; roll back by redeploying the last good tag |
+| Godot web export cannot be tested headless in CI _(retired with the web build, 2026-10-18)_ | Software GL (SwiftShader) in Chromium for the smoke test; fps stays a manual phone check |
+| A broken `main` reaches GitHub Pages _(retired with the web build, 2026-10-18)_ | `deploy` depends on `ci` passing; protected `main`; roll back by redeploying the last good tag |
 | The GDD is large (hero, spells, tech tree, eight specialisations) and has few numbers | Phase gates and content flags: only the slice in Phase 4 and 5 first; the rest in Phase 7 and 8; every number is tuned by headless runs |
 | New foes and specialisations break the balance | Content flags; the replay goldens keep the base game identical with the flags off; headless balance runs per foe |
+| The diorama (terrain, scatter, post) is too heavy for the Mobile renderer on a phone | Chunked and culled terrain, one `MultiMesh` per prop type, baked contact shading instead of SSAO, a quality setting; measure on the iPhone in each art PR and at the gate (#97) |
+| The 32x20 map makes runs long and taps small | The camera starts near the spawn and pans; the overview zoom keeps 2x2 sockets at least 44 px or taps need a closer zoom (#328); wave pacing re-tuned (#237) |
+| Curved routes churn the replay goldens | Re-record them once in #321 as a reviewed change; the ported grid path and its frozen fixtures stay untouched |
+| No shareable web link for playtesters | Desktop builds on GitHub Releases; TestFlight once the owner joins the Apple Developer Program |
 
 - [x] Repo name and whether it is public from day one: public from day one, repo `psychic-bassoon`, codename Project Slag.
 - [x] Embed the game in the personal site, or link out: link out.
 - [x] Landscape only (owner decision).
-- [x] Engine: Godot 4 (owner decision, 2026-10-10); web first, native later.
+- [x] Engine: Godot 4 (owner decision, 2026-10-10); native only from 2026-10-18 (iOS, then Mac and PC; the web build is dropped).
 - [ ] Music: commission, CC0 tracks, or skip for v1
-- [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
-- [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
+- [x] Pages: `main` was the live "latest" web build until 2026-10-18; with #318 Pages serves a page that links to the latest release, and tags create the GitHub Releases with the desktop builds.
+- [x] Testing on a phone before merge: a local build installed over the cable (`scripts/ios-run.sh`, #318); TestFlight needs the paid Apple Developer Program (the owner's call).
 - [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows. Raised to 18.5 MB on 2026-10-18 for the three full-length music tracks (about 5.8 MB of Vorbis that does not gzip); the asset budget went from 6 MB to 9 MB. Re-set after the iPhone measurement (ticket #124).
 - [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package were renamed on 2026-10-13 (#163).
 - [x] Meshy: tried and dropped (owner, 2026-10-13): the generated models were not good enough, so the owner models every foe in Blender. No generated models are used; the earlier paid-plan rules no longer apply.

@@ -1,7 +1,7 @@
 ---
 type: decision
 date: 2026-10-17
-status: accepted
+status: superseded-by: 2026-10-18-hand-folded-fantasy.md
 decided-by: owner on Claude's proposal
 links: [#147, #149]
 ---

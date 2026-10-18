@@ -8,6 +8,9 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-18 | decision | Adopt the Hand-Folded Fantasy look and drop the desk-top framing | render | none | docs/art/STYLE.md, CLAUDE.md |
+| 2026-10-18 | decision | Ship natively on iOS and desktop and drop the web build | infra | none | CLAUDE.md, PLAN.md |
+| 2026-10-18 | decision | Play on a 32x20 valley with curved routes, guarded bridges and a movable hero | sim | none | CLAUDE.md, PLAN.md |
 | 2026-10-18 | decision | Build the towers, the guard and the Camp Cook as stop-motion papercraft models | render | none | |
 | 2026-10-17 | decision | Draw the road as masking tape and dress the board in the papercraft look | render | none | |
 | 2026-10-16 | decision | Skip graphify for now | tooling | none | |
