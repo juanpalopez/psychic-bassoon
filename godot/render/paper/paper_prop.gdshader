@@ -1,28 +1,23 @@
-// Plain coloured paper for props (trees, shrubs, buttons, the Heartstone): a fibre texture,
-// matte, and a wrapped light so thin paper softens round the terminator. `glow` lights it
-// from inside.
+// Plain coloured paper (an imported material's colour, such as a foe's or a bridge's): the
+// painted paper of painted.gdshaderinc in `colour`. The vertex colour multiplies it, so a
+// MultiMesh's instance colour tints it (a hurt foe is drawn darker); a model without vertex
+// colours reads white there. `glow` lights it from inside in its own colour (dimmed the same
+// way).
 shader_type spatial;
 render_mode cull_disabled;
 
-uniform sampler2D paper_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
+// the foes wear this look and walk: the fibre stays on the model
+#define PAINTED_OBJECT_SPACE
+#include "res://render/paper/painted.gdshaderinc"
+
 uniform vec3 colour : source_color = vec3(0.8, 0.78, 0.72);
 uniform float glow = 0.0;
-uniform float wrap = 0.35;
-
-varying vec3 world_pos;
 
 void vertex() {
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	PAINTED_VERTEX
 }
 
 void fragment() {
-	vec4 n = texture(paper_noise, world_pos.xz * 1.3 + vec2(world_pos.y * 0.7));
-	ALBEDO = colour * (0.9 + 0.2 * n.r);
-	ROUGHNESS = 0.85;
-	EMISSION = colour * glow;
-}
-
-void light() {
-	float wrapped = clamp((dot(NORMAL, LIGHT) + wrap) / (1.0 + wrap), 0.0, 1.0);
-	DIFFUSE_LIGHT += wrapped * ATTENUATION * LIGHT_COLOR / PI;
+	PAINTED_PAPER(colour * COLOR.rgb, 1.0, 0.0)
+	EMISSION = colour * COLOR.rgb * glow;
 }
