@@ -9,9 +9,11 @@
 ## stands up towards the camera, so any near blur that softened the bottom edge of the ground
 ## would also blur a foe standing in the play area (a 2 m foe at 80% of the screen height).
 ##
-## `depth_at`, `distance_at`, `focus`, `haze` and `haze_amount` are plain maths, tested;
-## `follow` reads the camera and writes the result into the depth of field
-## (`CameraAttributesPractical`) and the Environment's depth fog, only when the view moved.
+## `depth_at`, `distance_at`, `focus`, `haze`, `haze_amount` and `shadow_reach` are plain maths,
+## tested; `follow` reads the camera and writes the result into the depth of field
+## (`CameraAttributesPractical`), the Environment's depth fog and the sun's shadow distance (so
+## the overview of the 32 by 20 map, some 110 m away, still has shadows), only when the view
+## moved.
 class_name DioramaLens
 extends RefCounted
 
@@ -21,6 +23,8 @@ const SHARP_SHARE := 0.8
 ## haze thickens to its full amount at `HAZE_FULL` times the distance of the screen's top edge.
 const CLEAR_SHARE := 0.5
 const HAZE_FULL := 1.25
+## How far past the screen's top edge the sun's shadows reach, as a share of its distance.
+const SHADOW_MARGIN := 1.1
 
 var _key := Vector3(-1.0, -1.0, -1.0)
 
@@ -61,9 +65,18 @@ static func haze_amount(at: float, span: Vector2, curve: float, density: float) 
 	return pow(smoothstep(span.x, span.y, at), curve) * density
 
 
-## Fits the depth of field and the haze to `camera`, which looks down at the ground (y = 0).
+## How far from the camera the sun's shadows must reach to cover the whole screen.
+static func shadow_reach(distance: float, pitch_degrees: float, fov_degrees: float) -> float:
+	return distance_at(distance, pitch_degrees, fov_degrees / 2.0) * SHADOW_MARGIN
+
+
+## Fits the depth of field, the haze and the sun's shadows to `camera`, which looks down at the
+## ground (y = 0).
 func follow(
-	camera: Camera3D, environment: Environment, attributes: CameraAttributesPractical
+	camera: Camera3D,
+	environment: Environment,
+	attributes: CameraAttributesPractical,
+	sun: DirectionalLight3D = null
 ) -> void:
 	var forward := -camera.global_basis.z
 	if forward.y >= -1e-4:
@@ -82,3 +95,5 @@ func follow(
 		var span := haze(distance, pitch, camera.fov)
 		environment.fog_depth_begin = span.x
 		environment.fog_depth_end = span.y
+	if sun != null:
+		sun.directional_shadow_max_distance = shadow_reach(distance, pitch, camera.fov)

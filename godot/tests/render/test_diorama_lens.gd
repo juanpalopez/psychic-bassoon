@@ -107,6 +107,13 @@ func test_follow_fits_the_scene_to_the_camera() -> void:
 	assert_almost_eq(environment.fog_depth_end, span.y, 1e-3)
 
 
+func test_the_shadows_reach_past_the_top_of_the_screen_at_every_zoom() -> void:
+	for view in [[110.0, 62.0], [36.0, 56.0]]:
+		var reach := DioramaLens.shadow_reach(view[0], view[1], 20.0)
+		assert_gt(reach, DioramaLens.distance_at(view[0], view[1], 10.0), str(view))
+		assert_lt(reach, DioramaLens.distance_at(view[0], view[1], 10.0) * 1.5, "not wasted")
+
+
 func test_the_game_fits_the_lens_to_its_camera_each_frame() -> void:
 	var packed := MAIN_SCENE.instantiate()
 	var defaults := packed.get_node("WorldEnvironment") as WorldEnvironment
@@ -125,5 +132,8 @@ func test_the_game_fits_the_lens_to_its_camera_each_frame() -> void:
 	var camera := (main.get_node("CameraRig") as CameraRig).camera()
 	var forward := -camera.global_basis.z
 	var distance := camera.global_position.y / -forward.y
+	var sun := main.get_node("Sun") as DirectionalLight3D
+	var top := DioramaLens.distance_at(distance, rad_to_deg(asin(-forward.y)), camera.fov / 2.0)
+	assert_gt(sun.directional_shadow_max_distance, top, "shadows reach the top of the screen")
 	var blur := DioramaLens.focus(distance, rad_to_deg(asin(-forward.y)), camera.fov)
 	assert_almost_eq(attributes.dof_blur_far_distance, blur.x, 1e-2)

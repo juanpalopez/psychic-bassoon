@@ -153,7 +153,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_lens.follow(_camera, _world.environment, _tilt_shift())
+	_lens.follow(_camera, _world.environment, _tilt_shift(), _sun)
 	var ticks_speed := _speed.ticks_speed()
 	# Auto start counts game time, so it holds while paused, runs faster at 2x and 3x, and
 	# a slow frame counts no more than the clock lets the game run
