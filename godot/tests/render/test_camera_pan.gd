@@ -29,7 +29,8 @@ func _put(rig: CameraRig, at: Vector2) -> void:
 
 
 func test_the_middle_of_the_screen_stays_over_the_board_at_every_allowed_pan() -> void:
-	var half := BoardSpace.size() / 2.0
+	# the board here is the map plus its scenery margin
+	var half := BoardSpace.size() / 2.0 + Vector2.ONE * CameraRig.SCENERY_MARGIN
 	var share := CameraRig.SCREEN_SHARE_OVER_BOARD
 	for shape in [Vector2i(1280, 720), Vector2i(2160, 720), Vector2i(1024, 768)]:
 		for zoom_level in [0.3, 0.6, 1.0]:
@@ -80,8 +81,9 @@ func test_there_is_room_to_pan_both_ways_when_closest_on_every_shape() -> void:
 
 func test_the_pan_limits_do_not_jump_as_the_zoom_changes() -> void:
 	# the limits grow with the board, so a step may move them by a share of its width: a
-	# 160th (0.1 cells on the 16-wide board, 0.2 on the 32-wide valley); a jump is far more
-	var most := BoardSpace.size().x / 160.0
+	# 160th (0.1 cells on the 16-wide board, 0.2 on the 32-wide valley); a jump is far more.
+	# The limits reach the scenery margin past the map, so the width counts it on both sides.
+	var most := (BoardSpace.size().x + 2.0 * CameraRig.SCENERY_MARGIN) / 160.0
 	for shape in SHAPES:
 		var rig := _rig_in(shape.x, shape.y)
 		var before: Array[Vector2] = []

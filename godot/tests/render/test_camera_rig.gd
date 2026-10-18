@@ -217,7 +217,7 @@ func test_dragging_moves_the_scene_with_the_finger() -> void:
 func test_a_pan_stays_near_the_board_and_springs_back_after_release() -> void:
 	var rig := _phone_rig()
 	rig.set_zoom(1.0)
-	rig.pan_by_pixels(Vector2(-2000.0, 0.0))
+	rig.pan_by_pixels(Vector2(-4000.0, 0.0))
 	var range := rig.pan_range()
 	# held: overscroll is damped, not unlimited
 	assert_gt(rig.pan.x, range.end.x)
