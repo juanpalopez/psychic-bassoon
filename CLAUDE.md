@@ -110,6 +110,7 @@ fixtures/    frozen JSON from the retired TypeScript sim for the ported core (pr
   - Summary is imperative, lowercase, no trailing period, at most 72 characters. The one exception is Dependabot's `Bump …` wording.
   - Release notes are generated from these messages, so write them for a reader of the changelog.
 - Pull requests: the title follows the same format (PRs are squash-merged, so the title becomes the commit). Fill in the PR template and reference the ticket (`Closes #N`). The `PR checks` workflow rejects non-conforming titles and commits.
+- **Keep PRs small (owner, 2026-10-18, #349):** a PR changes at most 300 lines of production code (added plus deleted; tests, docs, goldens, fixtures, assets, lockfiles and Godot's generated files do not count) and should stay under 200. The `PR size` check (`scripts/check-pr-size.mjs`) fails above 300 and warns above 200; only the owner's `size-exception` label lets a larger PR through. Plan the split before writing code: a ticket that needs more becomes several PRs (stacked, each with its own tests and a working build), or the ticket is split. A pure move or rename may be its own PR with the label.
 
 ### Reviews
 
