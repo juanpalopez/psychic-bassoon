@@ -474,8 +474,7 @@ func test_the_river_has_water_and_every_road_a_bed() -> void:
 	assert_eq(board.diorama.builder("RoadBeds").get_child_count(), 1)
 
 
-## This branch's camera rig gives the real zoom, pitch and footprint; its pan range is the one
-## before #339, so the pans #339 allows are checked as well (re-check once it lands).
+## The camera's real zoom, pitch, footprint and pan range (#339: the map plus its scenery margin).
 func test_no_edge_of_the_world_is_in_view_from_any_camera_position() -> void:
 	var board := _board(1)
 	var rect := board.diorama.field.world_rect().grow(-2.0)
@@ -495,18 +494,14 @@ func test_no_edge_of_the_world_is_in_view_from_any_camera_position() -> void:
 				aspect,
 				CameraRig.YAW_DEGREES
 			)
-			# overscroll is rubber-banded: allow the pan a little past its range; and as #339's
-			# camera pans its target over the whole map plus a 2 cell margin once zoomed in to
-			# half way (narrowing to the middle below that), check those pans too
-			var slack := Vector2.ONE * 3.0
-			var reach := (
-				(BoardSpace.size() / 2.0 + Vector2.ONE * 2.0) * clampf(rig.zoom / 0.5, 0, 1)
-			)
-			var pans: Array[Vector2] = [range.position - slack, range.end + slack]
-			for x in [-1.0, 1.0]:
-				for y in [-1.0, 1.0]:
-					# a drag past the limit gets only `CameraRig.RUBBER` of it through
-					pans.append(Vector2(x, y) * (reach + Vector2.ONE * 3.0 * CameraRig.RUBBER))
+			# overscroll is rubber-banded: a drag past the limit gets only `RUBBER` of it through
+			var slack := Vector2.ONE * 3.0 * CameraRig.RUBBER
+			var pans: Array[Vector2] = [
+				range.position - slack,
+				range.end + slack,
+				Vector2(range.position.x, range.end.y) + Vector2(-slack.x, slack.y),
+				Vector2(range.end.x, range.position.y) + Vector2(slack.x, -slack.y),
+			]
 			for corner in pans:
 				var seen := Rect2(foot.position + corner, foot.size)
 				assert_true(

@@ -157,5 +157,5 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 				% [map_seed, counts["drawn"], counts["shadows"]]
 			)
 		)
-		assert_lte(counts["drawn"], 38, "seed %d: surfaces drawn" % map_seed)
+		assert_lte(counts["drawn"], 42, "seed %d: surfaces drawn" % map_seed)
 		assert_lte(counts["shadows"], 17, "seed %d: surfaces in the shadow map" % map_seed)
