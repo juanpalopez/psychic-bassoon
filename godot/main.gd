@@ -9,6 +9,8 @@
 ## page with `?seed=42` to start on a given seed.
 extends Node3D
 
+## How far past the 44 pt threshold a flight aims, in canvas pixels (see `_fly_to_socket`).
+const FLIGHT_AIM_MARGIN := 0.5
 const EARLY_RULES := preload("res://content/game_rules.gd")
 const MESSAGE_SECONDS := 2.0
 ## Said when even the closest zoom draws a socket under 44 pt (a very small window).
@@ -302,7 +304,10 @@ func _fly_to_socket(anchor: Vector2i) -> void:
 	select_cell(BoardSpace.NO_CELL)
 	var top := _socket_top(anchor)
 	var side := float(_game.map.footprint)
-	_rig.fly_to(top, maxf(_rig.zoom, _rig.zoom_to_show(top, side, tap_pixels())))
+	# aim a hair past the threshold: the flight lands through 32-bit lerps, so a zoom found
+	# exactly at 44 pt can land a few millionths of a pixel under it and fail the re-check
+	var aim := tap_pixels() + FLIGHT_AIM_MARGIN
+	_rig.fly_to(top, maxf(_rig.zoom, _rig.zoom_to_show(top, side, aim)))
 	# set after `fly_to`, which ends any earlier flight (and drops its target)
 	_fly_target = anchor
 
