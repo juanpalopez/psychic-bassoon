@@ -190,3 +190,113 @@ func test_zooming_out_past_44_points_closes_the_build_menu() -> void:
 	assert_false(main.socket_tappable(anchor))
 	assert_false(_menu(main).visible, "the menu closed")
 	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
+
+
+func test_zooming_out_to_the_overview_closes_the_tower_panel() -> void:
+	var main: Node = await _main()
+	var game: GameState = main.game()
+	var anchor: Vector2i = game.map.sockets[0]
+	main.select_cell(anchor)
+	_menu(main).tower_buttons()[0].pressed.emit()
+	main._process(0.05)
+	assert_eq(game.towers.size(), 1, "a tower stands on the socket")
+	_rig(main).show_point(_top(main, anchor), 1.0)
+	_tap_socket(main, anchor)
+	assert_not_null(_panel(main).tower(), "the tower panel opened at the closest zoom")
+	_rig(main).zoom_steps(-100.0)
+	main._process(0.0)
+	assert_false(main.socket_tappable(anchor))
+	assert_null(_panel(main).tower(), "the tower panel closed at the overview")
+	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
+
+
+## Two free sockets on screen in the current view: one drawn under 44 pt, one at least 44 pt.
+func _small_and_big(main: Node) -> Array[Vector2i]:
+	var game: GameState = main.game()
+	var size := _size(main)
+	var small := GameMap.NO_SOCKET
+	var big := GameMap.NO_SOCKET
+	for anchor in game.map.sockets:
+		var at := _rig(main).camera().unproject_position(_top(main, anchor))
+		if not Rect2(Vector2.ZERO, size).grow(-20.0).has_point(at):
+			continue
+		if main.socket_tappable(anchor):
+			big = anchor if big == GameMap.NO_SOCKET else big
+		else:
+			small = anchor if small == GameMap.NO_SOCKET else small
+	return [small, big]
+
+
+func test_a_tap_on_another_socket_during_a_flight_selects_that_socket() -> void:
+	var main: Node = await _main()
+	# the start view: sockets low on the screen are 44 pt, some high up are not
+	var pair := _small_and_big(main)
+	assert_ne(pair[0], GameMap.NO_SOCKET, "a small socket on screen")
+	assert_ne(pair[1], GameMap.NO_SOCKET, "a big socket on screen")
+	_tap_socket(main, pair[0])
+	assert_true(_rig(main).flying(), "the first tap flies to the small socket")
+	# the camera has not moved yet: the big socket is where it was, and big enough
+	_tap_socket(main, pair[1])
+	assert_false(_rig(main).flying(), "the second tap ended the flight")
+	assert_eq(main.selected_cell(), pair[1])
+	_land(main)
+	assert_eq(main.selected_cell(), pair[1], "the old flight does not take the selection back")
+	assert_true(_menu(main).visible)
+
+
+func test_a_flight_from_a_closer_zoom_never_zooms_out() -> void:
+	var main: Node = await _main()
+	var game: GameState = main.game()
+	var rig := _rig(main)
+	var size := _size(main)
+	var spawn := BoardSpace.cell_to_world(game.map.path[0].x, game.map.path[0].y)
+	# a zoom above what a centred socket needs, where a socket high on the screen is still
+	# drawn under 44 pt: its flight only needs to centre it
+	for zoom_level in [0.72, 0.7, 0.68]:
+		rig.show_point(spawn + Vector3(6.0, 0.0, 0.0), zoom_level)
+		for anchor in game.map.sockets:
+			var at := rig.camera().unproject_position(_top(main, anchor))
+			if not Rect2(Vector2.ZERO, size).grow(-20.0).has_point(at):
+				continue
+			if main.socket_tappable(anchor):
+				continue
+			if rig.zoom_to_show(_top(main, anchor), 2.0, main.tap_pixels()) >= zoom_level:
+				continue
+			_tap_socket(main, anchor)
+			assert_true(rig.flying())
+			_land(main)
+			assert_gte(rig.zoom, zoom_level - 1e-9, "the flight kept the closer zoom")
+			assert_eq(main.selected_cell(), anchor)
+			return
+	fail_test("no socket on screen was small yet needed less zoom than the view had")
+
+
+func test_the_tap_size_reads_the_window_and_the_screen_scale() -> void:
+	var main: Node = await _main()
+	# the 844x390 pt phone at 3x: its window is 1170 px tall
+	assert_almost_eq(main.tap_pixels_for(720.0, 1170.0, 3.0), 81.23, 0.01)
+	# an iPhone 15 Pro (852x393 pt at 3x): 1179 px
+	assert_almost_eq(main.tap_pixels_for(720.0, 1179.0, 3.0), 80.61, 0.01)
+	# a desktop window with no scaling, and a headless run with no window
+	assert_almost_eq(main.tap_pixels_for(720.0, 720.0, 1.0), 44.0, 1e-9)
+	assert_almost_eq(main.tap_pixels_for(1280.0, 0.0, 1.0), 44.0, 1e-9)
+
+
+func test_a_window_too_small_to_build_in_says_so_after_the_flight() -> void:
+	var port := SubViewport.new()
+	port.size = Vector2i(1558, 720)
+	add_child_autofree(port)
+	var main := MAIN_SCENE.instantiate()
+	# so few points per pixel that even the closest zoom draws a socket under 44 pt
+	main.points_per_pixel = 0.05
+	port.add_child(main)
+	await get_tree().process_frame
+	var game: GameState = main.game()
+	var anchor: Vector2i = game.map.sockets[0]
+	_rig(main).show_point(_top(main, anchor), 1.0)
+	assert_false(main.socket_tappable(anchor))
+	_tap_socket(main, anchor)
+	_land(main)
+	assert_false(_menu(main).visible, "nothing opens")
+	assert_eq(main.selected_cell(), BoardSpace.NO_CELL)
+	assert_eq((main.get_node("Hud/Message") as Label).text, main.TOO_SMALL_MESSAGE)

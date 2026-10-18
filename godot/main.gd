@@ -11,6 +11,8 @@ extends Node3D
 
 const EARLY_RULES := preload("res://content/game_rules.gd")
 const MESSAGE_SECONDS := 2.0
+## Said when even the closest zoom draws a socket under 44 pt (a very small window).
+const TOO_SMALL_MESSAGE := "Make the window bigger to build here"
 ## Where the tower card sits: beside the build menu, this far from it and from the edges.
 const CARD_MARGIN := 14.0
 const MENU_ICON := preload("res://assets/icons/menu.svg")
@@ -278,11 +280,21 @@ func socket_tappable(anchor: Vector2i) -> bool:
 func tap_pixels() -> float:
 	if points_per_pixel > 0.0:
 		return TapZoom.MIN_POINTS / points_per_pixel
-	var canvas := get_viewport().get_visible_rect().size.y
-	# the display's window in pixels: a headless run has none (0), and then a pixel is a point
-	var window := float(DisplayServer.window_get_size().y)
-	var scale := DisplayServer.screen_get_scale()
-	return TapZoom.MIN_POINTS / TapZoom.points_per_pixel(canvas, window, scale)
+	# the only display reads (a headless run has no window: 0, and then a pixel is a point);
+	# #97 logs them on the iPhone
+	return tap_pixels_for(
+		get_viewport().get_visible_rect().size.y,
+		float(DisplayServer.window_get_size().y),
+		DisplayServer.screen_get_scale()
+	)
+
+
+## The least width, in canvas pixels, of a 44 pt tap target on a canvas `canvas_height` pixels
+## tall, drawn in a window `window_pixels` tall on a screen of `screen_scale` pixels per point.
+static func tap_pixels_for(
+	canvas_height: float, window_pixels: float, screen_scale: float
+) -> float:
+	return TapZoom.MIN_POINTS / TapZoom.points_per_pixel(canvas_height, window_pixels, screen_scale)
 
 
 ## Flies the camera in to a socket until it is drawn at least 44 pt, then selects it.
@@ -298,8 +310,13 @@ func _fly_to_socket(anchor: Vector2i) -> void:
 func _on_flight_ended(arrived: bool) -> void:
 	var target := _fly_target
 	_fly_target = BoardSpace.NO_CELL
-	if arrived and target != BoardSpace.NO_CELL:
+	if not arrived or target == BoardSpace.NO_CELL:
+		return
+	# a window so small that even the closest zoom draws a socket under 44 pt builds nothing
+	if socket_tappable(target):
 		select_cell(target)
+	else:
+		_show_message(TOO_SMALL_MESSAGE)
 
 
 ## Building, upgrading and selling happen only where the socket is drawn at least 44 pt: when

@@ -5,9 +5,12 @@ const MAIN_SCENE := preload("res://main.tscn")
 const RULES := preload("res://content/game_rules.gd")
 
 
+## The main scene, driven only by the test: the engine does not call its `_process` with the
+## real frame time (under load that frame is long and ticks the game by however long it took).
 func _main() -> Node:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
+	main.set_process(false)
 	await get_tree().process_frame
 	return main
 
