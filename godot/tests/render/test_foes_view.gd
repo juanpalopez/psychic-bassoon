@@ -6,6 +6,7 @@ const FOES := preload("res://content/foes.gd")
 
 func _view() -> FoesView:
 	var view := FoesView.new()
+	view.spread_enabled = false
 	add_child_autofree(view)
 	return view
 

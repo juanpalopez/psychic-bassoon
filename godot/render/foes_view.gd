@@ -40,6 +40,12 @@ const MODELS := {
 ## A foe that has not moved yet faces along the road, towards +x.
 const DEFAULT_YAW := PI / 2.0
 
+## How much of the way to a new heading a foe turns each tick (a corner takes a few ticks).
+const HEADING_EASE := 0.2
+
+## Whether foes are moved by their `FoeSpread` offset (tests turn it off to read sim points).
+var spread_enabled := true
+
 var _multimeshes := {}
 var _tick_seen := -1
 var _previous := {}
@@ -56,6 +62,8 @@ var _models := {}
 ## The way each foe last walked (radians about the vertical axis), by foe id.
 var _yaws := {}
 var _drawn_yaws := {}
+## The way each foe last walked as a unit vector in world x/z, by foe id, for its spread.
+var _headings := {}
 ## The health bars over the hurt foes (one MultiMesh for all of them).
 var _bars: FoeBars
 
@@ -159,10 +167,40 @@ func reset() -> void:
 	_previous.clear()
 	_current.clear()
 	_yaws.clear()
+	_headings.clear()
 	_bars.begin()
 	_bars.finish()
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = 0
+
+
+## Eases each walking foe's heading towards the way it walked this tick, and forgets the
+## foes that are gone. A foe at a road corner turns its heading over several ticks, so its
+## spread offset glides round the corner instead of jumping across the road.
+func _ease_headings(game: GameState) -> void:
+	var alive := {}
+	for foe in game.foes:
+		alive[foe.id] = true
+		var walked: Vector2 = _current[foe.id] - _previous[foe.id]
+		if walked.length_squared() <= 1e-9:
+			continue
+		var raw := walked.normalized()
+		if not _headings.has(foe.id):
+			_headings[foe.id] = raw
+			continue
+		var old: Vector2 = _headings[foe.id]
+		# easing between opposite ways collapses back to the old one, so a reversal takes the
+		# new way at once (the sim's roads do not reverse; a knock-back could)
+		if old.dot(raw) < -0.5:
+			_headings[foe.id] = raw
+		else:
+			_headings[foe.id] = old.lerp(raw, HEADING_EASE).normalized()
+	for id in _headings.keys():
+		if not alive.has(id):
+			_headings.erase(id)
+	for id in _yaws.keys():
+		if not alive.has(id):
+			_yaws.erase(id)
 
 
 ## Draws the foes of `game`. `alpha` is how far we are from the last tick to the
@@ -181,6 +219,7 @@ func update(game: GameState, alpha: float, hold: HitHold = null) -> void:
 			before[foe.id] = _current.get(foe.id, next[foe.id])
 		_previous = before
 		_current = next
+		_ease_headings(game)
 	var blend := clampf(alpha, 0.0, 1.0)
 	for type in _used:
 		_used[type] = 0
@@ -198,20 +237,26 @@ func update(game: GameState, alpha: float, hold: HitHold = null) -> void:
 		var to: Vector2 = _current.get(foe.id, Vector2(foe.x, foe.y))
 		var at := from.lerp(to, blend)
 		var position := BoardSpace.point_to_world(at.x, at.y)
+		var walked := to - from
+		var lift := 0.0
+		if spread_enabled:
+			var spread := FoeSpread.offset(foe.id, _headings.get(foe.id, Vector2.RIGHT), foe.flying)
+			position.x += spread.x
+			position.z += spread.z
+			lift = spread.y
 		var scale := foe.radius / CAPSULE_RADIUS
 		var basis := Basis.from_scale(Vector3(scale, scale, scale))
-		position.y = GROUND + CAPSULE_HEIGHT * scale / 2.0
-		var head_y := GROUND + CAPSULE_HEIGHT * scale
+		position.y = GROUND + lift + CAPSULE_HEIGHT * scale / 2.0
+		var head_y := GROUND + lift + CAPSULE_HEIGHT * scale
 		if _models.has(foe.type):
 			var model: Dictionary = _models[foe.type]
-			var walked := to - from
 			if walked.length_squared() > 1e-9:
 				_yaws[foe.id] = atan2(walked.x, walked.y)
 			var yaw: float = _yaws.get(foe.id, DEFAULT_YAW)
 			scale = model.scale
 			basis = Basis(Vector3.UP, yaw) * Basis.from_scale(Vector3(scale, scale, scale))
-			position.y = GROUND + float(model.foot)
-			head_y = GROUND + float(model.height)
+			position.y = GROUND + lift + float(model.foot)
+			head_y = GROUND + lift + float(model.height)
 			_drawn_yaws[foe.type][index] = yaw
 		multimesh.set_instance_transform(index, Transform3D(basis, position))
 		var hp := foe.hp if hold == null else hold.shown_hp(foe)
