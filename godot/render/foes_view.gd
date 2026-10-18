@@ -41,6 +41,9 @@ const MODELS := {
 const DEFAULT_YAW := PI / 2.0
 
 ## Whether foes are moved by their `FoeSpread` offset (tests turn it off to read sim points).
+## How much of the way to a new heading a foe turns each tick (a corner takes a few ticks).
+const HEADING_EASE := 0.2
+
 var spread_enabled := true
 
 var _multimeshes := {}
@@ -166,6 +169,31 @@ func reset() -> void:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = 0
 
 
+## Eases each walking foe's heading towards the way it walked this tick, and forgets the
+## foes that are gone. A foe at a road corner turns its heading over several ticks, so its
+## spread offset glides round the corner instead of jumping across the road.
+func _ease_headings(game: GameState) -> void:
+	var alive := {}
+	for foe in game.foes:
+		alive[foe.id] = true
+		var walked: Vector2 = _current[foe.id] - _previous[foe.id]
+		if walked.length_squared() <= 1e-9:
+			continue
+		var raw := walked.normalized()
+		if not _headings.has(foe.id):
+			_headings[foe.id] = raw
+			continue
+		var eased: Vector2 = (_headings[foe.id] as Vector2).lerp(raw, HEADING_EASE)
+		# a full turn about leaves nothing to ease towards: take the new way
+		_headings[foe.id] = eased.normalized() if eased.length_squared() > 1e-6 else raw
+	for id in _headings.keys():
+		if not alive.has(id):
+			_headings.erase(id)
+	for id in _yaws.keys():
+		if not alive.has(id):
+			_yaws.erase(id)
+
+
 ## Draws the foes of `game`. `alpha` is how far we are from the last tick to the
 ## next, 0 to 1.
 func update(game: GameState, alpha: float) -> void:
@@ -179,6 +207,7 @@ func update(game: GameState, alpha: float) -> void:
 			before[foe.id] = _current.get(foe.id, next[foe.id])
 		_previous = before
 		_current = next
+		_ease_headings(game)
 	var blend := clampf(alpha, 0.0, 1.0)
 	for type in _used:
 		_used[type] = 0
@@ -196,8 +225,6 @@ func update(game: GameState, alpha: float) -> void:
 		var at := from.lerp(to, blend)
 		var position := BoardSpace.point_to_world(at.x, at.y)
 		var walked := to - from
-		if walked.length_squared() > 1e-9:
-			_headings[foe.id] = walked.normalized()
 		var lift := 0.0
 		if spread_enabled:
 			var spread := FoeSpread.offset(foe.id, _headings.get(foe.id, Vector2.RIGHT), foe.flying)

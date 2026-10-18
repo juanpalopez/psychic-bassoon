@@ -88,7 +88,7 @@ func test_flyers_vary_in_height_and_spread_wider() -> void:
 		heights[snappedf(o.y, 0.01)] = true
 		widest = maxf(widest, absf(o.z))
 	assert_gt(heights.size(), 10)
-	assert_gt(widest, FoeSpread.LANE)
+	assert_gt(widest, FoeSpread.LANE + FoeSpread.JITTER)
 
 
 func test_two_foes_at_one_sim_position_draw_apart() -> void:
@@ -130,6 +130,38 @@ func test_a_walking_foe_is_offset_across_its_heading() -> void:
 	var at := view.drawn_position("scrapGoblin", 0)
 	assert_almost_eq(at.x, truth.x + o.x, 1e-5)
 	assert_almost_eq(at.z, truth.z + o.z, 1e-5)
+
+
+func test_the_offset_glides_round_a_road_corner() -> void:
+	# a foe walks right, then turns down; its drawn spot may not jump across the road
+	var view := _drawn_view()
+	var foe := _foe(1, "scrapGoblin", 2.0, 2.0)
+	var previous := Vector3.ZERO
+	var biggest := 0.0
+	for tick in 20:
+		if tick < 10:
+			foe.x += 0.1
+		else:
+			foe.y += 0.1
+		view.update(_game_with([foe] as Array[Foe], tick + 1), 1.0)
+		var sim := BoardSpace.point_to_world(foe.x, foe.y)
+		var drawn := view.drawn_position("scrapGoblin", 0)
+		var offset := Vector3(drawn.x - sim.x, 0.0, drawn.z - sim.z)
+		if tick > 0:
+			biggest = maxf(biggest, offset.distance_to(previous))
+		previous = offset
+	assert_lt(biggest, 0.1, "no jump of more than a tenth of a cell between ticks")
+
+
+func test_headings_of_gone_foes_are_forgotten() -> void:
+	var view := _drawn_view()
+	var foe := _foe(5, "scrapGoblin", 2.0, 2.0)
+	view.update(_game_with([foe] as Array[Foe], 1), 1.0)
+	foe.x += 0.1
+	view.update(_game_with([foe] as Array[Foe], 2), 1.0)
+	assert_true(view._headings.has(5))
+	view.update(_game_with([] as Array[Foe], 3), 1.0)
+	assert_false(view._headings.has(5), "pruned when the foe is gone")
 
 
 func test_health_bars_follow_the_offset_foe() -> void:
