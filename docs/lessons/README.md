@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-18 | decision | Budget the frame at 200k triangles, with 40k for the terrain and 32k for the scenery | render | none | CLAUDE.md, PLAN.md |
 | 2026-10-18 | lesson | Stop only the job you started, never every process that matches a pattern | harness | none | |
 | 2026-10-18 | lesson | Fade the world past the map by its distance from the map, not by depth fog | render | none | |
 | 2026-10-18 | lesson | Place a map feature through a chosen anchor with a search, not by rejection sampling | sim | none | |
