@@ -12,8 +12,9 @@
 # builds nothing on its own. The mock in docs/art/diorama/ was made in roughly this order (the
 # exact arguments of each render were tuned by hand and not recorded; each render saves its
 # camera next to it as renders/<name>_cam.json):
-#   exec(open("assets-src/diorama_lookdev/diorama_lookdev.py").read())
-#   use_board("board_large"); build_world2(); stage_units()
+#   import os; os.environ["PKD_ROOT"] = "<path to your checkout>"
+#   exec(open(os.environ["PKD_ROOT"] + "/assets-src/diorama_lookdev/diorama_lookdev.py").read())
+#   use_board("board_large.json"); build_world2(); stage_units()
 #   light_and_camera(...); save_camera("v15_game"); render("v15_game")
 # then, outside Blender: python3 post.py renders/v15_game.exr out.png renders/v15_game_cam.json --dof
 # It loads the desk GLBs from godot/assets/models (decor_pins, decor_scrap), which the diorama
@@ -23,7 +24,11 @@ from mathutils import Vector, noise, Matrix
 
 # The repo root: from PKD_ROOT, or two folders up from this script (run it with
 # `blender --python assets-src/diorama_lookdev/diorama_lookdev.py` from a checkout).
-ROOT = os.environ.get("PKD_ROOT") or os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
+try:
+    _HERE = os.path.dirname(os.path.abspath(__file__))
+except NameError:  # exec() from Blender's console has no __file__: set PKD_ROOT first
+    _HERE = os.path.join(os.environ.get("PKD_ROOT", os.getcwd()), "assets-src", "diorama_lookdev")
+ROOT = os.environ.get("PKD_ROOT") or os.path.abspath(os.path.join(_HERE, "..", ".."))
 HERE = ROOT + "/assets-src/diorama_lookdev"
 MODELS = ROOT + "/godot/assets/models"
 B = json.load(open(HERE + "/board_seed1.json"))

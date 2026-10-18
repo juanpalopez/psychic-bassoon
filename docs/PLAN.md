@@ -126,14 +126,14 @@ Input / HUD taps ──commands──▶          │           ──events─�
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Engine | Godot 4.x (version pinned at setup), Forward+ on desktop and the Mobile renderer on iOS (2026-10-18; it was Compatibility for the web) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
+| Engine | Godot 4.x (version pinned at setup); from #318 Forward+ on desktop and the Mobile renderer on iOS (decided 2026-10-18; until then Compatibility for the web build) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
 | Language | GDScript, typed everywhere | Runs on every export target in the pinned 4.x (it was also the only language for the web build) |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
 | Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, the diorama terrain built from the map at load time in culled chunks with scatter as one `MultiMesh` per prop type (2026-10-18, #324 to #326; it was modular 1 m tiles) | Few draw calls on a phone |
 | Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the Three.js build |
 | HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens; a radial context menu for sockets and towers |
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed (the ported pieces match the TypeScript fixtures) |
-| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; a headless desktop export in CI (the Playwright smoke test of the web build goes with #318) | Balance, maps and replays stay verifiable |
+| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; the web export and a Playwright smoke test in CI until #318, then a headless desktop export | Balance, maps and replays stay verifiable |
 | Audio | Godot `AudioStreamPlayer` | Native builds can start sound at once |
 | CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, the Godot web export, size budget and Pages deploy until #318 (then a desktop export and a Pages page that links to releases), tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
 
@@ -457,7 +457,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 | New foes and specialisations break the balance | Content flags; the replay goldens keep the base game identical with the flags off; headless balance runs per foe |
 | The diorama (terrain, scatter, post) is too heavy for the Mobile renderer on a phone | Chunked and culled terrain, one `MultiMesh` per prop type, baked contact shading instead of SSAO, a quality setting; measure on the iPhone in each art PR and at the gate (#97) |
 | The 32x20 map makes runs long and taps small | The camera starts near the spawn and pans; taps at the overview zoom zoom in first (#328); wave pacing re-tuned (#237) |
-| Curved routes churn the replay goldens | Re-record them once in #321 as a reviewed change; the ported grid path and its frozen fixtures stay untouched |
+| Curved routes churn the replay goldens | Re-record them as reviewed changes in #320 and #321 (named in `docs/lessons/2026-10-18-valley-map.md`); the ported grid path and its frozen fixtures stay untouched |
 | No shareable web link for playtesters | Desktop builds on GitHub Releases; TestFlight once the owner joins the Apple Developer Program |
 
 - [x] Repo name and whether it is public from day one: public from day one, repo `psychic-bassoon`, codename Project Slag.

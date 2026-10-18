@@ -12,7 +12,7 @@ With the diorama look the owner wants the playable map to feel larger, with road
 
 ## Decision
 - The board is 32x20 cells (#320); the camera pans across it and the whole map is an overview zoom, not the play view (#328).
-- The sim walks the curve: a route-geometry layer rounds the grid path's corners and is the truth for movement, range and hits (#321). The ported grid path and the frozen fixtures stay as they are; the replay goldens are re-recorded once as a reviewed change.
+- The sim walks the curve: a route-geometry layer rounds the grid path's corners and is the truth for movement, range and hits (#321). The ported grid path and the frozen fixtures stay as they are; the replay goldens are re-recorded as reviewed changes in #320 (the bigger map) and #321 (the curve).
 - Bridges over the river are held by guards posted on them (#323); this replaces the drawbridge idea dropped on 2026-10-12.
 - Heroes move anywhere walkable on the map, a little like an RTS (#275, #335).
 
