@@ -540,7 +540,8 @@ static func _direction(sim: Vector2) -> Vector3:
 	)
 
 
-## An indexed surface of the bed: positions, UVs (along, across) and upward normals.
+## The surface of the bed while it is built: shared vertices (positions and UVs, along and
+## across) and the triangles between them.
 class Ribbon:
 	extends RefCounted
 	var _vertices := PackedVector3Array()
@@ -569,19 +570,25 @@ class Ribbon:
 	func triangle_count() -> int:
 		return _indices.size() / 3
 
+	## The surface, its triangles laid out corner by corner (unindexed, as every diorama mesh is,
+	## so a face's three corners are three vertices in a row).
 	func commit(material: Material) -> ArrayMesh:
 		var mesh := ArrayMesh.new()
 		if _indices.is_empty():
 			return mesh
+		var corners := PackedVector3Array()
+		var uvs := PackedVector2Array()
+		for i in _indices:
+			corners.append(_vertices[i])
+			uvs.append(_uvs[i])
 		var normals := PackedVector3Array()
-		normals.resize(_vertices.size())
+		normals.resize(corners.size())
 		normals.fill(Vector3.UP)
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = _vertices
+		arrays[Mesh.ARRAY_VERTEX] = corners
 		arrays[Mesh.ARRAY_NORMAL] = normals
-		arrays[Mesh.ARRAY_TEX_UV] = _uvs
-		arrays[Mesh.ARRAY_INDEX] = _indices
+		arrays[Mesh.ARRAY_TEX_UV] = uvs
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		mesh.surface_set_material(0, material)
 		return mesh

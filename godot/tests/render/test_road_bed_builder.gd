@@ -130,9 +130,12 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 			)
 			# the highest face looking up over the bridge cell's middle is the planks' top
 			var middle := Vector2(bridge.cell) + Vector2(0.5, 0.5)
+			var along := 0 if bridge.horizontal else 1
 			var plank_top := -INF
 			for i in vertices.size():
-				if normals[i].y > 0.99 and _sim(vertices[i]).distance_to(middle) < 0.45:
+				var off := _sim(vertices[i]) - middle
+				var on_deck := absf(off[along]) < 0.2 and absf(off[1 - along]) < 0.5
+				if normals[i].y > 0.99 and on_deck:
 					plank_top = maxf(plank_top, vertices[i].y)
 			assert_almost_eq(plank_top, top, 1e-4, label)
 	assert_gt(seen, SEEDS.size(), "the seeds have bridges, some two")
@@ -185,7 +188,9 @@ func test_the_feeder_is_drawn_to_its_join_and_no_further() -> void:
 		var main := _line_of(game.routes[0])
 		var feeder := lines[1]
 		var end := feeder[feeder.size() - 1]
-		assert_lt(_distance_to(end, main), 1e-3, "it ends on the main road, seed %d" % map_seed)
+		# (a curve near the join differs from the main road's by less than the join epsilon)
+		var off_main := _distance_to(end, main)
+		assert_lt(off_main, LOOKS.JOIN_EPSILON, "it ends on the main road, seed %d" % map_seed)
 		# past its run-out (straight, `ROAD_RUN_OUT` long) it is about as long as the feeder from
 		# its spawn point to its join cell
 		var second := game.routes[1]
@@ -270,17 +275,14 @@ func test_every_triangle_faces_up_or_out() -> void:
 			0
 		)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-		var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
 		var wrong := 0
-		for i in range(0, indices.size(), 3):
-			var a := vertices[indices[i]]
-			var b := vertices[indices[i + 1]]
-			var c := vertices[indices[i + 2]]
-			var normal := (b - a).cross(c - a)
+		for i in range(0, vertices.size(), 3):
+			var normal := (vertices[i + 1] - vertices[i]).cross(vertices[i + 2] - vertices[i])
 			# Godot's front faces are clockwise: seen from above, the cross product points down
 			if normal.length() > 1e-9 and normal.y >= 0.0:
 				wrong += 1
 		assert_eq(wrong, 0, "bed triangles wound away from the sky, seed %d" % map_seed)
+		assert_eq(_wrongly_wound(arrays), 0, "and against their normals, seed %d" % map_seed)
 		var bridges := RoadBedBuilder.bridge_mesh(game.map, setup.top).surface_get_arrays(0)
 		assert_eq(_wrongly_wound(bridges), 0, "bridge facets wound inward, seed %d" % map_seed)
 
@@ -377,13 +379,7 @@ func _on_deck(map: GameMap, at: Vector2) -> bool:
 ## The bed's triangles as a flat list of their corners, on the field's tops.
 func _bed(setup: Dictionary, routes: Array[Route]) -> PackedVector3Array:
 	var mesh := RoadBedBuilder.bed_mesh(setup.map, routes, setup.top)
-	var arrays := mesh.surface_get_arrays(0)
-	var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
-	var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-	var corners := PackedVector3Array()
-	for i in indices:
-		corners.append(vertices[i])
-	return corners
+	return mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 
 
 ## How far a bed point lies outside every cell it may be on (a road cell, any cell off the board,
@@ -487,7 +483,4 @@ func _lowest(mesh: Mesh) -> float:
 func _triangles(mesh: Mesh) -> int:
 	if mesh.get_surface_count() == 0:
 		return 0
-	var arrays := mesh.surface_get_arrays(0)
-	if arrays[Mesh.ARRAY_INDEX] != null:
-		return (arrays[Mesh.ARRAY_INDEX] as PackedInt32Array).size() / 3
-	return (arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+	return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
