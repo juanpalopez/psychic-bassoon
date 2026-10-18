@@ -1,5 +1,6 @@
-## The diorama's road bed (the placeholder until #325) is laid along the curved routes the
-## valley board's foes walk (#321), so every point a foe walks past is drawn on the bed.
+## The diorama's road bed (#325) is laid along the curved routes the valley board's foes walk
+## (#321), so every point a foe walks past is drawn on the bed, or on a bridge's planks over the
+## river (the bed stops at the gorge).
 extends GutTest
 
 ## Sub-points checked on each segment between two route points.
@@ -14,7 +15,7 @@ func test_every_point_of_the_curved_routes_lies_on_the_road_bed() -> void:
 		board.build_on_ready = false
 		add_child_autofree(board)
 		board.show_map(game.map, game.routes)
-		var bed := board.diorama.builder("RoadBeds").get_child(0) as MeshInstance3D
+		var bed := board.diorama.builder("RoadBeds").get_node("RoadBed") as MeshInstance3D
 		var mesh := bed.mesh as ArrayMesh
 		var vertices: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var buckets := _buckets(vertices)
@@ -29,10 +30,20 @@ func test_every_point_of_the_curved_routes_lies_on_the_road_bed() -> void:
 					var y := route.ys[p - 1] + (route.ys[p] - route.ys[p - 1]) * t
 					var at := BoardSpace.point_to_world(x, y)
 					checked += 1
+					if _on_a_bridge(game.map, Vector2(x, y)):
+						continue
 					if not _on_bed(vertices, buckets, Vector2(at.x, at.z)):
 						off += 1
 		assert_gt(checked, 0)
 		assert_eq(off, 0, "points off the road bed, seed %d" % map_seed)
+
+
+## True on a bridge's deck, end to end and edge to edge (sim cells).
+func _on_a_bridge(map: GameMap, at: Vector2) -> bool:
+	for bridge in map.bridges:
+		if RoadBedBuilder.deck_rect(bridge).has_point(at):
+			return true
+	return false
 
 
 ## The triangles (by first vertex index) whose bounds reach into each unit square of the world.
