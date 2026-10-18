@@ -118,11 +118,22 @@ func _print_road_length(seeds: Array[int]) -> void:
 ## What each wave is made of on one seed: foes, by kind, and their total hp.
 func _print_composition(map_seed: int, max_waves: int) -> void:
 	print("\nwave composition on seed %d" % map_seed)
-	print("wave  foes  goblins  orcs  golems  total hp  first foe in (s)  last foe in (s)")
+	print(
+		(
+			"wave  foes  goblins  orcs  golems  moths  shamans  total hp"
+			+ "  first foe in (s)  last foe in (s)"
+		)
+	)
 	var game := Game.create(map_seed)
 	for wave in range(1, max_waves + 1):
 		var orders := WaveBuilder.build(wave, game.rng)
-		var counts := {"scrapGoblin": 0, "corrugatedOrc": 0, "cardboardGolem": 0}
+		var counts := {
+			"scrapGoblin": 0,
+			"corrugatedOrc": 0,
+			"cardboardGolem": 0,
+			"razorMoth": 0,
+			"inkShaman": 0,
+		}
 		var hp := 0
 		var time := WAVES.FIRST_SPAWN_DELAY
 		var first := time
@@ -132,13 +143,15 @@ func _print_composition(map_seed: int, max_waves: int) -> void:
 			time += order.gap
 		print(
 			(
-				"%4d  %4d  %7d  %4d  %6d  %8d  %16.1f  %15.1f"
+				"%4d  %4d  %7d  %4d  %6d  %5d  %7d  %8d  %16.1f  %15.1f"
 				% [
 					wave,
 					orders.size(),
 					counts.scrapGoblin,
 					counts.corrugatedOrc,
 					counts.cardboardGolem,
+					counts.razorMoth,
+					counts.inkShaman,
 					hp,
 					first,
 					time,
