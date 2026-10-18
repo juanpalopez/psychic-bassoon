@@ -471,7 +471,9 @@ func test_the_river_has_water_and_every_road_a_bed() -> void:
 	var board := _board(7920)
 	assert_false(board.map.river.is_empty(), "this seed has a river")
 	assert_gt(board.diorama.builder("Water").get_child_count(), 0)
-	assert_eq(board.diorama.builder("RoadBeds").get_child_count(), 1)
+	var road := board.diorama.builder("RoadBeds")
+	assert_not_null(road.get_node_or_null("RoadBed"), "a bed")
+	assert_not_null(road.get_node_or_null("Bridges"), "and the bridges")
 
 
 ## The camera's real zoom, pitch, footprint and pan range (#339: the map plus its scenery margin).
