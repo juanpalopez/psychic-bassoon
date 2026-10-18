@@ -76,10 +76,16 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 22
+          node-version-file: .nvmrc
 
       - name: Count the production lines this PR changes (limit 300)
         run: |
           flags=()
           if [ "$ALLOW" = "true" ]; then flags+=(--allow); fi
-          node scripts/check-pr-size.mjs "$BASE_SHA" "$HEAD_SHA" "${flags[@]}"
+          # run the base branch's counter, so a PR cannot change its own limit or rules
+          # (the PR's copy only when the base has none yet: the PR that adds it)
+          counter="$RUNNER_TEMP/check-pr-size.mjs"
+          if ! git show "${BASE_SHA}:scripts/check-pr-size.mjs" > "$counter" 2>/dev/null; then
+            cp scripts/check-pr-size.mjs "$counter"
+          fi
+          node "$counter" "$BASE_SHA" "$HEAD_SHA" "${flags[@]}"

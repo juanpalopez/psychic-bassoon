@@ -6,3 +6,7 @@ export function countProduction(numstat: string): {
   files: {path: string; lines: number}[];
 };
 export function verdict(total: number, allow?: boolean): 'ok' | 'warn' | 'fail';
+export function report(
+  numstat: string,
+  allow?: boolean
+): {lines: string[]; code: number};

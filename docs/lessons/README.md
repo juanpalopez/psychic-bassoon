@@ -10,7 +10,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 | --- | --- | --- | --- | --- | --- |
 | 2026-10-18 | decision | Budget the frame at 200k triangles, with 40k for the terrain and 32k for the scenery | render | none | CLAUDE.md, PLAN.md |
 | 2026-10-18 | lesson | Stop only the job you started, never every process that matches a pattern | harness | none | |
-| 2026-10-18 | decision | Keep each PR to at most 300 changed lines of production code | ci | none | |
+| 2026-10-18 | decision | Keep each PR to at most 300 changed lines of production code | ci | ci-check | scripts/check-pr-size.mjs, .github/workflows/pr-checks.yml |
 | 2026-10-18 | lesson | Place a map feature through a chosen anchor with a search, not by rejection sampling | sim | none | |
 | 2026-10-18 | lesson | Check native exports on Linux: every desktop preset and the iOS Xcode project export there | ci | ci-check | .github/workflows/ci.yml, scripts/check-desktop-export.sh |
 | 2026-10-18 | lesson | Never read MultiMesh instance transforms back in a headless test | render | checklist | docs/REVIEW-CHECKLIST.md |
