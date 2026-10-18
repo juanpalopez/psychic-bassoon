@@ -9,19 +9,21 @@ const MARGIN := 1.05
 ## Project a world point as a camera at `distance` would see it: normalised
 ## device coordinates, each within -1..1 when the point is on screen. This is
 ## written out independently of `CameraRig.fit_distance`, so the test can fail.
-func _ndc(point: Vector3, distance: float, aspect: float) -> Vector2:
+func _ndc(point: Vector3, distance: float, aspect: float, yaw: float = 0.0) -> Vector2:
 	var pitch := deg_to_rad(PITCH)
-	var forward := Vector3(0.0, -sin(pitch), -cos(pitch))
-	var up := Vector3(0.0, cos(pitch), -sin(pitch))
+	var turn := Basis(Vector3.UP, deg_to_rad(yaw))
+	var forward := turn * Vector3(0.0, -sin(pitch), -cos(pitch))
+	var up := turn * Vector3(0.0, cos(pitch), -sin(pitch))
+	var right := turn * Vector3.RIGHT
 	var camera := -forward * distance
 	var offset := point - camera
 	var depth := offset.dot(forward)
 	var tan_v := tan(deg_to_rad(FOV) / 2.0)
-	return Vector2(offset.x / (depth * tan_v * aspect), offset.dot(up) / (depth * tan_v))
+	return Vector2(offset.dot(right) / (depth * tan_v * aspect), offset.dot(up) / (depth * tan_v))
 
 
-func _fit(aspect: float) -> float:
-	return CameraRig.fit_distance(BoardSpace.corners(), PITCH, FOV, aspect, MARGIN)
+func _fit(aspect: float, yaw: float = 0.0) -> float:
+	return CameraRig.fit_distance(BoardSpace.corners(), PITCH, FOV, aspect, MARGIN, yaw)
 
 
 func test_every_corner_is_on_screen_at_the_fitted_distance() -> void:
@@ -73,11 +75,19 @@ func test_the_rig_aims_the_camera_down_at_the_board() -> void:
 	rig.frame(16.0 / 9.0)
 	var camera := rig.camera()
 	assert_not_null(camera)
-	assert_almost_eq(camera.rotation_degrees.x, -PITCH, 1e-4)
+	# the camera looks down by the pitch, turned about the vertical axis by the yaw
+	var forward := -camera.global_transform.basis.z
+	assert_almost_eq(rad_to_deg(asin(-forward.y)), PITCH, 1e-4)
+	var flat := Vector3(forward.x, 0.0, forward.z).normalized()
+	var expected := Basis(Vector3.UP, deg_to_rad(CameraRig.YAW_DEGREES)) * Vector3(0.0, 0.0, -1.0)
+	assert_almost_eq(flat.dot(expected), 1.0, 1e-6)
 	assert_almost_eq(camera.fov, FOV, 1e-4)
-	# the camera is behind the board (positive z) and above it
-	assert_gt(camera.position.z, 0.0)
+	# no roll: the camera's right stays level
+	assert_almost_eq(camera.global_transform.basis.x.y, 0.0, 1e-6)
+	# the camera is above the board and looks at the origin
 	assert_gt(camera.position.y, 0.0)
+	var to_origin := (-camera.position).normalized()
+	assert_almost_eq(to_origin.dot(forward), 1.0, 1e-6)
 
 
 func test_pitch_runs_from_62_degrees_zoomed_out_to_56_zoomed_in() -> void:
@@ -108,15 +118,19 @@ func _phone_rig() -> CameraRig:
 	return rig
 
 
+func _pitch_of(camera: Camera3D) -> float:
+	return rad_to_deg(asin(camera.global_transform.basis.z.y))
+
+
 func test_zoom_in_moves_the_camera_closer_and_lower() -> void:
 	var rig := _phone_rig()
 	var camera := rig.camera()
 	var far := camera.position.length()
-	var far_pitch := camera.rotation_degrees.x
+	var far_pitch := _pitch_of(camera)
 	rig.set_zoom(1.0)
 	assert_lt(camera.position.length(), far)
-	assert_gt(camera.rotation_degrees.x, far_pitch, "less negative: a lower angle")
-	assert_almost_eq(camera.rotation_degrees.x, -CameraRig.MIN_PITCH, 1e-4)
+	assert_lt(_pitch_of(camera), far_pitch, "a lower angle")
+	assert_almost_eq(_pitch_of(camera), CameraRig.MIN_PITCH, 1e-4)
 
 
 func test_zoom_is_clamped_to_the_range() -> void:
@@ -160,42 +174,36 @@ func _rig_in(width: int, height: int) -> CameraRig:
 	return rig
 
 
-func test_zoomed_in_there_is_room_to_pan_but_the_view_never_leaves_the_board() -> void:
+func test_zoomed_in_there_is_room_to_pan_but_the_target_never_leaves_the_board() -> void:
 	var half := BoardSpace.size() / 2.0
 	for shape in [Vector2i(1280, 720), Vector2i(1558, 720), Vector2i(1024, 768)]:
 		for zoom_level in [0.5, 1.0]:
 			var rig := _rig_in(shape.x, shape.y)
 			rig.set_zoom(zoom_level)
 			var range := rig.pan_range()
-			if zoom_level == 1.0:
-				# closest, a view always has some room to pan, along at least one axis
-				assert_true(range.size.x > 0.0 or range.size.y > 0.0, "room to pan at %s" % shape)
-			# at every corner of the allowed pans, the whole screen still looks at the board
-			var size := Vector2(shape)
+			assert_true(range.size.x > 0.0 and range.size.y > 0.0, "room to pan at %s" % shape)
+			# at every corner of the allowed pans, the camera still looks at a point on the board
 			for x in [range.position.x, range.end.x]:
 				for y in [range.position.y, range.end.y]:
 					rig.pan = Vector2(x, y)
 					rig._pan_raw = rig.pan
 					rig._place()
-					for corner in [Vector2.ZERO, Vector2(1.0, 0.0), Vector2(0.0, 1.0), Vector2.ONE]:
-						var ground := rig.ground_under(corner * size)
-						var where := "%s zoom %s pan %s" % [shape, zoom_level, Vector2(x, y)]
-						# an axis where the screen shows more than the board has no range to keep
-						if range.size.x > 0.0:
-							assert_lte(absf(ground.x), half.x + 1e-3, "x at " + where)
-						if range.size.y > 0.0:
-							assert_lte(absf(ground.y), half.y + 1e-3, "z at " + where)
+					var middle := rig.ground_under(Vector2(shape) / 2.0)
+					assert_lte(absf(middle.x), half.x + 1e-3, "x at %s" % shape)
+					assert_lte(absf(middle.y), half.y + 1e-3, "z at %s" % shape)
 
 
-func test_the_footprint_and_bounds_maths() -> void:
-	var foot := Rect2(Vector2(-3.0, -2.0), Vector2(6.0, 5.0))
-	var bounds := CameraRig.pan_bounds(Vector2(10.0, 8.0), foot)
-	assert_eq(bounds.position, Vector2(-7.0, -6.0))
-	assert_eq(bounds.end, Vector2(7.0, 5.0))
-	# a view wider than the board has nothing to pan on that axis
-	var wide := CameraRig.pan_bounds(Vector2(2.0, 8.0), foot)
-	assert_eq(wide.position.x, 0.0)
-	assert_eq(wide.end.x, 0.0)
+func test_the_pan_limits_are_symmetric_and_grow_with_the_zoom() -> void:
+	var rig := _phone_rig()
+	var near := rig.pan_range()
+	rig.set_zoom(0.5)
+	var middle := rig.pan_range()
+	rig.set_zoom(1.0)
+	var close := rig.pan_range()
+	assert_lt(near.size.x, middle.size.x)
+	assert_lt(middle.size.x, close.size.x)
+	assert_almost_eq(close.position.x, -close.end.x, 1e-9)
+	assert_almost_eq(close.position.y, -close.end.y, 1e-9)
 
 
 func test_rubber_band_lets_you_overscroll_a_little() -> void:
@@ -218,17 +226,32 @@ func test_a_pinch_keeps_the_point_under_the_fingers_where_it_was() -> void:
 	assert_almost_eq(after.y, before.y, 1e-3)
 
 
+## The ground direction (x, z) that points right on the screen, and the one that points up
+## the screen, read from the camera itself.
+func _screen_axes(camera: Camera3D) -> Array[Vector2]:
+	var right := camera.global_transform.basis.x
+	var forward := -camera.global_transform.basis.z
+	return [
+		Vector2(right.x, right.z).normalized(),
+		Vector2(forward.x, forward.z).normalized(),
+	]
+
+
 func test_dragging_moves_the_scene_with_the_finger() -> void:
 	var rig := _phone_rig()
 	rig.set_zoom(1.0)
+	var axes := _screen_axes(rig.camera())
 	rig.pan_by_pixels(Vector2(100.0, 0.0))
-	# the scene follows the finger to the right, so the camera target moves to -x
-	assert_lt(rig.pan.x, 0.0)
-	assert_eq(rig.pan.y, 0.0)
+	# the scene follows the finger to the right, so the camera target moves left on the screen
+	assert_lt(rig.pan.dot(axes[0]), 0.0)
+	assert_almost_eq(rig.pan.dot(axes[1]), 0.0, 1e-6, "a sideways drag does not move up or down")
 	rig.release_pan()
+	rig.pan = Vector2.ZERO
+	rig._pan_raw = Vector2.ZERO
 	rig.pan_by_pixels(Vector2(0.0, 100.0))
-	# dragging down pushes the scene toward the viewer: the target moves away (-z)
-	assert_lt(rig.pan.y, 0.0)
+	# dragging down pushes the scene toward the viewer: the target moves up the screen
+	assert_gt(rig.pan.dot(axes[1]), 0.0)
+	assert_almost_eq(rig.pan.dot(axes[0]), 0.0, 1e-6, "a vertical drag does not move sideways")
 
 
 func test_a_pan_stays_near_the_board_and_springs_back_after_release() -> void:

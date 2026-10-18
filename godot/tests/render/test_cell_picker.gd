@@ -88,3 +88,37 @@ func test_a_tap_off_the_board_still_picks_nothing_with_heights() -> void:
 		CellPicker.cell_at(camera, Vector2(-500.0, -500.0), board.surface_height),
 		BoardSpace.NO_CELL
 	)
+
+
+func test_the_camera_the_picker_uses_is_turned_by_the_yaw() -> void:
+	var camera := _rig().camera()
+	var forward := -camera.global_transform.basis.z
+	assert_gt(absf(forward.x), 0.1, "the view direction is not along the board's rows")
+
+
+func test_the_round_trip_holds_zoomed_in_and_panned_with_the_yaw() -> void:
+	var scene := _scene(7920)
+	var board: Board = scene.board
+	var camera: Camera3D = scene.camera
+	var rig := camera.get_parent() as CameraRig
+	rig.canvas_height = 720.0
+	rig.set_zoom(0.8)
+	rig.pan_by_pixels(Vector2(-150.0, 90.0))
+	rig.release_pan()
+	var size := get_viewport().get_visible_rect().size
+	var picked := 0
+	for row in board.map.rows:
+		for col in board.map.cols:
+			var cell := Vector2i(col, row)
+			var point := BoardSpace.cell_to_world(col, row)
+			point.y = board.surface_height(cell)
+			var screen := camera.unproject_position(point)
+			if screen.x < 0.0 or screen.y < 0.0 or screen.x > size.x or screen.y > size.y:
+				continue
+			var hit := CellPicker.cell_at(camera, screen, board.surface_height)
+			if hit == cell:
+				picked += 1
+			else:
+				# only a taller tile in front may hide the top of a cell
+				assert_gt(board.surface_height(hit), board.surface_height(cell), str(cell))
+	assert_gt(picked, 40, "many cells were in view and picked")
