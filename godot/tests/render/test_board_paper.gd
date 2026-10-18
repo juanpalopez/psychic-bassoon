@@ -147,7 +147,7 @@ func _surfaces(node: Node, counts: Dictionary) -> void:
 func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 	# the phone budget is under 120 draw calls a frame with 80 foes and every tower; the whole
 	# diorama (every chunk, before the camera culls most of them up close), its markers and their
-	# shadows keep to about a third of it
+	# shadows keep to about a third of it; the coarse chunks out in the haze cast no shadow
 	for map_seed in SEEDS:
 		var counts := {"drawn": 0, "shadows": 0}
 		_surfaces(_board(map_seed), counts)
@@ -157,5 +157,5 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 				% [map_seed, counts["drawn"], counts["shadows"]]
 			)
 		)
-		assert_lte(counts["drawn"], 36, "seed %d: surfaces drawn" % map_seed)
-		assert_lte(counts["shadows"], 20, "seed %d: surfaces in the shadow map" % map_seed)
+		assert_lte(counts["drawn"], 38, "seed %d: surfaces drawn" % map_seed)
+		assert_lte(counts["shadows"], 17, "seed %d: surfaces in the shadow map" % map_seed)
