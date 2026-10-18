@@ -1,6 +1,6 @@
 # RFC: An online leaderboard with verified scores
 
-Status: draft for the owner, staged on 2026-10-18 (the owner chose to start with stage B) · 2026-10-17 · Phase 8 (Meta, polish, launch, native) · Author: Claude (Sonnet). Free-tier limits and product behaviour named below come from the author's knowledge of Cloudflare, Apple and Google at the time of writing and must be checked against their current pages before a ticket relies on them.
+Status: **parked** (owner, 2026-10-18): no backend until there is a player base and stable balance; Game Center on iOS is the preferred later route, and a local best plus a shared daily seed come first (see the ticket "Local best per seed and a shared daily seed"). The design below stays as the reference if a web leaderboard is wanted later. Draft for the owner, staged on 2026-10-18 (the owner chose to start with stage B) · 2026-10-17 · Phase 8 (Meta, polish, launch, native) · Author: Claude (Sonnet). Free-tier limits and product behaviour named below come from the author's knowledge of Cloudflare, Apple and Google at the time of writing and must be checked against their current pages before a ticket relies on them.
 
 ## 1. Summary
 
