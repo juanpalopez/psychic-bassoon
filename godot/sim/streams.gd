@@ -13,5 +13,8 @@ const SOCKETS := 3
 ## Where the second road (the feeder) leaves the board and joins the main road. Its own
 ## stream, so adding it never moves the main road or the sockets' draws.
 const SECOND_SOURCE := 4
+## The valley's terrain layer: terrace heights, regions and the river (#322). Its own stream,
+## drawn after the road and the sockets are placed, so it never moves either of them.
+const TERRAIN := 5
 ## Render-only scenery around the board; never affects the game.
 const SCENERY := 100

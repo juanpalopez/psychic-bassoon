@@ -1,11 +1,12 @@
 # Goldens written by the GDScript sim
 
-Regression data written by the GDScript sim itself, not by the TypeScript sim (whose fixtures in `/fixtures` are frozen and cover only the ported core). A golden changes only by a reviewed balance change: edit the rule or number, regenerate it with its script in `godot/tools/`, and say so in the PR.
+Regression data written by the GDScript sim itself, not by the TypeScript sim (whose fixtures in `/fixtures` are frozen and cover only the ported core). A golden changes only by a reviewed balance change (for `terrain.json`, a reviewed change to the terrain rules or numbers): edit the rule or number, regenerate it with its script in `godot/tools/`, and say so in the PR.
 
 | File | Written by | Holds |
 | --- | --- | --- |
 | `sockets.json` | `godot --headless --path godot -s tools/write_sockets_golden.gd` | for 8 seeds, the sockets in reading order and their elevation levels |
 | `socket_blocks.json` | `godot --headless --path godot -s tools/write_socket_blocks_golden.gd` | for 8 seeds on the 22 by 16 board, the 2x2 socket anchors, their levels and the Heartstone's footprint |
+| `terrain.json` | `godot --headless --path godot -s tools/write_terrain_golden.gd` | for the 5 valley seeds in `TerrainKit.SEEDS` (32 by 20), the terrain layer: each row of heights and of regions as a string of digits, the river cells and each bridge as `[x, y, horizontal, path_index]` |
 | `replays.json` | `godot --headless --path godot -s tools/write_replays_golden.gd` | 5 whole games played by the scripted bot (won, lost and stopped runs, each strategy): the seed, the commands with their ticks, a checkpoint every 20 seconds of play and the final state |
 | `specs.json` | `godot --headless --path godot -s tools/write_specs_golden.gd` | one fixed tier 4 scenario (a Crossbow Ballista and its skewer on a line of Orcs): checkpoints every second with the same hashes |
 | `specs_prism.json` | same tool | the two Prism Spire specs (Flash Freeze with Frostbite; Ink Vortex with Corrosive Light) on a line of foes with a Golem among them, checkpoints every second |

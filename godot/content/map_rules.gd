@@ -112,3 +112,44 @@ const ELEVATION_LEVELS := 3
 const ELEVATION_WEIGHTS: Array[int] = [6, 3, 1]
 ## Range multiplier bonus by level: a tower on level 2 reaches 15% further.
 const ELEVATION_RANGE_BONUS: Array[float] = [0.0, 0.0, 0.15]
+
+## The terrain layer of the valley (#322), drawn from its own stream after the road and the
+## sockets. Terraces 0 (the valley floor, where the road runs) to `TERRAIN_LEVELS - 1`; the
+## cells beside a road stay at most `TERRAIN_ROADSIDE_MAX`, and each socket block stands on its
+## own elevation level. The heights come from a smooth field with a random value every
+## `TERRAIN_NOISE_CELL` cells, mixed with a rise away from the road that reaches its top
+## `TERRAIN_VALLEY_REACH` cells out and makes up `TERRAIN_VALLEY_WEIGHT` of the height (the
+## valley); lone pits and spikes are smoothed over at most `TERRAIN_SMOOTH_PASSES` times.
+const TERRAIN_LEVELS := 5
+const TERRAIN_ROADSIDE_MAX := 1
+const TERRAIN_NOISE_CELL := 5
+const TERRAIN_VALLEY_REACH := 6
+const TERRAIN_VALLEY_WEIGHT := 0.5
+const TERRAIN_SMOOTH_PASSES := 8
+## Regions, from a second smooth field `n` in [0, 1): rocks on terraces of `ROCKS_MIN_LEVEL`
+## or higher where `n < ROCKS_BELOW`; forest at least `FOREST_ROAD_GAP` cells from the road
+## where `n > FOREST_ABOVE`; dirt within `DIRT_ROAD_GAP` cells of the road where `n < DIRT_BELOW`;
+## meadow elsewhere (and always on the road, the sockets and the river).
+const ROCKS_MIN_LEVEL := 3
+const ROCKS_BELOW := 0.35
+const FOREST_ROAD_GAP := 2
+const FOREST_ABOVE := 0.55
+const DIRT_ROAD_GAP := 1
+const DIRT_BELOW := 0.4
+## The river flows from the top edge to the bottom edge and crosses the road only on bridges,
+## each straight across a straight stretch of road one cell wide, meeting it head on. It keeps
+## at least `RIVER_EDGE_MARGIN` columns in from the left and right edges, `RIVER_SPAWN_GAP`
+## cells (Manhattan) from every spawn, and off the sockets, the inside cells of the road's turns
+## and the Heartstone. Its course is the cheapest one: each cell costs `RIVER_STEP_COST`, plus
+## `RIVER_HIGH_GROUND_COST` times the height field (it seeks low ground), plus
+## `RIVER_ROADSIDE_COST` beside the road (it keeps away from the road), and each bridge costs
+## `RIVER_BRIDGE_COST` more (it crosses as few times as it can). A course that crowds one of
+## its bridges, or walls in a raised socket block, is searched again without that bridge or
+## those cells, at most `RIVER_SEARCH_PASSES` times.
+const RIVER_EDGE_MARGIN := 1
+const RIVER_SPAWN_GAP := 3
+const RIVER_STEP_COST := 1.0
+const RIVER_HIGH_GROUND_COST := 3.0
+const RIVER_ROADSIDE_COST := 4.0
+const RIVER_BRIDGE_COST := 20.0
+const RIVER_SEARCH_PASSES := 6
