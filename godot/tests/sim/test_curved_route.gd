@@ -4,12 +4,15 @@
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
+const GAME_RULES := preload("res://content/game_rules.gd")
 const EPSILON := 1e-9
 ## Sub-points checked on each segment between two route points.
 const SUBSTEPS := 4
 ## The most a route turns from one segment to the next: cos 25 degrees. A grid corner turns
 ## 90 degrees at once; a curve sampled at `CURVE_POINT_SPACING` turns a few degrees a segment.
 const MIN_TURN_COS := 0.9
+## How finely the join tests walk a second-route foe forward, in cells.
+const JOIN_STEP := 0.001
 
 var _seeds: Array[int] = []
 
@@ -193,6 +196,34 @@ func test_corners_one_cell_apart_do_not_overlap_or_double_back() -> void:
 		_check_curve(Route.build_curved(cells), cells, pair[0])
 
 
+func test_tight_curves_meet_on_the_corner_cells_edges() -> void:
+	# the S-bend's two corners are neighbours, so each curve runs between its corner cell's edge
+	# midpoints: in from (1, 0), across the edge the two corners share, out to (3, 1); each of
+	# those points is on the route exactly once, so the curves meet and do not repeat a point
+	var route := Route.build_curved(_s_bend())
+	for point in [[2.0, 0.5], [2.5, 1.0], [3.0, 1.5]]:
+		assert_eq(_count_point(route, point[0], point[1]), 1, "edge midpoint %s" % [point])
+	# the straight cells either side keep their centres
+	assert_eq(_count_point(route, 1.5, 0.5), 1)
+	assert_eq(_count_point(route, 3.5, 1.5), 1)
+
+
+func test_a_full_curve_meets_the_centres_of_the_cells_either_side() -> void:
+	var route := Route.build_curved(_one_corner())
+	assert_eq(_count_point(route, 2.5, 0.5), 1, "the cell before the corner")
+	assert_eq(_count_point(route, 3.5, 1.5), 1, "the cell after it")
+	assert_eq(_count_point(route, 3.5, 0.5), 0, "the corner cell's centre is cut")
+	assert_eq(_count_point(route, 3.0, 0.5), 0, "a full curve has no edge point")
+
+
+func _count_point(route: Route, x: float, y: float) -> int:
+	var found := 0
+	for p in route.xs.size():
+		if route.xs[p] == x and route.ys[p] == y:
+			found += 1
+	return found
+
+
 func test_every_valley_route_stays_on_its_road_and_flows_smoothly() -> void:
 	for map_seed in _seeds:
 		var map := _valley(map_seed)
@@ -315,19 +346,90 @@ func test_after_the_join_both_routes_are_the_same_curve() -> void:
 	assert_gt(checked, 25, "most valley maps have a second road")
 
 
-func test_a_second_route_foe_is_on_the_main_road_from_the_join_cell() -> void:
-	for map_seed in range(1, 40):
+func test_a_second_route_foe_is_on_the_main_road_where_the_main_road_has_its_join_cell() -> void:
+	# the threshold is in main-road terms: a route-1 foe counts as on the main road from the
+	# distance that maps onto the main road's join cell, so a guard posted at or after the join
+	# cell holds it (on the curve, route 1's own join point maps a little past it)
+	var checked := 0
+	for map_seed in _seeds:
 		var game := Game.create(map_seed)
 		if game.routes.size() < 2:
 			continue
+		checked += 1
+		var join_main := game.routes[0].cell_distance(game.map.join_index)
 		var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 1)
-		var join := game.routes[1].cell_distance(game.map.feeder_length)
-		foe.distance = join - 0.01
-		assert_eq(Barracks.main_distance(game, foe), -1.0, "still on the feeder")
-		foe.distance = join
-		assert_gte(Barracks.main_distance(game, foe), 0.0, "on the main road")
-		return
-	fail_test("no seed with a second road")
+		foe.distance = join_main + game.second_offset
+		var along := Barracks.main_distance(game, foe)
+		assert_gte(along, 0.0, "on the main road at its join cell, seed %d" % map_seed)
+		assert_almost_eq(along, join_main, EPSILON, "seed %d" % map_seed)
+		foe.distance = join_main + game.second_offset - JOIN_STEP
+		assert_eq(
+			Barracks.main_distance(game, foe), -1.0, "still on the feeder, seed %d" % map_seed
+		)
+	assert_gt(checked, 25)
+
+
+func test_a_second_route_foes_first_main_distance_is_no_later_than_the_join_cell() -> void:
+	# walk a route-1 foe forward in small steps: the first main-road distance it gets is at or
+	# before the main road's join cell (one step of slack for the walk itself)
+	var checked := 0
+	for map_seed in _seeds:
+		var game := Game.create(map_seed)
+		if game.routes.size() < 2:
+			continue
+		checked += 1
+		var join_main := game.routes[0].cell_distance(game.map.join_index)
+		var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 1)
+		var start := game.routes[1].cell_distance(game.map.feeder_length - 1)
+		var steps := 0
+		foe.distance = start
+		while Barracks.main_distance(game, foe) < 0.0 and steps < 3000:
+			steps += 1
+			foe.distance = start + float(steps) * JOIN_STEP
+		var first := Barracks.main_distance(game, foe)
+		assert_gte(first, 0.0, "the foe reaches the main road, seed %d" % map_seed)
+		assert_lte(first, join_main + JOIN_STEP, "no later than the join cell, seed %d" % map_seed)
+	assert_gt(checked, 25)
+
+
+func test_guard_posts_on_curved_routes_follow_the_nearest_point_rule() -> void:
+	# on the curve exact ties are rare but near-ties happen (on these seeds two road points come
+	# within 5e-6 squared cells of each other): the post is the same every time, and it is the
+	# nearest road point, the one nearer the Heartstone when two are exactly as near, as on the
+	# grid route
+	var sockets := 0
+	var closest_gap := INF
+	for map_seed in [1, 2, 3, 42, 7920]:
+		var game := Game.create(map_seed)
+		var route := game.routes[0]
+		for anchor in game.map.sockets:
+			var tent := Tower.new()
+			tent.col = anchor.x
+			tent.row = anchor.y
+			var post := Barracks.post_for(game, tent)
+			assert_eq(Barracks.post_for(game, tent), post, "the same post twice")
+			var centre := game.map.socket_centre(anchor)
+			var best := INF
+			var second := INF
+			var want := 0.0
+			for i in int(floor(route.total / GAME_RULES.GUARD_POST_STEP)) + 1:
+				var along := float(i) * GAME_RULES.GUARD_POST_STEP
+				var at := route.position_at(along)
+				var dx := at.x - centre.x
+				var dy := at.y - centre.y
+				var squared := dx * dx + dy * dy
+				if squared <= best:
+					if squared < best:
+						second = best
+					best = squared
+					want = along
+				elif squared < second:
+					second = squared
+			assert_eq(post, want, "seed %d socket %s" % [map_seed, anchor])
+			sockets += 1
+			closest_gap = minf(closest_gap, second - best)
+	assert_gt(sockets, 100)
+	gut.p("closest second-nearest road point over %d sockets: %s" % [sockets, str(closest_gap)])
 
 
 func test_flying_routes_start_where_the_curved_routes_start() -> void:

@@ -97,7 +97,8 @@ static func build_curved(cells: Array[Vector2i]) -> Route:
 	return route
 
 
-## A straight line from one point to another (the flight of a flying foe).
+## A straight line from one point to another (the flight of a flying foe). It has no road cells,
+## so `cell_points` stays empty and `cell_distance` is not for it.
 static func straight(from_x: float, from_y: float, to_x: float, to_y: float) -> Route:
 	var route := Route.new()
 	route.xs.append(from_x)
@@ -121,7 +122,8 @@ static func join_offset(main: Route, second: Route, feeder_length: int, join_ind
 	return second.cell_distance(feeder_length + settle) - main.cell_distance(join_index + settle)
 
 
-## Distance from the spawn point to the point that stands for the path's `cell`-th cell.
+## Distance from the spawn point to the point that stands for the path's `cell`-th cell. Only
+## for road routes (`build`, `build_curved`); a `straight` line has no cells.
 func cell_distance(cell: int) -> float:
 	return cumulative[cell_points[cell]]
 
