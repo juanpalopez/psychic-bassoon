@@ -3,6 +3,11 @@ name: CI
 on:
   pull_request:
   workflow_call:
+    inputs:
+      all-desktop:
+        description: Also export the Windows and macOS builds (the release workflow sets it)
+        type: boolean
+        default: false
   push:
     branches: [main]
 
@@ -98,20 +103,21 @@ jobs:
           echo "version=${version}" >> "$GITHUB_OUTPUT"
           echo "templates=${version/-/.}" >> "$GITHUB_OUTPUT"
 
-      - name: Restore Godot and the web export templates
+      - name: Restore Godot and the desktop export templates
         id: cache
         uses: actions/cache@v6
         with:
           path: |
             ~/godot-bin
             ~/.local/share/godot/export_templates
-          key: godot-${{ steps.version.outputs.version }}-web_nothreads-v1
+          key: godot-${{ steps.version.outputs.version }}-${{ inputs.all-desktop && 'desktop' || 'linux' }}-v2
 
-      - name: Download Godot and the web templates (verified)
+      - name: Download Godot and the desktop templates (verified)
         if: steps.cache.outputs.cache-hit != 'true'
         env:
           VERSION: ${{ steps.version.outputs.version }}
           TEMPLATES: ${{ steps.version.outputs.templates }}
+          ALL_DESKTOP: ${{ inputs.all-desktop }}
         run: |
           base="https://github.com/godotengine/godot/releases/download/${VERSION}"
           binary="Godot_v${VERSION}_linux.x86_64.zip"
@@ -120,10 +126,14 @@ jobs:
           grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt > wanted.txt
           test "$(wc -l < wanted.txt)" -eq 2
           sha512sum -c wanted.txt
+          # export-release needs only the release templates
+          wanted=(templates/version.txt templates/linux_release.x86_64)
+          if [ "$ALL_DESKTOP" = "true" ]; then
+            wanted+=(templates/windows_release_x86_64.exe templates/macos.zip)
+          fi
           mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/"${TEMPLATES}"
           unzip -q "${binary}" -d ~/godot-bin
-          unzip -q -j "${tpz}" templates/version.txt templates/web_nothreads_release.zip templates/web_nothreads_debug.zip \
-            -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
+          unzip -q -j "${tpz}" "${wanted[@]}" -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
           rm -f "${binary}" "${tpz}" wanted.txt SHA512-SUMS.txt
 
       - name: Install gdtoolkit
@@ -197,28 +207,38 @@ jobs:
             exit 1
           fi
 
-      - name: Web export
+      - name: Linux export
         run: |
-          mkdir -p build/web
-          "$GODOT" --headless --path godot --export-release "Web" ../build/web/index.html
-          # Godot does not copy extra files; the shell links this manifest
-          cp godot/web/manifest.webmanifest build/web/
-          # the Godot build used to live at /godot/: send old links and icons to the root
-          mkdir -p build/web/godot
-          cp godot/web/godot-redirect.html build/web/godot/index.html
+          mkdir -p build/linux
+          "$GODOT" --headless --path godot --export-release "Linux" ../build/linux/papercraft-kingdom-defense.x86_64
+          bash scripts/check-desktop-export.sh build/linux/papercraft-kingdom-defense.x86_64
 
-      - name: Download budget
-        run: pnpm check:godot-size
+      - name: Run the Linux build headless
+        run: |
+          # the exported game (no tests or tools in it) must start and run its scene
+          timeout 120 build/linux/papercraft-kingdom-defense.x86_64 --headless --quit-after 300 2>&1 | tee run.log
+          if grep -E "SCRIPT ERROR|Parse Error|Failed to load" run.log; then
+            echo "::error::The exported Linux build logged errors while running"
+            exit 1
+          fi
 
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Windows and macOS exports
+        if: inputs.all-desktop
+        run: |
+          mkdir -p build/windows build/macos
+          "$GODOT" --headless --path godot --export-release "Windows" ../build/windows/papercraft-kingdom-defense.exe
+          bash scripts/check-desktop-export.sh build/windows/papercraft-kingdom-defense.exe
+          "$GODOT" --headless --path godot --export-release "macOS" ../build/macos/papercraft-kingdom-defense.zip
+          listing="$(unzip -l build/macos/papercraft-kingdom-defense.zip)"
+          if ! grep -qE '\.app/Contents/Resources/[^/]+\.pck$' <<< "$listing"; then
+            echo "::error::The macOS export has no .app with a .pck"
+            exit 1
+          fi
 
-      - name: Smoke test of the export
-        run: pnpm test:e2e:godot
-
-      - name: Upload the web export
+      - name: Upload the desktop export
         uses: actions/upload-artifact@v7
         with:
-          name: godot-web
-          path: build/web
+          name: godot-desktop
+          path: build
+          if-no-files-found: error
           retention-days: 7
