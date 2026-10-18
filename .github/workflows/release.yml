@@ -36,6 +36,8 @@ jobs:
     name: ci
     needs: guard
     uses: ./.github/workflows/ci.yml
+    with:
+      all-desktop: true
 
   release:
     name: release
@@ -53,20 +55,28 @@ jobs:
           lfs: false
           persist-credentials: false
 
-      # The Godot export is built and tested once, by the ci job above.
-      - name: Fetch the Godot export from the ci job
+      # The desktop builds are exported once, by the ci job above.
+      - name: Fetch the desktop builds from the ci job
         uses: actions/download-artifact@v8
         with:
-          name: godot-web
+          name: godot-desktop
           path: dist
 
-      - name: Package the build
+      - name: Package the builds
         run: |
-          cd dist
-          zip -r "../papercraft-kingdom-defense-${TAG}.zip" .
+          name="papercraft-kingdom-defense"
+          bash scripts/check-desktop-export.sh "dist/linux/${name}.x86_64"
+          bash scripts/check-desktop-export.sh "dist/windows/${name}.exe"
+          test -s "dist/macos/${name}.zip"
+          # artifacts do not keep file modes, so make the Linux binary executable again
+          chmod +x "dist/linux/${name}.x86_64"
+          (cd dist/linux && zip -r "../../${name}-${TAG}-linux-x86_64.zip" .)
+          (cd dist/windows && zip -r "../../${name}-${TAG}-windows-x86_64.zip" .)
+          # Godot already zips the macOS .app (ad-hoc signed, not notarized)
+          cp "dist/macos/${name}.zip" "${name}-${TAG}-macos-universal.zip"
 
       - name: Create GitHub Release
         run: |
           flags=(--generate-notes --verify-tag)
           if [[ "$TAG" == *-* ]]; then flags+=(--prerelease); fi
-          gh release create "$TAG" "papercraft-kingdom-defense-${TAG}.zip" --title "$TAG" "${flags[@]}"
+          gh release create "$TAG" papercraft-kingdom-defense-"${TAG}"-*.zip --title "$TAG" "${flags[@]}"
