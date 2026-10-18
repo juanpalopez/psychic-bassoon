@@ -1,7 +1,8 @@
 ## The scenery's props, generated as faceted papercraft (docs/art/STYLE.md: "faceted cone pines
 ## and round broadleaf trees, grey-brown boulders split into facets, dirt patches and grass
-## tufts"): flat-shaded facets with their colours (`TerrainPalette`) in the vertex colours, each
-## prop one surface. A prop stands on its origin, one cell is one unit, and it is built to
+## tufts"): flat-shaded facets with their colours (`TerrainPalette`, linear) in the vertex
+## colours, in the painted paper the ground wears (`painted.gdshader`), each prop one surface.
+## A prop stands on its origin, one cell is one unit, and it is built to
 ## `DioramaLooks.PROP_RADIUS`; its footprint at scale 1 is measured on the meshes (`reach`).
 ## `light` gives the plainer mesh the scenery past the board's margin wears (fewer facets, no
 ## trunk). Every mesh is made once and shared; nothing here is random: the facets' jitter comes
@@ -39,7 +40,7 @@ static func mesh(kind: String, light: bool) -> ArrayMesh:
 			_grass(facets)
 		_:
 			push_error("no scenery prop called %s" % kind)
-	var made := facets.commit(PaperLook.material("diorama_vc"))
+	var made := facets.commit(PaperLook.material("painted"))
 	_meshes[key] = made
 	return made
 
