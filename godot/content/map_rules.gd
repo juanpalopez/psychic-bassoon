@@ -2,14 +2,16 @@
 ## (`web-three-final:src/content/rules.ts`). Data only: the sim reads these, never hard-codes.
 extends RefCounted
 
-## The board the game builds, in cells: the GDD's landscape board.
-const GRID_COLS := 16
-const GRID_ROWS := 11
+## The board the game builds, in cells: the 32 by 20 valley (owner, 2026-10-18, #320). The
+## camera pans across it.
+const GRID_COLS := 32
+const GRID_ROWS := 20
 ## The ported generator's original board, which the frozen fixtures pin.
 const LEGACY_COLS := 9
 const LEGACY_ROWS := 13
-## The board: 16 columns by 11 rows, landscape (a road crosses the long side). The GDD said
-## 22 by 16, but that shows too many cells at a readable unit size (owner, 2026-10-14, #255).
+## The board before the valley: 16 columns by 11 rows, landscape (a road crosses the long side).
+## The GDD said 22 by 16, but that showed too many cells at a readable unit size (owner,
+## 2026-10-14, #255). Its tests keep it pinned with the classic road shape below.
 const LANDSCAPE_COLS := 16
 const LANDSCAPE_ROWS := 11
 ## Whether the game's road grows a detour. The owner chose one road and one spawn
@@ -45,6 +47,19 @@ const START_MARGIN := 1
 const DETOUR_MIN_RUN := 5
 ## The detour runs this many cells beside the main road.
 const DETOUR_OFFSET := 2
+
+## The valley shape: a board at least `VALLEY_MIN_COLS` wide (the 32 by 20 game board) draws a
+## road with longer straight runs and shorter sideways turns than the classic shape above, so
+## it winds through the valley instead of sweeping from edge to edge on every turn, and it gets
+## more sockets. Smaller boards (the 16 by 11, the fixtures' 9 by 13) keep the classic numbers.
+const VALLEY_MIN_COLS := 24
+const VALLEY_MIN_RUN_DOWN := 3
+const VALLEY_RUN_DOWN_VARIANCE := 3
+const VALLEY_MIN_TURN_COLUMNS := 3
+const VALLEY_MAX_TURN_COLUMNS := 8
+const VALLEY_MIN_EXTRA_CELLS := 24
+const VALLEY_SOCKET_MIN := 24
+const VALLEY_SOCKET_MAX := 30
 
 ## Spawn point sits this far above the top row, in cells.
 const SPAWN_OFFSET := 0.45

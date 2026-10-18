@@ -20,19 +20,22 @@ const RULES := preload("res://content/map_rules.gd")
 ## happened on about 0.1% of the roads of the old game board (22 by 16, one road, 2x2
 ## blocks: 2 of 3,000 seeds; not measured on 16 by 11), on about 0.4% with a detour
 ## (11 of 3,000), and often on small boards (20 by 14: 3% to 7%).
-static func place(map: GameMap) -> bool:
+## `least` and `most` bound the count for 2x2 blocks (the valley asks for more, #320).
+static func place(
+	map: GameMap, least: int = RULES.SOCKET_MIN, most_blocks: int = RULES.SOCKET_MAX
+) -> bool:
 	var rng := Rng.derive(map.seed, Streams.SOCKETS)
 	var candidates := _candidates(map)
 	_shuffle(candidates, rng)
-	var most: int = RULES.SOCKET_MAX_SINGLE_CELL if map.footprint == 1 else RULES.SOCKET_MAX
-	var target: int = RULES.SOCKET_MIN + rng.next_int(most - RULES.SOCKET_MIN + 1)
+	var most: int = RULES.SOCKET_MAX_SINGLE_CELL if map.footprint == 1 else most_blocks
+	var target: int = least + rng.next_int(most - least + 1)
 	var chosen: Array[Vector2i] = []
 	for cell in candidates:
 		if chosen.size() >= target:
 			break
 		if _keeps_distance(cell, chosen, map.footprint):
 			chosen.append(cell)
-	if chosen.size() < RULES.SOCKET_MIN:
+	if chosen.size() < least:
 		return false
 	chosen.sort_custom(_reading_order)
 	map.sockets = chosen
