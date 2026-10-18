@@ -153,6 +153,38 @@ func test_the_offset_glides_round_a_road_corner() -> void:
 	assert_lt(biggest, 0.1, "no jump of more than a tenth of a cell between ticks")
 
 
+func test_a_foe_that_turns_right_round_takes_the_new_heading() -> void:
+	var view := _drawn_view()
+	var foe := _foe(2, "scrapGoblin", 5.0, 2.0)
+	view.update(_game_with([foe] as Array[Foe], 1), 1.0)
+	foe.x += 0.1
+	view.update(_game_with([foe] as Array[Foe], 2), 1.0)
+	foe.x -= 0.1
+	view.update(_game_with([foe] as Array[Foe], 3), 1.0)
+	assert_lt((view._headings[2] as Vector2).x, 0.0, "now walking back")
+
+
+func test_a_flyer_glides_round_a_corner_too() -> void:
+	var view := _drawn_view()
+	var flyer := _foe(3, "razorMoth", 2.0, 2.0)
+	flyer.flying = true
+	var previous := Vector3.ZERO
+	var biggest := 0.0
+	for tick in 20:
+		if tick < 10:
+			flyer.x += 0.1
+		else:
+			flyer.y += 0.1
+		view.update(_game_with([flyer] as Array[Foe], tick + 1), 1.0)
+		var sim := BoardSpace.point_to_world(flyer.x, flyer.y)
+		var drawn := view.drawn_position("razorMoth", 0)
+		var offset := Vector3(drawn.x - sim.x, 0.0, drawn.z - sim.z)
+		if tick > 0:
+			biggest = maxf(biggest, offset.distance_to(previous))
+		previous = offset
+	assert_lt(biggest, 0.12)
+
+
 func test_headings_of_gone_foes_are_forgotten() -> void:
 	var view := _drawn_view()
 	var foe := _foe(5, "scrapGoblin", 2.0, 2.0)

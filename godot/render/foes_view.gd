@@ -40,10 +40,10 @@ const MODELS := {
 ## A foe that has not moved yet faces along the road, towards +x.
 const DEFAULT_YAW := PI / 2.0
 
-## Whether foes are moved by their `FoeSpread` offset (tests turn it off to read sim points).
 ## How much of the way to a new heading a foe turns each tick (a corner takes a few ticks).
 const HEADING_EASE := 0.2
 
+## Whether foes are moved by their `FoeSpread` offset (tests turn it off to read sim points).
 var spread_enabled := true
 
 var _multimeshes := {}
@@ -183,9 +183,13 @@ func _ease_headings(game: GameState) -> void:
 		if not _headings.has(foe.id):
 			_headings[foe.id] = raw
 			continue
-		var eased: Vector2 = (_headings[foe.id] as Vector2).lerp(raw, HEADING_EASE)
-		# a full turn about leaves nothing to ease towards: take the new way
-		_headings[foe.id] = eased.normalized() if eased.length_squared() > 1e-6 else raw
+		var old: Vector2 = _headings[foe.id]
+		# easing between opposite ways collapses back to the old one, so a reversal takes the
+		# new way at once (the sim's roads do not reverse; a knock-back could)
+		if old.dot(raw) < -0.5:
+			_headings[foe.id] = raw
+		else:
+			_headings[foe.id] = old.lerp(raw, HEADING_EASE).normalized()
 	for id in _headings.keys():
 		if not alive.has(id):
 			_headings.erase(id)
