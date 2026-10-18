@@ -1,9 +1,11 @@
 // The green self-healing cutting mat: a printed grid on the cell edges (and half-cell
 // lines inside the board), faint healed cuts, and a dark core on the cut edge of the mat.
+// Painted paper (painted.gdshaderinc), matte like the rest.
 shader_type spatial;
 
+#include "res://render/paper/painted.gdshaderinc"
+
 uniform vec2 board_half = vec2(8.0, 5.5);
-uniform sampler2D paper_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 uniform sampler2D cuts : hint_default_black, filter_linear_mipmap, repeat_enable;
 uniform vec3 mat_dark : source_color = vec3(0.10, 0.29, 0.21);
 uniform vec3 mat_light : source_color = vec3(0.13, 0.33, 0.24);
@@ -12,12 +14,8 @@ uniform vec3 line_minor : source_color = vec3(0.29, 0.48, 0.37);
 uniform vec3 cut_colour : source_color = vec3(0.25, 0.43, 0.33);
 uniform vec3 core_colour : source_color = vec3(0.06, 0.06, 0.07);
 
-varying vec3 world_pos;
-varying vec3 world_normal;
-
 void vertex() {
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	PAINTED_VERTEX
 }
 
 // 1 on a thin line where v is a whole number, anti-aliased by the screen-space slope
@@ -28,19 +26,17 @@ float grid_line(float v, float half_width) {
 }
 
 void fragment() {
-	vec2 g = world_pos.xz + board_half;
-	float inside = step(abs(world_pos.x), board_half.x - 0.01) * step(abs(world_pos.z), board_half.y - 0.01);
+	vec2 g = painted_world.xz + board_half;
+	float inside = step(abs(painted_world.x), board_half.x - 0.01) * step(abs(painted_world.z), board_half.y - 0.01);
 	float major = max(grid_line(g.x, 0.008), grid_line(g.y, 0.008));
 	float minor = max(grid_line(g.x * 2.0, 0.008), grid_line(g.y * 2.0, 0.008)) * inside;
-	vec4 n = texture(paper_noise, world_pos.xz * 0.37);
+	vec4 n = texture(paper_noise, painted_world.xz * 0.37);
 	vec3 col = mix(mat_dark, mat_light, n.b);
 	col = mix(col, line_minor, minor * 0.35);
 	col = mix(col, line_major, major * 0.8);
-	float cut = texture(cuts, world_pos.xz * 0.21).r * smoothstep(0.35, 0.65, n.g);
+	float cut = texture(cuts, painted_world.xz * 0.21).r * smoothstep(0.35, 0.65, n.g);
 	col = mix(col, cut_colour, cut * 0.5);
-	float side = 1.0 - smoothstep(0.5, 0.6, abs(world_normal.y));
-	vec3 side_col = mix(core_colour, mat_light, step(-0.035, world_pos.y));
-	ALBEDO = mix(col, side_col, side);
-	ROUGHNESS = 0.5 + n.b * 0.1;
-	SPECULAR = 0.35;
+	float side = 1.0 - smoothstep(0.5, 0.6, abs(painted_up.y));
+	vec3 side_col = mix(core_colour, mat_light, step(-0.035, painted_world.y));
+	PAINTED_PAPER(mix(col, side_col, side), 1.0)
 }

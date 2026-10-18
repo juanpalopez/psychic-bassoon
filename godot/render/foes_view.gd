@@ -28,8 +28,9 @@ const COLOURS := {
 const FALLBACK_COLOUR := Color("cccccc")
 ## The foes drawn with a model from `godot/assets/models/enemies` instead of a capsule
 ## (greybox models by the owner): its file and how tall it stands, in cells. A model is
-## scaled to that height with its feet on the road and faces +Z at yaw 0, keeps its own
-## materials and is darkened as the foe is hurt; a missing file leaves the capsule.
+## scaled to that height with its feet on the road and faces +Z at yaw 0, wears the painted
+## paper of `PaperLook` in its materials' colours (the instance colour multiplies it, so the
+## foe is darkened as it is hurt); a missing file leaves the capsule.
 const MODELS := {
 	"scrapGoblin": {"path": "res://assets/models/enemies/scrap_goblin.glb", "height": 0.8},
 	"corrugatedOrc": {"path": "res://assets/models/enemies/corrugated_orc.glb", "height": 1.2},
@@ -73,7 +74,9 @@ func _init(models: Dictionary = MODELS) -> void:
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.use_colors = true
-		var mesh := ModelLoader.mesh(models[type].path) if models.has(type) else null
+		var mesh := (
+			PaperLook.dress(ModelLoader.mesh(models[type].path)) if models.has(type) else null
+		)
 		if mesh != null:
 			var box := mesh.get_aabb()
 			var scale := float(models[type].height) / box.size.y
@@ -83,7 +86,6 @@ func _init(models: Dictionary = MODELS) -> void:
 				"foot": -box.position.y * scale,
 				"height": float(models[type].height),
 			}
-			_make_tintable(mesh)
 			multimesh.mesh = mesh
 		else:
 			var capsule := CapsuleMesh.new()
@@ -275,16 +277,3 @@ func update(game: GameState, alpha: float, hold: HitHold = null) -> void:
 	_bars.finish()
 	for type in _multimeshes:
 		(_multimeshes[type] as MultiMesh).visible_instance_count = _used[type]
-
-
-## Lets the instance colour tint the model's own materials (the instance colour is
-## white for a healthy foe and darker as it is hurt): each surface's material is
-## copied with `vertex_color_use_as_albedo`.
-static func _make_tintable(mesh: Mesh) -> void:
-	for surface in mesh.get_surface_count():
-		var material := mesh.surface_get_material(surface) as StandardMaterial3D
-		if material == null:
-			continue
-		var tintable := material.duplicate() as StandardMaterial3D
-		tintable.vertex_color_use_as_albedo = true
-		mesh.surface_set_material(surface, tintable)

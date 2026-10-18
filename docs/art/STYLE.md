@@ -53,7 +53,11 @@ The kingdom is a world the Grand Crafter folded out of paper and card. There is 
 | Planks / rope | `#b88a55` / `#8a6a45` |
 | Sun / sky | `#ffd9a8` / `#b9cbe0` |
 | Warm haze | `#c7bdb3` |
-| Magic | cool cyan (to be picked in #327; must glow against `#ffd9a8` light) and the Blot's purple |
+| Magic | cool cyan `#5ff0ff` (#327; it glows against the `#ffd9a8` light) and the Blot's purple (a model's own glow colour) |
+
+## Materials
+
+The shared shader family lives in `godot/render/paper/` (#327). `painted.gdshaderinc` holds the painted light every lit look includes: a custom `light()` that tints the lit side warm (`light_warm`, the sun) and fills the shadow side cool (`shade_cool`, the sky), with wrap lighting and a smooth ramp instead of bands; no specular and no reflections; fibre and a broad wash in the albedo; darker folds between facets and a darker cut edge; and contact shading from the caller's baked value times a darkening at the foot of upright faces. `painted.gdshader` is the generic surface (vertex colour times `tint` times an optional `albedo_map`, contact from the vertex alpha or a map on UV2) for terrain and props, and `painted_magic.gdshader` is the cool emissive variant for magic. The older looks (`paper_vc`, `craft_vc`, `paper_prop`, the card and desk looks) include the same light. Blender materials named `PK_Painted` and `PK_Magic` ask for the two new shaders; any other imported material becomes painted paper in its colour, or magic in its emission colour when it glows (`PaperLook`). The colours are `source_color` uniforms with this palette as their defaults.
 
 ## Renderers
 

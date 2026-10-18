@@ -58,8 +58,10 @@ func test_a_hurt_model_is_tinted_through_the_instance_colour() -> void:
 	assert_lt(view.drawn_colour("corrugatedOrc", 1).v, 0.9)
 	var mesh := view.mesh_of("corrugatedOrc")
 	for surface in mesh.get_surface_count():
-		var material := mesh.surface_get_material(surface) as StandardMaterial3D
-		assert_true(material.vertex_color_use_as_albedo, "surface %d" % surface)
+		# the painted paper multiplies its colour by COLOR, which carries the instance colour
+		var material := mesh.surface_get_material(surface) as ShaderMaterial
+		assert_not_null(material, "surface %d wears the painted paper" % surface)
+		assert_true(material.shader.code.contains("COLOR.rgb"), "surface %d" % surface)
 
 
 func test_a_missing_model_file_falls_back_to_a_capsule() -> void:
