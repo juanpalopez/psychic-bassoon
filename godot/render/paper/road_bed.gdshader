@@ -3,11 +3,12 @@
 // -1 at one outer edge through 0 in the middle to 1 at the other (the Heartstone's yard gives the
 // distance out from its middle, 0 to 1). The flagstones are laid in world space, so the bed and
 // the yard share one paving. Nothing reads the screen, so Compatibility, Mobile and Forward+ draw
-// it the same; a few mixes and one noise read a pixel.
+// it the same; a few mixes and one noise read a pixel. It is lit as the painted paper every lit
+// surface shares (painted.gdshaderinc) and fades into the haze past the map like the terrain.
 shader_type spatial;
-render_mode cull_disabled;
 
-uniform sampler2D paper_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
+#include "res://render/paper/painted.gdshaderinc"
+#include "res://render/paper/haze.gdshaderinc"
 
 group_uniforms road;
 // The sand, its worn edge, the joints between flagstones and the lip's outer face, where the bed
@@ -24,20 +25,13 @@ uniform float wear_to : hint_range(0.0, 1.0) = 0.86;
 uniform float stone_size = 0.27;
 uniform float joints : hint_range(0.0, 1.0) = 0.6;
 uniform float stone_tone : hint_range(0.0, 0.3) = 0.09;
-uniform float fibre : hint_range(0.0, 0.5) = 0.08;
-
-group_uniforms light;
-// The same warm sun and cool fill as the painted paper (STYLE.md: sun #ffd9a8, sky #b9cbe0).
-uniform vec3 light_warm : source_color = vec3(1.0, 0.851, 0.659);
-uniform vec3 shade_cool : source_color = vec3(0.725, 0.796, 0.878);
-uniform float warmth : hint_range(0.0, 1.0) = 0.3;
-uniform float wrap : hint_range(0.0, 1.0) = 0.45;
 group_uniforms;
 
 varying vec3 world_pos;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
+	PAINTED_VERTEX
 }
 
 float hash(vec2 p) {
@@ -46,7 +40,6 @@ float hash(vec2 p) {
 
 void fragment() {
 	float across = abs(UV.y);
-	vec4 n = texture(paper_noise, world_pos.xz * 0.9);
 	vec4 broad = texture(paper_noise, world_pos.xz * 0.11 + vec2(0.31, 0.77));
 	// a worn edge that wanders a little
 	float wear = smoothstep(wear_from, wear_to, across + (broad.g - 0.5) * 0.15);
@@ -66,17 +59,6 @@ void fragment() {
 	colour = mix(colour, joint_colour, joint);
 	// the lip's outer face, past its crest
 	colour = mix(colour, lip_colour, smoothstep(0.95, 1.0, across));
-	colour *= 1.0 + fibre * (n.b - 0.5);
-	ALBEDO = colour;
-	ROUGHNESS = 1.0;
-	SPECULAR = 0.0;
-}
-
-void light() {
-	float lit = smoothstep(0.0, 1.0, clamp((dot(NORMAL, LIGHT) + wrap) / (1.0 + wrap), 0.0, 1.0));
-	vec3 tint = mix(vec3(1.0), light_warm, warmth);
-	DIFFUSE_LIGHT += lit * ATTENUATION * LIGHT_COLOR * tint / PI;
-	if (LIGHT_IS_DIRECTIONAL) {
-		DIFFUSE_LIGHT += (1.0 - lit * ATTENUATION) * shade_cool * 0.18 * LIGHT_COLOR / PI;
-	}
+	PAINTED_PAPER(colour, 1.0, 0.0)
+	HAZE_FOG(painted_world)
 }
