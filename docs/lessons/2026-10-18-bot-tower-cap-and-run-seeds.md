@@ -16,7 +16,7 @@ The valley has 24 to 30 sockets (mean 26.2 over seeds 1 to 8). The bot fills eve
 - `test_the_scripted_bot_wins_a_20_wave_run` plays mix seed 3 (won with all 20 Heartstone health).
 
 ## Alternatives considered
-- No cap: the bot plays the valley as a weaker player than on 16x11, which skews the #237 sweep.
+- No cap: measured for the #342 review, the bot wins 0 of 8 with the Mortar and the guard mix and 1 with the Mix (5 with the cap), a weaker player than on 16x11, which skews the #237 sweep. A cap of 13 plays like 15 (same wins).
 - Keep seed 4 in CI and lower the bar: the check needs a whole 20-wave game to time.
 
 ## Consequences

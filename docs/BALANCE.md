@@ -383,15 +383,27 @@ The join point first drifted late on the main road, so the second road met the f
 
 Owner decision (`docs/lessons/2026-10-18-valley-map.md`): the board is 32 by 20 cells and the camera pans across it. Boards at least `VALLEY_MIN_COLS` (24) wide use a valley road shape (`godot/content/map_rules.gd`: straight runs of 3 to 5 cells, sideways turns of 3 to 8 columns, at least 24 cells more than the board is wide) and 24 to 30 sockets; the 16 by 11 board and the fixtures' boards keep the classic numbers. The bot builds at most `MAX_TOWERS` (15, the most sockets the 16 by 11 board had) before it upgrades, so it does not spread its Buttons over twice the towers. No foe, tower or wave number changed; the balance pass for the bigger board is #237.
 
-**Sweep** (seeds 1 to 8, 20 waves, all five strategies; median as the tool prints it, the upper of the middle two; raw files `docs/balance/valley-map-before-16x11-seeds-1-8.txt` from `main` at 5d02ab5 and `docs/balance/valley-map-32x20-seeds-1-8.txt`, commands in their headers). Mean main road: 43.9 cells on 16 by 11, 75.0 on the valley; mean sockets 12.9 and 26.2.
+**Sweep** (seeds 1 to 8, 20 waves, all five strategies). Four runs: `main` at 5d02ab5 (16 by 11), and the valley with the bot's cap at 15 (this change), at 13 (the 16 by 11 board's mean socket count) and with no cap (the bot fills every socket before it upgrades, as it did on 16 by 11). Raw files, commands in their headers: `docs/balance/valley-map-before-16x11-seeds-1-8.txt`, `valley-map-32x20-seeds-1-8.txt`, `valley-map-32x20-cap13-seeds-1-8.txt`, `valley-map-32x20-nocap-seeds-1-8.txt`. Mean main road: 43.9 cells on 16 by 11, 75.0 on the valley; mean sockets 12.9 and 26.2. The tool's own "median waves cleared" line is the upper of the middle two; the tables below use the true median.
 
-| Profile | Median waves 16x11 | Median waves 32x20 | Wins of 8, 16x11 | Wins of 8, 32x20 | Leaks per cleared wave, 16x11 | Leaks per cleared wave, 32x20 | Mean wave clear 16x11 (s) | Mean wave clear 32x20 (s) | Towers at the end, 32x20 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| spoolOnly | 19 | 20 | 3 | 7 | 0.52 | 0.22 | 45.7 | 66.5 | 26.2 |
-| mortarHeavy | 17 | 17 | 1 | 1 | 0.73 | 0.94 | 54.4 | 82.3 | 17.0 |
-| prismHeavy | 19 | 20 | 2 | 5 | 0.60 | 0.48 | 51.0 | 74.8 | 20.4 |
-| mix | 20 | 20 | 5 | 5 | 0.48 | 0.50 | 51.3 | 75.3 | 21.6 |
-| guardMix | 20 | 17 | 4 | 3 | 0.45 | 0.77 | 55.8 | 84.7 | 18.0 |
+Waves cleared, min / median / max over the 8 seeds, and wins (20 waves cleared) of 8:
+
+| Profile | 16x11 | 32x20, cap 15 (chosen) | 32x20, cap 13 | 32x20, no cap |
+| --- | --- | --- | --- | --- |
+| spoolOnly | 17 / 19 / 20, 3 wins | 18 / 20 / 20, 7 wins | 18 / 20 / 20, 7 wins | 14 / 20 / 20, 6 wins |
+| mortarHeavy | 9 / 17 / 20, 1 win | 9 / 14.5 / 20, 1 win | 9 / 16.5 / 20, 1 win | 9 / 10 / 13, 0 wins |
+| prismHeavy | 13 / 19 / 20, 2 wins | 14 / 20 / 20, 5 wins | 14 / 20 / 20, 5 wins | 10 / 14 / 20, 2 wins |
+| mix | 16 / 20 / 20, 5 wins | 13 / 20 / 20, 5 wins | 14 / 20 / 20, 6 wins | 10 / 13.5 / 20, 1 win |
+| guardMix | 14 / 18.5 / 20, 4 wins | 9 / 16 / 20, 3 wins | 9 / 17 / 20, 3 wins | 9 / 10.5 / 14, 0 wins |
+
+Leaks per cleared wave, mean seconds to clear a wave, and mean towers at the end:
+
+| Profile | 16x11 | 32x20, cap 15 (chosen) | 32x20, cap 13 | 32x20, no cap |
+| --- | --- | --- | --- | --- |
+| spoolOnly | 0.52, 46 s, 12.9 | 0.22, 66 s, 26.2 | 0.22, 65 s, 26.2 | 0.25, 78 s, 26.2 |
+| mortarHeavy | 0.73, 54 s, 12.9 | 0.94, 82 s, 17.0 | 0.81, 81 s, 16.0 | 1.07, 87 s, 22.9 |
+| prismHeavy | 0.60, 51 s, 12.9 | 0.48, 75 s, 20.4 | 0.45, 73 s, 20.2 | 0.76, 82 s, 25.5 |
+| mix | 0.48, 51 s, 12.9 | 0.50, 75 s, 21.6 | 0.46, 73 s, 21.4 | 0.66, 87 s, 25.9 |
+| guardMix | 0.45, 56 s, 12.9 | 0.77, 85 s, 18.0 | 0.71, 81 s, 17.2 | 0.98, 88 s, 24.1 |
 
 Per wave, over all five strategies (the runs still alive at that wave):
 
@@ -418,6 +430,14 @@ Per wave, over all five strategies (the runs still alive at that wave):
 | 19 | 76 | 81 | 1.73 | 0.48 | 22 | 23 |
 | 20 | 112 | 114 | 3.73 | 0.10 | 15 | 21 |
 
-**What it says** (for #237): the road is 1.7 times as long and a wave takes about 1.5 times as long to clear (a won run is 19 to 30 minutes of play, from 14 to 24). The Spool Guard alone got easier (7 of 8 wins: twice the sockets, and more road in each tower's reach) and so did the Prism Spire (5 of 8); the Mortar and the guard mix got harder: 7 of their 12 losses fall at waves 10 to 13 (leaks per wave at waves 11 to 13 rose two- to fivefold), and their lost runs end on the 15-tower cap with most towers still at level 1 (levels 0/1/2 of 1/14/0, 8/7/0, 11/4/0 for the Mortar). The Mix holds at 5 of 8. Late-wave leaks fell: the runs that get that far have 20 or more towers.
+**What it says** (for #237):
 
-The CI game-time check now plays the guard mix on seed 2 (a win on the valley; seed 4 falls at wave 16). It takes about 15 s of CPU in the agents' container, against 9 s for seed 4 on 16 by 11. The replay goldens were re-recorded once for the board (`godot/tests/goldens/README.md`); the scripted-bot win test plays the mix on seed 3 (a win with all 20 Heartstone health; seed 7 now falls at wave 14).
+- **The Thimble Mortar and the guard mix got worse on the valley.** Their true medians fell from 17 to 14.5 and from 18.5 to 16, and the guard mix wins 3 of 8 instead of 4. On seeds 6, 7 and 8 both clear only 9 to 12 waves, ending on the 15-tower cap with most towers still at their first or second level; 7 of their 12 losses fall at waves 10 to 13, where leaks per wave rose two- to fivefold.
+- **The Spool Guard and the Prism Spire got easier** (7 and 5 wins of 8, from 3 and 2), and the Mix holds at 5.
+- **The cap separates from the board this way:**
+  - Without a cap the bot does much worse on the valley, in four strategies of five (the Spool Guard alone still wins 6). The Mortar and the guard mix build 18 to 27 towers, almost all at their first level, and clear only 9 to 14 waves (no win). So the bot's old rule, not the board alone, would have made the valley look far harder.
+  - Between caps of 13 and 15 the results barely move. The Mortar's median is 16.5 against 14.5 and the guard mix's 17 against 16, with the same wins.
+  - So the drop of the Mortar and the guard mix comes with the board, not with the cap's value: with either cap they win the same seeds, and both fall at wave 10 on seed 6. The cap is still a suspect for #237: a cap that follows the map, or a smarter build-or-upgrade rule, may suit the expensive towers better.
+- **A wave takes about 1.5 times as long to clear** (the road is 1.7 times as long). A won run is 19 to 30 minutes of play, from 14 to 24. Late-wave leaks fell: the runs that get that far have 20 or more towers.
+
+The CI game-time check now plays the guard mix on seed 2 (a win on the valley; seed 4 falls at wave 16). It took 13 s on the GitHub runner (14.5 s of CPU in the agents' container, against 8.7 s for seed 4 on 16 by 11). The replay goldens were re-recorded once for the board (`godot/tests/goldens/README.md`); the scripted-bot win test plays the mix on seed 3 (a win with all 20 Heartstone health; seed 7 now falls at wave 14).
