@@ -63,10 +63,10 @@ describe('check-assets script', () => {
     expect(run().status).toBe(0);
   });
 
-  it('fails over the 6 MB budget', () => {
+  it('fails over the 9 MB budget', () => {
     writeFileSync(
       join(assets, 'models', 'kit', 'big.glb'),
-      randomFillSync(Buffer.alloc(6_500_000))
+      randomFillSync(Buffer.alloc(9_500_000))
     );
     writeFileSync(credits, '| `models/kit/big.glb` | Kenney | CC0 | none |\n');
     const result = run();

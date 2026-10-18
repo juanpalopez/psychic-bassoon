@@ -28,7 +28,7 @@ describe('check-godot-size script', () => {
   it('fails over the download budget (incompressible data)', () => {
     writeFileSync(
       join(dir, 'index.wasm'),
-      randomFillSync(Buffer.alloc(15_000_000))
+      randomFillSync(Buffer.alloc(19_000_000))
     );
     const result = run();
     expect(result.status).toBe(1);

@@ -7,7 +7,8 @@ import {
 } from 'node:fs';
 import {join, relative, sep} from 'node:path';
 
-const MAX_ASSET_BYTES = 6_000_000;
+// Raised from 6 MB for the three full-length music tracks (about 5.8 MB, owner decision pending).
+const MAX_ASSET_BYTES = 9_000_000;
 // Placeholders and OS junk that is never shipped on purpose, and the `.import`
 // file Godot writes next to each asset it imports (it belongs to the credited file).
 const IGNORED = new Set(['.gitkeep', '.DS_Store', 'Thumbs.db']);

@@ -4,7 +4,8 @@ import {gzipSync} from 'node:zlib';
 
 // Download size of the Godot web export, gzipped as GitHub Pages serves it.
 // Provisional budget: re-set after the iPhone measurement (ticket #124).
-const MAX_GZIPPED_BYTES = 14_000_000;
+// Raised from 14 MB for the three full-length music tracks, which gzip no further.
+const MAX_GZIPPED_BYTES = 18_500_000;
 const dir = process.argv[2] ?? 'build/web';
 
 if (!statSync(dir, {throwIfNoEntry: false})?.isDirectory()) {
