@@ -1,8 +1,22 @@
 ## The quality setting: a phone gets the phone default and a desktop everything, a command-line
-## argument overrides either, and the phone default turns the costly passes off.
+## argument overrides either, the lower levels turn the costly passes off, and the game wires it
+## in.
 extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
+
+
+func after_each() -> void:
+	# apply() sets the renderer's global depth of field and shadow filter
+	RenderQuality.reset_globals()
+
+
+## The game at `level`, after its _ready.
+func _main_at(level: RenderQuality.Level) -> Node:
+	var main := MAIN_SCENE.instantiate()
+	main.render_quality = level
+	add_child_autofree(main)
+	return main
 
 
 func _scene_environment() -> Environment:
@@ -33,10 +47,19 @@ func test_the_command_line_overrides_the_platform() -> void:
 		RenderQuality.Level.PHONE
 	)
 	assert_eq(
+		RenderQuality.choose(phone, PackedStringArray(["--quality=low"])), RenderQuality.Level.LOW
+	)
+	assert_eq(
 		RenderQuality.choose(phone, PackedStringArray(["--quality=ultra"])),
 		RenderQuality.Level.PHONE,
 		"an unknown level is ignored"
 	)
+
+
+func test_this_desktop_reads_as_high() -> void:
+	# the suite runs on a desktop (or CI's Linux) with no --quality argument
+	assert_eq(RenderQuality.platform_features(), [] as Array[String])
+	assert_eq(RenderQuality.from_platform(), RenderQuality.Level.HIGH)
 
 
 func test_the_phone_default_turns_the_costly_passes_off() -> void:
@@ -49,13 +72,36 @@ func test_the_phone_default_turns_the_costly_passes_off() -> void:
 	autofree(sun)
 	sun.light_angular_distance = 1.5
 	sun.shadow_blur = 1.0
-	RenderQuality.apply(RenderQuality.Level.PHONE, environment, sun)
+	var attributes := CameraAttributesPractical.new()
+	attributes.dof_blur_far_enabled = true
+	attributes.dof_blur_amount = 0.1
+	RenderQuality.apply(RenderQuality.Level.PHONE, environment, sun, attributes)
 	assert_false(environment.ssao_enabled, "no SSAO")
 	assert_false(environment.ssil_enabled, "no SSIL")
 	assert_eq(sun.light_angular_distance, 0.0, "no soft-shadow search")
 	assert_gt(sun.shadow_blur, 1.0, "a wider cheap blur instead")
 	assert_true(environment.glow_enabled, "glow stays for the magic")
 	assert_true(environment.fog_enabled, "the haze stays")
+	assert_true(attributes.dof_blur_far_enabled, "the tilt-shift stays")
+	assert_lt(attributes.dof_blur_amount, 0.1, "but lighter")
+
+
+func test_low_also_drops_the_tilt_shift_and_the_glow() -> void:
+	var environment := Environment.new()
+	environment.glow_enabled = true
+	environment.fog_enabled = true
+	var sun := DirectionalLight3D.new()
+	autofree(sun)
+	sun.light_angular_distance = 1.5
+	var attributes := CameraAttributesPractical.new()
+	attributes.dof_blur_far_enabled = true
+	attributes.dof_blur_near_enabled = true
+	RenderQuality.apply(RenderQuality.Level.LOW, environment, sun, attributes)
+	assert_false(environment.glow_enabled)
+	assert_false(attributes.dof_blur_far_enabled)
+	assert_false(attributes.dof_blur_near_enabled)
+	assert_eq(sun.light_angular_distance, 0.0)
+	assert_true(environment.fog_enabled, "the haze is cheap and stays")
 
 
 func test_high_keeps_what_the_scene_set_up() -> void:
@@ -63,10 +109,28 @@ func test_high_keeps_what_the_scene_set_up() -> void:
 	var sun := DirectionalLight3D.new()
 	autofree(sun)
 	sun.light_angular_distance = 1.5
-	RenderQuality.apply(RenderQuality.Level.HIGH, environment, sun)
+	var attributes := CameraAttributesPractical.new()
+	attributes.dof_blur_amount = 0.1
+	RenderQuality.apply(RenderQuality.Level.HIGH, environment, sun, attributes)
 	assert_true(environment.ssao_enabled)
 	assert_true(environment.ssil_enabled)
 	assert_eq(sun.light_angular_distance, 1.5)
+	assert_almost_eq(attributes.dof_blur_amount, 0.1, 1e-6)
+
+
+func test_the_game_applies_the_phone_default_when_it_starts() -> void:
+	var main := _main_at(RenderQuality.Level.PHONE)
+	var environment := (main.get_node("WorldEnvironment") as WorldEnvironment).environment
+	assert_false(environment.ssao_enabled, "no SSAO after _ready")
+	assert_eq((main.get_node("Sun") as DirectionalLight3D).light_angular_distance, 0.0)
+
+
+func test_a_phone_game_leaves_the_next_game_its_own_scene() -> void:
+	_main_at(RenderQuality.Level.PHONE)
+	var main := _main_at(RenderQuality.Level.HIGH)
+	var environment := (main.get_node("WorldEnvironment") as WorldEnvironment).environment
+	assert_true(environment.ssao_enabled, "the Environment is not shared between games")
+	assert_gt((main.get_node("Sun") as DirectionalLight3D).light_angular_distance, 0.0)
 
 
 func test_the_scene_sets_up_the_diorama_light_and_post() -> void:

@@ -27,6 +27,9 @@ const PAN_GESTURE_PIXELS := 12.0
 ## Points per canvas pixel for the 44 pt rule; 0 reads them from the display. Tests set the
 ## phone's, because a headless run has no display.
 var points_per_pixel := 0.0
+## The render quality (a `RenderQuality.Level`); below 0 asks the platform. A test sets it
+## before the scene enters the tree.
+var render_quality: int = -1
 
 var _game: GameState
 var _clock := Clock.new()
@@ -85,7 +88,8 @@ var _zoom_seen := 0.0
 
 
 func _ready() -> void:
-	RenderQuality.apply(RenderQuality.from_platform(), _world.environment, _sun)
+	var level: int = RenderQuality.from_platform() if render_quality < 0 else render_quality
+	RenderQuality.apply(level as RenderQuality.Level, _world.environment, _sun, _tilt_shift())
 	var from_url: Variant = _seed_from_url()
 	_rig.flight_ended.connect(_on_flight_ended)
 	_start(from_url if from_url is int else _board.map_seed)
@@ -149,7 +153,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_lens.follow(_camera, _world.environment, _world.camera_attributes as CameraAttributesPractical)
+	_lens.follow(_camera, _world.environment, _tilt_shift())
 	var ticks_speed := _speed.ticks_speed()
 	# Auto start counts game time, so it holds while paused, runs faster at 2x and 3x, and
 	# a slow frame counts no more than the clock lets the game run
@@ -187,6 +191,10 @@ func _process(delta: float) -> void:
 		_game_over.show_for(_game.wave)
 	else:
 		_game_over.close()
+
+
+func _tilt_shift() -> CameraAttributesPractical:
+	return _world.camera_attributes as CameraAttributesPractical
 
 
 ## The first pointer is the mouse, or the first finger (Godot turns a touch into

@@ -27,6 +27,7 @@ colors = PackedColorArray(0, 0, 0.018, 1, 0.265, 0.256, 0.2545, 1, 0.53, 0.512, 
 gradient = SubResource("Gradient_grade")
 
 [sub_resource type="Environment" id="Environment_diorama"]
+resource_local_to_scene = true
 background_mode = 1
 background_color = Color(0.78, 0.741, 0.702, 1)
 ambient_light_source = 2
@@ -69,6 +70,7 @@ adjustment_saturation = 1.12
 adjustment_color_correction = SubResource("GradientTexture1D_grade")
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributes_tiltshift"]
+resource_local_to_scene = true
 dof_blur_far_enabled = true
 dof_blur_far_distance = 55.0
 dof_blur_far_transition = 5.0
