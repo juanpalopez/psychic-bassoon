@@ -422,6 +422,7 @@ func _tell_intro(event: GameEvent) -> void:
 ## The phone check tops the crowd up before each tick.
 func _before_tick(game: GameState) -> void:
 	Stress.top_up(game, _stress_foes)
+	_hold.before_tick(game)
 
 
 ## Turns on the phone check from the page: `?stress=80` and `?fps`.
@@ -453,6 +454,7 @@ func _after_tick(game: GameState) -> void:
 			_towers.act(event.tower_id, "deploy")
 		elif event.kind == GameEvent.Kind.FOE_LEAKED:
 			_hold.release(event.foe_id)
+	_hold.after_tick(game)
 
 
 ## Draws the shot a tower fired this tick, from the tower to where its target stood, and
@@ -465,7 +467,8 @@ func _draw_shot(game: GameState, event: GameEvent) -> void:
 			var to := ShotsView.body_point(event.x, event.y)
 			var kind := ShotsView.kind_for(tower.type)
 			_shots.add_shot(from, to, event.splash, kind)
-			_hold.hold(game, event, ShotsView.landing_of(kind, from, to))
+			if not from.is_equal_approx(to):
+				_hold.hold(event, ShotsView.landing_of(kind, from, to))
 			return
 
 
