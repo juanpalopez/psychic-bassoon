@@ -25,6 +25,10 @@ const CAMERA_NEAR := 1.0
 const MIN_ASPECT := 0.5
 ## The turn about the vertical axis (degrees): the camera sits to the +x side of the target.
 const YAW_DEGREES := 40.0
+## The share of the screen (about its centre) that must stay over the board when panning.
+const SCREEN_SHARE_OVER_BOARD := 0.5
+## The zoom at which the pans are fully open; below it they narrow toward 0 (the whole board).
+const PAN_RAMP_ZOOM := 0.05
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
 const MAX_PITCH := 62.0
 const MIN_PITCH := 56.0
@@ -127,14 +131,15 @@ static func closest_distance(fov_degrees: float, viewport_height: float, fit: fl
 
 ## The part of the ground the screen shows when the camera targets the middle of the board
 ## (pan 0) and is turned by `yaw_degrees`: the box around where the four corners of the screen
-## meet the ground. A pan moves the whole footprint, so a box is exact for keeping its corners
-## over the board.
+## meet the ground. `share` shrinks the screen about its centre first (0.5 is the inner half).
+## A pan moves the whole footprint, so a box is exact for keeping its corners over the board.
 static func footprint(
 	distance: float,
 	pitch_degrees: float,
 	fov_degrees_value: float,
 	aspect: float,
-	yaw_degrees: float = 0.0
+	yaw_degrees: float = 0.0,
+	share: float = 1.0
 ) -> Rect2:
 	var pitch := deg_to_rad(pitch_degrees)
 	var turn := Basis(Vector3.UP, deg_to_rad(yaw_degrees))
@@ -144,7 +149,9 @@ static func footprint(
 	var low := Vector2(INF, INF)
 	var high := Vector2(-INF, -INF)
 	for corner in [Vector2(-1.0, -1.0), Vector2(1.0, -1.0), Vector2(-1.0, 1.0), Vector2(1.0, 1.0)]:
-		var direction := basis * Vector3(corner.x * tan_v * aspect, corner.y * tan_v, -1.0)
+		var direction := (
+			basis * Vector3(corner.x * share * tan_v * aspect, corner.y * share * tan_v, -1.0)
+		)
 		if direction.y >= -1e-6:
 			continue
 		var hit := position + direction * (-position.y / direction.y)
@@ -153,18 +160,36 @@ static func footprint(
 	return Rect2(low, high - low)
 
 
-## The pans (the camera target, x and z) that keep the whole screen over the board: the board's
-## half size less what the screen shows each way. An axis where the screen shows more than the
-## board has nothing to pan, so its range is the single point 0.
+## The pans (the camera target, x and z) that keep a footprint over the board: the board's
+## half size less what the footprint covers each way. An axis where the footprint is larger than
+## the board has no range that fits, so it collapses to the midpoint of the two limits (not to 0,
+## so the pan stays continuous as the zoom changes).
 static func pan_bounds(board_half: Vector2, foot: Rect2) -> Rect2:
 	var low := -board_half - foot.position
 	var high := board_half - foot.end
 	if low.x > high.x:
-		low.x = 0.0
-		high.x = 0.0
+		low.x = (low.x + high.x) / 2.0
+		high.x = low.x
 	if low.y > high.y:
-		low.y = 0.0
-		high.y = 0.0
+		low.y = (low.y + high.y) / 2.0
+		high.y = low.y
+	return Rect2(low, high - low)
+
+
+## The pans narrowed for a zoom: all of `bounds` from `PAN_RAMP_ZOOM` up, shrinking toward 0 (the
+## pan the fit is made for, so the whole board is in view) as the zoom falls to 0. A collapsed
+## axis (no room that fits) thus moves smoothly from 0 to its midpoint instead of jumping.
+static func pan_ramp(bounds: Rect2, zoom_value: float) -> Rect2:
+	var ease := clampf(zoom_value / PAN_RAMP_ZOOM, 0.0, 1.0)
+	var low := bounds.position * ease
+	var high := bounds.end * ease
+	# an axis with room keeps to its limits even when 0 is not among them
+	if bounds.size.x > 0.0:
+		low.x = clampf(low.x, bounds.position.x, bounds.end.x)
+		high.x = clampf(high.x, bounds.position.x, bounds.end.x)
+	if bounds.size.y > 0.0:
+		low.y = clampf(low.y, bounds.position.y, bounds.end.y)
+		high.y = clampf(high.y, bounds.position.y, bounds.end.y)
 	return Rect2(low, high - low)
 
 
@@ -250,14 +275,17 @@ func ground_under(pixel: Vector2) -> Vector2:
 	return Vector2(hit.x, hit.z)
 
 
-## The pans allowed now: the whole screen stays over the board.
+## The pans allowed now: the inner `SCREEN_SHARE_OVER_BOARD` of the screen stays over the board,
+## so the board's outer rows can come to the middle of the screen and desk shows only at its edges.
 func pan_range() -> Rect2:
 	# the range only changes with the zoom, the screen shape, the fit and the canvas height
 	var key := Vector4(zoom, _aspect, _fit, canvas_height)
 	if key != _range_key:
 		_range_key = key
-		var foot := footprint(_distance(), pitch_for(zoom), fov_degrees, _aspect, YAW_DEGREES)
-		_range = pan_bounds(BoardSpace.size() / 2.0, foot)
+		var foot := footprint(
+			_distance(), pitch_for(zoom), fov_degrees, _aspect, YAW_DEGREES, SCREEN_SHARE_OVER_BOARD
+		)
+		_range = pan_ramp(pan_bounds(BoardSpace.size() / 2.0, foot), zoom)
 	return _range
 
 

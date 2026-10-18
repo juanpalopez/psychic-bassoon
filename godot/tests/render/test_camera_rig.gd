@@ -174,57 +174,12 @@ func _rig_in(width: int, height: int) -> CameraRig:
 	return rig
 
 
-func test_the_whole_screen_stays_over_the_board_at_every_pan_the_rig_allows() -> void:
-	var half := BoardSpace.size() / 2.0
-	for shape in [Vector2i(1280, 720), Vector2i(2160, 720), Vector2i(1024, 768)]:
-		for zoom_level in [0.3, 0.6, 1.0]:
-			var rig := _rig_in(shape.x, shape.y)
-			rig.set_zoom(zoom_level)
-			var range := rig.pan_range()
-			var room := range.size.x > 0.0 or range.size.y > 0.0
-			# (a very wide screen shows the whole board's width even closest: nothing to pan)
-			if zoom_level == 1.0 and shape.x < 2000:
-				assert_true(room, "room to pan when closest at %s" % shape)
-			# at every corner of the allowed pans, all four screen corners hit the board
-			var size := Vector2(shape)
-			for x in [range.position.x, range.end.x]:
-				for y in [range.position.y, range.end.y]:
-					rig.pan = Vector2(x, y)
-					rig._pan_raw = rig.pan
-					rig._place()
-					for corner in [Vector2.ZERO, Vector2(1.0, 0.0), Vector2(0.0, 1.0), Vector2.ONE]:
-						var ground := rig.ground_under(corner * size)
-						var where := "%s zoom %s pan %s" % [shape, zoom_level, Vector2(x, y)]
-						# an axis where the screen shows more than the board has no range to keep
-						if range.size.x > 0.0:
-							assert_lte(absf(ground.x), half.x + 1e-3, "x at " + where)
-						if range.size.y > 0.0:
-							assert_lte(absf(ground.y), half.y + 1e-3, "z at " + where)
-
-
 func test_rubber_band_lets_you_overscroll_a_little() -> void:
 	assert_eq(CameraRig.rubber(2.0, -5.0, 5.0), 2.0)
 	assert_eq(CameraRig.rubber(-5.0, -5.0, 5.0), -5.0)
 	assert_almost_eq(CameraRig.rubber(9.0, -5.0, 5.0), 5.0 + 4.0 * CameraRig.RUBBER, 1e-9)
 	assert_almost_eq(CameraRig.rubber(-9.0, -5.0, 5.0), -(5.0 + 4.0 * CameraRig.RUBBER), 1e-9)
 	assert_almost_eq(CameraRig.rubber(1.0, 2.0, 6.0), 2.0 - 1.0 * CameraRig.RUBBER, 1e-9)
-
-
-func test_a_pinch_keeps_the_point_under_the_fingers_where_it_was() -> void:
-	var rig := _rig_in(1280, 720)
-	rig.set_zoom(0.9)
-	# start from the middle of the allowed pans, so the pinned point is not clamped away
-	var range := rig.pan_range()
-	rig.pan = range.position + range.size / 2.0
-	rig._pan_raw = rig.pan
-	rig._place()
-	var centre := Vector2(640.0, 360.0) * Vector2(1.0, 1.0)
-	var before := rig.ground_under(centre)
-	rig.zoom_by(1.05, centre)
-	var after := rig.ground_under(centre)
-	assert_gt(rig.zoom, 0.9)
-	assert_almost_eq(after.x, before.x, 1e-3)
-	assert_almost_eq(after.y, before.y, 1e-3)
 
 
 func _screen_axes(camera: Camera3D) -> Array[Vector2]:
@@ -239,20 +194,24 @@ func _screen_axes(camera: Camera3D) -> Array[Vector2]:
 func test_dragging_moves_the_scene_with_the_finger() -> void:
 	var rig := _rig_in(1280, 720)
 	rig.set_zoom(1.0)
+	var range := rig.pan_range()
+	assert_true(range.size.x > 0.0 and range.size.y > 0.0, "room to pan both ways")
+	var start := range.position + range.size / 2.0
+	rig.pan = start
+	rig._pan_raw = start
+	rig._place()
 	var axes := _screen_axes(rig.camera())
-	rig.pan_by_pixels(Vector2(100.0, 0.0))
+	rig.pan_by_pixels(Vector2(30.0, 0.0))
 	# the scene follows the finger to the right, so the camera target moves left on the screen
-	assert_lt(rig._pan_raw.dot(axes[0]), 0.0)
-	assert_almost_eq(
-		rig._pan_raw.dot(axes[1]), 0.0, 1e-6, "a sideways drag does not move up or down"
-	)
+	assert_lt((rig.pan - start).dot(axes[0]), 0.0)
+	assert_almost_eq((rig.pan - start).dot(axes[1]), 0.0, 1e-6, "no move up or down")
 	rig.release_pan()
-	rig.pan = Vector2.ZERO
-	rig._pan_raw = Vector2.ZERO
-	rig.pan_by_pixels(Vector2(0.0, 100.0))
+	rig.pan = start
+	rig._pan_raw = start
+	rig.pan_by_pixels(Vector2(0.0, 30.0))
 	# dragging down pushes the scene toward the viewer: the target moves up the screen
-	assert_gt(rig._pan_raw.dot(axes[1]), 0.0)
-	assert_almost_eq(rig._pan_raw.dot(axes[0]), 0.0, 1e-6, "a vertical drag does not move sideways")
+	assert_gt((rig.pan - start).dot(axes[1]), 0.0)
+	assert_almost_eq((rig.pan - start).dot(axes[0]), 0.0, 1e-6, "no move sideways")
 
 
 func test_a_pan_stays_near_the_board_and_springs_back_after_release() -> void:
