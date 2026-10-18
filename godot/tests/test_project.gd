@@ -198,6 +198,9 @@ func test_a_tap_on_a_raised_socket_selects_that_socket() -> void:
 		var top := BoardSpace.cell_to_world(socket.x, socket.y)
 		top.y = board.surface_height(socket)
 		_tap(main, camera.unproject_position(top))
+		# a socket drawn under 44 pt is flown to first and selected when the camera arrives
+		for i in 3:
+			(main.get_node("CameraRig") as CameraRig)._process(CameraRig.FLY_SECONDS)
 		assert_eq(main.selected_cell(), socket, "level %d" % game.map.elevation_at(socket))
 
 
