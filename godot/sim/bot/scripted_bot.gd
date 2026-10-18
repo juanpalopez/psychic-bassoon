@@ -5,9 +5,11 @@
 ## It builds, in turn, the towers of its profile on the sockets that reach the
 ## most road (counted with a Spool Guard's reach and the socket's elevation
 ## bonus, from the block's centre; ties go to reading order), saving up when it
-## cannot pay. Once every socket has a tower it upgrades, the lowest level and
-## then the cheapest first. It launches the next wave when none is running (and,
-## if its profile says so, early when few foes are left). One build or upgrade
+## cannot pay. Once every socket has a tower, or it has `MAX_TOWERS` of them (the
+## valley has twice the sockets a player can fill), it upgrades, the lowest level
+## and then the cheapest first, and builds again only when every tower is at the
+## top. It launches the next wave when none is running (and, if its profile says
+## so, early when few foes are left). One build or upgrade
 ## per tick, so it never spends the same Buttons twice. A Kitchen Mess Tent goes on the
 ## free socket whose aura reaches the most guards (none before a Guard Tent stands);
 ## when no socket suits the next tower of its order it builds the next one instead.
@@ -15,6 +17,7 @@ class_name ScriptedBot
 extends RefCounted
 
 const TOWERS := preload("res://content/towers.gd")
+const PROFILES := preload("res://content/bot_profiles.gd")
 const SCOUT_TOWER := "spoolGuard"
 
 var _profile: Dictionary
@@ -38,7 +41,9 @@ func act(game: GameState) -> void:
 func _spend(game: GameState) -> void:
 	var order: Array = _profile.build_order
 	var free := _best_free_socket(game)
-	if free != GameMap.NO_SOCKET and not order.is_empty():
+	var upgrade := _cheapest_upgrade(game)
+	var room: bool = game.towers.size() < int(_profile.get("max_towers", PROFILES.MAX_TOWERS))
+	if free != GameMap.NO_SOCKET and not order.is_empty() and (room or upgrade == null):
 		var next := _next_build(game, order)
 		var type: String = next.type
 		var spot: Vector2i = next.socket
@@ -47,9 +52,8 @@ func _spend(game: GameState) -> void:
 		if game.buttons >= cost:
 			Game.submit(game, Command.build(type, spot.x, spot.y))
 		return
-	var target := _cheapest_upgrade(game)
-	if target != null and game.buttons >= _next_cost(target):
-		Game.submit(game, Command.upgrade(target.id))
+	if upgrade != null and game.buttons >= _next_cost(upgrade):
+		Game.submit(game, Command.upgrade(upgrade.id))
 
 
 ## The tower of the order to build next and where: the one its turn names, or the

@@ -129,7 +129,8 @@ func test_a_beam_locks_a_moth_in_reach() -> void:
 
 
 func test_an_air_foe_is_ranked_by_the_distance_left_on_its_own_line() -> void:
-	var scene := TowerFireKit.scene("spoolGuard")
+	# on the 16 by 11 board's map 1 the moth's line is short beside the road
+	var scene := TowerFireKit.scene("spoolGuard", 1, false, TowerFireKit.landscape())
 	var game: GameState = scene.game
 	var goblin := TowerFireKit.foe(game, scene.near)
 	var moth := _moth_at_the_tower(scene)
@@ -153,7 +154,8 @@ func test_a_lock_on_a_moth_is_dropped_by_a_tower_that_cannot_hit_air() -> void:
 
 
 func test_support_first_and_anti_air_work_together() -> void:
-	var spool := TowerFireKit.scene("spoolGuard")
+	# the 16 by 11 board's map 1, where the moth at the start of its line has the least left
+	var spool := TowerFireKit.scene("spoolGuard", 1, false, TowerFireKit.landscape())
 	var game: GameState = spool.game
 	var goblin := TowerFireKit.foe(game, spool.near)
 	var moth := _moth_at_the_tower(spool)
@@ -163,7 +165,7 @@ func test_support_first_and_anti_air_work_together() -> void:
 	assert_eq(
 		TowerFire.target_for(game, spool.tower).id, moth.id, "then the foe left to walk least"
 	)
-	var mortar := TowerFireKit.scene("thimbleMortar")
+	var mortar := TowerFireKit.scene("thimbleMortar", 1, false, TowerFireKit.landscape())
 	var mortar_goblin := TowerFireKit.foe(mortar.game, mortar.near)
 	_moth_at_the_tower(mortar)
 	var mortar_shaman := TowerFireKit.foe(mortar.game, mortar.near - 0.2, "inkShaman")

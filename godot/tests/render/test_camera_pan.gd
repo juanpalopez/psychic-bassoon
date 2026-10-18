@@ -79,6 +79,9 @@ func test_there_is_room_to_pan_both_ways_when_closest_on_every_shape() -> void:
 
 
 func test_the_pan_limits_do_not_jump_as_the_zoom_changes() -> void:
+	# the limits grow with the board, so a step may move them by a share of its width: a
+	# 160th (0.1 cells on the 16-wide board, 0.2 on the 32-wide valley); a jump is far more
+	var most := BoardSpace.size().x / 160.0
 	for shape in SHAPES:
 		var rig := _rig_in(shape.x, shape.y)
 		var before: Array[Vector2] = []
@@ -95,7 +98,7 @@ func test_the_pan_limits_do_not_jump_as_the_zoom_changes() -> void:
 				for i in now.size():
 					worst = maxf(worst, now[i].distance_to(before[i]))
 			before = now
-		assert_lte(worst, 0.1, "largest jump in one zoom step at %s" % shape)
+		assert_lte(worst, most, "largest jump in one zoom step at %s" % shape)
 
 
 ## Pinches 1.05 off-centre at (0.8w, 0.25h) from the middle of the allowed pans. Returns whether

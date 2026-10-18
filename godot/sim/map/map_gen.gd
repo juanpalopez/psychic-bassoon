@@ -4,13 +4,44 @@
 ## (`web-three-final:src/sim/map/mapgen.ts`, frozen as fixtures).
 ##
 ## The road generator draws a road that runs down a tall board. A wide board
-## (more columns than rows, the game's 16 by 11) is made by drawing on the turned
+## (more columns than rows, the game's 32 by 20) is made by drawing on the turned
 ## grid (rows by columns) and turning the cells back, so the road crosses
 ## the long side from the left edge to the right.
 class_name MapGen
 extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
+
+
+## The numbers that shape a board's road and its sockets: the classic ones (the fixtures' 9 by
+## 13, the 16 by 11) or the valley's (a board at least `VALLEY_MIN_COLS` wide, #320).
+class Shape:
+	extends RefCounted
+	var min_run_down: int = RULES.MIN_RUN_DOWN
+	var run_down_variance: int = RULES.RUN_DOWN_VARIANCE
+	var min_turn_columns: int = RULES.MIN_TURN_COLUMNS
+	## 0: a turn may cross the whole board.
+	var max_turn_columns: int = 0
+	var min_extra_cells: int = RULES.MIN_EXTRA_CELLS
+	var socket_min: int = RULES.SOCKET_MIN
+	var socket_max: int = RULES.SOCKET_MAX
+
+
+## The shape for a board of `cols` by `rows` cells with sockets of `footprint` cells a side. The
+## valley's socket count is for 2x2 blocks; single-cell sockets keep the classic bounds (the
+## placer caps them at `SOCKET_MAX_SINGLE_CELL`).
+static func shape_for(cols: int, _rows: int, footprint: int = 2) -> Shape:
+	var shape := Shape.new()
+	if cols >= RULES.VALLEY_MIN_COLS:
+		shape.min_run_down = RULES.VALLEY_MIN_RUN_DOWN
+		shape.run_down_variance = RULES.VALLEY_RUN_DOWN_VARIANCE
+		shape.min_turn_columns = RULES.VALLEY_MIN_TURN_COLUMNS
+		shape.max_turn_columns = RULES.VALLEY_MAX_TURN_COLUMNS
+		shape.min_extra_cells = RULES.VALLEY_MIN_EXTRA_CELLS
+		if footprint > 1:
+			shape.socket_min = RULES.VALLEY_SOCKET_MIN
+			shape.socket_max = RULES.VALLEY_SOCKET_MAX
+	return shape
 
 
 ## A way to grow a second route beside a straight stretch of the main road.
@@ -27,7 +58,7 @@ class Detour:
 ## `with_detour` a second route may leave the main road, run beside it and rejoin. With
 ## `second_source` (a wide board, no detour) a second spawn source may be added: a road from
 ## the top or bottom edge that joins the main road, as `routes[1]`.
-## A road that leaves room for fewer than 12 sockets is drawn again.
+## A road that leaves room for fewer than its shape's socket minimum is drawn again.
 static func generate(
 	seed: int,
 	cols: int = RULES.GRID_COLS,
@@ -39,10 +70,11 @@ static func generate(
 	var wide := cols > rows
 	var tall_cols := rows if wide else cols
 	var tall_rows := cols if wide else rows
+	var shape := shape_for(cols, rows, footprint)
 	var rng := Rng.derive(seed, Streams.MAP)
 	var feeder_rng := Rng.derive(seed, Streams.SECOND_SOURCE)
 	for attempt in RULES.MAX_ATTEMPTS:
-		var path := _try_path(rng, tall_cols, tall_rows)
+		var path := _try_path(rng, tall_cols, tall_rows, shape)
 		if path.is_empty():
 			continue
 		var routes: Array = [path]
@@ -54,14 +86,14 @@ static func generate(
 		# always was, and only then does the second road try to fit beside it
 		var plain := _assemble(seed, cols, rows, footprint, wide, routes, {})
 		# a road with too little room for the sockets is thrown away for another
-		if not SocketPlacer.place(plain):
+		if not SocketPlacer.place(plain, shape.socket_min, shape.socket_max):
 			continue
 		if second_source and wide and not with_detour:
 			for feeder in _feeders(path, feeder_rng, tall_cols, tall_rows):
 				var with_feeder := routes.duplicate()
 				with_feeder.append(feeder.route)
 				var map := _assemble(seed, cols, rows, footprint, wide, with_feeder, feeder)
-				if SocketPlacer.place(map):
+				if SocketPlacer.place(map, shape.socket_min, shape.socket_max):
 					return map
 		return plain
 	push_error("no valid map for seed %d in %d tries" % [seed, RULES.MAX_ATTEMPTS])
@@ -110,27 +142,44 @@ static func _turned(routes: Array) -> Array:
 
 
 ## One attempt at the main road. Returns an empty array when it came out short.
-static func _try_path(rng: Rng, cols: int, rows: int) -> Array[Vector2i]:
+## The classic shape draws exactly the ported generator's numbers, so the fixtures still match.
+static func _try_path(rng: Rng, cols: int, rows: int, shape: Shape = null) -> Array[Vector2i]:
+	if shape == null:
+		shape = Shape.new()
 	var col: int = RULES.START_MARGIN + rng.next_int(cols - 2 * RULES.START_MARGIN)
 	var row := 0
 	var cells: Array[Vector2i] = [Vector2i(col, row)]
 	while row < rows - 1:
-		var run := mini(RULES.MIN_RUN_DOWN + rng.next_int(RULES.RUN_DOWN_VARIANCE), rows - 1 - row)
+		var run := mini(shape.min_run_down + rng.next_int(shape.run_down_variance), rows - 1 - row)
 		for i in run:
 			row += 1
 			cells.append(Vector2i(col, row))
 		if row >= rows - 1:
 			break
-		var target := rng.next_int(cols)
-		while absi(target - col) < RULES.MIN_TURN_COLUMNS:
-			target = rng.next_int(cols)
+		var target := _turn_target(rng, col, cols, shape)
 		var step := signi(target - col)
 		while col != target:
 			col += step
 			cells.append(Vector2i(col, row))
-	if cells.size() >= rows + RULES.MIN_EXTRA_CELLS:
+	if cells.size() >= rows + shape.min_extra_cells:
 		return cells
 	return []
+
+
+## The column a sideways turn goes to: at least `min_turn_columns` away and, in the valley, at
+## most `max_turn_columns` (drawn among the columns in that reach, so a cap costs no extra draws).
+static func _turn_target(rng: Rng, col: int, cols: int, shape: Shape) -> int:
+	if shape.max_turn_columns <= 0:
+		var target := rng.next_int(cols)
+		while absi(target - col) < shape.min_turn_columns:
+			target = rng.next_int(cols)
+		return target
+	var reachable: Array[int] = []
+	for target in cols:
+		var gap := absi(target - col)
+		if gap >= shape.min_turn_columns and gap <= shape.max_turn_columns:
+			reachable.append(target)
+	return reachable[rng.next_int(reachable.size())]
 
 
 static func _gap(a: Vector2i, b: Vector2i) -> int:

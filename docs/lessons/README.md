@@ -8,6 +8,9 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-18 | lesson | Never read MultiMesh instance transforms back in a headless test | render | checklist | docs/REVIEW-CHECKLIST.md |
+| 2026-10-18 | lesson | Give a mechanic test the board it was written on | sim | checklist | docs/REVIEW-CHECKLIST.md |
+| 2026-10-18 | decision | Cap the scripted bot at 15 towers and move the CI game and the win test to valley seeds | balance | none | |
 | 2026-10-18 | decision | Adopt the Hand-Folded Fantasy look and drop the desk-top framing | render | none | |
 | 2026-10-18 | decision | Ship natively on iOS and desktop and drop the web build | infra | none | |
 | 2026-10-18 | decision | Play on a 32x20 valley with curved routes, guarded bridges and a movable hero | sim | none | |

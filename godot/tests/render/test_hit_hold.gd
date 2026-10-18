@@ -93,8 +93,8 @@ func test_a_blast_holds_the_foes_it_hurt_and_no_others() -> void:
 
 
 func test_a_foe_that_leaks_beside_a_blast_is_not_held_or_drawn() -> void:
-	# map 5 has a socket within the mortar's reach of the end of the road
-	var scene := TowerFireKit.scene("thimbleMortar", 5, true)
+	# map 5 of the 16 by 11 board has a socket within the mortar's reach of the end of the road
+	var scene := TowerFireKit.scene("thimbleMortar", 5, true, TowerFireKit.landscape(5))
 	var total := scene.game.routes[0].total
 	var leaker := TowerFireKit.foe(scene.game, total - 0.01, "cardboardGolem")
 	leaker.speed = 1.0

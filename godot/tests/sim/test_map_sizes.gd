@@ -170,14 +170,11 @@ func test_every_landscape_map_gets_12_to_22_sockets_off_the_road_within_reach() 
 		assert_eq(map.elevation.size(), ROWS)
 
 
-func test_the_game_builds_the_gdd_board_by_default() -> void:
-	var game := Game.create(1)
-	assert_eq([game.map.cols, game.map.rows], [COLS, ROWS])
-	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [COLS, ROWS])
-	assert_eq(game.map.footprint, 2)
-	assert_between(game.routes.size(), 1, 2, "the main road, and a feeder when it fits")
-	assert_false(game.random_lanes, "foes do not pick a lane at random")
-	assert_false(RULES.GAME_DETOUR)
+func test_the_game_no_longer_builds_this_board_by_default() -> void:
+	# the game moved to the 32 by 20 valley (#320, test_valley_map.gd); this board keeps its
+	# classic road shape
+	assert_ne([RULES.GRID_COLS, RULES.GRID_ROWS], [COLS, ROWS])
+	assert_lt(COLS, RULES.VALLEY_MIN_COLS, "the classic shape, not the valley's")
 
 
 func test_the_game_road_is_about_45_cells_and_holds_12_to_15_sockets() -> void:

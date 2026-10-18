@@ -2,6 +2,8 @@
 class_name TowerFireKit
 extends RefCounted
 
+const MAP_RULES := preload("res://content/map_rules.gd")
+
 
 ## A game with one tower of `type` built (cooldown 0) on the level-0 socket
 ## nearest the road, and a way to put a foe on the road in its reach.
@@ -50,6 +52,13 @@ static func scene(
 	# the build tick already let the tower look for a target: nothing was there
 	scene.tower.cooldown = 0.0
 	return scene
+
+
+## A game on the 16 by 11 board (the game board until #320), for a test whose numbers or
+## placement were chosen on that board's map of `map_seed` and that is about a mechanic, not
+## the board.
+static func landscape(map_seed: int = 1) -> GameState:
+	return Game.create(map_seed, MAP_RULES.LANDSCAPE_COLS, MAP_RULES.LANDSCAPE_ROWS)
 
 
 ## A foe standing still on route 0 at `along`, `type` of wave 1.

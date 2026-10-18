@@ -1,0 +1,86 @@
+[
+  {
+    "name": "the game board keeps the classic shape",
+    "file": "sim/map/map_gen.gd",
+    "old": "if cols >= RULES.VALLEY_MIN_COLS:",
+    "new": "if cols > 1000:",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "the valley's turns are not capped",
+    "file": "sim/map/map_gen.gd",
+    "old": "if gap >= shape.min_turn_columns and gap <= shape.max_turn_columns:",
+    "new": "if gap >= shape.min_turn_columns:",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "the classic boards get the turn cap too",
+    "file": "sim/map/map_gen.gd",
+    "old": "\tif shape.max_turn_columns <= 0:\n",
+    "new": "\tif shape.max_turn_columns <= 0:\n\t\tshape.max_turn_columns = RULES.VALLEY_MAX_TURN_COLUMNS\n\tif false:\n",
+    "tests": ["test_valley_map", "test_map_sizes"]
+  },
+  {
+    "name": "the valley's runs use the classic minimum",
+    "file": "sim/map/map_gen.gd",
+    "old": "var run := mini(shape.min_run_down + rng.next_int(shape.run_down_variance), rows - 1 - row)",
+    "new": "var run := mini(RULES.MIN_RUN_DOWN + rng.next_int(shape.run_down_variance), rows - 1 - row)",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "the valley draws the classic socket count",
+    "file": "sim/map/socket_placer.gd",
+    "old": "var target: int = least + rng.next_int(most - least + 1)",
+    "new": "var target: int = RULES.SOCKET_MIN + rng.next_int(RULES.SOCKET_MAX - RULES.SOCKET_MIN + 1)",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "a valley map with too few sockets is kept",
+    "file": "sim/map/socket_placer.gd",
+    "old": "if chosen.size() < least:",
+    "new": "if chosen.size() < RULES.SOCKET_MIN:",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "the bot has no tower cap",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "and (room or upgrade == null)",
+    "new": "and true",
+    "tests": ["test_scripted_bot"]
+  },
+  {
+    "name": "the bot ignores the profile's own cap",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "int(_profile.get(\"max_towers\", PROFILES.MAX_TOWERS))",
+    "new": "int(PROFILES.MAX_TOWERS)",
+    "tests": ["test_scripted_bot"]
+  },
+  {
+    "name": "the bot never builds past the cap",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "and (room or upgrade == null)",
+    "new": "and room",
+    "tests": ["test_scripted_bot"]
+  },
+  {
+    "name": "a valley turn stops one column short of the cap",
+    "file": "sim/map/map_gen.gd",
+    "old": "gap <= shape.max_turn_columns",
+    "new": "gap < shape.max_turn_columns",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "a short valley road is kept",
+    "file": "sim/map/map_gen.gd",
+    "old": "if cells.size() >= rows + shape.min_extra_cells:",
+    "new": "if cells.size() >= rows + RULES.MIN_EXTRA_CELLS:",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "single-cell sockets on the valley ask for the block count",
+    "file": "sim/map/map_gen.gd",
+    "old": "\t\tif footprint > 1:\n",
+    "new": "\t\tif true:\n",
+    "tests": ["test_valley_map"]
+  }
+]

@@ -287,12 +287,15 @@ func test_paperboard_tiles_step_in_on_the_outside_of_their_block() -> void:
 	var cells := _level_2_cells(board)
 	assert_gt(cells.size(), 0, "a map with a level 2 socket")
 	var multimesh := (board.get_node("Paperboard") as MultiMeshInstance3D).multimesh
-	for i in cells.size():
-		var tile := multimesh.get_instance_transform(i)
-		var anchor := board.map.socket_anchor_at(cells[i])
+	assert_eq(multimesh.instance_count, cells.size(), "a tile per level 2 cell")
+	# a headless run's dummy renderer reads every instance transform back as the identity, so
+	# check the turn the board gives each tile (on the 16 by 11 board this test passed only
+	# because its block lay where the identity happened to point outwards)
+	for cell in cells:
+		var anchor := board.map.socket_anchor_at(cell)
 		var middle := BoardSpace.footprint_centre(anchor, board.map.footprint)
-		var stepped := tile.basis * Vector3(1.0, 0.0, 1.0)
-		assert_gt(stepped.dot(tile.origin - middle), 0.0, str(cells[i]))
+		var stepped := board._outward(cell) * Vector3(1.0, 0.0, 1.0)
+		assert_gt(stepped.dot(BoardSpace.cell_to_world(cell.x, cell.y) - middle), 0.0, str(cell))
 
 
 func _level_2_cells(board: Board) -> Array[Vector2i]:

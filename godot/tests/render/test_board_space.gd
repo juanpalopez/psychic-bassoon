@@ -15,14 +15,9 @@ func test_the_board_is_centred_on_the_origin() -> void:
 
 func test_a_higher_column_is_further_right() -> void:
 	# the board is landscape as the sim has it: columns run across the screen
-	assert_lt(
-		BoardSpace.cell_to_world(0, int(RULES.GRID_ROWS * 0.5)).x, BoardSpace.cell_to_world(1, 5).x
-	)
-	assert_almost_eq(
-		BoardSpace.cell_to_world(0, int(RULES.GRID_ROWS * 0.5)).z,
-		BoardSpace.cell_to_world(1, 5).z,
-		1e-9
-	)
+	var row := int(RULES.GRID_ROWS * 0.5)
+	assert_lt(BoardSpace.cell_to_world(0, row).x, BoardSpace.cell_to_world(1, row).x)
+	assert_almost_eq(BoardSpace.cell_to_world(0, row).z, BoardSpace.cell_to_world(1, row).z, 1e-9)
 
 
 func test_a_higher_row_is_nearer_the_camera() -> void:
@@ -54,7 +49,8 @@ func test_size_is_columns_across_and_rows_deep() -> void:
 	var size := BoardSpace.size()
 	assert_eq(size.x, float(RULES.GRID_COLS))
 	assert_eq(size.y, float(RULES.GRID_ROWS))
-	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [16, 11])
+	# the 32 by 20 valley (owner, 2026-10-18, #320)
+	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [32, 20])
 
 
 func test_corners_are_the_outer_edge_of_the_board() -> void:

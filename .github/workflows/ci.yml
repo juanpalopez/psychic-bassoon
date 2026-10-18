@@ -176,14 +176,16 @@ jobs:
 
       - name: Headless game time budget
         env:
-          # one whole bot game (about 25 minutes of play, 20 waves) takes about 5 s on a
-          # laptop; the budget is a generous multiple, so it catches a sim that got
-          # several times slower, not noise (measurements: docs/BALANCE.md)
+          # one whole bot game (about 30 minutes of play, 20 waves, on the 32x20 valley) took
+          # 13 s on the runner (PR #342; 14.5 s of CPU, 41 to 46 s wall in a busy 2-core
+          # container), so the budget is about 4.5 times the runner's time: it catches a sim
+          # that got several times slower, not noise (docs/BALANCE.md). Seed 2 is a guard mix
+          # win on the valley (seed 4, the win on 16x11, falls at wave 16)
           BUDGET_SECONDS: "60"
         run: |
           start=$SECONDS
           "$GODOT" --headless --path godot -s tools/balance_run.gd -- \
-            --seeds=4 --profiles=guardMix --waves=20 | tee game.log
+            --seeds=2 --profiles=guardMix --waves=20 | tee game.log
           elapsed=$((SECONDS - start))
           echo "A whole bot game took ${elapsed} s (budget ${BUDGET_SECONDS} s)"
           if ! grep -q "median waves cleared: 20" game.log; then

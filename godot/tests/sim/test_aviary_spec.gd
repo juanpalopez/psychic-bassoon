@@ -8,8 +8,8 @@ const TOWERS := preload("res://content/towers.gd")
 const AVIARY := "paperPlaneAviary"
 
 
-func _scene() -> TowerFireKit.Scene:
-	var scene := TowerFireKit.scene("spoolGuard")
+func _scene(existing: GameState = null) -> TowerFireKit.Scene:
+	var scene := TowerFireKit.scene("spoolGuard", 1, false, existing)
 	scene.game.buttons = 100000
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))
@@ -166,15 +166,30 @@ func test_the_squadron_drops_a_bomb_per_plane_each_interval_and_then_leaves() ->
 
 
 func test_a_bomb_hits_a_flyer_and_applies_frostbite_like_any_tower_damage() -> void:
-	var scene := _scene()
+	# the 16 by 11 board's map 1, where the moth's straight line passes the tower
+	var scene := _scene(TowerFireKit.landscape())
 	var game := scene.game
 	var moth := FoeSpawner.spawn(game, "razorMoth", 1, 0)
 	moth.speed = 0.0
 	moth.hp = 1.0e9
 	moth.max_hp = 1.0e9
+	# a foe stands where its distance puts it, so hold the moth at the point of its line nearest
+	# the tower (put on the tower, it went back to its line's start on the first tick)
 	var centre := game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
-	moth.x = centre.x
-	moth.y = centre.y
+	var line := game.air_routes[0]
+	var gap := INF
+	var along := 0.0
+	while along <= line.total:
+		var point := line.position_at(along)
+		var here := centre.distance_to(Vector2(point.x, point.y))
+		if here < gap:
+			gap = here
+			moth.distance = along
+		along += 0.05
+	var at := line.position_at(moth.distance)
+	moth.x = at.x
+	moth.y = at.y
+	assert_lt(gap, TowerFire.reach_of(game, scene.tower), "the moth's line passes in reach")
 	Game.submit(game, Command.activate(scene.tower.id))
 	Game.tick(game)
 	for i in 40:
