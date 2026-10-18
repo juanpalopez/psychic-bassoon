@@ -161,7 +161,9 @@ func drawn_foes(game: GameState) -> Array[Foe]:
 		if not _pieces.has(foe.id):
 			_drawn.append(foe)
 	for id: int in _ghosts:
-		_drawn.append(_ghosts[id])
+		# a piece killed while still inside the foe it came out of is never seen
+		if not _pieces.has(id):
+			_drawn.append(_ghosts[id])
 	return _drawn
 
 
