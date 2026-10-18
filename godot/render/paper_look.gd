@@ -2,7 +2,8 @@
 ##
 ## A model from Blender names each material after the look it wants (`PK_CuttingMat`,
 ## `PK_Corrugated`, ...); props put their colours in the vertex colours on one `PK_PaperVC`
-## surface. `dress` swaps every imported surface material for its shader, and gives any other
+## surface, and the towers and units on one `PK_Craft` surface a part (`PK_Glass` for
+## glass). `dress` swaps every imported surface material for its shader, and gives any other
 ## surface the plain paper shader in its imported colour (lit from inside when the model gave
 ## it an emission). Every look is one material shared by every mesh,
 ## so the board stays a handful of draw calls.
@@ -22,6 +23,8 @@ const LOOKS := {
 	"PK_MaskingTape": "masking_tape",
 	"PK_BlotInk": "blot_ink",
 	"PK_PaperVC": "paper_vc",
+	"PK_Craft": "craft_vc",
+	"PK_Glass": "glass",
 }
 ## The looks that draw the board's grid, and so need to know where the board is.
 const GRID_LOOKS: Array[String] = ["cutting_mat", "masking_tape"]

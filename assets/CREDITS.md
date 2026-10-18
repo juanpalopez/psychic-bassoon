@@ -14,12 +14,13 @@ The greybox draws primitives, except the owner's models below. When a model is a
 | `models/enemies/razor_moth.glb` | Original, the owner (greybox Razor Moth, 284 triangles, static) | Owned by the owner (all rights reserved) | used by FoesView for the Ink Shaman |
 | `models/enemies/ink_shaman.glb` | Original, the owner (greybox Ink Shaman, 306 triangles, static) | Owned by the owner (all rights reserved) | used by FoesView for the Ink Shaman |
 | `models/heroes/knight_of_cardboard.glb` | Original, the owner (greybox Knight of Cardboard, 408 triangles, static) | Owned by the owner (all rights reserved) | not used yet (the hero is not in the game) |
-| `models/heroes/camp_cook.glb` | Original, the owner (greybox Camp Cook, 392 triangles, static) | Owned by the owner (all rights reserved) | not used yet (the hero is not in the game) |
-| `models/towers/spool_guard.glb` | Original, the owner (greybox Spool Guard, 214 triangles, static) | Owned by the owner (all rights reserved) | none |
-| `models/towers/thimble_mortar.glb` | Original, the owner (greybox Thimble Mortar, 320 triangles, static) | Owned by the owner (all rights reserved) | none |
-| `models/towers/prism_spire.glb` | Original, the owner (greybox Prism Spire, 256 triangles, static) | Owned by the owner (all rights reserved) | none |
-| `models/towers/guard_tent.glb` | Original, the owner (greybox Guard Tent, 68 triangles, static) | Owned by the owner (all rights reserved) | none |
-| `models/towers/kitchen_mess_tent.glb` | Original, the owner (greybox Kitchen Mess Tent, 184 triangles, static) | Owned by the owner (all rights reserved) | none |
+| `models/heroes/camp_cook.glb` | Original, the owner (papercraft Camp Cook, 1,395 triangles, 3 parts, clips idle, walk, attack, splash, fall, rise; `assets-src/papercraft/unit_camp_cook.py`) | Owned by the owner (all rights reserved) | not used yet (the hero is not in the game) |
+| `models/towers/spool_guard.glb` | Original, the owner (papercraft Spool Guard, 2,036 triangles, 3 parts, clips idle, fire; `assets-src/papercraft/tower_spool_guard.py`) | Owned by the owner (all rights reserved) | drawn by `render/tower_view.gd` |
+| `models/towers/thimble_mortar.glb` | Original, the owner (papercraft Thimble Mortar, 2,088 triangles, 3 parts, clips idle, fire; `assets-src/papercraft/tower_thimble_mortar.py`) | Owned by the owner (all rights reserved) | drawn by `render/tower_view.gd` |
+| `models/towers/prism_spire.glb` | Original, the owner (papercraft Prism Spire, 1,998 triangles, 3 parts, clips idle, fire; `assets-src/papercraft/tower_prism_spire.py`) | Owned by the owner (all rights reserved) | drawn by `render/tower_view.gd` |
+| `models/towers/guard_tent.glb` | Original, the owner (papercraft Guard Tent, 711 triangles, 3 parts, clips idle, deploy; `assets-src/papercraft/tower_guard_tent.py`) | Owned by the owner (all rights reserved) | drawn by `render/tower_view.gd` |
+| `models/towers/kitchen_mess_tent.glb` | Original, the owner (papercraft Kitchen Mess Tent, 1,555 triangles, 3 parts, clips idle, serve; `assets-src/papercraft/tower_mess_tent.py`) | Owned by the owner (all rights reserved) | drawn by `render/tower_view.gd` |
+| `models/units/guard.glb` | Original, the owner (papercraft guard of the Guard Tent, 672 triangles, 3 parts, clips idle, strike, fall, rise; `assets-src/papercraft/unit_guard.py`) | Owned by the owner (all rights reserved) | drawn by `render/guards_view.gd` |
 | `models/towers/heartstone.glb` | Original, the owner (papercraft origami Heartstone, 92 triangles, static; `assets-src/papercraft/godot_kit.py`) | Owned by the owner (all rights reserved) | drawn by `render/board.gd` |
 | `models/terrain/overlay_bridge_deck.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |
 | `models/terrain/overlay_bridge_rail.glb` | Original, the owner (greybox terrain piece) | Owned by the owner (all rights reserved) | none |

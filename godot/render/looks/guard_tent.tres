@@ -7,4 +7,4 @@ script = ExtResource("1_look")
 body_colour = Color(0.612, 0.325, 0.78, 1)
 pip_colour = Color(1, 0.91, 0.88, 1)
 model_path = "res://assets/models/towers/guard_tent.glb"
-model_scale = 0.6
+model_scale = 1.0

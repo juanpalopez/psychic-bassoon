@@ -438,6 +438,9 @@ func _after_tick(game: GameState) -> void:
 			_show_message(RejectText.of(event.reason))
 		elif event.kind == GameEvent.Kind.TOWER_FIRED:
 			_draw_shot(game, event)
+			_towers.fire(event.tower_id, ShotsView.body_point(event.x, event.y))
+		elif event.kind == GameEvent.Kind.GUARD_RAISED:
+			_towers.act(event.tower_id, "deploy")
 
 
 ## Draws the shot a tower fired this tick, from the tower to where its target stood.
