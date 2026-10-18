@@ -8,8 +8,6 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
@@ -46,7 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
-      actions: read # to download the Godot export built by the CI run
       contents: read
       pages: write
       id-token: write
@@ -60,54 +57,36 @@ jobs:
           lfs: false
           persist-credentials: false
 
-      # The Godot export is built and tested once, by the CI run being deployed.
-      - name: Fetch the Godot export from the CI run
-        uses: actions/download-artifact@v8
-        with:
-          name: godot-web
-          path: dist
-          run-id: ${{ github.event.workflow_run.id }}
-          github-token: ${{ github.token }}
-
-      - name: Check the Godot export is complete
-        run: |
-          test -s dist/index.html
-          test -s dist/index.wasm
-          test -s dist/index.pck
-          test -s dist/manifest.webmanifest
-          test -s dist/godot/index.html
-          # the CI run keeps its export for 7 days; a re-run after that fails here
-          sha256sum dist/index.pck dist/index.wasm
+      # The web build is retired (#318): Pages serves one static page that links to the releases.
+      - name: Check the page links to the releases
+        run: grep -qF "$RELEASES_URL" site/index.html
+        env:
+          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases/latest
 
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: dist
+          path: site
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
 
-      - name: Check the live page serves this build
+      - name: Check the live page links to the releases
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases/latest
         run: |
-          want_pck=$(sha256sum < dist/index.pck)
-          want_wasm=$(sha256sum < dist/index.wasm)
           for attempt in 1 2 3 4 5 6; do
-            code=$(curl -sS --max-time 20 -o live.html -w '%{http_code}' "${PAGE_URL}index.html?ci=${HEAD_SHA}" || true)
-            curl -sS --max-time 60 -o live.pck "${PAGE_URL}index.pck?ci=${HEAD_SHA}" || true
-            curl -sS --max-time 120 -o live.wasm "${PAGE_URL}index.wasm?ci=${HEAD_SHA}" || true
-            got_pck=$(sha256sum < live.pck)
-            got_wasm=$(sha256sum < live.wasm)
-            if [ "$code" = "200" ] && [ "$got_pck" = "$want_pck" ] && [ "$got_wasm" = "$want_wasm" ] && grep -q 'GODOT_CONFIG' live.html; then
-              echo "The Godot export is live at the site root"
+            code=$(curl -sS --max-time 20 -o live.html -w '%{http_code}' "${PAGE_URL}?ci=${HEAD_SHA}" || true)
+            if [ "$code" = "200" ] && grep -qF "$RELEASES_URL" live.html; then
+              echo "The releases page is live at the site root"
               exit 0
             fi
-            echo "Attempt ${attempt}: index ${code}, pck/wasm digests differ or are missing"
+            echo "Attempt ${attempt}: HTTP ${code}, or the page has no releases link yet"
             sleep 10
           done
-          echo "::error::The Godot export is not served at ${PAGE_URL}."
+          echo "::error::The releases page is not served at ${PAGE_URL}."
           exit 1

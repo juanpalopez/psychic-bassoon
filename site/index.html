@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Papercraft Kingdom Defense</title>
+    <meta
+      name="description"
+      content="Papercraft Kingdom Defense is now a native game. Download the latest build from GitHub Releases."
+    />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --paper: #f4ecdc;
+        --ink: #2b2420;
+        --accent: #8a3b2e;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --paper: #221d1a;
+          --ink: #efe6d6;
+          --accent: #e59a7e;
+        }
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: var(--paper);
+        color: var(--ink);
+        font:
+          1.05rem/1.6 system-ui,
+          -apple-system,
+          'Segoe UI',
+          sans-serif;
+      }
+      main {
+        max-width: 34rem;
+        padding: 2rem 1rem;
+      }
+      h1 {
+        font-size: 1.6rem;
+        line-height: 1.25;
+        margin: 0 0 1rem;
+      }
+      a {
+        color: var(--accent);
+        font-weight: 600;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Papercraft Kingdom Defense</h1>
+      <p>
+        The web build is retired. The game now ships natively: iOS first, then
+        macOS, Windows and Linux.
+      </p>
+      <p>
+        Each tagged release carries the Linux, Windows and macOS builds: see the
+        <a href="https://github.com/juanpalopez/psychic-bassoon/releases/latest"
+          >latest release</a
+        >.
+      </p>
+    </main>
+  </body>
+</html>
