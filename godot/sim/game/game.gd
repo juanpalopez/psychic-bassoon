@@ -25,8 +25,11 @@ static func create(
 	var game := GameState.new()
 	game.seed = seed
 	game.map = MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
+	# the valley board walks curves through the road's corners (#321); the classic boards keep
+	# the grid route their tests pin
+	var curved := cols >= MAP_RULES.VALLEY_MIN_COLS
 	for cells in game.map.routes:
-		game.routes.append(Route.build(cells))
+		game.routes.append(Route.build_curved(cells) if curved else Route.build(cells))
 	game.route = game.routes[0]
 	var block := game.map.heartstone
 	var heart_x := float(block.position.x) + float(block.size.x) / 2.0
@@ -37,9 +40,8 @@ static func create(
 	# foes pick a lane at random only on the old detour; the second source is by wave and group
 	game.random_lanes = with_detour and game.routes.size() > 1
 	if game.map.feeder_length > 0:
-		game.second_offset = (
-			game.routes[1].cumulative[game.map.feeder_length + 1]
-			- game.routes[0].cumulative[game.map.join_index + 1]
+		game.second_offset = Route.join_offset(
+			game.routes[0], game.routes[1], game.map.feeder_length, game.map.join_index
 		)
 	game.buttons = RULES.START_BUTTONS
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH

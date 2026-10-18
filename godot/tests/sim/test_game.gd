@@ -29,7 +29,10 @@ func test_create_builds_the_map_and_every_route() -> void:
 	assert_eq(game.map.path, map.path)
 	assert_eq(game.routes.size(), map.routes.size())
 	assert_eq(game.route, game.routes[0])
-	assert_almost_eq(game.route.total, 0.95 + float(map.path.size() - 1), 1e-9)
+	# the valley board walks the curve through the road's corners, which is shorter than the
+	# grid path (#321)
+	assert_eq(game.route.total, Route.build_curved(map.path).total)
+	assert_lt(game.route.total, 0.95 + float(map.path.size() - 1))
 
 
 func test_create_uses_the_waves_and_routes_streams_from_the_fixture() -> void:

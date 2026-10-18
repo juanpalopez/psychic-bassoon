@@ -4,6 +4,9 @@ extends GutTest
 
 const SPECS := preload("res://content/specs.gd")
 const BLOT := "blotSingularity"
+## A valley seed whose second road joins the main road before the stretch the Spire covers
+## (on the curved routes, #321), so a foe of either source stands there on the main road.
+const TWO_ROAD_SEED := 8
 
 
 func _scene(spec: String) -> TowerFireKit.Scene:
@@ -52,12 +55,12 @@ func _two_road_scene(map_seed: int) -> TowerFireKit.Scene:
 
 func test_a_well_opened_on_a_second_road_foe_sits_at_its_main_road_distance() -> void:
 	var checked := 0
-	for map_seed in [5]:
+	for map_seed in [TWO_ROAD_SEED]:
 		var scene := _two_road_scene(map_seed)
 		if scene == null:
 			continue
 		var game := scene.game
-		var join: float = game.routes[1].cumulative[game.map.feeder_length + 1]
+		var join: float = game.routes[1].cell_distance(game.map.feeder_length)
 		var on_second := FoeSpawner.spawn(game, "corrugatedOrc", 1, 1)
 		on_second.speed = 0.0
 		on_second.distance = join + 1.0
@@ -107,8 +110,8 @@ func test_a_well_pulls_a_foe_to_its_centre_and_no_further() -> void:
 
 
 func test_ink_vortex_with_only_a_feeder_foe_in_reach_is_refused() -> void:
-	var scene := _two_road_scene(5)
-	assert_not_null(scene, "seed 5 has a second spawn source")
+	var scene := _two_road_scene(TWO_ROAD_SEED)
+	assert_not_null(scene, "seed %d has a second spawn source" % TWO_ROAD_SEED)
 	var game := scene.game
 	var feeder := FoeSpawner.spawn(game, "corrugatedOrc", 1, 1)
 	feeder.speed = 0.0
@@ -126,7 +129,7 @@ func test_ink_vortex_with_only_a_feeder_foe_in_reach_is_refused() -> void:
 
 
 func test_a_second_road_foe_ends_at_the_well_centre_on_the_main_road() -> void:
-	var scene := _two_road_scene(5)
+	var scene := _two_road_scene(TWO_ROAD_SEED)
 	var game := scene.game
 	assert_gt(absf(game.second_offset), 1.0, "this map's second road is offset from the main road")
 	var target := _tough(game, scene.near + 0.4)
@@ -151,7 +154,7 @@ func test_a_second_road_foe_ends_at_the_well_centre_on_the_main_road() -> void:
 
 
 func test_a_foe_still_on_the_feeder_inside_the_well_is_not_pulled() -> void:
-	var scene := _two_road_scene(5)
+	var scene := _two_road_scene(TWO_ROAD_SEED)
 	var game := scene.game
 	var target := _tough(game, scene.near)
 	target.speed = 0.0

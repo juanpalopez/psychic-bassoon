@@ -125,6 +125,10 @@ func test_a_foe_exactly_on_a_pools_edge_is_slowed() -> void:
 	var game := scene.game
 	var target := _tough(game, scene.near)
 	target.speed = 0.0
+	# a centre the float maths holds exactly (a point on a curved route need not be), so the
+	# foe below is exactly one cell away
+	target.x = floor(target.x) + 0.5
+	target.y = floor(target.y) + 0.5
 	Zones.open_pool(game, scene.tower, target, 1.0, 0.35, 4.0)
 	var edge := _tough(game, scene.near)
 	edge.speed = 0.0

@@ -66,6 +66,16 @@ const SPAWN_OFFSET := 0.45
 ## A cell's centre is at col + this.
 const CELL_CENTRE := 0.5
 
+## Curved routes (#321): on the valley board the line foes walk rounds each corner of the grid
+## path with a quadratic Bezier whose control point is the corner cell's centre. Its legs run
+## `CURVE_LEG` cells back along the road and on along it (to the centres of the cells either
+## side), or `CURVE_LEG_TIGHT` (to the corner cell's edges) when a neighbouring cell is a corner
+## too, so the curves of an S-bend or a U-turn meet instead of overlapping. Legs above 1 would
+## leave the road's cells. A curve gets one point per `CURVE_POINT_SPACING` cells of its legs.
+const CURVE_LEG := 1.0
+const CURVE_LEG_TIGHT := 0.5
+const CURVE_POINT_SPACING := 0.125
+
 ## Sockets: the pre-etched circular sites where towers can be built (the GDD
 ## replaces free building). A map gets this many, chosen among the cells that
 ## are not road but lie within `SOCKET_REACH` cells of it (Chebyshev distance),

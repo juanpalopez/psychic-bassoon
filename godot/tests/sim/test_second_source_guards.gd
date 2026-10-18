@@ -8,7 +8,7 @@ func _game_with_post_past_the_join() -> GameState:
 		var game := GuardKit.game_with_tent(map_seed)
 		if game.routes.size() < 2:
 			continue
-		var join_main := game.routes[0].cumulative[game.map.join_index + 1]
+		var join_main := game.routes[0].cell_distance(game.map.join_index)
 		if GuardKit.post(game) > join_main + 0.8:
 			return game
 	return null
@@ -18,7 +18,7 @@ func test_a_second_route_foe_on_the_main_road_has_a_main_distance() -> void:
 	var game := _game_with_post_past_the_join()
 	assert_not_null(game, "some seed has a tent past the join")
 	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 1)
-	var join_on_second := game.routes[1].cumulative[game.map.feeder_length + 1]
+	var join_on_second := game.routes[1].cell_distance(game.map.feeder_length)
 	foe.distance = join_on_second - 0.5
 	assert_eq(Barracks.main_distance(game, foe), -1.0, "still on the feeder")
 	foe.distance = join_on_second + 3.0
@@ -42,7 +42,7 @@ func test_a_foe_still_on_the_feeder_is_not_held_by_a_post_it_has_not_reached() -
 	var game := _game_with_post_past_the_join()
 	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 1)
 	# the same number on its own route is somewhere on the feeder or just after the join
-	foe.distance = game.routes[1].cumulative[game.map.feeder_length + 1] - 0.5
+	foe.distance = game.routes[1].cell_distance(game.map.feeder_length) - 0.5
 	GuardKit.tick(game, 1)
 	assert_eq(foe.engaged_guard_id, -1)
 

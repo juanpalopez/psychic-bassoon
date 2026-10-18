@@ -203,7 +203,7 @@ static func main_distance(game: GameState, foe: Foe) -> float:
 		return foe.distance
 	if game.random_lanes:
 		return -1.0
-	if foe.distance < game.routes[foe.route].cumulative[game.map.feeder_length + 1]:
+	if foe.distance < game.routes[foe.route].cell_distance(game.map.feeder_length):
 		return -1.0
 	return foe.distance - game.second_offset
 

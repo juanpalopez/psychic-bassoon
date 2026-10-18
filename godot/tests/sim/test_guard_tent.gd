@@ -3,6 +3,7 @@
 extends GutTest
 
 const TOWERS := preload("res://content/towers.gd")
+const MAP_RULES := preload("res://content/map_rules.gd")
 
 
 func test_the_guard_tent_is_content_with_three_levels() -> void:
@@ -91,9 +92,10 @@ func test_a_tent_that_dies_with_the_game_state_is_plain_data() -> void:
 
 
 func test_when_two_road_points_tie_the_post_is_the_one_nearer_the_heartstone() -> void:
+	# exact ties need the grid route's straight lines around a block: the 16 by 11 board's
 	var tied := _tied_socket(1)
 	assert_ne(tied, Vector2i(-1, -1), "seed 1 has a tent socket with two equally near road points")
-	var game := Game.create(1)
+	var game := _classic(1)
 	game.buttons = 500
 	GameTestKit.run(game, [Command.build("guardTent", tied.x, tied.y)])
 	var middle := GuardKit.post(game)
@@ -101,9 +103,13 @@ func test_when_two_road_points_tie_the_post_is_the_one_nearer_the_heartstone() -
 	assert_gt(_last_nearest_along(game, tied) - _first_nearest_along(game, tied), 0.5)
 
 
+func _classic(map_seed: int) -> GameState:
+	return Game.create(map_seed, MAP_RULES.LANDSCAPE_COLS, MAP_RULES.LANDSCAPE_ROWS)
+
+
 ## A socket of the seed's map with two exactly equally near road points.
 func _tied_socket(map_seed: int) -> Vector2i:
-	var game := Game.create(map_seed)
+	var game := _classic(map_seed)
 	for anchor in game.map.sockets:
 		if _first_nearest_along(game, anchor) != _last_nearest_along(game, anchor):
 			return anchor
