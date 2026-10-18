@@ -134,6 +134,12 @@ static func flight_of(kind: Kind, from: Vector3, to: Vector3) -> float:
 	return clampf(from.distance_to(to) / DART_SPEED, DART_MIN, DART_MAX)
 
 
+## When a shot of `kind` is drawn landing, in seconds after it is fired: the first
+## stop-motion frame at or after the end of its flight. `HitHold` shows the hit then.
+static func landing_of(kind: Kind, from: Vector3, to: Vector3) -> float:
+	return ceilf(flight_of(kind, from, to) * FPS - 1e-6) / FPS
+
+
 ## How long a shot of `kind` stays on screen: its flight and then its pop or burst.
 static func life_of(kind: Kind, from: Vector3, to: Vector3) -> float:
 	return flight_of(kind, from, to) + (BURST_SECONDS if kind == Kind.PELLET else POP_SECONDS)

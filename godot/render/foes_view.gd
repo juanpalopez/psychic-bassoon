@@ -126,6 +126,11 @@ func drawn_yaw(type: String, index: int) -> float:
 	return _drawn_yaws[type][index]
 
 
+## How many health bars are drawn.
+func bar_count() -> int:
+	return _bars.bar_count()
+
+
 ## How many foes of this type are drawn right now.
 func visible_count(type: String) -> int:
 	if not _multimeshes.has(type):
@@ -161,8 +166,11 @@ func reset() -> void:
 
 
 ## Draws the foes of `game`. `alpha` is how far we are from the last tick to the
-## next, 0 to 1.
-func update(game: GameState, alpha: float) -> void:
+## next, 0 to 1. With a `hold`, a foe shows the health it had until the shot that hit it
+## lands, and a killed foe stands where it fell until then.
+func update(game: GameState, alpha: float, hold: HitHold = null) -> void:
+	if hold != null:
+		hold.observe(game)
 	if game.tick_count != _tick_seen:
 		_tick_seen = game.tick_count
 		var next := {}
@@ -177,7 +185,8 @@ func update(game: GameState, alpha: float) -> void:
 	for type in _used:
 		_used[type] = 0
 	_bars.begin()
-	for foe in game.foes:
+	var drawn: Array[Foe] = game.foes if hold == null else hold.drawn_foes(game)
+	for foe in drawn:
 		var multimesh: MultiMesh = _multimeshes.get(foe.type)
 		if multimesh == null:
 			continue
@@ -205,7 +214,9 @@ func update(game: GameState, alpha: float) -> void:
 			head_y = GROUND + float(model.height)
 			_drawn_yaws[foe.type][index] = yaw
 		multimesh.set_instance_transform(index, Transform3D(basis, position))
-		var health := FoeBars.share(float(foe.hp), float(foe.max_hp))
+		var hp := foe.hp if hold == null else hold.shown_hp(foe)
+		var standing := foe.alive or (hold != null and hold.is_ghost(foe.id))
+		var health := FoeBars.share(hp, foe.max_hp)
 		var base: Color = (
 			Color.WHITE if _models.has(foe.type) else COLOURS.get(foe.type, FALLBACK_COLOUR)
 		)
@@ -214,7 +225,7 @@ func update(game: GameState, alpha: float) -> void:
 		_drawn_positions[foe.type][index] = position
 		_drawn_scales[foe.type][index] = scale
 		_drawn_colours[foe.type][index] = colour
-		if FoeBars.is_shown(foe.hp, foe.max_hp, foe.alive):
+		if FoeBars.is_shown(hp, foe.max_hp, standing):
 			_bars.add(Vector3(position.x, head_y, position.z), health, foe.type)
 	_bars.finish()
 	for type in _multimeshes:

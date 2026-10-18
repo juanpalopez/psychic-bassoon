@@ -48,6 +48,21 @@ func test_a_dart_flies_between_two_and_four_frames() -> void:
 	assert_almost_eq(far, 4.0 / 12.0, 1e-6)
 
 
+func test_a_shot_is_drawn_landing_on_the_first_frame_after_its_flight() -> void:
+	var flight := ShotsView.flight_of(ShotsView.Kind.DART, FROM, TO)
+	var lands := ShotsView.landing_of(ShotsView.Kind.DART, FROM, TO)
+	assert_almost_eq(lands, ceilf(flight * ShotsView.FPS) / ShotsView.FPS, 1e-6)
+	var view := _view()
+	view.add_shot(FROM, TO, 0.0)
+	view.update(lands - 0.01)
+	assert_true(view.shot_body(0).visible, "still flying just before")
+	view.update(0.01)
+	assert_false(view.shot_body(0).visible, "landed then")
+	assert_almost_eq(
+		ShotsView.landing_of(ShotsView.Kind.PELLET, FROM, TO), ShotsView.PELLET_SECONDS, 1e-6
+	)
+
+
 func test_a_shot_goes_after_its_flight_and_its_pop() -> void:
 	var view := _view()
 	view.add_shot(FROM, TO, 0.0)
