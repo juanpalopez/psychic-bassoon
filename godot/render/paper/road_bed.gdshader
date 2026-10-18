@@ -4,11 +4,10 @@
 // distance out from its middle, 0 to 1). The flagstones are laid in world space, so the bed and
 // the yard share one paving. Nothing reads the screen, so Compatibility, Mobile and Forward+ draw
 // it the same; a few mixes and one noise read a pixel. It is lit as the painted paper every lit
-// surface shares (painted.gdshaderinc) and fades into the haze past the map like the terrain.
+// surface shares (painted.gdshaderinc); the haze is the Environment's fog, as on the terrain.
 shader_type spatial;
 
 #include "res://render/paper/painted.gdshaderinc"
-#include "res://render/paper/haze.gdshaderinc"
 
 group_uniforms road;
 // The sand, its worn edge, the joints between flagstones and the lip's outer face, where the bed
@@ -60,5 +59,4 @@ void fragment() {
 	// the lip's outer face, past its crest
 	colour = mix(colour, lip_colour, smoothstep(0.95, 1.0, across));
 	PAINTED_PAPER(colour, 1.0, 0.0)
-	HAZE_FOG(painted_world)
 }

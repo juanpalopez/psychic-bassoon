@@ -119,12 +119,13 @@ static func bed_material() -> ShaderMaterial:
 	return made
 
 
-## The bridges, one surface of faceted planks, posts and ropes in `diorama_vc.gdshader`.
+## The bridges, one surface of faceted planks, posts and ropes in the painted paper the ground
+## and the props share (`painted.gdshader`, its colours linear in the vertex colours).
 static func bridge_mesh(map: GameMap, height_fn: Callable) -> ArrayMesh:
 	var mesh := FacetMesh.new()
 	for bridge in map.bridges:
 		_bridge(mesh, bridge, map.seed, height_fn)
-	return mesh.commit(PaperLook.material("diorama_vc"))
+	return mesh.commit(PaperLook.material("painted"))
 
 
 ## A route's points, in sim cells.
