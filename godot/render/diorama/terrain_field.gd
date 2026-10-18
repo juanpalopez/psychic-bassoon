@@ -64,6 +64,9 @@ const SALT_DETAIL := 702
 const SALT_RIVER := 703
 
 var map: GameMap
+## The lines foes walk, one per map route (the game's own, or made from the map's cells): the
+## road beds follow them.
+var routes: Array[Route] = []
 ## The seed the hashes use (the map's).
 var seed: int = 0
 ## The map cell of the field's first cell, and the field's size in cells.
@@ -83,10 +86,17 @@ var leads: Array = []
 var lead_directions: Array[Vector2i] = []
 
 
-## The field for a map: the sim's terraces on the map, made-up country round it.
-static func from_map(source: GameMap) -> TerrainField:
+## The field for a map: the sim's terraces on the map, made-up country round it. `walked` are
+## the game's routes; when empty they are made from the map's route cells.
+static func from_map(source: GameMap, walked: Array[Route] = []) -> TerrainField:
 	var field := TerrainField.new()
 	field.map = source
+	field.routes = walked
+	if walked.is_empty():
+		for cells in source.routes:
+			var typed: Array[Vector2i] = []
+			typed.assign(cells)
+			field.routes.append(Route.build(typed))
 	field.seed = source.seed
 	field.size = Vector2i(source.cols + 2 * MARGIN, source.rows + 2 * MARGIN)
 	field.levels.resize(field.size.x * field.size.y)

@@ -7,7 +7,7 @@
 ##
 ## - `Terraces`: the terrace tops and the corrugated cliffs (`TerraceBuilder`), in chunks;
 ## - `Water`: the river in its gorge (`WaterBuilder`), in chunks;
-## - `RoadBeds`: the road beds and the bridges (a placeholder `RoadBedBuilder` until #325);
+## - `RoadBeds`: the road beds and the bridges (a placeholder `PlaceholderRoadBed` until #325);
 ## - `Scatter`: the forests, rocks, dirt and grass (a placeholder `PlaceholderScatter` until #326).
 ##
 ## Plug a builder in with `use_builder("RoadBeds", builder)` (any `DioramaBuilder`); it is built
@@ -32,13 +32,14 @@ var _builders := {}
 func _init() -> void:
 	use_builder("Terraces", TerraceBuilder.new())
 	use_builder("Water", WaterBuilder.new())
-	use_builder("RoadBeds", RoadBedBuilder.new())
+	use_builder("RoadBeds", PlaceholderRoadBed.new())
 	use_builder("Scatter", PlaceholderScatter.new())
 
 
-## Builds the diorama for a map, replacing the last one.
-func build(map: GameMap) -> void:
-	field = TerrainField.from_map(map)
+## Builds the diorama for a map, replacing the last one. `routes` are the lines foes walk (the
+## game's `routes`); without them the field makes them from the map's cells.
+func build(map: GameMap, routes: Array[Route] = []) -> void:
+	field = TerrainField.from_map(map, routes)
 	for slot in SLOTS:
 		_build_slot(slot)
 

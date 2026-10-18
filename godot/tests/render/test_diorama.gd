@@ -93,6 +93,16 @@ func test_the_field_takes_the_maps_terraces_and_carves_the_river() -> void:
 					)
 
 
+func test_without_the_games_routes_the_field_makes_them_from_the_map() -> void:
+	var map := MapGen.generate(1)
+	var field := TerrainField.from_map(map)
+	assert_eq(field.routes.size(), map.routes.size())
+	var game := Game.create(1)
+	for i in field.routes.size():
+		assert_eq(field.routes[i].xs, game.routes[i].xs, "route %d" % i)
+		assert_eq(field.routes[i].ys, game.routes[i].ys, "route %d" % i)
+
+
 func test_the_world_carries_on_at_least_30_cells_past_every_edge() -> void:
 	var map := MapGen.generate(1)
 	var field := TerrainField.from_map(map)

@@ -76,9 +76,9 @@ func rebuild() -> void:
 	_draw(MapGen.generate(map_seed))
 
 
-## Draws a map the game made (the same map `map_seed` would give, without making it again).
-## A map the board already shows is only adopted, not rebuilt.
-func show_map(source: GameMap) -> void:
+## Draws a map the game made (the same map `map_seed` would give, without making it again),
+## with the game's routes for the road beds. A map the board already shows is only adopted.
+func show_map(source: GameMap, routes: Array[Route] = []) -> void:
 	if (
 		map != null
 		and map.seed == source.seed
@@ -88,11 +88,13 @@ func show_map(source: GameMap) -> void:
 	):
 		map = source
 		diorama.field.map = source
+		if not routes.is_empty():
+			diorama.field.routes = routes
 		return
 	_quiet = true
 	map_seed = source.seed
 	_quiet = false
-	_draw(source)
+	_draw(source, routes)
 
 
 ## The height of the top of a cell: the road, the water in the river's gorge, or the terrace
@@ -108,7 +110,7 @@ func socket_transform(index: int) -> Transform3D:
 	return _socket_transforms[index]
 
 
-func _draw(source: GameMap) -> void:
+func _draw(source: GameMap, routes: Array[Route] = []) -> void:
 	for child in _built:
 		remove_child(child)
 		child.queue_free()
@@ -123,7 +125,7 @@ func _draw(source: GameMap) -> void:
 		var part := diorama.builder(builder_slot)
 		if part != null:
 			part.clear()
-	diorama.build(map)
+	diorama.build(map, routes)
 	var size := Vector2(float(map.cols), float(map.rows)) / 2.0
 	for look in [diorama.ground_material, diorama.water_material]:
 		if look is ShaderMaterial:

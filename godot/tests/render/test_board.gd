@@ -133,11 +133,12 @@ func test_showing_the_games_map_draws_it_without_making_it_again() -> void:
 	board.show_map(game_map)
 	assert_eq(board.map, game_map, "the board reads the game's own map")
 	assert_eq(diorama.builder("Terraces").get_child(0), chunk, "the same seed is not rebuilt")
-	var other := MapGen.generate(7920)
-	board.show_map(other)
-	assert_eq(board.map, other)
+	var game := Game.create(7920)
+	board.show_map(game.map, game.routes)
+	assert_eq(board.map, game.map)
 	assert_eq(board.map_seed, 7920)
-	assert_eq(board.diorama.field.map, other)
+	assert_eq(board.diorama.field.map, game.map)
+	assert_eq(board.diorama.field.routes, game.routes, "the road beds follow the game's routes")
 
 
 func test_a_socket_overlay_sits_at_the_centre_of_its_block_on_its_level() -> void:

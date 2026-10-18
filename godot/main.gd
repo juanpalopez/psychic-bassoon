@@ -425,7 +425,7 @@ func _start(map_seed: int) -> void:
 	_auto.cancel()
 	_game = Game.create(map_seed)
 	# the board draws the game's own map (the diorama is built from its snapshot)
-	_board.show_map(_game.map)
+	_board.show_map(_game.map, _game.routes)
 	_clock = Clock.new()
 	_foes.reset()
 	_hold.reset()

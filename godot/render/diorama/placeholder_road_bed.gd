@@ -1,9 +1,10 @@
-## A placeholder road bed until #325 lays the real ones (packed earth and flagstones along the
-## curved routes, and the bridges): a sand ribbon with a worn edge along each road's cell
-## centres, its corners rounded, carried on past the map along the field's leads, and a plank
-## deck where it crosses the river. Every road cell is under it. One mesh, one draw call.
+## A placeholder road bed until #325's `RoadBedBuilder` lays the real ones (packed earth and
+## flagstones along the routes, and the bridges): a sand ribbon with a worn edge along each
+## road's cell centres, its corners rounded, carried on past the map along the field's leads,
+## and a plank deck where it crosses the river. Every road cell is under it. One mesh, one
+## draw call.
 @tool
-class_name RoadBedBuilder
+class_name PlaceholderRoadBed
 extends DioramaBuilder
 
 ## Half the ribbon's width, and the worn edge's share of it.
