@@ -81,7 +81,7 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 8. **Radial menu and the greybox.** The greybox build menu is a side panel (step A2); the radial menu replaces it in A5. Pan, pinch and the 30° to 65° tilt are camera work for Phase 5.
 9. **Stop-motion at 12 fps.** Animation is sampled at 12 fps while the sim ticks at 30 Hz and the camera runs at 60: baked vertex-animation clips are sampled at a stepped time, so it costs nothing extra; it needs checking with the `MultiMesh` foes.
 10. **Story presentation.** The GDD has lore but no chapters, story cards or voice. The old chapter plan is dropped until the owner asks for it.
-11. **Persistence.** The tech tree needs saved progress (local storage on the web, a file on iOS) behind one adapter.
+11. **Persistence.** The tech tree needs saved progress (a file on iOS and desktop) behind one adapter.
 12. **Landscape.** The GDD says phones and tablets and does not mention orientation; the owner's rule stays: landscape only.
 13. **Damage types and beams.** The GDD relies on physical, magic and true damage (the Orc "requires magic", Frostbite boosts "physical towers", Precision Snipe is "true damage") and on a continuous beam (the Prism Spire). The ported model has one armor floor. Define the types, how armor and resistances apply to each, and beam versus projectile attacks before the combat core (Phase 4 step 6).
 14. **Meta-progression and determinism.** Golden Staples upgrade permanent skills and base stats, so the same seed and commands give different runs for different tech trees. A run's input must be the seed, the commands and a frozen meta-loadout (the tech-tree state at the start of the run), stored with replays, shared seeds and best-wave records.
@@ -107,13 +107,13 @@ The GDD sets the direction and few numbers. These need a decision or a number be
 **How the sim stays correct:** the same seed plus the same commands must give the same result. From the combat port on, GDScript-generated replay goldens (fixtures written by the GDScript sim itself, with float bits) are the regression check, and any change to them is a reviewed, deliberate balance change.
 
 **Known costs and risks, accepted:**
-- **Web export is heavier.** The standard Godot 4 web engine is tens of MB uncompressed and several MB compressed (not yet measured here), against about 150 kB for the Three.js bundle. Startup is slower; show a loading screen. Measuring it on the owner's iPhone is a go/no-go gate in Phase 3.
-- **iOS Safari.** Use the single-threaded web export (no `SharedArrayBuffer`, so GitHub Pages works without special headers) and the Compatibility renderer (WebGL2). Audio must start after the first tap. Memory limits are tight: test on the real phone early.
-- **GDScript only for the web.** As of the pinned 4.x, C# does not export to web and GDExtension is not an option for the web build, so the sim is GDScript. At 30 ticks per second with about 100 entities this is fine; check it in Phase 4.
+- **Web export is heavier.** _(Retired with the web build, 2026-10-18.)_ The standard Godot 4 web engine is tens of MB uncompressed and several MB compressed (not yet measured here), against about 150 kB for the Three.js bundle. Startup is slower; show a loading screen. Measuring it on the owner's iPhone is a go/no-go gate in Phase 3.
+- **iOS Safari.** _(Retired with the web build, 2026-10-18.)_ Use the single-threaded web export (no `SharedArrayBuffer`, so GitHub Pages works without special headers) and the Compatibility renderer (WebGL2). Audio must start after the first tap. Memory limits are tight: test on the real phone early.
+- **GDScript only for the web.** _(Retired with the web build, 2026-10-18.)_ As of the pinned 4.x, C# does not export to web and GDExtension is not an option for the web build, so the sim is GDScript. At 30 ticks per second with about 100 entities this is fine; check it in Phase 4.
 - **Determinism.** The ported pieces still match the TypeScript fixtures bit for bit, and the rules that made that possible stay: GDScript floats are 64-bit like JavaScript's, so results match if we use the same operations (`+ - * /`, `sqrt`, `floor`; never `randf`, `randi`, trig or engine `round`). Traps to port deliberately: `/` between two integers is integer division in GDScript (divide by a float such as `4294967296.0`); JavaScript's `Math.imul` and `>>>` need every value kept in [0, 2^32) and masked after each `*`, `+` and `^`; `Math.round` becomes `int(floor(x + 0.5))`. Fixtures store integers above 2^53 and fingerprints as hex strings and are compared with exact `==` (Godot's `JSON.parse` returns every number as a float).
 - **Different tooling.** gdtoolkit for lint and format, GUT for tests, the Godot CLI for export. CI must download a pinned Godot and its export templates (cache them).
 
-**Native now (owner, 2026-10-18):** the web build is dropped and the game ships natively (`docs/lessons/2026-10-18-native-only.md`, #318, #319). The history: the same project was to export to iOS once the web build was solid (Android only if wanted); it needs an Apple Developer account, signing, App Store review and safe-area and input checks, so it is its own phase. Keep game code free of browser-only calls: the web shell (landscape prompt, reduced-motion read) stays outside `godot/sim`, `render` and `ui` logic behind one small adapter, so the iOS build swaps the adapter.
+**Native now (owner, 2026-10-18):** the web build is dropped and the game ships natively (`docs/lessons/2026-10-18-native-only.md`, #318, #319). The history: the same project was to export to iOS once the web build was solid (Android only if wanted); it needs an Apple Developer account, signing, App Store review and safe-area and input checks, so it is its own phase. The web shell went with the web build (#318); its jobs (the landscape prompt, the fullscreen button, the reduced-motion read and the `?stress` and `?fps` parameters) move into the game behind one small platform adapter, outside `godot/sim`, `render` and `ui` logic (#319).
 
 ## Tech stack and architecture
 
@@ -126,16 +126,16 @@ Input / HUD taps ──commands──▶          │           ──events─�
 
 | Layer | Choice | Why |
 | --- | --- | --- |
-| Engine | Godot 4.x (version pinned at setup); from #318 Forward+ on desktop and the Mobile renderer on iOS (decided 2026-10-18; until then Compatibility for the web build) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
+| Engine | Godot 4.x (version pinned at setup); Forward+ on desktop and the Mobile renderer on iOS and Android (decided 2026-10-18, #318; Compatibility before that, for the web build) | SSAO, fog, glow and depth of field for the diorama look; native iOS, macOS, Windows and Linux exports |
 | Language | GDScript, typed everywhere | Runs on every export target in the pinned 4.x (it was also the only language for the web build) |
 | Simulation | `RefCounted` classes and plain data (Dictionary and typed arrays) under `sim/` | No scene tree, so tests and headless runs are fast and deterministic |
 | Rendering | `MultiMeshInstance3D` per foe type, one scene per tower, the diorama terrain built from the map at load time in culled chunks with scatter as one `MultiMesh` per prop type (2026-10-18, #324 to #326; it was modular 1 m tiles) | Few draw calls on a phone |
 | Models | glTF/GLB (the owner's Blender models, CC0 packs); the Godot importer | Assets carry over from the Three.js build |
 | HUD and menus | `Control` nodes with a Theme resource | Native layout, anchors and touch input; a Theme mirrors the Claude Design tokens; a radial context menu for sockets and towers |
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed (the ported pieces match the TypeScript fixtures) |
-| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; the web export and a Playwright smoke test in CI until #318, then a headless desktop export | Balance, maps and replays stay verifiable |
+| Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; a Linux desktop export in CI that must start and run headless (it replaced the web export and the Playwright smoke test in #318) | Balance, maps and replays stay verifiable |
 | Audio | Godot `AudioStreamPlayer` | Native builds can start sound at once |
-| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, the Godot web export, size budget and Pages deploy until #318 (then a desktop export and a Pages page that links to releases), tagged releases | Every change ships through the same checked path (see CI/CD pipeline) |
+| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, a Linux desktop export, a Pages page that links to the latest release, tagged releases with the Linux, Windows and macOS builds | Every change ships through the same checked path (see CI/CD pipeline) |
 
 - **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers; no follow camera (owner, 2026-10-14). On the 32x20 map (owner, 2026-10-18) the camera pans across the map: a run starts near the spawn, the zoom-out limit shows the whole map as an overview (a tap there zooms in first), and pan is clamped to the map plus a scenery margin (#328; it used to start with the whole 16x11 board in view).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
@@ -157,7 +157,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 
 **Asset pipeline**
 
-Track B, one asset end to end (owner rescope, 2026-10-11): the Scrap Goblin (the swarm foe, the Scamp in the old plan) goes through the whole pipeline before any other foe does. Its gate is 80 animated Scrap Goblins at 60 fps on the owner's phone in the web export; the pipeline steps are then written down for the next foe. The owner models it in Blender (Meshy was tried and dropped on 2026-10-13); the steps after the model:
+Track B, one asset end to end (owner rescope, 2026-10-11): the Scrap Goblin (the swarm foe, the Scamp in the old plan) goes through the whole pipeline before any other foe does. Its gate is 80 animated Scrap Goblins at 60 fps on the owner's phone in a native build; the pipeline steps are then written down for the next foe. The owner models it in Blender (Meshy was tried and dropped on 2026-10-13); the steps after the model:
 
 1. Clean up: fix scale, put the origin at the feet facing forward, reduce to the triangle budget, bake the texture onto one map.
 2. Armature: a small skeleton of about 15 to 20 bones (hips, spine, head, arms, legs, plus ears or a weapon if needed).
@@ -214,10 +214,11 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     ui/                  # HUD scenes and the Theme resource
     assets/              # imported GLB models, audio, textures
     tests/               # GUT tests, including the fixtures for the ported core
-    export_presets.cfg   # the web export preset today; iOS and desktop presets from #318 (Godot reads it from the project root)
-    web/                 # the custom HTML shell (landscape prompt, meta tags, loader), removed by #318 and #319
+    export_presets.cfg   # iOS (Xcode project only), macOS, Windows and Linux presets (Godot reads it from the project root)
   fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
+  site/                  # the static page GitHub Pages serves (the web build is retired; it links to the latest release)
+  scripts/               # repo checks, scripts/ios-run.sh (build and run on a connected iPhone) and balance tooling
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
     workflows/           # pr-checks.yml, ci.yml, deploy.yml, release.yml
@@ -235,15 +236,15 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
-| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); Web export; download-size budget; Playwright smoke test against the exported build. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
-| `deploy` | Push to `main`, only after `ci` passes | Goes with #318 (the web build is dropped; Pages then serves a short page that links to the latest release). Until then it publishes to GitHub Pages. The Godot export is served at the root URL. Until the game exists that is the Phase 3 stub scene; the Three.js build is no longer served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
-| `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks, exports, and publishes a GitHub Release with generated notes and the build attached. |
+| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); the headless game time budget; the Linux desktop export, checked for its binary and `.pck` and run headless, uploaded as `godot-desktop`; with the `all-desktop` input (releases) also the Windows and macOS exports. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes `site/index.html` to GitHub Pages: a short page that says the web build is retired (#318) and links to the latest release. Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
+| `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks with the Linux, Windows and macOS exports, and publishes a GitHub Release with generated notes and the three builds attached as zips (the macOS app is ad-hoc signed, not notarized). |
 
 **Versions follow phase gates** (semantic versioning, 0.x until launch). The only tag so far is `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
-- CI checks: lint, formatting, determinism (the fixtures for the ported core, then replay goldens), sim rules, export size, `assets/CREDITS.md` coverage for every GLB.
-- Headless Chromium has no real GPU, so fps is not measured in CI. The Godot web build can report draw calls and frame time through a debug overlay that the smoke test reads on a fixed scene.
+- CI checks: lint, formatting, determinism (the fixtures for the ported core, then replay goldens), sim rules, the asset size budget, `assets/CREDITS.md` coverage for every GLB, and that the Linux export starts.
+- CI has no GPU: the exported Linux build runs headless (no rendering), so fps and draw calls are not measured in CI.
 - 60 fps with 80 foes on a mid-range phone stays a manual check at the Phase 5 gate. Record device, fps and seed in the PR.
 
 **Hygiene**
@@ -374,7 +375,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 
 **Phase 5 status (2026-10-15):** the 60 fps check passed on the owner's iPhone with 200 foes, after a slow first second. Left: the path, sockets and foes lining up by eye on the phone.
 
-**How to run the phone checks (2026-10-15, #241; the web URL goes with #318, and #319 replaces the parameters with `--stress=80 --fps` flags and a debug menu in the native build):** open the deployed site with `?stress=80&fps` (for example `https://juanpalopez.github.io/psychic-bassoon/?stress=80&fps`). Do not build towers during the check (kills make the crowd refill one foe a tick at the spawn point). The page keeps 80 foes walking (goblins, orcs and a golem now and then, made by the sim's own spawner, no towers or waves, the Heartstone never dies) and shows `fps, draws, foes, tris` at the bottom. Read the fps after 20 seconds, once with a mouse-free phone held in landscape, and record device, fps and draw calls here. For the by-eye check, play a run with the intro (`?tour=0` skips it) and look at the road, sockets and foes at the corners. The draw-call budget is 120; the headless browser shows 52 draws with 80 foes.
+**How to run the phone checks (2026-10-15, #241; the web URL went with #318, and #319 brings them back as `--stress=80 --fps` flags and a debug menu in the native build, so until then they cannot run on the phone):** the steps were: open the deployed site with `?stress=80&fps` (for example `https://juanpalopez.github.io/psychic-bassoon/?stress=80&fps`). Do not build towers during the check (kills make the crowd refill one foe a tick at the spawn point). The page keeps 80 foes walking (goblins, orcs and a golem now and then, made by the sim's own spawner, no towers or waves, the Heartstone never dies) and shows `fps, draws, foes, tris` at the bottom. Read the fps after 20 seconds, once with a mouse-free phone held in landscape, and record device, fps and draw calls here. For the by-eye check, play a run with the intro (`?tour=0` skips it) and look at the road, sockets and foes at the corners. The draw-call budget is 120; the headless browser shows 52 draws with 80 foes.
 
 ### Phase 6 · Art and ambience (Hand-Folded Fantasy)
 
@@ -422,7 +423,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 **Goal:** the between-run progression, then ship it and take it native.
 
 **Work breakdown**
-1. The workshop: Golden Staples, the permanent tech tree (skills, base stats, new blueprints) and saved progress behind one persistence adapter (local storage on the web, a file on iOS).
+1. The workshop: Golden Staples, the permanent tech tree (skills, base stats, new blueprints) and saved progress behind one persistence adapter (a file on iOS and desktop).
 2. Audio and music (decision from the open questions).
 3. Performance and loading pass on real devices; 30 fps fallback with reduced effects.
 4. README with key art and a short play guide; link from the personal site.
@@ -465,9 +466,9 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [x] Landscape only (owner decision).
 - [x] Engine: Godot 4 (owner decision, 2026-10-10); native only from 2026-10-18 (iOS, then Mac and PC; the web build is dropped).
 - [ ] Music: commission, CC0 tracks, or skip for v1
-- [x] Pages: `main` was the live "latest" web build until 2026-10-18; with #318 Pages serves a page that links to the latest release, and tags create the GitHub Releases with the desktop builds.
+- [x] Pages: `main` was the live "latest" web build until 2026-10-18; since #318 Pages serves a page that links to the latest release, and tags create the GitHub Releases with the desktop builds.
 - [x] Testing on a phone before merge: a local build installed over the cable (`scripts/ios-run.sh`, #318); TestFlight needs the paid Apple Developer Program (the owner's call).
-- [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows. Raised to 18.5 MB on 2026-10-18 for the three full-length music tracks (about 5.8 MB of Vorbis that does not gzip); the asset budget went from 6 MB to 9 MB. Re-set after the iPhone measurement (ticket #124).
+- [x] Download budget for the Godot web build _(retired with the web build in #318; the asset budget stays)_: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows. Raised to 18.5 MB on 2026-10-18 for the three full-length music tracks (about 5.8 MB of Vorbis that does not gzip); the asset budget went from 6 MB to 9 MB. Re-set after the iPhone measurement (ticket #124).
 - [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package were renamed on 2026-10-13 (#163).
 - [x] Meshy: tried and dropped (owner, 2026-10-13): the generated models were not good enough, so the owner models every foe in Blender. No generated models are used; the earlier paid-plan rules no longer apply.
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Decided by the Scrap Goblin spike (ticket #157); fallback is part animation and fewer animated instances.

@@ -11,7 +11,7 @@ Closes #
 ## Checklist
 
 - [ ] Tests written first for sim/content changes (TDD), and they pass
-- [ ] `pnpm lint && pnpm test` pass locally, and for Godot code `gdformat`, `gdlint`, GUT and the web export
+- [ ] `pnpm lint && pnpm test` pass locally, and for Godot code `gdformat`, `gdlint`, GUT and the Linux desktop export
 - [ ] `godot/sim` passes `pnpm check:sim-purity`
 - [ ] Balance numbers live in `godot/content`; no magic numbers in logic
 - [ ] No hard-coded colours (CSS tokens or the Godot Theme only) and no `Math.random()` or `randf`/`randi` in the sim
