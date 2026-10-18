@@ -8,6 +8,8 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-18 | lesson | Stop only the job you started, never every process that matches a pattern | harness | none | |
+| 2026-10-18 | lesson | Fade the world past the map by its distance from the map, not by depth fog | render | none | |
 | 2026-10-18 | lesson | Place a map feature through a chosen anchor with a search, not by rejection sampling | sim | none | |
 | 2026-10-18 | lesson | Check native exports on Linux: every desktop preset and the iOS Xcode project export there | ci | ci-check | .github/workflows/ci.yml, scripts/check-desktop-export.sh |
 | 2026-10-18 | lesson | Never read MultiMesh instance transforms back in a headless test | render | checklist | docs/REVIEW-CHECKLIST.md |
