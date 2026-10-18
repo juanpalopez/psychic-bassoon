@@ -11,9 +11,11 @@
 ## - `Scatter`: the forests, rocks, dirt and grass (a placeholder `PlaceholderScatter` until #326).
 ##
 ## Plug a builder in with `use_builder("RoadBeds", builder)` (any `DioramaBuilder`); it is built
-## at once if the field exists, and on every later `build`. The ground wears `ground_material`
-## (`terrain_vc`: the painted paper of #327 with the cliffs' flutes and the haze), a vertex-colour
-## material: rgb the colour in linear light, alpha the baked contact shading.
+## at once if the field exists, and on every later `build`. The ground wears `ground_material`,
+## the painted paper (`painted.gdshader`, #341) shared with the props: rgb the vertex colour in
+## linear light, alpha the contact shading baked at the foot of each cliff (`contact_from` 1), no
+## folds. The haze is the Environment's depth fog, which `DioramaLens` fits to the view (#343),
+## so the ground and everything on it fade alike.
 @tool
 class_name Diorama
 extends Node3D
@@ -21,7 +23,7 @@ extends Node3D
 const SLOTS: Array[String] = ["Terraces", "Water", "RoadBeds", "Scatter"]
 
 ## The material of the terraces and the road beds, and of the water.
-var ground_material: Material = PaperLook.material("terrain_vc")
+var ground_material: Material = PaperLook.material("painted")
 var water_material: Material = PaperLook.material("water")
 ## The field of the last build, or null before the first.
 var field: TerrainField

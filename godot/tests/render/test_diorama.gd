@@ -510,19 +510,20 @@ func test_no_edge_of_the_world_is_in_view_from_any_camera_position() -> void:
 				)
 
 
-func test_the_haze_is_whole_before_the_edge_of_the_world() -> void:
-	# the uniform's default, read from the include (the headless renderer compiles no shader)
-	var code := FileAccess.get_file_as_string("res://render/paper/haze.gdshaderinc")
-	var found := RegEx.create_from_string("uniform float haze_to = ([0-9.]+);").search(code)
-	assert_not_null(found, "haze_to has a default")
-	assert_lt(float(found.get_string(1)), float(TerrainField.MARGIN) - 2.0)
+func test_the_world_fades_into_one_haze_the_colour_of_the_background() -> void:
+	# one haze: the Environment's depth fog (fitted to the view by DioramaLens), the colour of
+	# the background past the world's last cells; no diorama shader writes a fog of its own
 	var scene := FileAccess.get_file_as_string("res://main.tscn")
 	var sky := RegEx.create_from_string("background_color = Color\\(([0-9., ]+)\\)").search(scene)
-	var background := sky.get_string(1).split(",")
-	var haze := RegEx.create_from_string("haze_colour : source_color = vec3\\(([0-9., ]+)\\)")
-	var rgb := haze.search(code).get_string(1).split(",")
-	for k in 3:
-		assert_almost_eq(float(background[k]), float(rgb[k]), 0.002, "the haze is the background")
+	var fog := RegEx.create_from_string("fog_light_color = Color\\(([0-9., ]+)\\)").search(scene)
+	assert_true(scene.contains("fog_enabled = true"))
+	assert_eq(fog.get_string(1), sky.get_string(1), "the haze is the background")
+	var board := _board(1)
+	for slot in ["Terraces", "Water", "RoadBeds"]:
+		for child in board.diorama.builder(slot).get_children():
+			var look := (child as MeshInstance3D).material_override as ShaderMaterial
+			assert_false(look.shader.code.contains("FOG ="), "%s keeps no haze of its own" % slot)
+	assert_eq(board.diorama.ground_material, PaperLook.material("painted"), "the painted paper")
 
 
 func test_the_diorama_keeps_to_its_triangle_and_draw_call_budget() -> void:

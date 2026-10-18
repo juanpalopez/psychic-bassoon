@@ -1,9 +1,8 @@
 // The river in its gorge (#324): light to deep blue with a soft moving sheen, and white foam
 // where it meets the banks (the vertex alpha, broken up by the paper noise). The one surface
-// allowed to shine (STYLE.md). Fades into the haze past the map like the ground.
+// allowed to shine (STYLE.md). The Environment's depth haze (DioramaLens) fades it like the
+// ground.
 shader_type spatial;
-
-#include "res://render/paper/haze.gdshaderinc"
 
 uniform sampler2D paper_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 // STYLE.md: water light #7fc4f2 and deep #2f6fbf.
@@ -30,5 +29,4 @@ void fragment() {
 	ROUGHNESS = mix(1.0 - gloss, 0.9, foam);
 	SPECULAR = mix(0.5, 0.1, foam);
 	METALLIC = 0.0;
-	HAZE_FOG(world_position)
 }

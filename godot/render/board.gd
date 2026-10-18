@@ -2,13 +2,14 @@
 ##
 ## The ground is a `Diorama` (#324): terraces from the map's terrain layer with corrugated
 ## cliffs, the river in its gorge, a road bed, scatter, and render-only country past the map
-## that fades into haze, so no edge of the world shows. On top of it the board draws a pencil
-## circle on each socket, spilled Blot ink at each spawn and the Heartstone. Everything that
-## stands on the board (towers, foes, guards, the highlight, the range ring, the tap picking)
-## reads `surface_height`, which is the ground the diorama drew. Set `map_seed` (also in the
-## editor: this is a `@tool` script) and the board rebuilds from `MapGen.generate`; `show_map`
-## draws a map the game already made. It only reads the map, and every random-looking choice
-## comes from a hash of the cell and the seed, so the same seed always looks the same.
+## that fades into the Environment's haze, so no edge of the world shows. On top of it the
+## board draws a pencil circle on each socket, spilled Blot ink at each spawn and the
+## Heartstone. Everything that stands on the board (towers, foes, guards, the highlight, the
+## range ring, the tap picking) reads `surface_height`, which is the ground the diorama drew.
+## Set `map_seed` (also in the editor: this is a `@tool` script) and the board rebuilds from
+## `MapGen.generate`; `show_map` draws a map the game already made. It only reads the map, and
+## every random-looking choice comes from a hash of the cell and the seed, so the same seed
+## always looks the same.
 @tool
 class_name Board
 extends Node3D
@@ -134,10 +135,6 @@ func _draw(source: GameMap, routes: Array[Route] = []) -> void:
 			part.clear()
 	diorama.build(map, routes)
 	builds += 1
-	var size := Vector2(float(map.cols), float(map.rows)) / 2.0
-	for look in [diorama.ground_material, diorama.water_material]:
-		if look is ShaderMaterial:
-			(look as ShaderMaterial).set_shader_parameter("map_half", size)
 	_count_cells()
 	_add_socket_overlays()
 	_add_markers()
