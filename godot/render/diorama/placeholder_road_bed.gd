@@ -1,6 +1,6 @@
 ## A placeholder road bed until #325's `RoadBedBuilder` lays the real ones (packed earth and
-## flagstones along the routes, and the bridges): a sand ribbon with a worn edge along each
-## road's cell centres, its corners rounded, carried on past the map along the field's leads,
+## flagstones along the routes, and the bridges): a sand ribbon with a worn edge along the line
+## each road's foes walk (`TerrainField.routes`), carried on past the map along the field's leads,
 ## and a plank deck where it crosses the river. Every road cell is under it. One mesh, one
 ## draw call.
 @tool
@@ -14,11 +14,11 @@ const EDGE_SHARE := 0.22
 ## lower, so a feeder never fights the main road where it joins.
 const BED_HEIGHT := 0.006
 const ROAD_STEP := 0.0015
-## Rounds of corner cutting (Chaikin) on the cell centres.
-const ROUNDING := 2
 const SALT_SAND := 731
 ## A straight stretch keeps every this-many-th point, so the sand's colour still varies along it.
 const THIN_EVERY := 6
+## A later road has joined one laid before once its line comes this close to that road's.
+const JOINED := 0.02
 
 ## The material the bed wears (`Diorama` sets it).
 var material: Material
@@ -28,24 +28,41 @@ func build(field: TerrainField) -> void:
 	clear()
 	var bucket := MeshBucket.new()
 	var drawn := {}
+	var laid: Array[Vector2] = []
 	var bridges := {}
 	for bridge in field.map.bridges:
 		bridges[bridge.cell] = true
 	for r in field.map.routes.size():
-		var route: Array = field.map.routes[r]
-		var cells: Array[Vector2i] = []
-		var lead := _lead_for(field, route[0])
+		var cells: Array = field.map.routes[r]
+		var points: Array[Vector2] = []
+		var lead := _lead_for(field, cells[0])
 		for k in range(lead.size() - 1, -1, -1):
-			cells.append(lead[k])
-		for cell in route:
-			cells.append(cell)
-			# a later road stops where it joins one already laid
-			if drawn.has(cell) and cells.size() > lead.size() + 1:
+			var at := field.cell_centre(lead[k])
+			points.append(Vector2(at.x, at.z))
+		# the line the foes walk (curved through the corners on the valley board), from the
+		# spawn point off the edge; a later road stops where it joins one already laid
+		var route: Route = field.routes[r]
+		for p in route.xs.size():
+			var at := BoardSpace.point_to_world(route.xs[p], route.ys[p])
+			points.append(Vector2(at.x, at.z))
+			# past the join cell, once its curve has met the road laid before
+			if p > 0 and drawn.has(field.cell_under(at)) and _on_line(at, laid):
 				break
+		for p in route.xs.size():
+			var at := BoardSpace.point_to_world(route.xs[p], route.ys[p])
+			laid.append(Vector2(at.x, at.z))
 		for cell in cells:
 			drawn[cell] = true
-		_ribbon(field, bucket, cells, BED_HEIGHT - ROAD_STEP * float(r), bridges)
+		_ribbon(field, bucket, points, BED_HEIGHT - ROAD_STEP * float(r), bridges)
 	add_mesh("RoadBed", bucket.to_mesh(), material, false)
+
+
+## Whether `at` lies on a road already laid (within `JOINED` of one of its points).
+static func _on_line(at: Vector3, laid: Array[Vector2]) -> bool:
+	for point in laid:
+		if point.distance_to(Vector2(at.x, at.z)) < JOINED:
+			return true
+	return false
 
 
 ## The cells a road carries on through past the map from its start, if it leaves at an edge.
@@ -58,16 +75,10 @@ func _lead_for(field: TerrainField, start: Vector2i) -> Array[Vector2i]:
 
 
 func _ribbon(
-	field: TerrainField, bucket: MeshBucket, cells: Array[Vector2i], y: float, bridges: Dictionary
+	field: TerrainField, bucket: MeshBucket, points: Array[Vector2], y: float, bridges: Dictionary
 ) -> void:
-	if cells.size() < 2:
+	if points.size() < 2:
 		return
-	var points: Array[Vector2] = []
-	for cell in cells:
-		var at := field.cell_centre(cell)
-		points.append(Vector2(at.x, at.z))
-	for round_index in ROUNDING:
-		points = _rounded(points)
 	points = _thinned(field, points, bridges)
 	var previous: Array[Vector3] = []
 	var previous_colours: Array[Color] = []
@@ -126,13 +137,3 @@ static func _thinned(
 			kept.append(points[k])
 	kept.append(points[points.size() - 1])
 	return kept
-
-
-## One round of corner cutting: each segment's quarter points, the ends kept.
-static func _rounded(points: Array[Vector2]) -> Array[Vector2]:
-	var out: Array[Vector2] = [points[0]]
-	for k in points.size() - 1:
-		out.append(points[k].lerp(points[k + 1], 0.25))
-		out.append(points[k].lerp(points[k + 1], 0.75))
-	out.append(points[points.size() - 1])
-	return out
