@@ -11,6 +11,9 @@ var placements: Array[SceneryScatter.Placement] = []
 
 func build(field: TerrainField) -> void:
 	clear()
+	# the props fade into the haze past the map, as the terrain does
+	var half := Vector2(float(field.map.cols), float(field.map.rows)) / 2.0
+	PaperLook.material("diorama_vc").set_shader_parameter("map_half", half)
 	placements = SceneryScatter.placements(field)
 	var made := SceneryScatter.build_from(placements, field)
 	for child in made.get_children():
