@@ -31,5 +31,5 @@ void fragment() {
 	vec3 top_col = mix(top_a, top_b, n.g);
 	float top = smoothstep(0.5, 0.6, painted_up.y);
 	vec3 col = mix(side, top_col, top);
-	PAINTED_PAPER(mix(col, fleck_colour, smoothstep(0.8, 0.84, n.b) * 0.5), 1.0)
+	PAINTED_PAPER(mix(col, fleck_colour, smoothstep(0.8, 0.84, n.b) * 0.5), 1.0, 0.0)
 }

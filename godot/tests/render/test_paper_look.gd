@@ -98,5 +98,41 @@ func test_the_magic_default_keeps_the_shader_colours() -> void:
 
 func test_the_generic_painted_shader_takes_vertex_colour_a_map_and_baked_contact() -> void:
 	var code := _code("painted")
-	for part in ["albedo_map", "COLOR.rgb", "contact_from", "COLOR.a", "contact_map", "UV2"]:
+	for part in ["albedo_map", "COLOR.rgb", "contact_from", "COLOR.a", "bake_map", "UV2"]:
 		assert_true(code.contains(part), part)
+
+
+func test_folds_come_from_the_builder_not_the_screen() -> void:
+	var code := (load(PaperLook.SHADERS + "painted.gdshaderinc") as ShaderInclude).code
+	assert_false(code.contains("fwidth(NORMAL)"), "no screen-space crease guess")
+	assert_true(code.contains("#define PAINTED_PAPER(base, baked, folded)"))
+	assert_true(_code("painted").contains("fold_from"))
+
+
+func test_the_looks_that_move_keep_their_paper_on_the_model() -> void:
+	for look in ["paper_prop", "painted_magic", "craft_vc"]:
+		assert_true(_code(look).contains("#define PAINTED_OBJECT_SPACE"), look)
+
+
+func test_a_hovering_model_has_no_dark_foot() -> void:
+	var box := BoxMesh.new()
+	box.material = _imported(Color("b9773c"))
+	var standing := PaperLook.dress(box).surface_get_material(0) as ShaderMaterial
+	var hovering := PaperLook.dress(box, false).surface_get_material(0) as ShaderMaterial
+	assert_null(standing.get_shader_parameter("ground_contact"), "the shader's foot darkening")
+	assert_eq(hovering.get_shader_parameter("ground_contact"), 0.0)
+	assert_eq(hovering.get_shader_parameter("colour"), Color("b9773c"), "otherwise the same look")
+	assert_eq(PaperLook.dress(box, false), PaperLook.dress(box, false), "made once")
+
+
+func test_the_razor_moth_hovers_and_the_goblin_stands() -> void:
+	var view := FoesView.new()
+	add_child_autofree(view)
+	if not view.uses_model("razorMoth") or not view.uses_model("scrapGoblin"):
+		pending("the foe models are missing")
+		return
+	for surface in view.mesh_of("razorMoth").get_surface_count():
+		var look := view.mesh_of("razorMoth").surface_get_material(surface) as ShaderMaterial
+		assert_eq(look.get_shader_parameter("ground_contact"), 0.0, "moth surface %d" % surface)
+	var goblin := view.mesh_of("scrapGoblin").surface_get_material(0) as ShaderMaterial
+	assert_null(goblin.get_shader_parameter("ground_contact"))

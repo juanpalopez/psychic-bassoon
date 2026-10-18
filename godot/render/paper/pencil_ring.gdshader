@@ -14,6 +14,6 @@ void vertex() {
 
 void fragment() {
 	float streak = texture(paper_noise, vec2(UV.x * 0.5, UV.y * 0.05)).r;
-	PAINTED_PAPER(mix(pencil_a, pencil_b, streak), 1.0)
+	PAINTED_PAPER(mix(pencil_a, pencil_b, streak), 1.0, 0.0)
 	EMISSION = vec3(glow);
 }

@@ -32,5 +32,5 @@ void fragment() {
 	vec3 kraft = mix(kraft_a, kraft_b, n.g);
 	kraft = mix(kraft, fibre_colour, n.r * 0.35);
 	kraft *= 0.94 + 0.06 * sin(painted_world.x * 6.2831853 / flute_length);
-	PAINTED_PAPER(mix(side, kraft, top), 1.0)
+	PAINTED_PAPER(mix(side, kraft, top), 1.0, 0.0)
 }

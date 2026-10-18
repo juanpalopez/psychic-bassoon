@@ -14,6 +14,6 @@ void vertex() {
 }
 
 void fragment() {
-	PAINTED_PAPER(COLOR.rgb, 1.0)
+	PAINTED_PAPER(COLOR.rgb, 1.0, 0.0)
 	EMISSION = COLOR.rgb * COLOR.a * glow;
 }

@@ -25,5 +25,5 @@ void fragment() {
 	float rings = fract(n * 9.0);
 	vec3 col = mix(wood_dark, wood_light, smoothstep(0.2, 0.8, rings));
 	float seam = grid_line(painted_world.z / plank + 0.3, 0.002);
-	PAINTED_PAPER(mix(col, seam_colour, seam), 1.0)
+	PAINTED_PAPER(mix(col, seam_colour, seam), 1.0, 0.0)
 }

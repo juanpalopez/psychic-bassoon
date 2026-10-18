@@ -34,7 +34,7 @@ void fragment() {
 	float through = max(grid_line(g.x, 0.008), grid_line(g.y, 0.008));
 	col = mix(col, grid_through, through * 0.22);
 	float edge = max(1.0 - smoothstep(0.0, 0.07, UV.y), smoothstep(0.93, 1.0, UV.y));
-	PAINTED_PAPER(mix(col, edge_colour, edge * 0.55), 1.0)
+	PAINTED_PAPER(mix(col, edge_colour, edge * 0.55), 1.0, 0.0)
 	float dx = crinkle(UV + vec2(0.004, 0.0)) - c;
 	float dy = crinkle(UV + vec2(0.0, 0.016)) - c;
 	NORMAL_MAP = normalize(vec3(-dx * 2.5, -dy * 2.5, 1.0)) * 0.5 + 0.5;

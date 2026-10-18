@@ -38,5 +38,5 @@ void fragment() {
 	col = mix(col, cut_colour, cut * 0.5);
 	float side = 1.0 - smoothstep(0.5, 0.6, abs(painted_up.y));
 	vec3 side_col = mix(core_colour, mat_light, step(-0.035, painted_world.y));
-	PAINTED_PAPER(mix(col, side_col, side), 1.0)
+	PAINTED_PAPER(mix(col, side_col, side), 1.0, 0.0)
 }

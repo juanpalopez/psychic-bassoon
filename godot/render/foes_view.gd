@@ -74,8 +74,12 @@ func _init(models: Dictionary = MODELS) -> void:
 		var multimesh := MultiMesh.new()
 		multimesh.transform_format = MultiMesh.TRANSFORM_3D
 		multimesh.use_colors = true
+		# a flying foe hovers, so its looks leave out the darkening at the foot
+		var grounded: bool = not FOES.DEFS[type].get("flying", false)
 		var mesh := (
-			PaperLook.dress(ModelLoader.mesh(models[type].path)) if models.has(type) else null
+			PaperLook.dress(ModelLoader.mesh(models[type].path), grounded)
+			if models.has(type)
+			else null
 		)
 		if mesh != null:
 			var box := mesh.get_aabb()

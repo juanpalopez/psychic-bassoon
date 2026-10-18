@@ -88,22 +88,42 @@ static func _html(colour: Variant) -> String:
 	return (colour as Color).to_html(false) if colour is Color else "-"
 
 
-## A copy of `mesh` with each surface wearing its look, made once per mesh.
-static func dress(mesh: Mesh) -> Mesh:
+## A copy of `mesh` with each surface wearing its look, made once per mesh. A model that
+## hovers (`grounded` false: the Razor Moth) gets its looks without the darkening at the foot.
+static func dress(mesh: Mesh, grounded: bool = true) -> Mesh:
 	if mesh == null:
 		return null
-	if _dressed.has(mesh):
-		return _dressed[mesh]
+	var key := [mesh, grounded]
+	if _dressed.has(key):
+		return _dressed[key]
 	var copy := mesh.duplicate() as Mesh
 	for i in copy.get_surface_count():
-		copy.surface_set_material(i, look_for(mesh.surface_get_material(i)))
-	_dressed[mesh] = copy
+		copy.surface_set_material(i, look_for(mesh.surface_get_material(i), grounded))
+	_dressed[key] = copy
 	return copy
 
 
 ## The look for one imported material: its named shader, the magic glow in its emission
-## colour when it glows, or plain paper in its colour (the shader's own when it has none).
-static func look_for(imported: Material) -> Material:
+## colour when it glows, or plain paper in its colour (the shader's own when it has none);
+## without the foot darkening when it is not `grounded`.
+static func look_for(imported: Material, grounded: bool = true) -> Material:
+	var look := _look_for(imported)
+	return look if grounded else hovering(look)
+
+
+## The shared copy of a look with no darkening at the foot, for a model that hovers.
+static func hovering(look: Material) -> Material:
+	if not look is ShaderMaterial:
+		return look
+	var key := "hovering %d" % look.get_instance_id()
+	if not _materials.has(key):
+		var made := look.duplicate() as ShaderMaterial
+		made.set_shader_parameter("ground_contact", 0.0)
+		_materials[key] = made
+	return _materials[key]
+
+
+static func _look_for(imported: Material) -> Material:
 	var material_name := imported.resource_name if imported != null else ""
 	for prefix in LOOKS:
 		if material_name.begins_with(prefix):

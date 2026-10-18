@@ -8,6 +8,8 @@
 shader_type spatial;
 render_mode cull_disabled;
 
+// the guards walk and the towers move their parts: the fibre stays on the model
+#define PAINTED_OBJECT_SPACE
 #include "res://render/paper/painted.gdshaderinc"
 
 uniform float glow = 0.9;
@@ -58,6 +60,6 @@ void fragment() {
 		// corrugated card seen on its cut edge: the flutes along the edge
 		albedo *= 0.62 + 0.45 * stripes(flutes, flutes_w);
 	}
-	PAINTED_PAPER(albedo, 1.0)
+	PAINTED_PAPER(albedo, 1.0, 0.0)
 	EMISSION = k == 0 ? COLOR.rgb * COLOR.a * glow : vec3(0.0);
 }
