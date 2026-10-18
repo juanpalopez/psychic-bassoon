@@ -17,6 +17,8 @@ const ROAD_STEP := 0.0015
 ## Rounds of corner cutting (Chaikin) on the cell centres.
 const ROUNDING := 2
 const SALT_SAND := 731
+## A straight stretch keeps every this-many-th point, so the sand's colour still varies along it.
+const THIN_EVERY := 6
 
 ## The material the bed wears (`Diorama` sets it).
 var material: Material
@@ -66,6 +68,7 @@ func _ribbon(
 		points.append(Vector2(at.x, at.z))
 	for round_index in ROUNDING:
 		points = _rounded(points)
+	points = _thinned(field, points, bridges)
 	var previous: Array[Vector3] = []
 	var previous_colours: Array[Color] = []
 	for k in points.size():
@@ -107,6 +110,22 @@ func _colours(field: TerrainField, point: Vector2, k: int, on_bridge: bool) -> A
 	var edge := Color(TerrainPalette.ROAD_EDGE.srgb_to_linear(), 0.8)
 	var middle := Color(sand.srgb_to_linear(), 1.0)
 	return [edge, middle, middle, edge]
+
+
+## The points that bend the ribbon, its ends, and those on a bridge (for the planks): a point in
+## the middle of a straight stretch adds triangles and nothing else.
+static func _thinned(
+	field: TerrainField, points: Array[Vector2], bridges: Dictionary
+) -> Array[Vector2]:
+	var kept: Array[Vector2] = [points[0]]
+	for k in range(1, points.size() - 1):
+		var before := (points[k] - kept[kept.size() - 1]).normalized()
+		var after := (points[k + 1] - points[k]).normalized()
+		var at := field.cell_under(Vector3(points[k].x, 0.0, points[k].y))
+		if before.dot(after) < 0.9999 or bridges.has(at) or k % THIN_EVERY == 0:
+			kept.append(points[k])
+	kept.append(points[points.size() - 1])
+	return kept
 
 
 ## One round of corner cutting: each segment's quarter points, the ends kept.

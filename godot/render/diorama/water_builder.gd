@@ -25,15 +25,15 @@ func build(field: TerrainField) -> void:
 			var cell := field.origin + Vector2i(i, j)
 			if not field.is_gorge(cell):
 				continue
-			var key := TerraceBuilder.chunk_of(i, j)
+			var key := TerraceBuilder.chunk_of(cell, Vector2i(field.map.cols, field.map.rows))
 			if not buckets.has(key):
 				buckets[key] = MeshBucket.new()
 			_cell(field, cell, y, buckets[key])
 	var keys := buckets.keys()
 	keys.sort()
 	for key in keys:
-		var chunk: Vector2i = key
-		add_mesh("Water_%d_%d" % [chunk.x, chunk.y], buckets[key].to_mesh(), material, false)
+		var chunk := "Water" + TerraceBuilder.chunk_name(key)
+		add_mesh(chunk, buckets[key].to_mesh(), material, false)
 
 
 ## The sheet over one gorge cell: its square, plus a strip under each bank beside it and a

@@ -47,6 +47,11 @@ const HEARTSTONE_FILL := 0.9
 		if is_node_ready() and not _quiet:
 			rebuild()
 
+## Whether the board draws `map_seed` when it enters the tree. The game's scene turns it off,
+## because main draws the game's own map at once (`show_map`), so the diorama is built once;
+## the editor always draws.
+@export var build_on_ready: bool = true
+
 var map: GameMap
 var road_count: int = 0
 var ground_count: int = 0
@@ -57,6 +62,8 @@ var heartstone_marker: MeshInstance3D
 var spawn_count: int = 0
 ## The ground, rebuilt with the board (its builders are its children).
 var diorama: Diorama
+## How many times the board has built its diorama (a new map builds once).
+var builds: int = 0
 # what rebuild() made, so it never frees a node someone else put under the board
 var _built: Array[Node] = []
 # set while `show_map` records the seed, so the setter does not rebuild
@@ -67,7 +74,7 @@ var _socket_transforms: Array[Transform3D] = []
 
 
 func _ready() -> void:
-	if map == null:
+	if map == null and (build_on_ready or Engine.is_editor_hint()):
 		rebuild()
 
 
@@ -126,6 +133,7 @@ func _draw(source: GameMap, routes: Array[Route] = []) -> void:
 		if part != null:
 			part.clear()
 	diorama.build(map, routes)
+	builds += 1
 	var size := Vector2(float(map.cols), float(map.rows)) / 2.0
 	for look in [diorama.ground_material, diorama.water_material]:
 		if look is ShaderMaterial:

@@ -1,6 +1,8 @@
 ## The terraces of the diorama: faceted grassy tops at each level of the field, and corrugated
 ## card cliffs with a dark soil lip down to the level below (`assets-src/diorama_lookdev`,
-## `terraces2` and `wall_strip`), meshed in square chunks so the camera culls what it does not see.
+## `terraces2` and `wall_strip`), meshed in chunks so the camera culls what it does not see: small
+## square chunks aligned to the map's cells over the map and the country near it, where the
+## camera works, and one coarse chunk per side and corner out in the haze.
 ##
 ## The mesh is marching squares over the cell centres: each square between four centres is
 ## split into four triangles round its middle, and each triangle is cut along every terrace
@@ -17,8 +19,13 @@
 class_name TerraceBuilder
 extends DioramaBuilder
 
-## Cells on a side of a chunk.
-const CHUNK_CELLS := 32
+## Cells on a side of a near chunk; its edges fall on multiples of it in map cells.
+const CHUNK_CELLS := 16
+## The near chunks cover the map grown to whole chunks with at least this many cells round it
+## (32 by 20 gives x -16 to 48 and y -16 to 32); past them lie the coarse chunks.
+const NEAR_CELLS := 12
+## The key of a coarse chunk: this plus its band across (0 west, 1 middle, 2 east) and in depth.
+const FAR_KEY := 1000
 ## How far an outline may wander from the middle of an edge (a share of the edge), and how far
 ## the middle of a square may move from its corners' share.
 const EDGE_NOISE := 0.3
@@ -27,6 +34,9 @@ const CENTRE_NOISE := 0.25
 const GORGE_WIDEN := 0.18
 ## The middle of a square that follows a guarded corner sits this close to the outline.
 const GUARD_EPSILON := 0.02
+## An outline crossing this close to the middle (a share of the way to the corner) is drawn
+## through the middle itself, so a guarded corner is square and leaves no sliver of wall.
+const MIDDLE_SNAP := 0.06
 ## The soil lip under the grass, in metres, and how far down a wall sinks into the level below.
 const LIP := 0.08
 const SINK := 0.03
@@ -49,8 +59,9 @@ const SALT_RIDGE_Z := 716
 const SALT_FACET := 717
 const SALT_KRAFT := 718
 ## Far from the map, flat ground is drawn as one quad over blocks of this many squares a side
-## (the biggest that fits first), but never within `MERGE_KEEP` cells of the map. The chunk
-## size is a multiple of each, so a block never straddles two chunks.
+## (the biggest that fits first), but never within `MERGE_KEEP` cells of the map. Blocks start
+## on multiples of their size in map cells and every chunk edge is a multiple of 16, so a block
+## never straddles two chunks.
 const MERGE_TIERS: Array[int] = [8, 4, 2]
 const MERGE_KEEP := 3
 ## From this many cells past the map the cliffs are plainer.
@@ -80,20 +91,13 @@ var _buckets := {}
 
 func build(field: TerrainField) -> void:
 	clear()
-	_field = field
-	_w = field.size.x
-	_h = field.size.y
-	var first := field.cell_centre(field.origin)
-	_x0 = first.x
-	_z0 = first.z
-	_prepare_nodes()
-	_prepare_edges()
+	prepare(field)
 	_buckets.clear()
 	var done := PackedByteArray()
 	done.resize(_w * _h)
 	for tier in MERGE_TIERS:
-		for bj in range(0, _h - 1 - tier + 1, tier):
-			for bi in range(0, _w - 1 - tier + 1, tier):
+		for bj in range(posmod(-field.origin.y, tier), _h - 1 - tier + 1, tier):
+			for bi in range(posmod(-field.origin.x, tier), _w - 1 - tier + 1, tier):
 				if _flat_block(bi, bj, tier, done):
 					_block(bi, bj, tier, done)
 	for j in _h - 1:
@@ -105,12 +109,49 @@ func build(field: TerrainField) -> void:
 	keys.sort()
 	for key in keys:
 		var bucket: MeshBucket = _buckets[key]
+		var chunk: Vector2i = key
 		if bucket.is_empty():
 			continue
-		var chunk: Vector2i = key
-		add_mesh("Chunk_%d_%d" % [chunk.x, chunk.y], bucket.to_mesh(), material, true)
+		# out in the haze, past the sun's shadow distance, a chunk casts no shadow
+		add_mesh(chunk_name(key), bucket.to_mesh(), material, chunk.x < FAR_KEY)
 		chunk_count += 1
 	_buckets.clear()
+
+
+## Reads the field: each centre's grass and where the outlines cross each edge. `build` calls
+## it; a test calls it to mesh single squares with `square`.
+func prepare(field: TerrainField) -> void:
+	_field = field
+	_w = field.size.x
+	_h = field.size.y
+	var first := field.cell_centre(field.origin)
+	_x0 = first.x
+	_z0 = first.z
+	_prepare_nodes()
+	_prepare_edges()
+
+
+## The mesh of one square (first corner at field cell (i, j)) on its own, as `build` draws it
+## outside the merged blocks. Call `prepare` first.
+func square(i: int, j: int) -> MeshBucket:
+	var bucket := MeshBucket.new()
+	_square(i, j, bucket)
+	return bucket
+
+
+## The values of the middle of the square at field cell (i, j), one per level its corners
+## stand on, low to high (for tests: they never rise, so the outlines nest).
+func middle_values(i: int, j: int) -> PackedFloat32Array:
+	var at := j * _w + i
+	var nodes := PackedInt32Array([at, at + 1, at + _w + 1, at + _w])
+	var levels := PackedInt32Array()
+	var steps := PackedInt32Array()
+	for node in nodes:
+		levels.append(_field.levels[node])
+		if not steps.has(_field.levels[node]):
+			steps.append(_field.levels[node])
+	steps.sort()
+	return _middle_values(i, j, nodes, levels, steps)
 
 
 ## Whether the squares from field cell (bi, bj), `tier` on a side, are all on one level, not
@@ -170,13 +211,40 @@ func _is_far(i: int, j: int) -> bool:
 	return past >= FAR_CELLS
 
 
-## The chunk (in chunk units) that holds the square whose first corner is field cell (i, j).
-static func chunk_of(i: int, j: int) -> Vector2i:
-	return Vector2i(floori(i / float(CHUNK_CELLS)), floori(j / float(CHUNK_CELLS)))
+## The chunk that holds the square whose first corner is `cell` (map cells) on a map of `size`:
+## a near chunk (in chunk units, aligned to the map) or a coarse one (`FAR_KEY` plus its bands).
+static func chunk_of(cell: Vector2i, size: Vector2i) -> Vector2i:
+	var near := near_rect(size)
+	if near.has_point(cell):
+		return Vector2i(floori(cell.x / float(CHUNK_CELLS)), floori(cell.y / float(CHUNK_CELLS)))
+	var band := Vector2i.ONE
+	for k in 2:
+		if cell[k] < near.position[k]:
+			band[k] = 0
+		elif cell[k] >= near.end[k]:
+			band[k] = 2
+	return Vector2i(FAR_KEY, FAR_KEY) + band
+
+
+## The map cells the near chunks cover: the map grown by `NEAR_CELLS`, out to whole chunks.
+static func near_rect(size: Vector2i) -> Rect2i:
+	var low := Vector2i.ZERO
+	var high := Vector2i.ZERO
+	for k in 2:
+		low[k] = floori(-NEAR_CELLS / float(CHUNK_CELLS)) * CHUNK_CELLS
+		high[k] = ceili((size[k] + NEAR_CELLS) / float(CHUNK_CELLS)) * CHUNK_CELLS
+	return Rect2i(low, high - low)
+
+
+## The node name of a chunk: `Chunk_x_y` near the map, `Far_<band>_<band>` out in the haze.
+static func chunk_name(key: Vector2i) -> String:
+	if key.x >= FAR_KEY:
+		return "Far_%d_%d" % [key.x - FAR_KEY, key.y - FAR_KEY]
+	return "Chunk_%d_%d" % [key.x, key.y]
 
 
 func _bucket(i: int, j: int) -> MeshBucket:
-	var key := chunk_of(i, j)
+	var key := chunk_of(_field.origin + Vector2i(i, j), Vector2i(_field.map.cols, _field.map.rows))
 	if not _buckets.has(key):
 		_buckets[key] = MeshBucket.new()
 	return _buckets[key]
@@ -370,6 +438,9 @@ func _towards(centre: float, corner_in: bool, corner: Vector2) -> Vector2:
 	if is_equal_approx(centre, corner_value):
 		return MIDDLE
 	var share := clampf((centre - 0.5) / (centre - corner_value), 0.0, 1.0)
+	# an outline that passes this close to the middle goes through it: no sliver of a wall
+	if share < MIDDLE_SNAP:
+		return MIDDLE
 	return MIDDLE + (corner - MIDDLE) * share
 
 
@@ -390,6 +461,8 @@ func _top(
 	var first := _world(i, j, poly[0], y)
 	var first_colour := _top_colour(nodes, levels, poly[0], level)
 	for k in range(1, poly.size() - 1):
+		if (poly[k] - poly[0]).cross(poly[k + 1] - poly[0]) == 0.0:
+			continue
 		bucket.tri(
 			first,
 			_world(i, j, poly[k], y),

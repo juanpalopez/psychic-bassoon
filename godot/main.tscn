@@ -97,6 +97,7 @@ directional_shadow_max_distance = 45.0
 [node name="Board" type="Node3D" parent="."]
 script = ExtResource("2_board")
 map_seed = 1
+build_on_ready = false
 
 [node name="CameraRig" type="Node3D" parent="."]
 script = ExtResource("3_rig")
