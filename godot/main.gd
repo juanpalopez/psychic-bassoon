@@ -49,6 +49,8 @@ var _fps := FpsOverlay.new()
 var _guide := GuidePanel.new()
 var _auto := AutoWave.new()
 var _progress := IntroProgress.default()
+## The tilt-shift and the haze, fitted to the camera each time the view moves.
+var _lens := DioramaLens.new()
 # whether the game was paused by the player when an overlay opened over it
 var _paused_before_overlay := false
 # the socket a tap flew the camera to, selected when the camera arrives
@@ -56,6 +58,8 @@ var _fly_target := BoardSpace.NO_CELL
 # the zoom last frame, to see the player zoom out past a selected socket
 var _zoom_seen := 0.0
 
+@onready var _world: WorldEnvironment = $WorldEnvironment
+@onready var _sun: DirectionalLight3D = $Sun
 @onready var _board: Board = $Board
 @onready var _rig: CameraRig = $CameraRig
 @onready var _camera: Camera3D = _rig.camera()
@@ -81,6 +85,7 @@ var _zoom_seen := 0.0
 
 
 func _ready() -> void:
+	RenderQuality.apply(RenderQuality.from_platform(), _world.environment, _sun)
 	var from_url: Variant = _seed_from_url()
 	_rig.flight_ended.connect(_on_flight_ended)
 	_start(from_url if from_url is int else _board.map_seed)
@@ -144,6 +149,7 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_lens.follow(_camera, _world.environment, _world.camera_attributes as CameraAttributesPractical)
 	var ticks_speed := _speed.ticks_speed()
 	# Auto start counts game time, so it holds while paused, runs faster at 2x and 3x, and
 	# a slow frame counts no more than the clock lets the game run

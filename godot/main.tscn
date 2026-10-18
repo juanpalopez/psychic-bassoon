@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://main.gd" id="1_main"]
 [ext_resource type="Script" path="res://render/board.gd" id="2_board"]
@@ -19,26 +19,78 @@
 [ext_resource type="Texture2D" path="res://assets/icons/flag.svg" id="17_flag_icon"]
 [ext_resource type="Texture2D" path="res://assets/icons/auto.svg" id="18_auto_icon"]
 
-[sub_resource type="Environment" id="Environment_desk"]
+[sub_resource type="Gradient" id="Gradient_grade"]
+offsets = PackedFloat32Array(0, 0.25, 0.5, 0.75, 1)
+colors = PackedColorArray(0, 0, 0.018, 1, 0.265, 0.256, 0.2545, 1, 0.53, 0.512, 0.491, 1, 0.795, 0.768, 0.7275, 1, 1, 1, 0.964, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_grade"]
+gradient = SubResource("Gradient_grade")
+
+[sub_resource type="Environment" id="Environment_diorama"]
 background_mode = 1
-background_color = Color(0.16, 0.11, 0.075, 1)
+background_color = Color(0.78, 0.741, 0.702, 1)
 ambient_light_source = 2
-ambient_light_color = Color(0.62, 0.68, 0.8, 1)
-ambient_light_energy = 0.7
-tonemap_mode = 4
+ambient_light_color = Color(0.725, 0.796, 0.878, 1)
+ambient_light_energy = 0.5
+tonemap_mode = 3
+tonemap_exposure = 0.88
+tonemap_white = 6.0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 2.5
+ssao_power = 1.6
+ssao_light_affect = 0.25
+ssil_enabled = true
+ssil_radius = 3.0
+ssil_intensity = 0.6
+glow_enabled = true
+glow_levels/1 = 0.0
+glow_levels/2 = 0.5
+glow_levels/3 = 0.8
+glow_levels/4 = 0.5
+glow_levels/5 = 0.2
+glow_intensity = 0.7
+glow_blend_mode = 0
+glow_hdr_threshold = 1.25
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.78, 0.741, 0.702, 1)
+fog_light_energy = 1.0
+fog_sun_scatter = 0.1
+fog_density = 0.55
+fog_depth_curve = 0.6
+fog_depth_begin = 50.0
+fog_depth_end = 70.0
+fog_height = 0.1
+fog_height_density = 0.45
+adjustment_enabled = true
+adjustment_contrast = 1.06
+adjustment_saturation = 1.12
+adjustment_color_correction = SubResource("GradientTexture1D_grade")
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributes_tiltshift"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 55.0
+dof_blur_far_transition = 5.0
+dof_blur_near_enabled = true
+dof_blur_near_distance = 45.0
+dof_blur_near_transition = 5.0
+dof_blur_amount = 0.12
 
 [node name="Main" type="Node3D"]
 script = ExtResource("1_main")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_desk")
+environment = SubResource("Environment_diorama")
+camera_attributes = SubResource("CameraAttributes_tiltshift")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
 rotation_degrees = Vector3(-42, -91.5, 0)
-light_color = Color(1, 0.86, 0.7, 1)
-light_energy = 1.1
+light_color = Color(1, 0.851, 0.659, 1)
+light_energy = 1.25
+light_angular_distance = 1.5
 shadow_enabled = true
-shadow_blur = 1.5
+shadow_blur = 1.0
 directional_shadow_mode = 0
 directional_shadow_max_distance = 45.0
 

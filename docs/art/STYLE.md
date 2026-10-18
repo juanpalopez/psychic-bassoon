@@ -63,6 +63,8 @@ The shared shader family lives in `godot/render/paper/` (#327). `painted.gdshade
 
 The desktop build uses Forward+: SSAO, SSIL, volumetric fog, glow and depth of field. The iOS build uses the Mobile renderer, which has no SSAO and no volumetric fog. To make up for it, the phone bakes contact shading into vertex colour, uses height and depth fog from the Environment, and keeps glow and depth of field. Both must read as the same game; the phone may be softer and simpler, never a different style.
 
+The light and post live in `main.tscn` (#95): the warm sun with soft shadows, the cool sky fill (ambient light), SSAO and SSIL, glow for the magic, depth fog towards the far edge and height fog that settles below the ground, ACES and a grade (contrast, saturation and a warm-highlight, cool-shadow colour-correction ramp from `post.py`'s split toning), and a tilt-shift depth of field. `DioramaLens` fits the depth of field and the depth fog to the camera on every zoom and pan, so the middle of the screen stays sharp and clear. `RenderQuality` is the quality setting: HIGH on a desktop keeps all of it, and PHONE (the default on `mobile`, `ios` and `android`; `--quality=phone` or `--quality=high` after `--` overrides it) turns off SSAO, SSIL and the sun's soft-shadow search, and draws the depth of field at its cheapest.
+
 ## What it is not
 
 - It is not a desk-top diorama: no cutting mat, no tape road, no pencils or erasers, no table edge.
