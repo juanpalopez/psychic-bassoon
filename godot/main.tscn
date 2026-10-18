@@ -74,9 +74,6 @@ resource_local_to_scene = true
 dof_blur_far_enabled = true
 dof_blur_far_distance = 55.0
 dof_blur_far_transition = 5.0
-dof_blur_near_enabled = true
-dof_blur_near_distance = 45.0
-dof_blur_near_transition = 5.0
 dof_blur_amount = 0.12
 
 [node name="Main" type="Node3D"]

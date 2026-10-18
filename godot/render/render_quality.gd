@@ -22,6 +22,7 @@ const NAMES := {"low": Level.LOW, "phone": Level.PHONE, "high": Level.HIGH}
 const CHEAP_SUN_BLUR := 2.0
 ## The share of the scene's depth-of-field blur a phone draws.
 const PHONE_DOF_AMOUNT := 0.6
+const BASE_DOF_META := &"scene_dof_blur_amount"
 const DOF_QUALITY := {
 	Level.LOW: RenderingServer.DOF_BLUR_QUALITY_VERY_LOW,
 	Level.PHONE: RenderingServer.DOF_BLUR_QUALITY_LOW,
@@ -93,8 +94,11 @@ static func apply(
 	if attributes != null:
 		attributes.dof_blur_far_enabled = attributes.dof_blur_far_enabled and on["dof"]
 		attributes.dof_blur_near_enabled = attributes.dof_blur_near_enabled and on["dof"]
-		if level == Level.PHONE:
-			attributes.dof_blur_amount *= PHONE_DOF_AMOUNT
+		# the scene's amount, kept on the resource, so applying twice gives the same blur
+		if not attributes.has_meta(BASE_DOF_META):
+			attributes.set_meta(BASE_DOF_META, attributes.dof_blur_amount)
+		var share := PHONE_DOF_AMOUNT if level == Level.PHONE else 1.0
+		attributes.dof_blur_amount = float(attributes.get_meta(BASE_DOF_META)) * share
 	RenderingServer.camera_attributes_set_dof_blur_quality(DOF_QUALITY[level], level == Level.HIGH)
 	RenderingServer.camera_attributes_set_dof_blur_bokeh_shape(DOF_SHAPE[level])
 	if not on["soft_filter"]:

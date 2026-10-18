@@ -1,8 +1,13 @@
-## The tilt-shift and the depth haze of the diorama, fitted to where the camera looks: a band
-## across the middle of the screen (the play area) stays sharp and clear, and the blur and the
-## haze grow towards the top and bottom edges at every zoom and pan (docs/art/STYLE.md,
-## Atmosphere). The tilt-shift is this game's own: `assets-src/diorama_lookdev/post.py`'s
-## depth blur would blur nothing at a 20 degree field of view.
+## The tilt-shift and the depth haze of the diorama, fitted to where the camera looks: the play
+## area stays sharp and clear, and the blur and the haze grow towards the top edge (the far
+## side of the valley) at every zoom and pan (docs/art/STYLE.md, Atmosphere). The tilt-shift is
+## this game's own: `assets-src/diorama_lookdev/post.py`'s depth blur would blur nothing at a
+## 20 degree field of view.
+##
+## There is no near blur. Looking down through 20 degrees, the ground across the lower half of
+## the screen spans only 2 to 5 m of depth, less than a Cardboard Golem or a tower on its block
+## stands up towards the camera, so any near blur that softened the bottom edge of the ground
+## would also blur a foe standing in the play area (a 2 m foe at 80% of the screen height).
 ##
 ## `depth_at`, `distance_at`, `focus`, `haze` and `haze_amount` are plain maths, tested;
 ## `follow` reads the camera and writes the result into the depth of field
@@ -10,7 +15,7 @@
 class_name DioramaLens
 extends RefCounted
 
-## The share of the screen height, about its middle, that stays sharp.
+## How far from the middle towards the top edge the ground stays sharp, as a share of the way.
 const SHARP_SHARE := 0.8
 ## The share of the screen height, about its middle, that the haze leaves clear; above it the
 ## haze thickens to its full amount at `HAZE_FULL` times the distance of the screen's top edge.
@@ -33,20 +38,13 @@ static func distance_at(distance: float, pitch_degrees: float, angle_degrees: fl
 	return distance * sin(pitch) / sin(pitch - deg_to_rad(angle_degrees))
 
 
-## Where the blur starts and how far it ramps to full, past and before the focus, for a
-## vertical field of view `fov_degrees`: sharp in the middle `SHARP_SHARE` of the screen,
-## full at its top and bottom edges. x: far distance, y: far transition, z: near distance,
-## w: near transition (a value, so a pan allocates nothing).
-static func focus(distance: float, pitch_degrees: float, fov_degrees: float) -> Vector4:
+## Where the far blur starts (`x`) and how far it ramps to full (`y`), for a vertical field of
+## view `fov_degrees`: sharp up to `SHARP_SHARE` of the way from the middle to the top edge,
+## full at the top edge (a value, so a pan allocates nothing).
+static func focus(distance: float, pitch_degrees: float, fov_degrees: float) -> Vector2:
 	var half := fov_degrees / 2.0
 	var far := depth_at(distance, pitch_degrees, half * SHARP_SHARE)
-	var near := depth_at(distance, pitch_degrees, -half * SHARP_SHARE)
-	return Vector4(
-		far,
-		depth_at(distance, pitch_degrees, half) - far,
-		near,
-		near - depth_at(distance, pitch_degrees, -half)
-	)
+	return Vector2(far, depth_at(distance, pitch_degrees, half) - far)
 
 
 ## Where the depth haze begins and where it reaches its full amount (`x` and `y`), as
@@ -80,8 +78,6 @@ func follow(
 		var blur := focus(distance, pitch, camera.fov)
 		attributes.dof_blur_far_distance = blur.x
 		attributes.dof_blur_far_transition = blur.y
-		attributes.dof_blur_near_distance = blur.z
-		attributes.dof_blur_near_transition = blur.w
 	if environment != null and environment.fog_mode == Environment.FOG_MODE_DEPTH:
 		var span := haze(distance, pitch, camera.fov)
 		environment.fog_depth_begin = span.x

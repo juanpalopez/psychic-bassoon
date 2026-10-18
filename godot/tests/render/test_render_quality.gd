@@ -86,6 +86,19 @@ func test_the_phone_default_turns_the_costly_passes_off() -> void:
 	assert_lt(attributes.dof_blur_amount, 0.1, "but lighter")
 
 
+func test_the_phone_blur_is_a_share_of_the_scene_blur_however_often_it_is_applied() -> void:
+	var environment := Environment.new()
+	var sun := DirectionalLight3D.new()
+	autofree(sun)
+	var attributes := CameraAttributesPractical.new()
+	attributes.dof_blur_amount = 0.1
+	RenderQuality.apply(RenderQuality.Level.PHONE, environment, sun, attributes)
+	RenderQuality.apply(RenderQuality.Level.PHONE, environment, sun, attributes)
+	assert_almost_eq(attributes.dof_blur_amount, 0.1 * RenderQuality.PHONE_DOF_AMOUNT, 1e-6)
+	RenderQuality.apply(RenderQuality.Level.HIGH, environment, sun, attributes)
+	assert_almost_eq(attributes.dof_blur_amount, 0.1, 1e-6, "back to the scene's on HIGH")
+
+
 func test_low_also_drops_the_tilt_shift_and_the_glow() -> void:
 	var environment := Environment.new()
 	environment.glow_enabled = true

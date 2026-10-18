@@ -22,16 +22,37 @@ func test_the_play_area_is_sharp_and_the_edges_are_blurred() -> void:
 	for view in [[60.0, 62.0], [18.0, 56.0]]:
 		var distance: float = view[0]
 		var blur := DioramaLens.focus(distance, view[1], 20.0)
-		# the middle 80% of the screen is between the near and the far blur
-		for tenth in range(-4, 5):
-			var depth := DioramaLens.depth_at(distance, view[1], float(tenth))
-			assert_between(depth, blur.z - 1e-4, blur.x + 1e-4, "%d degrees" % tenth)
+		# the ground from the bottom edge up to 80% of the way to the top edge is sharp
+		for degrees in range(-10, 9):
+			var depth := DioramaLens.depth_at(distance, view[1], float(degrees))
+			assert_lte(depth, blur.x + 1e-4, "%d degrees is sharp, %s" % [degrees, view])
 		var top := DioramaLens.depth_at(distance, view[1], 10.0)
-		var bottom := DioramaLens.depth_at(distance, view[1], -10.0)
+		assert_gt(DioramaLens.depth_at(distance, view[1], 9.0), blur.x, "9 degrees is blurred")
 		assert_almost_eq(blur.x + blur.y, top, 1e-3, "full at the top")
-		assert_almost_eq(blur.z - blur.w, bottom, 1e-3, "and the bottom")
 		assert_gt(blur.y, 0.0)
-		assert_gt(blur.w, 0.0)
+
+
+## The view depth of the head of something `height` metres tall standing on the ground seen
+## `degrees` from the middle of the screen (it leans towards the camera, which looks down).
+func _head_depth(distance: float, pitch: float, degrees: float, height: float) -> float:
+	return DioramaLens.depth_at(distance, pitch, degrees) - height * sin(deg_to_rad(pitch))
+
+
+func test_a_standing_foe_in_the_play_area_is_never_blurred() -> void:
+	var scene := MAIN_SCENE.instantiate()
+	var attributes := (
+		(scene.get_node("WorldEnvironment") as WorldEnvironment).camera_attributes
+		as CameraAttributesPractical
+	)
+	scene.free()
+	assert_false(attributes.dof_blur_near_enabled, "no near blur to catch a foe's head")
+	for view in [[60.0, 62.0], [35.0, 59.0], [18.0, 56.0]]:
+		var blur := DioramaLens.focus(view[0], view[1], 20.0)
+		# a Cardboard Golem (2 m) or a tower on its block (4 m), from the bottom to row 0.1
+		for degrees in range(-10, 9):
+			for height in [0.8, 2.0, 4.0]:
+				var head := _head_depth(view[0], view[1], float(degrees), height)
+				assert_lt(head, blur.x, "%s m at %d degrees, %s" % [height, degrees, view])
 
 
 func test_the_sharp_band_scales_with_the_zoom() -> void:
@@ -79,8 +100,8 @@ func test_follow_fits_the_scene_to_the_camera() -> void:
 	DioramaLens.new().follow(camera, environment, attributes)
 	var blur := DioramaLens.focus(30.0, 60.0, 20.0)
 	assert_almost_eq(attributes.dof_blur_far_distance, blur.x, 1e-3)
-	assert_almost_eq(attributes.dof_blur_near_distance, blur.z, 1e-3)
-	assert_true(attributes.dof_blur_far_enabled and attributes.dof_blur_near_enabled)
+	assert_almost_eq(attributes.dof_blur_far_transition, blur.y, 1e-3)
+	assert_true(attributes.dof_blur_far_enabled)
 	var span := DioramaLens.haze(30.0, 60.0, 20.0)
 	assert_almost_eq(environment.fog_depth_begin, span.x, 1e-3)
 	assert_almost_eq(environment.fog_depth_end, span.y, 1e-3)
