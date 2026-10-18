@@ -1,6 +1,5 @@
-## The tape is still laid in straight strips along the grid path's runs (`TapeBuilder`), while
-## the valley board's foes walk the curved routes (#321). The curves cut each corner inside the
-## overlapping strips, so every point a foe walks past is drawn on tape.
+## The diorama's road bed (the placeholder until #325) is laid along the curved routes the
+## valley board's foes walk (#321), so every point a foe walks past is drawn on the bed.
 extends GutTest
 
 ## Sub-points checked on each segment between two route points.
@@ -8,10 +7,15 @@ const SUBSTEPS := 4
 const EPSILON := 1e-6
 
 
-func test_every_point_of_the_curved_routes_lies_on_the_tape() -> void:
+func test_every_point_of_the_curved_routes_lies_on_the_road_bed() -> void:
 	for map_seed in [1, 2, 3, 42, 7920]:
 		var game := Game.create(map_seed)
-		var mesh := TapeBuilder.build(game.map.routes, map_seed)
+		var board := Board.new()
+		board.build_on_ready = false
+		add_child_autofree(board)
+		board.show_map(game.map, game.routes)
+		var bed := board.diorama.builder("RoadBeds").get_child(0) as MeshInstance3D
+		var mesh := bed.mesh as ArrayMesh
 		var vertices: PackedVector3Array = mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
 		var buckets := _buckets(vertices)
 		var off := 0
@@ -25,10 +29,10 @@ func test_every_point_of_the_curved_routes_lies_on_the_tape() -> void:
 					var y := route.ys[p - 1] + (route.ys[p] - route.ys[p - 1]) * t
 					var at := BoardSpace.point_to_world(x, y)
 					checked += 1
-					if not _on_tape(vertices, buckets, Vector2(at.x, at.z)):
+					if not _on_bed(vertices, buckets, Vector2(at.x, at.z)):
 						off += 1
 		assert_gt(checked, 0)
-		assert_eq(off, 0, "points off the tape, seed %d" % map_seed)
+		assert_eq(off, 0, "points off the road bed, seed %d" % map_seed)
 
 
 ## The triangles (by first vertex index) whose bounds reach into each unit square of the world.
@@ -50,7 +54,7 @@ func _buckets(vertices: PackedVector3Array) -> Dictionary:
 	return buckets
 
 
-func _on_tape(vertices: PackedVector3Array, buckets: Dictionary, point: Vector2) -> bool:
+func _on_bed(vertices: PackedVector3Array, buckets: Dictionary, point: Vector2) -> bool:
 	var key := Vector2i(int(floor(point.x)), int(floor(point.y)))
 	for i in buckets.get(key, []):
 		var a := Vector2(vertices[i].x, vertices[i].z)

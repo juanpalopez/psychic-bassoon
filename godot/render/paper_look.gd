@@ -5,7 +5,7 @@
 ## Fantasy, `docs/art/STYLE.md`): warm where the sun hits, cool where it does not, matte, with
 ## fibre, folds and contact shading. A model from Blender names each material after the look it
 ## wants (`PK_Painted` for vertex-colour paper with contact baked in its alpha, `PK_Magic` for
-## the cool glow, `PK_Corrugated`, ...); props put their colours in the vertex colours on one
+## the cool glow, `PK_PencilRing`, ...); props put their colours in the vertex colours on one
 ## `PK_PaperVC` surface, and the towers and units on one `PK_Craft` surface a part (`PK_Glass`
 ## for glass). `dress` swaps every imported surface material for its shader, and gives any
 ## other surface the plain painted paper in its imported colour, or the magic glow in its
@@ -17,15 +17,9 @@ extends RefCounted
 
 const SHADERS := "res://render/paper/"
 const NOISE := preload("res://assets/textures/paper/paper_noise.png")
-const CUTS := preload("res://assets/textures/paper/mat_cuts.png")
 ## The shader that each Blender material name asks for (matched on the start of the name).
 const LOOKS := {
-	"PK_CuttingMat": "cutting_mat",
-	"PK_Corrugated": "corrugated",
-	"PK_Greyboard": "greyboard",
 	"PK_PencilRing": "pencil_ring",
-	"PK_DeskWood": "desk_wood",
-	"PK_MaskingTape": "masking_tape",
 	"PK_BlotInk": "blot_ink",
 	"PK_PaperVC": "paper_vc",
 	"PK_Craft": "craft_vc",
@@ -33,8 +27,6 @@ const LOOKS := {
 	"PK_Painted": "painted",
 	"PK_Magic": "painted_magic",
 }
-## The looks that draw the board's grid, and so need to know where the board is.
-const GRID_LOOKS: Array[String] = ["cutting_mat", "masking_tape"]
 
 static var _materials := {}
 static var _dressed := {}
@@ -46,8 +38,6 @@ static func material(look: String) -> ShaderMaterial:
 		var made := ShaderMaterial.new()
 		made.shader = load(SHADERS + look + ".gdshader")
 		made.set_shader_parameter("paper_noise", NOISE)
-		if look == "cutting_mat":
-			made.set_shader_parameter("cuts", CUTS)
 		_materials[look] = made
 	return _materials[look]
 
@@ -61,13 +51,6 @@ static func paper(colour: Color, glow: float = 0.0) -> ShaderMaterial:
 		made.set_shader_parameter("glow", glow)
 		_materials[key] = made
 	return _materials[key]
-
-
-## Tells the grid looks where the board's edges are: half its size in cells, x across and
-## y in depth (the grid lines fall on whole numbers from the corner).
-static func set_board(half_size: Vector2) -> void:
-	for look in GRID_LOOKS:
-		material(look).set_shader_parameter("board_half", half_size)
 
 
 ## The shared magic material: paper in `paper_colour` glowing in `glow_colour` (either one

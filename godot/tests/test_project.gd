@@ -50,6 +50,7 @@ func test_main_scene_draws_the_board_with_a_camera() -> void:
 	assert_not_null(board)
 	assert_gt(board.road_count, 0)
 	assert_gt(board.socket_count, 0)
+	assert_eq(board.builds, 1, "the diorama is built once, for the game's own map")
 	var rig := main.get_node("CameraRig") as CameraRig
 	assert_not_null(rig)
 	assert_not_null(rig.get_child(0) as Camera3D)

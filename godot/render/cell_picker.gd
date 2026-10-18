@@ -7,8 +7,9 @@
 class_name CellPicker
 extends RefCounted
 
-## Above the tallest tile the board can have (a level 2 socket is 2.0 high).
-const TOP := 2.1
+const RULES := preload("res://content/map_rules.gd")
+## Above the highest ground the map can have (its top terrace).
+const TOP := float(RULES.TERRAIN_LEVELS - 1) * TerrainField.TERRACE_STEP + 0.1
 ## How far the ray moves per step while it is walked down, in world units.
 const STEP := 0.02
 
