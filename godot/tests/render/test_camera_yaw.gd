@@ -76,11 +76,14 @@ func test_a_drag_follows_the_yaw_so_the_view_moves_the_way_the_finger_does() -> 
 	var point := before
 	# the ground under the middle of the screen at the start; after a drag right it must sit
 	# to the right of where the middle now is, along the camera's own right
-	for drag in [Vector2(80.0, 0.0), Vector2(-80.0, 0.0), Vector2(0.0, 60.0), Vector2(0.0, -60.0)]:
+	for drag in [Vector2(20.0, 0.0), Vector2(-20.0, 0.0), Vector2(0.0, 15.0), Vector2(0.0, -15.0)]:
 		rig.pan = Vector2.ZERO
 		rig._pan_raw = Vector2.ZERO
 		rig._place()
 		rig.pan_by_pixels(drag)
+		# the raw drag, before the limits damp it
+		rig.pan = rig._pan_raw
+		rig._place()
 		var camera := rig.camera()
 		# where the starting ground point now appears on the screen
 		var moved := camera.unproject_position(Vector3(point.x, 0.0, point.y))
@@ -124,3 +127,23 @@ func test_the_drag_maths_turns_with_the_yaw() -> void:
 	var quarter := CameraRig.ground_drag(Vector2(10.0, 0.0), 0.1, 60.0, 90.0)
 	assert_almost_eq(quarter.x, 0.0, 1e-6)
 	assert_almost_eq(quarter.y, 1.0, 1e-6)
+
+
+func test_a_tall_point_at_a_board_corner_stays_on_screen_when_zoomed_out() -> void:
+	var lift := CameraRig.top_height()
+	# the cliff plus a tower: well above the ground, so the fit must allow for it
+	assert_gte(lift, 2.0 + 1.0)
+	for aspect in [1.0, 4.0 / 3.0, 16.0 / 9.0, 2.16, 2.4]:
+		var rig := CameraRig.new()
+		add_child_autofree(rig)
+		rig.frame(aspect)
+		var camera := rig.camera()
+		var tan_v := tan(deg_to_rad(camera.fov) / 2.0)
+		for corner in BoardSpace.corners():
+			var local := (
+				camera.global_transform.affine_inverse() * (corner + Vector3(0.0, lift, 0.0))
+			)
+			var depth := -local.z
+			assert_gt(depth, 0.0)
+			assert_lte(absf(local.y) / (depth * tan_v), 1.0 + 1e-6, "vertical, aspect %f" % aspect)
+			assert_lte(absf(local.x) / (depth * tan_v * aspect), 1.0 + 1e-6, "horizontal")

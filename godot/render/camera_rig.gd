@@ -11,12 +11,14 @@
 ## road, tape and sockets read at an angle instead of as strict rows and columns. The yaw is one
 ## constant, and a drag is turned by it so the scene still follows the finger.
 ##
-## `fit_distance`, `pitch_for`, `closest_distance`, `pan_limits`, `ground_drag` and `rubber` are
-## plain maths so they can be tested; `frame` places the camera for a screen
+## `fit_distance`, `pitch_for`, `closest_distance`, `footprint`, `pan_bounds`, `top_height`,
+## `ground_drag` and `rubber` are plain maths so they can be tested; `frame` places the
+## camera for a screen
 ## shape and is called again when the window changes.
 class_name CameraRig
 extends Node3D
 
+const TOWERS := preload("res://content/towers.gd")
 ## Metres to the near clip plane.
 const CAMERA_NEAR := 1.0
 ## The narrowest screen the rig frames for (a hidden canvas reports no size).
@@ -56,6 +58,8 @@ var _aspect := 16.0 / 9.0
 # the whole-board distance for the current aspect, so a drag never recomputes it
 var _fit := 0.0
 var _pan_raw := Vector2.ZERO
+var _range := Rect2()
+var _range_key := Vector4(-1.0, -1.0, -1.0, -1.0)
 var _holding := false
 
 
@@ -121,12 +125,58 @@ static func closest_distance(fov_degrees: float, viewport_height: float, fit: fl
 	return minf(distance, fit)
 
 
-## The pans (the camera target, x and z) allowed at a zoom: the target stays inside the board,
-## with the room to move growing from nothing (the whole board in view) to the whole board
-## (closest). Measured in world axes, so the yaw does not change it.
-static func pan_limits(board_half: Vector2, zoom_value: float) -> Rect2:
-	var reach := board_half * clampf(zoom_value, 0.0, 1.0)
-	return Rect2(-reach, reach * 2.0)
+## The part of the ground the screen shows when the camera targets the middle of the board
+## (pan 0) and is turned by `yaw_degrees`: the box around where the four corners of the screen
+## meet the ground. A pan moves the whole footprint, so a box is exact for keeping its corners
+## over the board.
+static func footprint(
+	distance: float,
+	pitch_degrees: float,
+	fov_degrees_value: float,
+	aspect: float,
+	yaw_degrees: float = 0.0
+) -> Rect2:
+	var pitch := deg_to_rad(pitch_degrees)
+	var turn := Basis(Vector3.UP, deg_to_rad(yaw_degrees))
+	var position := turn * Vector3(0.0, sin(pitch) * distance, cos(pitch) * distance)
+	var basis := turn * Basis(Vector3.RIGHT, -pitch)
+	var tan_v := tan(deg_to_rad(fov_degrees_value) / 2.0)
+	var low := Vector2(INF, INF)
+	var high := Vector2(-INF, -INF)
+	for corner in [Vector2(-1.0, -1.0), Vector2(1.0, -1.0), Vector2(-1.0, 1.0), Vector2(1.0, 1.0)]:
+		var direction := basis * Vector3(corner.x * tan_v * aspect, corner.y * tan_v, -1.0)
+		if direction.y >= -1e-6:
+			continue
+		var hit := position + direction * (-position.y / direction.y)
+		low = Vector2(minf(low.x, hit.x), minf(low.y, hit.z))
+		high = Vector2(maxf(high.x, hit.x), maxf(high.y, hit.z))
+	return Rect2(low, high - low)
+
+
+## The pans (the camera target, x and z) that keep the whole screen over the board: the board's
+## half size less what the screen shows each way. An axis where the screen shows more than the
+## board has nothing to pan, so its range is the single point 0.
+static func pan_bounds(board_half: Vector2, foot: Rect2) -> Rect2:
+	var low := -board_half - foot.position
+	var high := board_half - foot.end
+	if low.x > high.x:
+		low.x = 0.0
+		high.x = 0.0
+	if low.y > high.y:
+		low.y = 0.0
+		high.y = 0.0
+	return Rect2(low, high - low)
+
+
+## The highest point the board can have, for the fit: the top cliff plus the tallest tower body
+## (a default look at its top level). A tower at a corner of the board must stay on screen.
+static func top_height() -> float:
+	var look := TowerLook.new()
+	var top_level := 0
+	for def in TOWERS.DEFS.values():
+		top_level = maxi(top_level, (def.cost as Array).size() - 1)
+	var cliff: float = Board.LEVEL_HEIGHTS[Board.LEVEL_HEIGHTS.size() - 1]
+	return cliff + look.base_height + look.height_per_level * float(top_level)
 
 
 ## How far the camera target moves on the ground (x and z) for a drag of `delta` screen pixels:
@@ -200,9 +250,15 @@ func ground_under(pixel: Vector2) -> Vector2:
 	return Vector2(hit.x, hit.z)
 
 
-## The pans allowed now: the target stays inside the board.
+## The pans allowed now: the whole screen stays over the board.
 func pan_range() -> Rect2:
-	return pan_limits(BoardSpace.size() / 2.0, zoom)
+	# the range only changes with the zoom, the screen shape, the fit and the canvas height
+	var key := Vector4(zoom, _aspect, _fit, canvas_height)
+	if key != _range_key:
+		_range_key = key
+		var foot := footprint(_distance(), pitch_for(zoom), fov_degrees, _aspect, YAW_DEGREES)
+		_range = pan_bounds(BoardSpace.size() / 2.0, foot)
+	return _range
 
 
 ## Mouse wheel notches: positive zooms in.
@@ -254,7 +310,11 @@ func _place() -> void:
 
 
 func _fit_now() -> float:
-	return fit_distance(BoardSpace.corners(), MAX_PITCH, fov_degrees, _aspect, margin, YAW_DEGREES)
+	var points: Array[Vector3] = []
+	for corner in BoardSpace.corners():
+		points.append(corner)
+		points.append(corner + Vector3(0.0, top_height(), 0.0))
+	return fit_distance(points, MAX_PITCH, fov_degrees, _aspect, margin, YAW_DEGREES)
 
 
 func _screen_aspect() -> float:
