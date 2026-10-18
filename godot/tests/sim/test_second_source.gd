@@ -119,8 +119,10 @@ func test_the_second_route_joins_the_main_one_at_a_known_distance() -> void:
 	var main := game.routes[0]
 	var second := game.routes[1]
 	var offset := game.second_offset
-	# one cell past the join the foe stands where a main-road foe at that distance stands
-	var on_second := second.cumulative[game.map.feeder_length + 1] + 2.0
+	# past the join (once the curves near it have settled) the foe stands where a main-road foe
+	# at that distance stands
+	var settled := game.map.feeder_length + Route.JOIN_SETTLE_CELLS
+	var on_second := second.cell_distance(settled) + 1.0
 	var a := second.position_at(on_second)
 	var b := main.position_at(on_second - offset)
 	assert_almost_eq(a.x, b.x, 1e-9)
