@@ -310,7 +310,7 @@ Built and merged: the repo, CI/CD and protected `main` (Phase 0); the seeded, de
 - [x] CI runs lint, GUT and the export, and a red check blocks the deploy.
 - [x] Fixtures exist and the TypeScript tests regenerate them identically.
 - [x] **Go/no-go:** on the owner's iPhone Safari the export's download size, start time, memory and an 80-instance stub scene are within the budget set here. If not, stop and take the fallback in Risks (keep Three.js for web, Godot for native only) before any Phase 4 work.
-  - **Result (2026-10-10): go.** The stub runs on the owner's iPhone 15 Pro (60 Hz). The export is 11.67 MB gzipped (`index.wasm` 10.15 MB, `index.pck` 1.40 MB). Download budget: 14 MB gzipped, as CI enforces. Not measured: start time and memory in numbers, frame rate beyond "works", and any mid-range phone; the iPhone 15 Pro is a flagship, so the 60 fps target on a mid-range phone stays open for the Phase 5 gate. Phase 4 started before this was recorded, on the owner's instruction.
+  - **Result (2026-10-10): go.** The stub runs on the owner's iPhone 15 Pro (60 Hz). The export is 11.67 MB gzipped (`index.wasm` 10.15 MB, `index.pck` 1.40 MB). Download budget: 14 MB gzipped, as CI enforces (raised to 18.5 MB on 2026-10-18 for the music tracks). Not measured: start time and memory in numbers, frame rate beyond "works", and any mid-range phone; the iPhone 15 Pro is a flagship, so the 60 fps target on a mid-range phone stays open for the Phase 5 gate. Phase 4 started before this was recorded, on the owner's instruction.
 
 ### Phase 4 · The simulation in GDScript, designed from the GDD
 
@@ -459,7 +459,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [ ] Music: commission, CC0 tracks, or skip for v1
 - [x] Pages: `main` is the live "latest" build, deployed after `ci` passes. Tags only create GitHub Releases.
 - [ ] Testing on a phone before merge: LAN or an uploaded build artifact (Pages can't preview PRs)
-- [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows.
+- [x] Download budget for the Godot web build: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows. Raised to 18.5 MB on 2026-10-18 for the three full-length music tracks (about 5.8 MB of Vorbis that does not gzip); the asset budget went from 6 MB to 9 MB. Re-set after the iPhone measurement (ticket #124).
 - [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package were renamed on 2026-10-13 (#163).
 - [x] Meshy: tried and dropped (owner, 2026-10-13): the generated models were not good enough, so the owner models every foe in Blender. No generated models are used; the earlier paid-plan rules no longer apply.
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Decided by the Scrap Goblin spike (ticket #157); fallback is part animation and fewer animated instances.
