@@ -5,9 +5,12 @@ const MAIN_SCENE := preload("res://main.tscn")
 const RULES := preload("res://content/game_rules.gd")
 
 
+## The main scene, driven only by the test: the engine does not call its `_process` with the
+## real frame time (under load that frame is long and ticks the game by however long it took).
 func _main() -> Node:
 	var main := MAIN_SCENE.instantiate()
 	add_child_autofree(main)
+	main.set_process(false)
 	await get_tree().process_frame
 	return main
 
@@ -273,6 +276,8 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 		main.set_process(false)
 		await get_tree().process_frame
 		main._start(case[1])
+		# the overview, where every socket is on screen (a run starts on the spawn side)
+		(main.get_node("CameraRig") as CameraRig).show_point(Vector3.ZERO, 0.0)
 		var hud := main.get_node("Hud")
 		var menu := hud.get_node("BuildMenu") as BuildMenu
 		var menu_button := hud.get_node("MenuButton") as Button

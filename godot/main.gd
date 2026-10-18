@@ -9,10 +9,12 @@
 ## page with `?seed=42` to start on a given seed.
 extends Node3D
 
+## How far past the 44 pt threshold a flight aims, in canvas pixels (see `_fly_to_socket`).
+const FLIGHT_AIM_MARGIN := 0.5
 const EARLY_RULES := preload("res://content/game_rules.gd")
-## The view a run starts in: the whole board, centred (owner decision, 2026-10-14).
-const START_ZOOM := 0.0
 const MESSAGE_SECONDS := 2.0
+## Said when even the closest zoom draws a socket under 44 pt (a very small window).
+const TOO_SMALL_MESSAGE := "Make the window bigger to build here"
 ## Where the tower card sits: beside the build menu, this far from it and from the edges.
 const CARD_MARGIN := 14.0
 const MENU_ICON := preload("res://assets/icons/menu.svg")
@@ -21,6 +23,10 @@ const FREE_COLOUR := Color(0.2, 0.9, 0.9, 0.55)
 const BLOCKED_COLOUR := Color(0.95, 0.3, 0.25, 0.55)
 ## Pixels of drag that one unit of a trackpad pan gesture stands for.
 const PAN_GESTURE_PIXELS := 12.0
+
+## Points per canvas pixel for the 44 pt rule; 0 reads them from the display. Tests set the
+## phone's, because a headless run has no display.
+var points_per_pixel := 0.0
 
 var _game: GameState
 var _clock := Clock.new()
@@ -45,6 +51,10 @@ var _auto := AutoWave.new()
 var _progress := IntroProgress.default()
 # whether the game was paused by the player when an overlay opened over it
 var _paused_before_overlay := false
+# the socket a tap flew the camera to, selected when the camera arrives
+var _fly_target := BoardSpace.NO_CELL
+# the zoom last frame, to see the player zoom out past a selected socket
+var _zoom_seen := 0.0
 
 @onready var _board: Board = $Board
 @onready var _rig: CameraRig = $CameraRig
@@ -72,8 +82,8 @@ var _paused_before_overlay := false
 
 func _ready() -> void:
 	var from_url: Variant = _seed_from_url()
+	_rig.flight_ended.connect(_on_flight_ended)
 	_start(from_url if from_url is int else _board.map_seed)
-	_rig.set_zoom(START_ZOOM)
 	add_child(_audio)
 	_menu_button.toggled.connect(
 		func(on: bool) -> void:
@@ -156,6 +166,7 @@ func _process(delta: float) -> void:
 	_update_launch_button()
 	_sync_intro()
 	_menu.set_buttons(_game.buttons)
+	_close_if_zoomed_out()
 	if _menu.visible:
 		# the camera may have panned or zoomed since the menu opened
 		_place_menu()
@@ -246,11 +257,91 @@ func _notification(what: int) -> void:
 		_fingers.reset()
 
 
+## A tap picks a cell. A socket (or the tower on it) drawn under 44 pt, as at the overview,
+## is not selected yet: the camera flies in to it first and selects it on arrival (#328).
 func _on_tap(position: Vector2) -> void:
+	_rig.cancel_flight()
 	var cell := CellPicker.cell_at(_camera, position, _board.surface_height)
+	if cell != BoardSpace.NO_CELL:
+		var anchor := _game.map.socket_anchor_at(cell)
+		if anchor != GameMap.NO_SOCKET and not socket_tappable(anchor):
+			_fly_to_socket(anchor)
+			return
 	select_cell(cell)
 	if cell == BoardSpace.NO_CELL:
 		_show_message("Tap a socket")
+
+
+## Whether a socket block is drawn big enough to build, upgrade or sell on: its narrowest
+## width on screen is at least `TapZoom.MIN_POINTS`.
+func socket_tappable(anchor: Vector2i) -> bool:
+	return _rig.square_pixels(_socket_top(anchor), float(_game.map.footprint)) >= tap_pixels()
+
+
+## The least width, in canvas pixels, that a tap target needs on this screen (44 pt).
+func tap_pixels() -> float:
+	if points_per_pixel > 0.0:
+		return TapZoom.MIN_POINTS / points_per_pixel
+	# the only display reads (a headless run has no window: 0, and then a pixel is a point);
+	# #97 logs them on the iPhone
+	return tap_pixels_for(
+		get_viewport().get_visible_rect().size.y,
+		float(DisplayServer.window_get_size().y),
+		DisplayServer.screen_get_scale()
+	)
+
+
+## The least width, in canvas pixels, of a 44 pt tap target on a canvas `canvas_height` pixels
+## tall, drawn in a window `window_pixels` tall on a screen of `screen_scale` pixels per point.
+static func tap_pixels_for(
+	canvas_height: float, window_pixels: float, screen_scale: float
+) -> float:
+	return TapZoom.MIN_POINTS / TapZoom.points_per_pixel(canvas_height, window_pixels, screen_scale)
+
+
+## Flies the camera in to a socket until it is drawn at least 44 pt, then selects it.
+func _fly_to_socket(anchor: Vector2i) -> void:
+	select_cell(BoardSpace.NO_CELL)
+	var top := _socket_top(anchor)
+	var side := float(_game.map.footprint)
+	# aim a hair past the threshold: the flight lands through 32-bit lerps, so a zoom found
+	# exactly at 44 pt can land a few millionths of a pixel under it and fail the re-check
+	var aim := tap_pixels() + FLIGHT_AIM_MARGIN
+	_rig.fly_to(top, maxf(_rig.zoom, _rig.zoom_to_show(top, side, aim)))
+	# set after `fly_to`, which ends any earlier flight (and drops its target)
+	_fly_target = anchor
+
+
+func _on_flight_ended(arrived: bool) -> void:
+	var target := _fly_target
+	_fly_target = BoardSpace.NO_CELL
+	if not arrived or target == BoardSpace.NO_CELL:
+		return
+	# a window so small that even the closest zoom draws a socket under 44 pt builds nothing
+	if socket_tappable(target):
+		select_cell(target)
+	else:
+		_show_message(TOO_SMALL_MESSAGE)
+
+
+## Building, upgrading and selling happen only where the socket is drawn at least 44 pt: when
+## the player zooms out past that, the build menu or tower panel closes.
+func _close_if_zoomed_out() -> void:
+	var zoomed_out := _rig.zoom < _zoom_seen
+	_zoom_seen = _rig.zoom
+	if not zoomed_out or _selected == BoardSpace.NO_CELL:
+		return
+	if not (_menu.visible or _panel.tower() != null):
+		return
+	if not socket_tappable(_selected):
+		select_cell(BoardSpace.NO_CELL)
+
+
+## The middle of a socket block, at the top of its tile.
+func _socket_top(anchor: Vector2i) -> Vector3:
+	var top := BoardSpace.footprint_centre(anchor, _game.map.footprint)
+	top.y = _board.surface_height(anchor)
+	return top
 
 
 ## The game being played (read it; change it only with commands).
@@ -333,6 +424,12 @@ func _start(map_seed: int) -> void:
 		_flow.skip()
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_update_launch_button()
+	# a run starts on the spawn side, at a zoom where its sockets can be tapped (#328)
+	var spawn: Vector2i = _game.map.path[0]
+	_rig.start_view(
+		BoardSpace.cell_to_world(spawn.x, spawn.y), float(_game.map.footprint), tap_pixels()
+	)
+	_zoom_seen = _rig.zoom
 
 
 func _tower_on(cell: Vector2i) -> Tower:

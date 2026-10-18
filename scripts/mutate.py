@@ -31,6 +31,8 @@ from concurrent.futures import ThreadPoolExecutor
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # the godot binary: the GODOT environment variable, else `godot` on the PATH
 GODOT = os.environ.get("GODOT", "godot")
+# repo-root files the tests read through `res://../` (test_project, test_camera_pitch_rule)
+ROOT_FILES = ("CLAUDE.md", ".godot-version")
 
 
 def run_godot(project, *args):
@@ -46,6 +48,9 @@ def prepare(tmp, name):
     dest = os.path.join(tmp, name)
     shutil.copytree(os.path.join(REPO, "godot"), dest, symlinks=True,
                     ignore=shutil.ignore_patterns(".godot"))
+    # each copy sits in `tmp`, so `res://../<file>` is `tmp/<file>`
+    for root_file in ROOT_FILES:
+        shutil.copyfile(os.path.join(REPO, root_file), os.path.join(tmp, root_file))
     out = run_godot(dest, "--import")
     if re.search(r"SCRIPT ERROR|Parse Error", out):
         sys.exit("%s: the project does not import:\n%s" % (name, out[-1500:]))

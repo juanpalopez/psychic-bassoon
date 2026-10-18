@@ -42,6 +42,20 @@ func _move_to(main: Node, position: Vector2) -> void:
 	main._unhandled_input(motion)
 
 
+## A tap on a socket drawn under 44 pt flies the camera in first and selects it on arrival.
+func _land(main: Node) -> void:
+	var rig := main.get_node("CameraRig") as CameraRig
+	for i in 3:
+		rig._process(CameraRig.FLY_SECONDS)
+
+
+## Puts a socket in the middle of the screen at the closest zoom, where a tap selects it at once.
+func _close_on(main: Node, socket: Vector2i) -> void:
+	var game: GameState = main.game()
+	var rig := main.get_node("CameraRig") as CameraRig
+	rig.show_point(BoardSpace.footprint_centre(socket, game.map.footprint), 1.0)
+
+
 func _press(main: Node, position: Vector2, pressed: bool) -> void:
 	var event := InputEventMouseButton.new()
 	event.button_index = MOUSE_BUTTON_LEFT
@@ -75,8 +89,7 @@ func test_the_wheel_zooms_in_and_out() -> void:
 	await get_tree().process_frame
 	var rig := main.get_node("CameraRig") as CameraRig
 	var start := rig.zoom
-	assert_almost_eq(start, main.START_ZOOM, 1e-9)
-	assert_eq(start, 0.0, "a run starts with the whole board in view")
+	assert_gte(start, CameraRig.START_MIN_ZOOM, "a run starts on the spawn side, not the overview")
 	for wheel in [MOUSE_BUTTON_WHEEL_UP, MOUSE_BUTTON_WHEEL_UP]:
 		var event := InputEventMouseButton.new()
 		event.button_index = wheel
@@ -114,6 +127,7 @@ func test_a_tap_with_a_first_finger_that_is_not_index_0_selects_the_socket() -> 
 		var game: GameState = main.game()
 		var camera := (main.get_node("CameraRig") as CameraRig).camera()
 		var socket: Vector2i = game.map.sockets[0]
+		_close_on(main, socket)
 		var at := BoardSpace.footprint_centre(socket, game.map.footprint)
 		var position := camera.unproject_position(at)
 		_finger(main, index, position, true, true)
@@ -128,6 +142,7 @@ func test_a_finger_a_button_took_still_counts_so_another_finger_can_tap_the_boar
 	var game: GameState = main.game()
 	var camera := (main.get_node("CameraRig") as CameraRig).camera()
 	var socket: Vector2i = game.map.sockets[0]
+	_close_on(main, socket)
 	var position := camera.unproject_position(
 		BoardSpace.footprint_centre(socket, game.map.footprint)
 	)
@@ -202,6 +217,7 @@ func test_a_tap_still_picks_the_right_socket_after_zooming_and_panning() -> void
 		if screen.x < 0.0 or screen.y < 0.0 or screen.x > size.x or screen.y > size.y:
 			continue
 		_tap(main, screen)
+		_land(main)
 		assert_eq(main.selected_cell(), socket)
 		tapped += 1
 	assert_gt(tapped, 3, "several sockets were on screen to tap")
@@ -250,5 +266,6 @@ func test_letting_go_over_a_button_does_not_leave_a_finger_stuck() -> void:
 	top.y = (main.get_node("Board") as Board).surface_height(socket)
 	var screen := camera.unproject_position(top)
 	_tap(main, screen)
+	_land(main)
 	var picked: Vector2i = main.selected_cell()
 	assert_ne(picked, BoardSpace.NO_CELL, "the next tap works")

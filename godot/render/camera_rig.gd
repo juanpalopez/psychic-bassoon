@@ -1,22 +1,29 @@
-## The board camera: it frames the whole board, and lets the player pan and zoom.
+## The board camera: it pans across the 32x20 valley, and lets the player pan and zoom.
 ##
-## The view is one number, `zoom`, from 0 (the whole board in view, looking down
+## The view is one number, `zoom`, from 0 (the overview: the whole map in view, looking down
 ## at 62 degrees) to 1 (close, looking in at 56 degrees, cells about 100 px wide
 ## on the 720 px canvas); a pinch or the mouse wheel moves it. The pitch barely changes:
 ## a steep, nearly top-down view keeps units and sockets readable at every zoom. A one-finger drag
-## pans, within the board and rubber-banding back after release. The field of
+## pans, within the map plus `SCENERY_MARGIN` and rubber-banding back after release. The field of
 ## view is about 20 degrees, landscape.
+##
+## A run starts on the spawn side (`start_view`), at a zoom where sockets can be tapped. On a
+## phone the overview draws sockets under 44 pt, so a tap there flies the camera in to the socket
+## first (`zoom_to_show`, `fly_to`); `square_pixels` measures how big a socket is drawn.
 ##
 ## The camera orbits its target by a fixed yaw (`YAW_DEGREES`) about the vertical axis, so the
 ## road, tape and sockets read at an angle instead of as strict rows and columns. The yaw is one
 ## constant, and a drag is turned by it so the scene still follows the finger.
 ##
 ## `fit_distance`, `pitch_for`, `closest_distance`, `footprint`, `pan_bounds`, `top_height`,
-## `ground_drag` and `rubber` are plain maths so they can be tested; `frame` places the
-## camera for a screen
-## shape and is called again when the window changes.
+## `ground_drag`, `rubber`, `view_basis`, `eye_offset`, `project` and `start_pan` are plain maths
+## so they can be tested; `frame` places the camera for a screen shape and is called again when
+## the window changes.
 class_name CameraRig
 extends Node3D
+
+## A flight (`fly_to`) ended: `arrived` is false when the player took the camera back first.
+signal flight_ended(arrived: bool)
 
 const TOWERS := preload("res://content/towers.gd")
 ## Metres to the near clip plane.
@@ -25,8 +32,12 @@ const CAMERA_NEAR := 1.0
 const MIN_ASPECT := 0.5
 ## The turn about the vertical axis (degrees): the camera sits to the +x side of the target.
 const YAW_DEGREES := 30.0
-## The share of the screen (about its centre) that must stay over the board when panning.
+## The share of the screen (about its centre) that must stay over the map plus
+## `SCENERY_MARGIN` when panning.
 const SCREEN_SHARE_OVER_BOARD := 0.08
+## How far past the map's edge (in cells) the middle of the screen may go: the spawn and the
+## Heartstone sit on the edge, and this lets them come to the middle with scenery beyond them.
+const SCENERY_MARGIN := 2.0
 ## The zoom at which the pans are fully open; below it they narrow toward 0 (the whole board).
 const PAN_RAMP_ZOOM := 0.5
 ## The pitch (degrees below the horizon) zoomed out and zoomed in.
@@ -44,6 +55,14 @@ const WHEEL_STEP := 0.08
 const PINCH_SENSITIVITY := 0.6
 ## How fast the view settles when the finger lets go (per second).
 const SPRING := 14.0
+## How long a flight to a tapped socket takes (seconds).
+const FLY_SECONDS := 0.35
+## Where the spawn sits at the start of a run: this share of the screen width from the left.
+const START_SPAWN_SHARE := 0.25
+## A run never starts further out than this zoom, so even a big screen starts on the spawn side.
+const START_MIN_ZOOM := 0.4
+## Halvings in the search for the zoom that draws a socket big enough (2^-24 of the zoom range).
+const ZOOM_SEARCH_STEPS := 24
 
 @export var fov_degrees: float = 20.0
 ## Room left around the board, as a share of its size.
@@ -65,6 +84,13 @@ var _pan_raw := Vector2.ZERO
 var _range := Rect2()
 var _range_key := Vector4(-1.0, -1.0, -1.0, -1.0)
 var _holding := false
+var _flying := false
+var _flight_time := 0.0
+var _flight_from_pan := Vector2.ZERO
+var _flight_to_pan := Vector2.ZERO
+# zooms stay 64-bit floats: a Vector3 would round them to 32 bits
+var _flight_from_zoom := 0.0
+var _flight_to_zoom := 0.0
 
 
 func _ready() -> void:
@@ -73,6 +99,9 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if _flying:
+		_advance_flight(delta)
+		return
 	var range := pan_range()
 	if _holding:
 		pan = _rubbered(_pan_raw, range)
@@ -228,6 +257,42 @@ static func rubber(value: float, low: float, high: float) -> float:
 	return value
 
 
+## How the camera is turned for a pitch (degrees below the horizon) and a yaw: no roll.
+static func view_basis(pitch_degrees: float, yaw_degrees: float) -> Basis:
+	return (
+		Basis(Vector3.UP, deg_to_rad(yaw_degrees))
+		* Basis(Vector3.RIGHT, -deg_to_rad(pitch_degrees))
+	)
+
+
+## Where the camera sits relative to the point it looks at, `distance` away.
+static func eye_offset(distance: float, pitch_degrees: float, yaw_degrees: float) -> Vector3:
+	var pitch := deg_to_rad(pitch_degrees)
+	return (
+		Basis(Vector3.UP, deg_to_rad(yaw_degrees))
+		* Vector3(0.0, sin(pitch) * distance, cos(pitch) * distance)
+	)
+
+
+## Where a world point is drawn on a canvas of `canvas` pixels, for a camera at `eye` turned by
+## `basis` with a vertical field of view of `fov_degrees_value` (as `Camera3D.unproject_position`
+## does, but for any view, so a view can be measured before the camera goes there).
+static func project(
+	point: Vector3, eye: Vector3, basis: Basis, fov_degrees_value: float, canvas: Vector2
+) -> Vector2:
+	var local := basis.transposed() * (point - eye)
+	var depth := maxf(-local.z, 1e-6)
+	var scale := canvas.y / (2.0 * tan(deg_to_rad(fov_degrees_value) / 2.0) * depth)
+	return canvas / 2.0 + Vector2(local.x, -local.y) * scale
+
+
+## The pan a run starts at: the spawn, moved along the camera's right so that it sits
+## `START_SPAWN_SHARE` of the way across a screen showing `ground_width` of ground.
+static func start_pan(spawn: Vector2, ground_width: float, yaw_degrees: float) -> Vector2:
+	var right := Basis(Vector3.UP, deg_to_rad(yaw_degrees)) * Vector3.RIGHT
+	return spawn + Vector2(right.x, right.z) * ground_width * (0.5 - START_SPAWN_SHARE)
+
+
 ## The camera this rig places.
 func camera() -> Camera3D:
 	if _camera == null:
@@ -247,6 +312,7 @@ func frame(aspect: float) -> void:
 
 
 func set_zoom(value: float) -> void:
+	cancel_flight()
 	zoom = clampf(value, 0.0, 1.0)
 	_place()
 
@@ -275,18 +341,147 @@ func ground_under(pixel: Vector2) -> Vector2:
 	return Vector2(hit.x, hit.z)
 
 
-## The pans allowed now: the middle `SCREEN_SHARE_OVER_BOARD` of the screen stays over the board,
-## so the board's outer rows can come to the middle of the screen and desk shows around it.
+## The pans allowed now: the middle `SCREEN_SHARE_OVER_BOARD` of the screen stays over the map
+## plus `SCENERY_MARGIN`, so the map's outer rows can come to the middle of the screen with
+## scenery around them.
 func pan_range() -> Rect2:
 	# the range only changes with the zoom, the screen shape, the fit and the canvas height
 	var key := Vector4(zoom, _aspect, _fit, canvas_height)
 	if key != _range_key:
 		_range_key = key
-		var foot := footprint(
-			_distance(), pitch_for(zoom), fov_degrees, _aspect, YAW_DEGREES, SCREEN_SHARE_OVER_BOARD
-		)
-		_range = pan_ramp(pan_bounds(BoardSpace.size() / 2.0, foot), zoom)
+		_range = pan_range_at(zoom)
 	return _range
+
+
+## The pans allowed at a zoom (see `pan_range`).
+func pan_range_at(zoom_value: float) -> Rect2:
+	var foot := footprint(
+		_distance_at(zoom_value),
+		pitch_for(zoom_value),
+		fov_degrees,
+		_aspect,
+		YAW_DEGREES,
+		SCREEN_SHARE_OVER_BOARD
+	)
+	var half := BoardSpace.size() / 2.0 + Vector2.ONE * SCENERY_MARGIN
+	return pan_ramp(pan_bounds(half, foot), zoom_value)
+
+
+## How wide (its narrowest width, in canvas pixels) a flat square `side` cells wide around
+## `centre` is drawn now.
+func square_pixels(centre: Vector3, side: float) -> float:
+	return square_pixels_at(zoom, pan, centre, side)
+
+
+## How wide a flat square around `centre` would be drawn at this zoom and pan.
+func square_pixels_at(zoom_value: float, pan_value: Vector2, centre: Vector3, side: float) -> float:
+	var pitch := pitch_for(zoom_value)
+	var eye := (
+		Vector3(pan_value.x, 0.0, pan_value.y)
+		+ eye_offset(_distance_at(zoom_value), pitch, YAW_DEGREES)
+	)
+	var basis := view_basis(pitch, YAW_DEGREES)
+	var height := maxf(_viewport_height(), 1.0)
+	var canvas := Vector2(height * _aspect, height)
+	var drawn := PackedVector2Array()
+	for corner in TapZoom.square_corners(centre, side):
+		drawn.append(project(corner, eye, basis, fov_degrees, canvas))
+	return TapZoom.narrowest_width(drawn)
+
+
+## The pan that brings a point (it may be raised) to the middle of the screen at a zoom, as near
+## as the limits allow.
+func pan_to_centre(point: Vector3, zoom_value: float) -> Vector2:
+	var forward := -view_basis(pitch_for(zoom_value), YAW_DEGREES).z
+	var ground := point + forward * (point.y / -forward.y)
+	var range := pan_range_at(zoom_value)
+	return Vector2(ground.x, ground.z).clamp(range.position, range.end)
+
+
+## The least zoom at which a flat square `side` cells wide around `centre`, brought to the middle
+## of the screen as near as the limits allow, is drawn at least `min_pixels` across its narrowest
+## width; 1 when even the closest zoom draws it smaller.
+func zoom_to_show(centre: Vector3, side: float, min_pixels: float) -> float:
+	if _shown_pixels(centre, side, 0.0) >= min_pixels:
+		return 0.0
+	if _shown_pixels(centre, side, 1.0) < min_pixels:
+		return 1.0
+	var low := 0.0
+	var high := 1.0
+	for i in ZOOM_SEARCH_STEPS:
+		var middle := (low + high) / 2.0
+		if _shown_pixels(centre, side, middle) >= min_pixels:
+			high = middle
+		else:
+			low = middle
+	return high
+
+
+## Eases the camera to `target_zoom` with `point` in the middle of the screen (as near as the
+## limits allow) over `FLY_SECONDS`, then emits `flight_ended(true)`. A drag, a pinch or a zoom
+## by the player ends it early.
+func fly_to(point: Vector3, target_zoom: float) -> void:
+	cancel_flight()
+	var to_zoom := clampf(target_zoom, 0.0, 1.0)
+	var to_pan := pan_to_centre(point, to_zoom)
+	_flight_from_pan = pan
+	_flight_to_pan = to_pan
+	_flight_from_zoom = zoom
+	_flight_to_zoom = to_zoom
+	_flight_time = 0.0
+	_holding = false
+	_flying = true
+
+
+## Puts the camera at a zoom with `point` in the middle of the screen (as near as the limits
+## allow) at once, with no flight.
+func show_point(point: Vector3, zoom_value: float) -> void:
+	cancel_flight()
+	_holding = false
+	zoom = clampf(zoom_value, 0.0, 1.0)
+	pan = pan_to_centre(point, zoom)
+	_pan_raw = pan
+	_place()
+
+
+## Whether a flight is under way.
+func flying() -> bool:
+	return _flying
+
+
+## Ends a flight where the camera is now and emits `flight_ended(false)`; no flight, nothing.
+func cancel_flight() -> void:
+	if not _flying:
+		return
+	_flying = false
+	_pan_raw = pan
+	flight_ended.emit(false)
+
+
+## The view a run starts in: on the spawn side, with the spawn `START_SPAWN_SHARE` of the way
+## across the screen, at the least zoom where a socket `side` cells wide in the middle of the
+## screen is `min_pixels` across (and no further out than `START_MIN_ZOOM`).
+func start_view(spawn: Vector3, side: float, min_pixels: float) -> void:
+	cancel_flight()
+	_holding = false
+	var centred := 0.0
+	if _centred_pixels(side, 1.0) < min_pixels:
+		centred = 1.0
+	elif _centred_pixels(side, 0.0) < min_pixels:
+		var low := 0.0
+		centred = 1.0
+		for i in ZOOM_SEARCH_STEPS:
+			var middle := (low + centred) / 2.0
+			if _centred_pixels(side, middle) >= min_pixels:
+				centred = middle
+			else:
+				low = middle
+	zoom = maxf(centred, START_MIN_ZOOM)
+	var width := 2.0 * _distance() * tan(deg_to_rad(fov_degrees) / 2.0) * _aspect
+	var range := pan_range()
+	pan = start_pan(Vector2(spawn.x, spawn.z), width, YAW_DEGREES).clamp(range.position, range.end)
+	_pan_raw = pan
+	_place()
 
 
 ## Mouse wheel notches: positive zooms in.
@@ -296,6 +491,7 @@ func zoom_steps(steps: float) -> void:
 
 ## A drag of `delta` screen pixels: the scene follows the finger.
 func pan_by_pixels(delta: Vector2) -> void:
+	cancel_flight()
 	_holding = true
 	var height := maxf(_viewport_height(), 1.0)
 	var ground_per_pixel := 2.0 * _distance() * tan(deg_to_rad(fov_degrees) / 2.0) / height
@@ -315,26 +511,46 @@ func _rubbered(raw: Vector2, range: Rect2) -> Vector2:
 	)
 
 
+func _shown_pixels(centre: Vector3, side: float, zoom_value: float) -> float:
+	return square_pixels_at(zoom_value, pan_to_centre(centre, zoom_value), centre, side)
+
+
+## A square at the point the camera looks at, at a zoom: the same wherever the camera is.
+func _centred_pixels(side: float, zoom_value: float) -> float:
+	return square_pixels_at(zoom_value, Vector2.ZERO, Vector3.ZERO, side)
+
+
+func _advance_flight(delta: float) -> void:
+	_flight_time = minf(_flight_time + delta, FLY_SECONDS)
+	var eased := smoothstep(0.0, 1.0, _flight_time / FLY_SECONDS)
+	zoom = lerpf(_flight_from_zoom, _flight_to_zoom, eased)
+	pan = _flight_from_pan.lerp(_flight_to_pan, eased)
+	_pan_raw = pan
+	_place()
+	if _flight_time >= FLY_SECONDS:
+		_flying = false
+		flight_ended.emit(true)
+
+
 ## Camera distance from its target at the current zoom.
 func _distance() -> float:
+	return _distance_at(zoom)
+
+
+func _distance_at(zoom_value: float) -> float:
 	if _fit <= 0.0:
 		_fit = _fit_now()
 	var closest := closest_distance(fov_degrees, _viewport_height(), _fit)
-	return lerpf(_fit, closest, zoom)
+	return lerpf(_fit, closest, clampf(zoom_value, 0.0, 1.0))
 
 
 func _place() -> void:
 	var camera_node := camera()
-	var pitch := deg_to_rad(pitch_for(zoom))
-	var distance := _distance()
+	var pitch := pitch_for(zoom)
 	camera_node.fov = fov_degrees
-	var turn := Basis(Vector3.UP, deg_to_rad(YAW_DEGREES))
 	# orbit the pan target: the same offset as before the yaw, turned about the vertical axis
-	camera_node.basis = turn * Basis(Vector3.RIGHT, -pitch)
-	camera_node.position = (
-		Vector3(pan.x, 0.0, pan.y)
-		+ turn * Vector3(0.0, sin(pitch) * distance, cos(pitch) * distance)
-	)
+	camera_node.basis = view_basis(pitch, YAW_DEGREES)
+	camera_node.position = Vector3(pan.x, 0.0, pan.y) + eye_offset(_distance(), pitch, YAW_DEGREES)
 
 
 func _fit_now() -> float:
