@@ -59,7 +59,6 @@ Generated with numpy for the papercraft shaders in `render/paper/` (seamless noi
 | File | Source | Licence | Edits |
 | --- | --- | --- | --- |
 | `textures/paper/paper_noise.png` | Original, the owner (seamless paper fibre, blotch, speck and crinkle noise) | Owned by the owner (all rights reserved) | read by `render/paper_look.gd` |
-| `textures/paper/mat_cuts.png` | Original, the owner (seamless healed cut marks for the cutting mat) | Owned by the owner (all rights reserved) | read by `render/paper_look.gd` |
 
 ## Fonts
 

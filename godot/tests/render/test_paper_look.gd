@@ -4,9 +4,9 @@
 extends GutTest
 
 const INCLUDE := '#include "res://render/paper/painted.gdshaderinc"'
-## The looks allowed their own light: wet ink and glass may shine (STYLE.md: only water and
-## magic shine), and the unshaded beam and bars have no light at all.
-const OWN_LIGHT: Array[String] = ["blot_ink", "glass", "prism_beam", "foe_bar"]
+## The looks allowed their own light: wet ink, glass and the river's water may shine
+## (STYLE.md: only water and magic shine), and the unshaded beam and bars have no light at all.
+const OWN_LIGHT: Array[String] = ["blot_ink", "glass", "prism_beam", "foe_bar", "water"]
 
 
 func _code(look: String) -> String:

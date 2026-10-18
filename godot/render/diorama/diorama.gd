@@ -11,9 +11,9 @@
 ## - `Scatter`: the forests, rocks, dirt and grass (a placeholder `PlaceholderScatter` until #326).
 ##
 ## Plug a builder in with `use_builder("RoadBeds", builder)` (any `DioramaBuilder`); it is built
-## at once if the field exists, and on every later `build`. The ground's look is
-## `ground_material` (a vertex-colour material: rgb the colour in linear light, alpha the baked
-## contact shading), so #327's painted paper swaps in with one assignment before `build`.
+## at once if the field exists, and on every later `build`. The ground wears `ground_material`
+## (`terrain_vc`: the painted paper of #327 with the cliffs' flutes and the haze), a vertex-colour
+## material: rgb the colour in linear light, alpha the baked contact shading.
 @tool
 class_name Diorama
 extends Node3D
