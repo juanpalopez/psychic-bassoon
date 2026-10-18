@@ -12,7 +12,7 @@ How to explore without spending a full sweep: change one thing at a time, play o
 
 Options: `--seeds=` (comma-separated map seeds), `--profiles=` (`spoolOnly`, `mortarHeavy`, `prismHeavy`, `mix`; see `godot/content/bot_profiles.gd`) and `--waves=` (waves to clear, 1 to 20; the run also stops when the Heartstone falls, when wave 20 is cleared and the run is won, or after 30 minutes of play). `--detail` adds the wave tables below. Twenty-four runs of about 20 minutes of play each take about a minute.
 
-The bot (`godot/sim/bot`) builds its profile's towers in turn on the sockets that reach the most road, saves up when it cannot pay, upgrades (lowest level, then cheapest) once every socket has a tower, and launches the next wave as soon as none is running. It is a steady, mildly clever player, not an expert: it never sells, never calls a wave early (in these profiles), and builds in a fixed order. A human who plays well should do better; a human who plays badly, worse.
+The bot (`godot/sim/bot`) builds its profile's towers in turn on the sockets that reach the most road, saves up when it cannot pay, upgrades (lowest level, then cheapest) once every socket has a tower or it has `MAX_TOWERS` (15) of them (from #320; it builds again only when every tower is at the top level), and launches the next wave as soon as none is running. It is a steady, mildly clever player, not an expert: it never sells, never calls a wave early (in these profiles), and builds in a fixed order. A human who plays well should do better; a human who plays badly, worse.
 
 ## Baseline (the numbers inherited from the prototype, on the 22 by 16 board with one road)
 
@@ -161,7 +161,7 @@ Each item of the list is one configuration: `"file:CONSTANT": value` sets a `con
 
 ## Limits of the bot
 
-- It saves up for its next tower and upgrades nothing until every socket has a tower, which is why the lost runs show almost no upgrades: they were still building when the waves caught up.
+- It saves up for its next tower and upgrades nothing until every socket has a tower or it has 15 (`MAX_TOWERS`, #320), which is why the lost runs show few upgrades: they were still building when the waves caught up.
 - The per-wave rows count kills and leaks since the previous clear. A game that ends in the middle of a wave keeps those numbers in `unfinished`, and with early calls kills belong to the wave that clears next.
 - It never sells, never moves a tower and plays one fixed build order per profile.
 
@@ -378,3 +378,46 @@ The join point first drifted late on the main road, so the second road met the f
 | 12, 20, 33 | 20, 36, 62 | 36, 72, 140 | 5 | 5 | 9 | 12 | 8 |
 
 **The chosen numbers** put all five strategies in the band (Spool 5, Mortar 4, Prism 5, Mix 9, Guard mix 6 of 16). The Spool Guard and the Prism Spire lose about 14 and 15 percent damage, the Thimble Mortar gains 12 percent. The sockets move on every map that gets a second road (its cells are road), so the early waves play differently even though the road and waves 1 to 10 do not change. The replay goldens were regenerated (the mix game now plays seed 7, a won run with two routes).
+
+## The 32 by 20 valley (2026-10-18, #320)
+
+Owner decision (`docs/lessons/2026-10-18-valley-map.md`): the board is 32 by 20 cells and the camera pans across it. Boards at least `VALLEY_MIN_COLS` (24) wide use a valley road shape (`godot/content/map_rules.gd`: straight runs of 3 to 5 cells, sideways turns of 3 to 8 columns, at least 24 cells more than the board is wide) and 24 to 30 sockets; the 16 by 11 board and the fixtures' boards keep the classic numbers. The bot builds at most `MAX_TOWERS` (15, the most sockets the 16 by 11 board had) before it upgrades, so it does not spread its Buttons over twice the towers. No foe, tower or wave number changed; the balance pass for the bigger board is #237.
+
+**Sweep** (seeds 1 to 8, 20 waves, all five strategies; median as the tool prints it, the upper of the middle two; raw files `docs/balance/valley-map-before-16x11-seeds-1-8.txt` from `main` at 5d02ab5 and `docs/balance/valley-map-32x20-seeds-1-8.txt`, commands in their headers). Mean main road: 43.9 cells on 16 by 11, 75.0 on the valley; mean sockets 12.9 and 26.2.
+
+| Profile | Median waves 16x11 | Median waves 32x20 | Wins of 8, 16x11 | Wins of 8, 32x20 | Leaks per cleared wave, 16x11 | Leaks per cleared wave, 32x20 | Mean wave clear 16x11 (s) | Mean wave clear 32x20 (s) | Towers at the end, 32x20 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| spoolOnly | 19 | 20 | 3 | 7 | 0.52 | 0.22 | 45.7 | 66.5 | 26.2 |
+| mortarHeavy | 17 | 17 | 1 | 1 | 0.73 | 0.94 | 54.4 | 82.3 | 17.0 |
+| prismHeavy | 19 | 20 | 2 | 5 | 0.60 | 0.48 | 51.0 | 74.8 | 20.4 |
+| mix | 20 | 20 | 5 | 5 | 0.48 | 0.50 | 51.3 | 75.3 | 21.6 |
+| guardMix | 20 | 17 | 4 | 3 | 0.45 | 0.77 | 55.8 | 84.7 | 18.0 |
+
+Per wave, over all five strategies (the runs still alive at that wave):
+
+| Wave | Clear 16x11 (s) | Clear 32x20 (s) | Leaks 16x11 | Leaks 32x20 | Runs 16x11 | Runs 32x20 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | 15 | 24 | 0.00 | 0.00 | 40 | 40 |
+| 2 | 17 | 25 | 0.00 | 0.00 | 40 | 40 |
+| 3 | 16 | 23 | 0.00 | 0.00 | 40 | 40 |
+| 4 | 48 | 78 | 0.02 | 0.12 | 40 | 40 |
+| 5 | 77 | 121 | 0.47 | 1.13 | 40 | 40 |
+| 6 | 54 | 88 | 0.05 | 0.15 | 40 | 40 |
+| 7 | 57 | 88 | 0.10 | 0.10 | 40 | 40 |
+| 8 | 54 | 89 | 0.12 | 0.05 | 40 | 40 |
+| 9 | 53 | 82 | 0.05 | 0.63 | 40 | 40 |
+| 10 | 95 | 143 | 0.92 | 1.35 | 39 | 37 |
+| 11 | 47 | 72 | 0.50 | 1.05 | 38 | 37 |
+| 12 | 42 | 71 | 0.23 | 1.06 | 38 | 34 |
+| 13 | 48 | 73 | 0.21 | 1.06 | 38 | 33 |
+| 14 | 44 | 68 | 0.36 | 0.56 | 36 | 32 |
+| 15 | 63 | 85 | 1.65 | 1.16 | 34 | 31 |
+| 16 | 48 | 66 | 0.09 | 0.31 | 34 | 29 |
+| 17 | 57 | 68 | 0.60 | 0.41 | 30 | 29 |
+| 18 | 66 | 82 | 0.56 | 0.42 | 23 | 26 |
+| 19 | 76 | 81 | 1.73 | 0.48 | 22 | 23 |
+| 20 | 112 | 114 | 3.73 | 0.10 | 15 | 21 |
+
+**What it says** (for #237): the road is 1.7 times as long and a wave takes about 1.5 times as long to clear (a won run is 19 to 30 minutes of play, from 14 to 24). The Spool Guard alone got easier (7 of 8 wins: twice the sockets, and more road in each tower's reach) and so did the Prism Spire (5 of 8); the Mortar and the guard mix got harder: 7 of their 12 losses fall at waves 10 to 13 (leaks per wave at waves 11 to 13 rose two- to fivefold), and their lost runs end on the 15-tower cap with most towers still at level 1 (levels 0/1/2 of 1/14/0, 8/7/0, 11/4/0 for the Mortar). The Mix holds at 5 of 8. Late-wave leaks fell: the runs that get that far have 20 or more towers.
+
+The CI game-time check now plays the guard mix on seed 2 (a win on the valley; seed 4 falls at wave 16). It takes about 15 s of CPU in the agents' container, against 9 s for seed 4 on 16 by 11. The replay goldens were re-recorded once for the board (`godot/tests/goldens/README.md`); the scripted-bot win test plays the mix on seed 3 (a win with all 20 Heartstone health; seed 7 now falls at wave 14).
