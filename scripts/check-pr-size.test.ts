@@ -1,5 +1,12 @@
 import {execFileSync, spawnSync} from 'node:child_process';
-import {mkdtempSync, rmSync, writeFileSync, mkdirSync} from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join, resolve} from 'node:path';
 import {describe, expect, it} from 'vitest';
@@ -130,9 +137,16 @@ describe('check-pr-size: on a real repository', () => {
   }
   const lines = (n: number) =>
     Array.from({length: n}, (_, i) => `var a${i} := ${i}`).join('\n');
-  function check(dir: string, base: string, head: string): number | null {
-    return spawnSync('node', [script, base, head], {cwd: dir, encoding: 'utf8'})
-      .status;
+  function check(
+    dir: string,
+    base: string,
+    head: string,
+    ...flags: string[]
+  ): number | null {
+    return spawnSync('node', [script, base, head, ...flags], {
+      cwd: dir,
+      encoding: 'utf8',
+    }).status;
   }
 
   it('fails a code change hidden from diffs by a -diff attribute', () => {
@@ -158,6 +172,43 @@ describe('check-pr-size: on a real repository', () => {
     git('mv', 'godot/tests/helper.gd', 'godot/sim/helper.gd');
     git('commit', '-q', '-m', 'move');
     expect(check(dir, base, git('rev-parse', 'HEAD'))).toBe(1);
+    rmSync(dir, {recursive: true, force: true});
+  });
+
+  it('lets a 301-line change through only with --allow', () => {
+    const {dir, git} = repo();
+    const base = git('rev-parse', 'HEAD');
+    mkdirSync(join(dir, 'godot/sim'), {recursive: true});
+    writeFileSync(join(dir, 'godot/sim/big.gd'), lines(301) + '\n');
+    git('add', '-A');
+    git('commit', '-q', '-m', 'big');
+    const head = git('rev-parse', 'HEAD');
+    expect(check(dir, base, head)).toBe(1);
+    expect(check(dir, base, head, '--allow')).toBe(0);
+    rmSync(dir, {recursive: true, force: true});
+  });
+
+  it('runs the check from a path with a space through a symlink', () => {
+    const {dir, git} = repo();
+    const base = git('rev-parse', 'HEAD');
+    mkdirSync(join(dir, 'godot/sim'), {recursive: true});
+    writeFileSync(join(dir, 'godot/sim/big.gd'), lines(400));
+    git('add', '-A');
+    git('commit', '-q', '-m', 'big');
+    const spaced = mkdtempSync(join(tmpdir(), 'pr size '));
+    const copy = join(spaced, 'check.mjs');
+    writeFileSync(copy, readFileSync(script));
+    const link = join(spaced, 'link.mjs');
+    symlinkSync(copy, link);
+    for (const path of [copy, link]) {
+      const run = spawnSync('node', [path, base, git('rev-parse', 'HEAD')], {
+        cwd: dir,
+        encoding: 'utf8',
+      });
+      expect(run.status).toBe(1);
+      expect(run.stdout).toMatch(/Production lines changed: 400/);
+    }
+    rmSync(spaced, {recursive: true, force: true});
     rmSync(dir, {recursive: true, force: true});
   });
 

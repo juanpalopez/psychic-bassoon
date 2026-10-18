@@ -8,6 +8,8 @@
 // `--allow` (the PR has the owner's `size-exception` label) turns a failure into a warning.
 // CI runs the base branch's copy of this file, so a PR cannot raise its own limit.
 import {execFileSync} from 'node:child_process';
+import {realpathSync} from 'node:fs';
+import {pathToFileURL} from 'node:url';
 
 export const LIMIT = 300;
 export const WARN_ABOVE = 200;
@@ -122,6 +124,11 @@ function main(argv) {
   return code;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Compares real paths, so a path with spaces or through a symlink still runs the check
+// (a plain `file://` string compare would skip it and exit 0).
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(realpathSync(process.argv[1])).href
+) {
   process.exit(main(process.argv.slice(2)));
 }
