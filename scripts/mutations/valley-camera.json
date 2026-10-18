@@ -1,0 +1,65 @@
+[
+  {
+    "name": "zooming out closes only the build menu, not the tower panel",
+    "file": "main.gd",
+    "old": "if not (_menu.visible or _panel.tower() != null):",
+    "new": "if not _menu.visible:",
+    "tests": ["test_tap_zoom_flow"]
+  },
+  {
+    "name": "a tap does not end a flight under way",
+    "file": "main.gd",
+    "old": "\t_rig.cancel_flight()\n\tvar cell := CellPicker",
+    "new": "\tvar cell := CellPicker",
+    "tests": ["test_tap_zoom_flow"]
+  },
+  {
+    "name": "a flight may zoom out from a closer view",
+    "file": "main.gd",
+    "old": "maxf(_rig.zoom, _rig.zoom_to_show(top, side, tap_pixels()))",
+    "new": "_rig.zoom_to_show(top, side, tap_pixels())",
+    "tests": ["test_tap_zoom_flow"]
+  },
+  {
+    "name": "the tap size ignores the screen scale",
+    "file": "main.gd",
+    "old": "TapZoom.points_per_pixel(canvas_height, window_pixels, screen_scale)",
+    "new": "TapZoom.points_per_pixel(canvas_height, window_pixels, 1.0)",
+    "tests": ["test_tap_zoom_flow"]
+  },
+  {
+    "name": "the socket is selected on arrival even when still under 44 pt",
+    "file": "main.gd",
+    "old": "\tif socket_tappable(target):\n",
+    "new": "\tif true:\n",
+    "tests": ["test_tap_zoom_flow"]
+  },
+  {
+    "name": "the start view centres the spawn",
+    "file": "render/camera_rig.gd",
+    "old": "ground_width * (0.5 - START_SPAWN_SHARE)",
+    "new": "ground_width * 0.0",
+    "tests": ["test_camera_valley"]
+  },
+  {
+    "name": "the pan has no scenery margin",
+    "file": "render/camera_rig.gd",
+    "old": "BoardSpace.size() / 2.0 + Vector2.ONE * SCENERY_MARGIN",
+    "new": "BoardSpace.size() / 2.0",
+    "tests": ["test_camera_valley"]
+  },
+  {
+    "name": "a socket counts its widest side, not its narrowest",
+    "file": "render/tap_zoom.gd",
+    "old": "narrowest = minf(narrowest, reach)",
+    "new": "narrowest = reach if narrowest == INF else maxf(narrowest, reach)",
+    "tests": ["test_tap_zoom"]
+  },
+  {
+    "name": "the pitch zoomed in differs from CLAUDE.md",
+    "file": "render/camera_rig.gd",
+    "old": "const MIN_PITCH := 56.0",
+    "new": "const MIN_PITCH := 58.0",
+    "tests": ["test_camera_pitch_rule"]
+  }
+]
