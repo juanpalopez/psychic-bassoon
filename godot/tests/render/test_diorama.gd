@@ -26,8 +26,9 @@ const SCENERY_TRIANGLES := 32000
 ## Where along a shared edge the seam test compares the tops (never the middle, where a
 ## guarded outline crosses exactly).
 ## Every surface the diorama draws before culling: 12 near chunks, at most 12 coarse ones, the
-## water's chunks, the road bed and five scatter meshes.
-const SURFACES := 36
+## water's chunks, the road bed and the bridges (#325), and the scatter's 18 (#326: six kinds in
+## the board's two halves, three in the ring's two halves; a close view culls about half).
+const SURFACES := 49
 const ALONG: Array[float] = [0.07, 0.23, 0.41, 0.62, 0.79, 0.94]
 ## The screen shapes the camera frames for: a 16:9 screen, a tall phone, a 4:3 tablet.
 const ASPECTS: Array[float] = [16.0 / 9.0, 19.5 / 9.0, 4.0 / 3.0]

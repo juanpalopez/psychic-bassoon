@@ -30,3 +30,17 @@ const PLANK_DARK := Color("8a6a45")
 const POST := Color("8f6a40")
 const ROPE := Color("8a6a45")
 const TRESTLE := Color("9c7647")
+## The scenery's props (#326): cone pines and their shade, broadleaf crowns and their shade,
+## trunks, shrubs, boulders (three stones), dirt patches fading to dry grass at the edge, and
+## grass blades green at the root and dry at the tip.
+const PINE := Color("4f8c3a")
+const PINE_SHADE := Color("33652e")
+const BROADLEAF := Color("6a9a3a")
+const BROADLEAF_SHADE := Color("4a6a2c")
+const TRUNK := Color("6b4a2e")
+const SHRUB := Color("5a8634")
+const STONES: Array[Color] = [Color("9b8b78"), Color("a89a86"), Color("8c7b68")]
+const DIRT_PATCH := Color("8c7150")
+const DIRT_PATCH_EDGE := Color("8f8c4c")
+const GRASS_BLADE := Color("5f8a30")
+const GRASS_TIP := Color("a3a052")

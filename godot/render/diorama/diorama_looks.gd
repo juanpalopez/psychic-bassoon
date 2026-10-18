@@ -71,3 +71,66 @@ const TRESTLE_SIZE := 0.07
 
 ## How far a plank's tone may stray from the plank colour (a share either way).
 const PLANK_TONE := 0.1
+
+## The scenery scatter (#326). It covers the board and a ring `SCATTER_RING` cells past each
+## edge (inside the diorama's `TerrainField.MARGIN`), in four chunks for culling: the board and
+## `SCATTER_CENTRE_MARGIN` cells round it, and the ring beyond, each cut in two at the board's
+## middle column. Ground cover (dirt and grass) and shrubs grow only in the two middle chunks;
+## the ring holds the forest and the boulders in lighter meshes.
+const SCATTER_RING := 32
+const SCATTER_CENTRE_MARGIN := 6
+## Past the board, regions come from smooth noise with a value every `OUTSIDE_NOISE_CELL` cells:
+## forest above `OUTSIDE_FOREST_ABOVE` (less `OUTSIDE_FOREST_GROWTH` at full distance, so the
+## forest thickens further out), boulders below `OUTSIDE_ROCKS_BELOW` on a second field, meadow
+## elsewhere. Within `OUTSIDE_CARRY` cells of the edge, a forest or rocks edge cell carries on.
+const OUTSIDE_NOISE_CELL := 6
+const OUTSIDE_FOREST_ABOVE := 0.38
+const OUTSIDE_FOREST_GROWTH := 0.3
+const OUTSIDE_ROCKS_BELOW := 0.16
+const OUTSIDE_CARRY := 3
+## How far out (cells) the scatter reaches its full density and size.
+const OUTSIDE_FULL := 12.0
+
+## Props per cell, by prop and region (MEADOW, FOREST, ROCKS, DIRT) on the board.
+const DENSITY := {
+	"pine": [0.03, 0.5, 0.1, 0.0],
+	"broadleaf": [0.04, 0.25, 0.0, 0.02],
+	"shrub": [0.04, 0.2, 0.12, 0.08],
+	"boulder": [0.02, 0.02, 0.6, 0.04],
+	"dirt": [0.015, 0.0, 0.03, 0.6],
+	"grass": [0.35, 0.2, 0.3, 0.4],
+}
+## Past the board, at full distance, the trees cover `OUTSIDE_COVER` times as much ground and
+## each is up to `OUTSIDE_TREE_SCALE` times as big, so their count per cell is the table's times
+## the cover over the size squared. The triangles go with the count: raising `OUTSIDE_COVER`
+## raises them, raising `OUTSIDE_TREE_SCALE` lowers them (fewer, bigger trees).
+const OUTSIDE_COVER := 3.0
+const OUTSIDE_TREE_SCALE := 2.4
+## The size each prop's mesh is built to (its footprint radius at scale 1, cells). A placement's
+## footprint is measured on the mesh itself (`SceneryProps.reach`), so it never lies about it.
+const PROP_RADIUS := {
+	"pine": 0.3,
+	"broadleaf": 0.34,
+	"shrub": 0.2,
+	"boulder": 0.26,
+	"dirt": 0.3,
+	"grass": 0.12,
+}
+## How much further than its footprint a prop keeps off the road, a socket or the Heartstone, a
+## bridge and the river. A tree's crown leans over a tower, so trees keep well clear; grass and
+## dirt may lie right against the road bed.
+const KEEP_OFF_ROAD := {
+	"pine": 0.3, "broadleaf": 0.3, "shrub": 0.1, "boulder": 0.1, "dirt": 0.0, "grass": 0.0
+}
+const KEEP_OFF_SOCKET := {
+	"pine": 0.5, "broadleaf": 0.5, "shrub": 0.15, "boulder": 0.15, "dirt": 0.0, "grass": 0.0
+}
+const KEEP_OFF_BRIDGE := 0.15
+const KEEP_OFF_RIVER := 0.1
+## Size: on the board a prop is drawn at `SCALE_MIN` to `SCALE_MAX`; trees past the board grow up
+## to `OUTSIDE_TREE_SCALE` times that at full distance. A tree's height strays by `TREE_STRETCH`.
+const SCALE_MIN := 0.9
+const SCALE_MAX := 1.3
+const TREE_STRETCH := 0.15
+## How much a prop's instance tint strays (a share either way), so no two read the same.
+const TINT := 0.08

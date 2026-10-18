@@ -8,7 +8,7 @@
 ## - `Terraces`: the terrace tops and the corrugated cliffs (`TerraceBuilder`), in chunks;
 ## - `Water`: the river in its gorge (`WaterBuilder`), in chunks;
 ## - `RoadBeds`: the road beds and the bridges (`RoadBedSlot`, #325);
-## - `Scatter`: the forests, rocks, dirt and grass (a placeholder `PlaceholderScatter` until #326).
+## - `Scatter`: the forests, rocks, dirt and grass (`ScenerySlot`, #326).
 ##
 ## Plug a builder in with `use_builder("RoadBeds", builder)` (any `DioramaBuilder`); it is built
 ## at once if the field exists, and on every later `build`. The ground wears `ground_material`,
@@ -35,7 +35,7 @@ func _init() -> void:
 	use_builder("Terraces", TerraceBuilder.new())
 	use_builder("Water", WaterBuilder.new())
 	use_builder("RoadBeds", RoadBedSlot.new())
-	use_builder("Scatter", PlaceholderScatter.new())
+	use_builder("Scatter", ScenerySlot.new())
 
 
 ## Builds the diorama for a map, replacing the last one. `routes` are the lines foes walk (the
