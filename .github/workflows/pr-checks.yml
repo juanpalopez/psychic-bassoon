@@ -2,7 +2,7 @@ name: PR checks
 
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
 
 permissions:
   contents: read
@@ -59,3 +59,33 @@ jobs:
           if ! printf '%s' "$PR_BODY" | grep -Eiq '(closes|fixes|refs|resolves) #[0-9]+'; then
             echo "::warning::No ticket referenced. Add 'Closes #N' (or 'Refs #N') to the PR description."
           fi
+
+  pr-size:
+    name: PR size
+    runs-on: ubuntu-latest
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      # the owner allows a larger PR by adding this label (owner, 2026-10-18, #349)
+      ALLOW: ${{ contains(github.event.pull_request.labels.*.name, 'size-exception') }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Count the production lines this PR changes (limit 300)
+        run: |
+          flags=()
+          if [ "$ALLOW" = "true" ]; then flags+=(--allow); fi
+          # run the base branch's counter, so a PR cannot change its own limit or rules
+          # (the PR's copy only when the base has none yet: the PR that adds it)
+          counter="$RUNNER_TEMP/check-pr-size.mjs"
+          if ! git show "${BASE_SHA}:scripts/check-pr-size.mjs" > "$counter" 2>/dev/null; then
+            cp scripts/check-pr-size.mjs "$counter"
+          fi
+          node "$counter" "$BASE_SHA" "$HEAD_SHA" "${flags[@]}"
