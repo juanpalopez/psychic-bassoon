@@ -114,6 +114,25 @@ func test_the_shadows_reach_past_the_top_of_the_screen_at_every_zoom() -> void:
 		assert_lt(reach, DioramaLens.distance_at(view[0], view[1], 10.0) * 1.5, "not wasted")
 
 
+func test_a_quality_cap_keeps_the_shadows_short() -> void:
+	var camera := Camera3D.new()
+	add_child_autofree(camera)
+	camera.fov = 20.0
+	camera.rotation_degrees = Vector3(-62.0, 30.0, 0.0)
+	camera.global_position = Vector3(0.0, 110.0 * sin(deg_to_rad(62.0)), 0.0)
+	var sun := DirectionalLight3D.new()
+	autofree(sun)
+	var lens := DioramaLens.new()
+	lens.shadow_cap = 70.0
+	lens.follow(camera, null, null, sun)
+	assert_almost_eq(sun.directional_shadow_max_distance, 70.0, 1e-4, "the overview casts none")
+	camera.global_position = Vector3(0.0, 36.0 * sin(deg_to_rad(62.0)), 0.0)
+	lens.follow(camera, null, null, sun)
+	assert_almost_eq(
+		sun.directional_shadow_max_distance, DioramaLens.shadow_reach(36.0, 62.0, 20.0), 1e-3
+	)
+
+
 func test_the_game_fits_the_lens_to_its_camera_each_frame() -> void:
 	var packed := MAIN_SCENE.instantiate()
 	var defaults := packed.get_node("WorldEnvironment") as WorldEnvironment
@@ -135,5 +154,11 @@ func test_the_game_fits_the_lens_to_its_camera_each_frame() -> void:
 	var sun := main.get_node("Sun") as DirectionalLight3D
 	var top := DioramaLens.distance_at(distance, rad_to_deg(asin(-forward.y)), camera.fov / 2.0)
 	assert_gt(sun.directional_shadow_max_distance, top, "shadows reach the top of the screen")
+	assert_gte(sun.directional_shadow_fade_start, 0.949)
+	assert_gt(
+		sun.directional_shadow_max_distance * sun.directional_shadow_fade_start,
+		top,
+		"and fade only past it, not from the middle"
+	)
 	var blur := DioramaLens.focus(distance, rad_to_deg(asin(-forward.y)), camera.fov)
 	assert_almost_eq(attributes.dof_blur_far_distance, blur.x, 1e-2)

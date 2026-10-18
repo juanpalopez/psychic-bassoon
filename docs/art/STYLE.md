@@ -38,7 +38,7 @@ The kingdom is a world the Grand Crafter folded out of paper and card. There is 
 - **Key light.** Warm amber sun, low to mid height, with soft long shadows. The sky fill is cool and pale.
 - **Magic.** Cool cyan (and the Blot's purple) emissive, with a soft glow. Magic is the cool accent against the warm world; keep it rare enough to read.
 - **Contact shading.** Strong ambient occlusion where things meet the ground, in creases and under overhangs: SSAO on desktop, baked into vertex colour on the phone.
-- **Atmosphere.** Depth haze towards the horizon, height fog that settles in the canyons, and a gentle warm-highlight, cool-shadow grade. A tilt-shift depth of field keeps the play area sharp and softens the edges.
+- **Atmosphere.** Depth haze towards the horizon, height fog that settles in the canyons, and a gentle warm-highlight, cool-shadow grade. A tilt-shift depth of field keeps the play area sharp and softens the far side of the valley with a far blur. There is no near blur, because foes and towers stand up towards the camera and a near blur would catch them.
 
 **Starting palette.** These are look-dev values. The shader uniforms and the Environment are the truth once the look is built.
 

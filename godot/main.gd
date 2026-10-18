@@ -90,6 +90,7 @@ var _zoom_seen := 0.0
 func _ready() -> void:
 	var level: int = RenderQuality.from_platform() if render_quality < 0 else render_quality
 	RenderQuality.apply(level as RenderQuality.Level, _world.environment, _sun, _tilt_shift())
+	_lens.shadow_cap = RenderQuality.shadow_cap(level as RenderQuality.Level)
 	var from_url: Variant = _seed_from_url()
 	_rig.flight_ended.connect(_on_flight_ended)
 	_start(from_url if from_url is int else _board.map_seed)

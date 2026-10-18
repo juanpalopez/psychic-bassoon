@@ -4,8 +4,10 @@
 ##   paper bakes contact shading instead), no soft-shadow search (PCSS) on the sun, and a
 ##   lighter, cheaper depth of field. Glow, fog and the grade stay, so the phone is softer and
 ##   simpler, never another style;
+##   The sun's shadows reach at most `PHONE_SHADOW_REACH` from the camera, so the overview
+##   (about 110 m away on the 32 by 20 map) draws no shadow pass; nearer zooms keep them;
 ## - LOW (for a device that misses its frame budget even so): PHONE without the depth of
-##   field, the glow and the soft shadow filter.
+##   field, the glow, the soft shadow filter and the sun's shadows.
 ##
 ## The level comes from the platform through `from_platform`, the one place that reads it: a
 ## phone (`mobile`, `ios` or `android`) gets PHONE, anything else HIGH. `--quality=low`,
@@ -22,6 +24,9 @@ const NAMES := {"low": Level.LOW, "phone": Level.PHONE, "high": Level.HIGH}
 const CHEAP_SUN_BLUR := 2.0
 ## The share of the scene's depth-of-field blur a phone draws.
 const PHONE_DOF_AMOUNT := 0.6
+## The farthest the sun's shadows reach from the camera on a phone, in metres: the closer half
+## of the zoom range on the 32 by 20 map (the closest view is about 36 m away).
+const PHONE_SHADOW_REACH := 70.0
 const BASE_DOF_META := &"scene_dof_blur_amount"
 const DOF_QUALITY := {
 	Level.LOW: RenderingServer.DOF_BLUR_QUALITY_VERY_LOW,
@@ -74,7 +79,13 @@ static func passes(level: Level) -> Dictionary:
 		"soft_filter": level != Level.LOW,
 		"glow": level != Level.LOW,
 		"dof": level != Level.LOW,
+		"sun_shadows": level != Level.LOW,
 	}
+
+
+## The farthest the sun's shadows may reach from the camera at a level (INF for no cap).
+static func shadow_cap(level: Level) -> float:
+	return PHONE_SHADOW_REACH if level == Level.PHONE else INF
 
 
 ## Turns the costly passes off below HIGH; HIGH keeps what the scene set up.
@@ -88,6 +99,7 @@ static func apply(
 	environment.ssao_enabled = environment.ssao_enabled and on["ssao"]
 	environment.ssil_enabled = environment.ssil_enabled and on["ssil"]
 	environment.glow_enabled = environment.glow_enabled and on["glow"]
+	sun.shadow_enabled = sun.shadow_enabled and on["sun_shadows"]
 	if not on["soft_sun"]:
 		sun.light_angular_distance = 0.0
 		sun.shadow_blur = maxf(sun.shadow_blur, CHEAP_SUN_BLUR)

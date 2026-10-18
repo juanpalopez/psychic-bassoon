@@ -72,6 +72,7 @@ func test_the_phone_default_turns_the_costly_passes_off() -> void:
 	autofree(sun)
 	sun.light_angular_distance = 1.5
 	sun.shadow_blur = 1.0
+	sun.shadow_enabled = true
 	var attributes := CameraAttributesPractical.new()
 	attributes.dof_blur_far_enabled = true
 	attributes.dof_blur_amount = 0.1
@@ -82,6 +83,7 @@ func test_the_phone_default_turns_the_costly_passes_off() -> void:
 	assert_gt(sun.shadow_blur, 1.0, "a wider cheap blur instead")
 	assert_true(environment.glow_enabled, "glow stays for the magic")
 	assert_true(environment.fog_enabled, "the haze stays")
+	assert_true(sun.shadow_enabled, "the sun still casts")
 	assert_true(attributes.dof_blur_far_enabled, "the tilt-shift stays")
 	assert_lt(attributes.dof_blur_amount, 0.1, "but lighter")
 
@@ -106,6 +108,7 @@ func test_low_also_drops_the_tilt_shift_and_the_glow() -> void:
 	var sun := DirectionalLight3D.new()
 	autofree(sun)
 	sun.light_angular_distance = 1.5
+	sun.shadow_enabled = true
 	var attributes := CameraAttributesPractical.new()
 	attributes.dof_blur_far_enabled = true
 	attributes.dof_blur_near_enabled = true
@@ -114,6 +117,7 @@ func test_low_also_drops_the_tilt_shift_and_the_glow() -> void:
 	assert_false(attributes.dof_blur_far_enabled)
 	assert_false(attributes.dof_blur_near_enabled)
 	assert_eq(sun.light_angular_distance, 0.0)
+	assert_false(sun.shadow_enabled, "no shadow pass at all")
 	assert_true(environment.fog_enabled, "the haze is cheap and stays")
 
 
@@ -129,6 +133,20 @@ func test_high_keeps_what_the_scene_set_up() -> void:
 	assert_true(environment.ssil_enabled)
 	assert_eq(sun.light_angular_distance, 1.5)
 	assert_almost_eq(attributes.dof_blur_amount, 0.1, 1e-6)
+
+
+func test_only_the_phone_caps_the_shadow_reach() -> void:
+	assert_eq(RenderQuality.shadow_cap(RenderQuality.Level.HIGH), INF)
+	assert_eq(RenderQuality.shadow_cap(RenderQuality.Level.PHONE), RenderQuality.PHONE_SHADOW_REACH)
+	assert_lt(RenderQuality.PHONE_SHADOW_REACH, 110.0, "short of the 32 by 20 overview")
+	assert_gt(RenderQuality.PHONE_SHADOW_REACH, 42.0, "past the top of the closest view")
+
+
+func test_a_phone_game_keeps_its_shadows_within_the_phone_reach() -> void:
+	var main := _main_at(RenderQuality.Level.PHONE)
+	await wait_frames(2)
+	var sun := main.get_node("Sun") as DirectionalLight3D
+	assert_lte(sun.directional_shadow_max_distance, RenderQuality.PHONE_SHADOW_REACH)
 
 
 func test_the_game_applies_the_phone_default_when_it_starts() -> void:

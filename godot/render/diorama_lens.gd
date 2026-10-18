@@ -26,6 +26,9 @@ const HAZE_FULL := 1.25
 ## How far past the screen's top edge the sun's shadows reach, as a share of its distance.
 const SHADOW_MARGIN := 1.1
 
+## The farthest the sun's shadows may reach, in metres (a quality level's cap; INF for none).
+var shadow_cap := INF
+
 var _key := Vector3(-1.0, -1.0, -1.0)
 
 
@@ -65,7 +68,8 @@ static func haze_amount(at: float, span: Vector2, curve: float, density: float) 
 	return pow(smoothstep(span.x, span.y, at), curve) * density
 
 
-## How far from the camera the sun's shadows must reach to cover the whole screen.
+## How far from the camera the sun's shadows must reach to cover the whole screen. The sun's
+## `directional_shadow_fade_start` (0.95 in `main.tscn`) keeps the fade past the top edge.
 static func shadow_reach(distance: float, pitch_degrees: float, fov_degrees: float) -> float:
 	return distance_at(distance, pitch_degrees, fov_degrees / 2.0) * SHADOW_MARGIN
 
@@ -96,4 +100,6 @@ func follow(
 		environment.fog_depth_begin = span.x
 		environment.fog_depth_end = span.y
 	if sun != null:
-		sun.directional_shadow_max_distance = shadow_reach(distance, pitch, camera.fov)
+		sun.directional_shadow_max_distance = minf(
+			shadow_reach(distance, pitch, camera.fov), shadow_cap
+		)
