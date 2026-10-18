@@ -5,15 +5,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: [
-      'dist',
-      'node_modules',
-      'playwright-report',
-      'test-results',
-      'build',
-      'godot',
-      '.claude',
-    ],
+    ignores: ['dist', 'node_modules', 'build', 'godot', '.claude'],
   },
   js.configs.recommended,
   ...tseslint.configs.strict,
@@ -66,7 +58,7 @@ export default tseslint.config(
   },
   {
     // Named exports only. Tool config files need a default export.
-    files: ['e2e-godot/**/*.ts', 'scripts/**/*.mjs', 'scripts/**/*.ts'],
+    files: ['scripts/**/*.mjs', 'scripts/**/*.ts'],
     rules: {
       'no-restricted-exports': [
         'error',

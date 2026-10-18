@@ -5,7 +5,7 @@
 #
 # Per track: cut the leading silence and the closing fade, then crossfade the last
 # CROSSFADE seconds over the first ones, so the loop point has no gap and no dip.
-# Output is stereo Vorbis (quality QUALITY); the web budget is in scripts/check-godot-size.mjs.
+# Output is stereo Vorbis (quality QUALITY); the size budget is in scripts/check-assets.mjs.
 set -euo pipefail
 
 CROSSFADE=2

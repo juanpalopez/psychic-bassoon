@@ -26,7 +26,7 @@ A re-review is worth its cost when logic changed (code under `godot/sim`, the ti
 
 ## Do not repeat CI
 
-Run `gh pr checks <N>` first. Lint, types, unit tests, build, bundle size, the smoke test and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
+Run `gh pr checks <N>` first. Lint, types, unit tests, the Linux desktop export and its checked headless run (a clean log: no `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line, exit 0, no timeout; nothing is rendered, so judge visuals from screenshots), and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
 
 ## Review a stack as a whole
 
@@ -49,7 +49,7 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 4. **Tests.** Sim and content changes have tests written first, with a fixed seed and no timing. A test that cannot fail is a finding. A test about a mechanic names its board (`TowerFireKit.landscape`, `Game.create(seed, cols, rows)`); only a test about the game board uses the default. A headless test never reads MultiMesh instance transforms back (the dummy renderer returns the identity); it checks the function or array that computed them.
 5. **Render and UI.** Typed GDScript. No hard-coded colours (the Theme only; the 3D board's look colours are `source_color` uniforms in `godot/render/paper/` and the `main.tscn` Environment). Free nodes you remove; no allocation per frame; one `MultiMesh` per foe type. Tap targets of at least 44 pt; at the overview zoom a tap zooms in first. Respect reduced motion.
 6. **Assets.** CC0 packs (the row says CC0) or the owner's own work (the row says `Owned by the owner (all rights reserved)`; AI mesh generators such as Meshy are not used; a Blender model scripted with Claude and HUD icons drawn with Claude are the owner's own); fonts (`.ttf`, `.otf`, `.woff`, `.woff2` under `fonts/`) may also be SIL OFL 1.1 with the licence text in `assets/licenses/`; flag any third-party IP, brand or likeness in a reference; each recorded in `assets/CREDITS.md`; models as GLB only, within the per-unit triangle budget (foe 800 to 1,200 with a baked 512 px map, tower 1,500 to 3,000, boss 3,000 to 5,000) and the frame caps in the plan.
-7. **Workflows.** Least-privilege `permissions`; no untrusted input (PR title, body, branch) in `run:` steps; deploy and release cannot skip `ci`; tag and branch guards are enforced.
+7. **Workflows.** Least-privilege `permissions`; no untrusted input (PR title, body, branch) in `run:` steps; deploy and release cannot skip `ci`; tag and branch guards are enforced. No secrets in the repo, and no Apple team id: the committed iOS preset keeps `application/app_store_team_id` blank (`scripts/ios-run.sh` injects it only for the export).
 8. **Consistency.** Docs, scripts, ticket numbers and paths agree with each other and with the code.
 
 ## Report format

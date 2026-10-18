@@ -4,13 +4,30 @@ extends GutTest
 const MAIN_SCENE := preload("res://main.tscn")
 
 
-func test_renderer_is_compatibility_for_web() -> void:
-	assert_eq(
-		ProjectSettings.get_setting("rendering/renderer/rendering_method.web"), "gl_compatibility"
-	)
-	assert_eq(
-		ProjectSettings.get_setting("rendering/renderer/rendering_method"), "gl_compatibility"
-	)
+func test_renderer_is_forward_plus_with_mobile_for_phones() -> void:
+	assert_eq(ProjectSettings.get_setting("rendering/renderer/rendering_method"), "forward_plus")
+	assert_eq(ProjectSettings.get_setting("rendering/renderer/rendering_method.mobile"), "mobile")
+
+
+## Native builds only (the web build was dropped, #318), and the Apple team id stays out
+## of the repo: `scripts/ios-run.sh` writes it into the preset only while it exports.
+func test_export_presets_are_native_and_carry_no_team_id() -> void:
+	var presets := ConfigFile.new()
+	assert_eq(presets.load("res://export_presets.cfg"), OK)
+	var platforms: Array[String] = []
+	var ios := ""
+	for section in presets.get_sections():
+		if section.ends_with(".options"):
+			continue
+		var platform := str(presets.get_value(section, "platform"))
+		platforms.append(platform)
+		if platform == "iOS":
+			ios = section
+	platforms.sort()
+	assert_eq(platforms, ["Linux", "Windows Desktop", "iOS", "macOS"] as Array[String])
+	var options := ios + ".options"
+	assert_eq(presets.get_value(options, "application/app_store_team_id"), "")
+	assert_true(presets.get_value(options, "application/export_project_only"))
 
 
 func test_game_is_landscape_only() -> void:

@@ -2,21 +2,22 @@
 
 A tactile, stop-motion papercraft tower defense for phones and tablets. In a forgotten corner of an old craft room, an abandoned cutting mat holds a tiny paper kingdom, until The Blot, a bottle of corrupted purple ink, twists scraps of stationery into monsters. You are the Grand Crafter: build spool guards, guard tents, prism spires and thimble mortars from office supplies, command a cardboard knight, cast glue and thumbtack spells, and hold the line. The design is in [`docs/GDD.md`](docs/GDD.md).
 
-It is built with **Godot 4** (GDScript) and plays in landscape on a phone, in the browser first and as a native iOS app later. The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
+It is built with **Godot 4** (GDScript) and plays in landscape, natively on iOS first and on macOS, Windows and Linux (the web build was dropped on 2026-10-18). The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
-- **Play (latest `main`):** https://juanpalopez.github.io/psychic-bassoon/ (for now the greybox: the real map with sockets where you can tap a socket and build, not the game yet; add `?seed=42` to pick a map)
+- **Download:** each tagged release carries the Linux, Windows and macOS builds ([latest release](https://github.com/juanpalopez/psychic-bassoon/releases/latest)); the iPhone build is installed locally for now (`scripts/ios-run.sh`). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
-> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets with three elevation levels are done too. Foes and waves are done too; the towers shooting at them (combat) is next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 to A3): the live page shows the real map with sockets, where you can tap a socket and build, and start waves of foes that walk the road. It is not the game yet.
+> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets with three elevation levels are done too. Foes and waves are done too; the towers shooting at them (combat) is next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 to A3): the game shows the real map with sockets, where you can tap a socket and build, and start waves of foes that walk the road. It is not the game yet.
 
 ## Getting started
 
 ### Prerequisites
 
-- [Godot](https://godotengine.org/) with the exact version in `.godot-version` (the web export templates must match it)
-- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the repo's checks, the frozen-fixture check and the smoke test
+- [Godot](https://godotengine.org/) with the exact version in `.godot-version` (its export templates must match it)
+- [Node.js](https://nodejs.org/) 22 or newer and [pnpm](https://pnpm.io/) 10 (`corepack enable`), for the repo's checks and the frozen-fixture check
 - [gdtoolkit](https://github.com/Scony/godot-gdscript-toolkit) 4.5.0 (`pip install gdtoolkit==4.5.0`) for `gdformat` and `gdlint`
+- For the iPhone build: a Mac with Xcode 15 or newer, an Apple ID (a free one works; its installs expire after 7 days) and your team id in `PKD_TEAM_ID` or `~/.config/pkd/team_id`
 
 ### Install
 
@@ -31,32 +32,27 @@ godot --headless --path godot --import   # once, so class_name scripts resolve
 
 ```bash
 godot --path godot                                                   # open or run the project
-mkdir -p build/web && godot --headless --path godot --export-release "Web" ../build/web/index.html
-cp godot/web/manifest.webmanifest build/web/
-mkdir -p build/web/godot && cp godot/web/godot-redirect.html build/web/godot/index.html
-pnpm serve                                                           # serve the export on your LAN, port 8080
+mkdir -p build/linux && godot --headless --path godot --export-release "Linux" ../build/linux/papercraft-kingdom-defense.x86_64
+scripts/ios-run.sh                                                   # on a Mac: build, install and launch on a connected iPhone
 ```
 
-Open the "Network" address on a phone on the same Wi-Fi.
+The `Windows` and `macOS` presets export the same way (see `CLAUDE.md`, Commands). On the iPhone, trust the developer once in Settings → General → VPN & Device Management.
 
 ### Test
 
 ```bash
 godot --headless --path godot -s addons/gut/gut_cmdln.gd -gexit     # GUT tests for the GDScript sim
 pnpm test                # Vitest: the repo's scripts (checks and tooling)
-pnpm exec playwright install chromium   # once
-pnpm test:e2e:godot      # Playwright smoke test against build/web
 ```
 
 ### Lint and format
 
 ```bash
 (cd godot && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdformat && find . -name '*.gd' -not -path './addons/*' -not -path './.godot/*' | xargs gdlint)
-pnpm lint                # Prettier, ESLint and TypeScript type checks (scripts and e2e)
+pnpm lint                # Prettier, ESLint and TypeScript type checks (scripts)
 pnpm format              # Prettier --write
 pnpm check:sim-purity    # the GDScript sim must stay free of the scene tree and random numbers
 pnpm check:assets        # godot/assets against assets/CREDITS.md
-pnpm check:godot-size    # download size of build/web
 pnpm check:fixtures      # the frozen fixtures against fixtures/SHA256SUMS
 python3 scripts/mutate.py scripts/mutations/barracks.json   # can the tests fail? (survivors are untested rules)
 ```
@@ -71,11 +67,10 @@ godot/
   content/   data only: tower and map numbers (foes and waves arrive with their ports)
   render/    scenes and scripts (Phase 5)
   ui/        HUD scenes and the Theme (Phase 5)
-  web/       the custom HTML shell and manifest for the web export
   tests/     GUT tests
 fixtures/    frozen JSON from the retired TypeScript sim (PRNG, maps, routes): what the GDScript sim must reproduce
-scripts/     CI checks (purity, assets, size, fixtures) and balance tooling
-e2e-godot/   Playwright smoke test of the web export
+scripts/     CI checks (purity, render boundary, assets, fixtures, desktop export), the iPhone run script and balance tooling
+site/        the static page GitHub Pages serves (it links to the latest release)
 assets-src/  Blender sources and raw packs
 docs/        plan, review checklist, art references
 prototype/   the original 2D prototype (rules and balance reference)
@@ -102,9 +97,9 @@ Work is planned in phases and tracked as tickets on the [project board](https://
 ### CI/CD
 
 - `PR checks`: Conventional Commit titles and commits, and a ticket-reference warning.
-- `CI`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, then the Godot job (format, lint, sim purity, GUT, web export, download budget, smoke test), on every pull request and push to `main`.
-- `Deploy`: after `CI` passes on `main`, the Godot export is published to GitHub Pages at the site root.
-- `Release`: pushing a `vMAJOR.MINOR.PATCH` tag (on `main`) runs the checks and creates a GitHub Release with the Godot export attached.
+- `CI`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, then the Godot job (format, lint, sim purity, render boundary, GUT, the headless game budget, and a Linux export that must run headless), on every pull request and push to `main`.
+- `Deploy`: after `CI` passes on `main`, GitHub Pages serves `site/index.html`, a page that links to the latest release.
+- `Release`: pushing a `vMAJOR.MINOR.PATCH` tag (on `main`) runs the checks with the Linux, Windows and macOS exports and creates a GitHub Release with the three builds attached.
 
 ### Assets
 

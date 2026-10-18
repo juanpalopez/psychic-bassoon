@@ -1,8 +1,6 @@
 dist
 node_modules
 pnpm-lock.yaml
-playwright-report
-test-results
 .claude
 .github
 *.md

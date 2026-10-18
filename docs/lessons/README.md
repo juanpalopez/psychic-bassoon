@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-18 | lesson | Check native exports on Linux: every desktop preset and the iOS Xcode project export there | ci | ci-check | .github/workflows/ci.yml, scripts/check-desktop-export.sh |
 | 2026-10-18 | lesson | Never read MultiMesh instance transforms back in a headless test | render | checklist | docs/REVIEW-CHECKLIST.md |
 | 2026-10-18 | lesson | Give a mechanic test the board it was written on | sim | checklist | docs/REVIEW-CHECKLIST.md |
 | 2026-10-18 | decision | Cap the scripted bot at 15 towers and move the CI game and the win test to valley seeds | balance | none | |
@@ -50,7 +51,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 
 ## Promoting a lesson
 Promote a lesson when it has happened twice, or when one failure was costly. Pick the cheapest form that a machine enforces:
-1. **ci-check / script**: if a tool can detect it, write `scripts/check-<name>.mjs` with a Vitest test next to it (as `check-sim-purity`, `check-render-boundary` and `check-godot-size` already do) and wire it into `ci`. Then remove the matching line from REVIEW-CHECKLIST.md so reviewers stop paying for it.
+1. **ci-check / script**: if a tool can detect it, write `scripts/check-<name>.mjs` with a Vitest test next to it (as `check-sim-purity` and `check-render-boundary` already do) and wire it into `ci`. Then remove the matching line from REVIEW-CHECKLIST.md so reviewers stop paying for it.
 2. **checklist**: if it needs judgement, add one line to `docs/REVIEW-CHECKLIST.md`. If it is a working rule, add it to CLAUDE.md too, and keep the two files in step.
 3. **command / skill / agent / hook**: if it is a repeated multi-step procedure, write `.claude/commands/<name>.md` (one prompt) or `.claude/skills/<name>/SKILL.md` (steps plus scripts); a role that keeps coming back becomes an agent in `.claude/agents/`; something that must happen on every tool call or session start becomes a hook.
 4. **mode**: a named way of working for a kind of task (for example a balance mode: which agents run the sweeps, which files may change, which checks must pass, what to write at the end), kept as a skill or a command that sets those rules for the session.
