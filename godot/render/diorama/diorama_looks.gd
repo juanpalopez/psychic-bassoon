@@ -42,11 +42,12 @@ const HEART_CAP_RADIUS := 0.47
 const HEART_YARD_SEGMENTS := 20
 
 ## The bridges: a flat deck `BRIDGE_SPAN` cells long centred on the bridge cell (its ends rest on
-## the banks, over the road bed's cut ends), of `PLANKS` planks `DECK_WIDTH` across. Its top is
-## where foes and guards stand on a bridge cell (`TerrainField.ROAD_HEIGHT` above the banks), so
-## it does not sag. The road bed stops at the bridge cell's edges.
+## the banks, over the road bed's cut ends), of `PLANKS` planks `DECK_WIDTH` across (an odd count,
+## so one lies over the cell's middle). Its top is where foes and guards stand on a bridge cell
+## (`TerrainField.ROAD_HEIGHT` above the banks), so it does not sag. The road bed stops at the
+## bridge cell's edges.
 const BRIDGE_SPAN := 1.7
-const PLANKS := 10
+const PLANKS := 11
 const DECK_WIDTH := 0.96
 const PLANK_THICKNESS := 0.035
 const PLANK_FILL := 0.82
