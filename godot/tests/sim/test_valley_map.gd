@@ -28,6 +28,7 @@ func test_the_game_builds_the_valley_by_default() -> void:
 	assert_eq(game.map.footprint, 2)
 	assert_between(game.routes.size(), 1, 2, "the main road, and a feeder when it fits")
 	assert_false(game.random_lanes, "foes do not pick a lane at random")
+	assert_false(RULES.GAME_DETOUR)
 
 
 func test_the_road_crosses_the_valley_as_one_valid_path_for_every_seed() -> void:
@@ -82,6 +83,71 @@ func test_the_road_winds_with_long_runs_and_short_turns() -> void:
 				RULES.VALLEY_MAX_TURN_COLUMNS,
 				"turn, seed %d" % map_seed
 			)
+
+
+func test_the_turns_reach_both_ends_of_their_range() -> void:
+	var shortest := 1000
+	var longest := 0
+	for map_seed in _seeds:
+		for turn: int in _runs(_valley(map_seed).path).across:
+			shortest = mini(shortest, turn)
+			longest = maxi(longest, turn)
+	assert_eq(shortest, RULES.VALLEY_MIN_TURN_COLUMNS)
+	assert_eq(longest, RULES.VALLEY_MAX_TURN_COLUMNS)
+
+
+func test_a_road_shorter_than_the_valleys_minimum_is_drawn_again() -> void:
+	# seed 132's first road on the valley is 55 cells: long enough for the classic minimum
+	# (the turned board's 32 rows + 16) but not for the valley's (32 + 24)
+	var shape := MapGen.shape_for(COLS, ROWS)
+	assert_eq(MapGen._try_path(Rng.derive(132, Streams.MAP), ROWS, COLS, shape).size(), 0)
+	shape.min_extra_cells = RULES.MIN_EXTRA_CELLS
+	var kept := MapGen._try_path(Rng.derive(132, Streams.MAP), ROWS, COLS, shape)
+	assert_between(
+		kept.size(), COLS + RULES.MIN_EXTRA_CELLS, COLS + RULES.VALLEY_MIN_EXTRA_CELLS - 1
+	)
+
+
+func test_single_cell_sockets_on_the_valley_keep_the_classic_count() -> void:
+	# the valley's 24 to 30 is for 2x2 blocks; single cells keep 12 to SOCKET_MAX_SINGLE_CELL
+	for map_seed in [1, 5, 42]:
+		var map := MapGen.generate(map_seed, COLS, ROWS, false, 1, false)
+		assert_not_null(map, "seed %d" % map_seed)
+		assert_between(
+			map.sockets.size(), RULES.SOCKET_MIN, RULES.SOCKET_MAX_SINGLE_CELL, "seed %d" % map_seed
+		)
+
+
+func test_every_game_map_has_a_valid_second_road_and_its_sockets() -> void:
+	# the game's own maps (with the second source): the feeder rules are the 16 by 11 ones,
+	# kept on purpose (their join cap is a share of the road; the rest are local spacing)
+	var with_feeder := 0
+	for map_seed in _seeds:
+		var map := Game.create(map_seed).map
+		var where := "seed %d" % map_seed
+		assert_between(map.sockets.size(), RULES.VALLEY_SOCKET_MIN, RULES.VALLEY_SOCKET_MAX, where)
+		if map.routes.size() < 2:
+			continue
+		with_feeder += 1
+		var main: Array = map.routes[0]
+		var feeder: Array = map.routes[1]
+		var start: Vector2i = feeder[0]
+		assert_true(start.y == 0 or start.y == ROWS - 1, "starts on the top or bottom, " + where)
+		var seen := {}
+		for i in feeder.size():
+			var cell: Vector2i = feeder[i]
+			assert_true(cell.x >= 0 and cell.x < COLS and cell.y >= 0 and cell.y < ROWS, where)
+			assert_false(seen.has(cell), "no cell twice, " + where)
+			seen[cell] = true
+			assert_eq(map.tiles[cell.y][cell.x], GameMap.Tile.ROAD, where)
+			if i > 0:
+				var step: Vector2i = feeder[i] - feeder[i - 1]
+				assert_eq(absi(step.x) + absi(step.y), 1, "4-connected, " + where)
+		assert_gte(map.feeder_length, RULES.FEEDER_MIN_CELLS, where)
+		assert_eq(feeder.slice(map.feeder_length), main.slice(map.join_index), "joins, " + where)
+		assert_eq(feeder[feeder.size() - 1], main[main.size() - 1], "to the Heartstone, " + where)
+		assert_lte(map.join_index * 100, main.size() * RULES.FEEDER_JOIN_MAX_PERCENT, where)
+	assert_gte(with_feeder, _seeds.size() * 9 / 10, "nearly every valley has room for a feeder")
 
 
 func test_every_valley_map_holds_its_sockets_off_the_road() -> void:

@@ -61,5 +61,26 @@
     "old": "and (room or upgrade == null)",
     "new": "and room",
     "tests": ["test_scripted_bot"]
+  },
+  {
+    "name": "a valley turn stops one column short of the cap",
+    "file": "sim/map/map_gen.gd",
+    "old": "gap <= shape.max_turn_columns",
+    "new": "gap < shape.max_turn_columns",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "a short valley road is kept",
+    "file": "sim/map/map_gen.gd",
+    "old": "if cells.size() >= rows + shape.min_extra_cells:",
+    "new": "if cells.size() >= rows + RULES.MIN_EXTRA_CELLS:",
+    "tests": ["test_valley_map"]
+  },
+  {
+    "name": "single-cell sockets on the valley ask for the block count",
+    "file": "sim/map/map_gen.gd",
+    "old": "\t\tif footprint > 1:\n",
+    "new": "\t\tif true:\n",
+    "tests": ["test_valley_map"]
   }
 ]
