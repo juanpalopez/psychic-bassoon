@@ -27,8 +27,10 @@ class Shape:
 	var socket_max: int = RULES.SOCKET_MAX
 
 
-## The shape for a board of `cols` by `rows` cells.
-static func shape_for(cols: int, _rows: int) -> Shape:
+## The shape for a board of `cols` by `rows` cells with sockets of `footprint` cells a side. The
+## valley's socket count is for 2x2 blocks; single-cell sockets keep the classic bounds (the
+## placer caps them at `SOCKET_MAX_SINGLE_CELL`).
+static func shape_for(cols: int, _rows: int, footprint: int = 2) -> Shape:
 	var shape := Shape.new()
 	if cols >= RULES.VALLEY_MIN_COLS:
 		shape.min_run_down = RULES.VALLEY_MIN_RUN_DOWN
@@ -36,8 +38,9 @@ static func shape_for(cols: int, _rows: int) -> Shape:
 		shape.min_turn_columns = RULES.VALLEY_MIN_TURN_COLUMNS
 		shape.max_turn_columns = RULES.VALLEY_MAX_TURN_COLUMNS
 		shape.min_extra_cells = RULES.VALLEY_MIN_EXTRA_CELLS
-		shape.socket_min = RULES.VALLEY_SOCKET_MIN
-		shape.socket_max = RULES.VALLEY_SOCKET_MAX
+		if footprint > 1:
+			shape.socket_min = RULES.VALLEY_SOCKET_MIN
+			shape.socket_max = RULES.VALLEY_SOCKET_MAX
 	return shape
 
 
@@ -67,7 +70,7 @@ static func generate(
 	var wide := cols > rows
 	var tall_cols := rows if wide else cols
 	var tall_rows := cols if wide else rows
-	var shape := shape_for(cols, rows)
+	var shape := shape_for(cols, rows, footprint)
 	var rng := Rng.derive(seed, Streams.MAP)
 	var feeder_rng := Rng.derive(seed, Streams.SECOND_SOURCE)
 	for attempt in RULES.MAX_ATTEMPTS:

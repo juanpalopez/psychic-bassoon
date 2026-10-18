@@ -28,6 +28,7 @@ static func place(
 	var candidates := _candidates(map)
 	_shuffle(candidates, rng)
 	var most: int = RULES.SOCKET_MAX_SINGLE_CELL if map.footprint == 1 else most_blocks
+	assert(least <= most, "a socket count of %d to %d" % [least, most])
 	var target: int = least + rng.next_int(most - least + 1)
 	var chosen: Array[Vector2i] = []
 	for cell in candidates:
