@@ -1,4 +1,4 @@
-## The board draws the real map: one tile per cell of the sim's map.
+## The board draws the real map: the diorama built from the sim's map, and its markers.
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
@@ -83,29 +83,6 @@ func test_rebuilding_leaves_no_stale_children_and_keeps_foreign_ones() -> void:
 	assert_true(foreign.get_parent() == board, "a node someone else added is kept")
 
 
-func _multimesh(board: Board, node_name: String) -> MultiMesh:
-	return (board.get_node(node_name) as MultiMeshInstance3D).multimesh
-
-
-func test_tiles_are_drawn_with_few_draw_calls() -> void:
-	# one MultiMesh per model, not a node per cell
-	var board := _board(1)
-	var multimeshes := 0
-	var surfaces := 0
-	for child in board.get_children():
-		if child is MultiMeshInstance3D:
-			multimeshes += 1
-			surfaces += child.multimesh.mesh.get_surface_count()
-	assert_lte(multimeshes, 8)
-	assert_lt(surfaces, 30, "a few dozen draw calls at most")
-
-
-func test_the_real_terrain_models_are_used_not_the_box_fallback() -> void:
-	var board := _board(7920)
-	for node_name in ["Mat", "Lane", "Cardboard", "Paperboard", "SocketOverlays", "Desk"]:
-		assert_false(_multimesh(board, node_name).mesh is BoxMesh, node_name)
-
-
 func test_things_standing_on_the_board_use_the_boards_heights() -> void:
 	assert_eq(FoesView.GROUND, Board.ROAD_HEIGHT)
 	assert_eq(GuardsView.GROUND, Board.ROAD_HEIGHT)
@@ -119,41 +96,48 @@ func test_the_board_draws_one_socket_overlay_per_socket() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
 		assert_eq(board.socket_count, board.map.sockets.size(), "seed %d" % map_seed)
-		assert_eq(_multimesh(board, "SocketOverlays").instance_count, board.socket_count)
+		var overlays := board.get_node("SocketOverlays") as MultiMeshInstance3D
+		assert_eq(overlays.multimesh.instance_count, board.socket_count)
 
 
-func test_the_surfaces_are_flat_on_the_mat_and_rise_one_unit_a_level() -> void:
+func test_the_surfaces_are_flat_on_the_road_and_rise_one_terrace_a_level() -> void:
 	var board := _board(7920)
 	var heights := {}
 	for cell in board.map.sockets:
 		heights[board.map.elevation_at(cell)] = board.surface_height(cell)
-	assert_eq(heights, {0: 0.0, 1: 1.0, 2: 2.0})
+	var step := Board.TERRACE_STEP
+	assert_eq(heights, {0: 0.0, 1: step, 2: 2.0 * step})
+	for level in Board.LEVEL_HEIGHTS.size():
+		assert_almost_eq(Board.LEVEL_HEIGHTS[level], float(level) * step, 1e-9)
+	assert_eq(Board.LEVEL_HEIGHTS.size(), RULES.TERRAIN_LEVELS, "a height for every terrace")
 	var road := board.map.path[3]
-	assert_almost_eq(board.surface_height(road), 0.01, 1e-9, "the lane is a hair above the mat")
+	assert_almost_eq(board.surface_height(road), 0.01, 1e-9, "the road is a hair above the floor")
 	for cell in board.map.path:
 		assert_lt(board.surface_height(cell), 0.1)
 
 
-func test_the_mat_covers_the_ground_and_level_0_sockets_the_lane_the_road() -> void:
+func test_the_tap_picker_starts_above_the_highest_ground_of_the_map() -> void:
 	for map_seed in [1, 7920, 15839]:
 		var board := _board(map_seed)
-		var level_0_cells := 0
-		var raised_cells := 0
-		for anchor in board.map.sockets:
-			if board.map.elevation_at(anchor) == 0:
-				level_0_cells += _cells_per_block(board)
-			else:
-				raised_cells += _cells_per_block(board)
-		assert_eq(_multimesh(board, "Mat").instance_count, board.ground_count + level_0_cells)
-		assert_eq(_multimesh(board, "Lane").instance_count, board.road_count)
-		assert_eq(
-			(
-				_multimesh(board, "Cardboard").instance_count
-				+ _multimesh(board, "Paperboard").instance_count
-			),
-			raised_cells,
-			"seed %d" % map_seed
-		)
+		for row in board.map.rows:
+			for col in board.map.cols:
+				assert_lt(board.surface_height(Vector2i(col, row)), CellPicker.TOP)
+	assert_lt(Board.LEVEL_HEIGHTS[Board.LEVEL_HEIGHTS.size() - 1], CellPicker.TOP)
+
+
+func test_showing_the_games_map_draws_it_without_making_it_again() -> void:
+	var board := _board(1)
+	var game_map := MapGen.generate(1)
+	var diorama := board.diorama
+	var chunk := diorama.builder("Terraces").get_child(0)
+	board.show_map(game_map)
+	assert_eq(board.map, game_map, "the board reads the game's own map")
+	assert_eq(diorama.builder("Terraces").get_child(0), chunk, "the same seed is not rebuilt")
+	var other := MapGen.generate(7920)
+	board.show_map(other)
+	assert_eq(board.map, other)
+	assert_eq(board.map_seed, 7920)
+	assert_eq(board.diorama.field.map, other)
 
 
 func test_a_socket_overlay_sits_at_the_centre_of_its_block_on_its_level() -> void:
@@ -174,21 +158,6 @@ func test_every_cell_of_a_socket_block_has_the_blocks_height() -> void:
 		for dy in board.map.footprint:
 			for dx in board.map.footprint:
 				assert_eq(board.surface_height(anchor + Vector2i(dx, dy)), height, str(anchor))
-
-
-func test_the_desk_skirt_rings_the_board_two_tiles_thick_and_never_covers_it() -> void:
-	var board := _board(1)
-	var cols := board.map.cols
-	var rows := board.map.rows
-	var expected := (cols + 4) * (rows + 4) - cols * rows
-	var total := 0
-	for node_name in ["Desk", "Erasers", "Pencils"]:
-		total += _multimesh(board, node_name).instance_count
-	for cell in board.skirt_cells:
-		var outside := cell.x < 0 or cell.x >= cols or cell.y < 0 or cell.y >= rows
-		assert_true(outside, "%s is off the board" % cell)
-		assert_true(cell.x >= -2 and cell.x < cols + 2 and cell.y >= -2 and cell.y < rows + 2)
-	assert_eq(total, expected)
 
 
 func test_the_heartstone_marker_covers_its_footprint() -> void:
