@@ -110,14 +110,15 @@ jobs:
           path: |
             ~/godot-bin
             ~/.local/share/godot/export_templates
-          key: godot-${{ steps.version.outputs.version }}-${{ inputs.all-desktop && 'desktop' || 'linux' }}-v2
+          # one key for every run: a tag run can only restore caches saved on main, so the
+          # release templates are cached by the main runs too instead of downloaded per release
+          key: godot-${{ steps.version.outputs.version }}-desktop-v3
 
       - name: Download Godot and the desktop templates (verified)
         if: steps.cache.outputs.cache-hit != 'true'
         env:
           VERSION: ${{ steps.version.outputs.version }}
           TEMPLATES: ${{ steps.version.outputs.templates }}
-          ALL_DESKTOP: ${{ inputs.all-desktop }}
         run: |
           base="https://github.com/godotengine/godot/releases/download/${VERSION}"
           binary="Godot_v${VERSION}_linux.x86_64.zip"
@@ -126,11 +127,10 @@ jobs:
           grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt > wanted.txt
           test "$(wc -l < wanted.txt)" -eq 2
           sha512sum -c wanted.txt
-          # export-release needs only the release templates
+          # export-release needs only the release templates (all three desktops, so the
+          # one cache serves both CI and releases)
           wanted=(templates/version.txt templates/linux_release.x86_64)
-          if [ "$ALL_DESKTOP" = "true" ]; then
-            wanted+=(templates/windows_release_x86_64.exe templates/macos.zip)
-          fi
+          wanted+=(templates/windows_release_x86_64.exe templates/macos.zip)
           mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/"${TEMPLATES}"
           unzip -q "${binary}" -d ~/godot-bin
           unzip -q -j "${tpz}" "${wanted[@]}" -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
@@ -172,13 +172,9 @@ jobs:
           echo "GODOT=${binary[0]}" >> "$GITHUB_ENV"
 
       - name: Import the project
-        run: |
-          # --import exits 0 even when a script fails to parse, so scan the log
-          "$GODOT" --headless --path godot --import 2>&1 | tee import.log
-          if grep -E "SCRIPT ERROR|Parse Error|ERROR: Failed to load script" import.log; then
-            echo "::error::GDScript errors found while importing"
-            exit 1
-          fi
+        # --import exits 0 even when a script fails to parse: the checker also fails on any
+        # ERROR, SCRIPT ERROR or SHADER ERROR line, a non-zero exit or a timeout
+        run: bash scripts/run-godot-checked.sh 600 import.log -- "$GODOT" --headless --path godot --import
 
       - name: GUT tests
         run: |
@@ -214,13 +210,13 @@ jobs:
           bash scripts/check-desktop-export.sh build/linux/papercraft-kingdom-defense.x86_64
 
       - name: Run the Linux build headless
-        run: |
-          # the exported game (no tests or tools in it) must start and run its scene
-          timeout 120 build/linux/papercraft-kingdom-defense.x86_64 --headless --quit-after 300 2>&1 | tee run.log
-          if grep -E "SCRIPT ERROR|Parse Error|Failed to load" run.log; then
-            echo "::error::The exported Linux build logged errors while running"
-            exit 1
-          fi
+        # the exported game (no tests or tools in it) must start and run its scene for 300
+        # frames with no engine error, script error or shader error, exit 0 and not hang;
+        # headless uses the dummy renderer, so nothing is drawn, but scripts, resources and
+        # shader compiles are checked as far as they log
+        run: >-
+          bash scripts/run-godot-checked.sh 120 run.log --
+          build/linux/papercraft-kingdom-defense.x86_64 --headless --quit-after 300
 
       - name: Windows and macOS exports
         if: inputs.all-desktop
@@ -236,6 +232,8 @@ jobs:
           fi
 
       - name: Upload the desktop export
+        # only the release workflow uses it
+        if: inputs.all-desktop
         uses: actions/upload-artifact@v7
         with:
           name: godot-desktop

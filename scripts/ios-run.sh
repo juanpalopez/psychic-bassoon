@@ -133,7 +133,25 @@ mkdir -p build/ios
 restore_preset
 [ -d "$PROJECT" ] || fail "Godot did not write ${PROJECT}."
 
+# A locked iPhone refuses development services (the build's device step, the install and
+# the launch): wait for it to be unlocked.
+locked() {
+  xcrun devicectl device info lockState --device "$device" 2>/dev/null | grep -q "passcodeRequired: true"
+}
+wait_until_unlocked() {
+  if locked; then
+    echo "==> The iPhone is locked: unlock it (waiting up to ${UNLOCK_WAIT} s)"
+    local waited=0
+    while locked; do
+      [ "$waited" -lt "$UNLOCK_WAIT" ] || fail "the iPhone stayed locked for ${UNLOCK_WAIT} s. Unlock it and run this again."
+      sleep 3
+      waited=$((waited + 3))
+    done
+  fi
+}
+
 echo "==> Building with xcodebuild"
+wait_until_unlocked
 xcodebuild -project "$PROJECT" -scheme "$SCHEME" -configuration Debug \
   -destination "id=${device}" -derivedDataPath "$DERIVED" \
   -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
@@ -150,19 +168,7 @@ for candidate in "$DERIVED"/Build/Products/Debug-iphoneos/*.app; do
 done
 [ -n "$app" ] || fail "no .app in ${DERIVED}/Build/Products/Debug-iphoneos after the build."
 
-# A locked iPhone refuses the launch: wait for it to be unlocked.
-locked() {
-  xcrun devicectl device info lockState --device "$device" 2>/dev/null | grep -q "passcodeRequired: true"
-}
-if locked; then
-  echo "==> The iPhone is locked: unlock it (waiting up to ${UNLOCK_WAIT} s)"
-  waited=0
-  while locked; do
-    [ "$waited" -lt "$UNLOCK_WAIT" ] || fail "the iPhone stayed locked for ${UNLOCK_WAIT} s. Unlock it and run this again."
-    sleep 3
-    waited=$((waited + 3))
-  done
-fi
+wait_until_unlocked
 
 echo "==> Installing ${app}"
 xcrun devicectl device install app --device "$device" "$app" \

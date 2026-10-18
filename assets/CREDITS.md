@@ -101,6 +101,12 @@ Drawn as SVG for the papercraft HUD (Claude Design canvas "Papercraft Kingdom De
 | `icons/tower_spool_guard.svg` | Original, the owner (HUD icon, drawn with Claude) | Owned by the owner (all rights reserved) | none |
 | `icons/tower_thimble_mortar.svg` | Original, the owner (HUD icon, drawn with Claude) | Owned by the owner (all rights reserved) | none |
 
+## App icon
+
+| File | Source | Licence | Edits |
+| --- | --- | --- | --- |
+| `app/icon.png` | Original, the owner (placeholder app icon: a folded red paper heart on kraft card, 1024 px, drawn with Claude) | Owned by the owner (all rights reserved) | the iOS and desktop icon (`config/icon`, the iOS preset) |
+
 ## History: assets of the Three.js game
 
 The Three.js game (tag `web-three-final`) shipped these, all removed from the tree with it. They are listed so the credit survives, and any of them that returns needs a row above.

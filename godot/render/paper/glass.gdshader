@@ -1,5 +1,5 @@
 // The Prism Spire's glass marble: a tinted, mostly see-through shell, brighter at its rim.
-// The glowing cat's-eye inside is craft_vc paper. GL Compatibility: alpha blending.
+// The glowing cat's-eye inside is craft_vc paper. Alpha blending (it started on GL Compatibility).
 shader_type spatial;
 render_mode blend_mix, cull_back, depth_draw_opaque;
 

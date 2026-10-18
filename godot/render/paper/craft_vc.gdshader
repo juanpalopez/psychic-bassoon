@@ -3,7 +3,7 @@
 // colours are in the vertex colours and the look of each face in UV2.x, written by
 // assets-src/papercraft/towers_export.py: 0 paper, 1 wood, 2 metal, 3 dimpled metal (the
 // thimble), 4 wound thread, 5 corrugated card. Vertex alpha lights paper from inside.
-// GL Compatibility: plain branches, a wrapped light like paper_vc, and a hand-made highlight
+// Plain branches (it started on GL Compatibility): a wrapped light like paper_vc, and a hand-made highlight
 // on metal (the desk has no sky to reflect).
 shader_type spatial;
 render_mode cull_disabled;

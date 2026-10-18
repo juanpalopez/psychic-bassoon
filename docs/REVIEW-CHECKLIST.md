@@ -26,7 +26,7 @@ A re-review is worth its cost when logic changed (code under `godot/sim`, the ti
 
 ## Do not repeat CI
 
-Run `gh pr checks <N>` first. Lint, types, unit tests, the Linux desktop export and its headless run, and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
+Run `gh pr checks <N>` first. Lint, types, unit tests, the Linux desktop export and its checked headless run (a clean log: no `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line, exit 0, no timeout; nothing is rendered, so judge visuals from screenshots), and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
 
 ## Review a stack as a whole
 

@@ -236,14 +236,14 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
-| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); the headless game time budget; the Linux desktop export, checked for its binary and `.pck` and run headless, uploaded as `godot-desktop`; with the `all-desktop` input (releases) also the Windows and macOS exports. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
+| `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); the headless game time budget; the Linux desktop export, checked for its binary and `.pck` and run 300 frames headless through `scripts/run-godot-checked.sh` (fails on a non-zero exit, a timeout, or an `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line), uploaded as `godot-desktop` for releases; with the `all-desktop` input (releases) also the Windows and macOS exports. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
 | `deploy` | Push to `main`, only after `ci` passes | Publishes `site/index.html` to GitHub Pages: a short page that says the web build is retired (#318) and links to the latest release. Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks with the Linux, Windows and macOS exports, and publishes a GitHub Release with generated notes and the three builds attached as zips (the macOS app is ad-hoc signed, not notarized). |
 
 **Versions follow phase gates** (semantic versioning, 0.x until launch). The only tag so far is `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
-- CI checks: lint, formatting, determinism (the fixtures for the ported core, then replay goldens), sim rules, the asset size budget, `assets/CREDITS.md` coverage for every GLB, and that the Linux export starts.
+- CI checks: lint, formatting, determinism (the fixtures for the ported core, then replay goldens), sim rules, the asset size budget, `assets/CREDITS.md` coverage for every GLB, and that the Linux export runs 300 frames with a clean log (scripts, resources and shader compiles that log an error).
 - CI has no GPU: the exported Linux build runs headless (no rendering), so fps and draw calls are not measured in CI.
 - 60 fps with 80 foes on a mid-range phone stays a manual check at the Phase 5 gate. Record device, fps and seed in the PR.
 
