@@ -34,7 +34,7 @@ script = ExtResource("1_main")
 environment = SubResource("Environment_desk")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
-rotation_degrees = Vector3(-42, -121.5, 0)
+rotation_degrees = Vector3(-42, -91.5, 0)
 light_color = Color(1, 0.86, 0.7, 1)
 light_energy = 1.1
 shadow_enabled = true

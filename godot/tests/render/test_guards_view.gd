@@ -47,7 +47,9 @@ func test_the_health_bar_stays_square_to_the_camera_as_the_guard_turns() -> void
 	var view := _view()
 	view.update(game)
 	var bar := view.get_child(0).get_node("Bar") as Node3D
-	assert_almost_eq(bar.global_transform.basis.x.dot(Vector3.RIGHT), 1.0, 1e-6)
+	# the camera is turned by the yaw, so the bar is too
+	var right := Basis(Vector3.UP, deg_to_rad(CameraRig.YAW_DEGREES)) * Vector3.RIGHT
+	assert_almost_eq(bar.global_transform.basis.x.dot(right), 1.0, 1e-6)
 
 
 func test_the_guard_parts_stand_in_place_when_each_clip_starts() -> void:

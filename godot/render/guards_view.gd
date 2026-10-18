@@ -187,6 +187,8 @@ func _make() -> Node3D:
 	bar.mesh = box
 	bar.material_override = _flat(BAR_COLOUR)
 	bar.position.y = BODY_HEIGHT + BAR_GAP
+	# square to the camera, which is turned about the vertical axis
+	bar.rotation.y = deg_to_rad(CameraRig.YAW_DEGREES)
 	root.add_child(bar)
 	return root
 
