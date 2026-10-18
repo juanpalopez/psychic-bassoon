@@ -1,6 +1,6 @@
 ## The scripted bot: a player that only sends commands. It builds where a tower
-## reaches the most road, spends what it has, upgrades when the sockets are used,
-## and calls the waves.
+## reaches the most road, spends what it has, upgrades when the sockets are used or it has
+## `MAX_TOWERS` towers, and calls the waves.
 extends GutTest
 
 const PROFILES := preload("res://content/bot_profiles.gd")
@@ -139,11 +139,38 @@ func test_it_never_sends_an_upgrade_it_cannot_pay_for() -> void:
 	assert_eq(rejected, 0, "59 Buttons do not buy a 60 Button upgrade, and it did not try")
 
 
+func test_it_builds_at_most_max_towers_and_then_upgrades() -> void:
+	var game := Game.create(1)
+	assert_gt(game.map.sockets.size(), PROFILES.MAX_TOWERS, "the valley has sockets to spare")
+	# enough for MAX_TOWERS Spool Guards and one upgrade (60), not for another tower as well
+	game.buttons = 50 * PROFILES.MAX_TOWERS + 60
+	game.heartstone_health = 100000
+	var rejected := _play(game, _bot("spoolOnly"), PROFILES.MAX_TOWERS * 3 + 5)
+	assert_eq(rejected, 0)
+	assert_eq(game.towers.size(), PROFILES.MAX_TOWERS, "it stops building at the cap")
+	var upgraded := 0
+	for tower in game.towers:
+		upgraded += tower.level
+	assert_eq(upgraded, 1, "the spare Buttons went into an upgrade, not a sixteenth tower")
+
+
+func test_a_profile_can_set_its_own_tower_cap() -> void:
+	var game := Game.create(1)
+	game.buttons = 100000
+	game.heartstone_health = 100000
+	var profile: Dictionary = PROFILES.PROFILES.spoolOnly.duplicate(true)
+	profile.max_towers = 3
+	_play(game, ScriptedBot.new(profile), 6)
+	assert_eq(game.towers.size(), 3)
+	assert_gt(game.towers[0].level + game.towers[1].level + game.towers[2].level, 0)
+
+
 func test_it_upgrades_once_every_socket_has_a_tower() -> void:
 	var game := Game.create(1)
 	game.buttons = 100000
 	game.heartstone_health = 100000
 	var bot := _bot("spoolOnly")
+	# MAX_TOWERS towers, all of them to the top level, then the rest of the sockets
 	var rejected := _play(game, bot, game.map.sockets.size() * 3 + 20)
 	assert_eq(game.towers.size(), game.map.sockets.size(), "one tower on every socket")
 	# afterwards the spare Buttons go into upgrades, lowest level first
@@ -157,11 +184,12 @@ func test_it_upgrades_once_every_socket_has_a_tower() -> void:
 
 func test_it_upgrades_the_lowest_level_tower_first() -> void:
 	var game := Game.create(1)
-	# exactly enough for a Spool Guard on every socket and nothing over
-	game.buttons = 50 * game.map.sockets.size()
+	# exactly enough for a Spool Guard on every socket it fills and nothing over
+	var towers := mini(game.map.sockets.size(), PROFILES.MAX_TOWERS)
+	game.buttons = 50 * towers
 	var bot := _bot("spoolOnly")
-	_play(game, bot, game.map.sockets.size() * 3 + 5)
-	assert_eq(game.towers.size(), game.map.sockets.size())
+	_play(game, bot, towers * 3 + 5)
+	assert_eq(game.towers.size(), towers)
 	# now just enough for three upgrades (60 each); the first kills pay a few more
 	# Buttons, far from a fourth
 	game.buttons = 60 * 3

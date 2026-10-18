@@ -5,10 +5,11 @@
 ## It builds, in turn, the towers of its profile on the sockets that reach the
 ## most road (counted with a Spool Guard's reach and the socket's elevation
 ## bonus, from the block's centre; ties go to reading order), saving up when it
-## cannot pay. Once every socket has a tower, or it has `MAX_TOWERS` of them (the valley has
-## twice the sockets a player can fill), it upgrades, the lowest level and then the cheapest
-## first, and builds again only when every tower is at the top. It launches the next wave when none is running (and,
-## if its profile says so, early when few foes are left). One build or upgrade
+## cannot pay. Once every socket has a tower, or it has `MAX_TOWERS` of them (the
+## valley has twice the sockets a player can fill), it upgrades, the lowest level
+## and then the cheapest first, and builds again only when every tower is at the
+## top. It launches the next wave when none is running (and, if its profile says
+## so, early when few foes are left). One build or upgrade
 ## per tick, so it never spends the same Buttons twice. A Kitchen Mess Tent goes on the
 ## free socket whose aura reaches the most guards (none before a Guard Tent stands);
 ## when no socket suits the next tower of its order it builds the next one instead.
