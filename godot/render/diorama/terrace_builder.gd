@@ -24,8 +24,10 @@ const CHUNK_CELLS := 16
 ## The near chunks cover the map grown to whole chunks with at least this many cells round it
 ## (32 by 20 gives x -16 to 48 and y -16 to 32); past them lie the coarse chunks.
 const NEAR_CELLS := 12
-## The key of a coarse chunk: this plus its band across (0 west, 1 middle, 2 east) and in depth.
+## The key of a coarse chunk: this plus, across and in depth, 0 before the near chunks, 200
+## after them, or 100 plus its piece alongside them.
 const FAR_KEY := 1000
+const FAR_CELLS_ALONG := 32
 ## How far an outline may wander from the middle of an edge (a share of the edge), and how far
 ## the middle of a square may move from its corners' share.
 const EDGE_NOISE := 0.3
@@ -217,13 +219,17 @@ static func chunk_of(cell: Vector2i, size: Vector2i) -> Vector2i:
 	var near := near_rect(size)
 	if near.has_point(cell):
 		return Vector2i(floori(cell.x / float(CHUNK_CELLS)), floori(cell.y / float(CHUNK_CELLS)))
-	var band := Vector2i.ONE
+	# a coarse chunk is a band past the near ones (0 before, 2 after, 1 alongside), cut along
+	# its length every `FAR_CELLS_ALONG` cells so the camera culls most of it up close
+	var key := Vector2i(FAR_KEY, FAR_KEY)
 	for k in 2:
 		if cell[k] < near.position[k]:
-			band[k] = 0
+			key[k] += 0
 		elif cell[k] >= near.end[k]:
-			band[k] = 2
-	return Vector2i(FAR_KEY, FAR_KEY) + band
+			key[k] += 200
+		else:
+			key[k] += 100 + floori((cell[k] - near.position[k]) / float(FAR_CELLS_ALONG))
+	return key
 
 
 ## The map cells the near chunks cover: the map grown by `NEAR_CELLS`, out to whole chunks.

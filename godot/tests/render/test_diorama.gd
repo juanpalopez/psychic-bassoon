@@ -25,9 +25,9 @@ const TERRAIN_TRIANGLES := 40000
 const SCENERY_TRIANGLES := 32000
 ## Where along a shared edge the seam test compares the tops (never the middle, where a
 ## guarded outline crosses exactly).
-## Every surface the diorama draws before culling: 12 near chunks, at most 8 coarse ones, the
+## Every surface the diorama draws before culling: 12 near chunks, at most 12 coarse ones, the
 ## water's chunks, the road bed and five scatter meshes.
-const SURFACES := 32
+const SURFACES := 36
 const ALONG: Array[float] = [0.07, 0.23, 0.41, 0.62, 0.79, 0.94]
 ## The screen shapes the camera frames for: a 16:9 screen, a tall phone, a 4:3 tablet.
 const ASPECTS: Array[float] = [16.0 / 9.0, 19.5 / 9.0, 4.0 / 3.0]
@@ -262,7 +262,7 @@ func test_the_terraces_are_built_in_small_chunks_on_the_map_and_coarse_ones_far_
 		assert_eq(chunk.material_override, material, "one shared material")
 	assert_eq(material, board.diorama.ground_material)
 	assert_eq(near_count, near.size.x * near.size.y / (TerraceBuilder.CHUNK_CELLS ** 2))
-	assert_lte(terraces.chunk_count - near_count, 8, "one coarse chunk a side and corner")
+	assert_lte(terraces.chunk_count - near_count, 12, "a few coarse chunks round them")
 	assert_true(near.encloses(Rect2i(Vector2i(-12, -12), size + Vector2i(24, 24))))
 
 
