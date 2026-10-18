@@ -144,7 +144,8 @@ func _process(delta: float) -> void:
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS)
 	_guards.update(_game)
 	if ticks_speed > 0:
-		_shots.update(delta)
+		# shots age in game time, so at 2x and 3x they keep up with the hits they show
+		_shots.update(delta * float(ticks_speed))
 	_shots.show_beams(_game, _board.surface_height)
 	_audio.set_music(SoundMap.music_for(_game))
 	_update_launch_button()
@@ -451,7 +452,8 @@ func _draw_shot(game: GameState, event: GameEvent) -> void:
 			_shots.add_shot(
 				ShotsView.muzzle(tower, surface, game.map.footprint),
 				ShotsView.body_point(event.x, event.y),
-				event.splash
+				event.splash,
+				ShotsView.kind_for(tower.type)
 			)
 			return
 

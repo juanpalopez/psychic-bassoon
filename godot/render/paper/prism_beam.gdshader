@@ -1,6 +1,7 @@
 // The Prism Spire's beam: light split by the marble into a rainbow round a white core,
 // with bright pulses running down it to the foe. Unshaded and added on top, so it glows on
-// the desk. The pulses and the width step at 12 fps like the rest of the stop-motion; the
+// the desk. The pulses and the width (which throbs as a whole: the tube has rings only at its
+// two ends) step at 12 fps like the rest of the stop-motion; the
 // tube is `ShotsView`'s beam mesh (UV.x round it, UV.y along it, 0 at the tower).
 shader_type spatial;
 render_mode unshaded, blend_add, cull_disabled, depth_draw_never, shadows_disabled;
@@ -13,7 +14,7 @@ void vertex() {
 	float stepped = floor(TIME * 12.0) / 12.0;
 	// the node is stretched along its length, so its z basis is the beam's length
 	length_m = length(MODEL_MATRIX[2].xyz);
-	float pulse = 1.0 + 0.22 * sin(stepped * 31.0 + UV.y * 6.0);
+	float pulse = 1.0 + 0.22 * sin(stepped * 31.0);
 	VERTEX.xy *= pulse;
 }
 

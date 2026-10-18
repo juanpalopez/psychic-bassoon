@@ -1,7 +1,8 @@
 ## Tower attacks, drawn from what the sim reports. The sim lands a shot the tick it is
 ## fired; the drawing gives it a flight: the Spool Guard's paper dart flies straight to the
 ## foe and pops into paper scraps, the Thimble Mortar's crumpled pellet arcs over and bursts
-## into confetti in a ring as wide as its blast, and the Prism Spire's beam is a rainbow of
+## into confetti, a blast of either (the mortar's, the Aviary's dart bombs) leaves a ring as
+## wide as its splash, and the Prism Spire's beam is a rainbow of
 ## split light that lasts as long as its lock, with a glow where it hits. Flights step at
 ## 12 frames a second like the rest of the stop-motion. Everything comes from small fixed
 ## pools, so nothing is created while playing, and nothing is random: the scraps' scatter is
@@ -13,21 +14,27 @@ enum Kind { DART, PELLET }
 
 ## The stop-motion frame rate the flights step at.
 const FPS := 12.0
-const MAX_SHOTS := 48
+## A shot costs a draw call in flight and one or two as it bursts, a beam two (its tube and
+## its glow), so the pools stay small for the phone budget of 120 draw calls; shots age in
+## game time, so 3x speed does not keep more of them alive.
+const MAX_SHOTS := 32
 const MAX_BEAMS := 32
+## The tower that lobs pellets; every other tower's shot is a dart.
+const MORTAR_TYPE := "thimbleMortar"
 ## A dart flies at this speed, but takes at least 2 and at most 4 frames.
 const DART_SPEED := 22.0
 const DART_MIN := 2.0 / 12.0
 const DART_MAX := 4.0 / 12.0
 ## A pellet's flight, and how high its arc rises over the higher end per metre it travels.
-const PELLET_SECONDS := 6.0 / 12.0
+const PELLET_SECONDS := 4.0 / 12.0
 const ARC_BASE := 0.8
 const ARC_PER_METRE := 0.3
 ## How long the pop or the burst at the target lasts.
 const POP_SECONDS := 3.0 / 12.0
 const BURST_SECONDS := 5.0 / 12.0
-## The longest a shot can be on screen.
-const SHOT_SECONDS := DART_MAX + POP_SECONDS
+## The longest a shot can be on screen: a pellet's flight and burst (a dart lives at most
+## DART_MAX + POP_SECONDS, which is shorter).
+const SHOT_SECONDS := PELLET_SECONDS + BURST_SECONDS
 const BEAM_WIDTH := 0.22
 const RING_HEIGHT := 0.03
 ## Where up the drawn tower a shot leaves it, as a share of its height.
@@ -115,9 +122,9 @@ static func body_point(sim_x: float, sim_y: float) -> Vector3:
 	return Vector3(at.x, BODY_HEIGHT, at.z)
 
 
-## What a tower of `type` throws: a blast (`splash` above 0) is a pellet, anything else a dart.
-static func kind_for(splash: float) -> Kind:
-	return Kind.PELLET if splash > 0.0 else Kind.DART
+## What a tower of `type` throws: the Thimble Mortar a pellet, every other tower a dart.
+static func kind_for(type: String) -> Kind:
+	return Kind.PELLET if type == MORTAR_TYPE else Kind.DART
 
 
 ## How long a shot of `kind` takes to fly from `from` to `to`, in seconds.
@@ -148,13 +155,11 @@ static func point_on_flight(kind: Kind, from: Vector3, to: Vector3, share: float
 	return on_line + Vector3(0.0, lift, 0.0)
 
 
-## Throws a shot of `kind` from `from` to `to`, with a confetti ring `splash` cells wide at
-## the target when it is above 0. When every slot is busy the oldest is reused.
+## Throws a shot of `kind` from `from` to `to`, with a ring `splash` cells wide at the
+## target when it is above 0. When every slot is busy the oldest is reused.
 func add_shot(from: Vector3, to: Vector3, splash: float, kind: Kind = Kind.DART) -> void:
 	if from.is_equal_approx(to):
 		return
-	if splash > 0.0:
-		kind = Kind.PELLET
 	var slot := _next
 	_next = (_next + 1) % MAX_SHOTS
 	_kind[slot] = kind
@@ -286,15 +291,15 @@ func _draw(slot: int) -> void:
 	var burst := _bursts[slot]
 	burst.position = _to[slot] + Vector3(0.0, -0.25 * t * t, 0.0)
 	if kind == Kind.PELLET:
-		var reach := maxf(_splash[slot], 0.5)
-		burst.scale = Vector3.ONE * (0.4 + 0.8 * t) * reach
+		burst.scale = Vector3.ONE * (0.4 + 0.8 * t) * maxf(_splash[slot], 0.5)
+	else:
+		burst.scale = Vector3.ONE * (0.15 + 0.35 * t)
+	if _splash[slot] > 0.0:
 		var ring := _rings[slot]
 		ring.visible = true
 		ring.position = Vector3(_to[slot].x, RING_HEIGHT, _to[slot].z)
 		var grow := (0.55 + 0.45 * t) * _splash[slot]
 		ring.scale = Vector3(grow, 1.0, grow)
-	else:
-		burst.scale = Vector3.ONE * (0.15 + 0.35 * t)
 	burst.rotation.y = age * 3.0
 	burst.visible = true
 
