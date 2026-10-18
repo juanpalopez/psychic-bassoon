@@ -1,15 +1,25 @@
 # RFC: An online leaderboard with verified scores
 
-Status: draft for the owner · 2026-10-17 · Phase 8 (Meta, polish, launch, native) · Author: Claude (Sonnet). Free-tier limits and product behaviour named below come from the author's knowledge of Cloudflare, Apple and Google at the time of writing and must be checked against their current pages before a ticket relies on them.
+Status: draft for the owner, staged on 2026-10-18 (the owner chose to start with stage B) · 2026-10-17 · Phase 8 (Meta, polish, launch, native) · Author: Claude (Sonnet). Free-tier limits and product behaviour named below come from the author's knowledge of Cloudflare, Apple and Google at the time of writing and must be checked against their current pages before a ticket relies on them.
 
 ## 1. Summary
 
 Players should be able to compare runs. This RFC proposes a leaderboard whose scores can be **trusted without trusting the client**:
 
-- The backend runs on Cloudflare's free tier (Workers, D1, Turnstile, R2), provisioned with Terraform.
+- The backend runs on Cloudflare's free tier (Workers, D1, Turnstile), provisioned with Terraform. **Stage B uses no R2**, so no product on the account can bill.
 - Identity is an **anonymous, server-issued player token** first, with Sign in with Apple, Game Center and Google linked later for recovery across devices.
-- The server hands out the seed of every ranked run, and the client sends back the **command log**. The sim is deterministic (same seed plus same commands gives the same game), so a **verifier re-plays the run with the real sim** and only then marks the score verified.
+- The server hands out the seed of every ranked run. In **stage B** it checks the claimed result against bounds the sim publishes. In **stages C and D** the client also sends back the **command log**; the sim is deterministic (same seed plus same commands gives the same game), so a **verifier re-plays the run with the real sim** and only then marks the score verified.
 - Abuse is limited in layers: Turnstile, per-IP and per-player rate limits, size caps, plausibility checks before verification, and moderation tools after.
+
+**Delivery is staged (owner, 2026-10-18).** Replay verification is the strongest defence but also the most to build, and most casual games do not have it. So:
+
+| Stage | What ships | Anti-cheat | Sections |
+| --- | --- | --- | --- |
+| **B (first)** | Worker, D1, anonymous tokens, server-issued daily and weekly seeds, plausibility checks, rate limits, reports and bans | Obvious fakes are blocked; a score is **claimed, not proven** | 6.1, 6.2, 7 (no R2), 8, 9.3 (the checks that need no log), 10 to 15 |
+| C | The client also uploads its command log when its score would enter the top N; only those logs are stored and replayed | Scores that are visible are verified | 9.1, 9.2, 9.4, with logs in D1 and deleted after verification except the top N |
+| D | Every run is verified; account linking; App Attest | Full | the rest |
+
+Everything in this RFC that mentions R2, the command log, the verifier or the replay belongs to stage C or D. Stage B is built so C can be added without changing the API or the data model (the `finish` call already allows an optional log).
 
 The sim stays pure. A new adapter, `godot/net/`, does the HTTP, exactly as `render` and `ui` are adapters over the sim.
 
@@ -69,7 +79,6 @@ Godot client (web or iOS)                 Cloudflare (free tier)                
    - start run   (seed, run id)            ├─ JWT sign / verify  (Web Crypto)
    - finish run  (command log)             ├─ rate limiting
    - read boards                           ├─ D1  (players, runs, scores, bans)
-                                           └─ R2  (command logs, kept for re-verify)
                                                      ▲
                                                      │  admin API (service token)
                            GitHub Actions  ──────────┘  fetch pending runs, post results
@@ -78,7 +87,7 @@ Godot client (web or iOS)                 Cloudflare (free tier)                
 
 - **API Worker.** One Cloudflare Worker, TypeScript, routes described in section 6.5 and 9.
 - **D1.** Relational data: players, runs, verified scores, bans, audit log.
-- **R2.** Command logs (small files), so any run can be re-verified when the sim version changes or a cheat pattern is found. R2 has a free tier with no egress fees (verify the current limits).
+- **Command logs (stage C).** Stored in D1 for runs that reach the top N, deleted after verification otherwise. R2 is deliberately not used: it is the one Cloudflare product here that bills when the free allowance is exceeded.
 - **Verifier.** A scheduled GitHub Actions job runs the real GDScript sim headless (`godot --headless`) over pending runs. It talks to the Worker through a private admin API.
 - **Client adapter.** `godot/net/` uses `HTTPRequest`, which works in the web export and on iOS. It never touches `godot/sim` internals: it reads the finished game through read-only accessors and a **run recorder** that is a new sim-side value (section 9.1).
 
@@ -128,17 +137,16 @@ All Cloudflare infrastructure is created by the `cloudflare/cloudflare` Terrafor
 | Resource | Purpose |
 | --- | --- |
 | D1 database | Players, runs, scores, bans |
-| R2 bucket | Command logs |
-| Worker script and its bindings | The API, with D1, R2 and secrets bound |
+| Worker script and its bindings | The API, with D1 and secrets bound |
 | Route or custom domain, DNS record | `api.<domain>` (or `workers.dev` for the first release) |
 | Turnstile widget | The registration challenge |
 | Rate limiting and WAF rules | Edge-level limits (section 8.2) |
-| API token for CI | Scoped to this account's Workers, D1 and R2 only |
+| API token for CI | Scoped to this account's Workers, D1 and Turnstile only |
 
 Notes:
 
 - The provider's v5 line renamed several resources; the ticket pins an exact provider version and follows its docs.
-- **State** lives in a private R2 bucket (S3-compatible backend) or Terraform Cloud's free tier, with locking. State holds secrets, so the bucket is private, versioned and not public.
+- **State** lives in **Terraform Cloud's free tier** (the `cloud {}` block): it gives locking and a history of state versions, needs no R2 and no card, and cannot bill. State holds secrets, so the workspace is private, nothing prints it, and it is never uploaded as a CI artifact. An R2 bucket through the S3 backend is the alternative (no versioning, no locking guarantee, a card is needed to enable R2); it is not used in stage B.
 - **Secrets** (signing keys, service token, Turnstile secret) are created outside git (`openssl rand`, `wrangler secret put` or the provider's secret resource) and never committed. CI deploys read them from GitHub Actions secrets. A leaked secret is rotated, not patched.
 - **Schema** is not Terraform's job. D1 migrations live in `infra/cloudflare/migrations/` and are applied by `wrangler d1 migrations apply` in CI.
 - **Deploy.** A workflow on `main` runs `terraform plan` on PRs and `terraform apply` on merge for `infra/**`, and `wrangler deploy` for the Worker. The Worker and the infrastructure have separate environments: `staging` (own D1 and bucket) and `production`.
@@ -197,17 +205,32 @@ These belong to `godot/sim` and need tests first:
 - **`SIM_VERSION`:** a constant bumped whenever any rule, number or stream changes (every balance change to `godot/content` or `godot/sim`). It is part of every run.
 - **Ranked configuration:** the settings the game is created with (map size, footprint, second source, and in the future the frozen meta-loadout) are a single value, `RankedRules`, hashed into the run so the verifier replays under the same rules.
 
-### 9.2 Verification pipeline
+### 9.1b Stage B: claimed scores with bounds
+
+Stage B has no command log. The client sends a **claimed result** (waves cleared, Heartstone health left, ticks, whether it won) for a run the server issued, and the Worker accepts it only when it passes these checks, all computed from numbers the sim publishes:
+
+- **Wall-clock floor:** `ticks / 90` seconds (30 Hz at 3x) must have passed since `start`.
+- **Shape:** waves cleared at most the number of waves in the game, Heartstone health between 0 and `START_HEARTSTONE_HEALTH`, a win only when every wave is cleared, and a loss only with 0 health.
+- **Minimum ticks per wave:** a sim-derived floor (the fastest a wave can spawn and be cleared, measured from the content tables and the scripted bot), so `ticks` cannot be smaller than the waves claimed allow.
+- **Maximum score:** the highest score reachable with those bounds; anything above is rejected.
+- **Seed, version and expiry:** the run id, seed and `sim_version` must equal what `start` recorded, and one finish per run.
+- **Quotas and rate limits** from section 8.
+
+A forger can still claim a plausible best score (for example a perfect win in a believable time). Stage B stops the crude cheats, not a careful one. Mitigations in stage B: top scores are shown with an "unverified" mark, any player can be reported, an admin can remove a score or ban a player, and stage C is added when the first suspicious top score appears.
+
+The sim provides `Score` and a `Bounds` table (waves, maximum health, minimum ticks per wave) with tests, and `SIM_VERSION`; `RunRecorder` and `RankedRules` wait for stage C.
+
+### 9.2 Verification pipeline (stage C and D)
 
 1. The client plays the run and records the command log.
-2. `POST /v1/runs/{run_id}/finish` stores the log in R2 and the claimed score and tick count in D1 with status `pending`.
+2. `POST /v1/runs/{run_id}/finish` stores the log in D1 and the claimed score and tick count in D1 with status `pending`.
 3. A scheduled **GitHub Actions** job (every 15 to 30 minutes, within free minutes if the repository is public) runs on the pinned sim version: `godot --headless` loads the seed, replays the commands tick by tick through `Game.submit` and `Game.tick`, stops at the end, and computes the real `Score`.
 4. The job posts the result through the admin API: `verified` (the recomputed score equals the claim), `corrected` (the run is valid but the claim was wrong; the true score is used) or `rejected` (a command is illegal at its tick, the log does not end the game, the version is unknown, or it throws).
 5. Only `verified` and `corrected` scores appear on the public board. Pending scores are shown to their owner and, if the owner chooses, greyed out in the public list.
 
 Because the sim is deterministic and never uses `randf`, `Time` or `OS`, the result does not depend on the machine. The replay goldens already pass on both a Mac and the Linux CI runner, which is evidence for cross-platform float equality, but a **cross-platform replay check** (web export, iOS and Linux give the same hash on a fixed set of runs) is a ticket of its own before the iOS board opens.
 
-**Version handling.** Each run records `sim_version`. The verifier checks out that exact tag (or uses a cached export of it). A balance release bumps `SIM_VERSION` and starts new weekly boards; old runs are not re-judged against new rules. Command logs stay in R2 so a bug found in the verifier can be re-run.
+**Version handling.** Each run records `sim_version`. The verifier checks out that exact tag (or uses a cached export of it). A balance release bumps `SIM_VERSION` and starts new weekly boards; old runs are not re-judged against new rules. Command logs stay in D1 (stage C) until they are verified, and only the top N are kept, so a bug found in the verifier can be re-run on the runs that matter. No R2 is needed.
 
 If a board is public with an unlimited number of submitted runs, the verifier needs capacity. Cost control: verify only runs that would enter the **top N** (for example the top 200) of a board, plus a random sample of the rest for cheat detection. A run below the cut-off stays `unranked` and costs nothing.
 
@@ -257,7 +280,7 @@ Say it plainly, so nobody is surprised:
 
 - **Data collected:** a random player id, a display name, a player code, hashed refresh tokens, hashed provider subjects (if linked), runs (seed, version, command log, score, timestamps), and coarse abuse data (IP-derived counters, kept for days, not stored with the player). No email, location, advertising id or device name.
 - **IP addresses:** used in memory for rate limiting and Turnstile. Cloudflare logs follow its own retention; the Worker does not write IPs to D1 except a salted hash in the abuse table for at most 7 days.
-- **Retention and deletion:** `DELETE /v1/me` removes the player, links, tokens and scores, and the R2 logs; a deleted player's run entries disappear from the boards. The in-game settings screen exposes it, as App Store and privacy rules require a way to delete an account created in the app.
+- **Retention and deletion:** `DELETE /v1/me` removes the player, links, tokens and scores, and any stored logs; a deleted player's run entries disappear from the boards. The in-game settings screen exposes it, as App Store and privacy rules require a way to delete an account created in the app.
 - **Children and age rating:** names are free text, which is user-generated content. Apple expects a reporting and blocking path and a content filter for it; section 8.5 provides them. The ticket checks the age-rating questionnaire and COPPA/GDPR-K obligations for the target regions before launch.
 - **Privacy policy:** a short page linked from the app and the web build, describing the table above.
 - **Public board data:** display name, code, score, date, wave reached. Nothing else.
@@ -308,7 +331,7 @@ Indexes: `runs(board_id, status, true_score desc)` for the boards, `runs(player_
 
 ## 14. Free-tier and cost estimate
 
-Order of magnitude, to be checked against the current Cloudflare pages: the Workers free plan allows on the order of 100,000 requests a day, D1 a few million row reads and 100,000 row writes a day with a few GB of storage, R2 about 10 GB with no egress fees, Turnstile is free. Each ranked run is about 3 requests (start, finish, a board read) and a few D1 writes, so the free tier supports thousands of runs a day. The edge cache on boards keeps reads low. If a limit is hit the API degrades to errors (not charges), and the kill switch and caching are the first levers before moving to the paid plan, which is a few dollars a month.
+Order of magnitude, to be checked against the current Cloudflare pages: the Workers free plan allows on the order of 100,000 requests a day, D1 a few million row reads and 100,000 row writes a day with a few GB of storage, Turnstile is free. Stage B uses no R2, and Terraform Cloud's free tier holds the state, so nothing on the account can bill; the Workers and D1 free plans return errors past their limits instead of charging, as long as the account is never upgraded. Each ranked run is about 3 requests (start, finish, a board read) and a few D1 writes, so the free tier supports thousands of runs a day. The edge cache on boards keeps reads low. If a limit is hit the API degrades to errors (not charges), and the kill switch and caching are the first levers before moving to the paid plan, which is a few dollars a month.
 
 ## 15. Testing
 
@@ -320,16 +343,21 @@ Order of magnitude, to be checked against the current Cloudflare pages: the Work
 
 ## 16. Tickets, in order
 
-1. **[Phase 8] Sim: `Score`, `RunRecorder`, `SIM_VERSION` and `RankedRules`** (sim, deep review, goldens unchanged with the feature off).
-2. **[Phase 8] Infra: Terraform for Cloudflare, state backend, staging and production.**
-3. **[Phase 8] API: register, tokens, rate limits, Turnstile, boards, runs start and finish, tests and OpenAPI.**
-4. **[Phase 8] Verifier: headless replay job, admin API, version pinning.**
-5. **[Phase 8] Client: `godot/net/` adapter, name entry, board screen, run submission and status.**
-6. **[Phase 8] Moderation and privacy: reports, bans, delete-me, privacy policy, incident runbook.**
-7. **[Phase 8] Cross-platform replay check (web, Linux, iOS).**
-8. **[Phase 8] Account linking: Sign in with Apple, Game Center and Google; App Attest on iOS.**
+**Stage B (start here):**
 
-Tickets 1 to 6 give a safe web leaderboard; 7 and 8 gate the iOS board.
+- **B1. [Phase 8] Sim: `Score`, `Bounds` and `SIM_VERSION`** (sim, deep review, goldens unchanged, tests first).
+- **B2. [Phase 8] Infra: Terraform for Cloudflare (D1, Worker, Turnstile), Terraform Cloud state, staging and production, CI plan and apply.**
+- **B3. [Phase 8] API: register, tokens, Turnstile, rate limits, boards, run start and finish with the plausibility checks, reports and bans, `DELETE /me`, tests and OpenAPI.**
+- **B4. [Phase 8] Client: `godot/net/` adapter, name entry, board screen, run submission, privacy link and delete-me.**
+
+**Later:**
+
+- **C1. Optional command-log upload for top-N scores, and the headless replay verifier** (adds `RunRecorder`, `RankedRules`, the admin API).
+- **C2. Cross-platform replay check (web, Linux, iOS).**
+- **D1. Account linking: Sign in with Apple, Game Center and Google; App Attest on iOS.**
+- **D2. Incident runbook and moderation tools beyond reports and bans.**
+
+B1 to B4 give a safe, free, web leaderboard that blocks the crude cheats; C and D gate stronger claims and the iOS board.
 
 ## 17. Risks
 
@@ -344,6 +372,8 @@ Tickets 1 to 6 give a safe web leaderboard; 7 and 8 gate the iOS board.
 | Offensive names | Store review and reputation | Filter, report, shadow ban, quick admin tools |
 
 ## 18. Alternatives considered
+
+- **Platform leaderboards only** (Game Center, Google Play Games): no backend, free, but no web support and the score is trusted. Possible later on iOS next to this board.
 
 - **Trust the client's score** (SilentWolf, a plain Supabase table): simplest, and cheaters reach the top within a day. Rejected for a game with a deterministic sim that makes verification cheap.
 - **Supabase or Firebase instead of Cloudflare:** both have good auth, but Supabase free projects pause when idle and Firebase needs the paid plan for server-side logic. The Worker gives one small, testable codebase.
