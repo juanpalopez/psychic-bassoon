@@ -5,6 +5,7 @@
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
+const GOLDEN := "res://tests/goldens/terrain.json"
 
 var _seeds: Array[int] = []
 var _maps: Array[GameMap] = []
@@ -61,12 +62,41 @@ func test_the_road_lies_on_the_valley_floor_and_its_banks_stay_low() -> void:
 
 
 func test_a_socket_block_stands_on_its_own_level() -> void:
+	# the sockets are placed first with their levels and the terrain adapts to them, so a
+	# block may stand above the road's banks (coordinator, #322)
 	for map in _maps:
 		for anchor in map.sockets:
 			for dy in map.footprint:
 				for dx in map.footprint:
 					var cell := anchor + Vector2i(dx, dy)
 					assert_eq(map.height_at(cell), map.elevation_at(anchor), "seed %d" % map.seed)
+
+
+func test_the_ground_round_a_socket_block_rises_to_meet_it() -> void:
+	# a cell beside a block on level L is at least L - 1 (at most the bank height beside the
+	# road), and every block has a side neighbour within one terrace: no lone plinths
+	for map in _maps:
+		for anchor in map.sockets:
+			var level := map.elevation_at(anchor)
+			var near := false
+			for dy in range(-1, map.footprint + 1):
+				for dx in range(-1, map.footprint + 1):
+					var cell := anchor + Vector2i(dx, dy)
+					if not map.in_bounds(cell) or map.is_socket_cell(cell):
+						continue
+					var side := dx >= 0 and dx < map.footprint or dy >= 0 and dy < map.footprint
+					if side and absi(map.height_at(cell) - level) <= 1:
+						near = true
+					if _on_road(map, cell) or map.river.has(cell):
+						# the road and the river run on the valley floor: a canyon wall
+						continue
+					var least := level - 1
+					if _road_gap(map, cell) <= 1:
+						least = mini(least, RULES.TERRAIN_ROADSIDE_MAX)
+					assert_gte(
+						map.height_at(cell), least, "beside %s, seed %d" % [anchor, map.seed]
+					)
+			assert_true(near, "lone plinth at %s, seed %d" % [anchor, map.seed])
 
 
 func test_neighbouring_cells_step_at_most_one_terrace_except_at_cliffs() -> void:
@@ -104,6 +134,10 @@ func test_regions_put_forest_away_from_the_road_and_every_region_appears() -> vo
 			seen[region] = true
 			if region == GameMap.Region.FOREST:
 				assert_gte(_road_gap(map, cell), RULES.FOREST_ROAD_GAP, "seed %d" % map.seed)
+			if region == GameMap.Region.DIRT:
+				assert_lte(_road_gap(map, cell), RULES.DIRT_ROAD_GAP, "seed %d" % map.seed)
+			if region == GameMap.Region.ROCKS:
+				assert_gte(map.height_at(cell), RULES.ROCKS_MIN_LEVEL, "seed %d" % map.seed)
 			if _on_road(map, cell) or map.is_socket_cell(cell) or map.river.has(cell):
 				assert_eq(region, GameMap.Region.MEADOW, "kept clear, seed %d" % map.seed)
 	for region in GameMap.Region.values():
@@ -122,6 +156,7 @@ func test_the_river_runs_from_the_top_edge_to_the_bottom_edge() -> void:
 	var with_river := 0
 	for map in _maps:
 		if map.river.is_empty():
+			assert_true(map.bridges.is_empty(), "no river, no bridge, seed %d" % map.seed)
 			continue
 		with_river += 1
 		assert_eq(map.river[0].y, 0, "starts on the top edge, seed %d" % map.seed)
@@ -130,6 +165,13 @@ func test_the_river_runs_from_the_top_edge_to_the_bottom_edge() -> void:
 			var step := map.river[i] - map.river[i - 1]
 			assert_eq(absi(step.x) + absi(step.y), 1, "4-connected, seed %d" % map.seed)
 			assert_gte(step.y, 0, "never flows back up, seed %d" % map.seed)
+		for cell in map.river:
+			assert_between(
+				cell.x,
+				RULES.RIVER_EDGE_MARGIN,
+				map.cols - 1 - RULES.RIVER_EDGE_MARGIN,
+				"edge margin"
+			)
 	var share := float(with_river) / float(_maps.size())
 	assert_gte(share, 0.9, "share of maps with a river: %.2f" % share)
 
@@ -152,7 +194,7 @@ func test_the_road_crosses_the_river_only_on_bridges_over_straight_road() -> voi
 	for map in _maps:
 		if map.river.is_empty():
 			continue
-		assert_eq(map.bridges.size(), 1, "one crossing, one bridge, seed %d" % map.seed)
+		assert_gte(map.bridges.size(), 1, "the road is crossed, seed %d" % map.seed)
 		var bridged := {}
 		for bridge in map.bridges:
 			var cell := bridge.cell
@@ -173,10 +215,38 @@ func test_the_road_crosses_the_river_only_on_bridges_over_straight_road() -> voi
 
 
 func test_a_bridge_knows_where_it_sits_on_the_main_road() -> void:
+	# `path_index` is the bridge's index in `path`, and -1 only for a bridge on the second
+	# road's own cells (the feeder, before it joins)
 	for map in _maps:
 		for bridge in map.bridges:
-			if bridge.path_index >= 0:
+			if map.path.has(bridge.cell):
+				assert_between(bridge.path_index, 0, map.path.size() - 1, "seed %d" % map.seed)
 				assert_eq(map.path[bridge.path_index], bridge.cell, "seed %d" % map.seed)
+			else:
+				assert_eq(bridge.path_index, -1, "seed %d" % map.seed)
+				var feeder: Array = map.routes[1].slice(0, map.feeder_length)
+				assert_true(feeder.has(bridge.cell), "on the feeder, seed %d" % map.seed)
+
+
+func test_the_river_meets_a_bridge_head_on_and_keeps_out_of_road_turns() -> void:
+	for map in _maps:
+		for bridge in map.bridges:
+			# two river cells in line on each side, and nothing on the bridge's diagonals
+			var cross := Vector2i(0, 1) if bridge.horizontal else Vector2i(1, 0)
+			for k in [-2, -1, 1, 2]:
+				assert_true(map.river.has(bridge.cell + cross * k), "head on, seed %d" % map.seed)
+			for corner: Vector2i in [
+				Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)
+			]:
+				assert_false(map.river.has(bridge.cell + corner), "diagonal, seed %d" % map.seed)
+		for route in map.routes:
+			for i in range(1, route.size() - 1):
+				var cell: Vector2i = route[i]
+				var bend: Vector2i = route[i - 1] + route[i + 1] - cell * 2
+				if bend == Vector2i.ZERO:
+					continue
+				var inside: Vector2i = cell + bend
+				assert_false(map.river.has(inside), "inside a turn, seed %d" % map.seed)
 
 
 func test_the_terrain_is_reproducible_and_leaves_the_road_and_sockets_alone() -> void:
@@ -201,6 +271,16 @@ func test_the_terrain_is_reproducible_and_leaves_the_road_and_sockets_alone() ->
 	assert_eq(a.sockets, sockets)
 	assert_eq(a.elevation, elevation)
 	assert_eq(a.heights, heights, "the same seed gives the same terrain")
+
+
+func test_the_terrain_matches_its_golden() -> void:
+	# pins the layer across commits and platforms: run tools/write_terrain_golden.gd only for a
+	# reviewed change to the terrain rules
+	var file := FileAccess.open(GOLDEN, FileAccess.READ)
+	assert_not_null(file, "run tools/write_terrain_golden.gd")
+	if file == null:
+		return
+	assert_eq(JSON.stringify(TerrainKit.record(), "\t") + "\n", file.get_as_text())
 
 
 func test_the_classic_boards_get_no_terrain_layer() -> void:

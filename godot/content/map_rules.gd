@@ -136,17 +136,20 @@ const FOREST_ROAD_GAP := 2
 const FOREST_ABOVE := 0.55
 const DIRT_ROAD_GAP := 1
 const DIRT_BELOW := 0.4
-## The river flows from the top edge to the bottom edge and crosses the main road once, on a
-## bridge, where the road runs straight left to right and the river straight down across it.
-## It keeps at least `RIVER_EDGE_MARGIN` columns in from the left and right edges and
-## `RIVER_SPAWN_GAP` cells (Manhattan) from every spawn, and off the sockets and the
-## Heartstone. Up to `RIVER_CROSSING_TRIES` crossings (in an order drawn from the stream) are
-## tried. Its course is the cheapest one: each cell costs `RIVER_STEP_COST`, plus
+## The river flows from the top edge to the bottom edge and crosses the road only on bridges,
+## each straight across a straight stretch of road one cell wide, meeting it head on. It keeps
+## at least `RIVER_EDGE_MARGIN` columns in from the left and right edges, `RIVER_SPAWN_GAP`
+## cells (Manhattan) from every spawn, and off the sockets, the inside cells of the road's turns
+## and the Heartstone. Its course is the cheapest one: each cell costs `RIVER_STEP_COST`, plus
 ## `RIVER_HIGH_GROUND_COST` times the height field (it seeks low ground), plus
-## `RIVER_ROADSIDE_COST` beside the road (it keeps off the road but for the bridge).
-const RIVER_EDGE_MARGIN := 4
-const RIVER_SPAWN_GAP := 4
-const RIVER_CROSSING_TRIES := 12
+## `RIVER_ROADSIDE_COST` beside the road (it keeps away from the road), and each bridge costs
+## `RIVER_BRIDGE_COST` more (it crosses as few times as it can). A course that crowds one of
+## its bridges, or walls in a raised socket block, is searched again without that bridge or
+## those cells, at most `RIVER_SEARCH_PASSES` times.
+const RIVER_EDGE_MARGIN := 1
+const RIVER_SPAWN_GAP := 3
 const RIVER_STEP_COST := 1.0
 const RIVER_HIGH_GROUND_COST := 3.0
 const RIVER_ROADSIDE_COST := 4.0
+const RIVER_BRIDGE_COST := 20.0
+const RIVER_SEARCH_PASSES := 6

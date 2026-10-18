@@ -20,7 +20,8 @@ class Bridge:
 	var cell := Vector2i.ZERO
 	## True when the road runs left to right across the bridge (the river flows down it).
 	var horizontal: bool = true
-	## The bridge's index in `path` (the main road), or -1 when it is on the second road only.
+	## The bridge's index in `path` (the main road), or -1 only when it is on the second road's
+	## own cells (the feeder, before it joins the main road).
 	var path_index: int = -1
 
 
@@ -51,15 +52,23 @@ var sockets: Array[Vector2i] = []
 ## ground are level 0; only sockets stand higher.
 var elevation: Array[PackedByteArray] = []
 ## The terrain layer (#322), one `PackedByteArray` per row: each cell's terrace, from 0 (the
-## valley floor, where the road and the river run) up to `TERRAIN_LEVELS - 1`. A socket block
-## stands on its own elevation level. On the classic boards it equals `elevation`.
+## valley floor, where the road and the river run) up to `TERRAIN_LEVELS - 1`. The sockets are
+## placed first and the terrain adapts to them: each socket block stands on its own elevation
+## level (0 to 2), even beside the road. Every other cell within one cell of a road is at most
+## `TERRAIN_ROADSIDE_MAX`, and a cell beside a block on level L (but the road and the river) is
+## at least L - 1 (no higher than the bank height beside the road). On the classic boards it
+## equals `elevation`.
 var heights: Array[PackedByteArray] = []
 ## One `PackedByteArray` of `Region` values per row.
 var regions: Array[PackedByteArray] = []
-## The river's cells from the top edge to the bottom edge, each a side step from the one
-## before (it never flows back up); empty when the map has no river.
+## The river's cells from the top edge to the bottom edge, each one step down, left or right
+## from the one before (it never flows back up); empty when the map has no river. It crosses a
+## road only on a bridge, head on: the two cells before and after a bridge are in line with it,
+## so it steps down across a road running left to right and sideways across one running up or
+## down. It keeps off the sockets, the inside cell of every road turn and the Heartstone.
 var river: Array[Vector2i] = []
-## The bridges where the road crosses the river, in the river's order.
+## The bridges where the road crosses the river, in the river's order (empty without a river,
+## at least one with one).
 var bridges: Array[Bridge] = []
 
 

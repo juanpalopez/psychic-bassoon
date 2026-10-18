@@ -1,14 +1,14 @@
-## The valley's terrain layer (#322): terrace heights, regions and a river with its bridge,
+## The valley's terrain layer (#322): terrace heights, regions and a river with its bridges,
 ## built on a finished map (road and sockets placed) from its own stream, so it never moves the
 ## road or the sockets. Only boards with the valley shape get one; the classic boards stay flat
 ## (their heights are the socket levels) with no river.
 ##
 ## Heights come from a smooth value-noise field (random values on a coarse lattice, blended
 ## with a smoothstep, so only `+ - *` and `floor` are used) that rises away from the road (the
-## valley), cut into terraces, then held down where the game needs it: the road and the river
-## on the floor, low banks beside the road, each socket block on its own level. The river is
-## the cheapest course down the board (it prefers low ground) through a road crossing drawn
-## from the stream, where the road runs straight and the river crosses it straight on a bridge.
+## valley), cut into terraces, then set where the game needs it: the road and the river on the
+## floor, low banks beside the road, each socket block on its own level with the ground round it
+## raised to one terrace below it. The river is the cheapest course down the board over the
+## same field (it seeks low ground), crossing the road only on bridges it meets head on.
 class_name TerrainGen
 extends RefCounted
 
@@ -24,6 +24,13 @@ class Flow:
 	extends RefCounted
 	var best := PackedFloat64Array()
 	var parent := PackedInt32Array()
+
+
+## A road cell a bridge can span and the step the river takes across it: down, or left or right.
+class Span:
+	extends RefCounted
+	var cell := Vector2i.ZERO
+	var step := Vector2i.ZERO
 
 
 ## Fills `map.heights`, `map.regions`, `map.river` and `map.bridges`. Building it twice gives the
@@ -43,8 +50,9 @@ static func build(map: GameMap) -> void:
 	var detail := _noise(rng, map.cols, map.rows)
 	var sockets := _socket_mask(map)
 	var gaps := _road_gaps(map)
-	_place_river(map, rng, field, gaps, sockets)
-	var heights := _carve_heights(map, field, gaps, sockets)
+	var floors := _plinth_floors(map, gaps)
+	_place_river(map, field, gaps, sockets)
+	var heights := _carve_heights(map, field, gaps, sockets, floors)
 	map.heights = _rows_of(heights, map)
 	map.regions = _rows_of(_paint_regions(map, heights, detail, gaps, sockets), map)
 
@@ -145,11 +153,37 @@ static func _road_gaps(map: GameMap) -> PackedInt32Array:
 	return gaps
 
 
+## The least height of each cell beside a socket block (0 elsewhere): one terrace below the
+## block, and no higher than `TERRAIN_ROADSIDE_MAX` on the road's banks, so a block on level 2
+## rises from a slope instead of standing alone as a plinth. The road itself has none.
+static func _plinth_floors(map: GameMap, gaps: PackedInt32Array) -> PackedByteArray:
+	var out := PackedByteArray()
+	out.resize(map.cols * map.rows)
+	for anchor in map.sockets:
+		var least := map.elevation_at(anchor) - 1
+		if least <= 0:
+			continue
+		for y in range(maxi(0, anchor.y - 1), mini(map.rows, anchor.y + map.footprint + 1)):
+			for x in range(maxi(0, anchor.x - 1), mini(map.cols, anchor.x + map.footprint + 1)):
+				var at := y * map.cols + x
+				if gaps[at] == 0:
+					continue
+				var floor_here := least
+				if gaps[at] <= 1:
+					floor_here = mini(floor_here, RULES.TERRAIN_ROADSIDE_MAX)
+				out[at] = maxi(out[at], floor_here)
+	return out
+
+
 ## Terraces from the field (rising away from the road), then the game's rules on top: the road
-## and the river on the floor, low banks beside the road, each socket block on its own level,
-## and no lone pit or spike.
+## and the river on the floor, low banks beside the road, each socket block on its own level
+## with the ground round it raised to its floor, and no lone pit or spike.
 static func _carve_heights(
-	map: GameMap, field: PackedFloat64Array, gaps: PackedInt32Array, sockets: PackedByteArray
+	map: GameMap,
+	field: PackedFloat64Array,
+	gaps: PackedInt32Array,
+	sockets: PackedByteArray,
+	floors: PackedByteArray
 ) -> PackedByteArray:
 	var top: int = RULES.TERRAIN_LEVELS - 1
 	var weight: float = RULES.TERRAIN_VALLEY_WEIGHT
@@ -164,6 +198,7 @@ static func _carve_heights(
 		var level := clampi(int(floor(shape * float(RULES.TERRAIN_LEVELS))), 0, top)
 		if gaps[i] <= 1:
 			level = mini(level, RULES.TERRAIN_ROADSIDE_MAX)
+		level = maxi(level, floors[i])
 		if gaps[i] == 0:
 			level = 0
 			fixed[i] = 1
@@ -176,15 +211,20 @@ static func _carve_heights(
 			if sockets[y * map.cols + x] == 1:
 				heights[y * map.cols + x] = map.elevation_at(Vector2i(x, y))
 				fixed[y * map.cols + x] = 1
-	_smooth_lone_cells(map, heights, fixed, gaps)
+	_smooth_lone_cells(map, heights, fixed, gaps, floors)
 	return heights
 
 
 ## A cell with no side neighbour within one terrace is pulled to one terrace from its nearest
-## neighbour (a bank cell no higher than `TERRAIN_ROADSIDE_MAX`). Fixed cells (road, river,
-## sockets) never move; the passes stop once nothing does.
+## neighbour (a bank cell no higher than `TERRAIN_ROADSIDE_MAX`, a cell beside a socket block
+## no lower than its floor). Fixed cells (road, river, sockets) never move; the passes stop once
+## nothing does.
 static func _smooth_lone_cells(
-	map: GameMap, heights: PackedByteArray, fixed: PackedByteArray, gaps: PackedInt32Array
+	map: GameMap,
+	heights: PackedByteArray,
+	fixed: PackedByteArray,
+	gaps: PackedInt32Array,
+	floors: PackedByteArray
 ) -> void:
 	for pass_index in RULES.TERRAIN_SMOOTH_PASSES:
 		var moved := false
@@ -210,6 +250,7 @@ static func _smooth_lone_cells(
 				var level := nearest + 1 if here > nearest else nearest - 1
 				if gaps[at] <= 1:
 					level = mini(level, RULES.TERRAIN_ROADSIDE_MAX)
+				level = maxi(level, floors[at])
 				if level != here:
 					heights[at] = level
 					moved = true
@@ -246,60 +287,142 @@ static func _paint_regions(
 	return out
 
 
-## Picks a road crossing with the stream and runs the cheapest course from the top edge down to
-## it and on from it to the bottom edge; the next crossing is tried when no course reaches one,
-## up to `RIVER_CROSSING_TRIES`. A map may end up without a river when none fits.
+## The cheapest course from the top edge to the bottom edge. It flows down a row at a time
+## with side steps along a row, and crosses a road only on a bridge: a straight five-cell step
+## (approach, entry, the road cell, outlet, departure) across a straight stretch one cell wide,
+## so it meets the bridge head on. The cells beside an entry or an outlet (the bridge's
+## diagonals) and the entries and outlets themselves are never walked otherwise, so the river
+## never presses against the road at a bridge. A map may end up without a river when no course
+## fits.
 static func _place_river(
-	map: GameMap,
-	rng: Rng,
-	field: PackedFloat64Array,
-	gaps: PackedInt32Array,
-	sockets: PackedByteArray
+	map: GameMap, field: PackedFloat64Array, gaps: PackedInt32Array, sockets: PackedByteArray
 ) -> void:
 	var keep_off := _river_keep_off(map, sockets)
-	var blocked := keep_off.duplicate()
-	for i in blocked.size():
+	var walk := keep_off.duplicate()
+	for i in walk.size():
 		if gaps[i] == 0:
-			blocked[i] = 1
-	var crossings := _crossings(map, keep_off, blocked)
-	for i in range(crossings.size() - 1, 0, -1):
-		var j := rng.next_int(i + 1)
-		var held := crossings[i]
-		crossings[i] = crossings[j]
-		crossings[j] = held
+			walk[i] = 1
+	var spans := _spans(map, keep_off, walk)
 	var cost := PackedFloat64Array()
 	for i in field.size():
 		var step: float = RULES.RIVER_STEP_COST + field[i] * RULES.RIVER_HIGH_GROUND_COST
 		if gaps[i] == 1:
 			step += RULES.RIVER_ROADSIDE_COST
 		cost.append(step)
-	for k in mini(crossings.size(), RULES.RIVER_CROSSING_TRIES):
-		var bridge := crossings[k]
-		var above := bridge - Vector2i(0, 1)
-		var below := bridge + Vector2i(0, 1)
-		var upper := _flow(map, blocked, cost, Vector2i(-1, 0), above.y)
-		if upper.best[above.y * map.cols + above.x] >= UNREACHED:
-			continue
-		var lower := _flow(map, blocked, cost, below, map.rows - 1)
-		var mouth := _cheapest_on_row(map, lower, map.rows - 1)
+	# the search alone may walk past a bridge it uses (onto its diagonals, or onto its entry or
+	# outlet a second time), or wall in a raised socket block with river; the bridge or the
+	# cells are taken out and the search runs again
+	for pass_index in RULES.RIVER_SEARCH_PASSES:
+		var usable: Array[Span] = []
+		for span in spans:
+			var approach := span.cell - span.step * 2
+			var departure := span.cell + span.step * 2
+			if walk[_index(map, approach)] == 0 and walk[_index(map, departure)] == 0:
+				usable.append(span)
+		var flow := _flow(map, walk, cost, usable)
+		var mouth := _cheapest_on_row(map, flow, map.rows - 1)
 		if mouth < 0:
-			continue
-		var course := _course(map, upper, above.y * map.cols + above.x)
-		course.append(bridge)
-		course.append_array(_course(map, lower, mouth))
-		map.river = course
-		var span := GameMap.Bridge.new()
-		span.cell = bridge
-		span.horizontal = true
-		span.path_index = map.path.find(bridge)
-		map.bridges = [span]
+			return
+		var course := _course(map, flow, mouth)
+		var crowding := _crowding(map, course, gaps)
+		var moat := _plinth_moat(map, course, gaps)
+		if crowding.is_empty() and moat.is_empty():
+			map.river = course
+			break
+		# a crowded bridge is dropped (another may fit); a moat cell is kept off
+		for cell in crowding:
+			for k in range(spans.size() - 1, -1, -1):
+				var gap := spans[k].cell - cell
+				if absi(gap.x) <= 1 and absi(gap.y) <= 1:
+					spans.remove_at(k)
+		for cell in moat:
+			walk[_index(map, cell)] = 1
+	if map.river.is_empty():
 		return
+	var bridges: Array[GameMap.Bridge] = []
+	for i in range(1, map.river.size() - 1):
+		var cell := map.river[i]
+		if gaps[cell.y * map.cols + cell.x] != 0:
+			continue
+		var bridge := GameMap.Bridge.new()
+		bridge.cell = cell
+		# the river steps down onto a bridge over a road that runs left to right
+		bridge.horizontal = map.river[i - 1].x == cell.x
+		bridge.path_index = map.path.find(cell)
+		bridges.append(bridge)
+	map.bridges = bridges
 
 
-## 1 on the cells the river must keep off: the sockets, the Heartstone, the cells near a spawn
-## and the columns within `RIVER_EDGE_MARGIN` of the left and right edges.
+## The cells of a course that crowd one of its bridges: a cell beside the bridge's entry or
+## outlet, or a cell the course passes twice (an entry or outlet walked again outside the span).
+static func _crowding(
+	map: GameMap, course: Array[Vector2i], gaps: PackedInt32Array
+) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	var count := {}
+	for cell in course:
+		count[cell] = count.get(cell, 0) + 1
+	for i in range(1, course.size() - 1):
+		var cell := course[i]
+		if gaps[_index(map, cell)] != 0:
+			continue
+		var flow_dir := course[i] - course[i - 1]
+		var side := Vector2i(flow_dir.y, flow_dir.x)
+		for k in [-1, 1]:
+			for next: Vector2i in [cell + flow_dir * k + side, cell + flow_dir * k - side]:
+				if count.has(next) and not out.has(next):
+					out.append(next)
+	for cell in course:
+		if count[cell] > 1 and not out.has(cell):
+			out.append(cell)
+	return out
+
+
+## The river cells of a course beside a socket block on level 2 or higher that would leave the
+## block with nothing but road and river round it (a lone plinth over the valley floor).
+static func _plinth_moat(
+	map: GameMap, course: Array[Vector2i], gaps: PackedInt32Array
+) -> Array[Vector2i]:
+	var on_course := {}
+	for cell in course:
+		on_course[cell] = true
+	var out: Array[Vector2i] = []
+	for anchor in map.sockets:
+		if map.elevation_at(anchor) < 2:
+			continue
+		var moat: Array[Vector2i] = []
+		var held := false
+		for k in map.footprint:
+			for cell: Vector2i in [
+				anchor + Vector2i(k, -1),
+				anchor + Vector2i(k, map.footprint),
+				anchor + Vector2i(-1, k),
+				anchor + Vector2i(map.footprint, k),
+			]:
+				if not map.in_bounds(cell) or map.is_socket_cell(cell):
+					continue
+				if on_course.has(cell):
+					moat.append(cell)
+				elif gaps[_index(map, cell)] != 0:
+					held = true
+		if not held:
+			out.append_array(moat)
+	return out
+
+
+## 1 on the cells the river must keep off: the sockets, the inside cell of every road turn
+## (where the curved road bed widens), the Heartstone, the cells near a spawn and the columns
+## within `RIVER_EDGE_MARGIN` of the left and right edges. With the game's numbers the
+## Heartstone always lies inside the right-hand margin; it is kept off in its own right so a
+## smaller margin cannot put the river on it.
 static func _river_keep_off(map: GameMap, sockets: PackedByteArray) -> PackedByteArray:
 	var out := sockets.duplicate()
+	for route in map.routes:
+		for i in range(1, route.size() - 1):
+			var cell: Vector2i = route[i]
+			var inside: Vector2i = route[i - 1] + route[i + 1] - cell
+			if inside != cell and map.in_bounds(inside):
+				out[inside.y * map.cols + inside.x] = 1
 	var margin: int = RULES.RIVER_EDGE_MARGIN
 	for y in map.rows:
 		for x in map.cols:
@@ -314,63 +437,123 @@ static func _river_keep_off(map: GameMap, sockets: PackedByteArray) -> PackedByt
 	return out
 
 
-## The main-road cells the river can cross straight: the road runs left to right through the
-## cell and is one cell wide there, and the cells above and below are free for the river.
-static func _crossings(
+## The road cells a bridge can span, each as (x, y, and the step the river takes across it):
+## the road runs straight through the cell and is one cell wide there, and the four cells in
+## line with the step on either side (entry, outlet, approach and departure) are on the board
+## and off the road and the keep-off cells. Across a road running left to right the river steps
+## down; across a road running up or down it steps left or right (the search finds which way is
+## downstream). Any route may be spanned, the second road (the feeder) too.
+static func _spans(
 	map: GameMap, keep_off: PackedByteArray, blocked: PackedByteArray
-) -> Array[Vector2i]:
-	var out: Array[Vector2i] = []
-	for i in range(1, map.path.size() - 1):
-		var cell := map.path[i]
-		if cell.y < 1 or cell.y > map.rows - 2:
-			continue
-		if map.path[i - 1] != cell - Vector2i(1, 0) or map.path[i + 1] != cell + Vector2i(1, 0):
-			continue
-		var at := cell.y * map.cols + cell.x
-		if keep_off[at] == 1 or blocked[at - map.cols] == 1 or blocked[at + map.cols] == 1:
-			continue
-		out.append(cell)
+) -> Array[Span]:
+	var out: Array[Span] = []
+	var seen := {}
+	for route in map.routes:
+		for i in range(1, route.size() - 1):
+			var cell: Vector2i = route[i]
+			var along: Vector2i = route[i + 1] - cell
+			if route[i - 1] != cell - along or keep_off[cell.y * map.cols + cell.x] == 1:
+				continue
+			var across := Vector2i(absi(along.y), absi(along.x))
+			for flow_dir: Vector2i in [across, -across]:
+				# a cell on two routes (the main road after the feeder joins) is listed once
+				var key := _index(map, cell) * 3 + signi(flow_dir.x) + 1
+				if flow_dir.y < 0 or seen.has(key):
+					continue
+				var free := true
+				for k in [-2, -1, 1, 2]:
+					var next: Vector2i = cell + flow_dir * k
+					if not map.in_bounds(next) or blocked[next.y * map.cols + next.x] == 1:
+						free = false
+				if free:
+					var span := Span.new()
+					span.cell = cell
+					span.step = flow_dir
+					seen[key] = true
+					out.append(span)
 	return out
 
 
-## The cheapest courses from `start` (or from every free cell of its row when `start.x` is -1)
-## down to `last_row`, never through a blocked cell.
+## The cheapest courses from every free cell of the top row down to every cell: down a row, a
+## side step along a row, or a bridge span from its approach to its departure (down for a
+## bridge on a road running left to right, along the row for one on a road running up or
+## down). The side steps and the spans along a row are relaxed until the row settles.
 static func _flow(
-	map: GameMap, blocked: PackedByteArray, cost: PackedFloat64Array, start: Vector2i, last_row: int
+	map: GameMap, walk: PackedByteArray, cost: PackedFloat64Array, spans: Array[Span]
 ) -> Flow:
 	var flow := Flow.new()
 	flow.best.resize(map.cols * map.rows)
 	flow.best.fill(UNREACHED)
 	flow.parent.resize(map.cols * map.rows)
 	flow.parent.fill(-1)
+	var down_spans: Array[Span] = []
+	var row_spans: Array[Span] = []
+	for span in spans:
+		if span.step.x == 0:
+			down_spans.append(span)
+		else:
+			row_spans.append(span)
 	for x in map.cols:
-		var at := start.y * map.cols + x
-		if blocked[at] == 0 and (start.x < 0 or start.x == x):
-			flow.best[at] = cost[at]
-	for y in range(start.y, last_row + 1):
+		if walk[x] == 0:
+			flow.best[x] = cost[x]
+	for y in map.rows:
 		var row := y * map.cols
-		if y > start.y:
+		if y > 0:
 			for x in map.cols:
 				var at := row + x
-				if blocked[at] == 0 and flow.best[at - map.cols] < UNREACHED:
+				if walk[at] == 0 and flow.best[at - map.cols] < UNREACHED:
 					flow.best[at] = flow.best[at - map.cols] + cost[at]
 					flow.parent[at] = at - map.cols
-		for x in range(1, map.cols):
-			_relax(flow, blocked, cost, row + x, row + x - 1)
-		for x in range(map.cols - 2, -1, -1):
-			_relax(flow, blocked, cost, row + x, row + x + 1)
+		for span in down_spans:
+			if span.cell.y + 2 == y:
+				_relax_span(map, flow, cost, span)
+		var changed := true
+		while changed:
+			changed = false
+			for x in range(1, map.cols):
+				changed = _relax(flow, walk, cost, row + x, row + x - 1) or changed
+			for x in range(map.cols - 2, -1, -1):
+				changed = _relax(flow, walk, cost, row + x, row + x + 1) or changed
+			for span in row_spans:
+				if span.cell.y == y:
+					changed = _relax_span(map, flow, cost, span) or changed
 	return flow
 
 
-## Reaches `at` from its side neighbour `from` when that is cheaper.
+## Reaches `at` from its side neighbour `from` when that is cheaper; true when it did.
 static func _relax(
-	flow: Flow, blocked: PackedByteArray, cost: PackedFloat64Array, at: int, from: int
-) -> void:
-	if blocked[at] == 1 or flow.best[from] >= UNREACHED:
-		return
+	flow: Flow, walk: PackedByteArray, cost: PackedFloat64Array, at: int, from: int
+) -> bool:
+	if walk[at] == 1 or flow.best[from] >= UNREACHED:
+		return false
 	if flow.best[from] + cost[at] < flow.best[at]:
 		flow.best[at] = flow.best[from] + cost[at]
 		flow.parent[at] = from
+		return true
+	return false
+
+
+## Reaches a span's departure from its approach, over the bridge, when that is cheaper; true
+## when it did. The span costs its four cells past the approach plus `RIVER_BRIDGE_COST`.
+static func _relax_span(map: GameMap, flow: Flow, cost: PackedFloat64Array, span: Span) -> bool:
+	var flow_dir := span.step
+	var cell := span.cell
+	var from := _index(map, cell - flow_dir * 2)
+	if flow.best[from] >= UNREACHED:
+		return false
+	var total: float = flow.best[from] + RULES.RIVER_BRIDGE_COST
+	for k in [-1, 0, 1, 2]:
+		total += cost[_index(map, cell + flow_dir * k)]
+	var at := _index(map, cell + flow_dir * 2)
+	if total < flow.best[at]:
+		flow.best[at] = total
+		flow.parent[at] = from
+		return true
+	return false
+
+
+static func _index(map: GameMap, cell: Vector2i) -> int:
+	return cell.y * map.cols + cell.x
 
 
 ## The cheapest reached cell of `row` (the leftmost among equals), or -1 when none is reached.
@@ -383,13 +566,23 @@ static func _cheapest_on_row(map: GameMap, flow: Flow, row: int) -> int:
 	return pick
 
 
-## The cells of a course from its start to `end`, in flowing order.
+## The cells of the course that ends at `end`, in flowing order, with the three cells a bridge
+## span steps over filled in.
 static func _course(map: GameMap, flow: Flow, end: int) -> Array[Vector2i]:
 	var back: Array[Vector2i] = []
 	var at := end
 	while at >= 0:
 		var x := at % map.cols
-		back.append(Vector2i(x, (at - x) / map.cols))
-		at = flow.parent[at]
+		var cell := Vector2i(x, (at - x) / map.cols)
+		back.append(cell)
+		var from := flow.parent[at]
+		if from >= 0:
+			var fx := from % map.cols
+			var step := Vector2i(fx, (from - fx) / map.cols) - cell
+			if absi(step.x) + absi(step.y) > 1:
+				var unit := Vector2i(signi(step.x), signi(step.y))
+				for k in range(1, absi(step.x) + absi(step.y)):
+					back.append(cell + unit * k)
+		at = from
 	back.reverse()
 	return back
