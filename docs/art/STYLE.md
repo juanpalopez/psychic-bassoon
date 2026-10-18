@@ -38,7 +38,7 @@ The kingdom is a world the Grand Crafter folded out of paper and card. There is 
 - **Key light.** Warm amber sun, low to mid height, with soft long shadows. The sky fill is cool and pale.
 - **Magic.** Cool cyan (and the Blot's purple) emissive, with a soft glow. Magic is the cool accent against the warm world; keep it rare enough to read.
 - **Contact shading.** Strong ambient occlusion where things meet the ground, in creases and under overhangs: SSAO on desktop, baked into vertex colour on the phone.
-- **Atmosphere.** Depth haze towards the horizon, height fog that settles in the canyons, and a gentle warm-highlight, cool-shadow grade. A tilt-shift depth of field keeps the play area sharp and softens the edges.
+- **Atmosphere.** Depth haze towards the horizon, height fog that settles in the canyons, and a gentle warm-highlight, cool-shadow grade. A tilt-shift depth of field keeps the play area sharp and softens the far side of the valley with a far blur. There is no near blur, because foes and towers stand up towards the camera and a near blur would catch them.
 
 **Starting palette.** These are look-dev values. The shader uniforms and the Environment are the truth once the look is built.
 
@@ -61,7 +61,9 @@ The shared shader family lives in `godot/render/paper/` (#327). `painted.gdshade
 
 ## Renderers
 
-The desktop build uses Forward+: SSAO, SSIL, volumetric fog, glow and depth of field. The iOS build uses the Mobile renderer, which has no SSAO and no volumetric fog. To make up for it, the phone bakes contact shading into vertex colour, uses height and depth fog from the Environment, and keeps glow and depth of field. Both must read as the same game; the phone may be softer and simpler, never a different style.
+The desktop build uses Forward+: SSAO, SSIL, depth and height fog from the Environment (no volumetric fog), glow and depth of field. The iOS build uses the Mobile renderer, which has no SSAO, SSIL or volumetric fog. To make up for it, the phone bakes contact shading into vertex colour (from #324 to #326), uses the same depth and height fog, and keeps glow and a lighter depth of field. Both must read as the same game; the phone may be softer and simpler, never a different style.
+
+The light and post live in `main.tscn` (#95): the warm sun with soft shadows, the cool sky fill (ambient light), SSAO and SSIL, glow for the magic, depth fog towards the far edge and height fog that settles below the ground, ACES and a grade (contrast, saturation and a warm-highlight, cool-shadow colour-correction ramp from `post.py`'s split toning), and a tilt-shift depth of field. `DioramaLens` fits the depth of field and the depth fog to the camera on every zoom and pan: the ground from the bottom edge to 80% of the way up to the top edge stays sharp (no near blur: at a 20° field of view it would blur a foe standing in the play area), and the middle half stays clear of haze. `RenderQuality` is the quality setting: HIGH on a desktop keeps all of it; PHONE (the default on `mobile`, `ios` and `android`) turns off SSAO, SSIL and the sun's soft-shadow search and draws a lighter (60%), cheaper depth of field; LOW, for a device that still misses its frame budget, also drops the depth of field, the glow and the soft shadow filter. `--quality=low`, `--quality=phone` or `--quality=high` after `--` overrides the platform's level.
 
 ## What it is not
 
