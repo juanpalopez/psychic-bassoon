@@ -116,6 +116,29 @@ func test_the_clips_are_keyed_twelve_times_a_second() -> void:
 					assert_almost_eq(frames, roundf(frames), 1e-3, "%s %s key %d" % [id, clip, k])
 
 
+func test_every_clip_keys_the_same_tracks() -> void:
+	# a clip without a track that another clip has would leave that part wherever the last
+	# clip put it (or reset it), so every clip keys every channel any clip moves
+	for id in TOWERS.TOWER_IDS:
+		var player := StopMotion.player_of(_view(0, id))
+		var union := {}
+		var sets := {}
+		for clip in player.get_animation_list():
+			var animation := player.get_animation(clip)
+			var tracks := {}
+			for track in animation.get_track_count():
+				var key := (
+					"%s %d" % [animation.track_get_path(track), animation.track_get_type(track)]
+				)
+				tracks[key] = true
+				union[key] = true
+			sets[clip] = tracks
+		for clip in sets:
+			assert_eq(
+				sets[clip].size(), union.size(), "%s %s keys every moving channel" % [id, clip]
+			)
+
+
 func test_the_parts_stand_where_the_model_puts_them_when_a_clip_starts() -> void:
 	# a part a clip leaves alone must not drop to the model's origin (Godot resets channels
 	# that some clip keys when the playing clip has no track for them)

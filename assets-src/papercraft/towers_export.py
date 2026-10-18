@@ -6,9 +6,9 @@
 # - every surface but glass is merged into one material, PK_Craft, and the look each face
 #   wants goes into a second UV map (UV2.x: 0 paper, 1 wood, 2 metal, 3 dimpled metal,
 #   4 thread, 5 corrugated card) so that a part is one draw call (render/paper/craft_vc);
-# - each clip becomes an NLA track of that name on every part it moves, keyed every frame it
-#   changes at 12 fps with constant interpolation, so glTF gets STEP samplers and Godot plays
-#   it stepped like stop-motion (import the GLBs at animation/fps=12). Every clip keys every
+# - each clip becomes an NLA track of that name on every animated part, keyed at 12 fps (the
+#   exporter writes LINEAR samplers on every frame; import the GLBs at animation/fps=12 and
+#   StopMotion steps them with nearest interpolation). Every clip keys every
 #   channel any clip moves (Godot resets the others), and an aiming tower gets an `*_Aim`
 #   empty above its Head that no clip moves, for the game to turn.
 import bpy, math, os
@@ -83,9 +83,9 @@ def add_aim_pivot(objs, key):
 
 
 def clips_to_nla(objs, key):
-    """Each clip becomes an NLA track named after it on every animated part. Godot's mixer
-    resets a channel that some clip keys to zero when the playing clip leaves it out, so every
-    clip keys every channel that any clip moves on every animated part (at rest when the clip
+    """Each clip becomes an NLA track named after it on every animated part. Godot's mixer does
+    not promise what a channel holds when the playing clip has no track for it, so every clip
+    keys every channel that any clip moves on every animated part (at rest when the clip
     leaves it alone)."""
     rest = NS["REST"]
     clips = NS["CLIPS"][key]
