@@ -21,6 +21,9 @@ const LOOKS := preload("res://render/diorama/diorama_looks.gd")
 const SALT_LEFT := 11
 const SALT_RIGHT := 12
 const SALT_PLANK := 13
+## How far back inside a piece its end samples the ground (cells), so a cut end on a cell's edge
+## reads the cell it belongs to.
+const SAMPLE_INSET := 0.02
 
 
 ## The bed and the bridges for `map`, along `routes` (the game's `Route`s, `routes[0]` the main
@@ -71,14 +74,15 @@ static func deck_rect(bridge: GameMap.Bridge) -> Rect2:
 	return Rect2(centre - half, half * 2.0)
 
 
-## The top of a bridge's deck at its ends, in world units: just above the higher of its two
-## banks' road bed (the middle sags `DECK_SAG` lower). Guards on the bridge stand here.
+## The top of a bridge's deck, in world units: where foes and guards stand on the bridge cell,
+## `TerrainField.ROAD_HEIGHT` above the higher of its two banks (the same height the field's
+## `surface_height` gives a road cell, on the valley floor).
 static func deck_top(bridge: GameMap.Bridge, height_fn: Callable) -> float:
 	var step := Vector2i(1, 0) if bridge.horizontal else Vector2i(0, 1)
 	var bank := maxf(
 		float(height_fn.call(bridge.cell - step)), float(height_fn.call(bridge.cell + step))
 	)
-	return bank + LOOKS.ROAD_LIFT + LOOKS.DECK_LIFT
+	return bank + TerrainField.ROAD_HEIGHT
 
 
 ## The road bed: every centreline as a ribbon with lips, broken over the bridges, and the yard
@@ -101,8 +105,18 @@ static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) ->
 			along = _ribbon(ribbon, piece, i, along, drop, others, yard, map.seed, height_fn)
 	if yard.z > 0.0:
 		var ground := float(height_fn.call(map.path[map.path.size() - 1]))
-		_yard(ribbon, yard, ground + LOOKS.ROAD_LIFT - LOOKS.JOIN_DROP, ground, lines)
-	return ribbon.commit(PaperLook.material("road_bed"))
+		_yard(ribbon, yard, ground + LOOKS.BED_LIFT - LOOKS.JOIN_DROP, ground, lines)
+	return ribbon.commit(bed_material())
+
+
+## The road bed's material: `road_bed.gdshader` in the diorama's palette.
+static func bed_material() -> ShaderMaterial:
+	var made := PaperLook.material("road_bed")
+	made.set_shader_parameter("road_light", TerrainPalette.ROAD)
+	made.set_shader_parameter("road_edge", TerrainPalette.ROAD_EDGE)
+	made.set_shader_parameter("joint_colour", TerrainPalette.ROAD_JOINT)
+	made.set_shader_parameter("lip_colour", TerrainPalette.ROAD_LIP)
+	return made
 
 
 ## The bridges, one surface of faceted planks, posts and ropes in `diorama_vc.gdshader`.
@@ -311,8 +325,13 @@ static func _ribbon(
 			along += p.distance_to(piece[k - 1])
 		var tangent := (piece[mini(k + 1, count - 1)] - piece[maxi(k - 1, 0)]).normalized()
 		var left := Vector2(tangent.y, -tangent.x)
-		var ground := float(height_fn.call(Vector2i(floori(p.x), floori(p.y))))
-		var bed := ground + LOOKS.ROAD_LIFT - drop
+		# a piece cut at a bridge ends exactly on the gorge cell's edge: take the ground a hair
+		# back inside the piece, on the bank, not in the gorge
+		var probe := p + tangent * SAMPLE_INSET if k == 0 else p
+		if k == count - 1 and count > 1:
+			probe = p - tangent * SAMPLE_INSET
+		var ground := float(height_fn.call(Vector2i(floori(probe.x), floori(probe.y))))
+		var bed := ground + LOOKS.BED_LIFT - drop
 		var widths: Array[float] = [
 			half + _wobble(along, line, map_seed, SALT_LEFT),
 			half + _wobble(along, line, map_seed, SALT_RIGHT),
@@ -432,19 +451,19 @@ static func _bridge(
 	for k in LOOKS.PLANKS:
 		var s := (float(k) + 0.5) / float(LOOKS.PLANKS)
 		var at := centre + axis * (s - 0.5) * span
-		var y := top - LOOKS.PLANK_THICKNESS / 2.0 - _sag(s, LOOKS.DECK_SAG)
+		var y := top - LOOKS.PLANK_THICKNESS / 2.0
 		var tone := (CellHash.of(cell.x, cell.y, k, map_seed + SALT_PLANK) - 0.5) * 2.0
-		var colour := LOOKS.PLANK_COLOUR.darkened(maxf(0.0, -tone) * LOOKS.PLANK_TONE)
+		var colour := TerrainPalette.PLANK.darkened(maxf(0.0, -tone) * LOOKS.PLANK_TONE)
 		colour = colour.lightened(maxf(0.0, tone) * LOOKS.PLANK_TONE)
 		var turn := (CellHash.of(k, cell.x, cell.y, map_seed + SALT_PLANK + 1) - 0.5) * 0.08
 		var length := LOOKS.DECK_WIDTH * (0.96 + 0.06 * CellHash.of(k, cell.y, cell.x, map_seed))
 		var basis := Basis(Vector3.UP, turn) * flat
 		var size := Vector3(pitch * LOOKS.PLANK_FILL, LOOKS.PLANK_THICKNESS, length)
 		mesh.box(_world(at, y), basis, size, colour)
-	# two ropes under the plank ends, following the sag
+	# two ropes under the plank ends, pulled taut
 	for side: float in [-1.0, 1.0]:
 		var under := across * side * (LOOKS.DECK_WIDTH / 2.0 - 0.06)
-		_rope(mesh, centre + under, axis, span, top - LOOKS.PLANK_THICKNESS, LOOKS.DECK_SAG)
+		_rope(mesh, centre + under, axis, span, top - LOOKS.PLANK_THICKNESS, 0.0)
 	# posts on the banks and the hand ropes between them
 	for side: float in [-1.0, 1.0]:
 		var out := across * side * LOOKS.POST_OUT
@@ -454,7 +473,7 @@ static func _bridge(
 			var low := minf(bank, top) - 0.05
 			var high := top + LOOKS.POST_HEIGHT
 			var size := Vector3(LOOKS.POST_SIZE, high - low, LOOKS.POST_SIZE)
-			mesh.box(_world(foot, (low + high) / 2.0), flat, size, LOOKS.POST_COLOUR, false)
+			mesh.box(_world(foot, (low + high) / 2.0), flat, size, TerrainPalette.POST, false)
 		var rail := top + LOOKS.POST_HEIGHT - 0.04
 		_rope(mesh, centre + out, axis, span, rail, LOOKS.ROPE_SAG)
 		for h in LOOKS.HANGERS:
@@ -462,8 +481,8 @@ static func _bridge(
 			var at := centre + axis * (s - 0.5) * span
 			var from := _world(at + out, rail - _sag(s, LOOKS.ROPE_SAG))
 			var edge := at + across * side * (LOOKS.DECK_WIDTH / 2.0 - 0.02)
-			var to := _world(edge, top - _sag(s, LOOKS.DECK_SAG))
-			mesh.beam(from, to, LOOKS.HANGER_THICKNESS, LOOKS.ROPE_COLOUR)
+			var to := _world(edge, top)
+			mesh.beam(from, to, LOOKS.HANGER_THICKNESS, TerrainPalette.ROPE)
 	if top - floor_y > LOOKS.TRESTLE_MIN_DROP:
 		_trestles(mesh, centre, axis, across, top, floor_y, flat)
 
@@ -478,7 +497,7 @@ static func _rope(
 		var s := float(k) / float(LOOKS.ROPE_SEGMENTS)
 		var at := _world(middle + axis * (s - 0.5) * span, height - _sag(s, sag))
 		if k > 0:
-			mesh.beam(previous, at, LOOKS.ROPE_THICKNESS, LOOKS.ROPE_COLOUR)
+			mesh.beam(previous, at, LOOKS.ROPE_THICKNESS, TerrainPalette.ROPE)
 		previous = at
 
 
@@ -494,17 +513,19 @@ static func _trestles(
 ) -> void:
 	for s: float in LOOKS.TRESTLE_AT:
 		var at := centre + axis * (s - 0.5) * LOOKS.BRIDGE_SPAN
-		var under := top - LOOKS.PLANK_THICKNESS - _sag(s, LOOKS.DECK_SAG)
+		var under := top - LOOKS.PLANK_THICKNESS
 		var legs: Array[Vector3] = []
 		for side: float in [-1.0, 1.0]:
 			var foot := at + across * side * LOOKS.TRESTLE_OUT
 			var height := under - floor_y
 			var size := Vector3(LOOKS.TRESTLE_SIZE, height, LOOKS.TRESTLE_SIZE)
-			mesh.box(_world(foot, floor_y + height / 2.0), flat, size, LOOKS.TRESTLE_COLOUR, false)
+			mesh.box(
+				_world(foot, floor_y + height / 2.0), flat, size, TerrainPalette.TRESTLE, false
+			)
 			legs.append(_world(foot, floor_y))
 			legs.append(_world(foot, under))
-		mesh.beam(legs[0], legs[3], LOOKS.TRESTLE_SIZE * 0.6, LOOKS.TRESTLE_COLOUR)
-		mesh.beam(legs[1], legs[2], LOOKS.TRESTLE_SIZE * 0.6, LOOKS.TRESTLE_COLOUR)
+		mesh.beam(legs[0], legs[3], LOOKS.TRESTLE_SIZE * 0.6, TerrainPalette.TRESTLE)
+		mesh.beam(legs[1], legs[2], LOOKS.TRESTLE_SIZE * 0.6, TerrainPalette.TRESTLE)
 
 
 ## How far a sagging line hangs below its ends a share `s` of the way along.

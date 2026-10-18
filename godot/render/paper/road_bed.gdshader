@@ -10,12 +10,13 @@ render_mode cull_disabled;
 uniform sampler2D paper_noise : hint_default_white, filter_linear_mipmap, repeat_enable;
 
 group_uniforms road;
-// STYLE.md: road light #d9b98a, worn edge #b89262.
-uniform vec3 road_light : source_color = vec3(0.851, 0.725, 0.541);
-uniform vec3 road_edge : source_color = vec3(0.722, 0.573, 0.384);
-// The joints between flagstones and the lip's outer face, where the bed meets the grass.
-uniform vec3 joint_colour : source_color = vec3(0.647, 0.51, 0.31);
-uniform vec3 lip_colour : source_color = vec3(0.56, 0.42, 0.26);
+// The sand, its worn edge, the joints between flagstones and the lip's outer face, where the bed
+// meets the grass. The palette is TerrainPalette (ROAD, ROAD_EDGE, ROAD_JOINT, ROAD_LIP), which
+// RoadBedBuilder sets here; nothing is written twice.
+uniform vec3 road_light : source_color;
+uniform vec3 road_edge : source_color;
+uniform vec3 joint_colour : source_color;
+uniform vec3 lip_colour : source_color;
 // Where across the bed (share of the half width) the wear starts and where it is full.
 uniform float wear_from : hint_range(0.0, 1.0) = 0.55;
 uniform float wear_to : hint_range(0.0, 1.0) = 0.86;
