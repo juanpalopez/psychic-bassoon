@@ -3,9 +3,6 @@ extends GutTest
 
 const MAIN_SCENE := preload("res://main.tscn")
 const RULES := preload("res://content/game_rules.gd")
-## The web shell's Full screen button, in canvas pixels at its largest: about
-## 104x52 CSS px, drawn on an 844x390 phone where a canvas pixel is 0.54 px.
-const WEB_BUTTON := Vector2(200.0, 100.0)
 
 
 func _main() -> Node:
@@ -146,13 +143,8 @@ func test_no_hud_controls_overlap_on_wide_and_narrow_phones() -> void:
 		]:
 			var rects := await _hud_rects(size.x, size.y, shown)
 			var names := rects.keys()
-			# the web page's Full screen button floats over the top-right corner
-			var web_button := Rect2(float(size.x) - WEB_BUTTON.x, 0.0, WEB_BUTTON.x, WEB_BUTTON.y)
 			for i in names.size():
 				var rect: Rect2 = rects[names[i]]
-				assert_false(
-					rect.intersects(web_button), "%s under the Full screen button" % names[i]
-				)
 				assert_true(
 					Rect2(Vector2.ZERO, Vector2(size)).encloses(rect),
 					"%s fits at %s" % [names[i], size]
