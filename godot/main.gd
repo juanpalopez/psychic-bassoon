@@ -612,6 +612,8 @@ func _url_param(param_name: String) -> Variant:
 
 ## Starts the intro wave: speech bubbles on the map, sockets glowing, Skip always there.
 func _start_intro() -> void:
+	# started from the Menu: close it, or the tour's first tap on the board only closes it
+	_menu_button.button_pressed = false
 	_flow.start()
 	_tell_page_tour(true)
 
@@ -631,6 +633,7 @@ func _on_intro_finished(_skipped: bool) -> void:
 
 
 func _open_guide() -> void:
+	_menu_button.button_pressed = false
 	_pause_for_overlay(true)
 	_guide.open()
 

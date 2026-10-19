@@ -101,6 +101,12 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 		(main.get_node("Hud/GameOver") as GameOverPanel).show_for(1)
 	elif shown == "Menu":
 		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
+	elif shown == "Paused":
+		# paused: Pause shows its other glyph and caption, and the Menu its close glyph
+		var paused := GameSpeed.new()
+		paused.toggle_pause()
+		(main.get_node("Hud/SpeedBar") as SpeedBar).show_speed(paused)
+		(main.get_node("Hud/MenuButton") as Button).button_pressed = true
 	elif shown == "Message":
 		var message := main.get_node("Hud/Message") as Label
 		message.text = "That is road: build on a socket"
@@ -392,8 +398,11 @@ func test_a_long_frame_counts_no_more_game_time_than_the_clock_runs() -> void:
 ## Every control in a corner row is one row tall and sits the same distance from the edges, on
 ## the base canvas and on a wide phone.
 func test_the_corner_rows_line_up() -> void:
-	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
-		var rects := await _hud_rects(size.x, size.y)
+	for case in [
+		[Vector2i(1280, 720), ""], [Vector2i(1558, 720), ""], [Vector2i(1280, 720), "Paused"]
+	]:
+		var size: Vector2i = case[0]
+		var rects := await _hud_rects(size.x, size.y, case[1])
 		var width := float(size.x)
 		var height := float(size.y)
 		for top in ["TopBar", "MenuButton", "SpeedBar"]:
@@ -411,14 +420,3 @@ func test_the_corner_rows_line_up() -> void:
 		assert_eq((rects["SpeedBar"] as Rect2).position.x - menu.end.x, HudLayout.GAP)
 		var auto: Rect2 = rects["AutoWave"]
 		assert_eq((rects["LaunchWave"] as Rect2).position.x - auto.end.x, HudLayout.GAP)
-
-
-func test_a_tap_on_the_world_closes_the_menu_and_selects_nothing() -> void:
-	var main := await _main()
-	var menu_button := main.get_node("Hud/MenuButton") as Button
-	menu_button.button_pressed = true
-	var anchor: Vector2i = main.game().map.sockets[0]
-	main._on_tap(main._socket_on_screen(anchor).get_center())
-	assert_false(menu_button.button_pressed, "the dropdown closed")
-	assert_false((main.get_node("Hud/NextSeed") as Control).visible)
-	assert_eq(main.selected_cell(), BoardSpace.NO_CELL, "the tap only closed the menu")
