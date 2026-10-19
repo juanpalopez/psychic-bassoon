@@ -388,6 +388,9 @@ main > .download:focus-visible {
 }
 
 /* ---------- the page grid: bands span it, install steps sit in its middle ---------- */
+/* The install markup in index.html is kept line for line from the old download page, so
+   these rules find it by position: the releases link, the paragraph after it, its note,
+   and the three sections named by aria-labelledby. Keep that order when editing it. */
 main {
   display: grid;
   grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 373px)) minmax(
