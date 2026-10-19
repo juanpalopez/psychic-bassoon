@@ -221,7 +221,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
   scripts/               # repo checks, scripts/ios-run.sh (build and run on a connected iPhone) and balance tooling
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
-    workflows/           # pr-checks.yml, ci.yml, deploy.yml, release.yml, release-please.yml, release-please.yml
+    workflows/           # pr-checks.yml, ci.yml, deploy.yml, release.yml, release-please.yml
     ISSUE_TEMPLATE/, pull_request_template.md, dependabot.yml
 ```
 
