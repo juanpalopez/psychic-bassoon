@@ -496,6 +496,9 @@ footer .wrap {
   justify-content: space-between;
   gap: 12px 32px;
 }
+footer a {
+  color: var(--paper-light);
+}
 footer .brand {
   font-size: 22px;
 }
