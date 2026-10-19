@@ -117,10 +117,12 @@ fixtures/    frozen JSON from the retired TypeScript sim for the ported core (pr
 Every PR gets an adversarial review before it merges, scaled to its risk so reviews stay affordable. Reviewers are Claude subagents, never the author's own context.
 
 - **Agent and rulebook:** the project agent `adversarial-reviewer` (`.claude/agents/adversarial-reviewer.md`) reads `docs/REVIEW-CHECKLIST.md`, which holds the tiers, checks, limits and report format. Keep the checklist in step with this file.
-- **Tiers:**
+- **Tiers** (owner, 2026-10-19: PRs are small now, so most reviews use a cheaper model; choose by what the PR touches, not by how it feels):
   - **Skip:** Dependabot bumps with green CI, wording-only docs. Check CI and the title, then merge.
-  - **Standard** (`sonnet`, the agent's default): most PRs, including pure-logic sim modules (`godot/sim`) (map generation, combat, economy, waves). They still need tests first, and a sim PR that touches seeds, randomness or the tick loop is deep.
-  - **Deep** (`opus`, pass `model: opus`): workflows, determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling), secrets, permissions, deploy or release, rule changes in this file. When unsure, take the higher tier.
+  - **Light** (`haiku`, pass `model: haiku`): small, low-risk changes with no logic that can break the sim: docs with rules or numbers, `godot/content` data and numbers, tests only, copy and Theme tweaks, repo scripts, renames. At most about 100 changed production lines.
+  - **Standard** (`sonnet`, the agent's default): most PRs, including `godot/sim` logic (map generation, combat, economy, waves; they still need tests first), render, UI, workflows that do not touch secrets, permissions or release, and rule changes in this file.
+  - **Deep** (`opus`, pass `model: opus`): only determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling) and anything that touches secrets, permissions, tokens, deploy or release trust (tag guards, release or deploy workflows). Rare: a sim PR that does not touch those is Standard.
+  - **Escalate, do not guess:** a reviewer that cannot judge a change at its tier replies `ESCALATE: <reason>` and the caller reruns it one tier up. When unsure which tier, take the lower one, and escalate only if the review says so or the first review found a blocker in sim, security or release code.
 - **When:** once the PR is ready and `ci` has run, not on every push. Run `gh pr checks <N>` first; reviewers do not repeat what green CI proved (lint, types, tests, the Linux export and its checked headless run, title format; the run catches logged script, resource and shader errors but renders nothing, so visual changes still need screenshots).
 - **Input:** give the reviewer the PR number, base branch, head commit, ticket number, tier and, for a re-review, the earlier findings. Don't paste whole docs.
 - **Stacks:** review a stack as a whole in one pass (one reviewer, a report per PR, grouped by tier), not one reviewer per PR. The rules are in `docs/REVIEW-CHECKLIST.md`.
