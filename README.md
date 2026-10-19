@@ -4,7 +4,7 @@ A tactile, stop-motion papercraft tower defense for phones and tablets. In a for
 
 It is built with **Godot 4** (GDScript) and plays in landscape, natively on iOS first and on macOS, Windows and Linux (the web build was dropped on 2026-10-18). The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
-- **Download:** each tagged release carries the Linux, Windows and macOS builds ([latest release](https://github.com/juanpalopez/psychic-bassoon/releases/latest)); the iPhone build is installed locally for now (`scripts/ios-run.sh`; step-by-step guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
+- **Download:** each tagged release carries the Linux, Windows and macOS builds ([releases](https://github.com/juanpalopez/psychic-bassoon/releases), newest first, pre-releases included); the iPhone build is installed locally for now (`scripts/ios-run.sh`; step-by-step guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
@@ -70,7 +70,7 @@ godot/
   tests/     GUT tests
 fixtures/    frozen JSON from the retired TypeScript sim (PRNG, maps, routes): what the GDScript sim must reproduce
 scripts/     CI checks (purity, render boundary, assets, fixtures, desktop export), the iPhone run script and balance tooling
-site/        the static page GitHub Pages serves (it links to the latest release)
+site/        the static page GitHub Pages serves (it links to the releases list)
 assets-src/  Blender sources and raw packs
 docs/        plan, review checklist, art references
 prototype/   the original 2D prototype (rules and balance reference)
@@ -98,7 +98,7 @@ Work is planned in phases and tracked as tickets on the [project board](https://
 
 - `PR checks`: Conventional Commit titles and commits, and a ticket-reference warning.
 - `CI`: workflow lint, `pnpm lint`, `pnpm test`, the asset check, then the Godot job (format, lint, sim purity, render boundary, GUT, the headless game budget, and a Linux export that must run headless), on every pull request and push to `main`.
-- `Deploy`: after `CI` passes on `main`, GitHub Pages serves `site/index.html`, a page that links to the latest release.
+- `Deploy`: after `CI` passes on `main`, GitHub Pages serves `site/index.html`, a download page that links to the releases list (pre-releases included).
 - `Release`: pushing a `vMAJOR.MINOR.PATCH` tag (on `main`) runs the checks with the Linux, Windows and macOS exports and creates a GitHub Release with the three builds attached.
 
 ### Assets

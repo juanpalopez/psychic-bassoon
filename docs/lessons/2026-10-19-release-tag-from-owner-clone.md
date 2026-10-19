@@ -19,3 +19,6 @@ The cloud session could push branches and open PRs but not create a tag, so it c
 
 ## Rule next time
 To release, an agent checks that `main` is green and hands the owner the exact `git tag -a vX.Y.Z <sha>` and `git push origin vX.Y.Z` commands (or runs them on his Mac when it is linked). Never create the release by hand on GitHub: the workflow's `gh release create` then fails and no builds are attached.
+
+## Follow-up
+The first tag was `v0.1.0-alpha.1`. `release.yml` marks it a pre-release, and `GET /releases/latest` returned 404, so the page now links to `/releases` (pre-releases included) and `deploy.yml` checks for that `href`.
