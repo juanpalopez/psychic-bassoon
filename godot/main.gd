@@ -276,6 +276,11 @@ func _notification(what: int) -> void:
 ## is not selected yet: the camera flies in to it first and selects it on arrival (#328).
 func _on_tap(position: Vector2) -> void:
 	_rig.cancel_flight()
+	if _menu_button.button_pressed:
+		# a tap on the world closes the Menu's dropdown and does nothing else, so the
+		# dropdown never stands between the player and the board
+		_menu_button.button_pressed = false
+		return
 	var cell := CellPicker.cell_at(_camera, position, _board.surface_height)
 	if cell != BoardSpace.NO_CELL:
 		var anchor := _game.map.socket_anchor_at(cell)
@@ -607,6 +612,8 @@ func _url_param(param_name: String) -> Variant:
 
 ## Starts the intro wave: speech bubbles on the map, sockets glowing, Skip always there.
 func _start_intro() -> void:
+	# started from the Menu: close it, or the tour's first tap on the board only closes it
+	_menu_button.button_pressed = false
 	_flow.start()
 	_tell_page_tour(true)
 
@@ -626,6 +633,7 @@ func _on_intro_finished(_skipped: bool) -> void:
 
 
 func _open_guide() -> void:
+	_menu_button.button_pressed = false
 	_pause_for_overlay(true)
 	_guide.open()
 

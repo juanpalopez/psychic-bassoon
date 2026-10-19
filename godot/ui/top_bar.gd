@@ -17,6 +17,8 @@ var _texts: Array[String] = ["", "", ""]
 func _ready() -> void:
 	theme_type_variation = &"Chip"
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	# as tall as the buttons in its row, so the top row lines up
+	custom_minimum_size.y = HudLayout.ROW
 	var row := HBoxContainer.new()
 	row.alignment = BoxContainer.ALIGNMENT_CENTER
 	add_child(row)

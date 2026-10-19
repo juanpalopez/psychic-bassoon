@@ -158,13 +158,15 @@ func _buttons(theme: Theme) -> void:
 	theme.set_type_variation("IconButton", "Button")
 	theme.set_font_size("font_size", "IconButton", 18)
 	theme.set_constant("h_separation", "IconButton", 2)
-	var square := _box(CARDSTOCK, CARD_EDGE, EDGE, LIFT, RADIUS, Vector4(4, 8, 4, 6))
+	# glyph and caption fit inside the 88 px square, so the square never grows past its row
+	theme.set_constant("icon_max_width", "IconButton", 36)
+	var square := _box(CARDSTOCK, CARD_EDGE, EDGE, LIFT, RADIUS, Vector4(4, 4, 4, 4))
 	var square_hover := square.duplicate() as StyleBoxFlat
 	square_hover.bg_color = NOTE
-	var square_on := _box(ACTION, ACTION_EDGE, 2, 1, RADIUS, Vector4(4, 11, 4, 3))
+	var square_on := _box(ACTION, ACTION_EDGE, 2, 1, RADIUS, Vector4(4, 6, 4, 2))
 	var square_off := _box(Color(CARDSTOCK, 0.55), Color(CARD_EDGE, 0.55), EDGE, 0, RADIUS)
-	square_off.content_margin_top = 8
-	square_off.content_margin_bottom = 6
+	square_off.content_margin_top = 4
+	square_off.content_margin_bottom = 4
 	theme.set_stylebox("normal", "IconButton", square)
 	theme.set_stylebox("hover", "IconButton", square_hover)
 	theme.set_stylebox("pressed", "IconButton", square_on)

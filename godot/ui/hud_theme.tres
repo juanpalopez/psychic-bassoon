@@ -212,9 +212,9 @@ corner_radius_bottom_left = 14
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qgs3k"]
 content_margin_left = 16.0
-content_margin_top = 8.0
+content_margin_top = 4.0
 content_margin_right = 16.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.9529412, 0.9137255, 0.8235294, 0.55)
 border_width_bottom = 4
 border_color = Color(0.84705883, 0.78039217, 0.6392157, 0.55)
@@ -225,9 +225,9 @@ corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ekrau"]
 content_margin_left = 4.0
-content_margin_top = 8.0
+content_margin_top = 4.0
 content_margin_right = 4.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.9843137, 0.9647059, 0.91764706, 1)
 border_width_bottom = 4
 border_color = Color(0.84705883, 0.78039217, 0.6392157, 1)
@@ -241,9 +241,9 @@ shadow_offset = Vector2(0, 4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7j4oq"]
 content_margin_left = 4.0
-content_margin_top = 11.0
+content_margin_top = 6.0
 content_margin_right = 4.0
-content_margin_bottom = 3.0
+content_margin_bottom = 2.0
 bg_color = Color(0.18039216, 0.36862746, 0.61960787, 1)
 border_width_bottom = 2
 border_color = Color(0.12156863, 0.25490198, 0.43529412, 1)
@@ -257,9 +257,9 @@ shadow_offset = Vector2(0, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_epllc"]
 content_margin_left = 4.0
-content_margin_top = 8.0
+content_margin_top = 4.0
 content_margin_right = 4.0
-content_margin_bottom = 6.0
+content_margin_bottom = 4.0
 bg_color = Color(0.9529412, 0.9137255, 0.8235294, 1)
 border_width_bottom = 4
 border_color = Color(0.84705883, 0.78039217, 0.6392157, 1)
@@ -418,6 +418,7 @@ Highlight/base_type = &"Panel"
 Highlight/styles/panel = SubResource("StyleBoxFlat_8rdvh")
 IconButton/base_type = &"Button"
 IconButton/constants/h_separation = 2
+IconButton/constants/icon_max_width = 36
 IconButton/font_sizes/font_size = 18
 IconButton/styles/disabled = SubResource("StyleBoxFlat_qgs3k")
 IconButton/styles/hover = SubResource("StyleBoxFlat_ekrau")

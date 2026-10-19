@@ -47,7 +47,8 @@ func show_speed(speed: GameSpeed) -> void:
 	_speed = speed.speed
 	_pause.button_pressed = speed.paused
 	_pause.icon = PLAY_ICON if speed.paused else PAUSE_ICON
-	_pause.text = "Resume" if speed.paused else "Pause"
+	# a short caption, so the square stays 88 px wide and its row keeps its gaps
+	_pause.text = "Play" if speed.paused else "Pause"
 	_cycle.text = "%dx" % _speed
 
 
