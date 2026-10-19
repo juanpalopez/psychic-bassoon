@@ -6,27 +6,32 @@
     <title>Papercraft Kingdom Defense</title>
     <meta
       name="description"
-      content="Papercraft Kingdom Defense is now a native game. Download the latest build from GitHub Releases."
+      content="Download Papercraft Kingdom Defense for Windows, macOS or Linux, and how to open it the first time."
     />
     <style>
       :root {
         color-scheme: light dark;
         --paper: #f4ecdc;
+        --card: #fbf6ec;
         --ink: #2b2420;
+        --muted: #6b5d52;
+        --line: #dccfb8;
         --accent: #8a3b2e;
+        --accent-ink: #fbf6ec;
       }
       @media (prefers-color-scheme: dark) {
         :root {
           --paper: #221d1a;
+          --card: #2c2622;
           --ink: #efe6d6;
+          --muted: #b9ab9a;
+          --line: #463d36;
           --accent: #e59a7e;
+          --accent-ink: #221d1a;
         }
       }
       body {
         margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
         background: var(--paper);
         color: var(--ink);
         font:
@@ -36,31 +41,183 @@
           sans-serif;
       }
       main {
-        max-width: 34rem;
-        padding: 2rem 1rem;
+        max-width: 40rem;
+        margin: 0 auto;
+        padding: 2.5rem 1rem 3rem;
       }
       h1 {
-        font-size: 1.6rem;
-        line-height: 1.25;
-        margin: 0 0 1rem;
+        font-size: 1.8rem;
+        line-height: 1.2;
+        margin: 0 0 0.5rem;
+      }
+      h2 {
+        font-size: 1.2rem;
+        margin: 0 0 0.5rem;
       }
       a {
         color: var(--accent);
         font-weight: 600;
+      }
+      .lead {
+        color: var(--muted);
+        margin: 0 0 1.5rem;
+      }
+      .download {
+        display: inline-block;
+        background: var(--accent);
+        color: var(--accent-ink);
+        text-decoration: none;
+        padding: 0.7rem 1.2rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+      }
+      section {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 0.75rem;
+        padding: 1.1rem 1.25rem;
+        margin-bottom: 1rem;
+      }
+      ol {
+        margin: 0;
+        padding-left: 1.3rem;
+      }
+      li + li {
+        margin-top: 0.35rem;
+      }
+      code {
+        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-size: 0.88em;
+        overflow-wrap: anywhere;
+      }
+      pre {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 0.4rem;
+        padding: 0.6rem 0.75rem;
+        margin: 0.4rem 0 0;
+        overflow-x: auto;
+      }
+      pre code {
+        overflow-wrap: normal;
+      }
+      .note {
+        color: var(--muted);
+        font-size: 0.95rem;
+        margin: 0.75rem 0 0;
       }
     </style>
   </head>
   <body>
     <main>
       <h1>Papercraft Kingdom Defense</h1>
-      <p>
-        The web build is retired. The game now ships natively: iOS first, then
-        macOS, Windows and Linux.
+      <p class="lead">
+        A papercraft tower defense game for Windows, macOS and Linux. The iPhone
+        version is coming later.
       </p>
+
+      <a
+        class="download"
+        href="https://github.com/juanpalopez/psychic-bassoon/releases/latest"
+        >Download the latest release</a
+      >
+
       <p>
-        Each tagged release carries the Linux, Windows and macOS builds: see the
-        <a href="https://github.com/juanpalopez/psychic-bassoon/releases/latest"
-          >latest release</a
+        On the release page, open <strong>Assets</strong> and download the zip
+        for your computer. The game is free and still early, so expect rough
+        edges. Because it is not signed by Microsoft or Apple yet, your computer
+        warns you the first time you open it; in most cases the steps below get
+        past that.
+      </p>
+
+      <section aria-labelledby="windows">
+        <h2 id="windows">Windows</h2>
+        <ol>
+          <li>
+            Download <code>…-windows-x86_64.zip</code>. If Edge says it isn't
+            commonly downloaded, click <strong>…</strong>,
+            <strong>Keep</strong>, then
+            <strong>Show more → Keep anyway</strong>.
+          </li>
+          <li>
+            Right-click the zip, choose <strong>Extract All</strong>, then open
+            the extracted folder.
+          </li>
+          <li>
+            Double-click <code>papercraft-kingdom-defense.exe</code>. Keep the
+            <code>.pck</code> file next to it: it holds the game.
+          </li>
+          <li>
+            If <strong>Windows protected your PC</strong> appears, click
+            <strong>More info</strong>, then <strong>Run anyway</strong>.
+            Windows asks again for each new version.
+          </li>
+        </ol>
+        <p class="note">
+          If Windows says <strong>Smart App Control blocked an app</strong>,
+          there is no way past it for this build: the game needs a signed
+          release first.
+        </p>
+      </section>
+
+      <section aria-labelledby="macos">
+        <h2 id="macos">macOS</h2>
+        <ol>
+          <li>
+            Download <code>…-macos-universal.zip</code> (it runs on Intel and
+            Apple silicon Macs: macOS 10.15 or newer on Intel, macOS 11 or newer
+            on Apple silicon).
+          </li>
+          <li>
+            Safari usually unpacks the zip for you; if it is still a zip,
+            double-click it. Drag the app into
+            <strong>Applications</strong>.
+          </li>
+          <li>
+            Open the app. macOS says it can't check it for malicious software;
+            click <strong>Done</strong> (or <strong>OK</strong>).
+          </li>
+          <li>
+            Open <strong>System Settings → Privacy &amp; Security</strong>,
+            scroll down to the message about the game, click
+            <strong>Open Anyway</strong> and confirm with your password. After
+            that it opens normally.
+          </li>
+        </ol>
+        <p class="note">
+          If macOS still refuses, remove the download flag in Terminal, then
+          open the app again:
+        </p>
+        <pre><code>xattr -dr com.apple.quarantine /Applications/Papercraft*.app</code></pre>
+      </section>
+
+      <section aria-labelledby="linux">
+        <h2 id="linux">Linux</h2>
+        <ol>
+          <li>Download <code>…-linux-x86_64.zip</code>.</li>
+          <li>
+            Unpack it into a new folder (<strong>Extract Here</strong> in most
+            file managers, or
+            <code>unzip &lt;file&gt;.zip -d papercraft</code>).
+          </li>
+          <li>
+            Start the game from a terminal (the folder is called
+            <code>papercraft</code> here):
+          </li>
+        </ol>
+        <pre><code>cd papercraft
+chmod +x papercraft-kingdom-defense.x86_64
+./papercraft-kingdom-defense.x86_64</code></pre>
+        <p class="note">
+          Keep the <code>.pck</code> file next to the binary. You can also
+          double-click the binary in your file manager once it is executable.
+        </p>
+      </section>
+
+      <p class="note">
+        Found a bug? Open an issue on
+        <a href="https://github.com/juanpalopez/psychic-bassoon/issues"
+          >GitHub</a
         >.
       </p>
     </main>

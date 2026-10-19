@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-19 | lesson | Push release tags from the owner's clone, not from a cloud session | harness | checklist | docs/REVIEW-CHECKLIST.md, CLAUDE.md |
 | 2026-10-19 | lesson | Build the iPhone app outside any iCloud-synced folder | tooling | script | scripts/ios-run.sh |
 | 2026-10-18 | decision | Budget the frame at 200k triangles, with 40k for the terrain and 32k for the scenery | render | none | CLAUDE.md, PLAN.md |
 | 2026-10-18 | lesson | Stop only the job you started, never every process that matches a pattern | harness | none | |
