@@ -44,7 +44,10 @@ export function select(changed, graph) {
   const files = changed.filter(path => path);
   // The Godot job also installs the pnpm packages and runs the sim purity and render boundary
   // checks, so it is skipped only when every changed file is known not to matter to it.
-  if (files.every(path => DOCS_ONLY.some(rule => rule.test(path)))) {
+  if (
+    files.length > 0 &&
+    files.every(path => DOCS_ONLY.some(rule => rule.test(path)))
+  ) {
     return {godot: false, gut: 'none'};
   }
   const relevant = files.filter(
