@@ -254,3 +254,285 @@ main > .download:focus-visible {
     transition: none;
   }
 }
+
+/* ---------- hero: a window into the valley ---------- */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 136px 0 120px;
+  color: var(--paper-light);
+  background: var(--world-soil);
+}
+.hero__bg {
+  position: absolute;
+  inset: -40px;
+  background: url('img/valley-overview.webp') center / cover;
+  filter: blur(14px) saturate(1.1) brightness(0.62);
+}
+.hero__bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(30, 20, 12, 0.85),
+    rgba(30, 20, 12, 0.35) 60%,
+    rgba(30, 20, 12, 0.1)
+  );
+}
+.hero .wrap {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+  gap: 56px;
+  align-items: center;
+}
+.eyebrow {
+  margin: 0 0 14px;
+  color: var(--button-gold);
+  font: 800 15px/1.2 var(--sans);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.hero h1 {
+  margin: 0;
+  font: 900 clamp(60px, 8vw, 104px) / 0.9 var(--serif);
+  letter-spacing: -0.01em;
+  text-shadow:
+    0 4px 0 var(--bark-deep),
+    0 12px 28px rgba(0, 0, 0, 0.45);
+}
+.lead {
+  margin: 22px 0 0;
+  max-width: 30ch;
+  font: italic 500 24px/1.4 var(--serif);
+  color: #f1e3c2;
+}
+.cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 32px;
+}
+.platforms {
+  margin: 18px 0 0;
+  font-size: 16px;
+  color: #dccdb0;
+}
+.window {
+  position: relative;
+  margin: 0;
+  padding: 10px 10px 14px;
+  background: var(--paper-light);
+  border-radius: 6px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  transform: rotate(1.2deg);
+}
+.window img {
+  border-radius: 3px;
+  width: 100%;
+  aspect-ratio: 961 / 505;
+  object-fit: cover;
+}
+.window figcaption {
+  margin-top: 8px;
+  text-align: right;
+  color: var(--ink-soft);
+  font-size: 15px;
+}
+.pin {
+  position: absolute;
+  left: -36px;
+  bottom: -40px;
+  margin: 0;
+  padding: 12px 20px 18px;
+  background: var(--paper-light);
+  color: var(--ink);
+  font: 400 26px/1.1 var(--hand);
+  transform: rotate(-4deg);
+  filter: drop-shadow(0 6px 6px rgba(37, 24, 12, 0.45));
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% 86%,
+    93% 100%,
+    86% 88%,
+    79% 100%,
+    72% 88%,
+    65% 100%,
+    58% 88%,
+    51% 100%,
+    44% 88%,
+    37% 100%,
+    30% 88%,
+    23% 100%,
+    16% 88%,
+    9% 100%,
+    0 90%
+  );
+}
+.pin::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 6px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #d23c48;
+  box-shadow: inset -2px -2px 0 rgba(0, 0, 0, 0.25);
+}
+.pin span {
+  display: block;
+  padding-top: 10px;
+}
+
+/* ---------- the page grid: bands span it, install steps sit in its middle ---------- */
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) repeat(3, minmax(0, 373px)) minmax(
+      0,
+      1fr
+    );
+  column-gap: 20px;
+  align-items: start;
+  padding-bottom: 80px;
+  background: var(--paper-light);
+}
+main > * {
+  grid-column: 2 / 5;
+}
+main > .band {
+  grid-column: 1 / -1;
+}
+main > .download {
+  grid-column: 2;
+  align-self: center;
+  min-height: 72px;
+  font-size: 24px;
+}
+main > .download + p,
+main > .download + p + .note {
+  grid-column: 3 / 5;
+  margin: 0;
+}
+main > .download + p + .note {
+  margin: 8px 0 36px;
+}
+main > section:not(.band) {
+  padding: 22px 24px 24px;
+  background: var(--paper-light);
+  border: 2px solid var(--bark);
+  border-bottom-width: 5px;
+  border-radius: 16px;
+  box-shadow: var(--panel);
+}
+main > section[aria-labelledby='windows'] {
+  grid-column: 2;
+}
+main > section[aria-labelledby='macos'] {
+  grid-column: 3;
+}
+main > section[aria-labelledby='linux'] {
+  grid-column: 4;
+}
+main > section:not(.band) h2 {
+  margin: 0 0 10px;
+  font: 800 28px/1.1 var(--serif);
+}
+#install {
+  padding-bottom: 28px;
+}
+ol {
+  margin: 0;
+  padding-left: 1.3rem;
+  font-size: 17px;
+}
+li + li {
+  margin-top: 0.4rem;
+}
+code {
+  font:
+    0.88em ui-monospace,
+    'SF Mono',
+    Menlo,
+    Consolas,
+    monospace;
+  overflow-wrap: anywhere;
+}
+pre {
+  margin: 0.6rem 0 0;
+  padding: 0.6rem 0.75rem;
+  overflow-x: auto;
+  background: var(--paper-parchment);
+  border: 1px solid var(--paper-edge);
+  border-radius: 6px;
+  font-size: 15px;
+}
+pre code {
+  overflow-wrap: normal;
+}
+.note {
+  margin: 0.75rem 0 0;
+  color: var(--ink-soft);
+  font-size: 16px;
+}
+main > .note:last-child {
+  margin-top: 36px;
+}
+
+/* ---------- footer ---------- */
+footer {
+  padding: 40px 0 48px;
+  color: #dccdb0;
+  font-size: 16px;
+}
+footer .wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 32px;
+}
+footer .brand {
+  font-size: 22px;
+}
+
+@media (max-width: 960px) {
+  .hero .wrap {
+    grid-template-columns: 1fr;
+  }
+  main {
+    grid-template-columns: 16px minmax(0, 1fr) 16px;
+    column-gap: 0;
+  }
+  main > *,
+  main > .download + p,
+  main > .download + p + .note,
+  main > section:not(.band) {
+    grid-column: 2;
+  }
+  main > .download {
+    justify-self: start;
+    margin-bottom: 20px;
+  }
+  main > section:not(.band) {
+    margin-bottom: 20px;
+  }
+}
+@media (max-width: 600px) {
+  .hero {
+    padding: 112px 0 96px;
+  }
+  .lead {
+    font-size: 21px;
+  }
+  .window figcaption {
+    text-align: left;
+  }
+  .pin {
+    left: auto;
+    right: 4px;
+    bottom: -44px;
+    font-size: 22px;
+  }
+}
