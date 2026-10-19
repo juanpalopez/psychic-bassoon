@@ -24,13 +24,6 @@ const DOCS_ONLY = [
   /^\.claude\//,
   /^LICENSE$/,
 ];
-// Files whose change can alter the Godot job without touching godot/.
-const GODOT_ADJACENT = [
-  /^fixtures\//,
-  /^\.godot-version$/,
-  /^\.github\//,
-  /^scripts\/(run-godot-checked|check-desktop-export|check-godot-size|select-tests)\./,
-];
 // A change here runs the whole suite: shared by every replay, or not traceable by references.
 const FULL = [
   /^fixtures\//,
@@ -48,14 +41,12 @@ const FULL = [
 
 /** `{godot, gut}` for a changed file list (git's `--name-status`-free `--name-only` output). */
 export function select(changed, graph) {
-  const files = changed.filter(path => path && !path.endsWith('.uid'));
+  const files = changed.filter(path => path);
+  // The Godot job also installs the pnpm packages and runs the sim purity and render boundary
+  // checks, so it is skipped only when every changed file is known not to matter to it.
   if (files.every(path => DOCS_ONLY.some(rule => rule.test(path)))) {
     return {godot: false, gut: 'none'};
   }
-  const touchesGodot = files.some(
-    path => path.startsWith('godot/') || GODOT_ADJACENT.some(r => r.test(path))
-  );
-  if (!touchesGodot) return {godot: false, gut: 'none'};
   const relevant = files.filter(
     path => !DOCS_ONLY.some(rule => rule.test(path))
   );
@@ -64,7 +55,8 @@ export function select(changed, graph) {
   }
   const chosen = new Set();
   for (const path of relevant) {
-    if (!path.startsWith('godot/')) continue;
+    // a .uid file only names a resource the import step resolves; it selects no test
+    if (!path.startsWith('godot/') || path.endsWith('.uid')) continue;
     const local = path.slice('godot/'.length);
     if (local.startsWith('tests/')) {
       // a test script runs itself; anything else under tests/ (helpers) is traced like code

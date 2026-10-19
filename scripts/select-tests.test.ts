@@ -22,11 +22,14 @@ describe('select-tests: what runs', () => {
     ).toEqual({godot: false, gut: 'none'});
   });
 
-  it('skips Godot for a change that no Godot job can see', () => {
-    expect(select(['scripts/check-pr-size.mjs'], graph)).toEqual({
-      godot: false,
-      gut: 'none',
-    });
+  it.each([
+    'scripts/check-sim-purity.mjs',
+    'scripts/check-render-boundary.mjs',
+    'package.json',
+    'pnpm-lock.yaml',
+    '.nvmrc',
+  ])('keeps the Godot job for %s but runs no GUT test', path => {
+    expect(select([path], graph)).toEqual({godot: true, gut: 'none'});
   });
 
   it('runs the tests that reach a changed class through class_name', () => {
@@ -62,9 +65,9 @@ describe('select-tests: what runs', () => {
     );
   });
 
-  it('ignores .uid files', () => {
+  it('keeps the Godot job for .uid files but selects no test from them', () => {
     expect(select(['godot/sim/map/grid.gd.uid', 'docs/a.md'], graph)).toEqual({
-      godot: false,
+      godot: true,
       gut: 'none',
     });
   });

@@ -40,15 +40,18 @@ jobs:
 
       - name: Select the Godot job and the GUT tests
         id: select
+        shell: bash
         env:
           EVENT: ${{ github.event_name }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
+          set -euo pipefail
           if [ "$EVENT" != "pull_request" ]; then
             printf 'godot=true\ngut=all\n' | tee -a "$GITHUB_OUTPUT"
           else
-            # the base branch's copy decides, so a PR cannot narrow its own checks
+            # the base branch's copy of the script decides, so a PR cannot change its own rules
+            # (this file still comes from the PR; the full run on main is the backstop)
             git show "${BASE_SHA}:scripts/select-tests.mjs" > "$RUNNER_TEMP/select-tests.mjs" 2>/dev/null \
               || cp scripts/select-tests.mjs "$RUNNER_TEMP/select-tests.mjs"
             node "$RUNNER_TEMP/select-tests.mjs" "$BASE_SHA" "$HEAD_SHA" | tee -a "$GITHUB_OUTPUT"
@@ -125,7 +128,8 @@ jobs:
     name: godot
     needs: changes
     # a skipped job counts as passing for the required check
-    if: needs.changes.outputs.godot == 'true'
+    # run unless the selector said no: if it failed or printed nothing, run everything
+    if: ${{ !cancelled() && needs.changes.outputs.godot != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -219,7 +223,7 @@ jobs:
         env:
           GUT_TESTS: ${{ needs.changes.outputs.gut }}
         run: |
-          if [ "$GUT_TESTS" = "all" ]; then
+          if [ -z "$GUT_TESTS" ] || [ "$GUT_TESTS" = "all" ]; then
             "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
           else
             # only the tests that reach a changed file (scripts/select-tests.mjs)
