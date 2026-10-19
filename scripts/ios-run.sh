@@ -178,6 +178,8 @@ echo "==> Installing ${app}"
 xcrun devicectl device install app --device "$device" "$app" \
   || fail "the install failed. Is the iPhone unlocked, trusted (tap Trust on the phone) and in Developer Mode (Settings → Privacy & Security)?"
 
+wait_until_unlocked
+
 echo "==> Launching ${BUNDLE_ID}"
 if ! xcrun devicectl device process launch --device "$device" "$BUNDLE_ID"; then
   fail "the launch failed. On the first install, trust the developer on the iPhone in Settings → General → VPN & Device Management, then run this again."

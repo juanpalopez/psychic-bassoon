@@ -12,7 +12,7 @@ promoted-to: scripts/ios-run.sh
 The owner's clone lives in `~/Documents`, which iCloud syncs. `scripts/ios-run.sh` kept Xcode's derived data in `build/ios/dd` inside the clone, so the Godot export and the build succeeded but signing the app failed.
 
 ## Evidence
-`PapercraftKD.app: resource fork, Finder information, or similar detritus not allowed` / `Command CodeSign failed with a nonzero exit code`. `xattr -l` on the app showed `com.apple.FinderInfo`, `com.apple.fileprovider.fpfs#P` and `com.apple.provenance`.
+`PapercraftKD.app: resource fork, Finder information, or similar detritus not allowed` / `Command CodeSign failed with a nonzero exit code`. `xattr -l` on the app showed `com.apple.FinderInfo` and `com.apple.fileprovider.fpfs#P` (the iCloud file provider's tags).
 
 ## What we learnt
 iCloud's file provider tags every file it manages, including the built `.app`, and `codesign` rejects a bundle that carries those attributes.

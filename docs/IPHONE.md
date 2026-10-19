@@ -9,13 +9,14 @@ up. After that, each install takes about 3 minutes.
 
 - A Mac with **Xcode 15 or newer**, installed from the App Store. Open it once so it can
   finish installing its components.
-- **Godot 4.7.2** in `/Applications/Godot.app`, or on your `PATH`. The version must match
-  `.godot-version`. You also need its **export templates**: in Godot, open Editor → Manage
+- **Godot**, at the version in `.godot-version` (4.7.2 today), in `/Applications/Godot.app` or
+  on your `PATH`. You also need its **export templates**: in Godot, open Editor → Manage
   Export Templates → Download and Install.
 - An **Apple ID**. A free one works, but an app installed with it expires after 7 days. A paid
   developer account ($99 a year) keeps an install for a year.
 - A **USB cable** for the first install. Later installs can also work over Wi-Fi.
-- A clone of this repo on the Mac.
+- A clone of this repo on the Mac. Any folder works, including `~/Documents` (see the
+  iCloud row under "When something goes wrong").
 
 ## One-time setup
 
@@ -58,8 +59,8 @@ scripts/ios-run.sh
 ```
 
 **Keep the iPhone unlocked** while it runs. A locked phone refuses the build, the install and
-the launch. The script waits up to 2 minutes for you to unlock it; you can give it longer
-with `PKD_UNLOCK_WAIT=600 scripts/ios-run.sh`.
+the launch, so before each of those steps the script waits up to 2 minutes for you to unlock
+it. You can give it longer with `PKD_UNLOCK_WAIT=600 scripts/ios-run.sh`.
 
 The script prints one line per step:
 
@@ -89,15 +90,16 @@ deleted.
 | Message | Fix |
 |---|---|
 | `no Apple team id` | Do step 2 of the one-time setup. |
+| `the team id '…' is not 10 capital letters and digits` | Check `~/.config/pkd/team_id` holds exactly the 10-character id, in capitals. |
 | `no connected iPhone found` | Plug the phone in, unlock it and tap Trust. If you have several phones, pick one with `PKD_DEVICE=<UDID>`; `xcrun devicectl list devices` lists the UDIDs. |
 | `devicectl not found` / `xcodebuild not found` | Install Xcode and open it once. If you have several Xcodes, set `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. |
-| `the Godot export failed` | Install the 4.7.2 export templates (Editor → Manage Export Templates). On a fresh clone, import the project once first: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --import`. |
+| `the Godot export failed` | Install the export templates for the version in `.godot-version` (Editor → Manage Export Templates). On a fresh clone, import the project once first: `/Applications/Godot.app/Contents/MacOS/Godot --headless --path godot --import`. |
 | `Godot … not found` | Put Godot in `/Applications/Godot.app`, or set `GODOT=/path/to/Godot`. |
 | `the iPhone stayed locked` | Unlock it and run the script again, or give it longer with `PKD_UNLOCK_WAIT`. |
 | `xcodebuild failed` with a signing error | Sign in to Xcode → Settings → Accounts, keep the phone plugged in, and run it again. A free account can sign at most 3 apps per phone at a time, so delete an old test app if Xcode complains about the limit. |
 | `the install failed` | The phone is locked, not trusted, or not in Developer Mode (one-time setup, step 3). |
-| `resource fork, Finder information, or similar detritus not allowed` | The app was built inside a folder iCloud syncs (`~/Documents`, `~/Desktop`), and iCloud tags the files there. The script builds in `~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios` to avoid it; if you set `PKD_DERIVED`, keep it outside those folders. |
-| `the launch failed` | Trust the developer on the phone (see "The first launch only"). |
+| `resource fork, Finder information, or similar detritus not allowed` | The app was built inside a folder iCloud syncs (`~/Documents`, `~/Desktop`), and iCloud tags the files there. The script builds in `~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios` to avoid it; if you set `PKD_DERIVED`, give an absolute path outside those folders. |
+| `the launch failed` | On the first install, trust the developer on the phone (see "The first launch only"). Otherwise the phone may have locked again: unlock it and tap the game's icon. |
 
 ## What the script does, step by step
 
@@ -108,7 +110,10 @@ root:
 # 1. Find the iPhone's UDID
 xcrun devicectl list devices
 
-# 2. Export the Xcode project (with your team id in the iOS preset's app_store_team_id)
+# 2. Export the Xcode project. First put your team id in godot/export_presets.cfg:
+#    application/app_store_team_id="<TEAMID>" (the iOS preset). Put the file back right
+#    after the export with `git checkout godot/export_presets.cfg`, so the id is never committed.
+mkdir -p build/ios
 /Applications/Godot.app/Contents/MacOS/Godot --headless --path godot \
   --export-debug iOS ../build/ios/PapercraftKD.xcodeproj
 
@@ -123,9 +128,6 @@ xcodebuild -project build/ios/PapercraftKD.xcodeproj -scheme PapercraftKD -confi
 xcrun devicectl device install app --device <UDID> ~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios/Build/Products/Debug-iphoneos/*.app
 xcrun devicectl device process launch --device <UDID> com.juanpalopez.papercraftkd
 ```
-
-If you run step 2 by hand, put `godot/export_presets.cfg` back afterwards (`git checkout
-godot/export_presets.cfg`) so your team id is never committed.
 
 You can also open `build/ios/PapercraftKD.xcodeproj` in Xcode after step 2, choose your
 iPhone at the top of the window, and press **Run** (⌘R). Xcode then does steps 3 and 4 itself,
