@@ -387,3 +387,38 @@ func test_a_long_frame_counts_no_more_game_time_than_the_clock_runs() -> void:
 	main._process(0.05)
 	assert_eq(main.game().wave, 1, "a 5 s hitch is not 5 s of countdown")
 	assert_string_contains((main.get_node("Hud/LaunchWave") as Button).text, "Wave 2 in 3")
+
+
+## Every control in a corner row is one row tall and sits the same distance from the edges, on
+## the base canvas and on a wide phone.
+func test_the_corner_rows_line_up() -> void:
+	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
+		var rects := await _hud_rects(size.x, size.y)
+		var width := float(size.x)
+		var height := float(size.y)
+		for top in ["TopBar", "MenuButton", "SpeedBar"]:
+			var rect: Rect2 = rects[top]
+			assert_eq(rect.position.y, HudLayout.EDGE, "%s top at %s" % [top, size])
+			assert_eq(rect.size.y, HudLayout.ROW, "%s height at %s" % [top, size])
+		for bottom in ["AutoWave", "LaunchWave"]:
+			var rect: Rect2 = rects[bottom]
+			assert_eq(rect.end.y, height - HudLayout.EDGE, "%s bottom at %s" % [bottom, size])
+			assert_eq(rect.size.y, HudLayout.ROW, "%s height at %s" % [bottom, size])
+		assert_eq((rects["TopBar"] as Rect2).position.x, HudLayout.EDGE, "chip from the left")
+		assert_eq((rects["AutoWave"] as Rect2).position.x, HudLayout.EDGE, "Auto from the left")
+		assert_eq((rects["SpeedBar"] as Rect2).end.x, width - HudLayout.EDGE, "flush right")
+		var menu: Rect2 = rects["MenuButton"]
+		assert_eq((rects["SpeedBar"] as Rect2).position.x - menu.end.x, HudLayout.GAP)
+		var auto: Rect2 = rects["AutoWave"]
+		assert_eq((rects["LaunchWave"] as Rect2).position.x - auto.end.x, HudLayout.GAP)
+
+
+func test_a_tap_on_the_world_closes_the_menu_and_selects_nothing() -> void:
+	var main := await _main()
+	var menu_button := main.get_node("Hud/MenuButton") as Button
+	menu_button.button_pressed = true
+	var anchor: Vector2i = main.game().map.sockets[0]
+	main._on_tap(main._socket_on_screen(anchor).get_center())
+	assert_false(menu_button.button_pressed, "the dropdown closed")
+	assert_false((main.get_node("Hud/NextSeed") as Control).visible)
+	assert_eq(main.selected_cell(), BoardSpace.NO_CELL, "the tap only closed the menu")

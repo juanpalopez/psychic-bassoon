@@ -4,7 +4,8 @@ class_name IntroView
 extends Control
 
 const THEME := preload("res://ui/hud_theme.tres")
-const BUBBLE_POSITION := Vector2(16.0, 84.0)
+## Under the top row, at its left edge.
+const BUBBLE_POSITION := Vector2(HudLayout.EDGE, HudLayout.TOP_CLEAR)
 const BUBBLE_WIDTH := 640.0
 ## The small bubble used while the player acts on the map.
 const COMPACT_WIDTH := 440.0

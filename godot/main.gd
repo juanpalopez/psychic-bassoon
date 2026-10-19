@@ -276,6 +276,11 @@ func _notification(what: int) -> void:
 ## is not selected yet: the camera flies in to it first and selects it on arrival (#328).
 func _on_tap(position: Vector2) -> void:
 	_rig.cancel_flight()
+	if _menu_button.button_pressed:
+		# a tap on the world closes the Menu's dropdown and does nothing else, so the
+		# dropdown never stands between the player and the board
+		_menu_button.button_pressed = false
+		return
 	var cell := CellPicker.cell_at(_camera, position, _board.surface_height)
 	if cell != BoardSpace.NO_CELL:
 		var anchor := _game.map.socket_anchor_at(cell)

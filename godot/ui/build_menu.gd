@@ -24,8 +24,8 @@ const ICONS := {
 }
 ## Room kept clear for the corner controls above and the Start wave row below, and the
 ## gap between the menu and the socket it was opened for.
-const TOP_RESERVE := 112.0
-const BOTTOM_RESERVE := 120.0
+const TOP_RESERVE := HudLayout.TOP_CLEAR
+const BOTTOM_RESERVE := HudLayout.BOTTOM_CLEAR
 const EDGE_MARGIN := 14.0
 const SOCKET_GAP := 12.0
 ## How long a press must last to count as a hold (a look, not a choice).
