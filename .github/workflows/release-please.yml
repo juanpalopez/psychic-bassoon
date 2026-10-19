@@ -16,6 +16,8 @@ permissions:
 jobs:
   release-pr:
     name: release-pr
+    # stays green and idle until the owner has created the GitHub App and set the variable
+    if: ${{ vars.RELEASE_APP_ID != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -42,6 +44,7 @@ jobs:
 
   tag:
     name: tag
+    if: ${{ vars.RELEASE_APP_ID != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -69,6 +72,7 @@ jobs:
           # has a matching title: the PR must come from its branch and carry its label.
           pr="$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '
             [.[] | select(.head.ref == "release-please--branches--main"
+              and .head.repo.full_name == env.REPO
               and (.labels | map(.name) | index("autorelease: pending")))][0].number // empty')"
           if [ -z "$pr" ]; then
             echo "Not the merge of a pending release PR; nothing to tag."
@@ -76,7 +80,11 @@ jobs:
           fi
           # the version release-please wrote at this commit, not text from a title
           version="$(gh api "repos/${REPO}/contents/.release-please-manifest.json?ref=${SHA}" \
-            --jq .content | base64 -d | jq -r '."."')"
+            --jq .content | base64 -d | jq -er '."."')"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::The manifest version '${version}' is not SemVer."
+            exit 1
+          fi
           tag="v${version}"
           if gh api "repos/${REPO}/git/ref/tags/${tag}" >/dev/null 2>&1; then
             echo "${tag} already exists."
