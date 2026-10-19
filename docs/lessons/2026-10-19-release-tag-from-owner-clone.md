@@ -22,3 +22,5 @@ To release, an agent checks that `main` is green and hands the owner the exact `
 
 ## Follow-up
 The first tag was `v0.1.0-alpha.1`. `release.yml` marks it a pre-release, and `GET /releases/latest` returned 404, so the page now links to `/releases` (pre-releases included) and `deploy.yml` checks for that `href`.
+
+Update (2026-10-19, #358): the owner approved a GitHub App that tags the merge of release-please's own PR (`release-please.yml`). Manual tags from the owner's clone still work; a cloud session still never tags by hand.

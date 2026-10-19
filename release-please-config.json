@@ -1,0 +1,17 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "packages": {
+    ".": {
+      "release-type": "simple",
+      "package-name": "papercraft-kingdom-defense",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "versioning": "prerelease",
+      "prerelease": true,
+      "prerelease-type": "alpha",
+      "skip-github-release": true,
+      "pull-request-title-pattern": "chore: release${component} ${version}",
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
