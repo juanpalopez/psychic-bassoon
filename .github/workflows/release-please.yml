@@ -71,7 +71,7 @@ jobs:
           # Only the merge of release-please's own PR counts, never a commit that merely
           # has a matching title: the PR must come from its branch and carry its label.
           pr="$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '
-            [.[] | select(.head.ref == "release-please--branches--main"
+            [.[] | select((.head.ref | startswith("release-please--branches--main"))
               and .head.repo.full_name == env.REPO
               and (.labels | map(.name) | index("autorelease: pending")))][0].number // empty')"
           if [ -z "$pr" ]; then
