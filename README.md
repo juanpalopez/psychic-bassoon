@@ -4,7 +4,7 @@ A tactile, stop-motion papercraft tower defense for phones and tablets. In a for
 
 It is built with **Godot 4** (GDScript) and plays in landscape, natively on iOS first and on macOS, Windows and Linux (the web build was dropped on 2026-10-18). The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
 
-- **Download:** each tagged release carries the Linux, Windows and macOS builds ([latest release](https://github.com/juanpalopez/psychic-bassoon/releases/latest)); the iPhone build is installed locally for now (`scripts/ios-run.sh`). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
+- **Download:** each tagged release carries the Linux, Windows and macOS builds ([latest release](https://github.com/juanpalopez/psychic-bassoon/releases/latest)); the iPhone build is installed locally for now (`scripts/ios-run.sh`; step-by-step guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
@@ -36,7 +36,7 @@ mkdir -p build/linux && godot --headless --path godot --export-release "Linux" .
 scripts/ios-run.sh                                                   # on a Mac: build, install and launch on a connected iPhone
 ```
 
-The `Windows` and `macOS` presets export the same way (see `CLAUDE.md`, Commands). On the iPhone, trust the developer once in Settings → General → VPN & Device Management.
+The `Windows` and `macOS` presets export the same way (see `CLAUDE.md`, Commands). On the iPhone, trust the developer once in Settings → General → VPN & Device Management; [docs/IPHONE.md](docs/IPHONE.md) walks through the whole setup and the common errors.
 
 ### Test
 

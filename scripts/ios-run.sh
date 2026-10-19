@@ -13,6 +13,7 @@
 # export, and always puts the committed preset back. Other settings:
 #   PKD_DEVICE       the iPhone's UDID (default: the first connected physical iPhone)
 #   PKD_UNLOCK_WAIT  seconds to wait for a locked iPhone to be unlocked (default 120)
+#   PKD_DERIVED      Xcode's derived data (default ~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios)
 #   GODOT            the Godot binary (default: godot on PATH, or /Applications/Godot.app)
 #
 # With a free Apple ID the install expires after 7 days: run the script again. The first
@@ -23,7 +24,10 @@ set -euo pipefail
 BUNDLE_ID="com.juanpalopez.papercraftkd"
 PROJECT="build/ios/PapercraftKD.xcodeproj"
 SCHEME="PapercraftKD"
-DERIVED="build/ios/dd"
+# Derived data stays outside the clone: in an iCloud-synced folder (~/Documents, ~/Desktop) the
+# file provider tags the built app and codesign stops with "resource fork, Finder information,
+# or similar detritus not allowed" (#354).
+DERIVED="${PKD_DERIVED:-${HOME}/Library/Developer/Xcode/DerivedData/PapercraftKD-ios}"
 PRESET="godot/export_presets.cfg"
 TEAM_KEY="application/app_store_team_id"
 TEAM_FILE="${HOME}/.config/pkd/team_id"
@@ -173,6 +177,8 @@ wait_until_unlocked
 echo "==> Installing ${app}"
 xcrun devicectl device install app --device "$device" "$app" \
   || fail "the install failed. Is the iPhone unlocked, trusted (tap Trust on the phone) and in Developer Mode (Settings → Privacy & Security)?"
+
+wait_until_unlocked
 
 echo "==> Launching ${BUNDLE_ID}"
 if ! xcrun devicectl device process launch --device "$device" "$BUNDLE_ID"; then
