@@ -9,7 +9,7 @@ PRs are small (at most 300 changed production lines, #349), so a cheaper model i
 | Tier | When | Model | Depth |
 | --- | --- | --- | --- |
 | Skip | Dependabot bump with green CI, typo or wording-only docs, generated files | none | Check CI is green and the title conforms, then merge |
-| Light | Small, low-risk changes with no logic that can break the sim: docs with rules or numbers, `godot/content` data and numbers, tests only, copy and Theme tweaks, repo scripts, renames; at most about 100 changed production lines | `haiku` | Diff, ticket and checks 1, 3, 4, 8 only; at most 5 tool calls |
+| Light | Small, low-risk changes with no logic that can break the sim: docs with rules or numbers, `godot/content` data and numbers, tests only, copy and Theme tweaks, repo scripts, renames; at most about 100 changed production lines | `haiku` | Diff, ticket and checks 0, 1, 3, 4, 8 only (plus 7 if a workflow changed, which is not Light); at most 5 tool calls |
 | Standard | Most PRs: `godot/sim` logic (map generation, combat, economy, waves), render, UI, scaffolding, workflows that do not touch secrets, permissions or release, and rule changes in `CLAUDE.md` | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
 | Deep | Determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling) and anything that touches secrets, permissions, tokens, deploy or release trust (tag guards, release and deploy workflows) | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
 
