@@ -4,6 +4,7 @@ name: Release PR
 # Commits on main. Merging it tags main, and the tag starts release.yml.
 # A bot token is needed because a tag made with GITHUB_TOKEN starts no
 # workflow, and because only admins and the app may create `v*` tags.
+# The tag job is separate and keyed by commit, so a newer push cannot cancel it.
 
 on:
   push:
@@ -12,15 +13,14 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: release-please
-  cancel-in-progress: false
-
 jobs:
   release-pr:
     name: release-pr
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    concurrency:
+      group: release-please
+      cancel-in-progress: false
     steps:
       - name: Create the app token
         id: app
@@ -28,6 +28,8 @@ jobs:
         with:
           app-id: ${{ vars.RELEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
 
       # skip-github-release is set in the config: this step only opens or
       # updates the release PR; release.yml creates the GitHub Release.
@@ -38,19 +40,50 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+  tag:
+    name: tag
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    concurrency:
+      group: release-tag-${{ github.sha }}
+      cancel-in-progress: false
+    steps:
+      - name: Create the app token
+        id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+          permission-contents: write
+          permission-pull-requests: write
+
       - name: Tag main when the release PR was merged
+        shell: bash
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           REPO: ${{ github.repository }}
           SHA: ${{ github.sha }}
-          SUBJECT: ${{ github.event.head_commit.message }}
         run: |
-          # the squash commit of the release PR: "chore: release 0.1.0-alpha.2 (#N)"
-          first_line="${SUBJECT%%$'\n'*}"
-          if [[ ! "$first_line" =~ ^chore:\ release\ ([0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?) ]]; then
-            echo "Not a release commit; nothing to tag."
+          set -euo pipefail
+          # Only the merge of release-please's own PR counts, never a commit that merely
+          # has a matching title: the PR must come from its branch and carry its label.
+          pr="$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '
+            [.[] | select(.head.ref == "release-please--branches--main"
+              and (.labels | map(.name) | index("autorelease: pending")))][0].number // empty')"
+          if [ -z "$pr" ]; then
+            echo "Not the merge of a pending release PR; nothing to tag."
             exit 0
           fi
-          tag="v${BASH_REMATCH[1]}"
-          echo "Tagging ${SHA} as ${tag}"
-          gh api "repos/${REPO}/git/refs" -f ref="refs/tags/${tag}" -f sha="${SHA}"
+          # the version release-please wrote at this commit, not text from a title
+          version="$(gh api "repos/${REPO}/contents/.release-please-manifest.json?ref=${SHA}" \
+            --jq .content | base64 -d | jq -r '."."')"
+          tag="v${version}"
+          if gh api "repos/${REPO}/git/ref/tags/${tag}" >/dev/null 2>&1; then
+            echo "${tag} already exists."
+          else
+            echo "Tagging ${SHA} as ${tag}"
+            gh api "repos/${REPO}/git/refs" -f ref="refs/tags/${tag}" -f sha="${SHA}"
+          fi
+          # release-please stops opening release PRs while a merged one is still "pending"
+          gh label create "autorelease: tagged" --repo "$REPO" --color ededed 2>/dev/null || true
+          gh pr edit "$pr" --repo "$REPO" --remove-label "autorelease: pending" --add-label "autorelease: tagged"
