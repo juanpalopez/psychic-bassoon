@@ -217,7 +217,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     export_presets.cfg   # iOS (Xcode project only), macOS, Windows and Linux presets (Godot reads it from the project root)
   fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
-  site/                  # the static page GitHub Pages serves (the web build is retired; it links to the releases list)
+  site/                  # the Kingdom of the Fold homepage GitHub Pages serves (the web build is retired; it links to the releases list)
   scripts/               # repo checks, scripts/ios-run.sh (build and run on a connected iPhone) and balance tooling
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
@@ -237,7 +237,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
 | `ci` | PR and push to `main` | On a PR, a `changes` job (`scripts/select-tests.mjs`) skips the Godot job for docs-only changes and narrows GUT to the tests that reach a changed file; pushes to `main` and tags run everything (#359). Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); the headless game time budget; the Linux desktop export, checked for its binary and `.pck` and run 300 frames headless through `scripts/run-godot-checked.sh` (fails on a non-zero exit, a timeout, or an `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line), uploaded as `godot-desktop` for releases; with the `all-desktop` input (releases) also the Windows and macOS exports. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes `site/index.html` to GitHub Pages: a short download page that links to the releases list (pre-releases included), with install steps for Windows, macOS and Linux (#356; the web build is retired, #318). Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes `site/` to GitHub Pages: the Kingdom of the Fold homepage, which links to the releases list (pre-releases included), with install steps for Windows, macOS and Linux (#356; the web build is retired, #318). Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release-please` | Push to `main` | Opens or updates the `chore: release X` PR (version, `CHANGELOG.md`); when that PR is merged, tags main with a GitHub App token so the `release` workflow starts (#358). |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks with the Linux, Windows and macOS exports, and publishes a GitHub Release with generated notes and the three builds attached as zips (the macOS app is ad-hoc signed, not notarized). |
 
