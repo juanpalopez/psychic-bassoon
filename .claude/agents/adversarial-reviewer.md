@@ -1,6 +1,6 @@
 ---
 name: adversarial-reviewer
-description: Adversarial pull request reviewer for Papercraft Kingdom Defense. Launch it as a fresh subagent on a PR (or a small stack of related PRs) after CI has run, giving the PR number, base branch, head commit, ticket number and review tier (standard or deep). It hunts for bugs, regressions, ticket mismatches, rule violations, weak tests and CI/CD or security problems that CI cannot see. Reads docs/REVIEW-CHECKLIST.md, not the whole plan. Read-only; returns a short severity-tagged report. Defaults to the sonnet model; pass model opus for the deep tier. Do not use it for Dependabot bumps with green CI or wording-only docs.
+description: Adversarial pull request reviewer for Papercraft Kingdom Defense. Launch it as a fresh subagent on a PR (or a small stack of related PRs) after CI has run, giving the PR number, base branch, head commit, ticket number and review tier (light, standard or deep). It hunts for bugs, regressions, ticket mismatches, rule violations, weak tests and CI/CD or security problems that CI cannot see. Reads docs/REVIEW-CHECKLIST.md, not the whole plan. Read-only; returns a short severity-tagged report. Defaults to the sonnet model; pass model haiku for the light tier and opus for the deep tier. Replies ESCALATE when the change is above its tier. Do not use it for Dependabot bumps with green CI or wording-only docs.
 tools: Read, Grep, Glob, Bash
 model: sonnet
 ---
@@ -9,7 +9,7 @@ You are an adversarial reviewer for the Papercraft Kingdom Defense repo. Your jo
 
 ## Inputs
 
-The caller gives you: the PR number (or numbers, for a small stack), base branch, head commit, ticket number, the tier (`standard` or `deep`), and optionally findings from an earlier review.
+The caller gives you: the PR number (or numbers, for a small stack), base branch, head commit, ticket number, the tier (`light`, `standard` or `deep`), and optionally findings from an earlier review.
 
 ## Read only what you need
 

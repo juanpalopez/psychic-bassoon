@@ -4,13 +4,18 @@ What the `adversarial-reviewer` agent reads instead of the full `CLAUDE.md` and 
 
 ## Pick the review tier
 
+PRs are small (at most 300 changed production lines, #349), so a cheaper model is enough for most (owner, 2026-10-19). Choose by what the PR touches.
+
 | Tier | When | Model | Depth |
 | --- | --- | --- | --- |
 | Skip | Dependabot bump with green CI, typo or wording-only docs, generated files | none | Check CI is green and the title conforms, then merge |
-| Standard | Most PRs: scaffolding, content data, UI, render, docs with rules or numbers, and pure-logic sim modules (`godot/sim`) (map generation, combat, economy, waves) | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
-| Deep | `.github/workflows/`, determinism-critical sim code (the PRNG, the tick and command loop, the replay test and seed or snapshot handling), anything touching secrets, permissions, deploy or release, a rule change in `CLAUDE.md` | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
+| Light | Small, low-risk changes with no logic that can break the sim: docs with rules or numbers, `godot/content` data and numbers, tests only, copy and Theme tweaks, repo scripts, renames; at most about 100 changed production lines | `haiku` | Diff, ticket and checks 1, 3, 4, 8 only; at most 5 tool calls |
+| Standard | Most PRs: `godot/sim` logic (map generation, combat, economy, waves), render, UI, scaffolding, workflows that do not touch secrets, permissions or release, and rule changes in `CLAUDE.md` | `sonnet` | Diff, ticket and this checklist; at most 8 tool calls |
+| Deep | Determinism-critical sim code (the PRNG, the tick and command loop, the replay test, seed and snapshot handling) and anything that touches secrets, permissions, tokens, deploy or release trust (tag guards, release and deploy workflows) | `opus` | As Standard, plus try to break it (mutations, edge inputs); at most 15 tool calls |
 
-When unsure, take the higher tier, but choose the tier by what the PR touches, not by how it feels. A review costs about 50k tokens (a standard one 30k to 40k, a deep one 50k to 75k); the deep tier pays off on the tick loop, the PRNG, seeds, snapshots and goldens, workflows and rule changes, and not on UI, render, content numbers, docs, tools or CI scripts, which are standard. A sim PR that does not touch the tick loop, the PRNG, seeds or snapshots is standard if its tests were checked with `scripts/mutate.py`.
+**Escalation.** If you cannot judge the change at your tier (a Light review meets sim logic, a Standard review meets the tick loop, the PRNG or a token), stop and reply `ESCALATE: <reason>`; the caller reruns one tier up. Do not give a verdict you cannot support. When unsure which tier, take the lower one; escalate when the review says so, or when the first review found a blocker in sim, security or release code. A Light review never clears a PR that changes `godot/sim` logic.
+
+Rough cost of one review: Light about 10k tokens, Standard 30k to 40k, Deep 50k to 75k. A sim PR that does not touch the tick loop, the PRNG, seeds or snapshots is Standard even without `scripts/mutate.py` results, but the reviewer then checks that its tests can fail.
 
 ## What the caller sends the reviewer
 
@@ -34,7 +39,7 @@ A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per 
 
 - **Launch once.** One reviewer gets all the PR numbers, bottom to top, with each PR's base, head commit and ticket. Read the checklist and shared context once.
 - **Per-PR diffs.** Review each PR's own diff (its base to its head), in stack order, never the cumulative diff.
-- **Group by tier.** All deep-tier PRs in the stack go in one deep review; the rest go in one standard review. A single-tier stack is one review.
+- **Group by tier.** All PRs of one tier in the stack go in one review of that tier. A single-tier stack is one review.
 - **Cross-PR checks.** Look for what only a whole-stack view shows: a higher layer breaking an assumption of a lower one, duplicated or contradictory work, a ticket's requirement landing in the wrong PR, and config drift between layers (versions, scripts, paths, workflow names).
 - **Limits.** The tool-call limit of the tier applies to the whole review, plus 4 more calls per extra PR. Output limits apply per PR, plus at most 3 stack-level findings.
 - **Report.** One section per PR (`Reviewed commit`, findings, verdict), then a short `Stack-level` section.
