@@ -3,118 +3,79 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Papercraft Kingdom Defense</title>
+    <title>Kingdom of the Fold: a handcrafted tower defense</title>
     <meta
       name="description"
-      content="Download Papercraft Kingdom Defense for Windows, macOS or Linux, and how to open it the first time."
+      content="Kingdom of the Fold is a tower defense in a valley folded from paper and card. Download it free for Windows, macOS or Linux."
     />
-    <style>
-      :root {
-        color-scheme: light dark;
-        --paper: #f4ecdc;
-        --card: #fbf6ec;
-        --ink: #2b2420;
-        --muted: #6b5d52;
-        --line: #dccfb8;
-        --accent: #8a3b2e;
-        --accent-ink: #fbf6ec;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root {
-          --paper: #221d1a;
-          --card: #2c2622;
-          --ink: #efe6d6;
-          --muted: #b9ab9a;
-          --line: #463d36;
-          --accent: #e59a7e;
-          --accent-ink: #221d1a;
-        }
-      }
-      body {
-        margin: 0;
-        background: var(--paper);
-        color: var(--ink);
-        font:
-          1.05rem/1.6 system-ui,
-          -apple-system,
-          'Segoe UI',
-          sans-serif;
-      }
-      main {
-        max-width: 40rem;
-        margin: 0 auto;
-        padding: 2.5rem 1rem 3rem;
-      }
-      h1 {
-        font-size: 1.8rem;
-        line-height: 1.2;
-        margin: 0 0 0.5rem;
-      }
-      h2 {
-        font-size: 1.2rem;
-        margin: 0 0 0.5rem;
-      }
-      a {
-        color: var(--accent);
-        font-weight: 600;
-      }
-      .lead {
-        color: var(--muted);
-        margin: 0 0 1.5rem;
-      }
-      .download {
-        display: inline-block;
-        background: var(--accent);
-        color: var(--accent-ink);
-        text-decoration: none;
-        padding: 0.7rem 1.2rem;
-        border-radius: 0.5rem;
-        margin-bottom: 2rem;
-      }
-      section {
-        background: var(--card);
-        border: 1px solid var(--line);
-        border-radius: 0.75rem;
-        padding: 1.1rem 1.25rem;
-        margin-bottom: 1rem;
-      }
-      ol {
-        margin: 0;
-        padding-left: 1.3rem;
-      }
-      li + li {
-        margin-top: 0.35rem;
-      }
-      code {
-        font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-        font-size: 0.88em;
-        overflow-wrap: anywhere;
-      }
-      pre {
-        background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 0.4rem;
-        padding: 0.6rem 0.75rem;
-        margin: 0.4rem 0 0;
-        overflow-x: auto;
-      }
-      pre code {
-        overflow-wrap: normal;
-      }
-      .note {
-        color: var(--muted);
-        font-size: 0.95rem;
-        margin: 0.75rem 0 0;
-      }
-    </style>
+    <link
+      rel="preload"
+      href="fonts/alegreya-latin-900-normal.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link rel="stylesheet" href="home.css" />
   </head>
   <body>
+    <header class="nav">
+      <div class="wrap">
+        <a class="brand" href="#top">Kingdom of the Fold</a>
+        <nav aria-label="Sections">
+          <ul>
+            <li><a href="#install">Install</a></li>
+          </ul>
+        </nav>
+        <a class="btn btn--wood" href="#install">Download</a>
+      </div>
+    </header>
     <main>
-      <h1>Papercraft Kingdom Defense</h1>
-      <p class="lead">
-        A papercraft tower defense game for Windows, macOS and Linux. The iPhone
-        version is coming later.
-      </p>
+      <section class="band hero" id="top" aria-labelledby="title">
+        <div class="hero__bg" aria-hidden="true"></div>
+        <div class="wrap">
+          <div>
+            <p class="eyebrow">A handcrafted tower defense</p>
+            <h1 id="title">Kingdom of the Fold</h1>
+            <p class="lead">
+              A valley folded from paper and card, and a Heartstone to hold
+              against the Blot.
+            </p>
+            <div class="cta">
+              <a
+                class="btn btn--primary btn--big"
+                href="https://github.com/juanpalopez/psychic-bassoon/releases"
+                ><span
+                  class="glyph"
+                  style="--g: url('img/glyph-play.svg')"
+                ></span
+                >Download free</a
+              >
+              <a class="btn btn--big" href="#install">How to install</a>
+            </div>
+            <p class="platforms">
+              Windows, macOS and Linux. Early test builds; iPhone later.
+            </p>
+          </div>
+          <figure class="window">
+            <img
+              src="img/valley-game.webp"
+              width="961"
+              height="505"
+              alt="Towers on grassy terraces beside a winding road, with a rope bridge over a river and the red Heartstone at the far end."
+            />
+            <figcaption>Look-development render of the valley.</figcaption>
+            <p class="pin" aria-hidden="true">
+              <span>Foes on the river road!</span>
+            </p>
+          </figure>
+        </div>
+      </section>
+
+      <section class="band paper paper--light" id="install">
+        <div class="wrap">
+          <h2>Download and install</h2>
+        </div>
+      </section>
 
       <a
         class="download"
@@ -129,6 +90,10 @@
         is free and still early, so expect rough edges. Because it is not signed
         by Microsoft or Apple yet, your computer warns you the first time you
         open it; in most cases the steps below get past that.
+      </p>
+      <p class="note">
+        The download files still carry the game's working name, Papercraft
+        Kingdom Defense.
       </p>
 
       <section aria-labelledby="windows">
@@ -222,5 +187,11 @@ chmod +x papercraft-kingdom-defense.x86_64
         >.
       </p>
     </main>
+    <footer>
+      <div class="wrap">
+        <span class="brand">Kingdom of the Fold</span>
+        <span>Fonts: Alegreya and Patrick Hand, SIL Open Font License.</span>
+      </div>
+    </footer>
   </body>
 </html>
