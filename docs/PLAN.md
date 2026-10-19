@@ -135,7 +135,7 @@ Input / HUD taps ──commands──▶          │           ──events─�
 | Randomness | Seeded PRNG (mulberry32 on masked 32-bit integers) | Maps and waves replay exactly from a seed (the ported pieces match the TypeScript fixtures) |
 | Tests | GUT (Godot Unit Test) run headless; the TypeScript fixtures for the ported core, then GDScript replay goldens; a Linux desktop export in CI that must start and run headless (it replaced the web export and the Playwright smoke test in #318) | Balance, maps and replays stay verifiable |
 | Audio | Godot `AudioStreamPlayer` | Native builds can start sound at once |
-| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, a Linux desktop export, a Pages page that links to the latest release, tagged releases with the Linux, Windows and macOS builds | Every change ships through the same checked path (see CI/CD pipeline) |
+| CI/CD | GitHub Actions: PR checks, gdlint and gdformat, GUT, a Linux desktop export, a Pages page that links to the releases list, tagged releases with the Linux, Windows and macOS builds | Every change ships through the same checked path (see CI/CD pipeline) |
 
 - **Camera.** Perspective `Camera3D`, 20° field of view, landscape framing, pitched 62° zoomed out and 56° zoomed in; one-finger pan with rubber-band edges and a two-finger pinch that zooms around the fingers; no follow camera (owner, 2026-10-14). On the 32x20 map (owner, 2026-10-18) the camera pans across the map: a run starts near the spawn, the zoom-out limit shows the whole map as an overview (a tap there zooms in first), and pan is clamped to the map plus a scenery margin (#328; it used to start with the whole 16x11 board in view).
 - **Simulation.** Fixed 30 Hz tick (an accumulator in `_process`) owns all state. Rendering interpolates between ticks. 2×/3× speed means extra ticks per frame.
@@ -217,7 +217,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
     export_presets.cfg   # iOS (Xcode project only), macOS, Windows and Linux presets (Godot reads it from the project root)
   fixtures/              # frozen JSON from the retired TypeScript sim for the ported core (prng, maps, routes), checked by SHA256SUMS (GDScript replay goldens live in godot/tests/goldens/)
   assets-src/            # .blend sources and raw packs (Git LFS)
-  site/                  # the static page GitHub Pages serves (the web build is retired; it links to the latest release)
+  site/                  # the static page GitHub Pages serves (the web build is retired; it links to the releases list)
   scripts/               # repo checks, scripts/ios-run.sh (build and run on a connected iPhone) and balance tooling
   docs/                  # PLAN.md, design notes; docs/art/ has GAPS.md
   .github/
@@ -237,10 +237,10 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 | --- | --- | --- |
 | `pr-checks` | PR opened, edited, updated | Conventional Commits on the PR title and commits; warns if no ticket is referenced. Already in place. |
 | `ci` | PR and push to `main` | Pinned Godot and export templates (cached); `gdformat --check` and `gdlint`; the sim purity lint; GUT headless (fixtures, replay); the headless game time budget; the Linux desktop export, checked for its binary and `.pck` and run 300 frames headless through `scripts/run-godot-checked.sh` (fails on a non-zero exit, a timeout, or an `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line), uploaded as `godot-desktop` for releases; with the `all-desktop` input (releases) also the Windows and macOS exports. The `ci` job also runs the repo's script checks (lint, Vitest, assets, frozen fixtures). |
-| `deploy` | Push to `main`, only after `ci` passes | Publishes `site/index.html` to GitHub Pages: a short page that says the web build is retired (#318) and links to the latest release. Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
+| `deploy` | Push to `main`, only after `ci` passes | Publishes `site/index.html` to GitHub Pages: a short download page that links to the releases list (pre-releases included), with install steps for Windows, macOS and Linux (#356; the web build is retired, #318). Only the tip of `main` deploys, and the job checks that the live page has the releases link. The Three.js build is not served (to run it, check out the tag `web-three-final`). A red `main` never reaches the public site. |
 | `release` | Tag `vMAJOR.MINOR.PATCH` | Re-runs the checks with the Linux, Windows and macOS exports, and publishes a GitHub Release with generated notes and the three builds attached as zips (the macOS app is ad-hoc signed, not notarized). |
 
-**Versions follow phase gates** (semantic versioning, 0.x until launch). The only tag so far is `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
+**Versions follow phase gates** (semantic versioning, 0.x until launch). Tags so far: `web-three-final` (the last Three.js web build, created 2026-10-11 before the Three.js code was removed) and `v0.1.0-alpha.1` (2026-10-19, the first desktop pre-release; a tag with a `-` suffix is published as a pre-release). `v0.1.0` has not been cut yet; each later gate bumps the minor version. Notes come from Conventional Commits, so commit messages are the changelog.
 
 **What CI can and can't prove**
 - CI checks: lint, formatting, determinism (the fixtures for the ported core, then replay goldens), sim rules, the asset size budget, `assets/CREDITS.md` coverage for every GLB, and that the Linux export runs 300 frames with a clean log (scripts, resources and shader compiles that log an error).

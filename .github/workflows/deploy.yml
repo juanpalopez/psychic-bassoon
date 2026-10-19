@@ -57,11 +57,12 @@ jobs:
           lfs: false
           persist-credentials: false
 
-      # The web build is retired (#318): Pages serves one static page that links to the releases.
+      # The web build is retired (#318): Pages serves one static page that links to the releases
+      # list, not /releases/latest, which skips pre-releases such as v0.1.0-alpha.1 (#356).
       - name: Check the page links to the releases
-        run: grep -qF "$RELEASES_URL" site/index.html
+        run: grep -qF "href=\"$RELEASES_URL\"" site/index.html
         env:
-          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases/latest
+          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases
 
       - uses: actions/configure-pages@v6
 
@@ -77,11 +78,11 @@ jobs:
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases/latest
+          RELEASES_URL: https://github.com/juanpalopez/psychic-bassoon/releases
         run: |
           for attempt in 1 2 3 4 5 6; do
             code=$(curl -sS --max-time 20 -o live.html -w '%{http_code}' "${PAGE_URL}?ci=${HEAD_SHA}" || true)
-            if [ "$code" = "200" ] && grep -qF "$RELEASES_URL" live.html; then
+            if [ "$code" = "200" ] && grep -qF "href=\"$RELEASES_URL\"" live.html; then
               echo "The releases page is live at the site root"
               exit 0
             fi
