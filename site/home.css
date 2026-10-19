@@ -185,6 +185,13 @@ main > .download:hover {
   -webkit-mask: var(--g) center / contain no-repeat;
 }
 
+.btn:focus-visible,
+main > .download:focus-visible {
+  box-shadow:
+    var(--raised),
+    0 0 0 3px var(--paper-light);
+}
+
 /* ---------- top bar ---------- */
 .nav {
   position: absolute;
@@ -242,7 +249,8 @@ main > .download:hover {
   html {
     scroll-behavior: auto;
   }
-  .btn {
+  .btn,
+  main > .download {
     transition: none;
   }
 }
