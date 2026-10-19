@@ -19,6 +19,41 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Pull requests run only what the change can reach (#359); pushes to main and tags run all.
+  changes:
+    name: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    outputs:
+      godot: ${{ steps.select.outputs.godot }}
+      gut: ${{ steps.select.outputs.gut }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          lfs: false
+          persist-credentials: false
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+
+      - name: Select the Godot job and the GUT tests
+        id: select
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$EVENT" != "pull_request" ]; then
+            printf 'godot=true\ngut=all\n' | tee -a "$GITHUB_OUTPUT"
+          else
+            # the base branch's copy decides, so a PR cannot narrow its own checks
+            git show "${BASE_SHA}:scripts/select-tests.mjs" > "$RUNNER_TEMP/select-tests.mjs" 2>/dev/null \
+              || cp scripts/select-tests.mjs "$RUNNER_TEMP/select-tests.mjs"
+            node "$RUNNER_TEMP/select-tests.mjs" "$BASE_SHA" "$HEAD_SHA" | tee -a "$GITHUB_OUTPUT"
+          fi
+
   ci:
     name: ci
     runs-on: ubuntu-latest
@@ -88,6 +123,9 @@ jobs:
 
   godot:
     name: godot
+    needs: changes
+    # a skipped job counts as passing for the required check
+    if: needs.changes.outputs.godot == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -177,8 +215,17 @@ jobs:
         run: bash scripts/run-godot-checked.sh 600 import.log -- "$GODOT" --headless --path godot --import
 
       - name: GUT tests
+        if: needs.changes.outputs.gut != 'none'
+        env:
+          GUT_TESTS: ${{ needs.changes.outputs.gut }}
         run: |
-          "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
+          if [ "$GUT_TESTS" = "all" ]; then
+            "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
+          else
+            # only the tests that reach a changed file (scripts/select-tests.mjs)
+            echo "GUT subset: ${GUT_TESTS}"
+            "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 -gtest="$GUT_TESTS" -gexit
+          fi
 
       - name: Headless game time budget
         env:
