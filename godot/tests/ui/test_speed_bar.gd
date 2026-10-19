@@ -53,3 +53,15 @@ func test_the_buttons_are_big_enough_for_a_thumb() -> void:
 	for button in _bar().buttons():
 		assert_gte(button.custom_minimum_size.y * 0.54, 44.0)
 		assert_gte(button.custom_minimum_size.x * 0.54, 44.0)
+
+
+func test_the_paused_caption_fits_the_square() -> void:
+	var bar := _bar()
+	var speed := GameSpeed.new()
+	speed.toggle_pause()
+	bar.show_speed(speed)
+	var pause := bar.buttons()[0]
+	# headless font metrics differ from the game's, so also cap the caption at the length of
+	# "Pause": "Resume" made the square 97 px wide in the HUD font
+	assert_lte(pause.text.length(), "Pause".length(), "short caption: %s" % pause.text)
+	assert_lte(pause.get_combined_minimum_size().x, HudLayout.ROW)
