@@ -9,6 +9,13 @@ name: Release PR
 on:
   push:
     branches: [main]
+  # Re-run the tag step for a release PR whose push run did not tag (run it from main).
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: The merge commit of the release PR on main (40 hex characters)
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -17,7 +24,7 @@ jobs:
   release-pr:
     name: release-pr
     # stays green and idle until the owner has created the GitHub App and set the variable
-    if: ${{ vars.RELEASE_APP_ID != '' }}
+    if: ${{ github.event_name == 'push' && vars.RELEASE_APP_ID != '' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
@@ -44,11 +51,11 @@ jobs:
 
   tag:
     name: tag
-    if: ${{ vars.RELEASE_APP_ID != '' }}
+    if: ${{ vars.RELEASE_APP_ID != '' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     concurrency:
-      group: release-tag-${{ github.sha }}
+      group: release-tag-${{ inputs.sha || github.sha }}
       cancel-in-progress: false
     steps:
       - name: Create the app token
@@ -65,9 +72,19 @@ jobs:
         env:
           GH_TOKEN: ${{ steps.app.outputs.token }}
           REPO: ${{ github.repository }}
-          SHA: ${{ github.sha }}
+          SHA: ${{ inputs.sha || github.sha }}
         run: |
           set -euo pipefail
+          if [[ ! "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::'${SHA}' is not a full commit SHA."
+            exit 1
+          fi
+          # a dispatch can name any commit: it must already be on main
+          status="$(gh api "repos/${REPO}/compare/main...${SHA}" --jq .status)"
+          if [ "$status" != "identical" ] && [ "$status" != "behind" ]; then
+            echo "::error::${SHA} is not on main (${status})."
+            exit 1
+          fi
           # Only the merge of release-please's own PR counts, never a commit that merely
           # has a matching title: the PR must come from its branch (release-please--branches--main--components--<package>) and carry its label.
           pr="$(gh api "repos/${REPO}/commits/${SHA}/pulls" --jq '
