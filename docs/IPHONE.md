@@ -96,6 +96,7 @@ deleted.
 | `the iPhone stayed locked` | Unlock it and run the script again, or give it longer with `PKD_UNLOCK_WAIT`. |
 | `xcodebuild failed` with a signing error | Sign in to Xcode → Settings → Accounts, keep the phone plugged in, and run it again. A free account can sign at most 3 apps per phone at a time, so delete an old test app if Xcode complains about the limit. |
 | `the install failed` | The phone is locked, not trusted, or not in Developer Mode (one-time setup, step 3). |
+| `resource fork, Finder information, or similar detritus not allowed` | The app was built inside a folder iCloud syncs (`~/Documents`, `~/Desktop`), and iCloud tags the files there. The script builds in `~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios` to avoid it; if you set `PKD_DERIVED`, keep it outside those folders. |
 | `the launch failed` | Trust the developer on the phone (see "The first launch only"). |
 
 ## What the script does, step by step
@@ -113,13 +114,13 @@ xcrun devicectl list devices
 
 # 3. Build and sign it for that iPhone
 xcodebuild -project build/ios/PapercraftKD.xcodeproj -scheme PapercraftKD -configuration Debug \
-  -destination "id=<UDID>" -derivedDataPath build/ios/dd \
+  -destination "id=<UDID>" -derivedDataPath ~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios \
   -allowProvisioningUpdates -allowProvisioningDeviceRegistration \
   DEVELOPMENT_TEAM=<TEAMID> CODE_SIGN_STYLE=Automatic "CODE_SIGN_IDENTITY=Apple Development" \
   PRODUCT_BUNDLE_IDENTIFIER=com.juanpalopez.papercraftkd build
 
 # 4. Install and launch
-xcrun devicectl device install app --device <UDID> build/ios/dd/Build/Products/Debug-iphoneos/*.app
+xcrun devicectl device install app --device <UDID> ~/Library/Developer/Xcode/DerivedData/PapercraftKD-ios/Build/Products/Debug-iphoneos/*.app
 xcrun devicectl device process launch --device <UDID> com.juanpalopez.papercraftkd
 ```
 
