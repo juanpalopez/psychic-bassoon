@@ -5,10 +5,11 @@ const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 
 func _stub_valley(seed: int) -> Array[SectionResult]:
 	var plan := ValleyPlan.create(seed, 32, 20)
-	var sections := ValleySections.all()
+	# Straight stand-ins, so the tests do not depend on the real sections' shapes.
+	var section := StraightSection.new()
 	var results: Array[SectionResult] = []
 	for slot in plan.slots:
-		results.append(sections[slot.id].generate(slot, ValleyPlan.section_rng(seed, slot.id, 0)))
+		results.append(section.generate(slot, ValleyPlan.section_rng(seed, slot.id, 0)))
 	return results
 
 
@@ -71,3 +72,25 @@ func test_a_bridge_cell_stays_walkable() -> void:
 	bridge.cell = cell
 	strip.bridges.append(bridge)
 	assert_ne(HeroGraph.travel_steps(results, cell + Vector2i.LEFT, cell + Vector2i.RIGHT), -1)
+
+
+func test_a_cap_lower_than_the_walk_fails_and_names_the_target() -> void:
+	var results := _stub_valley(42)
+	var low: Array[Vector2i] = [Vector2i(ValleyPlan.Id.HEARTKEEP_APPROACH, 1)]
+	var problems := HeroGraph.problems(results, low)
+	assert_eq(problems.size(), 1)
+	assert_eq(problems[0].section, ValleyPlan.Id.HEARTKEEP_APPROACH)
+
+
+func test_the_real_sections_leave_the_hero_a_way_through_for_many_seeds() -> void:
+	for seed in range(1, 301):
+		var plan := ValleyPlan.create(seed, 32, 20)
+		var sections := ValleySections.all()
+		var results: Array[SectionResult] = []
+		for slot in plan.slots:
+			results.append(
+				sections[slot.id].generate(slot, ValleyPlan.section_rng(seed, slot.id, 0))
+			)
+		var problems := HeroGraph.problems(results)
+		var texts := problems.map(func(p: ValleyChecks.Problem) -> String: return p.text)
+		assert_eq(problems.size(), 0, "seed %d: %s" % [seed, texts])

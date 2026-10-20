@@ -39,12 +39,12 @@ static func travel_steps(results: Array[SectionResult], from: Vector2i, to: Vect
 	return create(results).steps(from, to)
 
 
-## The problems of the walkable graph: the spawn gate and the Heartstone approach in one
-## component, no walled-off pocket beside a socket block, and the hero's walk from the meadow
-## to the other sections within its caps. Each names the section to draw again.
-static func problems(results: Array[SectionResult]) -> Array[ValleyChecks.Problem]:
+## The problems of a whole valley's walkable graph: the Heartstone approach reachable, no walled-off
+## pocket beside a socket block, the walk from the meadow within `caps`. Each names the section.
+static func problems(
+	results: Array[SectionResult], caps: Array[Vector2i] = HERO.CAPS
+) -> Array[ValleyChecks.Problem]:
 	var found: Array[ValleyChecks.Problem] = []
-	# Only a whole valley has a spawn gate, a Heartstone and a meadow to walk from.
 	if results.size() != ValleyPlan.Id.size():
 		return found
 	var graph := create(results)
@@ -78,7 +78,7 @@ static func problems(results: Array[SectionResult]) -> Array[ValleyChecks.Proble
 		return found
 	var meadow := results[ValleyPlan.Id.SUNKEN_MEADOW]
 	var from := graph._anchor(meadow.rect)
-	for target in HERO.CAPS:
+	for target in caps:
 		var to := graph._anchor(results[target.x].rect)
 		var steps := graph.steps(from, to)
 		if steps < 0 or steps > target.y:
