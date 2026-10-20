@@ -12,7 +12,6 @@ const LANE_WIDTH := 2
 ## three runs: up (or down) from the entry to the edge of the board, all the way across to the
 ## A four-column strip has room for two runs only, and turns at either edge of the board, as the
 ## stream picks.
-## A four-column strip has room for two runs only, and turns at either edge of the board, whichever the stream picks.
 static func snake(slot: ValleyPlan.Slot, rng: Rng) -> Array[Vector2i]:
 	var rows := slot.rect.size.y
 	var near := VALLEY.GATE_MARGIN - 2
