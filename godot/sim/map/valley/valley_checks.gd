@@ -111,6 +111,7 @@ static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
 						result.id, "high socket %s has no low socket nearby" % result.sockets[index]
 					)
 				)
+	found.append_array(HeroGraph.problems(results))
 	return found
 
 

@@ -64,6 +64,10 @@ func test_the_same_seed_gives_the_same_valley() -> void:
 
 func test_a_failing_section_is_drawn_again_and_the_others_do_not_change() -> void:
 	var sections := ValleySections.all()
+	# The baseline uses the same stand-in, so a real section in that slot cannot change the map.
+	var steady := Flaky.new()
+	steady.failures = 0
+	sections[3] = steady
 	var baseline := ValleyStitcher.build(42, 32, 20, sections)
 	var flaky := Flaky.new()
 	sections[3] = flaky
