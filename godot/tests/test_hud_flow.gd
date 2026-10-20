@@ -297,13 +297,30 @@ func test_the_build_bar_takes_the_bottom_row_and_keeps_the_socket_in_view() -> v
 		assert_false(BuildMenu.needs_room(socket, Vector2(size)), "socket %s in view" % socket)
 		menu.info_requested.emit("spoolGuard")
 		var card := (main.get("_card") as Control).get_global_rect()
-		assert_lte(card.end.y, rect.position.y, "the card sits above the bar")
+		assert_almost_eq(card.end.y, rect.position.y - main.CARD_MARGIN, 0.5, "just above the bar")
+		assert_almost_eq(card.position.x, rect.position.x, 0.5, "at its left end")
 		assert_gte(card.position.y, HudLayout.TOP_CLEAR, "and below the top row")
 		menu.close_button().pressed.emit()
 		await get_tree().process_frame
 		assert_false(menu.visible)
 		assert_true((hud.get_node("AutoWave") as Control).visible, "Auto comes back")
 		assert_eq(main._selected, BoardSpace.NO_CELL, "Close drops the selection")
+
+
+func test_close_stops_easing_the_socket_into_view() -> void:
+	var main := await _main()
+	var rig := main.get_node("CameraRig") as CameraRig
+	var menu := main.get_node("Hud/BuildMenu") as BuildMenu
+	var anchor: Vector2i = main.game().map.sockets[0]
+	main.select_cell(anchor)
+	# ease the socket in as if the bar hid it
+	rig.fly_to(main._socket_top(anchor), rig.zoom)
+	rig._process(1.0 / 30.0)
+	var pan := rig.pan
+	menu.close_button().pressed.emit()
+	assert_false(rig.flying(), "Close ends the ease")
+	rig._process(1.0 / 30.0)
+	assert_eq(rig.pan, pan, "the camera stays where it was")
 
 
 func test_the_menu_button_shows_next_seed_and_sound() -> void:
