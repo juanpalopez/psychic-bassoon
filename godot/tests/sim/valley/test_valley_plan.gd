@@ -101,3 +101,7 @@ func test_add_socket_keeps_the_parallel_arrays_in_step() -> void:
 	assert_eq(result.sockets, [Vector2i(2, 5)] as Array[Vector2i])
 	assert_eq(result.socket_levels, [1] as Array[int])
 	assert_eq(result.socket_tags, [SectionResult.Tag.BEND] as Array[int])
+
+
+func test_the_attempt_budget_fits_a_sections_stream_stride() -> void:
+	assert_lte(RULES.MAX_SECTION_ATTEMPTS, RULES.SECTION_STREAM_STRIDE)

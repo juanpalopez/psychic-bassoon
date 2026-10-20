@@ -54,6 +54,7 @@ static func create(seed: int, cols: int, rows: int) -> ValleyPlan:
 		slot.exit = Vector2i(left + widths[index] - 1, gates[index + 1])
 		plan.slots.append(slot)
 		left += widths[index]
+	assert(left == cols, "the strips tile %d columns, not %d" % [left, cols])
 	return plan
 
 

@@ -75,6 +75,13 @@ func test_a_failing_section_is_drawn_again_and_the_others_do_not_change() -> voi
 	for anchor in baseline.sockets:
 		if not strip.has_point(anchor):
 			assert_true(map.sockets.has(anchor), "socket %s moved" % anchor)
+	for y in 20:
+		for x in 32:
+			if not strip.has_point(Vector2i(x, y)):
+				assert_eq(map.heights[y][x], baseline.heights[y][x])
+				assert_eq(map.regions[y][x], baseline.regions[y][x])
+				assert_eq(map.walkable[y][x], baseline.walkable[y][x])
+				assert_eq(map.elevation[y][x], baseline.elevation[y][x])
 
 
 func test_a_section_that_never_passes_gives_up_with_an_error() -> void:
@@ -86,3 +93,8 @@ func test_a_section_that_never_passes_gives_up_with_an_error() -> void:
 	assert_null(map)
 	assert_eq(flaky.calls, 20)
 	assert_push_error("section 1 fails")
+
+
+func test_every_seed_of_a_sweep_gives_a_valley() -> void:
+	for seed in range(1, 201):
+		assert_not_null(MapGen.generate_valley(seed), "seed %d" % seed)

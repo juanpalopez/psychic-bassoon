@@ -50,6 +50,11 @@ static func section_problems(
 			found.append(Problem.make(id, "the road jumps at %s" % road[index]))
 	if not found.is_empty():
 		return found
+	if result.socket_levels.size() != result.sockets.size():
+		return [Problem.make(id, "socket levels do not match the sockets")]
+	if result.socket_tags.size() != result.sockets.size():
+		return [Problem.make(id, "socket tags do not match the sockets")]
+	found.append_array(_link_problems(id, result))
 	var wanted := section.socket_range()
 	if result.sockets.size() < wanted.x or result.sockets.size() > wanted.y:
 		found.append(
@@ -75,7 +80,6 @@ static func section_problems(
 static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
 	var found: Array[Problem] = []
 	var all: Array[Vector2i] = []
-	var owner: Array[int] = []
 	var high := 0
 	for result in results:
 		for index in result.sockets.size():
@@ -88,8 +92,8 @@ static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
 						)
 					)
 			all.append(result.sockets[index])
-			owner.append(result.id)
 			high += 1 if result.socket_tags[index] == SectionResult.Tag.HIGH else 0
+	found.append_array(_join_bend_problems(results))
 	if high * 100 > all.size() * VALLEY.HIGH_MAX_PERCENT:
 		found.append(
 			Problem.make(
@@ -164,3 +168,44 @@ static func _most_high(results: Array[SectionResult]) -> int:
 			best = result.id
 			best_count = count
 	return best
+
+
+## The feeder ends beside the road cell it joins, and every bridge stands on the road: the
+## stitcher looks both up in the road, so a miss would give a corrupt route.
+static func _link_problems(id: int, result: SectionResult) -> Array[Problem]:
+	var found: Array[Problem] = []
+	if not result.feeder.is_empty():
+		var last := result.feeder[result.feeder.size() - 1]
+		if not result.road.has(result.feeder_join):
+			found.append(Problem.make(id, "the feeder joins %s, off the road" % result.feeder_join))
+		elif (result.feeder_join - last).length_squared() != 1:
+			found.append(Problem.make(id, "the feeder does not end beside %s" % result.feeder_join))
+	for bridge in result.bridges:
+		if not result.road.has(bridge.cell):
+			found.append(Problem.make(id, "the bridge at %s is off the road" % bridge.cell))
+	return found
+
+
+## A turn on the first or last cell of a section is no bend inside either road, so it is looked
+## for on the whole road; a block of any section may cover it.
+static func _join_bend_problems(results: Array[SectionResult]) -> Array[Problem]:
+	var found: Array[Problem] = []
+	var path: Array[Vector2i] = []
+	for result in results:
+		path.append_array(result.road)
+	for bend in SectionSockets.bends(path):
+		for result in results:
+			if result.road[0] != bend and result.road[result.road.size() - 1] != bend:
+				continue
+			if not _covered_anywhere(results, bend):
+				found.append(
+					Problem.make(result.id, "no socket block covers the join bend at %s" % bend)
+				)
+	return found
+
+
+static func _covered_anywhere(results: Array[SectionResult], bend: Vector2i) -> bool:
+	for result in results:
+		if _covered(result, bend):
+			return true
+	return false
