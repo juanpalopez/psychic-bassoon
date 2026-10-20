@@ -48,7 +48,7 @@ func test_the_road_ends_on_the_east_edge_with_dense_sockets_on_the_floor() -> vo
 		var drawn := _draw(seed)
 		var slot: ValleyPlan.Slot = drawn[0]
 		var result: SectionResult = drawn[2]
-		assert_eq(drawn[1].socket_range(), Vector2i(3, 6))
+		assert_eq(drawn[1].socket_range(), Vector2i(2, 6))
 		assert_eq(result.road[result.road.size() - 1], slot.exit)
 		assert_eq(slot.exit.x, 31)
 		for step in result.road:
@@ -92,3 +92,16 @@ func test_ground_rises_around_the_heartstone_and_the_hero_can_walk_to_it() -> vo
 				var cell := Vector2i(x, y)
 				if result.has_cell(cell):
 					assert_true(result.is_walkable(cell) and reached.has(cell))
+
+
+func test_every_seed_has_a_passing_draw_within_the_attempt_budget() -> void:
+	for seed in range(1, 301):
+		var slot := ValleyPlan.create(seed, 32, 20).slots[ValleyPlan.Id.HEARTKEEP_APPROACH]
+		var section := HeartkeepApproach.new()
+		var passed := false
+		for attempt in 20:
+			var result := section.generate(slot, ValleyPlan.section_rng(seed, 5, attempt))
+			if ValleyChecks.section_problems(slot, result, section).is_empty():
+				passed = true
+				break
+		assert_true(passed, "seed %d" % seed)

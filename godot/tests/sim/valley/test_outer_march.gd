@@ -32,7 +32,7 @@ func test_the_road_starts_on_the_west_edge_and_sockets_are_low_and_in_range() ->
 		var drawn := _draw(seed)
 		var result: SectionResult = drawn[2]
 		assert_eq(result.road[0].x, 0, "seed %d" % seed)
-		assert_eq(drawn[1].socket_range(), Vector2i(4, 5))
+		assert_eq(drawn[1].socket_range(), Vector2i(3, 5))
 		for level in result.socket_levels:
 			assert_true(level >= 0 and level <= 1)
 
@@ -65,3 +65,16 @@ func test_sockets_covering_a_bend_are_tagged_bend() -> void:
 				if SectionSockets.centre_gap(result.sockets[index], bend) <= 3.5:
 					covered = covered or result.socket_tags[index] == SectionResult.Tag.BEND
 			assert_true(covered, "seed %d bend %s" % [seed, bend])
+
+
+func test_every_seed_has_a_passing_draw_within_the_attempt_budget() -> void:
+	for seed in range(1, 301):
+		var slot := ValleyPlan.create(seed, 32, 20).slots[ValleyPlan.Id.OUTER_MARCH]
+		var section := OuterMarch.new()
+		var passed := false
+		for attempt in 20:
+			var result := section.generate(slot, ValleyPlan.section_rng(seed, 0, attempt))
+			if ValleyChecks.section_problems(slot, result, section).is_empty():
+				passed = true
+				break
+		assert_true(passed, "seed %d" % seed)
