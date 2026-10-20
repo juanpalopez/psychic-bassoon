@@ -120,91 +120,41 @@ func test_the_hold_timer_is_wired_to_the_hold_time() -> void:
 	assert_true((timers[0] as Timer).one_shot)
 
 
-func test_it_opens_above_the_socket_when_there_is_room() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var socket := Rect2(600.0, 400.0, 80.0, 60.0)
-	var at := BuildMenu.placement(socket, Vector2(660.0, 200.0), port)
-	assert_eq(at.y, socket.position.y - BuildMenu.SOCKET_GAP - 200.0, "above")
-	assert_eq(at.x + 330.0, socket.get_center().x, "centred on the socket")
-
-
-func test_a_socket_near_the_top_gets_the_menu_below_it() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var socket := Rect2(600.0, 150.0, 80.0, 60.0)
-	var at := BuildMenu.placement(socket, Vector2(660.0, 200.0), port)
-	assert_eq(at.y, socket.end.y + BuildMenu.SOCKET_GAP)
-
-
-func test_a_socket_in_the_middle_band_gets_the_menu_beside_it() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var menu_size := Vector2(660.0, 210.0)
-	# too low for the menu above it, too high for the menu below it
-	var right_side := Rect2(1000.0, 320.0, 90.0, 90.0)
-	var on_left := Rect2(BuildMenu.placement(right_side, menu_size, port), menu_size)
-	assert_lte(on_left.end.x, right_side.position.x, "to the left of a socket on the right")
-	var left_side := Rect2(100.0, 320.0, 90.0, 90.0)
-	var on_right := Rect2(BuildMenu.placement(left_side, menu_size, port), menu_size)
-	assert_gte(on_right.position.x, left_side.end.x, "to the right of a socket on the left")
-	assert_lte(on_right.end.x, port.x - BuildMenu.EDGE_MARGIN, "and off the right edge")
-	for rect in [on_left, on_right]:
-		assert_gte(rect.position.y, BuildMenu.TOP_RESERVE)
-		assert_lte(rect.end.y, port.y - BuildMenu.BOTTOM_RESERVE)
-
-
-func test_a_centre_socket_with_no_room_anywhere_gets_the_compact_menu() -> void:
+func test_close_asks_to_drop_the_selection_and_hides_the_bar() -> void:
 	var menu := _menu()
-	menu.theme = load("res://ui/hud_theme.tres")
-	menu.open_for(Vector2i(1, 1), 1000)
+	menu.open_for(Vector2i(2, 3), 1000)
+	watch_signals(menu)
+	menu.close_button().pressed.emit()
+	assert_signal_emitted(menu, "closed")
+	assert_false(menu.visible)
+
+
+func test_close_is_a_square_as_tall_as_the_row() -> void:
+	var close := _menu().close_button()
+	assert_eq(close.custom_minimum_size, Vector2(HudLayout.ROW, HudLayout.ROW))
+
+
+func test_tokens_are_one_row_tall_and_share_the_width() -> void:
+	for button in _menu().tower_buttons():
+		assert_eq(button.custom_minimum_size.y, HudLayout.ROW)
+		assert_eq(button.size_flags_horizontal, Control.SIZE_EXPAND_FILL)
+
+
+func test_a_socket_clear_of_both_rows_needs_no_room() -> void:
 	var port := Vector2(1280.0, 720.0)
-	# fills the middle: the full menu fits neither above, below, nor beside it
-	var socket := Rect2(500.0, 300.0, 140.0, 170.0)
-	menu.place_near(socket, port)
-	assert_true(menu.compact)
-	var rect := Rect2(menu.position, menu.size)
-	assert_false(rect.intersects(socket), "never over the socket")
-	assert_gte(rect.position.y, BuildMenu.TOP_RESERVE)
-	assert_lte(rect.end.y, port.y - BuildMenu.BOTTOM_RESERVE)
-	assert_eq(menu.tower_buttons()[0].text, str(TOWERS.DEFS[TOWERS.TOWER_IDS[0]].cost[0]))
-	menu.place_near(Rect2(600.0, 500.0, 80.0, 60.0), port)
-	assert_false(menu.compact, "the full menu comes back where it fits")
+	assert_false(BuildMenu.needs_room(Rect2(600.0, 300.0, 80.0, 60.0), port))
+	# touching the edge of the bottom row's band is still clear
+	var bottom := port.y - HudLayout.BOTTOM_CLEAR
+	assert_false(BuildMenu.needs_room(Rect2(600.0, bottom - 60.0, 80.0, 60.0), port))
+	assert_false(BuildMenu.needs_room(Rect2(600.0, HudLayout.TOP_CLEAR, 80.0, 60.0), port))
 
 
-func test_the_last_resort_is_never_over_the_socket() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var menu_size := Vector2(600.0, 140.0)
-	var huge := Rect2(400.0, 200.0, 480.0, 300.0)
-	var rect := Rect2(BuildMenu.placement(huge, menu_size, port), menu_size)
-	assert_false(rect.intersects(huge))
-	assert_true(Rect2(Vector2.ZERO, port).encloses(rect))
-	# below crowds the bottom row by 52 px, above the top row by 64: below wins
-	assert_eq(rect.position.y, huge.end.y + BuildMenu.SOCKET_GAP)
-
-
-func test_the_menu_never_reaches_the_right_edge_margin() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var menu_size := Vector2(660.0, 210.0)
-	# beside it on the right would end 5 px inside the edge margin
-	var socket := Rect2(510.0, 320.0, 89.0, 90.0)
-	var rect := Rect2(BuildMenu.placement(socket, menu_size, port), menu_size)
-	assert_lte(rect.end.x, port.x - BuildMenu.EDGE_MARGIN)
-
-
-func test_a_menu_taller_than_the_room_between_the_rows_fits_nowhere() -> void:
-	var port := Vector2(1280.0, 400.0)
-	var socket := Rect2(100.0, 150.0, 80.0, 60.0)
-	assert_null(BuildMenu.fitting_place(socket, Vector2(600.0, 210.0), port))
-
-
-func test_the_menu_stays_on_screen_and_clear_of_the_corner_rows() -> void:
-	var port := Vector2(1280.0, 720.0)
-	var menu_size := Vector2(660.0, 200.0)
-	for socket in [
-		Rect2(0.0, 600.0, 60.0, 60.0),
-		Rect2(1240.0, 120.0, 60.0, 60.0),
-		Rect2(640.0, 0.0, 60.0, 60.0)
-	]:
-		var rect := Rect2(BuildMenu.placement(socket, menu_size, port), menu_size)
-		assert_gte(rect.position.x, BuildMenu.EDGE_MARGIN, str(socket))
-		assert_lte(rect.end.x, port.x - BuildMenu.EDGE_MARGIN, str(socket))
-		assert_gte(rect.position.y, BuildMenu.TOP_RESERVE, str(socket))
-		assert_lte(rect.end.y, port.y - BuildMenu.BOTTOM_RESERVE, str(socket))
+func test_a_socket_under_the_bar_or_the_top_row_needs_room() -> void:
+	var port := Vector2(1558.0, 720.0)
+	var bottom := port.y - HudLayout.BOTTOM_CLEAR
+	assert_true(
+		BuildMenu.needs_room(Rect2(700.0, bottom - 50.0, 80.0, 60.0), port), "under the bar"
+	)
+	assert_true(BuildMenu.needs_room(Rect2(700.0, HudLayout.TOP_CLEAR - 5.0, 80.0, 60.0), port))
+	assert_true(BuildMenu.needs_room(Rect2(-90.0, 300.0, 80.0, 60.0), port), "off the left")
+	assert_true(BuildMenu.needs_room(Rect2(1500.0, 300.0, 80.0, 60.0), port), "off the right")

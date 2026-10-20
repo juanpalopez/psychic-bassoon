@@ -263,35 +263,20 @@ func _panels(theme: Theme) -> void:
 	theme.set_constant("separation", "VBoxContainer", 10)
 
 
-## The build menu's tower tokens: the icon is the token, so the button itself is bare.
-## Hover lifts the token; a tower the player cannot afford fades and its price turns red.
+## The build bar's tower tokens: cardstock buttons (the Button look) with the tower's disc
+## beside its name and price; a tower the player cannot afford keeps a faded disc and a red price.
 func _tokens(theme: Theme, display: FontFile) -> void:
-	theme.set_type_variation("TowerToken", "Button")
-	var rest := StyleBoxEmpty.new()
-	rest.content_margin_top = 6
-	rest.content_margin_bottom = 2
-	var lifted := StyleBoxEmpty.new()
-	lifted.content_margin_top = 0
-	lifted.content_margin_bottom = 8
-	for state in ["normal", "disabled", "focus"]:
-		theme.set_stylebox(state, "TowerToken", rest)
-	for state in ["hover", "pressed", "hover_pressed"]:
-		theme.set_stylebox(state, "TowerToken", lifted)
-	theme.set_font("font", "TowerToken", _weight(display, 800))
-	theme.set_font_size("font_size", "TowerToken", 19)
-	for state in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
-		theme.set_color(state, "TowerToken", INK)
-	theme.set_color("font_hover_pressed_color", "TowerToken", INK)
-	theme.set_color("font_disabled_color", "TowerToken", SHORT)
-	for state in [
-		"icon_normal_color",
-		"icon_hover_color",
-		"icon_focus_color",
-		"icon_pressed_color",
-		"icon_hover_pressed_color"
-	]:
-		theme.set_color(state, "TowerToken", Color.WHITE)
-	theme.set_color("icon_disabled_color", "TowerToken", Color(1, 1, 1, 0.4))
-	theme.set_constant("icon_max_width", "TowerToken", 88)
-	theme.set_constant("h_separation", "TowerToken", 4)
-	theme.set_constant("line_spacing", "TowerToken", -2)
+	theme.set_type_variation("BarToken", "Button")
+	theme.set_font("font", "BarToken", _weight(display, 800))
+	theme.set_font_size("font_size", "BarToken", 20)
+	# a held token is a look, not a toggle: it stays cardstock instead of turning blue
+	for state in ["pressed", "hover_pressed"]:
+		theme.set_stylebox(state, "BarToken", theme.get_stylebox("hover", "Button"))
+		theme.set_color("font_" + state + "_color", "BarToken", INK)
+	theme.set_color("font_disabled_color", "BarToken", SHORT)
+	# the discs are full-colour pictures, not glyphs for the ink to tint
+	for state in ["normal", "hover", "focus", "pressed", "hover_pressed"]:
+		theme.set_color("icon_" + state + "_color", "BarToken", Color.WHITE)
+	theme.set_color("icon_disabled_color", "BarToken", Color(1, 1, 1, 0.4))
+	theme.set_constant("h_separation", "BarToken", 10)
+	theme.set_constant("line_spacing", "BarToken", -2)

@@ -119,6 +119,9 @@ func _ready() -> void:
 	add_child(_glow)
 	_menu.info_requested.connect(_on_info_requested)
 	_menu.info_cleared.connect(_card.hide_card)
+	_menu.closed.connect(select_cell.bind(BoardSpace.NO_CELL))
+	# the build bar takes the bottom row: Auto and Start wave step aside while it is open
+	_menu.visibility_changed.connect(_update_launch_button)
 	_guide.closed.connect(func() -> void: _pause_for_overlay(false))
 	_how_to_play.pressed.connect(_start_intro)
 	_tower_guide.pressed.connect(_open_guide)
@@ -178,9 +181,6 @@ func _process(delta: float) -> void:
 	_sync_intro()
 	_menu.set_buttons(_game.buttons)
 	_close_if_zoomed_out()
-	if _menu.visible:
-		# the camera may have panned or zoomed since the menu opened
-		_place_menu()
 	_refresh_panel()
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
@@ -419,7 +419,7 @@ func select_cell(cell: Vector2i) -> void:
 	# the build menu may open over the Menu's dropdown: tapping the board closes it
 	_menu_button.button_pressed = false
 	_menu.open_for(anchor, _game.buttons)
-	_place_menu()
+	_keep_in_view(anchor)
 	# the intro moves on only when the build row really opened for a free socket
 	_flow.notify(IntroFlow.Event.SOCKET_SELECTED)
 
@@ -658,27 +658,22 @@ func _free_sockets() -> Array[Vector2i]:
 	return free
 
 
-## Shows a tower's card beside the build menu (hover, or press and hold): to its right when
-## there is room, else to its left, and always on screen.
+## Shows a tower's card just above the build bar, at its left end (hover, or press and hold).
 func _on_info_requested(id: String) -> void:
 	_card.show_for(id)
 	_card.reset_size()
-	var port := get_viewport().get_visible_rect().size
-	var menu := Rect2(_menu.position, _menu.size)
-	var x := menu.end.x + CARD_MARGIN
-	if x + _card.size.x > port.x - CARD_MARGIN:
-		x = menu.position.x - CARD_MARGIN - _card.size.x
+	var bar := Rect2(_menu.position, _menu.size)
 	_card.position = Vector2(
-		clampf(x, CARD_MARGIN, maxf(CARD_MARGIN, port.x - CARD_MARGIN - _card.size.x)),
-		clampf(menu.position.y, CARD_MARGIN, maxf(CARD_MARGIN, port.y - CARD_MARGIN - _card.size.y))
+		bar.position.x, maxf(CARD_MARGIN, bar.position.y - CARD_MARGIN - _card.size.y)
 	)
 
 
-## Puts the build menu beside the selected socket as it is drawn now.
-func _place_menu() -> void:
-	if _selected == BoardSpace.NO_CELL:
-		return
-	_menu.place_near(_socket_on_screen(_selected), get_viewport().get_visible_rect().size)
+## Eases a socket that the build bar or the top row would hide to the middle of the screen, at
+## the zoom the player chose.
+func _keep_in_view(anchor: Vector2i) -> void:
+	var port := get_viewport().get_visible_rect().size
+	if BuildMenu.needs_room(_socket_on_screen(anchor), port):
+		_rig.fly_to(_socket_top(anchor), _rig.zoom)
 
 
 ## The rectangle a socket block covers on screen: its four top corners, projected.
@@ -718,6 +713,10 @@ func _seed_from_url() -> Variant:
 
 ## The launch button says what a press would do, and rests while it cannot.
 func _update_launch_button() -> void:
+	_auto_button.visible = not _menu.visible
+	if _menu.visible:
+		_launch.visible = false
+		return
 	var next := _game.wave + 1
 	_launch.visible = true
 	if _game.won:

@@ -264,16 +264,10 @@ func test_the_tower_panel_is_a_low_strip_not_a_block_over_the_map() -> void:
 		assert_gte(rect.end.y, float(size.y) - 40.0, "TowerPanel sits along the bottom")
 
 
-## Tapping each socket opens the build menu beside it, clear of the corner controls, on 40
-## maps at the base size and a few on a phone.
-func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() -> void:
-	var cases := []
-	for map_seed in range(1, 41):
-		cases.append([Vector2i(1280, 720), map_seed])
-	for map_seed in [1, 2, 3, 5, 8]:
-		cases.append([Vector2i(1558, 720), map_seed])
-	for case in cases:
-		var size: Vector2i = case[0]
+## Tapping a socket turns the bottom row into the build bar: Auto and Start wave step aside, the
+## bar spans the row clear of the top controls, and the socket ends up between the rows.
+func test_the_build_bar_takes_the_bottom_row_and_keeps_the_socket_in_view() -> void:
+	for size in [Vector2i(1280, 720), Vector2i(1558, 720)]:
 		var port := SubViewport.new()
 		port.size = size
 		add_child_autofree(port)
@@ -281,36 +275,31 @@ func test_the_build_menu_opens_next_to_the_socket_and_off_the_corner_controls() 
 		port.add_child(main)
 		main.set_process(false)
 		await get_tree().process_frame
-		main._start(case[1])
-		# the overview, where every socket is on screen (a run starts on the spawn side)
-		(main.get_node("CameraRig") as CameraRig).show_point(Vector3.ZERO, 0.0)
+		main._start(2)
 		var hud := main.get_node("Hud")
 		var menu := hud.get_node("BuildMenu") as BuildMenu
-		var menu_button := hud.get_node("MenuButton") as Button
-		for anchor in main.game().map.sockets:
-			# the Menu's dropdown is open when the player taps the board
-			menu_button.button_pressed = true
-			main.select_cell(anchor)
-			await get_tree().process_frame
-			assert_true(menu.visible)
-			assert_false((hud.get_node("NextSeed") as Control).visible, "the dropdown closed")
-			var rect := menu.get_global_rect()
-			assert_true(Rect2(Vector2.ZERO, Vector2(size)).encloses(rect), "on screen")
-			for other in ["TopBar", "SpeedBar", "MenuButton", "LaunchWave", "AutoWave"]:
-				var other_rect := (hud.get_node(other) as Control).get_global_rect()
-				assert_false(
-					rect.intersects(other_rect),
-					"menu for %s over %s on seed %d at %s" % [anchor, other, case[1], size]
-				)
-			var socket: Rect2 = main._socket_on_screen(anchor)
-			assert_false(
-				rect.intersects(socket),
-				"the menu covers the socket %s on seed %d at %s" % [anchor, case[1], size]
-			)
-			var gap := maxf(rect.position.y - socket.end.y, socket.position.y - rect.end.y)
-			# a socket under the top row has its menu just below that row
-			var most := maxf(2.0 * BuildMenu.SOCKET_GAP, BuildMenu.TOP_RESERVE - socket.end.y)
-			assert_lte(gap, most + 1.0, "next to %s" % anchor)
+		var rig := main.get_node("CameraRig") as CameraRig
+		var anchor: Vector2i = main.game().map.sockets[0]
+		main.select_cell(anchor)
+		await get_tree().process_frame
+		assert_true(menu.visible)
+		assert_false((hud.get_node("LaunchWave") as Control).visible, "Start wave steps aside")
+		assert_false((hud.get_node("AutoWave") as Control).visible, "Auto steps aside")
+		var rect := menu.get_global_rect()
+		assert_almost_eq(rect.end.y, size.y - HudLayout.EDGE, 0.5, "on the bottom row")
+		assert_almost_eq(rect.size.y, HudLayout.ROW, 0.5, "one row tall")
+		assert_almost_eq(rect.position.x, HudLayout.EDGE, 0.5)
+		assert_almost_eq(rect.end.x, size.x - HudLayout.EDGE, 0.5)
+		# finish any flight that eases the socket out from under the bar
+		for i in 120:
+			rig._process(1.0 / 30.0)
+		var socket: Rect2 = main._socket_on_screen(anchor)
+		assert_false(BuildMenu.needs_room(socket, Vector2(size)), "socket %s in view" % socket)
+		menu.close_button().pressed.emit()
+		await get_tree().process_frame
+		assert_false(menu.visible)
+		assert_true((hud.get_node("AutoWave") as Control).visible, "Auto comes back")
+		assert_eq(main._selected, BoardSpace.NO_CELL, "Close drops the selection")
 
 
 func test_the_menu_button_shows_next_seed_and_sound() -> void:
