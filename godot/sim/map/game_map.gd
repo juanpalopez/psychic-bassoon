@@ -70,6 +70,11 @@ var river: Array[Vector2i] = []
 ## The bridges where the road crosses the river, in the river's order (empty without a river,
 ## at least one with one).
 var bridges: Array[Bridge] = []
+## One `PackedByteArray` per row: 1 where a hero can stand, 0 on water, cliff and rock (#381).
+## Empty on the boards before the sectioned valley, where every cell is walkable.
+var walkable: Array[PackedByteArray] = []
+## The cells of bridges only a hero uses (the sectioned valley's second crossing).
+var hero_bridges: Array[Vector2i] = []
 
 
 ## True when a tower can be built on the cell.
@@ -133,3 +138,10 @@ func region_at(cell: Vector2i) -> int:
 	if cell.y < 0 or cell.y >= regions.size() or cell.x < 0 or cell.x >= regions[cell.y].size():
 		return Region.MEADOW
 	return regions[cell.y][cell.x]
+
+
+## True when a hero can stand on the cell (every cell of the board, before the sectioned valley).
+func is_walkable(cell: Vector2i) -> bool:
+	if not in_bounds(cell):
+		return false
+	return walkable.is_empty() or walkable[cell.y][cell.x] == 1
