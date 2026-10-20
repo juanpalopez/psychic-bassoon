@@ -17,7 +17,7 @@ const SECTION_NAMES: Array[String] = [
 ## `BOUNDARY_JITTER` columns, and no strip is ever narrower than `MIN_WIDTH`.
 const BASE_WIDTHS: Array[int] = [5, 5, 6, 6, 5, 5]
 const BOUNDARY_JITTER := 1
-const MIN_WIDTH := 3
+const MIN_WIDTH := 4
 ## The road crosses from one section to the next on a gate row, kept `GATE_MARGIN` rows in from
 ## the top and bottom edges (room for a socket block on both sides, and for the Heartstone),
 ## and two gates in a row are at most `GATE_MAX_STEP` rows apart.
@@ -28,3 +28,12 @@ const GATE_MAX_STEP := 6
 ## the stride, always.
 const SECTION_STREAM_STRIDE := 100
 const MAX_SECTION_ATTEMPTS := 20
+
+## Socket blocks (2x2) sit at least one empty column from the right edge of their strip, so two
+## blocks in neighbouring strips keep the gap `SOCKET_BLOCK_GAP` asks for.
+const STRIP_RIGHT_MARGIN := 1
+## A bend of the road is covered when a socket block's centre is within this many cells of it.
+const BEND_COVER_REACH := 3.5
+## The straight stand-in sections (before a real section replaces one) keep this many blocks.
+const STUB_SOCKET_MIN := 2
+const STUB_SOCKET_MAX := 4
