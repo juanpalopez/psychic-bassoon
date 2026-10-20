@@ -26,29 +26,31 @@ static func candidates(result: SectionResult, blocked: Array[Rect2i]) -> Array[V
 	for y in range(result.rect.position.y, result.rect.end.y - size + 1):
 		for x in range(result.rect.position.x, last_x + 1):
 			var block := Rect2i(x, y, size, size)
-			if _free(block, result.road, blocked) and _reaches_road(block, result.road):
+			if _free(block, result.road, blocked) and reaches_road(block, result.road):
 				out.append(Vector2i(x, y))
 	return out
 
 
-## Fills the result's sockets with `least` to `most` blocks: one beside each bend first, then
+## Fills the result's sockets with `blocks.x` to `blocks.y` blocks: one beside each bend first, then
 ## the rest from the shuffled sites, each keeping `SOCKET_BLOCK_GAP` empty cells from the others.
-static func place(result: SectionResult, range: Vector2i, rng: Rng, blocked: Array[Rect2i]) -> void:
+static func place(
+	result: SectionResult, blocks: Vector2i, rng: Rng, blocked: Array[Rect2i]
+) -> void:
 	var sites := candidates(result, blocked)
 	for i in range(sites.size() - 1, 0, -1):
 		var j := rng.next_int(i + 1)
 		var held := sites[i]
 		sites[i] = sites[j]
 		sites[j] = held
-	var target: int = range.x + rng.next_int(range.y - range.x + 1)
+	var target: int = blocks.x + rng.next_int(blocks.y - blocks.x + 1)
 	for bend in bends(result.road):
 		var best := _nearest(sites, bend, result.sockets)
-		if best != Vector2i(-1, -1) and _centre_gap(best, bend) <= VALLEY.BEND_COVER_REACH:
+		if best != Vector2i(-1, -1) and centre_gap(best, bend) <= VALLEY.BEND_COVER_REACH:
 			result.add_socket(best, 0, SectionResult.Tag.BEND)
 	for site in sites:
 		if result.sockets.size() >= target:
 			break
-		if _keeps_distance(site, result.sockets):
+		if keeps_distance(site, result.sockets):
 			result.add_socket(site, 0, SectionResult.Tag.LOW)
 
 
@@ -62,13 +64,13 @@ static func _free(block: Rect2i, road: Array[Vector2i], blocked: Array[Rect2i]) 
 	return true
 
 
-static func _reaches_road(block: Rect2i, road: Array[Vector2i]) -> bool:
+static func reaches_road(block: Rect2i, road: Array[Vector2i]) -> bool:
 	var touch := false
 	var near := 0
 	var touch_reach: float = RULES.SOCKET_BLOCK_TOUCH_DISTANCE
 	var cover_reach: float = RULES.SOCKET_COVERAGE_REACH
 	for cell in road:
-		var gap := _centre_gap(block.position, cell)
+		var gap := centre_gap(block.position, cell)
 		touch = touch or gap <= touch_reach
 		if gap <= cover_reach:
 			near += 1
@@ -76,7 +78,7 @@ static func _reaches_road(block: Rect2i, road: Array[Vector2i]) -> bool:
 
 
 ## How far a block's centre (a 2x2 block's centre is on a cell corner) is from a cell's centre.
-static func _centre_gap(anchor: Vector2i, cell: Vector2i) -> float:
+static func centre_gap(anchor: Vector2i, cell: Vector2i) -> float:
 	var half := float(RULES.GAME_SOCKET_FOOTPRINT) / 2.0
 	var dx := float(anchor.x) + half - (float(cell.x) + RULES.CELL_CENTRE)
 	var dy := float(anchor.y) + half - (float(cell.y) + RULES.CELL_CENTRE)
@@ -87,16 +89,21 @@ static func _nearest(sites: Array[Vector2i], bend: Vector2i, chosen: Array[Vecto
 	var best := Vector2i(-1, -1)
 	var best_gap := 1.0e30
 	for site in sites:
-		var gap := _centre_gap(site, bend)
-		if gap < best_gap and _keeps_distance(site, chosen):
+		var gap := centre_gap(site, bend)
+		if gap < best_gap and keeps_distance(site, chosen):
 			best = site
 			best_gap = gap
 	return best
 
 
-static func _keeps_distance(site: Vector2i, chosen: Array[Vector2i]) -> bool:
-	var apart: int = RULES.GAME_SOCKET_FOOTPRINT + RULES.SOCKET_BLOCK_GAP
+static func keeps_distance(site: Vector2i, chosen: Array[Vector2i]) -> bool:
 	for other in chosen:
-		if absi(site.x - other.x) < apart and absi(site.y - other.y) < apart:
+		if not blocks_apart(site, other):
 			return false
 	return true
+
+
+## True when two blocks, by anchor, leave `SOCKET_BLOCK_GAP` empty cells between them.
+static func blocks_apart(a: Vector2i, b: Vector2i) -> bool:
+	var apart: int = RULES.GAME_SOCKET_FOOTPRINT + RULES.SOCKET_BLOCK_GAP
+	return absi(a.x - b.x) >= apart or absi(a.y - b.y) >= apart
