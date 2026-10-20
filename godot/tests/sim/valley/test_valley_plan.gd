@@ -21,8 +21,8 @@ func test_strips_tile_the_board() -> void:
 		var left := 0
 		for slot in _plan(seed).slots:
 			assert_eq(slot.rect.position.x, left, "seed %d" % seed)
+			assert_gte(slot.rect.size.x, RULES.MIN_WIDTHS[slot.id])
 			assert_eq(slot.rect.size.y, 20)
-			assert_gte(slot.rect.size.x, RULES.MIN_WIDTH)
 			left += slot.rect.size.x
 		assert_eq(left, 32, "seed %d" % seed)
 
