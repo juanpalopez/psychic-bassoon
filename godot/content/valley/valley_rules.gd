@@ -1,0 +1,30 @@
+## Numbers for the sectioned valley (#381, `docs/lessons/2026-10-20-sectioned-valley.md`): how
+## the 32 by 20 board is cut into the six sections and where the road passes between them.
+## Each section's own numbers live in its own file beside this one.
+extends RefCounted
+
+## The sections in road order, with the names the lore and the UI use (display names only).
+const SECTION_NAMES: Array[String] = [
+	"Outer March",
+	"Broken Ridge",
+	"Bluewater Crossing",
+	"Sunken Meadow",
+	"Ancient Fold",
+	"Heartkeep Approach",
+]
+## Each section is a strip of columns across the whole board height. These widths add up to the
+## board's 32 columns; the seed moves each boundary between two sections by up to
+## `BOUNDARY_JITTER` columns, and no strip is ever narrower than `MIN_WIDTH`.
+const BASE_WIDTHS: Array[int] = [5, 5, 6, 6, 5, 5]
+const BOUNDARY_JITTER := 1
+const MIN_WIDTH := 3
+## The road crosses from one section to the next on a gate row, kept `GATE_MARGIN` rows in from
+## the top and bottom edges (room for a socket block on both sides, and for the Heartstone),
+## and two gates in a row are at most `GATE_MAX_STEP` rows apart.
+const GATE_MARGIN := 3
+const GATE_MAX_STEP := 6
+## A section's random stream is `Streams.VALLEY_SECTION + id * SECTION_STREAM_STRIDE + attempt`,
+## so a section drawn again (a new attempt) never moves another section. Fewer attempts than
+## the stride, always.
+const SECTION_STREAM_STRIDE := 100
+const MAX_SECTION_ATTEMPTS := 20
