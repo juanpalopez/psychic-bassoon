@@ -4,19 +4,7 @@ const RIVER_RULES := preload("res://content/valley/bluewater_rules.gd")
 const VALLEY_RULES := preload("res://content/valley/valley_rules.gd")
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 
-## The fewest columns that hold four socket blocks: the river takes one column, the right edge
-## keeps one empty and a block is two wide, so a narrower strip cannot (see the PR notes).
-const WIDE := 6
-
 var _section := BluewaterCrossing.new()
-
-
-func _wide_seeds() -> Array[int]:
-	var seeds: Array[int] = []
-	for seed in range(1, 61):
-		if _slot(seed).rect.size.x >= WIDE:
-			seeds.append(seed)
-	return seeds
 
 
 func _slot(seed: int) -> ValleyPlan.Slot:
@@ -88,9 +76,7 @@ func test_sockets_keep_off_the_river_and_the_hero_bridge_approach() -> void:
 
 func test_the_section_passes_its_checks_within_the_attempts_and_mostly_at_the_first() -> void:
 	var first_pass := 0
-	var wide := _wide_seeds()
-	assert_gt(wide.size(), 30)
-	for seed in wide:
+	for seed in range(1, 61):
 		var passed_at := -1
 		for attempt in VALLEY_RULES.MAX_SECTION_ATTEMPTS:
 			var tried := _draw(seed, attempt)
@@ -100,11 +86,11 @@ func test_the_section_passes_its_checks_within_the_attempts_and_mostly_at_the_fi
 		assert_gte(passed_at, 0, "seed %d never passes" % seed)
 		if passed_at == 0:
 			first_pass += 1
-	assert_gte(first_pass * 2, wide.size())
+	assert_gte(first_pass, 30)
 
 
 func test_the_stitched_valley_has_the_bridge_on_the_road_and_the_hero_bridge() -> void:
-	for seed in _wide_seeds():
+	for seed in range(1, 61):
 		var map := MapGen.generate_valley(seed)
 		assert_not_null(map, "seed %d" % seed)
 		var slot := _slot(seed)
