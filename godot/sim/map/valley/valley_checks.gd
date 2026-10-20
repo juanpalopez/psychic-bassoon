@@ -65,6 +65,8 @@ static func section_problems(
 	for bend in SectionSockets.bends(road):
 		if not _covered(result, bend):
 			found.append(Problem.make(id, "no socket block covers the bend at %s" % bend))
+	for text in section.extra_problems(slot, result):
+		found.append(Problem.make(id, text))
 	return found
 
 
