@@ -243,18 +243,18 @@ visible = false
 horizontal_alignment = 1
 autowrap_mode = 3
 
-[node name="BuildMenu" type="PanelContainer" parent="Hud"]
+[node name="BuildMenu" type="HBoxContainer" parent="Hud"]
 theme = ExtResource("10_theme")
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -340.0
-offset_top = -100.0
-offset_right = 340.0
-offset_bottom = 100.0
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 14.0
+offset_top = -102.0
+offset_right = -14.0
+offset_bottom = -14.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 script = ExtResource("6_menu")
 
 [node name="TowerPanel" type="PanelContainer" parent="Hud"]

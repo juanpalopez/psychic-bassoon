@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-20 | decision | Build from a bar along the bottom row, not from a menu floating by the socket | ui | none | CLAUDE.md |
 | 2026-10-19 | decision | Rename the game Kingdom of the Fold and dress it in the new design system | docs | none | CLAUDE.md |
 | 2026-10-19 | lesson | Push release tags from the owner's clone, not from a cloud session | harness | checklist | docs/REVIEW-CHECKLIST.md, CLAUDE.md |
 | 2026-10-19 | lesson | Build the iPhone app outside any iCloud-synced folder | tooling | script | scripts/ios-run.sh |
