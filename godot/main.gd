@@ -119,7 +119,12 @@ func _ready() -> void:
 	add_child(_glow)
 	_menu.info_requested.connect(_on_info_requested)
 	_menu.info_cleared.connect(_card.hide_card)
-	_menu.closed.connect(select_cell.bind(BoardSpace.NO_CELL))
+	_menu.closed.connect(
+		func() -> void:
+			# a socket being eased into view is no longer wanted
+			_rig.cancel_flight()
+			select_cell(BoardSpace.NO_CELL)
+	)
 	# the build bar takes the bottom row: Auto and Start wave step aside while it is open
 	_menu.visibility_changed.connect(_update_launch_button)
 	_guide.closed.connect(func() -> void: _pause_for_overlay(false))

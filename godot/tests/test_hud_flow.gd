@@ -295,6 +295,10 @@ func test_the_build_bar_takes_the_bottom_row_and_keeps_the_socket_in_view() -> v
 			rig._process(1.0 / 30.0)
 		var socket: Rect2 = main._socket_on_screen(anchor)
 		assert_false(BuildMenu.needs_room(socket, Vector2(size)), "socket %s in view" % socket)
+		menu.info_requested.emit("spoolGuard")
+		var card := (main.get("_card") as Control).get_global_rect()
+		assert_lte(card.end.y, rect.position.y, "the card sits above the bar")
+		assert_gte(card.position.y, HudLayout.TOP_CLEAR, "and below the top row")
 		menu.close_button().pressed.emit()
 		await get_tree().process_frame
 		assert_false(menu.visible)

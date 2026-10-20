@@ -40,6 +40,8 @@ var _hold_fired := false
 
 func _ready() -> void:
 	visible = false
+	# a box lets taps through its gaps; a tap between two tokens must not reach the board
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	_hold_timer = Timer.new()
 	_hold_timer.one_shot = true
 	_hold_timer.wait_time = HOLD_SECONDS

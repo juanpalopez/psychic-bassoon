@@ -134,6 +134,10 @@ func test_close_is_a_square_as_tall_as_the_row() -> void:
 	assert_eq(close.custom_minimum_size, Vector2(HudLayout.ROW, HudLayout.ROW))
 
 
+func test_taps_between_the_tokens_stop_at_the_bar() -> void:
+	assert_eq(_menu().mouse_filter, Control.MOUSE_FILTER_STOP)
+
+
 func test_tokens_are_one_row_tall_and_share_the_width() -> void:
 	for button in _menu().tower_buttons():
 		assert_eq(button.custom_minimum_size.y, HudLayout.ROW)
