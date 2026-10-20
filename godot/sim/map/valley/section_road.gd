@@ -10,7 +10,8 @@ const LANE_WIDTH := 2
 
 ## A road from the slot's entry to its exit in unit steps. A strip of five columns or more gets
 ## three runs: up (or down) from the entry to the edge of the board, all the way across to the
-## other edge in the second-to-last column, and back to the exit's row in the last column.
+## A four-column strip has room for two runs only, and turns at either edge of the board, as the
+## stream picks.
 ## A four-column strip has room for two runs only, and turns at either edge of the board, whichever the stream picks.
 static func snake(slot: ValleyPlan.Slot, rng: Rng) -> Array[Vector2i]:
 	var rows := slot.rect.size.y
