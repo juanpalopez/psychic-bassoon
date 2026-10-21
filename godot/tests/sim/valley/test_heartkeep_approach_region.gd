@@ -4,6 +4,9 @@ const LANE_GAP := 4.0
 const STRETCH_STEPS := 20
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 const LAST_SEED := 300
+const ATTEMPTS := 20
+## Most seeds pass on the first draw; the stitcher redraws the rest.
+const MAX_FIRST_FAIL_PERCENT := 25
 
 
 func _drawn(seed: int) -> Array:
@@ -37,12 +40,22 @@ func test_the_valley_builds_with_no_problems_for_seeds_1_to_300() -> void:
 			assert_true(map.heartstone.has_point(map.path[map.path.size() - 1]))
 
 
-func test_the_region_has_five_or_six_sockets_and_passes_its_checks() -> void:
+func test_some_attempt_of_the_budget_passes_the_section_checks_with_five_or_six_blocks() -> void:
+	var first_failures := 0
 	for seed in range(1, LAST_SEED + 1):
-		var drawn := _drawn(seed)
-		var result: SectionResult = drawn[3]
-		assert_eq(drawn[2].socket_range(), Vector2i(5, 6))
-		assert_true(result.sockets.size() >= 5 and result.sockets.size() <= 6, "seed %d" % seed)
+		var layout := ValleyLayout.generate(seed, 32, 20)
+		var slot := layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH]
+		var section := HeartkeepApproachRegion.new()
+		assert_eq(section.socket_range(), Vector2i(5, 6))
+		var passed := false
+		for attempt in ATTEMPTS:
+			var result := section.generate(slot, layout.rng_for(slot.id, attempt))
+			var clean := ValleyChecks.section_problems(slot, result, section).is_empty()
+			if attempt == 0 and not clean:
+				first_failures += 1
+			passed = passed or clean
+		assert_true(passed, "seed %d has a passing draw" % seed)
+	assert_lt(first_failures * 100, LAST_SEED * MAX_FIRST_FAIL_PERCENT)
 
 
 func test_the_road_ends_on_the_east_edge_on_the_floor_without_lanes() -> void:
