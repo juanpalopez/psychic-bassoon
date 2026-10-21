@@ -20,4 +20,4 @@ const RISE_SIDE := 3
 const RISE_LEVEL := 1
 const RISE_TRIES := 40
 ## Sets of sockets drawn from the section's stream before the best is kept.
-const TRIES := 8
+const TRIES := 30

@@ -9,6 +9,8 @@ const SOCKETS_LEAST := 2
 const SOCKETS_MOST := 4
 ## The low blocks placed before the plateau (least, most), so the plateau never takes their room.
 const LOW_BLOCKS := Vector2i(1, 3)
+## The ridge top's terrace (the range bonus level).
+const RIDGE_LEVEL := 2
 ## Cells (Chebyshev) around the high block that rise onto the plateau. A plateau cell stands as
 ## many terraces above the road as it is cells from it (up to the ridge level), so the road, a
 ## step and the ridge top always form a ramp; the cells past the rim are the valley floor.
