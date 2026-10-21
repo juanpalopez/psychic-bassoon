@@ -1,6 +1,5 @@
-## Region 3, Broken Ridge: the high ground, top middle (#410). The strip ridge's plateau (one
-## high block stepped down towards the road, cliffs on its far side, a ramp from the road) on
-## the layout's spline road, with the river's cells closed to the hero and to socket blocks.
+## Region 3, Broken Ridge: the high ground, top middle (#410). A plateau with one high block,
+## stepped down towards the layout's spline road, with cliffs on its far side and a ramp.
 class_name BrokenRidgeRegion
 extends ValleySection
 
@@ -10,7 +9,7 @@ const SIDES: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1),
 
 ## Low blocks first (the plateau must not take their room), then each site for the high block.
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
-	var road := _road(slot, rng)
+	var road := RoadSpline.build(slot.spine).cells
 	var result: SectionResult = null
 	for _try in REGION.LOW_TRIES:
 		result = _try_lows(slot, road, rng)
@@ -51,11 +50,6 @@ func reserved(slot: ValleyPlan.Slot) -> Array[Rect2i]:
 	for cell in slot.river:
 		blocked.append(Rect2i(cell, Vector2i.ONE))
 	return blocked
-
-
-## The road is the spline through the layout's spine, not the strip's two-column run.
-func _road(slot: ValleyPlan.Slot, _rng: Rng) -> Array[Vector2i]:
-	return RoadSpline.build(slot.spine).cells
 
 
 func _finish(slot: ValleyPlan.Slot, base: SectionResult, ridge: Vector2i) -> SectionResult:
