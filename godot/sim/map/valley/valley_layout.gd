@@ -46,12 +46,16 @@ static func _stitches(layout: ValleyLayout) -> bool:
 	return map != null
 
 
-## The six stand-in sections, in road order.
+## The six sections, in road order (stand-ins until each ticket replaces its class).
 static func sections() -> Array[ValleySection]:
-	var out: Array[ValleySection] = []
-	for index in Region.size():
-		out.append(RegionStraightSection.new())
-	return out
+	return [
+		OuterMarchRegion.new(),
+		SunkenMeadowRegion.new(),
+		BluewaterCrossingRegion.new(),
+		BrokenRidgeRegion.new(),
+		AncientFoldRegion.new(),
+		HeartkeepApproachRegion.new(),
+	]
 
 
 func rng_for(id: int, attempt: int) -> Rng:
