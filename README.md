@@ -4,8 +4,8 @@ A premium, painterly low-poly fantasy tower-defense game about a folded-paper ki
 
 The game was previously titled **Papercraft Kingdom Defense** (and earlier Scrapline). The repository remains `psychic-bassoon`. The design baseline is in [`docs/GDD.md`](docs/GDD.md), the expanded tower/hero/enemy roster is in [`docs/UNIT_ROSTER.md`](docs/UNIT_ROSTER.md), and the visual direction is in [`docs/art/STYLE.md`](docs/art/STYLE.md).
 
-- **Roster visual reference:** [`docs/art/roster/roster-generated-reference.jpg`](docs/art/roster/roster-generated-reference.jpg) · [editable SVG](docs/art/roster/roster-overview.svg)
-- **Folded Valley map concept:** [`docs/art/maps/folded-valley-generated-reference.jpg`](docs/art/maps/folded-valley-generated-reference.jpg) · [editable tactical SVG](docs/art/maps/folded-valley-tactical-concept.svg)
+- **Roster visual reference:** [`docs/art/roster/roster-overview.svg`](docs/art/roster/roster-overview.svg)
+- **Folded Valley map concept:** [`docs/art/maps/folded-valley-tactical-concept.svg`](docs/art/maps/folded-valley-tactical-concept.svg)
 
 
 ## Getting started
