@@ -4,6 +4,7 @@
 class_name SectionPacking
 extends RefCounted
 
+const END := preload("res://content/valley/end_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 ## "No join bend", a cell off every board.
 const NO_BEND := Vector2i(-1, -1)
@@ -71,3 +72,18 @@ static func join_problems(result: SectionResult, join_bend: Vector2i) -> Array[S
 			return found
 	found.append("no socket block covers the join bend at %s" % join_bend)
 	return found
+
+
+## The first road shape (a `variant` of `SectionRoad.snake`, the Z last) whose draw passes the
+## section's checks, else the last one tried; `draw` takes the variant.
+static func first_passing(
+	section: ValleySection, slot: ValleyPlan.Slot, rng: Rng, draw: Callable
+) -> SectionResult:
+	var start := rng.next_int(END.Z_VARIANT)
+	var result: SectionResult = null
+	for step in END.VARIANTS:
+		var variant := (start + step) % END.Z_VARIANT if step < END.Z_VARIANT else END.Z_VARIANT
+		result = draw.call(variant)
+		if ValleyChecks.section_problems(slot, result, section).is_empty():
+			break
+	return result

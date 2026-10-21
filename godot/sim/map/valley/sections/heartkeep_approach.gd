@@ -4,21 +4,13 @@
 class_name HeartkeepApproach
 extends ValleySection
 
-const END := preload("res://content/valley/end_rules.gd")
 const KEEP := preload("res://content/valley/heartkeep_rules.gd")
 
 
-## The first road shape that passes the section's checks, else the last one tried.
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
-	var first := rng.next_int(END.Z_VARIANT)
-	var result: SectionResult = null
-	for step in END.VARIANTS:
-		result = _draw(
-			slot, rng, (first + step) % END.Z_VARIANT if step < END.Z_VARIANT else END.Z_VARIANT
-		)
-		if ValleyChecks.section_problems(slot, result, self).is_empty():
-			break
-	return result
+	return SectionPacking.first_passing(
+		self, slot, rng, func(v: int) -> SectionResult: return _draw(slot, rng, v)
+	)
 
 
 func _draw(slot: ValleyPlan.Slot, rng: Rng, variant: int) -> SectionResult:
