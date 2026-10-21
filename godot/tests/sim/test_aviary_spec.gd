@@ -8,8 +8,16 @@ const TOWERS := preload("res://content/towers.gd")
 const AVIARY := "paperPlaneAviary"
 
 
+## The Aviary scene on the first seed of the game board where the tower has a neighbouring socket
+## (the valley's sockets are spread along the banks, so seed 1 may not). `existing` is a game the
+## caller made, which keeps its own seed.
 func _scene(existing: GameState = null) -> TowerFireKit.Scene:
 	var scene := TowerFireKit.scene("spoolGuard", 1, false, existing)
+	if existing == null:
+		for map_seed in range(2, 40):
+			if _neighbour_and_stranger(scene.game, scene.tower)[0] != Vector2i(-1, -1):
+				break
+			scene = TowerFireKit.scene("spoolGuard", map_seed)
 	scene.game.buttons = 100000
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))

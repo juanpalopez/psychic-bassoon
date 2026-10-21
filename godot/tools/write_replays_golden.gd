@@ -15,7 +15,7 @@ const GAMES := [
 	[4, "mortarHeavy", 20],
 	[3, "spoolOnly", 20],
 	[3, "prismHeavy", 6],
-	[2, "guardMix", 20],
+	[5, "guardMix", 20],
 ]
 const PATH := "res://tests/goldens/replays.json"
 
