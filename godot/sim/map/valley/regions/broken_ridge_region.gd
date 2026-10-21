@@ -8,9 +8,7 @@ const REGION := preload("res://content/valley/broken_ridge_region_rules.gd")
 const SIDES: Array[Vector2i] = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
 
 
-## The low blocks are placed first (so the plateau does not take their room), then each site is
-## tried for the one high block; a few placements of the low blocks are tried before the last try
-## is returned for the stitcher to draw again.
+## Low blocks first (the plateau must not take their room), then each site for the high block.
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var road := _road(slot, rng)
 	var result: SectionResult = null
@@ -23,7 +21,6 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	return result
 
 
-## One placement of the low blocks and the first high site that passes the checks (else the last).
 func _try_lows(slot: ValleyPlan.Slot, road: Array[Vector2i], rng: Rng) -> SectionResult:
 	var base := SectionResult.create(slot)
 	base.road = road
@@ -61,8 +58,6 @@ func _road(slot: ValleyPlan.Slot, _rng: Rng) -> Array[Vector2i]:
 	return RoadSpline.build(slot.spine).cells
 
 
-## The low blocks of `base` plus the high block at `ridge`, with the plateau, its cliffs, the
-## river's cells and the dirt beside the road.
 func _finish(slot: ValleyPlan.Slot, base: SectionResult, ridge: Vector2i) -> SectionResult:
 	var result := SectionResult.create(slot)
 	result.road = base.road
@@ -81,15 +76,9 @@ func _finish(slot: ValleyPlan.Slot, base: SectionResult, ridge: Vector2i) -> Sec
 	for cell in _cliffs(result):
 		result.set_region(cell, GameMap.Region.ROCKS)
 		result.set_walkable(cell, false)
-	# the hero climbs the ramp, not the block's face
 	for dy in block.size.y:
 		for dx in block.size.x:
 			result.set_walkable(block.position + Vector2i(dx, dy), false)
-	for cell in result.road:
-		for side in SIDES:
-			var next: Vector2i = cell + side
-			if result.has_cell(next) and not result.road.has(next) and not _in_block(result, next):
-				result.set_region(next, GameMap.Region.DIRT)
 	_close_river(slot, result)
 	return result
 
@@ -103,8 +92,8 @@ func _close_river(slot: ValleyPlan.Slot, result: SectionResult) -> void:
 		result.set_walkable(cell, false)
 
 
-## The plateau: terraces rise with the distance from the road inside the ring around the high
-## block, and fall towards any other block, so a cliff stands only on the far rim.
+## Terraces rise with the distance from the road inside the ring around the high block and fall
+## towards other blocks, so a cliff stands only on the far rim.
 func _shape(result: SectionResult, cell: Vector2i, block: Rect2i) -> void:
 	if result.road.has(cell) or _in_block(result, cell):
 		return
@@ -131,7 +120,7 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	return []
 
 
-## The cells beside a drop of two terraces or more that are not socket blocks.
+## Cells beside a drop of two terraces or more.
 func _cliffs(result: SectionResult) -> Array[Vector2i]:
 	var found: Array[Vector2i] = []
 	var rect := result.rect
@@ -152,7 +141,7 @@ func _cliffs(result: SectionResult) -> Array[Vector2i]:
 	return found
 
 
-## True when a hero can walk from the road to a ridge-top cell beside the block, one terrace a step.
+## True when a hero can walk from the road to a ridge-top cell beside the block.
 func _has_ramp(slot: ValleyPlan.Slot, result: SectionResult, block: Rect2i) -> bool:
 	var seen := {result.road[0]: true}
 	var open: Array[Vector2i] = [result.road[0]]
