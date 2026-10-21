@@ -90,6 +90,20 @@ func problems() -> Array[String]:
 		if not dry:
 			found.append_array(_crossing_problems(slot, cells))
 	found.append_array(_lane_problems(all_cells))
+	found.append_array(_straight_problems())
+	return found
+
+
+## No straight leg longer than `MAX_STRAIGHT` cells, also across the gates between regions (the
+## Crossing's level approaches to the bridge excepted).
+func _straight_problems() -> Array[String]:
+	var found: Array[String] = []
+	for group in [[0, 1], [3, 4, 5]]:
+		var cells: Array[Vector2i] = []
+		for id in group:
+			cells.append_array(RoadSpline.build(slots[id].spine).cells)
+		if _longest_straight(cells) > LAYOUT.MAX_STRAIGHT:
+			found.append("regions %s: the road runs straight for too long" % [group])
 	return found
 
 
@@ -200,7 +214,7 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	var entries: Array[Vector2i] = [Vector2i(0, _between(rng, spawn.x, spawn.y))]
 	var exits: Array[Vector2i] = []
 	# Meadow: under the March, a gate column on their shared border.
-	var x := _between(rng, inset, left - 1 - inset)
+	var x := _between(rng, LAYOUT.MEADOW_GATE.x, LAYOUT.MEADOW_GATE.y)
 	exits.append(Vector2i(x, ys[0] - 1))
 	entries.append(Vector2i(x, ys[0]))
 	# Ridge: above the Crossing, on the far bank of the river.
@@ -227,7 +241,7 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	exits.append(Vector2i(right - 1, y))
 	entries.append(Vector2i(right, y))
 	# Heartkeep: under the Fold, then on to the Heartstone at the east edge.
-	x = _between(rng, right + inset, LAYOUT.COLS - 1 - inset)
+	x = right + _between(rng, LAYOUT.HEARTKEEP_GATE.x, LAYOUT.HEARTKEEP_GATE.y)
 	exits.append(Vector2i(x, ys[2] - 1))
 	entries.append(Vector2i(x, ys[2]))
 	exits.append(Vector2i(LAYOUT.COLS - 1, _between(rng, end.x, end.y)))
@@ -243,7 +257,7 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):
 				slot.river.append(cell)
-		slot.spine = _spine(slot)
+		slot.spine = _spine(rng, slot)
 		layout.slots.append(slot)
 	return layout
 
@@ -273,41 +287,78 @@ func _draw_river(rng: Rng) -> void:
 				river_cells.append(wet)
 
 
-## The road's waypoints through a region: one wide bend. The road leaves the entry square on to the
-## border, runs to a corner where the line from the entry meets the line into the exit, and the
-## corner is rounded by an arc of `BEND_RADIUS` cells (less when a leg is shorter); the waypoints
-## are spaced `SPINE_SPACING` apart or less, so the spline stays smooth. The Crossing's road is
-## the one its section draws.
-static func _spine(slot: Slot) -> Array[Vector2]:
+## The road's waypoints through a region, a sweeping curve: the entry, a short lead along the
+## heading into the region (square to the border), one or two middle points pushed off the chord
+## between the leads towards the region's middle (one gives a C, two a S), a lead before the
+## exit, and the exit. The spline does the curving, so the road runs on diagonals, not in legs.
+## The Crossing's road is the one its section draws.
+static func _spine(rng: Rng, slot: Slot) -> Array[Vector2]:
 	var start := Vector2(slot.entry) + Vector2(HALF, HALF)
 	var finish := Vector2(slot.exit) + Vector2(HALF, HALF)
 	if slot.id == Region.BLUEWATER_CROSSING:
 		return BluewaterCrossingRegion.waypoints(
 			slot, BluewaterCrossingRegion._span(slot.river, slot.entry.y)
 		)
-	var heading := Vector2(_inward(slot.rect, slot.entry))
-	var arriving := -Vector2(_inward(slot.rect, slot.exit))
-	var corner := Vector2(finish.x, start.y) if heading.y == 0.0 else Vector2(start.x, finish.y)
-	var leg_in := (corner - start).length()
-	var leg_out := (finish - corner).length()
-	var radius := minf(float(LAYOUT.BEND_RADIUS), minf(leg_in, leg_out))
-	var first := corner - heading * radius
-	var last := corner + arriving * radius
-	var middle := corner + (-heading + arriving) * (radius * (1.0 - sqrt(HALF)))
-	var spine: Array[Vector2] = [start]
-	_fill(spine, first)
-	spine.append(middle)
-	spine.append(last)
-	_fill(spine, finish)
+	var lead_in := start + Vector2(_inward(slot.rect, slot.entry)) * _lead(rng)
+	var lead_out := finish + Vector2(_inward(slot.rect, slot.exit)) * _lead(rng)
+	var chord := lead_out - lead_in
+	var length := chord.length()
+	var normal := Vector2(-chord.y, chord.x) / maxf(length, 1.0)
+	var middle := Vector2(slot.rect.position) + Vector2(slot.rect.size) * HALF
+	var side := 1.0 if (middle - (lead_in + lead_out) * HALF).dot(normal) >= 0.0 else -1.0
+	var push := float(LAYOUT.PUSH.x + rng.next_int(LAYOUT.PUSH.y + 1))
+	push = minf(push, length * LAYOUT.PUSH_SHARE)
+	var bends := 1 if length >= LAYOUT.S_LENGTH else 0
+	var low := (
+		Vector2(slot.rect.position + Vector2i.ONE * LAYOUT.SPINE_MARGIN) + Vector2(HALF, HALF)
+	)
+	var high := Vector2(slot.rect.end - Vector2i.ONE * LAYOUT.SPINE_MARGIN) - Vector2(HALF, HALF)
+	var spine: Array[Vector2] = [start, lead_in]
+	for step in range(1, bends + 1):
+		var point := lead_in + chord * (float(step) / float(bends + 1))
+		point += normal * (push * side * (1.0 if step % 2 == 1 else -1.0))
+		spine.append(
+			Vector2(maxf(low.x, minf(point.x, high.x)), maxf(low.y, minf(point.y, high.y)))
+		)
+	spine.append(lead_out)
+	spine.append(finish)
 	return spine
 
 
-## Adds the waypoints from the last one to `to`, evenly spaced `SPINE_SPACING` apart or less.
-static func _fill(spine: Array[Vector2], to: Vector2) -> void:
-	var from := spine[spine.size() - 1]
-	var steps := int(floor((from.distance_to(to) - HALF) / LAYOUT.SPINE_SPACING)) + 1
-	for step in range(1, steps + 1):
-		spine.append(from + (to - from) * (float(step) / float(steps)))
+static func _lead(rng: Rng) -> float:
+	return float(LAYOUT.LEAD.x + rng.next_int(LAYOUT.LEAD.y + 1))
+
+
+## The longest straight run of road cells (steps in one direction), for the rule that a region's
+## road has no long straight leg.
+static func _longest_straight(cells: Array[Vector2i]) -> int:
+	var longest := 1
+	var run := 1
+	for index in range(2, cells.size()):
+		run = (
+			run + 1 if cells[index] - cells[index - 1] == cells[index - 1] - cells[index - 2] else 1
+		)
+		longest = maxi(longest, run)
+	return longest
+
+
+## The share of the six roads on a diagonal: the heading over a cell's reach either side is
+## between 20 and 70 degrees off an axis (the ratio of its steps, no trig).
+func diagonal_share() -> float:
+	var diagonal := 0
+	var total := 0
+	for slot in slots:
+		var curve := RoadSpline.build(slot.spine)
+		for index in range(2, curve.xs.size() - 2):
+			var across := absf(curve.xs[index + 2] - curve.xs[index - 2])
+			var down := absf(curve.ys[index + 2] - curve.ys[index - 2])
+			total += 1
+			if (
+				down * 1000.0 > LAYOUT.DIAGONAL.x * across
+				and down * 1000.0 < LAYOUT.DIAGONAL.y * across
+			):
+				diagonal += 1
+	return float(diagonal) / float(maxi(total, 1))
 
 
 ## The direction into the region from the border edge a gate cell is on.
