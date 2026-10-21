@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-21 | decision | Lay the six sections out as 2D regions and walk a smooth spline road through them | sim | none | CLAUDE.md |
 | 2026-10-21 | lesson | Push a new commit after retargeting a PR to main, never just rerun its checks | ci | none | |
 | 2026-10-20 | decision | Generate the valley from six fixed sections, each with its own recipe and random stream | sim | none | CLAUDE.md (in #389) |
 | 2026-10-20 | decision | Build from a bar along the bottom row, not from a menu floating by the socket | ui | none | CLAUDE.md |
