@@ -62,8 +62,8 @@ func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 		for dy in 2:
 			for dx in 2:
 				taken[anchor + Vector2i(dx, dy)] = true
-	_boulders(slot, result, rng, taken)
 	_rises(slot, result, rng, taken)
+	_boulders(slot, result, rng, taken)
 	return result
 
 
