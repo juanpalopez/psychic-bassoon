@@ -30,7 +30,9 @@ const FULL = [
   /^\.godot-version$/,
   /^\.github\//,
   /^scripts\/select-tests\./,
-  /^godot\/content\//,
+  // the valley's own numbers (#381, #404) are traced by references like code: only valley tests
+  // and what reaches the valley read them
+  /^godot\/content\/(?!valley\/)/,
   /^godot\/sim\/(rng|streams|rounding)\.gd$/,
   /^godot\/sim\/game\//,
   /^godot\/tests\/goldens\//,
