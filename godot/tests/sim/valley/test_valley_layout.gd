@@ -166,7 +166,8 @@ func _stitch_problems(seed: int) -> void:
 		assert_eq((map.path[index + 1] - map.path[index]).length_squared(), 1, "seed %d" % seed)
 	assert_eq(map.path[0].x, 0)
 	assert_true(map.heartstone.has_point(map.path[map.path.size() - 1]))
-	assert_eq(map.route_curves.size(), 1)
+	# one curve per route: the main road and, once the Ancient Fold has its feeder, the second
+	assert_eq(map.route_curves.size(), map.routes.size())
 	assert_eq(
 		map.river.size(),
 		layout.slots.reduce(
