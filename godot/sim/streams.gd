@@ -16,5 +16,10 @@ const SECOND_SOURCE := 4
 ## The valley's terrain layer: terrace heights, regions and the river (#322). Its own stream,
 ## drawn after the road and the sockets are placed, so it never moves either of them.
 const TERRAIN := 5
+## The valley plan (#381): where the six sections' strips and gates go.
+const VALLEY_PLAN := 6
+## The first of the valley sections' streams: `VALLEY_SECTION + id * stride + attempt`, see
+## `ValleyPlan.section_rng`.
+const VALLEY_SECTION := 1000
 ## Render-only scenery around the board; never affects the game.
 const SCENERY := 100
