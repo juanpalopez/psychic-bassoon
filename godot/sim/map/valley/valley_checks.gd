@@ -114,6 +114,8 @@ static func valley_problems(
 						result.id, "high socket %s has no low socket nearby" % result.sockets[index]
 					)
 				)
+	if plan != null and plan.lane_gap > 0:
+		found.append_array(_lane_problems(results, plan.lane_gap, plan.lane_run))
 	found.append_array(HeroGraph.problems(results, plan.hero_caps if plan != null else HERO.CAPS))
 	return found
 
@@ -215,3 +217,34 @@ static func _covered_anywhere(results: Array[SectionResult], bend: Vector2i) -> 
 		if _covered(result, bend):
 			return true
 	return false
+
+
+## Two stretches of the road that run side by side closer than `gap` cells (a hairpin or a snake
+## of lanes): one problem per section whose road comes that near an earlier stretch.
+static func _lane_problems(results: Array[SectionResult], gap: int, run: int) -> Array[Problem]:
+	var cells: Array[Vector2i] = []
+	var owners: Array[int] = []
+	for result in results:
+		for cell in result.road:
+			cells.append(cell)
+			owners.append(result.id)
+	var found: Array[Problem] = []
+	var reported := {}
+	for later in range(run, cells.size()):
+		if reported.has(owners[later]):
+			continue
+		for earlier in later - run + 1:
+			var step := cells[later] - cells[earlier]
+			if step.length_squared() < gap * gap:
+				reported[owners[later]] = true
+				found.append(
+					Problem.make(
+						owners[later],
+						(
+							"the road at %s runs %s from itself at %s"
+							% [cells[later], step, cells[earlier]]
+						)
+					)
+				)
+				break
+	return found
