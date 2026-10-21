@@ -109,6 +109,13 @@ static func generate_valley(seed: int) -> GameMap:
 	return ValleyStitcher.build(seed, RULES.GRID_COLS, RULES.GRID_ROWS)
 
 
+## The map the game plays on its default board: the sectioned valley, or the route-first map
+## when the valley's sections cannot be made to pass. `Game.create` and the board both use it.
+static func game_map(seed: int) -> GameMap:
+	var valley := generate_valley(seed)
+	return valley if valley != null else generate(seed)
+
+
 ## A map for these routes (in the tall grid when `wide`), before its sockets are placed.
 static func _assemble(
 	seed: int, cols: int, rows: int, footprint: int, wide: bool, routes: Array, feeder: Dictionary

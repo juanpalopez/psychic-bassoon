@@ -18,6 +18,11 @@ func _scene(existing: GameState = null) -> TowerFireKit.Scene:
 			if _neighbour_and_stranger(scene.game, scene.tower)[0] != Vector2i(-1, -1):
 				break
 			scene = TowerFireKit.scene("spoolGuard", map_seed)
+		assert_ne(
+			_neighbour_and_stranger(scene.game, scene.tower)[0],
+			Vector2i(-1, -1),
+			"a seed with a neighbouring socket was found"
+		)
 	scene.game.buttons = 100000
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))
 	Game.submit(scene.game, Command.upgrade(scene.tower.id))

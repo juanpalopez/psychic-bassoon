@@ -64,10 +64,9 @@ static func _map_for(
 		and second_source
 		and not with_detour
 	)
-	var map: GameMap = MapGen.generate_valley(seed) if valley else null
-	if map == null:
-		map = MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
-	return map
+	if valley:
+		return MapGen.game_map(seed)
+	return MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
 
 
 ## Queues a command for the next tick. Does not change the game itself.
