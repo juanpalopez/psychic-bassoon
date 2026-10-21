@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0-alpha.4](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.3...v0.1.0-alpha.4) (2026-10-21)
+
+
+### Features
+
+* **sim:** add section E ancient fold with the later-wave feeder ([#398](https://github.com/juanpalopez/psychic-bassoon/issues/398)) ([b9ecce8](https://github.com/juanpalopez/psychic-bassoon/commit/b9ecce834366bd15e4e593f93552f9aa501b4666))
+* **sim:** add the Bluewater Crossing section with river and bridges ([#396](https://github.com/juanpalopez/psychic-bassoon/issues/396)) ([6ee99c0](https://github.com/juanpalopez/psychic-bassoon/commit/6ee99c094429328bcf24b3337fa88718c1cdb46c))
+* **sim:** add the Broken Ridge valley section ([#395](https://github.com/juanpalopez/psychic-bassoon/issues/395)) ([6638a5d](https://github.com/juanpalopez/psychic-bassoon/commit/6638a5dc73f4d72427e7f0d45b3ef19d8dbf3633))
+* **sim:** add the outer march and heartkeep approach sections ([#397](https://github.com/juanpalopez/psychic-bassoon/issues/397)) ([266beba](https://github.com/juanpalopez/psychic-bassoon/commit/266beba831418b2c92b7387c1b4324b157ddcfbd))
+* **sim:** add the section base class, a straight stand-in and a socket helper ([#391](https://github.com/juanpalopez/psychic-bassoon/issues/391)) ([b54ae97](https://github.com/juanpalopez/psychic-bassoon/commit/b54ae979c0653c23daef365ec5d78142558348a0))
+* **sim:** add the sunken meadow section and the hero walkable graph ([#399](https://github.com/juanpalopez/psychic-bassoon/issues/399)) ([0649442](https://github.com/juanpalopez/psychic-bassoon/commit/0649442638898e979219ad93aabfff76cbf17884))
+* **sim:** check each valley section and the valley as a whole ([#392](https://github.com/juanpalopez/psychic-bassoon/issues/392)) ([8f326a6](https://github.com/juanpalopez/psychic-bassoon/commit/8f326a6370fc13919d8ccd4d8c0c46f92cbf3c58)), closes [#383](https://github.com/juanpalopez/psychic-bassoon/issues/383)
+* **sim:** plan the valley as six fixed sections ([#390](https://github.com/juanpalopez/psychic-bassoon/issues/390)) ([48993e9](https://github.com/juanpalopez/psychic-bassoon/commit/48993e9de19ccf8f290af5c84d9f2f8ec344f1c5))
+* **sim:** play the sectioned valley on the game board ([#403](https://github.com/juanpalopez/psychic-bassoon/issues/403)) ([2be0f9f](https://github.com/juanpalopez/psychic-bassoon/commit/2be0f9f9da908911cd76fc6cd01cff3a7665b0b5))
+* **sim:** stitch the six sections into a map ([#393](https://github.com/juanpalopez/psychic-bassoon/issues/393)) ([1bb6ff8](https://github.com/juanpalopez/psychic-bassoon/commit/1bb6ff87f3307ccf897c6c83d7501d18bbb19790))
+
 ## [0.1.0-alpha.3](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.2...v0.1.0-alpha.3) (2026-10-20)
 
 
