@@ -114,3 +114,28 @@ func test_a_seed_gives_the_same_section_twice() -> void:
 	for seed in SEEDS:
 		assert_eq(_draw(seed).road, _draw(seed).road)
 		assert_eq(_draw(seed).river, _draw(seed).river)
+
+
+func test_every_seed_stitches_and_foes_cross_the_river_on_the_bridge_only() -> void:
+	# The stitcher assembles a map only when `ValleyChecks.all_problems` (the section checks and
+	# `valley_problems`) finds none, so a non-null map means the stitched results pass them.
+	for seed in range(1, 301):
+		var map := MapGen.generate_valley(seed)
+		assert_not_null(map, "seed %d" % seed)
+		if map == null:
+			continue
+		var slot := _slot(seed)
+		var bridge := map.bridges[0]
+		for bridge_found in map.bridges:
+			if slot.rect.has_point(bridge_found.cell):
+				bridge = bridge_found
+		var hero := Vector2i(-1, -1)
+		for cell in map.hero_bridges:
+			if slot.rect.has_point(cell):
+				hero = cell
+		for route in map.routes:
+			for cell in route:
+				assert_false(cell == hero, "seed %d hero bridge on a route" % seed)
+				if slot.rect.has_point(cell) and not map.is_walkable(cell):
+					fail_test("seed %d route on water %s" % [seed, cell])
+		assert_true(map.path.has(bridge.cell))

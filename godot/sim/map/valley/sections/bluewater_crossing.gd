@@ -17,16 +17,16 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var rect := slot.rect
 	var high := rect.end.x - 1 - RIVER.RIVER_RIGHT_OFFSET
 	var low := rect.position.x + RIVER.RIVER_LEFT_OFFSET
-	if rect.size.x <= RIVER.NARROW_STRIP:
-		low += RIVER.NARROW_LEFT_EXTRA
 	low = mini(low, high)
 	var column := low + rng.next_int(high - low + 1)
-	var bridge_row := _bridge_row(slot, rng)
+	# The bridge is on the entry row: the road is straight over the near bank (no bend there to
+	# cover), and blocks sit above and below it.
+	var bridge_row := slot.entry.y
 	# The river may step sideways once, on a row clear of the road bridge.
 	var jog_row := -1
 	var shifted := column
 	var clear: int = RIVER.RIVER_JOG_CLEARANCE
-	if high > low and rng.next_int(100) < RIVER.RIVER_JOG_PERCENT:
+	if high > low and rng.next_int(RIVER.PERCENT) < RIVER.RIVER_JOG_PERCENT:
 		var row := rect.position.y + clear + rng.next_int(rect.size.y - 2 * clear)
 		if absi(row - bridge_row) > clear:
 			jog_row = row
@@ -52,6 +52,7 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 		blocked.append(Rect2i(cell, Vector2i.ONE))
 	for dx in range(-RIVER.HERO_APPROACH_KEEP, RIVER.HERO_APPROACH_KEEP + 1):
 		blocked.append(Rect2i(hero + Vector2i(dx, 0), Vector2i.ONE))
+	_cover_join_bends(result, blocked)
 	SectionSockets.place(result, socket_range(), rng, blocked)
 	_tag_banks(result)
 	_shape_ground(result)
@@ -86,24 +87,13 @@ func extra_problems(_slot: ValleyPlan.Slot, result: SectionResult) -> Array[Stri
 		found.append("the river is broken")
 	for anchor in result.sockets:
 		for cell in result.river:
-			if Rect2i(anchor, Vector2i(2, 2)).has_point(cell):
+			if (
+				Rect2i(anchor, Vector2i(RULES.GAME_SOCKET_FOOTPRINT, RULES.GAME_SOCKET_FOOTPRINT))
+				. has_point(cell)
+			):
 				found.append("a socket sits on the river")
 				return found
 	return found
-
-
-## A row for the road's bridge that leaves long runs of road on both banks, for socket blocks.
-func _bridge_row(slot: ValleyPlan.Slot, rng: Rng) -> int:
-	var first := slot.rect.position.y + VALLEY.GATE_MARGIN
-	var last := slot.rect.end.y - 1 - VALLEY.GATE_MARGIN
-	var best := 0
-	for y in range(first, last + 1):
-		best = maxi(best, absi(y - slot.entry.y) + absi(y - slot.exit.y))
-	var rows: Array[int] = []
-	for y in range(first, last + 1):
-		if absi(y - slot.entry.y) + absi(y - slot.exit.y) >= best - RIVER.BRIDGE_ROW_SLACK:
-			rows.append(y)
-	return rows[rng.next_int(rows.size())]
 
 
 static func _river_column(y: int, jog_row: int, column: int, shifted: int) -> int:
@@ -135,24 +125,21 @@ func _hero_cell(
 	return Vector2i(_river_column(row, jog_row, column, shifted), row)
 
 
-## The road: along its entry row, up or down a column on the near bank, straight over the bridge,
-## then down a column on the far bank and out along its exit row. It never touches the river
-## elsewhere: both vertical runs keep clear of the river's columns.
+## The road: along its entry row straight over the bridge, then down a column on the far bank
+## and out along its exit row. It never touches the river
+## elsewhere: the far run keeps clear of the river's columns.
 func _draw_road(
 	result: SectionResult, slot: ValleyPlan.Slot, rng: Rng, bridge_column: int, bridge_row: int
 ) -> void:
-	var left := slot.rect.position.x
 	var right := slot.rect.end.x - 1
-	# Each run keeps room for a two-column block beside it, when the bank is wide enough.
-	var near := left + rng.next_int(maxi(bridge_column - 3 - left, 0) + 1)
-	var far_least := mini(bridge_column + 3, right)
+	# The far run keeps a block's room beside it when the bank has it; otherwise it hugs the exit
+	# column (the exit turn is then a join bend that a block must cover).
+	var far_least := mini(bridge_column + RIVER.BANK_ROOM, right)
 	var far := far_least + rng.next_int(right - far_least + 1)
-	if bridge_column + 3 > right:
+	if bridge_column + RIVER.BANK_ROOM > right:
 		far = right
 	result.road.append(slot.entry)
 	for waypoint in [
-		Vector2i(near, slot.entry.y),
-		Vector2i(near, bridge_row),
 		Vector2i(far, bridge_row),
 		Vector2i(far, slot.exit.y),
 		slot.exit,
@@ -164,9 +151,36 @@ func _draw_road(
 			result.road.append(last + step)
 
 
+## A turn on the road's first or last cell is no bend inside the road, so a block beside it is
+## placed first (the valley check looks for one within `BEND_COVER_REACH` of it).
+func _cover_join_bends(result: SectionResult, blocked: Array[Rect2i]) -> void:
+	var road := result.road
+	var ends := [[road[0], road[0] + Vector2i.LEFT, road[1]]]
+	ends.append([road[-1], road[-2], road[-1] + Vector2i.RIGHT])
+	var sites := SectionSockets.candidates(result, blocked)
+	for end in ends:
+		if end[1] - end[0] == end[0] - end[2]:
+			continue
+		var best := Vector2i(-1, -1)
+		var best_gap := VALLEY.BEND_COVER_REACH
+		for site in sites:
+			var gap := SectionSockets.centre_gap(site, end[0])
+			if gap <= best_gap and SectionSockets.keeps_distance(site, result.sockets):
+				best = site
+				best_gap = gap
+		if best != Vector2i(-1, -1):
+			result.add_socket(best, 0, SectionResult.Tag.BEND)
+
+
 func _tag_banks(result: SectionResult) -> void:
 	for index in result.sockets.size():
-		var reach := Rect2i(result.sockets[index], Vector2i(2, 2)).grow(RIVER.BANK_REACH)
+		var reach := (
+			Rect2i(
+				result.sockets[index],
+				Vector2i(RULES.GAME_SOCKET_FOOTPRINT, RULES.GAME_SOCKET_FOOTPRINT)
+			)
+			. grow(RIVER.BANK_REACH)
+		)
 		for cell in result.river:
 			if reach.has_point(cell) and result.socket_tags[index] == SectionResult.Tag.LOW:
 				result.socket_tags[index] = SectionResult.Tag.BANK
@@ -184,20 +198,24 @@ func _shape_ground(result: SectionResult) -> void:
 				result.set_region(cell, GameMap.Region.DIRT)
 			elif road_gap >= RIVER.SLOPE_ROAD_GAP and river_gap >= RIVER.SLOPE_RIVER_GAP:
 				if not _in_socket(cell, result):
-					result.set_height(cell, 1)
+					result.set_height(cell, RIVER.SLOPE_LEVEL)
 					result.set_region(cell, GameMap.Region.FOREST)
 
 
 static func _in_socket(cell: Vector2i, result: SectionResult) -> bool:
 	for anchor in result.sockets:
-		if Rect2i(anchor, Vector2i(2, 2)).grow(1).has_point(cell):
+		if (
+			Rect2i(anchor, Vector2i(RULES.GAME_SOCKET_FOOTPRINT, RULES.GAME_SOCKET_FOOTPRINT))
+			. grow(1)
+			. has_point(cell)
+		):
 			return true
 	return false
 
 
 ## The Chebyshev distance to the nearest of `cells`.
 static func _gap(cell: Vector2i, cells: Array[Vector2i]) -> int:
-	var best := 1000
+	var best := RIVER.FAR_GAP
 	for other in cells:
 		best = mini(best, maxi(absi(cell.x - other.x), absi(cell.y - other.y)))
 	return best
