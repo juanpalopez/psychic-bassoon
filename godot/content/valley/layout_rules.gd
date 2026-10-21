@@ -56,5 +56,5 @@ const BLOCK_MARGIN := Vector2i(1, 1)
 const BEND_RUN := 2
 ## The most steps the hero may need from the meadow to a kind of section (`ValleyPlan.Id`, steps).
 ## Provisional until the real sections exist: measured over seeds 1..3000 with the stand-in
-## sections (worst Broken Ridge MEASURE_R, Crossing MEASURE_C, Heartkeep MEASURE_H), plus 4 steps.
+## sections (worst Broken Ridge 31, Crossing 23, Heartkeep 35), plus 3 to 4 steps.
 const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 34), Vector2i(2, 27), Vector2i(5, 38)]

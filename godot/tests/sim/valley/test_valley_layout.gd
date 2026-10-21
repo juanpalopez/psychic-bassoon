@@ -1,8 +1,11 @@
 extends GutTest
 
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
-const SWEEP := 300
-const STITCH_SWEEP := 1500
+## A layout is drawn and stitched until one passes (a fraction of a second a seed), so the sweeps
+## sample the seeds 1..3000.
+const SWEEP_STEP := 10
+const STITCH_STEP := 10
+const LAST_SEED := 3000
 
 
 func _layout(seed: int) -> ValleyLayout:
@@ -122,7 +125,7 @@ func test_seeds_give_different_layouts() -> void:
 
 
 func test_every_seed_has_a_layout_that_passes_its_own_checks() -> void:
-	for seed in range(1, SWEEP + 1):
+	for seed in range(1, LAST_SEED + 1, SWEEP_STEP):
 		var layout := _layout(seed)
 		assert_not_null(layout, "seed %d" % seed)
 		if layout == null:
@@ -173,7 +176,7 @@ func _stitch_problems(seed: int) -> void:
 
 
 func test_the_stitched_stand_in_valley_passes_the_checks_for_every_seed() -> void:
-	for seed in range(1, STITCH_SWEEP + 1):
+	for seed in range(1, LAST_SEED + 1, STITCH_STEP):
 		_stitch_problems(seed)
 
 

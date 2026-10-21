@@ -34,7 +34,9 @@ static func build(
 			attempts[id] += 1
 			if attempts[id] >= VALLEY.MAX_SECTION_ATTEMPTS:
 				if not quiet:
-					push_error("valley seed %d: section %d fails: %s" % [seed, id, problems[0].text])
+					push_error(
+						"valley seed %d: section %d fails: %s" % [seed, id, problems[0].text]
+					)
 				return null
 			results[id] = _draw(plan, sections, id, attempts[id])
 	return null

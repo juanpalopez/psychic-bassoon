@@ -42,9 +42,7 @@ static func generate(seed: int, cols: int, rows: int) -> ValleyLayout:
 
 
 static func _stitches(layout: ValleyLayout) -> bool:
-	var map := ValleyStitcher.build(
-		layout.seed, layout.cols, layout.rows, sections(), layout, true
-	)
+	var map := ValleyStitcher.build(layout.seed, layout.cols, layout.rows, sections(), layout, true)
 	return map != null
 
 
