@@ -19,16 +19,8 @@ func _draw(slot: ValleyPlan.Slot, rng: Rng, variant: int) -> SectionResult:
 	var blocked := reserved(slot)
 	var join := SectionPacking.join_bend(result.road, false)
 	SectionPacking.pack(result, socket_range(), rng, blocked, join)
-	(
-		SectionGround
-		. paint(
-			result,
-			KEEP.TERRACE_GAP,
-			KEEP.FOREST_GAP,
-			blocked[0],
-			KEEP.RISE_GAP,
-			KEEP.RISE_REACH,
-		)
+	SectionGround.paint(
+		result, KEEP.TERRACE_GAP, KEEP.FOREST_GAP, blocked[0], KEEP.RISE_GAP, KEEP.RISE_REACH
 	)
 	return result
 

@@ -1,8 +1,7 @@
 ## Numbers the two end sections share (#384): road shape and ground levels.
 extends RefCounted
 
-## The snake road turns on this row at the top edge of the board, and this many rows in from the
-## bottom edge.
+## The snake road turns on this row at the top edge, or this many rows in from the bottom edge.
 const EDGE_ROW := 1
 ## A strip at least this many columns wide gets a road of three runs, narrower ones two.
 const THREE_RUN_WIDTH := 5
@@ -14,7 +13,6 @@ const DIRT_GAP := 1
 const FLOOR_LEVEL := 0
 const LOW_LEVEL := 1
 const RISE_LEVEL := 2
-## The road shapes a section tries (which edge the snake leaves toward), in an order the
-## stream picks.
+## The road shapes a section tries: two snakes (one edge or the other), then the single-turn Z.
 const VARIANTS := 3
 const Z_VARIANT := 2
