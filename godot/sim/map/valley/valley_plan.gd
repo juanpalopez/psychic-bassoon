@@ -27,6 +27,12 @@ class Slot:
 	## column). The next section's entry is the cell right of this exit, on the same row.
 	var entry := Vector2i.ZERO
 	var exit := Vector2i.ZERO
+	## The kind of section (an `Id`); -1 means the id itself, as in the strip layout.
+	var role: int = -1
+	## The road's waypoints in cell units, when the layout gives them (the 2D layout).
+	var spine: Array[Vector2] = []
+	## The cells of the river inside the rect, when the layout has one.
+	var river: Array[Vector2i] = []
 
 
 var seed: int = 0
@@ -49,6 +55,7 @@ static func create(seed: int, cols: int, rows: int) -> ValleyPlan:
 	for index in widths.size():
 		var slot := Slot.new()
 		slot.id = index
+		slot.role = index
 		slot.rect = Rect2i(left, 0, widths[index], rows)
 		slot.entry = Vector2i(left, gates[index])
 		slot.exit = Vector2i(left + widths[index] - 1, gates[index + 1])
