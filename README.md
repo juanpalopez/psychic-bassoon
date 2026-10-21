@@ -1,14 +1,17 @@
-# Papercraft Kingdom Defense
+# Kingdom of the Fold
 
-A tactile, stop-motion papercraft tower defense for phones and tablets. In a forgotten corner of an old craft room, an abandoned cutting mat holds a tiny paper kingdom, until The Blot, a bottle of corrupted purple ink, twists scraps of stationery into monsters. You are the Grand Crafter: build spool guards, guard tents, prism spires and thimble mortars from office supplies, command a cardboard knight, cast glue and thumbtack spells, and hold the line. The design is in [`docs/GDD.md`](docs/GDD.md).
+A premium, painterly low-poly fantasy tower-defense game about a folded-paper kingdom under siege by the Blot's corrupted ink. Defend the Heartkeep across a boundless 32×20 valley using spool ballistae, thimble mortars, prism spires, guard tents, craft magic, and a hero who can move between tactical fronts. The lore begins in a craft room, but the on-screen world is a complete fantasy valley—not a desk or cutting mat.
 
-It is built with **Godot 4** (GDScript) and plays in landscape, natively on iOS first and on macOS, Windows and Linux (the web build was dropped on 2026-10-18). The game was called Scrapline before the owner adopted the GDD (2026-10-11); the repo is still `psychic-bassoon`, and the code was renamed on 2026-10-13. The earlier Three.js and TypeScript game is retired; its last build is the tag [`web-three-final`](https://github.com/juanpalopez/psychic-bassoon/tree/web-three-final).
+The game was previously titled **Papercraft Kingdom Defense** (and earlier Scrapline). The repository remains `psychic-bassoon`. The design baseline is in [`docs/GDD.md`](docs/GDD.md), the expanded tower/hero/enemy roster is in [`docs/UNIT_ROSTER.md`](docs/UNIT_ROSTER.md), and the visual direction is in [`docs/art/STYLE.md`](docs/art/STYLE.md).
 
-- **Download:** each tagged release carries the Linux, Windows and macOS builds ([releases](https://github.com/juanpalopez/psychic-bassoon/releases), newest first, pre-releases included); the iPhone build is installed locally for now (`scripts/ios-run.sh`; step-by-step guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to the releases.
+- **Roster visual references:** [`generated poster crop`](docs/art/roster/roster-generated-reference.jpg) · [editable SVG](docs/art/roster/roster-overview.svg)
+- **Folded Valley map references:** [`generated poster crop`](docs/art/maps/folded-valley-generated-reference.jpg) · [editable tactical SVG](docs/art/maps/folded-valley-tactical-concept.svg)
+- **Download:** each tagged release carries the Linux, Windows and macOS builds ([releases](https://github.com/juanpalopez/psychic-bassoon/releases), newest first, pre-releases included); the iPhone build is installed locally for now (`scripts/ios-run.sh`; setup guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to releases.
 - **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
 - **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
 
-> **Status:** Phase 4 (the simulation in GDScript, designed from the GDD). The PRNG, the road generator with routes, and the game state, commands and 30 Hz tick are done and tested. Sockets with three elevation levels are done too. Foes and waves are done too; the towers shooting at them (combat) is next. Phase 5 (play in Godot) runs in parallel as a greybox (steps A1 to A3): the game shows the real map with sockets, where you can tap a socket and build, and start waves of foes that walk the road. It is not the game yet.
+> **Status:** The Godot 4 greybox runs with map, sockets, foes, towers, HUD, win/loss flow and simulation speeds. The production game remains in alpha: map readability/performance and content integration still need in-device checks. This PR changes design documentation only; no runtime gameplay is added.
+
 
 ## Getting started
 
