@@ -71,6 +71,7 @@ func problems() -> Array[String]:
 	var wet := {}
 	for cell in river_cells:
 		wet[cell] = true
+	var all_cells: Array[Vector2i] = []
 	for slot in slots:
 		var cells := RoadSpline.build(slot.spine).cells
 		for cell in cells:
@@ -85,29 +86,77 @@ func problems() -> Array[String]:
 			found.append("region %d: the road must wade the river in exactly one stretch" % slot.id)
 		if not dry and (wet.has(slot.entry) or wet.has(slot.exit)):
 			found.append("region %d: the gates must be on dry banks" % slot.id)
-		found.append_array(_uncoverable(slot, cells))
+		all_cells.append_array(cells)
+		if not dry:
+			found.append_array(_crossing_problems(slot, cells))
+	found.append_array(_lane_problems(all_cells))
 	return found
 
 
-## The bends of a region's road that no socket block site is near enough to cover.
-static func _uncoverable(slot: Slot, cells: Array[Vector2i]) -> Array[String]:
-	var probe := SectionResult.create(slot)
-	probe.road = cells
-	var blocked: Array[Rect2i] = []
-	for cell in slot.river:
-		blocked.append(Rect2i(cell, Vector2i.ONE))
-	var sites := SectionSockets.candidates(probe, blocked)
+## The rows from `first` down where the Crossing can enter: both gate cells dry, the river at
+## least `APPROACH_STRAIGHT` cells in from the entry and its far side `APPROACH_REACH` cells short
+## of the Ridge's gate column.
+func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
+	var reach: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_REACH
+	var straight: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
+	var wet := {}
+	var span := {}
+	for cell in river_cells:
+		wet[cell] = true
+		var old: Vector2i = span.get(cell.y, Vector2i(cell.x, cell.x))
+		span[cell.y] = Vector2i(mini(old.x, cell.x), maxi(old.y, cell.x))
+	var rows: Array[int] = []
+	for y in range(first, LAYOUT.ROWS - LAYOUT.GATE_INSET):
+		var here: Vector2i = span.get(y, Vector2i(-1, -1))
+		if (
+			not wet.has(Vector2i(left - 1, y))
+			and not wet.has(Vector2i(left, y))
+			and here.x - left >= straight
+			and here.y + reach <= ridge_x
+		):
+			rows.append(y)
+	return rows
+
+
+## The Crossing's road meets the river level on one row, with straight approaches before and
+## after the wet stretch and the far bank in reach of the exit (the real section draws that road).
+static func _crossing_problems(slot: Slot, cells: Array[Vector2i]) -> Array[String]:
+	var span := BluewaterCrossingRegion._span(slot.river, slot.entry.y)
+	var reach: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
 	var found: Array[String] = []
-	for bend in SectionSockets.bends(cells, slot.bend_run):
-		var near := sites.any(
-			func(site: Vector2i) -> bool:
-				return SectionSockets.centre_gap(site, bend) <= VALLEY.BEND_COVER_REACH
-		)
-		if not near:
-			found.append(
-				"region %d: no room for a socket block by the bend at %s" % [slot.id, bend]
-			)
+	var first := -1
+	var last := -1
+	for index in cells.size():
+		if slot.river.has(cells[index]):
+			first = index if first < 0 else first
+			last = index
+	if span.y < 0 or first < reach or last + reach >= cells.size():
+		return ["the crossing has no room for straight approaches"]
+	for step in range(1, reach + 1):
+		if (
+			cells[first - step] != cells[first] + Vector2i.LEFT * step
+			or cells[last + step] != cells[last] + Vector2i.RIGHT * step
+		):
+			found.append("the bridge approaches are not straight")
+			break
+	if cells[last].y != slot.entry.y:
+		found.append("the bridge is not level with the entry")
 	return found
+
+
+## The lane rule over the whole road (the six spines end to end): no cell twice, and no two cells
+## `lane_run` or more apart along the road closer than `lane_gap` in a straight line.
+func _lane_problems(cells: Array[Vector2i]) -> Array[String]:
+	var seen := {}
+	for cell in cells:
+		if seen.has(cell):
+			return ["the road visits %s twice" % cell]
+		seen[cell] = true
+	for later in range(lane_run, cells.size()):
+		for earlier in later - lane_run + 1:
+			if (cells[later] - cells[earlier]).length_squared() < lane_gap * lane_gap:
+				return ["the road at %s runs beside itself at %s" % [cells[later], cells[earlier]]]
+	return []
 
 
 ## How many separate stretches of the road are on the river.
@@ -128,6 +177,9 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	layout.rows = LAYOUT.ROWS
 	layout.hero_caps = LAYOUT.HERO_CAPS
 	layout.bend_run = LAYOUT.BEND_RUN
+	layout.lane_gap = LAYOUT.LANE_GAP
+	layout.lane_run = LAYOUT.LANE_RUN
+	layout.section_attempts = LAYOUT.SECTION_ATTEMPTS
 	var left := _jitter(rng, LAYOUT.LEFT_X)
 	var right := _jitter(rng, LAYOUT.RIGHT_X)
 	var ys := [
@@ -151,16 +203,27 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	var x := _between(rng, inset, left - 1 - inset)
 	exits.append(Vector2i(x, ys[0] - 1))
 	entries.append(Vector2i(x, ys[0]))
-	# Crossing: right of the Meadow, on a row of the Meadow's lower part.
-	var y := _between(rng, ys[0] + inset, LAYOUT.ROWS - 1 - inset)
+	# Ridge: above the Crossing, on the far bank of the river.
+	var ridge_x := _between(rng, right - reach.y, right - reach.x)
+	# Crossing: right of the Meadow, on a row where the river leaves room for straight approaches
+	# and for the bank to turn north to the Ridge; the river is drawn again until one does.
+	var first := maxi(ys[0] + inset, ys[1] + LAYOUT.CROSSING_DROP)
+	var rows: Array[int] = []
+	for _try in LAYOUT.RIVER_TRIES:
+		layout.river_cells.clear()
+		layout._draw_river(rng)
+		rows = layout._crossing_rows(left, ridge_x, first)
+		if not rows.is_empty():
+			break
+	if rows.is_empty():
+		rows.append(first)
+	var y: int = rows[rng.next_int(rows.size())]
 	exits.append(Vector2i(left - 1, y))
 	entries.append(Vector2i(left, y))
-	# Ridge: above the Crossing, on the far bank of the river.
-	x = _between(rng, right - reach.y, right - reach.x)
-	exits.append(Vector2i(x, ys[1]))
-	entries.append(Vector2i(x, ys[1] - 1))
+	exits.append(Vector2i(ridge_x, ys[1]))
+	entries.append(Vector2i(ridge_x, ys[1] - 1))
 	# Fold: right of the Ridge.
-	y = _between(rng, inset, mini(ys[1], ys[2]) - 1 - inset)
+	y = _between(rng, LAYOUT.RIDGE_EXIT_ROWS.x, LAYOUT.RIDGE_EXIT_ROWS.y)
 	exits.append(Vector2i(right - 1, y))
 	entries.append(Vector2i(right, y))
 	# Heartkeep: under the Fold, then on to the Heartstone at the east edge.
@@ -168,7 +231,6 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	exits.append(Vector2i(x, ys[2] - 1))
 	entries.append(Vector2i(x, ys[2]))
 	exits.append(Vector2i(LAYOUT.COLS - 1, _between(rng, end.x, end.y)))
-	layout._draw_river(rng)
 	for index in rects.size():
 		var slot := Slot.new()
 		slot.id = index
@@ -178,10 +240,10 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		slot.exit = exits[index]
 		slot.margin = LAYOUT.BLOCK_MARGIN
 		slot.bend_run = layout.bend_run
-		slot.spine = _spine(rng, slot)
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):
 				slot.river.append(cell)
+		slot.spine = _spine(slot)
 		layout.slots.append(slot)
 	return layout
 
@@ -211,33 +273,41 @@ func _draw_river(rng: Rng) -> void:
 				river_cells.append(wet)
 
 
-## The road's waypoints through a region: the entry, a point LEAD cells inside (so the road leaves
-## the border square on), a few points that sway to alternate sides of the straight line, the
-## same near the exit, and the exit.
-static func _spine(rng: Rng, slot: Slot) -> Array[Vector2]:
+## The road's waypoints through a region: one wide bend. The road leaves the entry square on to the
+## border, runs to a corner where the line from the entry meets the line into the exit, and the
+## corner is rounded by an arc of `BEND_RADIUS` cells (less when a leg is shorter); the waypoints
+## are spaced `SPINE_SPACING` apart or less, so the spline stays smooth. The Crossing's road is
+## the one its section draws.
+static func _spine(slot: Slot) -> Array[Vector2]:
 	var start := Vector2(slot.entry) + Vector2(HALF, HALF)
 	var finish := Vector2(slot.exit) + Vector2(HALF, HALF)
-	var lead_in := start + Vector2(_inward(slot.rect, slot.entry)) * float(LAYOUT.LEAD)
-	var lead_out := finish + Vector2(_inward(slot.rect, slot.exit)) * float(LAYOUT.LEAD)
-	var along := lead_out - lead_in
-	var length := sqrt(along.x * along.x + along.y * along.y)
-	var normal := Vector2(-along.y, along.x) / maxf(length, 1.0)
-	var margin: int = LAYOUT.SPINE_MARGIN
-	var low := Vector2(slot.rect.position + Vector2i(margin, margin)) + Vector2(HALF, HALF)
-	var high := Vector2(slot.rect.end - Vector2i(margin, margin)) - Vector2(HALF, HALF)
-	var side := 1.0 - 2.0 * float(rng.next_int(2))
-	var spine: Array[Vector2] = [start, lead_in]
-	for step in range(1, LAYOUT.SPINE_MIDS + 1):
-		var t := float(step) / float(LAYOUT.SPINE_MIDS + 1)
-		var sway := float(LAYOUT.SWAY_MIN + rng.next_int(LAYOUT.SWAY_SPAN + 1))
-		var point := lead_in + along * t + normal * (sway * side)
-		spine.append(
-			Vector2(maxf(low.x, minf(point.x, high.x)), maxf(low.y, minf(point.y, high.y)))
+	if slot.id == Region.BLUEWATER_CROSSING:
+		return BluewaterCrossingRegion.waypoints(
+			slot, BluewaterCrossingRegion._span(slot.river, slot.entry.y)
 		)
-		side = -side
-	spine.append(lead_out)
-	spine.append(finish)
+	var heading := Vector2(_inward(slot.rect, slot.entry))
+	var arriving := -Vector2(_inward(slot.rect, slot.exit))
+	var corner := Vector2(finish.x, start.y) if heading.y == 0.0 else Vector2(start.x, finish.y)
+	var leg_in := (corner - start).length()
+	var leg_out := (finish - corner).length()
+	var radius := minf(float(LAYOUT.BEND_RADIUS), minf(leg_in, leg_out))
+	var first := corner - heading * radius
+	var last := corner + arriving * radius
+	var middle := corner + (-heading + arriving) * (radius * (1.0 - sqrt(HALF)))
+	var spine: Array[Vector2] = [start]
+	_fill(spine, first)
+	spine.append(middle)
+	spine.append(last)
+	_fill(spine, finish)
 	return spine
+
+
+## Adds the waypoints from the last one to `to`, evenly spaced `SPINE_SPACING` apart or less.
+static func _fill(spine: Array[Vector2], to: Vector2) -> void:
+	var from := spine[spine.size() - 1]
+	var steps := int(floor((from.distance_to(to) - HALF) / LAYOUT.SPINE_SPACING)) + 1
+	for step in range(1, steps + 1):
+		spine.append(from + (to - from) * (float(step) / float(steps)))
 
 
 ## The direction into the region from the border edge a gate cell is on.

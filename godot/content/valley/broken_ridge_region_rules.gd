@@ -14,4 +14,4 @@ const RIDGE_LEVEL := 2
 ## the road as they are cells from it, so road, step and top form a ramp.
 const PLATEAU_RING := 2
 ## Placements of the low blocks tried (each with every site for the high block).
-const LOW_TRIES := 6
+const LOW_TRIES := 24

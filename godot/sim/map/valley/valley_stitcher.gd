@@ -32,7 +32,7 @@ static func build(
 			again[problem.section] = true
 		for id in again:
 			attempts[id] += 1
-			if attempts[id] >= VALLEY.MAX_SECTION_ATTEMPTS:
+			if attempts[id] >= plan.section_attempts:
 				if not quiet:
 					push_error(
 						"valley seed %d: section %d fails: %s" % [seed, id, problems[0].text]
