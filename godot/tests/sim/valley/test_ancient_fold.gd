@@ -135,7 +135,7 @@ func test_game_create_style_routes_agree_at_the_join() -> void:
 		var offset := Route.join_offset(main, second, map.feeder_length, map.join_index)
 		# a foe from the feeder is `offset` further along than the main road's foe at the join
 		# (the feeder is shorter than the road before the join, so the offset is negative)
-		assert_ne(offset, 0.0, "seed %d" % seed)
+		assert_lt(offset, 0.0, "seed %d" % seed)
 		var settle := Route.JOIN_SETTLE_CELLS
 		var at_main := main.cell_distance(map.join_index + settle)
 		var at_second := second.cell_distance(map.feeder_length + settle)
@@ -149,3 +149,8 @@ func test_ruin_cells_never_block_the_walk_along_either_route() -> void:
 		for route in map.routes:
 			for cell in route:
 				assert_true(map.is_walkable(cell), "seed %d cell %s" % [seed, cell])
+
+
+func test_every_seed_up_to_300_makes_a_valley() -> void:
+	for seed in range(1, 301):
+		assert_not_null(MapGen.generate_valley(seed), "seed %d" % seed)

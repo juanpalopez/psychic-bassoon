@@ -1,6 +1,5 @@
-## Section E, Ancient Fold (#388): ruins, and the secondary entrance that opens after wave 10.
-## The feeder is a straight run from the board's top or bottom edge down to the main road; it
-## joins before the Heartkeep Approach, and at least four socket blocks cover the join.
+## Section E, Ancient Fold (#388): ruins, and the secondary entrance that opens after wave 10:
+## a straight feeder from the board's top or bottom edge, with socket blocks around its join.
 class_name AncientFold
 extends ValleySection
 
@@ -11,7 +10,7 @@ const VALLEY := preload("res://content/valley/valley_rules.gd")
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var fallback := SectionResult.create(slot)
 	fallback.road.assign(_road(slot, [slot.exit.x], [slot.exit.y]))
-	for _try in FOLD.ROAD_TRIES:
+	for _draw in FOLD.ROAD_DRAWS:
 		var road := _random_road(slot, rng)
 		if road.is_empty():
 			continue
@@ -44,14 +43,13 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	return found
 
 
-## A road that winds: `FOLD.LEGS_MIN` to `LEGS_MAX` extra horizontal legs, each reached by a
-## vertical run at a drawn column, so a narrow strip has more road for socket blocks to touch.
+## A road that winds through extra legs, so a narrow strip has more road for blocks to touch.
 ## Empty when the road would cross itself.
 func _random_road(slot: ValleyPlan.Slot, rng: Rng) -> Array[Vector2i]:
 	var columns: Array[int] = []
 	var rows: Array[int] = []
 	var row := slot.entry.y
-	var span := slot.rect.size.y - 2 * FOLD.MID_ROW_MARGIN
+	var span := slot.rect.size.y - FOLD.MID_ROW_MARGIN - FOLD.MID_ROW_MARGIN
 	for _leg in FOLD.LEGS_MIN + rng.next_int(FOLD.LEGS_MAX - FOLD.LEGS_MIN + 1):
 		columns.append(slot.rect.position.x + rng.next_int(slot.rect.size.x))
 		row = FOLD.MID_ROW_MARGIN + rng.next_int(span)
@@ -67,8 +65,7 @@ func _random_road(slot: ValleyPlan.Slot, rng: Rng) -> Array[Vector2i]:
 	return road
 
 
-## The road through the turns: from the entry along its row to the first column, along that
-## column to the first row, along that row to the next column, and so on to the exit.
+## The road through the turns: along a row to a column, along it to a row, and so on to the exit.
 func _road(slot: ValleyPlan.Slot, columns: Array[int], rows: Array[int]) -> Array[Vector2i]:
 	var road: Array[Vector2i] = [slot.entry]
 	var cell := slot.entry
@@ -87,8 +84,7 @@ func _road(slot: ValleyPlan.Slot, columns: Array[int], rows: Array[int]) -> Arra
 	return road
 
 
-## Every feeder that fits the road, as [cells, join]: a straight run down a column from the top
-## edge or up from the bottom edge to the first road cell.
+## Every feeder that fits the road, as [cells, join]: a straight column from an edge.
 func _feeders(slot: ValleyPlan.Slot, road: Array[Vector2i]) -> Array:
 	var rows := slot.rect.size.y
 	var found := []
@@ -97,7 +93,7 @@ func _feeders(slot: ValleyPlan.Slot, road: Array[Vector2i]) -> Array:
 	for from_top in [true, false]:
 		for x in range(first, last + 1):
 			var cells: Array[Vector2i] = []
-			var join := Vector2i(-1, -1)
+			var join := FOLD.NO_JOIN
 			for step in rows:
 				var cell := Vector2i(x, step if from_top else rows - 1 - step)
 				if road.has(cell):
@@ -138,8 +134,7 @@ func _shuffled(items: Array, rng: Rng) -> Array:
 	return out
 
 
-## The merge blocks (found by a search over the sites in a shuffled order, so the seed picks
-## which fit), then one beside each bend they leave bare, then the rest.
+## The merge blocks, then one beside each bend they leave bare, then the rest.
 func _place_sockets(slot: ValleyPlan.Slot, rng: Rng, result: SectionResult) -> void:
 	var sites := _shuffled(SectionSockets.candidates(result, _blocked(slot, result)), rng)
 	var near: Array = sites.filter(
@@ -150,7 +145,7 @@ func _place_sockets(slot: ValleyPlan.Slot, rng: Rng, result: SectionResult) -> v
 	for anchor in merge:
 		result.add_socket(anchor, 0, SectionResult.Tag.MERGE)
 	for bend in SectionSockets.bends(result.road):
-		var best := SectionSockets._nearest(sites, bend, result.sockets)
+		var best := _closest(sites, bend, result.sockets)
 		if not _covers(result, bend) and best.x >= 0:
 			result.add_socket(best, 0, SectionResult.Tag.BEND)
 	var target := FOLD.SOCKET_MIN + rng.next_int(FOLD.SOCKET_MAX - FOLD.SOCKET_MIN + 1)
@@ -171,6 +166,18 @@ func _sockets_ok(result: SectionResult) -> bool:
 			return false
 	var count := result.sockets.size()
 	return near >= FOLD.MERGE_COVER_MIN and count >= FOLD.SOCKET_MIN and count <= FOLD.SOCKET_MAX
+
+
+## The site closest to the bend that keeps the gaps, or `NO_JOIN` when none does.
+func _closest(sites: Array, bend: Vector2i, chosen: Array[Vector2i]) -> Vector2i:
+	var best := FOLD.NO_JOIN
+	var best_gap := INF
+	for site in sites:
+		var gap := SectionSockets.centre_gap(site, bend)
+		if gap < best_gap and SectionSockets.keeps_distance(site, chosen):
+			best = site
+			best_gap = gap
+	return best
 
 
 func _covers(result: SectionResult, bend: Vector2i) -> bool:
