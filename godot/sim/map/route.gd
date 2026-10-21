@@ -97,6 +97,25 @@ static func build_curved(cells: Array[Vector2i]) -> Route:
 	return route
 
 
+## Builds the route for a road that has its own curve (the sectioned valley's spline roads, #404):
+## the spawn point, then the curve's points; each of `cells` stands for the point the curve gives
+## it. Returns null for an empty path.
+static func build_from_curve(cells: Array[Vector2i], curve: RoadCurve) -> Route:
+	if cells.is_empty():
+		push_error("a route needs at least one cell")
+		return null
+	var route := Route.new()
+	route.curved = true
+	_add_spawn(route, cells)
+	var shift := route.xs.size()
+	route.xs.append_array(curve.xs)
+	route.ys.append_array(curve.ys)
+	for point in curve.cell_points:
+		route.cell_points.append(point + shift)
+	_measure(route)
+	return route
+
+
 ## A straight line from one point to another (the flight of a flying foe). It has no road cells,
 ## so `cell_points` stays empty and `cell_distance` is not for it.
 static func straight(from_x: float, from_y: float, to_x: float, to_y: float) -> Route:
