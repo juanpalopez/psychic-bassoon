@@ -60,6 +60,7 @@ static func _assemble(plan: ValleyPlan, results: Array[SectionResult]) -> GameMa
 			map.routes.append(route)
 			map.feeder_length = result.feeder.size()
 			map.join_index = join
+	map.route_curves = _route_curves(map, results)
 	map.tiles = MapGen._tiles_for(map.routes, plan.cols, plan.rows)
 	var last := map.path[map.path.size() - 1]
 	map.heartstone = MapGen._heartstone_block(last, plan.cols, plan.rows, map.footprint)
@@ -105,3 +106,33 @@ static func _grid(map: GameMap) -> Array[PackedByteArray]:
 		line.resize(map.cols)
 		grid.append(line)
 	return grid
+
+
+## The curves foes walk, one per route: the sections' spline roads joined end to end (a section
+## with no spline contributes its cell centres), and the second route as its own cells and then
+## the main curve from the join on, so both are the same line after the join. Empty when no
+## section has a spline.
+static func _route_curves(map: GameMap, results: Array[SectionResult]) -> Array:
+	var any_spline := false
+	var main := RoadCurve.new()
+	for result in results:
+		any_spline = any_spline or result.road_curve != null
+		main.append_curve(
+			result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)
+		)
+	if not any_spline:
+		return []
+	var curves: Array = [main]
+	if map.routes.size() > 1:
+		var second := RoadCurve.from_cells(map.routes[1].slice(0, map.feeder_length))
+		var tail := RoadCurve.new()
+		var first_point := main.cell_points[map.join_index]
+		for index in range(first_point, main.xs.size()):
+			tail.xs.append(main.xs[index])
+			tail.ys.append(main.ys[index])
+		for index in range(map.join_index, main.cells.size()):
+			tail.cells.append(main.cells[index])
+			tail.cell_points.append(main.cell_points[index] - first_point)
+		second.append_curve(tail)
+		curves.append(second)
+	return curves

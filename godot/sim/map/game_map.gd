@@ -40,6 +40,9 @@ var path: Array[Vector2i] = []
 ## a second one leaves the main road, runs beside it and rejoins it. Each item
 ## is an `Array[Vector2i]`.
 var routes: Array = []
+## For each route, the `RoadCurve` foes walk, or null to round its grid path's corners (the old
+## boards, and any route a section gave no spline for, #404). Empty when no route has one.
+var route_curves: Array = []
 ## With a second spawn source: how many cells of `routes[1]` come before the main road (the
 ## feeder), and the index in `path` of the cell where it joins. Both are 0 without one.
 var feeder_length: int = 0

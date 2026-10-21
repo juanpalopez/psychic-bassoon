@@ -28,8 +28,15 @@ static func create(
 	# the valley board walks curves through the road's corners (#321); the classic boards keep
 	# the grid route their tests pin
 	var curved := cols >= MAP_RULES.VALLEY_MIN_COLS
-	for cells in game.map.routes:
-		game.routes.append(Route.build_curved(cells) if curved else Route.build(cells))
+	for index in game.map.routes.size():
+		var cells: Array[Vector2i] = game.map.routes[index]
+		var curve: RoadCurve = (
+			game.map.route_curves[index] if index < game.map.route_curves.size() else null
+		)
+		if curve != null:
+			game.routes.append(Route.build_from_curve(cells, curve))
+		else:
+			game.routes.append(Route.build_curved(cells) if curved else Route.build(cells))
 	game.route = game.routes[0]
 	var block := game.map.heartstone
 	var heart_x := float(block.position.x) + float(block.size.x) / 2.0

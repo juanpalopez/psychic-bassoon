@@ -11,6 +11,9 @@ var id: int = 0
 var rect := Rect2i()
 ## The main road through the strip, from the slot's entry to its exit.
 var road: Array[Vector2i] = []
+## The curve foes walk through this strip when its road is a spline (`road` is its cells), else
+## null: the stitcher then joins the road's cell centres.
+var road_curve: RoadCurve = null
 ## The second road's cells before the main road (the feeder), ending next to the cell where it
 ## joins; only the section that holds the merge fills it.
 var feeder: Array[Vector2i] = []
