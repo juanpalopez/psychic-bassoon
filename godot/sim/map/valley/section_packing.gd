@@ -1,6 +1,5 @@
-## Socket packing for the two end sections (#384). A strip is only four to seven columns wide, so
-## blocks are packed in scan order along the road (three rows apart in a lane) after one block
-## covers each bend; a shuffled fill leaves gaps that waste the few sites there are.
+## Socket packing for the two end sections (#384): one block per bend, then scan order along the
+## road, since a shuffled fill wastes the few sites of a narrow strip.
 class_name SectionPacking
 extends RefCounted
 
