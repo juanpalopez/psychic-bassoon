@@ -218,7 +218,9 @@ func _small_and_big(main: Node) -> Array[Vector2i]:
 	var big := GameMap.NO_SOCKET
 	for anchor in game.map.sockets:
 		var at := _rig(main).camera().unproject_position(_top(main, anchor))
-		if not Rect2(Vector2.ZERO, size).grow(-20.0).has_point(at):
+		# clear of the top row and of the build bar (88 px at the bottom), which would ease a
+		# selected socket to the middle: a flight of its own
+		if not Rect2(Vector2(20.0, 140.0), size - Vector2(40.0, 140.0 + 200.0)).has_point(at):
 			continue
 		if main.socket_tappable(anchor):
 			big = anchor if big == GameMap.NO_SOCKET else big

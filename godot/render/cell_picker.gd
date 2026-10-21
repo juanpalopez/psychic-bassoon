@@ -26,8 +26,9 @@ static func cell_at(
 		return BoardSpace.NO_CELL
 	if not surface_height.is_valid():
 		return BoardSpace.world_to_cell(hit as Vector3)
-	# walk from the height of the tallest tile down to the ground
-	var from_ground := ((hit as Vector3) - origin).length()
+	# walk from the height of the tallest tile down to the floor of the gorge (the river's
+	# surface lies below the ground plane, so a tap on the water needs the walk to go on)
+	var from_ground := (origin.y - TerrainField.GORGE_FLOOR) / absf(direction.y)
 	var from_top := from_ground - TOP / absf(direction.y)
 	var distance := maxf(from_top, 0.0)
 	while distance < from_ground:
