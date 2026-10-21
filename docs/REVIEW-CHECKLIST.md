@@ -33,18 +33,19 @@ A re-review is worth its cost when logic changed (code under `godot/sim`, the ti
 
 Run `gh pr checks <N>` first. Lint, types, unit tests, the Linux desktop export and its checked headless run (a clean log: no `ERROR:`, `SCRIPT ERROR:` or `SHADER ERROR:` line, exit 0, no timeout; nothing is rendered, so judge visuals from screenshots), and the PR title and commit format are already proven by CI when green: do not re-run them. Spend the effort on what CI cannot see: logic, missing tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough (for example, mutate the code and see if a test fails). If CI is red, missing or not yet run, say so and run only the minimum you need.
 
-## Review a stack as a whole
+## Review a stack in parallel (owner, 2026-10-21)
 
-A stack (PRs linked with `gh stack`) gets one review pass, not one reviewer per PR. This avoids paying for the same context seven times and catches problems that only show across layers.
+A stack (PRs linked with `gh stack`, or sibling PRs of one epic) gets one reviewer per PR, all started at once, each at the tier of its own PR. They share a stack directory, so they work in parallel and still see each other's findings. Waiting for one reviewer to read seven diffs in turn was the slowest step of a stack; the extra tokens are the price of finishing in the time of the slowest PR.
 
-- **Launch once.** One reviewer gets all the PR numbers, bottom to top, with each PR's base, head commit and ticket. Read the checklist and shared context once.
-- **Per-PR diffs.** Review each PR's own diff (its base to its head), in stack order, never the cumulative diff.
-- **Group by tier.** All PRs of one tier in the stack go in one review of that tier. A single-tier stack is one review.
-- **Cross-PR checks.** Look for what only a whole-stack view shows: a higher layer breaking an assumption of a lower one, duplicated or contradictory work, a ticket's requirement landing in the wrong PR, and config drift between layers (versions, scripts, paths, workflow names).
-- **Limits.** The tool-call limit of the tier applies to the whole review, plus 4 more calls per extra PR. Output limits apply per PR, plus at most 3 stack-level findings.
-- **Report.** One section per PR (`Reviewed commit`, findings, verdict), then a short `Stack-level` section.
-- **Posting.** Post each PR's section as a comment on that PR, and the stack-level section on the top PR.
-- **Fixes and re-review.** Fix a finding in the PR it belongs to, then `gh stack sync`. Re-review only the changed PRs and the ones above them, as a delta.
+- **The caller prepares the stack directory** (in the scratchpad, for example `<scratchpad>/review-<epic>/`) with one file, `stack.md`: the PRs bottom to top with base, head commit, ticket, tier and what each layer adds; the decision record to read; what must NOT change (for example the old pipeline and goldens); and the cross-PR questions to check (a higher layer breaking a lower one, two PRs editing the same file, a ticket requirement landing in the wrong PR, config drift between layers). Also run `gh pr checks` for every PR and put the result in `stack.md`.
+- **The caller starts every reviewer in one message** (background agents): PR number, tier and model (`haiku`, `sonnet`, `opus`), the stack directory, and the tool budget of the tier.
+- **Each reviewer** reads `stack.md`, reviews its own PR's diff (base to head, never the cumulative diff), and writes `report-<N>.md` in the stack directory. Before it finishes it lists the other `report-*.md` and `notes-*.md` files that exist and reads them. It appends to `notes-<N>.md` any fact a sibling needs (a function it saw changed, a constant two PRs both edit) and records in its own report only the interactions it confirmed. It writes only inside the stack directory.
+- **Same-tier PRs that touch the same files** may share one reviewer; say so in `stack.md`.
+- **Integration checks, mandatory for generators, plans and anything with seeds:** merge the PR head onto the CURRENT base in a scratch worktree and run the tests of the touched area (CI ran on the head's old base, so it can be stale: a section PR that passed CI failed on the newer base). For a stack or a set of siblings, also merge them all in one scratch branch and run the suite of the area. Sweep a generator over more seeds than the PR's own tests (a sweep of 300 hid a 0.9% failure that showed at 3,000 seeds).
+- **Loosened rules:** a PR that lowers a minimum, widens a tolerance, raises a budget or drops a check against its ticket is a finding unless the PR body gives a measured reason.
+- **The caller then reads the reports**, merges the `Stack-level` points (at most 3), and posts each PR's report as a comment on that PR (the stack-level section on the top PR). The reviewers never post.
+- **Fixes and re-review.** Fix a finding in the PR it belongs to (an agent author may be resumed with the findings). Re-review only the changed PRs and the ones above them, as a delta, with the earlier findings and the diff since the reviewed commit.
+- **Slash command.** `/review-stack <PR numbers>` (`.claude/commands/review-stack.md`) does the preparation and the launch.
 
 ## What to check
 
