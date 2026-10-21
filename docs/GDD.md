@@ -107,9 +107,9 @@ A hand-authored reference map should communicate six distinct region types. Proc
 
 The image below is an **illustrative level-design reference**, not an authoritative procedural seed or collision/navigation map. Use the current constraints in `godot/content/map_rules.gd` and `docs/lessons/2026-10-18-valley-map.md` for implementation.
 
-![Folded Valley tactical map concept](art/maps/folded-valley-tactical-concept.svg)
+![Generated Folded Valley map concept](art/maps/folded-valley-generated-reference.jpg)
 
-This editable SVG is a schematic reference; its route and sockets must be validated against Godot's map generation rules.
+[Open the editable tactical schematic](art/maps/folded-valley-tactical-concept.svg). The schematic is a gameplay reference; its route and sockets must be validated against Godot's map generation rules.
 
 ## 5. Towers, upgrades and tower skills
 
