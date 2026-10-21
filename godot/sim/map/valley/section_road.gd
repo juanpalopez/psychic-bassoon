@@ -1,5 +1,5 @@
-## Road shape shared by the two end sections (#384): a snake of long vertical runs, because a
-## strip is only four to seven columns wide and a socket block needs a road run beside it.
+## Road shape of the two end sections (#384): long vertical runs, since a socket block needs a
+## run beside it and a strip is only four to seven columns wide.
 class_name SectionRoad
 extends RefCounted
 

@@ -32,7 +32,6 @@ static func pack(
 	var sites := SectionSockets.candidates(result, blocked)
 	if rng.next_int(2) == 1:
 		sites.reverse()
-	var target: int = blocks.y
 	var bends := SectionSockets.bends(result.road)
 	if join_bend != NO_BEND:
 		bends.push_front(join_bend)
@@ -44,7 +43,7 @@ static func pack(
 		):
 			result.add_socket(best, 0, SectionResult.Tag.BEND)
 	for site in sites:
-		if result.sockets.size() >= target:
+		if result.sockets.size() >= blocks.y:
 			break
 		if SectionSockets.keeps_distance(site, result.sockets):
 			result.add_socket(site, 0, SectionResult.Tag.LOW)
@@ -61,17 +60,15 @@ static func _nearest(sites: Array[Vector2i], bend: Vector2i, chosen: Array[Vecto
 	return best
 
 
-## The problems of a turn on the road's first or last cell: none when a block of the strip covers
-## it (the valley check accepts a block of any strip, but a section must not count on one).
+## No problems when a block of the strip covers the join bend (the valley check accepts any
+## strip's block, but a section must not count on one).
 static func join_problems(result: SectionResult, join_bend: Vector2i) -> Array[String]:
-	var found: Array[String] = []
-	if join_bend == NO_BEND:
-		return found
 	for anchor in result.sockets:
 		if SectionSockets.centre_gap(anchor, join_bend) <= VALLEY.BEND_COVER_REACH:
-			return found
-	found.append("no socket block covers the join bend at %s" % join_bend)
-	return found
+			return []
+	return (
+		[] if join_bend == NO_BEND else ["no socket block covers the join bend at %s" % join_bend]
+	)
 
 
 ## The first road shape (a `variant` of `SectionRoad.snake`, the Z last) whose draw passes the
