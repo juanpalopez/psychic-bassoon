@@ -8,9 +8,6 @@ const TOWERS := preload("res://content/towers.gd")
 
 const CRYO := "cryoOrigamiSpire"
 const BLOT := "blotSingularity"
-## A valley seed whose second road joins the main road before the stretch the Spire covers
-## (on the curved routes, #321), so a foe of either source stands there on the main road.
-const TWO_ROAD_SEED := 8
 
 
 ## A Prism Spire at the top level with the spec chosen and the active ready.
@@ -298,11 +295,15 @@ func test_ink_vortex_with_only_a_flyer_in_reach_is_refused() -> void:
 
 func test_ink_vortex_pulls_a_foe_of_the_second_spawn_source_on_the_main_road() -> void:
 	var found := false
-	for map_seed in [TWO_ROAD_SEED]:
+	for map_seed in range(1, 40):
 		var probe := Game.create(map_seed)
 		if probe.routes.size() < 2 or probe.random_lanes:
 			continue
-		var scene := TowerFireKit.scene("prismSpire", map_seed)
+		# the second road joins the main road far along it (section E): stand past the join
+		var main_join: float = (
+			probe.routes[1].cell_distance(probe.map.feeder_length) - probe.second_offset
+		)
+		var scene := TowerFireKit.scene("prismSpire", map_seed, false, null, main_join + 3.0)
 		var game := scene.game
 		game.buttons = 100000
 		Game.submit(game, Command.upgrade(scene.tower.id))

@@ -6,13 +6,14 @@
 ##   godot --headless --path godot -s tools/write_replays_golden.gd
 extends SceneTree
 
-## Seed, bot profile and waves: a won run, a lost run, and each strategy (the last
-## one builds Guard Tents and a Mess Tent, so the barracks tick path is covered).
+## Seed, bot profile and waves on the sectioned valley (#381): won runs, a lost run, and each
+## strategy (the last one builds Guard Tents and a Mess Tent, so the barracks tick path is
+## covered).
 const GAMES := [
-	[7, "mix", 20],
+	[6, "mix", 20],
 	[1, "spoolOnly", 20],
 	[4, "mortarHeavy", 20],
-	[5, "mix", 20],
+	[3, "spoolOnly", 20],
 	[3, "prismHeavy", 6],
 	[2, "guardMix", 20],
 ]
