@@ -224,7 +224,10 @@ jobs:
           GUT_TESTS: ${{ needs.changes.outputs.gut }}
         run: |
           if [ -z "$GUT_TESTS" ] || [ "$GUT_TESTS" = "all" ]; then
-            "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gexit
+            # one Godot process per test script, one worker per core (up to 8): the suite is
+            # single-threaded, and the valley tests alone took the serial run past the job's 30
+            # minutes (#420)
+            bash scripts/run-gut-parallel.sh
           else
             # only the tests that reach a changed file (scripts/select-tests.mjs)
             echo "GUT subset: ${GUT_TESTS}"

@@ -15,8 +15,10 @@ if [ "$jobs" -le 0 ]; then
   [ "$jobs" -gt 8 ] && jobs=8
 fi
 dir="$(mktemp -d /tmp/gut-par.XXXXXX)"
+# the Godot binary: CI sets GODOT, a developer machine has `godot` on the PATH
+export GODOT_BIN="${GODOT:-godot}"
 export dir
-godot --headless --path godot --import >/dev/null 2>&1
+"$GODOT_BIN" --headless --path godot --import >/dev/null 2>&1
 # biggest first
 find godot/tests -name 'test_*.gd' -exec wc -c {} + | grep -v ' total$' | sort -rn \
   | awk '{print $2}' >"$dir/scripts.txt"
@@ -24,7 +26,7 @@ run_one() {
   path="$1"
   name="$(echo "$path" | tr '/' '_')"
   start=$(date +%s)
-  godot --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 \
+  "$GODOT_BIN" --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 \
     -gtest="res://${path#godot/}" -gexit >"$dir/$name.log" 2>&1
   echo "$(( $(date +%s) - start )) $path" >>"$dir/times.txt"
 }
