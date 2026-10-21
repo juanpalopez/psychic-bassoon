@@ -12,9 +12,10 @@ The sectioned valley (2026-10-20, #381) cuts the board into six full-height colu
 
 ## Decision
 - **Regions, not strips.** `ValleyPlan` places the six sections as rectangles of a 2D layout (A top left, B top middle, C the river crossing in the middle, D bottom left, E top right, F bottom right, as in the reference; the road still visits them in the lore order A to F). The seed moves the borders and the gate points. A section owns its rectangle, not a full-height column.
+- **The road visits the regions in the map's order: Outer March, Sunken Meadow, Bluewater Crossing, Broken Ridge, Ancient Fold, Heartkeep Approach** (owner, 2026-10-21, option 1 of the road-order question; the earlier fixed order A to F of `2026-10-20-sectioned-valley.md` is superseded for the order only, the road still crosses all six and the order is the same for every seed). The section ids are renumbered in road order.
+- **The river is a plan-level spline** from the top edge to the bottom edge that winds across the regions; every section keeps its road and sockets off it, and only Bluewater Crossing bridges it (a road bridge and a hero-only bridge).
 - **The road is a spline.** Each section gives waypoints; the road is a Catmull-Rom spline through them (only `+ - * /`). The route foes walk (`Route`, the truth for movement, range and hits) is built from the spline's points; the road cells (tiles, sockets, walkable, checks) are the spline rasterised to unit steps, so `ValleyChecks` and the stitcher keep their rules.
 - **Lane gap.** `ValleyChecks` rejects a section whose road has two stretches closer than a minimum gap (content), so a snake of lanes is a failed section, not a style.
-- **The river is a spline too**, crossing the road on the bridge and keeping its own course.
 - The frozen fixtures, the ported route-first generator and the old boards do not change; only the sectioned valley's routes do (goldens re-recorded under this record, deep tier).
 
 ## Alternatives considered
