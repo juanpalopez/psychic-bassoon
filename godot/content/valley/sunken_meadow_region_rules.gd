@@ -5,9 +5,6 @@ extends RefCounted
 ## Socket blocks the region keeps (least, most).
 const SOCKETS_LEAST := 4
 const SOCKETS_MOST := 5
-## The walkable ground joined to the entry covers at least this many cells (the smallest region
-## the layout draws is 9 by 10).
-const MIN_OPEN_AREA := 70
 ## Boulder clusters (least, most) and the longest side of one (cells), each tried this often.
 ## A cluster keeps one empty cell from the road, the blocks, the river, other clusters and the
 ## region's edge, so it never cuts the walkable ground in two.

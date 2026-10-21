@@ -60,7 +60,7 @@ func test_boulders_never_cut_the_walkable_ground() -> void:
 			for x in range(result.rect.position.x, result.rect.end.x):
 				if result.region_at(Vector2i(x, y)) == GameMap.Region.ROCKS:
 					boulders += 1
-		assert_eq(drawn[1].extra_problems(drawn[0].slots[ID], result).size(), 0, "seed %d" % seed)
+		assert_true(_one_piece(drawn[0].slots[ID], result), "seed %d" % seed)
 	assert_gt(boulders, 0)
 
 
@@ -86,3 +86,21 @@ func test_the_same_seed_draws_the_same_meadow() -> void:
 		assert_eq(a.sockets, b.sockets)
 		assert_eq(a.heights, b.heights)
 		assert_eq(a.walkable, b.walkable)
+
+
+## True when every walkable cell of the region joins the entry.
+func _one_piece(slot: ValleyPlan.Slot, result: SectionResult) -> bool:
+	var walkable := 0
+	for y in range(slot.rect.position.y, slot.rect.end.y):
+		for x in range(slot.rect.position.x, slot.rect.end.x):
+			walkable += 1 if result.is_walkable(Vector2i(x, y)) else 0
+	var seen := {slot.entry: true}
+	var queue: Array[Vector2i] = [slot.entry]
+	while not queue.is_empty():
+		var cell: Vector2i = queue.pop_back()
+		for step in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
+			var next: Vector2i = cell + step
+			if slot.rect.has_point(next) and not seen.has(next) and result.is_walkable(next):
+				seen[next] = true
+				queue.append(next)
+	return seen.size() == walkable and walkable >= 70

@@ -22,26 +22,6 @@ func socket_range() -> Vector2i:
 	return Vector2i(MEADOW.SOCKETS_LEAST, MEADOW.SOCKETS_MOST)
 
 
-## The walkable ground joined to the entry is large and holds every walkable cell of the region.
-func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[String]:
-	var walkable := 0
-	for y in range(slot.rect.position.y, slot.rect.end.y):
-		for x in range(slot.rect.position.x, slot.rect.end.x):
-			walkable += 1 if result.is_walkable(Vector2i(x, y)) else 0
-	var seen := {slot.entry: true}
-	var queue: Array[Vector2i] = [slot.entry]
-	while not queue.is_empty():
-		var cell: Vector2i = queue.pop_back()
-		for step in [Vector2i.LEFT, Vector2i.RIGHT, Vector2i.UP, Vector2i.DOWN]:
-			var next: Vector2i = cell + step
-			if slot.rect.has_point(next) and not seen.has(next) and result.is_walkable(next):
-				seen[next] = true
-				queue.append(next)
-	if seen.size() < MEADOW.MIN_OPEN_AREA or seen.size() != walkable:
-		return ["the open area is %d of %d walkable cells" % [seen.size(), walkable]]
-	return []
-
-
 func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var result := SectionResult.create(slot)
 	var curve := RoadSpline.build(slot.spine)
