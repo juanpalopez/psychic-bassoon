@@ -61,7 +61,7 @@ The ids in the code are stable keys; the GDD renames what the player sees and ad
 | Warlord | Cardboard Golem |
 | (none) | Razor Moth (flying), Ink Shaman (support), the hero, the spells, the tech tree |
 | Heartstone, lives | The Heartstone's health (the Heartstone returns in the 2026-10-12 GDD; the code says `heartstone_health`) |
-| Free plots on every non-road cell | 24 to 30 sockets on the 32x20 valley (#320; 12 to 15, mostly 12, on the 16x11 board before) |
+| Free plots on every non-road cell | 21 to 30 sockets on the 32x20 valley (#320, built from six fixed sections since #381, whose narrow strips can hold fewer; 12 to 15, mostly 12, on the 16x11 board before) |
 | Gold | Buttons (in a run), Golden Staples (between runs) |
 
 ### Gaps in the GDD
@@ -407,7 +407,7 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 4. Tier 4: the eight specialisations with one active and one passive each; a command to choose one and one to activate an ability (framework and the Crossbow Ballista in #273; see `docs/lessons/2026-10-16-tier4-framework.md`).
 5. The hero: the Knight of Cardboard (movement command, Rally Cry, Blade Whirl), moved anywhere walkable on the map, a little like an RTS (owner, 2026-10-18; #275, #335).
 6. Global spells and the Toolbox Tray: PVA Glue Trap, Falling Thumbtacks, The Crafter's Eraser, with Crafting Energy.
-7. Map depth: the 32x20 valley (#320), curved routes the sim walks (#321), the terrain layer with terraces, regions and a river (#322), bridges held by guards posted on them (#323, owner 2026-10-18), tape strips and PVA puddles (#277). Drawbridges and levers stay dropped (owner, 2026-10-12).
+7. Map depth: the 32x20 valley (#320), built from six fixed sections, each with its own recipe, stream and checks (Outer March, Broken Ridge, Bluewater Crossing, Sunken Meadow, Ancient Fold, Heartkeep Approach; epic #381, `docs/lessons/2026-10-20-sectioned-valley.md`), curved routes the sim walks (#321), the terrain layer with terraces, regions and a river (#322), bridges held by guards posted on them (#323, owner 2026-10-18), tape strips and PVA puddles (#277). Drawbridges and levers stay dropped (owner, 2026-10-12).
 8. Balance: headless runs for each new foe and tower; each foe needs at least two answers at tier 3 and a third from a specialisation.
 
 **Gate checklist**
