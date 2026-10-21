@@ -5,15 +5,37 @@ class_name SectionPacking
 extends RefCounted
 
 const VALLEY := preload("res://content/valley/valley_rules.gd")
+## "No join bend", a cell off every board.
+const NO_BEND := Vector2i(-1, -1)
 
 
-## Fills the result's sockets with `blocks.x` to `blocks.y` blocks (never over `blocked`).
-static func pack(result: SectionResult, blocks: Vector2i, rng: Rng, blocked: Array[Rect2i]) -> void:
+## The turn a strip's road makes with its neighbour: its last cell (`at_end`) when the road
+## arrives there vertically, since the next strip's road leaves it sideways, or its first cell
+## when it leaves it vertically, since the previous strip's road arrives sideways.
+static func join_bend(road: Array[Vector2i], at_end: bool) -> Vector2i:
+	if at_end:
+		var last := road[road.size() - 1]
+		return last if road[road.size() - 2].x == last.x else NO_BEND
+	return road[0] if road[1].x == road[0].x else NO_BEND
+
+
+## Fills the result's sockets with up to `blocks.y` blocks (never over `blocked`). `join_bend` is
+## a turn on the road's first or last cell, covered like the bends inside the strip.
+static func pack(
+	result: SectionResult,
+	blocks: Vector2i,
+	rng: Rng,
+	blocked: Array[Rect2i],
+	join_bend: Vector2i = NO_BEND
+) -> void:
 	var sites := SectionSockets.candidates(result, blocked)
 	if rng.next_int(2) == 1:
 		sites.reverse()
 	var target: int = blocks.y
-	for bend in SectionSockets.bends(result.road):
+	var bends := SectionSockets.bends(result.road)
+	if join_bend != NO_BEND:
+		bends.push_front(join_bend)
+	for bend in bends:
 		var best := _nearest(sites, bend, result.sockets)
 		if (
 			best != Vector2i(-1, -1)
@@ -36,3 +58,16 @@ static func _nearest(sites: Array[Vector2i], bend: Vector2i, chosen: Array[Vecto
 			best = site
 			best_gap = gap
 	return best
+
+
+## The problems of a turn on the road's first or last cell: none when a block of the strip covers
+## it (the valley check accepts a block of any strip, but a section must not count on one).
+static func join_problems(result: SectionResult, join_bend: Vector2i) -> Array[String]:
+	var found: Array[String] = []
+	if join_bend == NO_BEND:
+		return found
+	for anchor in result.sockets:
+		if SectionSockets.centre_gap(anchor, join_bend) <= VALLEY.BEND_COVER_REACH:
+			return found
+	found.append("no socket block covers the join bend at %s" % join_bend)
+	return found

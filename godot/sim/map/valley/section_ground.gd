@@ -4,6 +4,7 @@ class_name SectionGround
 extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
+const END := preload("res://content/valley/end_rules.gd")
 
 
 ## Paints heights and regions of a result whose road and sockets are placed. Ground `terrace_gap`
@@ -24,11 +25,11 @@ static func paint(
 			var cell := Vector2i(x, y)
 			var gap := _road_gap(result.road, cell)
 			var near_heart := heart.size != Vector2i.ZERO and _rect_gap(heart, cell) <= rise_reach
-			var level := 1 if gap >= terrace_gap else 0
+			var level := END.LOW_LEVEL if gap >= terrace_gap else END.FLOOR_LEVEL
 			if near_heart and gap >= rise_gap:
-				level = 2
+				level = END.RISE_LEVEL
 			result.set_height(cell, level)
-			if gap == 1:
+			if gap == END.DIRT_GAP:
 				result.set_region(cell, GameMap.Region.DIRT)
 			elif gap >= forest_gap and not near_heart:
 				result.set_region(cell, GameMap.Region.FOREST)
@@ -43,12 +44,12 @@ static func paint(
 					result.set_height(cell, result.socket_levels[index])
 					result.set_region(cell, GameMap.Region.MEADOW)
 				else:
-					result.set_height(cell, mini(result.height_at(cell), 1))
+					result.set_height(cell, mini(result.height_at(cell), END.LOW_LEVEL))
 
 
 ## Chebyshev distance from a cell to the nearest road cell.
 static func _road_gap(road: Array[Vector2i], cell: Vector2i) -> int:
-	var best := 1000000
+	var best: int = END.NO_ROAD_GAP
 	for step in road:
 		best = mini(best, maxi(absi(step.x - cell.x), absi(step.y - cell.y)))
 	return best

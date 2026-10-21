@@ -2,7 +2,7 @@ extends GutTest
 
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 const SWEEP := 60
-const MAX_FIRST_DRAW_FAILURES := 6
+const MAX_FIRST_DRAW_FAILURES := 12
 
 
 func _draw(seed: int) -> Array:

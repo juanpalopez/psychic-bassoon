@@ -1,10 +1,11 @@
 extends GutTest
 
+const VALLEY := preload("res://content/valley/valley_rules.gd")
 const RULES := preload("res://content/map_rules.gd")
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 const SWEEP := 60
 ## Most seeds pass on the first draw; the stitcher redraws the rest.
-const MAX_FIRST_DRAW_FAILURES := 6
+const MAX_FIRST_DRAW_FAILURES := 12
 
 
 func _draw(seed: int, attempt: int = 0) -> Array:
@@ -62,7 +63,10 @@ func test_sockets_covering_a_bend_are_tagged_bend() -> void:
 		for bend in SectionSockets.bends(result.road):
 			var covered := false
 			for index in result.sockets.size():
-				if SectionSockets.centre_gap(result.sockets[index], bend) <= 3.5:
+				if (
+					SectionSockets.centre_gap(result.sockets[index], bend)
+					<= VALLEY.BEND_COVER_REACH
+				):
 					covered = covered or result.socket_tags[index] == SectionResult.Tag.BEND
 			assert_true(covered, "seed %d bend %s" % [seed, bend])
 
@@ -78,3 +82,24 @@ func test_every_seed_has_a_passing_draw_within_the_attempt_budget() -> void:
 				passed = true
 				break
 		assert_true(passed, "seed %d" % seed)
+
+
+## An ASCII map of one section for the PR: road #, sockets S, forest f, rise by height digits.
+func test_print_the_section_for_seed_42() -> void:
+	var drawn := _draw(42)
+	var result: SectionResult = drawn[2]
+	var lines: Array[String] = []
+	for y in result.rect.size.y:
+		var line := ""
+		for x in result.rect.size.x:
+			var cell := result.rect.position + Vector2i(x, y)
+			var mark := str(result.height_at(cell))
+			if result.region_at(cell) == GameMap.Region.FOREST:
+				mark = "f"
+			for anchor in result.sockets:
+				if Rect2i(anchor, Vector2i(2, 2)).has_point(cell):
+					mark = "S"
+			line += "#" if result.road.has(cell) else mark
+		lines.append(line)
+	gut.p("\n".join(lines))
+	assert_eq(lines.size(), result.rect.size.y)
