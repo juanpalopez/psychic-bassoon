@@ -79,3 +79,7 @@ The light and post live in `main.tscn` (#95): the warm sun with soft shadows, th
 - `docs/art/diorama/mock-early.jpg`: the first look-dev pass (terraces and cliffs).
 - `assets-src/diorama_lookdev/`: the Blender script that built the mock (`diorama_lookdev.py`), the mock board (`board_large.py` and `board_large.json`) and the post pass (`post.py`, numpy). It covers marching-squares terraces, corrugated walls with a soil lip, road beds forced flat, and bridges along the road polyline over gorge spans. The post pass reads a multilayer EXR and applies depth fog, height fog, glow, ACES, the grade and a depth-based tilt-shift. Its values are the starting point for #95 and #327.
 - The owner's character references (the green goblin, the blue knight, the foe sheet) are kept by the owner and are not in the repo. Never trace them or use them as input to a generator; model from them by eye.
+
+## Roster companion
+
+The detailed tower, hero and enemy roster—including role identity, established versus proposed status, material cues, silhouette rules, upgrade branches, skills and art-sheet guidance—is maintained in [`docs/UNIT_ROSTER.md`](../UNIT_ROSTER.md). Keep every unit consistent with the rules above: squarish rather than voxel, painterly rather than flat, matte paper rather than plastic, and readable at gameplay distance. Proposed roster additions should not be treated as implemented content until they are added to the simulation and balance-tested.

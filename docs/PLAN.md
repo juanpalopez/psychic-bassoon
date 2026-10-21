@@ -1,16 +1,16 @@
-# Papercraft Kingdom Defense: Plan
+# Kingdom of the Fold: Plan
 
-Codename: **Project Slag**. The repo is `psychic-bassoon`; the game is **Papercraft Kingdom Defense** (formerly Scrapline; the code was renamed on 2026-10-13) and its tracker board is Project Slag.
+Codename: **Project Slag**. The repo is `psychic-bassoon`; the game is **Kingdom of the Fold** (formerly Papercraft Kingdom Defense, and earlier Scrapline). The tracker board is Project Slag.
 
-_Updated 2026-10-11: the owner adopted the Papercraft Kingdom Defense GDD (`docs/GDD.md`) as the design. Living version: the Claude doc of the same name; the GDD itself lives in the owner's Google Doc._
+_Updated 2026-10-20: `docs/GDD.md` is the repository design baseline for Kingdom of the Fold. `docs/UNIT_ROSTER.md` contains the expanded eight-tower, four-hero and twelve-enemy proposal, including implementation-status labels and draft balance values._
 
 > **Status (2026-10-18): a new art direction, a bigger map and native platforms (owner).** The look becomes "Hand-Folded Fantasy", a boundless papercraft diorama of a fantasy valley (`docs/art/STYLE.md`); the desk, cutting mat and tape road are dropped, and the lore stays. The map grows to 32x20 cells with curved routes the sim walks, a river with bridges held by guards, and a hero you move across the map. The web build is dropped: iOS first, then macOS, Windows and Linux, on the Forward+ and Mobile renderers; a debug build already runs on the owner's iPhone 15 Pro. Epic #316; decision records `docs/lessons/2026-10-18-hand-folded-fantasy.md`, `2026-10-18-native-only.md` and `2026-10-18-valley-map.md`. Where this plan or `docs/GDD.md` still says cutting mat, desk, tape road, web or Safari in a section below, these decisions win.
 
-> **Status (2026-10-13):** Phases 0 to 4 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired (last build: the tag `web-three-final`). The game moved to the **Godot engine** on 2026-10-10 and the owner adopted the GDD on 2026-10-11: a papercraft stop-motion tower defense with a hero, spells and a tech tree. Phase 4 (the simulation in GDScript) closed on 2026-10-13: the whole sim is in GDScript, deterministic and covered by replay goldens, with the Phase 4 gate checked below. Phase 5 (play in Godot) is a finished greybox (board, picking, foes, towers, HUD, win and lose, speeds) whose gate still waits on two checks on the owner's phone (60 fps with 80 foes, and the road, sockets and foes lining up by eye). Phase 7 content started early at the owner's request: three shooting towers, the Guard Tent and the Kitchen Mess Tent, blocking guards, and bigger swarm waves; flying and support foes, tier 4 specs, the hero and spells are not built. The owner models the art themselves in Blender (Meshy was dropped on 2026-10-13). The target is web first, then native iOS.
+> **Status (2026-10-13):** Phases 0 to 4 are complete. Phases 0 to 2 were built in TypeScript and Three.js; that game is retired (last build: the tag `web-three-final`). The game moved to the **Godot engine** on 2026-10-10 and the owner adopted the GDD on 2026-10-11: a papercraft stop-motion tower defense with a hero, spells and a tech tree. Phase 4 (the simulation in GDScript) closed on 2026-10-13: the whole sim is in GDScript, deterministic and covered by replay goldens, with the Phase 4 gate checked below. Phase 5 (play in Godot) is a finished greybox (board, picking, foes, towers, HUD, win and lose, speeds) whose gate still waits on two checks on the owner's phone (60 fps with 80 foes, and the road, sockets and foes lining up by eye). Phase 7 content started early at the owner's request: three shooting towers, the Guard Tent and the Kitchen Mess Tent, blocking guards, and bigger swarm waves; flying and support foes, tier 4 specs, the hero and spells are not built. The owner models the art themselves in Blender (Meshy was dropped on 2026-10-13). The web build is retired. The target is native iOS first, followed by macOS, Windows and Linux.
 
 ## Vision
 
-Papercraft Kingdom Defense is a tactile, isometric 3D tower defense for phones and tablets, built with Godot 4. You are the Grand Crafter defending a folded paper valley, building towers from spools, tents, prisms and thimbles to hold back corrupted stationery. It lives in this repo, ships natively on iOS first and on Mac and PC next (the web build was dropped on 2026-10-18), and doubles as a portfolio piece.
+Kingdom of the Fold is a tactile, isometric 3D tower defense for phones and tablets, built with Godot 4. You are the Grand Crafter defending a folded paper valley, building towers from spools, tents, prisms and thimbles to hold back corrupted stationery. It lives in this repo, ships natively on iOS first and on Mac and PC next (the web build was dropped on 2026-10-18), and doubles as a portfolio piece.
 
 **Pillars**
 
@@ -26,28 +26,25 @@ Papercraft Kingdom Defense is a tactile, isometric 3D tower defense for phones a
 
 The look no longer shows the mat or the craft room (owner, 2026-10-18): the paper folk's kingdom is drawn as a folded fantasy valley, and the story is unchanged. The full text is in `docs/GDD.md`. The old Scrapline lore (Greyhold Keep, the Hollow King, Castellan Quell) is dropped. Names appear in `godot/content` only; ids are stable keys (see Naming in `CLAUDE.md`).
 
-## Design (from the GDD)
+## Design baseline (from the GDD and expanded roster)
 
-`docs/GDD.md` is the source; this is the summary the plan is built on.
+The repository design baseline is `docs/GDD.md`; the detailed roster and proposed content are in `docs/UNIT_ROSTER.md`. The game's title is **Kingdom of the Fold**; `psychic-bassoon` remains the repository name.
 
-**Loop.** Scout and build (spend Buttons, the currency, on pre-etched sockets) → engage the wave (call it early for bonus income) → combat (targeting priorities, hero commands, drop-scraps, spells powered by regenerating PVA Ink / Crafting Energy) → rewards (Golden Staples from remaining Heartstone health, spent in a workshop tech tree on permanent skills, base stats and new origami blueprints).
+Visual references: [unit roster](art/roster/roster-overview.svg) · [Folded Valley tactical layout](art/maps/folded-valley-tactical-concept.svg).
 
-**Maps.** _Superseded in part on 2026-10-18: the map is a 32x20 valley with curved routes, terraces, a river and guarded bridges (#320 to #323), drawn as a diorama, not a mat._ A seeded cutting-mat board of 1 m tiles, **16 columns by 11 rows (176 cells), landscape** (owner, 2026-10-14, Map v3 #255: 22 by 16 showed too many cells at a readable unit size; before that 9 by 13), inside an out-of-bounds diorama skirt. Three levels: level 0 the mat (lanes 1 to 2 cells wide), level 1 a glued cardboard rise (+1.0 m), level 2 tiered cliffs (+2.0 m, a +15% range bonus and no line-of-sight blockers). Hazards: foil rivers with popsicle-stick bridges (a foe knocked into the water is slowed 50%), single-use tape strips, PVA glue puddles. Building is on 12 to 15 pre-etched circular sockets per map, each a **2x2 cell footprint** (2 m), not on free cells; towers stand 3 m to 6 m tall. The objective is the **Heartstone**, a 2x2 to 3x3 cell crystal at the end of the lane. **Owner decision, 2026-10-12: one path and one spawn source for now.** No detour or branching, and drawbridges and levers are dropped; the update no longer mentions level 1 as a choke point either. Several spawn sources that merge into the one path are a backlog idea (Phase 8 and later), see Backlog.
+**Loop.** Scout/build → call a wave → defend using towers, the movable hero, guard blockers and craft spells → earn Buttons and wave rewards → spend Golden Staples in a persistent workshop tree.
 
-**Towers.** Four archetypes, each with tiers 1 to 3 (linear damage, range and fire-rate upgrades) and a tier 4 that splits into two specialisations, each with one active and one passive ability.
+**Map.** The accepted direction is a boundless 32×20 folded fantasy valley with a curved primary route, a later feeder route that joins the main route, a river gorge and guarded bridges, terrain terraces, 2×2 tower sockets and walkable areas for a movable hero. The map is not a cutting mat, table, tape road or bounded display plinth. Six named regions are a level-design reference vocabulary, not six hard-coded procedural compartments. See `docs/lessons/2026-10-18-valley-map.md`, `godot/content/map_rules.gd` and `docs/GDD.md`.
 
-| Tower (archetype) | Base unit | Spec A | Spec B |
-| --- | --- | --- | --- |
-| The Spool Guard (archer) | A thread spool with a toothpick ballista firing paper-strip darts | Crossbow Ballista: piercing Heavy Skewer, Bleed; Armor Piercing 40% | Paper-Plane Aviary: Squadron Launch of 3 paper planes; High Recon +20% range to neighbours |
-| The Guard Tent (barracks) | A folded origami tent that spawns 2 guards to block the path | Cardboard Knights: Shield Wall; reflect 15% melee | Scissor Rogues: Precision Snipe; Paper Cuts slow stacks |
-| The Prism Spire (mage) | Rolled construction paper topped by a glass marble prism | Cryo-Origami Spire: Flash Freeze; Frostbite +20% damage taken | Blot Singularity: Ink Vortex pulls light foes; Corrosive Light strips armor |
-| The Thimble Mortar (artillery) | A metal thimble with matchstick powder, splash paper pellets | Glitter Cannon: Confetti Burst blinds; splash +35% | Sticky Glue Mortar: PVA Deluge slows 70%; Lingering Residue pools |
+**Towers.** The five established tower families are Spool Guard, Thimble Mortar, Prism Spire, Guard Tent and Kitchen Mess Tent. The proposed expansion adds Quillwatch Beacon (mark/focus fire), Briar Loom (road control) and Button Press (capped economy). Tiers I–III improve core stats; Tier IV branches into two specialisations, each with an active and passive ability. Detailed skills and current-versus-proposed values live in `docs/UNIT_ROSTER.md`.
 
-**Foes.** Scrap Goblin (swarm: fast, low health, weak to splash), Razor Moth (flying: ignores ground paths and blockers, needs anti-air), Corrugated Orc (armored: high armor, slow, needs armor stripping or magic), Ink Shaman (support: heals and speeds up nearby foes, prioritise it), Cardboard Golem (boss: huge health, spawns Scrap Goblins when destroyed).
+**Heroes.** Knight of Cardboard and Camp Cook are GDD-defined. Foldrunner and Lantern Scribe are proposed later heroes. The initial release should directly command one hero at a time to preserve mobile clarity.
 
-**Hero and spells.** The Knight of Cardboard is a movable, persistent hero (passive Rally Cry, active Blade Whirl with a 15 s cooldown). Three global spells from a bottom-right Toolbox Tray, cast by dragging with a live ground decal: PVA Glue Trap (slow 60% for 8 s), Falling Thumbtacks (damage and stumble on a 2×2 area), The Crafter's Eraser (strips non-boss armor, shields and buffs in a radius).
+**Enemies.** Five established archetypes are Scrap Goblin, Corrugated Orc, Ink Shaman, Razor Moth and Cardboard Golem. Proposed additions are Tackrunner, Glue Ooze, Ink Acolyte, Waxbound Beetle, Paperwing Bomber, The Binder and Inkheart Colossus. Proposed stats are draft values only.
 
-**Touch.** A radial context menu (48 pt targets, offset above the finger), one-finger pan with rubber-band edges, two-finger pinch to zoom with a 30° to 65° view angle, drag-and-drop spells.
+**Spells.** The GDD-defined global spells remain PVA Glue Trap, Falling Thumbtacks and The Crafter's Eraser. The newer HUD concept's Ice Dart, Glue Patch, Ink Bomb, Reinforce and Confetti Blast are not yet mapped to global spells versus tower/hero abilities; do not duplicate effects under conflicting names.
+
+**Art.** Follow `docs/art/STYLE.md`: painterly broad facets, warm amber sunlight, cool teal-blue shadows, matte paper and cardboard, visible corrugation and chunky non-voxel characters. The world is a fantasy valley; the craft-room origin remains lore.
 
 ### Mapping from the ported sim
 
@@ -260,7 +257,7 @@ papercraft-kingdom-defense/   # the repo is still psychic-bassoon
 
 From the 2D prototype (the ported base) to the GDD design.
 
-| Area | Prototype | Papercraft Kingdom Defense |
+| Area | Prototype | Kingdom of the Fold |
 | --- | --- | --- |
 | Map | Random path on a 9×13 grid | A seeded valley of 32×20 cells (owner, 2026-10-18, #320) with curved routes the sim walks (#321), terraces, regions and a river with guarded bridges (#322, #323). Before that: a seeded cutting-mat board of 16×11 cells (was 22×16) with three levels, 12 to 15 sockets of 2x2 cells (the generator gives 12 on about three maps in four), a Heartstone footprint, river, tape and glue hazards. The ported road generator (a main road and a detour) is the first layer, made size-aware; its 9×13 output stays pinned by the frozen fixtures. |
 | Building | Any free cell | Pre-etched sockets; a radial context menu |
@@ -470,6 +467,6 @@ A1 and A2 can start now (map generation, game state and commands are ported); A3
 - [x] Pages: `main` was the live "latest" web build until 2026-10-18; since #318 Pages serves a page that links to the latest release, and tags create the GitHub Releases with the desktop builds.
 - [x] Testing on a phone before merge: a local build installed over the cable (`scripts/ios-run.sh`, #318); TestFlight needs the paid Apple Developer Program (the owner's call).
 - [x] Download budget for the Godot web build _(retired with the web build in #318; the asset budget stays)_: 14 MB gzipped (11.67 MB measured at the Phase 3 gate); trim the export if it grows. Raised to 18.5 MB on 2026-10-18 for the three full-length music tracks (about 5.8 MB of Vorbis that does not gzip); the asset budget went from 6 MB to 9 MB. Re-set after the iPhone measurement (ticket #124).
-- [x] Name: Papercraft Kingdom Defense (owner, 2026-10-11). The repo stays `psychic-bassoon` and the board Project Slag. The code, project name, web shell, manifest and package were renamed on 2026-10-13 (#163).
+- [x] Former title: Papercraft Kingdom Defense (owner, 2026-10-11); superseded by Kingdom of the Fold in the design docs on 2026-10-20. The repo stays `psychic-bassoon` and the board Project Slag. Technical package IDs and stable content IDs remain unchanged unless separately migrated.
 - [x] Meshy: tried and dropped (owner, 2026-10-13): the generated models were not good enough, so the owner models every foe in Blender. No generated models are used; the earlier paid-plan rules no longer apply.
 - [ ] Vertex animation on `MultiMesh` for many animated foes: works on iPhone Safari within budget? Decided by the Scrap Goblin spike (ticket #157); fallback is part animation and fewer animated instances.
