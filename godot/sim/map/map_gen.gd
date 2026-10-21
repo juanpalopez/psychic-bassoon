@@ -102,6 +102,13 @@ static func generate(
 	return null
 
 
+## The sectioned valley (#381): the game's 32 by 20 board built from six fixed sections, each
+## with its own stream, so a section drawn again never moves another. Null when a section cannot
+## be made to pass its checks.
+static func generate_valley(seed: int) -> GameMap:
+	return ValleyStitcher.build(seed, RULES.GRID_COLS, RULES.GRID_ROWS)
+
+
 ## A map for these routes (in the tall grid when `wide`), before its sockets are placed.
 static func _assemble(
 	seed: int, cols: int, rows: int, footprint: int, wide: bool, routes: Array, feeder: Dictionary

@@ -21,8 +21,8 @@ func test_strips_tile_the_board() -> void:
 		var left := 0
 		for slot in _plan(seed).slots:
 			assert_eq(slot.rect.position.x, left, "seed %d" % seed)
+			assert_gte(slot.rect.size.x, RULES.MIN_WIDTHS[slot.id])
 			assert_eq(slot.rect.size.y, 20)
-			assert_gte(slot.rect.size.x, RULES.MIN_WIDTH)
 			left += slot.rect.size.x
 		assert_eq(left, 32, "seed %d" % seed)
 
@@ -101,3 +101,7 @@ func test_add_socket_keeps_the_parallel_arrays_in_step() -> void:
 	assert_eq(result.sockets, [Vector2i(2, 5)] as Array[Vector2i])
 	assert_eq(result.socket_levels, [1] as Array[int])
 	assert_eq(result.socket_tags, [SectionResult.Tag.BEND] as Array[int])
+
+
+func test_the_attempt_budget_fits_a_sections_stream_stride() -> void:
+	assert_lte(RULES.MAX_SECTION_ATTEMPTS, RULES.SECTION_STREAM_STRIDE)

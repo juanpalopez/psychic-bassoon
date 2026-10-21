@@ -25,3 +25,9 @@ func reserved(slot: ValleyPlan.Slot) -> Array[Rect2i]:
 		var rows := slot.rect.size.y
 		blocked.append(MapGen._heartstone_block(slot.exit, cols, rows, RULES.GAME_SOCKET_FOOTPRINT))
 	return blocked
+
+
+## Checks only this section has (a bridge, a meadow, a merge): the problems found, or none. It
+## runs with the common checks, and a problem makes the stitcher draw this section again.
+func extra_problems(_slot: ValleyPlan.Slot, _result: SectionResult) -> Array[String]:
+	return []

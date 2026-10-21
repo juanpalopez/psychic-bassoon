@@ -54,6 +54,7 @@ static func create(seed: int, cols: int, rows: int) -> ValleyPlan:
 		slot.exit = Vector2i(left + widths[index] - 1, gates[index + 1])
 		plan.slots.append(slot)
 		left += widths[index]
+	assert(left == cols, "the strips tile %d columns, not %d" % [left, cols])
 	return plan
 
 
@@ -70,7 +71,10 @@ static func _widths(rng: Rng) -> Array[int]:
 		var shift := rng.next_int(2 * jitter + 1) - jitter
 		var left_width: int = widths[boundary] + shift
 		var right_width: int = widths[boundary + 1] - shift
-		if left_width >= RULES.MIN_WIDTH and right_width >= RULES.MIN_WIDTH:
+		if (
+			left_width >= RULES.MIN_WIDTHS[boundary]
+			and right_width >= RULES.MIN_WIDTHS[boundary + 1]
+		):
 			widths[boundary] = left_width
 			widths[boundary + 1] = right_width
 	return widths

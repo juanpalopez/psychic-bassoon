@@ -92,3 +92,61 @@ func test_high_ground_is_capped_and_needs_a_low_socket_nearby() -> void:
 	)
 	assert_true(texts.any(func(t: String) -> bool: return t.contains("too many")), str(texts))
 	assert_true(texts.any(func(t: String) -> bool: return t.contains("no low socket")), str(texts))
+
+
+class Picky:
+	extends StraightSection
+
+	func extra_problems(_slot: ValleyPlan.Slot, _result: SectionResult) -> Array[String]:
+		return ["no meadow"]
+
+
+func test_a_section_can_add_its_own_checks() -> void:
+	var problems := ValleyChecks.section_problems(_slot(), _good(), Picky.new())
+	assert_eq(problems.size(), 1)
+	assert_eq(problems[0].text, "no meadow")
+	assert_eq(problems[0].section, 2)
+
+
+func test_a_feeder_must_end_beside_a_road_cell_it_joins() -> void:
+	var result := _good()
+	result.feeder = [Vector2i(result.road[2].x, 0)] as Array[Vector2i]
+	result.feeder_join = result.road[2]
+	var texts := _problems(result).map(func(p: ValleyChecks.Problem) -> String: return p.text)
+	assert_true(texts.any(func(t: String) -> bool: return t.contains("feeder")), str(texts))
+	result.feeder_join = Vector2i(0, 0)
+	texts = _problems(result).map(func(p: ValleyChecks.Problem) -> String: return p.text)
+	assert_true(texts.any(func(t: String) -> bool: return t.contains("off the road")), str(texts))
+
+
+func test_a_bridge_off_the_road_fails() -> void:
+	var result := _good()
+	var bridge := GameMap.Bridge.new()
+	bridge.cell = Vector2i(-5, -5)
+	result.bridges.append(bridge)
+	assert_gt(_problems(result).size(), 0)
+
+
+func test_sockets_with_missing_levels_are_a_problem_not_a_crash() -> void:
+	var result := _good()
+	result.socket_levels.clear()
+	assert_gt(_problems(result).size(), 0)
+
+
+func test_a_bend_on_a_section_join_needs_a_block_from_either_side() -> void:
+	var results: Array[SectionResult] = []
+	for id in 6:
+		results.append(_good(id))
+	var left := results[2]
+	var right := results[3]
+	# turn the road at the join: the left section ends going up, the right one starts going right
+	var exit := left.road[left.road.size() - 1]
+	left.road[left.road.size() - 2] = exit + Vector2i(0, 1)
+	for result in [left, right]:
+		result.sockets.clear()
+		result.socket_levels.clear()
+		result.socket_tags.clear()
+	var texts := ValleyChecks.valley_problems(results).map(
+		func(p: ValleyChecks.Problem) -> String: return p.text
+	)
+	assert_true(texts.any(func(t: String) -> bool: return t.contains("join bend")), str(texts))

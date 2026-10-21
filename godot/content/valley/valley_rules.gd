@@ -14,10 +14,11 @@ const SECTION_NAMES: Array[String] = [
 ]
 ## Each section is a strip of columns across the whole board height. These widths add up to the
 ## board's 32 columns; the seed moves each boundary between two sections by up to
-## `BOUNDARY_JITTER` columns, and no strip is ever narrower than `MIN_WIDTH`.
-const BASE_WIDTHS: Array[int] = [5, 5, 6, 6, 5, 5]
+## `BOUNDARY_JITTER` columns, and no strip is ever narrower than its `MIN_WIDTHS` entry (the
+## crossing keeps 6 columns: the river takes one, and each bank needs room for a 2x2 block).
+const BASE_WIDTHS: Array[int] = [5, 4, 7, 6, 5, 5]
 const BOUNDARY_JITTER := 1
-const MIN_WIDTH := 4
+const MIN_WIDTHS: Array[int] = [4, 4, 6, 5, 4, 4]
 ## The road crosses from one section to the next on a gate row, kept `GATE_MARGIN` rows in from
 ## the top and bottom edges (room for a socket block on both sides, and for the Heartstone),
 ## and two gates in a row are at most `GATE_MAX_STEP` rows apart.
