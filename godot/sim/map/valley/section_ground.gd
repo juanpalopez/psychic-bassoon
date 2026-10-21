@@ -1,5 +1,5 @@
 ## Terrain for the two end sections (#384): low terraces away from the road, forest at the strip's
-## edges, dirt beside the road, and the socket blocks' own cells kept at their level.
+## edges, and the socket blocks' own cells kept at their level.
 class_name SectionGround
 extends RefCounted
 
@@ -29,9 +29,7 @@ static func paint(
 			if near_heart and gap >= rise_gap:
 				level = END.RISE_LEVEL
 			result.set_height(cell, level)
-			if gap == END.DIRT_GAP:
-				result.set_region(cell, GameMap.Region.DIRT)
-			elif gap >= forest_gap and not near_heart:
+			if gap >= forest_gap and not near_heart:
 				result.set_region(cell, GameMap.Region.FOREST)
 	for index in result.sockets.size():
 		var block := Rect2i(result.sockets[index], Vector2i(size, size))

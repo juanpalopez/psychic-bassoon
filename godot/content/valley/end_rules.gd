@@ -7,8 +7,6 @@ const EDGE_ROW := 1
 const THREE_RUN_WIDTH := 5
 ## Distance given to a cell when there is no road to measure from.
 const NO_ROAD_GAP := 1000000
-## Chebyshev distance from the road at which dirt lies.
-const DIRT_GAP := 1
 ## Terraces: the valley floor, a low terrace and the rise around the Heartstone.
 const FLOOR_LEVEL := 0
 const LOW_LEVEL := 1
