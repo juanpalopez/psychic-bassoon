@@ -1,13 +1,13 @@
 ## Region 1, Sunken Meadow: the open meadow, bottom left (#410). One large walkable area the
 ## spline road wanders through in wide bends, a few boulder clusters that never cut the walkable
-## ground, low rises (terrace 1) and four or five socket blocks around the road.
+## ground and four or five socket blocks around the road.
 class_name SunkenMeadowRegion
 extends ValleySection
 
 const MEADOW := preload("res://content/valley/sunken_meadow_region_rules.gd")
 
 
-## Draws the sockets, boulders and rises a few times from the one stream and keeps the first set
+## Draws the sockets and boulders a few times from the one stream and keeps the first set
 ## that passes the section's checks (else the last, which the stitcher draws again).
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var result: SectionResult = null
@@ -62,7 +62,6 @@ func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 		for dy in 2:
 			for dx in 2:
 				taken[anchor + Vector2i(dx, dy)] = true
-	_rises(slot, result, rng, taken)
 	_boulders(slot, result, rng, taken)
 	return result
 
@@ -75,7 +74,7 @@ func _boulders(slot: ValleyPlan.Slot, result: SectionResult, rng: Rng, taken: Di
 	)
 	for _cluster in want:
 		for _try in MEADOW.BOULDER_TRIES:
-			var cells := _patch(slot, rng, rng.next_int(MEADOW.BOULDER_SIDE) + 1, 1, taken)
+			var cells := _patch(slot, rng, rng.next_int(MEADOW.BOULDER_SIDE) + 1, taken)
 			if cells.is_empty():
 				continue
 			for cell in cells:
@@ -85,29 +84,14 @@ func _boulders(slot: ValleyPlan.Slot, result: SectionResult, rng: Rng, taken: Di
 			break
 
 
-## Low rises of one terrace, away from the road and the blocks.
-func _rises(slot: ValleyPlan.Slot, result: SectionResult, rng: Rng, taken: Dictionary) -> void:
-	var want: int = MEADOW.RISES.x + rng.next_int(MEADOW.RISES.y - MEADOW.RISES.x + 1)
-	for _rise in want:
-		for _try in MEADOW.RISE_TRIES:
-			var cells := _patch(slot, rng, MEADOW.RISE_SIDE, 0, taken)
-			for cell in cells:
-				result.set_height(cell, MEADOW.RISE_LEVEL)
-				taken[cell] = true
-			if not cells.is_empty():
-				break
-
-
 ## A random `side` by `side`-ish patch (the second side drawn too) clear of `taken` by
-## one cell and `edge` cells from the region's edge, or no cells.
-func _patch(
-	slot: ValleyPlan.Slot, rng: Rng, side: int, edge: int, taken: Dictionary
-) -> Array[Vector2i]:
+## one cell and one cell from the region's edge, or no cells.
+func _patch(slot: ValleyPlan.Slot, rng: Rng, side: int, taken: Dictionary) -> Array[Vector2i]:
 	var width := side
 	var height := 1 + rng.next_int(side)
 	var rect := slot.rect
-	var x := rect.position.x + edge + rng.next_int(rect.size.x - width - 2 * edge + 1)
-	var y := rect.position.y + edge + rng.next_int(rect.size.y - height - 2 * edge + 1)
+	var x := rect.position.x + 1 + rng.next_int(rect.size.x - width - 1)
+	var y := rect.position.y + 1 + rng.next_int(rect.size.y - height - 1)
 	var cells: Array[Vector2i] = []
 	for dy in height:
 		for dx in width:

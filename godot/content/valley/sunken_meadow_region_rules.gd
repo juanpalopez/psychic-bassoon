@@ -1,5 +1,5 @@
 ## Numbers for the Sunken Meadow region (#410, epic #404): a large open walkable area the spline
-## road wanders through, with a few boulder clusters and low rises.
+## road wanders through, with a few boulder clusters.
 extends RefCounted
 
 ## Socket blocks the region keeps (least, most).
@@ -14,10 +14,5 @@ const MIN_OPEN_AREA := 70
 const BOULDER_CLUSTERS := Vector2i(2, 4)
 const BOULDER_SIDE := 2
 const BOULDER_TRIES := 40
-## Rises of one terrace (count least, most; side in cells), kept off the road and the blocks.
-const RISES := Vector2i(1, 2)
-const RISE_SIDE := 3
-const RISE_LEVEL := 1
-const RISE_TRIES := 40
 ## Sets of sockets drawn from the section's stream before the best is kept.
 const TRIES := 30

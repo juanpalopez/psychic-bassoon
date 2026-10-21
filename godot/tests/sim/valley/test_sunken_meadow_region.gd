@@ -33,13 +33,13 @@ func test_four_or_five_low_blocks_that_pass_the_checks() -> void:
 	assert_lte(failed, SWEEP / 10, "%d of %d first attempts failed" % [failed, SWEEP])
 
 
-func test_open_ground_with_no_cliffs_and_heights_zero_to_one() -> void:
+func test_open_ground_with_no_cliffs_and_flat_heights() -> void:
 	for seed in range(1, SWEEP + 1, 3):
 		var result: SectionResult = _drawn(seed)[2]
 		for y in range(result.rect.position.y, result.rect.end.y):
 			for x in range(result.rect.position.x, result.rect.end.x):
 				var cell := Vector2i(x, y)
-				assert_between(result.height_at(cell), 0, 1)
+				assert_eq(result.height_at(cell), 0)
 				assert_true(
 					(
 						result.region_at(cell) in [GameMap.Region.MEADOW, GameMap.Region.DIRT]
