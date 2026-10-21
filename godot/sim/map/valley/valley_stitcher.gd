@@ -7,11 +7,17 @@ const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 
 
-## The valley for a seed, or null (with an error) when a section keeps failing its checks.
+## The valley for a seed, or null (with an error, unless `quiet`) when a section keeps failing its
+## checks. `layout` replaces the strip plan.
 static func build(
-	seed: int, cols: int, rows: int, sections: Array[ValleySection] = ValleySections.all()
+	seed: int,
+	cols: int,
+	rows: int,
+	sections: Array[ValleySection] = ValleySections.all(),
+	layout: ValleyPlan = null,
+	quiet: bool = false
 ) -> GameMap:
-	var plan := ValleyPlan.create(seed, cols, rows)
+	var plan := layout if layout != null else ValleyPlan.create(seed, cols, rows)
 	var attempts: Array[int] = []
 	var results: Array[SectionResult] = []
 	for slot in plan.slots:
@@ -27,7 +33,8 @@ static func build(
 		for id in again:
 			attempts[id] += 1
 			if attempts[id] >= VALLEY.MAX_SECTION_ATTEMPTS:
-				push_error("valley seed %d: section %d fails: %s" % [seed, id, problems[0].text])
+				if not quiet:
+					push_error("valley seed %d: section %d fails: %s" % [seed, id, problems[0].text])
 				return null
 			results[id] = _draw(plan, sections, id, attempts[id])
 	return null
@@ -36,7 +43,7 @@ static func build(
 static func _draw(
 	plan: ValleyPlan, sections: Array[ValleySection], id: int, attempt: int
 ) -> SectionResult:
-	var rng := ValleyPlan.section_rng(plan.seed, id, attempt)
+	var rng := plan.rng_for(id, attempt)
 	return sections[id].generate(plan.slots[id], rng)
 
 

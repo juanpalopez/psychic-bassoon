@@ -46,3 +46,15 @@ const RIVER_WOBBLE := 2
 const RIVER_WIDTH := 2
 ## A layout that fails its own checks is drawn again, at most this often.
 const MAX_ATTEMPTS := 400
+## The stand-in sections keep this many socket blocks (least, most), enough to cover the bends
+## of a curved road.
+const STAND_IN_BLOCKS := Vector2i(1, 12)
+## A socket block keeps this many empty cells (right, bottom) from its region's edges.
+const BLOCK_MARGIN := Vector2i(1, 1)
+## A turn is a bend to cover only between straight runs of this many steps (a diagonal stretch of
+## a spline road is a staircase of one-step runs).
+const BEND_RUN := 2
+## The most steps the hero may need from the meadow to a kind of section (`ValleyPlan.Id`, steps).
+## Provisional until the real sections exist: measured over seeds 1..3000 with the stand-in
+## sections (worst Broken Ridge MEASURE_R, Crossing MEASURE_C, Heartkeep MEASURE_H), plus 4 steps.
+const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 34), Vector2i(2, 27), Vector2i(5, 38)]

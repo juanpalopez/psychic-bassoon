@@ -2,6 +2,7 @@ extends GutTest
 
 const SEEDS: Array[int] = [1, 42, 2026, 104729, 4294967295]
 const SWEEP := 300
+const STITCH_SWEEP := 1500
 
 
 func _layout(seed: int) -> ValleyLayout:
@@ -150,3 +151,32 @@ func test_the_crossing_must_wade_the_river_once_from_dry_banks() -> void:
 	var wet := _layout(42)
 	wet.river_cells.append(wet.slots[ValleyLayout.Region.BLUEWATER_CROSSING].entry)
 	assert_gt(wet.problems().size(), 0, "a wet entry")
+
+
+func _stitch_problems(seed: int) -> void:
+	var layout := _layout(seed)
+	var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+	assert_not_null(map, "seed %d" % seed)
+	if map == null:
+		return
+	for index in map.path.size() - 1:
+		assert_eq((map.path[index + 1] - map.path[index]).length_squared(), 1, "seed %d" % seed)
+	assert_eq(map.path[0].x, 0)
+	assert_true(map.heartstone.has_point(map.path[map.path.size() - 1]))
+	assert_eq(map.route_curves.size(), 1)
+	assert_eq(
+		map.river.size(),
+		layout.slots.reduce(
+			func(sum: int, slot: ValleyPlan.Slot) -> int: return sum + slot.river.size(), 0
+		)
+	)
+
+
+func test_the_stitched_stand_in_valley_passes_the_checks_for_every_seed() -> void:
+	for seed in range(1, STITCH_SWEEP + 1):
+		_stitch_problems(seed)
+
+
+func test_seeds_that_once_failed_to_stitch_now_do() -> void:
+	for seed in [359, 374, 483, 607, 710]:
+		_stitch_problems(seed)

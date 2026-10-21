@@ -20,9 +20,10 @@ func socket_range() -> Vector2i:
 ## Cells a socket block may not cover: the Heartstone's footprint, in the last section.
 func reserved(slot: ValleyPlan.Slot) -> Array[Rect2i]:
 	var blocked: Array[Rect2i] = []
-	if slot.id == ValleyPlan.Id.HEARTKEEP_APPROACH:
+	var role := slot.role if slot.role >= 0 else slot.id
+	if role == ValleyPlan.Id.HEARTKEEP_APPROACH:
 		var cols := slot.rect.end.x
-		var rows := slot.rect.size.y
+		var rows := slot.rect.end.y
 		blocked.append(MapGen._heartstone_block(slot.exit, cols, rows, RULES.GAME_SOCKET_FOOTPRINT))
 	return blocked
 
