@@ -141,3 +141,23 @@ func test_the_second_road_follows_the_main_curve_after_the_join() -> void:
 	for index in range(map.join_index + 3, map.path.size(), 7):
 		var along_second := second_route.cell_distance(map.feeder_length + index - map.join_index)
 		assert_almost_eq(along_second - main_route.cell_distance(index), offset, 0.0001)
+
+
+func test_unevenly_spaced_waypoints_do_not_loop() -> void:
+	# a long run, a short diagonal step, a long run: a uniform Catmull-Rom spline overshoots at the
+	# short step (its tangents are as long as the long runs) and doubles back
+	var points: Array[Vector2] = [
+		Vector2(0.5, 0.5), Vector2(10.5, 0.5), Vector2(11.5, 1.5), Vector2(11.5, 11.5)
+	]
+	var curve := RoadSpline.build(points)
+	var seen := {}
+	for cell in curve.cells:
+		assert_false(seen.has(cell), "cell %s twice" % cell)
+		seen[cell] = true
+	for index in range(1, curve.xs.size() - 1):
+		var ax := curve.xs[index] - curve.xs[index - 1]
+		var ay := curve.ys[index] - curve.ys[index - 1]
+		var bx := curve.xs[index + 1] - curve.xs[index]
+		var by := curve.ys[index + 1] - curve.ys[index]
+		var cosine := (ax * bx + ay * by) / (sqrt(ax * ax + ay * ay) * sqrt(bx * bx + by * by))
+		assert_gt(cosine, 0.5, "a hook at sample %d" % index)

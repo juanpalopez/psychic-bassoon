@@ -1,7 +1,8 @@
-## Builds a smooth road through waypoints (#404): a Catmull-Rom spline (it passes through every
-## waypoint and turns smoothly at each) sampled finely enough to rasterise into road cells that
-## step one cell at a time. Only `+ - * /`, `floor` and `sqrt` are used, so the curve is the same
-## on every machine. Waypoints are in cell units: (x + 0.5, y + 0.5) is the middle of cell (x, y).
+## Builds a smooth road through waypoints (#404): a cubic Hermite spline with Catmull-Rom style
+## tangents (it passes through every waypoint and turns smoothly at each), sampled finely enough
+## to rasterise into road cells that step one cell at a time. Only `+ - * /`, `floor` and `sqrt`
+## are used, so the curve is the same on every machine. Waypoints are in cell units: (x + 0.5, y +
+## 0.5) is the middle of cell (x, y).
 class_name RoadSpline
 extends RefCounted
 
@@ -23,26 +24,43 @@ static func build(waypoints: Array[Vector2]) -> RoadCurve:
 		var steps := int(floor(sqrt(dx * dx + dy * dy) * RULES.SAMPLES_PER_CELL)) + 1
 		for step in steps:
 			var t := float(step) / float(steps)
-			curve.xs.append(_blend(p0.x, p1.x, p2.x, p3.x, t))
-			curve.ys.append(_blend(p0.y, p1.y, p2.y, p3.y, t))
+			curve.xs.append(_blend(p0.x, p1.x, p2.x, p3.x, t, _tangent_scale(p0, p1, p2, p3)))
+			curve.ys.append(_blend(p0.y, p1.y, p2.y, p3.y, t, _tangent_scale(p0, p1, p2, p3)))
 	curve.xs.append(float(waypoints[count - 1].x))
 	curve.ys.append(float(waypoints[count - 1].y))
 	_rasterise(curve)
 	return curve
 
 
-## One coordinate of the Catmull-Rom curve between `b` and `c` at `t` in [0, 1).
-static func _blend(a: float, b: float, c: float, d: float, t: float) -> float:
+## The two tangent lengths of the segment from `p1` to `p2`, as factors of the vectors `p2 - p0`
+## and `p3 - p1`: each tangent points along its chord pair and is as long as the segment, so
+## waypoints that are unevenly spaced never make the curve overshoot into a loop (a uniform
+## Catmull-Rom spline does). Returns (start factor, end factor).
+static func _tangent_scale(p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2) -> Vector2:
+	var segment := _length(p1, p2)
+	var before := _length(p0, p2)
+	var after := _length(p1, p3)
+	return Vector2(segment / maxf(before, 0.000001), segment / maxf(after, 0.000001))
+
+
+static func _length(a: Vector2, b: Vector2) -> float:
+	var dx := float(b.x) - float(a.x)
+	var dy := float(b.y) - float(a.y)
+	return sqrt(dx * dx + dy * dy)
+
+
+## One coordinate of the cubic Hermite curve between `b` and `c` at `t` in [0, 1), with the tangent
+## at `b` along `c - a` and the tangent at `c` along `d - b`, scaled by `scale`.
+static func _blend(a: float, b: float, c: float, d: float, t: float, scale: Vector2) -> float:
 	var t2 := t * t
 	var t3 := t2 * t
+	var start := (c - a) * scale.x
+	var end := (d - b) * scale.y
 	return (
-		0.5
-		* (
-			2.0 * b
-			+ (c - a) * t
-			+ (2.0 * a - 5.0 * b + 4.0 * c - d) * t2
-			+ (3.0 * b - a - 3.0 * c + d) * t3
-		)
+		(2.0 * t3 - 3.0 * t2 + 1.0) * b
+		+ (t3 - 2.0 * t2 + t) * start
+		+ (3.0 * t2 - 2.0 * t3) * c
+		+ (t3 - t2) * end
 	)
 
 
