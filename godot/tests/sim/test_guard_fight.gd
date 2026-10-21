@@ -1,6 +1,9 @@
 ## Guards block one foe each, fight it, and come back when they fall.
 extends GutTest
 
+## How near a socket must be to the post for a level 1 Spool Guard to reach a foe held there.
+const POST_REACH := 2.3
+
 
 func test_a_foe_reaching_a_guard_stops_and_the_engagement_is_reported() -> void:
 	var game := GuardKit.game_with_tent()
@@ -168,7 +171,7 @@ func test_a_foe_already_past_the_post_is_left_alone() -> void:
 
 
 func test_towers_keep_shooting_a_held_foe() -> void:
-	var game := GuardKit.game_with_tent()
+	var game := _game_with_a_socket_in_reach_of_the_post()
 	var anchor := _socket_nearest_the_post(game)
 	GameTestKit.run(game, [Command.build("spoolGuard", anchor.x, anchor.y)])
 	var orc := GuardKit.foe_before_post(game, "corrugatedOrc", 0.3)
@@ -197,6 +200,20 @@ func test_the_same_seed_and_commands_replay_the_same_with_a_tent() -> void:
 	assert_eq(a, b)
 
 
+## The first seed of the game board whose guards' post has a socket within a level 1 Spool
+## Guard's reach (the valley's sockets keep to the banks, so the first seed may not).
+func _game_with_a_socket_in_reach_of_the_post() -> GameState:
+	for map_seed in range(1, 40):
+		var game := GuardKit.game_with_tent(map_seed)
+		var at := game.routes[0].position_at(GuardKit.post(game))
+		for i in range(1, game.map.sockets.size()):
+			var centre := game.map.socket_centre(game.map.sockets[i])
+			if centre.distance_to(Vector2(at.x, at.y)) < POST_REACH:
+				return game
+	fail_test("no seed has a socket in reach of the post")
+	return GuardKit.game_with_tent()
+
+
 func _socket_nearest_the_post(game: GameState) -> Vector2i:
 	var at := game.routes[0].position_at(GuardKit.post(game))
 	var best := game.map.sockets[1]
@@ -207,7 +224,9 @@ func _socket_nearest_the_post(game: GameState) -> Vector2i:
 		if distance < best_distance:
 			best_distance = distance
 			best = game.map.sockets[i]
-	assert_lt(best_distance, 2.3, "a socket within a level 1 Spool Guard's reach of the post")
+	assert_lt(
+		best_distance, POST_REACH, "a socket within a level 1 Spool Guard's reach of the post"
+	)
 	return best
 
 

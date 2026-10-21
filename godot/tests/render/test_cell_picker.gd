@@ -65,7 +65,8 @@ func test_a_tap_on_the_top_of_a_raised_tile_picks_that_tile() -> void:
 				var picked := CellPicker.cell_at(camera, screen, board.surface_height)
 				assert_eq(picked, cell, "socket %s level %d" % [cell, board.map.elevation_at(cell)])
 		checked[board.map.elevation_at(cell)] = true
-	assert_true(checked.has(0) and checked.has(1) and checked.has(2), "all three levels checked")
+	# the sectioned valley puts its sockets on the floor and the high ground (7920: levels 0 and 2)
+	assert_true(checked.has(0) and checked.keys().max() >= 2, "the floor and the high ground")
 
 
 func test_a_tap_on_road_and_ground_still_picks_them() -> void:

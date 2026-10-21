@@ -117,3 +117,11 @@ func test_most_maps_get_one_detour_and_never_more() -> void:
 		assert_between(map.routes.size(), 1, 2)
 		with_detour += 1 if map.routes.size() == 2 else 0
 	assert_gt(with_detour, 30)
+
+
+## The game board and the Board draw the same map: both ask `MapGen.game_map`. Its fallback to
+## the route-first map cannot be tested: no seed makes the valley fail, and the stitcher takes
+## no injected sections.
+func test_the_game_map_is_the_map_the_game_plays() -> void:
+	for map_seed in [1, 2, 3]:
+		assert_eq(MapGen.game_map(map_seed).path, Game.create(map_seed).map.path)

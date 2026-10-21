@@ -15,6 +15,8 @@ const GUARD_GOLDEN_PATH := "res://tests/goldens/specs_guard.json"
 const MESS_GOLDEN_PATH := "res://tests/goldens/specs_mess.json"
 const CHECKPOINT_EVERY := 30
 const TICKS := 180
+const NO_SOCKET := Vector2i(-1, -1)
+const MAX_SEED := 40
 
 
 static func play() -> Array:
@@ -66,8 +68,29 @@ static func play_aviary() -> Array:
 	return play_tower("spoolGuard", "paperPlaneAviary", true)
 
 
+## The first socket whose plot is next to the tower's, within the Aviary's gap, or NO_SOCKET.
+static func _neighbour_socket(game: GameState, tower: Tower) -> Vector2i:
+	var gap: float = SPECS.find("spoolGuard", "paperPlaneAviary").passive.gap
+	var here := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	for socket in game.map.sockets:
+		var there := game.map.socket_centre(socket)
+		if (
+			socket != Vector2i(tower.col, tower.row)
+			and Specs.adjacent(here, there, float(game.map.footprint), gap)
+		):
+			return socket
+	return NO_SOCKET
+
+
 static func play_tower(tower_type: String, spec: String, with_neighbour: bool = false) -> Array:
 	var scene := TowerFireKit.scene(tower_type)
+	if with_neighbour:
+		# the valley's sockets are spread along the banks: take the first seed with a plot
+		# next to the tower
+		var map_seed := 1
+		while map_seed < MAX_SEED and _neighbour_socket(scene.game, scene.tower) == NO_SOCKET:
+			map_seed += 1
+			scene = TowerFireKit.scene(tower_type, map_seed)
 	var game := scene.game
 	game.buttons = 10000
 	Game.submit(game, Command.upgrade(scene.tower.id))
@@ -83,17 +106,10 @@ static func play_tower(tower_type: String, spec: String, with_neighbour: bool = 
 		foe.max_hp = 100000.0
 	if with_neighbour:
 		# a Thimble Mortar on a plot next to the Aviary, so High Recon is in the golden
-		var gap: float = SPECS.find("spoolGuard", "paperPlaneAviary").passive.gap
-		var here := game.map.socket_centre(Vector2i(scene.tower.col, scene.tower.row))
-		for socket in game.map.sockets:
-			var there := game.map.socket_centre(socket)
-			if (
-				socket != Vector2i(scene.tower.col, scene.tower.row)
-				and Specs.adjacent(here, there, float(game.map.footprint), gap)
-			):
-				Game.submit(game, Command.build("thimbleMortar", socket.x, socket.y))
-				Game.tick(game)
-				break
+		var socket := _neighbour_socket(game, scene.tower)
+		if socket != NO_SOCKET:
+			Game.submit(game, Command.build("thimbleMortar", socket.x, socket.y))
+			Game.tick(game)
 		assert(game.towers.size() == 2, "the aviary scenario needs a plot next to the Aviary")
 	var events := ReplayKit.EventDigest.new()
 	var out := []

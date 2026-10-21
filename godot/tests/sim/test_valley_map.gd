@@ -119,11 +119,12 @@ func test_single_cell_sockets_on_the_valley_keep_the_classic_count() -> void:
 
 
 func test_every_game_map_has_a_valid_second_road_and_its_sockets() -> void:
-	# the game's own maps (with the second source): the feeder rules are the 16 by 11 ones,
-	# kept on purpose (their join cap is a share of the road; the rest are local spacing)
+	# the route-first generator's maps with the second source (the game board is the sectioned
+	# valley now): the feeder rules are the 16 by 11 ones, kept on purpose (their join cap is
+	# a share of the road; the rest are local spacing)
 	var with_feeder := 0
 	for map_seed in _seeds:
-		var map := Game.create(map_seed).map
+		var map := MapGen.generate(map_seed)
 		var where := "seed %d" % map_seed
 		assert_between(map.sockets.size(), RULES.VALLEY_SOCKET_MIN, RULES.VALLEY_SOCKET_MAX, where)
 		if map.routes.size() < 2:
@@ -169,11 +170,12 @@ func test_every_valley_map_holds_its_sockets_off_the_road() -> void:
 
 
 func test_the_game_road_length_and_sockets_on_average() -> void:
-	# a winding road about 1.6 times the 16 by 11 board's (about 45 cells): about 74
+	# the route-first generator: a winding road about 1.6 times the 16 by 11 board's (about 45
+	# cells): about 74
 	var length := 0
 	var sockets := 0
 	for map_seed in range(1, 41):
-		var map := Game.create(map_seed).map
+		var map := MapGen.generate(map_seed)
 		length += map.path.size()
 		sockets += map.sockets.size()
 	var mean_length := float(length) / 40.0

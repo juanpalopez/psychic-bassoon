@@ -441,3 +441,7 @@ Per wave, over all five strategies (the runs still alive at that wave):
 - **A wave takes about 1.5 times as long to clear** (the road is 1.7 times as long). A won run is 19 to 30 minutes of play, from 14 to 24. Late-wave leaks fell: the runs that get that far have 20 or more towers.
 
 The CI game-time check now plays the guard mix on seed 2 (a win on the valley; seed 4 falls at wave 16). It took 13 s on the GitHub runner (14.5 s of CPU in the agents' container, against 8.7 s for seed 4 on 16 by 11). The replay goldens were re-recorded once for the board (`godot/tests/goldens/README.md`); the scripted-bot win test plays the mix on seed 3 (a win with all 20 Heartstone health; seed 7 now falls at wave 14).
+
+### Guard mix on the sectioned valley (2026-10-21, #381)
+
+On the sectioned valley the guard mix is slow and rarely finishes: it needs about 3,850 ticks per wave against about 2,270 for the mix, and on seeds 1 to 12 it reaches wave 20 on none (the mix wins seed 6, spool-only wins 3 and 6). A Mess Tent is built only on valley seeds 5 and 7 of 1 to 7, because few sockets reach the guards' post. The golden games therefore use guardMix seed 11, a lost run that still builds both tents; a bot or placement change should revisit this.

@@ -24,7 +24,7 @@ static func create(
 ) -> GameState:
 	var game := GameState.new()
 	game.seed = seed
-	game.map = MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
+	game.map = _map_for(seed, cols, rows, with_detour, footprint, second_source)
 	# the valley board walks curves through the road's corners (#321); the classic boards keep
 	# the grid route their tests pin
 	var curved := cols >= MAP_RULES.VALLEY_MIN_COLS
@@ -48,6 +48,25 @@ static func create(
 	game.rng = Rng.derive(seed, Streams.WAVES)
 	game.route_rng = Rng.derive(seed, Streams.ROUTES)
 	return game
+
+
+## The game board (32 by 20, one road, 2x2 sockets, a second spawn source) is the sectioned
+## valley (#381); any other board is the route-first generator, which the mechanic tests and the
+## frozen fixtures name. The valley falls back to the route-first map if its sections cannot be
+## made to pass (the stitcher has already logged why).
+static func _map_for(
+	seed: int, cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
+) -> GameMap:
+	var valley := (
+		cols == MAP_RULES.GRID_COLS
+		and rows == MAP_RULES.GRID_ROWS
+		and footprint == MAP_RULES.GAME_SOCKET_FOOTPRINT
+		and second_source
+		and not with_detour
+	)
+	if valley:
+		return MapGen.game_map(seed)
+	return MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
 
 
 ## Queues a command for the next tick. Does not change the game itself.

@@ -6,15 +6,17 @@
 ##   godot --headless --path godot -s tools/write_replays_golden.gd
 extends SceneTree
 
-## Seed, bot profile and waves: a won run, a lost run, and each strategy (the last
-## one builds Guard Tents and a Mess Tent, so the barracks tick path is covered).
+## Seed, bot profile and waves on the sectioned valley (#381): two won runs (mix 6, spoolOnly 3),
+## lost runs (spoolOnly 1, mortarHeavy 4, guardMix 11), a run stopped at the wave cap (prismHeavy)
+## and each strategy. guardMix 11 builds Guard Tents and a Mess Tent, so the barracks tick path
+## is covered (Mess Tents are rare on the valley).
 const GAMES := [
-	[7, "mix", 20],
+	[6, "mix", 20],
 	[1, "spoolOnly", 20],
 	[4, "mortarHeavy", 20],
-	[5, "mix", 20],
+	[3, "spoolOnly", 20],
 	[3, "prismHeavy", 6],
-	[2, "guardMix", 20],
+	[11, "guardMix", 20],
 ]
 const PATH := "res://tests/goldens/replays.json"
 

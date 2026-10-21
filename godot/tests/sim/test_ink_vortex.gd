@@ -4,9 +4,11 @@ extends GutTest
 
 const SPECS := preload("res://content/specs.gd")
 const BLOT := "blotSingularity"
-## A valley seed whose second road joins the main road before the stretch the Spire covers
-## (on the curved routes, #321), so a foe of either source stands there on the main road.
-const TWO_ROAD_SEED := 8
+## A valley seed; the second road joins the main road far along it (in section E), so the Spire
+## stands on the main road a few cells past the join, where a foe of either source stands there.
+const TWO_ROAD_SEED := 1
+## How far past the join (cells of the main road) the Spire's stretch starts.
+const PAST_THE_JOIN := 3.0
 
 
 func _scene(spec: String) -> TowerFireKit.Scene:
@@ -41,7 +43,10 @@ func _two_road_scene(map_seed: int) -> TowerFireKit.Scene:
 	var probe := Game.create(map_seed)
 	if probe.routes.size() < 2 or probe.random_lanes:
 		return null
-	var scene := TowerFireKit.scene("prismSpire", map_seed)
+	var main_join: float = (
+		probe.routes[1].cell_distance(probe.map.feeder_length) - probe.second_offset
+	)
+	var scene := TowerFireKit.scene("prismSpire", map_seed, false, null, main_join + PAST_THE_JOIN)
 	var game := scene.game
 	game.buttons = 100000
 	Game.submit(game, Command.upgrade(scene.tower.id))

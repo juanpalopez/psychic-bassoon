@@ -6,7 +6,8 @@ const MAP_RULES := preload("res://content/map_rules.gd")
 
 
 ## A game with one tower of `type` built (cooldown 0) on the level-0 socket
-## nearest the road, and a way to put a foe on the road in its reach.
+## nearest the road (the part of the road from `after` on), and a way to put a foe on the road
+## in its reach.
 class Scene:
 	extends RefCounted
 	var game: GameState
@@ -18,7 +19,11 @@ class Scene:
 
 
 static func scene(
-	type: String = "spoolGuard", map_seed: int = 1, at_end: bool = false, existing: GameState = null
+	type: String = "spoolGuard",
+	map_seed: int = 1,
+	at_end: bool = false,
+	existing: GameState = null,
+	after: float = 0.0
 ) -> Scene:
 	var scene := Scene.new()
 	scene.game = existing if existing != null else Game.create(map_seed)
@@ -37,7 +42,7 @@ static func scene(
 				scene.near = route.total
 				best_socket = socket
 			continue
-		var along := 0.0
+		var along := after
 		while along <= route.total:
 			var point := route.position_at(along)
 			var gap := centre.distance_to(Vector2(point.x, point.y))

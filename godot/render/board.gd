@@ -81,7 +81,8 @@ func _ready() -> void:
 
 ## Draws the map for `map_seed` again from scratch.
 func rebuild() -> void:
-	_draw(MapGen.generate(map_seed))
+	# the default board is the map the game plays (the sectioned valley, or its fallback)
+	_draw(MapGen.game_map(map_seed))
 
 
 ## Draws a map the game made (the same map `map_seed` would give, without making it again),

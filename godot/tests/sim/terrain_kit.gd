@@ -35,9 +35,10 @@ static func encode(map: GameMap) -> Dictionary:
 	}
 
 
-## The layers for every seed in `SEEDS`, on the game's board.
+## The layers for every seed in `SEEDS`, on the route-first generator's 32 by 20 board (the
+## terrain layer the golden pins; the game board is the sectioned valley).
 static func record() -> Array:
 	var out := []
 	for map_seed in SEEDS:
-		out.append(encode(Game.create(map_seed).map))
+		out.append(encode(MapGen.generate(map_seed)))
 	return out

@@ -40,10 +40,9 @@ func test_the_guard_mix_builds_both_tents_among_its_towers() -> void:
 		assert_gt(game.guards.size(), 0)
 		if types.has("messTent"):
 			with_both.append(map_seed)
-	# on the valley (24 to 30 sockets, #320) seeds 1 to 7 have a socket near the guards' post
-	# and seed 8 has none (on the 16 by 11 board only seeds 2 and 7 had one); a placement
-	# change must move this
-	assert_eq(with_both, [1, 2, 3, 4, 5, 6, 7] as Array[int])
+	# on the sectioned valley (#381) only seeds 5 and 7 have a socket near the guards' post
+	# (the route-first 32 by 20 map had seeds 1 to 7); a placement change must move this
+	assert_eq(with_both, [5, 7] as Array[int])
 
 
 func test_a_mess_tent_goes_where_its_aura_reaches_the_guards() -> void:

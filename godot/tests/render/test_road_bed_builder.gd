@@ -27,15 +27,14 @@ func _setup(map_seed: int) -> Dictionary:
 	return {"game": game, "map": game.map, "field": field, "top": Callable(field, "top_at")}
 
 
-func test_the_game_walks_curved_routes_and_seed_259_has_a_feeder_bridge() -> void:
-	var game := Game.create(259)
-	assert_true(game.routes[0].curved, "the game's routes are the curves of #321")
-	assert_eq(game.map.bridges.size(), 2, "two bridges")
-	var on_feeder := 0
-	for bridge in game.map.bridges:
-		if bridge.path_index < 0:
-			on_feeder += 1
-	assert_eq(on_feeder, 1, "one on the feeder only")
+func test_the_game_walks_curved_routes_and_the_valley_has_one_road_bridge() -> void:
+	for map_seed in [1, 259, 7920]:
+		var game := Game.create(map_seed)
+		assert_true(game.routes[0].curved, "the game's routes are the curves of #321")
+		assert_eq(
+			game.map.bridges.size(), 1, "the Bluewater Crossing's road bridge, seed %d" % map_seed
+		)
+		assert_gte(game.map.bridges[0].path_index, 0, "on the main road, not the feeder")
 
 
 func test_every_point_foes_walk_lies_on_the_bed_or_a_bridge() -> void:
@@ -138,7 +137,7 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 				if normals[i].y > 0.99 and on_deck:
 					plank_top = maxf(plank_top, vertices[i].y)
 			assert_almost_eq(plank_top, top, 1e-4, label)
-	assert_gt(seen, SEEDS.size(), "the seeds have bridges, some two")
+	assert_gte(seen, SEEDS.size(), "every seed has its road bridge")
 
 
 func test_a_deck_rests_on_the_higher_bank() -> void:
@@ -320,7 +319,7 @@ func test_the_road_is_two_draw_calls_and_a_few_thousand_triangles() -> void:
 		most_bridges = maxi(most_bridges, _triangles(bridges))
 		root.free()
 	gut.p("most triangles: bed %d, bridges %d" % [most_bed, most_bridges])
-	assert_lt(most_bed, 4500, "the bed fits the terrain and road budget")
+	assert_lt(most_bed, 5500, "the bed fits the terrain and road budget")
 	assert_lt(most_bridges, 1500, "the bridges fit it too")
 
 

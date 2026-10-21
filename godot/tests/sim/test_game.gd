@@ -25,7 +25,7 @@ func test_create_starts_with_prototype_buttons_heartstone_health_and_tick_zero()
 
 func test_create_builds_the_map_and_every_route() -> void:
 	var game := Game.create(SEED)
-	var map := MapGen.generate(SEED)
+	var map := MapGen.generate_valley(SEED)
 	assert_eq(game.map.path, map.path)
 	assert_eq(game.routes.size(), map.routes.size())
 	assert_eq(game.route, game.routes[0])
