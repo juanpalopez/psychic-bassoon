@@ -19,6 +19,7 @@ enum Region {
 }
 
 const LAYOUT := preload("res://content/valley/layout_rules.gd")
+const VALLEY := preload("res://content/valley/valley_rules.gd")
 const HALF := 0.5
 
 ## The river's centre line (a spline from the top edge to the bottom edge).
@@ -27,16 +28,36 @@ var river: RoadCurve = null
 var river_cells: Array[Vector2i] = []
 
 
-## The layout for a seed, or null (with an error) when no draw passes `problems`.
+## The layout for a seed, or null (with an error) when no draw passes `problems` and stitches with
+## the stand-in sections (each retry draws the next layout from the same stream).
 static func generate(seed: int, cols: int, rows: int) -> ValleyLayout:
 	assert(cols == LAYOUT.COLS and rows == LAYOUT.ROWS, "the layout is made for 32 by 20")
 	var rng := Rng.derive(seed, Streams.VALLEY_LAYOUT)
 	for attempt in LAYOUT.MAX_ATTEMPTS:
 		var layout := _draw(seed, rng)
-		if layout.problems().is_empty():
+		if layout.problems().is_empty() and _stitches(layout):
 			return layout
 	push_error("valley layout seed %d: no draw passes its checks" % seed)
 	return null
+
+
+static func _stitches(layout: ValleyLayout) -> bool:
+	var map := ValleyStitcher.build(layout.seed, layout.cols, layout.rows, sections(), layout, true)
+	return map != null
+
+
+## The six stand-in sections, in road order.
+static func sections() -> Array[ValleySection]:
+	var out: Array[ValleySection] = []
+	for index in Region.size():
+		out.append(RegionStraightSection.new())
+	return out
+
+
+func rng_for(id: int, attempt: int) -> Rng:
+	var stream := Streams.VALLEY_LAYOUT_SECTION + id * VALLEY.SECTION_STREAM_STRIDE + attempt
+	assert(attempt < VALLEY.SECTION_STREAM_STRIDE, "too many attempts")
+	return Rng.derive(seed, stream)
 
 
 ## What is wrong with this layout, or nothing: every spine inside its region, no gate or road
@@ -60,6 +81,28 @@ func problems() -> Array[String]:
 			found.append("region %d: the road must wade the river in exactly one stretch" % slot.id)
 		if not dry and (wet.has(slot.entry) or wet.has(slot.exit)):
 			found.append("region %d: the gates must be on dry banks" % slot.id)
+		found.append_array(_uncoverable(slot, cells))
+	return found
+
+
+## The bends of a region's road that no socket block site is near enough to cover.
+static func _uncoverable(slot: Slot, cells: Array[Vector2i]) -> Array[String]:
+	var probe := SectionResult.create(slot)
+	probe.road = cells
+	var blocked: Array[Rect2i] = []
+	for cell in slot.river:
+		blocked.append(Rect2i(cell, Vector2i.ONE))
+	var sites := SectionSockets.candidates(probe, blocked)
+	var found: Array[String] = []
+	for bend in SectionSockets.bends(cells, slot.bend_run):
+		var near := sites.any(
+			func(site: Vector2i) -> bool:
+				return SectionSockets.centre_gap(site, bend) <= VALLEY.BEND_COVER_REACH
+		)
+		if not near:
+			found.append(
+				"region %d: no room for a socket block by the bend at %s" % [slot.id, bend]
+			)
 	return found
 
 
@@ -79,6 +122,8 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	layout.seed = seed
 	layout.cols = LAYOUT.COLS
 	layout.rows = LAYOUT.ROWS
+	layout.hero_caps = LAYOUT.HERO_CAPS
+	layout.bend_run = LAYOUT.BEND_RUN
 	var left := _jitter(rng, LAYOUT.LEFT_X)
 	var right := _jitter(rng, LAYOUT.RIGHT_X)
 	var ys := [
@@ -127,6 +172,8 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		slot.rect = rects[index]
 		slot.entry = entries[index]
 		slot.exit = exits[index]
+		slot.margin = LAYOUT.BLOCK_MARGIN
+		slot.bend_run = layout.bend_run
 		slot.spine = _spine(rng, slot)
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):

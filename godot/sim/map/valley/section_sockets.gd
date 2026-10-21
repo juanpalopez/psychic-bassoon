@@ -8,13 +8,30 @@ const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 
 
-## The road's bends: the cells where it turns.
-static func bends(road: Array[Vector2i]) -> Array[Vector2i]:
+## The road's bends: the cells where it turns. With `min_run` above 1 only a turn between two
+## straight runs of at least that many steps counts, so the staircase of a diagonal stretch of a
+## spline road is no row of bends.
+static func bends(road: Array[Vector2i], min_run: int = 1) -> Array[Vector2i]:
 	var found: Array[Vector2i] = []
 	for index in range(1, road.size() - 1):
-		if road[index] - road[index - 1] != road[index + 1] - road[index]:
+		if (
+			road[index] - road[index - 1] != road[index + 1] - road[index]
+			and _run(road, index, -1) >= min_run
+			and _run(road, index, 1) >= min_run
+		):
 			found.append(road[index])
 	return found
+
+
+## The steps in a straight line from `index` going `way` (1 or -1) along the road.
+static func _run(road: Array[Vector2i], index: int, way: int) -> int:
+	var step := (road[index + way] - road[index]) * way
+	var count := 0
+	var at := index
+	while at + way >= 0 and at + way < road.size() and road[at + way] - road[at] == step * way:
+		count += 1
+		at += way
+	return count
 
 
 ## Anchors of blocks that fit in the strip (one empty column kept at its right edge), off the
@@ -22,8 +39,8 @@ static func bends(road: Array[Vector2i]) -> Array[Vector2i]:
 static func candidates(result: SectionResult, blocked: Array[Rect2i]) -> Array[Vector2i]:
 	var size: int = RULES.GAME_SOCKET_FOOTPRINT
 	var out: Array[Vector2i] = []
-	var last_x := result.rect.end.x - size - VALLEY.STRIP_RIGHT_MARGIN
-	for y in range(result.rect.position.y, result.rect.end.y - size + 1):
+	var last_x := result.rect.end.x - size - result.margin.x
+	for y in range(result.rect.position.y, result.rect.end.y - size - result.margin.y + 1):
 		for x in range(result.rect.position.x, last_x + 1):
 			var block := Rect2i(x, y, size, size)
 			if _free(block, result.road, blocked) and reaches_road(block, result.road):
@@ -43,7 +60,7 @@ static func place(
 		sites[i] = sites[j]
 		sites[j] = held
 	var target: int = blocks.x + rng.next_int(blocks.y - blocks.x + 1)
-	for bend in bends(result.road):
+	for bend in bends(result.road, result.bend_run):
 		var best := _nearest(sites, bend, result.sockets)
 		if best != Vector2i(-1, -1) and centre_gap(best, bend) <= VALLEY.BEND_COVER_REACH:
 			result.add_socket(best, 0, SectionResult.Tag.BEND)

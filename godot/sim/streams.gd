@@ -23,5 +23,7 @@ const VALLEY_LAYOUT := 7
 ## The first of the valley sections' streams: `VALLEY_SECTION + id * stride + attempt`, see
 ## `ValleyPlan.section_rng`.
 const VALLEY_SECTION := 1000
+## Like `VALLEY_SECTION`, for the sections of the 2D layout (`ValleyLayout.rng_for`).
+const VALLEY_LAYOUT_SECTION := 2000
 ## Render-only scenery around the board; never affects the game.
 const SCENERY := 100

@@ -5,6 +5,7 @@ extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
+const HERO := preload("res://content/valley/hero_rules.gd")
 
 
 ## One problem and the section whose attempt should change.
@@ -27,7 +28,7 @@ static func all_problems(
 	var found: Array[Problem] = []
 	for slot in plan.slots:
 		found.append_array(section_problems(slot, results[slot.id], sections[slot.id]))
-	found.append_array(valley_problems(results))
+	found.append_array(valley_problems(results, plan))
 	return found
 
 
@@ -67,7 +68,7 @@ static func section_problems(
 		var block := Rect2i(result.sockets[index], Vector2i.ONE * RULES.GAME_SOCKET_FOOTPRINT)
 		if not _block_fits(slot, result, block, index, blocked):
 			found.append(Problem.make(id, "socket block %s does not fit" % result.sockets[index]))
-	for bend in SectionSockets.bends(road):
+	for bend in SectionSockets.bends(road, slot.bend_run):
 		if not _covered(result, bend):
 			found.append(Problem.make(id, "no socket block covers the bend at %s" % bend))
 	for text in section.extra_problems(slot, result):
@@ -77,7 +78,9 @@ static func section_problems(
 
 ## Across the whole valley: blocks of neighbouring strips keep their gap, high ground stays
 ## scarce and each high socket has a low one to fall back on.
-static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
+static func valley_problems(
+	results: Array[SectionResult], plan: ValleyPlan = null
+) -> Array[Problem]:
 	var found: Array[Problem] = []
 	var all: Array[Vector2i] = []
 	var high := 0
@@ -93,7 +96,7 @@ static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
 					)
 			all.append(result.sockets[index])
 			high += 1 if result.socket_tags[index] == SectionResult.Tag.HIGH else 0
-	found.append_array(_join_bend_problems(results))
+	found.append_array(_join_bend_problems(results, plan.bend_run if plan != null else 1))
 	if high * 100 > all.size() * VALLEY.HIGH_MAX_PERCENT:
 		found.append(
 			Problem.make(
@@ -111,7 +114,7 @@ static func valley_problems(results: Array[SectionResult]) -> Array[Problem]:
 						result.id, "high socket %s has no low socket nearby" % result.sockets[index]
 					)
 				)
-	found.append_array(HeroGraph.problems(results))
+	found.append_array(HeroGraph.problems(results, plan.hero_caps if plan != null else HERO.CAPS))
 	return found
 
 
@@ -119,7 +122,9 @@ static func _block_fits(
 	slot: ValleyPlan.Slot, result: SectionResult, block: Rect2i, index: int, blocked: Array[Rect2i]
 ) -> bool:
 	var inside := (
-		slot.rect.encloses(block) and block.end.x <= slot.rect.end.x - VALLEY.STRIP_RIGHT_MARGIN
+		slot.rect.encloses(block)
+		and block.end.x <= slot.rect.end.x - slot.margin.x
+		and block.end.y <= slot.rect.end.y - slot.margin.y
 	)
 	var level: int = result.socket_levels[index]
 	if not inside or level < 0 or level >= RULES.ELEVATION_LEVELS:
@@ -189,12 +194,12 @@ static func _link_problems(id: int, result: SectionResult) -> Array[Problem]:
 
 ## A turn on the first or last cell of a section is no bend inside either road, so it is looked
 ## for on the whole road; a block of any section may cover it.
-static func _join_bend_problems(results: Array[SectionResult]) -> Array[Problem]:
+static func _join_bend_problems(results: Array[SectionResult], run: int) -> Array[Problem]:
 	var found: Array[Problem] = []
 	var path: Array[Vector2i] = []
 	for result in results:
 		path.append_array(result.road)
-	for bend in SectionSockets.bends(path):
+	for bend in SectionSockets.bends(path, run):
 		for result in results:
 			if result.road[0] != bend and result.road[result.road.size() - 1] != bend:
 				continue

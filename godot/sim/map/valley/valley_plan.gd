@@ -15,6 +15,7 @@ enum Id {
 }
 
 const RULES := preload("res://content/valley/valley_rules.gd")
+const HERO := preload("res://content/valley/hero_rules.gd")
 
 
 ## One section's place on the board.
@@ -29,6 +30,10 @@ class Slot:
 	var exit := Vector2i.ZERO
 	## The kind of section (an `Id`); -1 means the id itself, as in the strip layout.
 	var role: int = -1
+	## Empty cells (right, bottom) a socket block keeps from the rect's edges.
+	var margin := Vector2i(RULES.STRIP_RIGHT_MARGIN, 0)
+	## The shortest straight runs on both sides of a turn that make it a bend to cover.
+	var bend_run: int = 1
 	## The road's waypoints in cell units, when the layout gives them (the 2D layout).
 	var spine: Array[Vector2] = []
 	## The cells of the river inside the rect, when the layout has one.
@@ -40,6 +45,10 @@ var cols: int = 0
 var rows: int = 0
 ## The six slots, in `Id` order.
 var slots: Array[Slot] = []
+## The steps the hero may need from the meadow to each kind of section: (kind, steps).
+var hero_caps: Array[Vector2i] = HERO.CAPS
+## The bend rule of the slots (`Slot.bend_run`), for the bends where two sections join.
+var bend_run: int = 1
 
 
 ## The plan for a seed on a board of `cols` by `rows` cells (the widths add up to 32 columns).
@@ -63,6 +72,12 @@ static func create(seed: int, cols: int, rows: int) -> ValleyPlan:
 		left += widths[index]
 	assert(left == cols, "the strips tile %d columns, not %d" % [left, cols])
 	return plan
+
+
+## The stream of one section's attempt as the stitcher asks for it; a layout may use other
+## stream ids.
+func rng_for(id: int, attempt: int) -> Rng:
+	return ValleyPlan.section_rng(seed, id, attempt)
 
 
 ## The stream of one section's attempt: a section drawn again never moves another one.

@@ -76,15 +76,16 @@ static func problems(
 				)
 	if not found.is_empty():
 		return found
-	var meadow := results[ValleyPlan.Id.SUNKEN_MEADOW]
-	var from := graph._anchor(meadow.rect)
+	var from := graph._anchor(_of_role(results, ValleyPlan.Id.SUNKEN_MEADOW).rect)
 	for target in caps:
-		var to := graph._anchor(results[target.x].rect)
+		var section := _of_role(results, target.x)
+		var to := graph._anchor(section.rect)
 		var steps := graph.steps(from, to)
 		if steps < 0 or steps > target.y:
 			found.append(
 				ValleyChecks.Problem.make(
-					target.x, "the hero needs %d steps from the meadow, cap %d" % [steps, target.y]
+					section.id,
+					"the hero needs %d steps from the meadow, cap %d" % [steps, target.y]
 				)
 			)
 	return found
@@ -95,6 +96,14 @@ func steps(from: Vector2i, to: Vector2i) -> int:
 	if not _is_open(from) or not _is_open(to):
 		return -1
 	return _distances(from)[to.y * cols + to.x]
+
+
+## The result of the section of this kind (`ValleyPlan.Id`).
+static func _of_role(results: Array[SectionResult], role: int) -> SectionResult:
+	for result in results:
+		if result.role == role:
+			return result
+	return results[role]
 
 
 func _is_open(cell: Vector2i) -> bool:
