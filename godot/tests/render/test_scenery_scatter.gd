@@ -172,13 +172,22 @@ func test_the_forest_is_thicker_further_out() -> void:
 		assert_gt(far / far_cells, near / near_cells, "seed %d" % map_seed)
 
 
+## The valley has far more meadow than rock, so the share of boulders that lie in the rocks would
+## be low whatever the table says; what follows the region is the density per cell.
 func test_the_board_scatter_follows_the_regions() -> void:
 	var counts := {"boulder": [0, 0], "dirt": [0, 0], "tree": [0, 0]}
 	var wanted := {
 		"boulder": GameMap.Region.ROCKS, "dirt": GameMap.Region.DIRT, "tree": GameMap.Region.FOREST
 	}
+	var cells_in := 0
+	var cells_out := 0
 	for map_seed in SEEDS:
 		var field := _field(map_seed)
+		for row in field.map.rows:
+			for col in field.map.cols:
+				var region := field.map.region_at(Vector2i(col, row))
+				cells_in += 1 if region == GameMap.Region.ROCKS else 0
+				cells_out += 0 if region == GameMap.Region.ROCKS else 1
 		for placement in SceneryScatter.placements(field):
 			var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
 			if not field.map.in_bounds(cell):
@@ -191,6 +200,13 @@ func test_the_board_scatter_follows_the_regions() -> void:
 				counts[key][1] += 1
 	for key: String in counts:
 		assert_gt(counts[key][0], 0, key)
+	assert_gt(cells_in, 0, "the valley has rocks")
+	var rock_cells := float(cells_in)
+	var other_cells := float(cells_out)
+	var in_rocks := float(counts["boulder"][1]) / rock_cells
+	var elsewhere := float(counts["boulder"][0] - counts["boulder"][1]) / other_cells
+	assert_gt(in_rocks, elsewhere * 5.0, "boulders crowd the rocks")
+	for key: String in ["dirt", "tree"]:
 		assert_gt(float(counts[key][1]) / float(counts[key][0]), 0.7, "%s in its region" % key)
 
 

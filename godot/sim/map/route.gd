@@ -152,7 +152,10 @@ func position_at(along: float) -> RoutePoint:
 static func _add_spawn(route: Route, cells: Array[Vector2i]) -> void:
 	var goes_right := cells.size() > 1 and cells[1].x > cells[0].x
 	var goes_up := cells.size() > 1 and cells[1].y < cells[0].y
-	if goes_right:
+	# a road that starts on the left edge below the top row (the valley's outer march) enters
+	# from the left, not down a column of meadow
+	var from_left := cells[0].x == 0 and cells[0].y > 0
+	if goes_right or from_left:
 		route.xs.append(-RULES.SPAWN_OFFSET)
 		route.ys.append(float(cells[0].y) + RULES.CELL_CENTRE)
 	elif goes_up:

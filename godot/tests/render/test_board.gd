@@ -17,7 +17,7 @@ func _cells_per_block(board: Board) -> int:
 
 func test_the_board_holds_the_map_for_its_seed() -> void:
 	var board := _board(7920)
-	var map := MapGen.generate(7920)
+	var map := Game.create(7920).map
 	assert_eq(board.map.path, map.path)
 	assert_eq(board.map.routes.size(), map.routes.size())
 
@@ -41,7 +41,7 @@ func test_changing_the_seed_rebuilds_the_board() -> void:
 	var before := board.map.path
 	board.map_seed = 7920
 	assert_ne(board.map.path, before)
-	assert_eq(board.map.path, MapGen.generate(7920).path)
+	assert_eq(board.map.path, Game.create(7920).map.path)
 	assert_eq(
 		board.road_count + board.ground_count + board.socket_count * _cells_per_block(board),
 		RULES.GRID_COLS * RULES.GRID_ROWS
@@ -102,11 +102,13 @@ func test_the_board_draws_one_socket_overlay_per_socket() -> void:
 
 func test_the_surfaces_are_flat_on_the_road_and_rise_one_terrace_a_level() -> void:
 	var board := _board(7920)
-	var heights := {}
-	for cell in board.map.sockets:
-		heights[board.map.elevation_at(cell)] = board.surface_height(cell)
 	var step := Board.TERRACE_STEP
-	assert_eq(heights, {0: 0.0, 1: step, 2: 2.0 * step})
+	var seen := {}
+	for cell in board.map.sockets:
+		var level := board.map.elevation_at(cell)
+		seen[level] = true
+		assert_almost_eq(board.surface_height(cell), float(level) * step, 1e-9, "socket %s" % cell)
+	assert_gt(seen.size(), 1, "the valley has sockets on more than one terrace")
 	for level in Board.LEVEL_HEIGHTS.size():
 		assert_almost_eq(Board.LEVEL_HEIGHTS[level], float(level) * step, 1e-9)
 	assert_eq(Board.LEVEL_HEIGHTS.size(), RULES.TERRAIN_LEVELS, "a height for every terrace")
@@ -127,7 +129,7 @@ func test_the_tap_picker_starts_above_the_highest_ground_of_the_map() -> void:
 
 func test_showing_the_games_map_draws_it_without_making_it_again() -> void:
 	var board := _board(1)
-	var game_map := MapGen.generate(1)
+	var game_map := Game.create(1).map
 	var diorama := board.diorama
 	var chunk := diorama.builder("Terraces").get_child(0)
 	board.show_map(game_map)
