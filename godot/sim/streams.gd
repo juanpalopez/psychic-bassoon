@@ -18,6 +18,8 @@ const SECOND_SOURCE := 4
 const TERRAIN := 5
 ## The valley plan (#381): where the six sections' strips and gates go.
 const VALLEY_PLAN := 6
+## The 2D valley layout (#407): the regions' borders, gates, spines and the river.
+const VALLEY_LAYOUT := 7
 ## The first of the valley sections' streams: `VALLEY_SECTION + id * stride + attempt`, see
 ## `ValleyPlan.section_rng`.
 const VALLEY_SECTION := 1000
