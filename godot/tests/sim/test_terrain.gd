@@ -1,3 +1,8 @@
+## The route-first generator's terrain layer (#322). The game board is the sectioned valley now
+## (`docs/lessons/2026-10-20-sectioned-valley.md`), so these tests build their maps with
+## `MapGen.generate` explicitly; the game board's own terrain is in
+## `tests/sim/valley/test_valley_game_board.gd`.
+##
 ## The valley's terrain layer (#322): terrace heights, regions (meadow, forest, rocks, dirt) and
 ## a river the road crosses on bridges, drawn from its own stream after the road and the
 ## sockets, so neither of them moves. The sim keeps it as plain data; the render builds the
@@ -16,7 +21,7 @@ func before_all() -> void:
 		_seeds.append(i * 104729 + 3)
 	_seeds.append_array([0, 1, 42, 4294967295])
 	for map_seed in _seeds:
-		_maps.append(Game.create(map_seed).map)
+		_maps.append(MapGen.generate(map_seed))
 
 
 func _cells(map: GameMap) -> Array[Vector2i]:
@@ -250,8 +255,8 @@ func test_the_river_meets_a_bridge_head_on_and_keeps_out_of_road_turns() -> void
 
 
 func test_the_terrain_is_reproducible_and_leaves_the_road_and_sockets_alone() -> void:
-	var a := Game.create(7).map
-	var b := Game.create(7).map
+	var a := MapGen.generate(7)
+	var b := MapGen.generate(7)
 	assert_eq(a.heights, b.heights)
 	assert_eq(a.regions, b.regions)
 	assert_eq(a.river, b.river)
