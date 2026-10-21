@@ -23,7 +23,9 @@ This is the detailed roster companion to [`docs/GDD.md`](GDD.md). It expands the
 
 ## Visual roster reference
 
-![Kingdom of the Fold roster overview](art/roster/roster-overview.svg)
+![Generated Kingdom of the Fold roster overview](art/roster/roster-generated-reference.jpg)
+
+[Open the editable roster schematic](art/roster/roster-overview.svg).
 
 This sheet is a visual index of the eight tower families, four hero options, and twelve enemy archetypes. It is an orientation aid, not a source of balance values; the tables below are authoritative for names, status, mechanics and draft numbers.
 
