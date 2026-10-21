@@ -150,3 +150,54 @@ func test_a_bend_on_a_section_join_needs_a_block_from_either_side() -> void:
 		func(p: ValleyChecks.Problem) -> String: return p.text
 	)
 	assert_true(texts.any(func(t: String) -> bool: return t.contains("join bend")), str(texts))
+
+
+func _road_result(cells: Array[Vector2i], id: int) -> SectionResult:
+	var result := SectionResult.new()
+	result.id = id
+	result.road = cells
+	return result
+
+
+func _hairpin() -> Array[Vector2i]:
+	# 14 cells out along row 0, a turn, and 14 back along row 2: two lanes 2 cells apart
+	var cells: Array[Vector2i] = []
+	for x in 14:
+		cells.append(Vector2i(x, 0))
+	cells.append(Vector2i(14, 1))
+	for x in range(14, -1, -1):
+		cells.append(Vector2i(x, 2))
+	return cells
+
+
+func test_a_hairpin_breaks_the_lane_rule_and_a_wide_bend_does_not() -> void:
+	var plan := ValleyPlan.new()
+	plan.lane_gap = 5
+	plan.lane_run = 12
+	var results: Array[SectionResult] = [_road_result(_hairpin(), 0)]
+	var found := ValleyChecks._lane_problems(results, plan.lane_gap, plan.lane_run)
+	assert_eq(found.size(), 1)
+	assert_eq(found[0].section, 0)
+	var wide: Array[Vector2i] = []
+	for x in 14:
+		wide.append(Vector2i(x, 0))
+	for y in range(1, 8):
+		wide.append(Vector2i(13, y))
+	for x in range(12, -1, -1):
+		wide.append(Vector2i(x, 7))
+	var ok: Array[SectionResult] = [_road_result(wide, 0)]
+	assert_eq(ValleyChecks._lane_problems(ok, plan.lane_gap, plan.lane_run).size(), 0)
+
+
+func test_the_lane_rule_is_blamed_on_the_later_section() -> void:
+	var first := _road_result(_hairpin().slice(0, 15), 0)
+	var second := _road_result(_hairpin().slice(15), 1)
+	var results: Array[SectionResult] = [first, second]
+	var found := ValleyChecks._lane_problems(results, 5, 12)
+	assert_eq(found.size(), 1)
+	assert_eq(found[0].section, 1)
+
+
+func test_stretches_closer_than_the_run_are_one_bend_not_two_lanes() -> void:
+	var results: Array[SectionResult] = [_road_result(_hairpin(), 0)]
+	assert_eq(ValleyChecks._lane_problems(results, 5, 40).size(), 0)

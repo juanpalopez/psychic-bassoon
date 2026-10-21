@@ -58,3 +58,9 @@ const BEND_RUN := 2
 ## Provisional until the real sections exist: measured over seeds 1..3000 with the stand-in
 ## sections (worst Broken Ridge 31, Crossing 23, Heartkeep 35), plus 3 to 4 steps.
 const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 34), Vector2i(2, 27), Vector2i(5, 38)]
+
+## The lane rule (#406): two stretches of the road at least `LANE_RUN` cells apart along it are
+## at least `LANE_GAP` cells apart in a straight line, so a bend is a wide curve, never a snake of
+## lanes or a hairpin.
+const LANE_GAP := 5
+const LANE_RUN := 12
