@@ -3,6 +3,12 @@ import {buildGraph, select} from './select-tests.mjs';
 
 // A small project: a map context, a combat context that uses it, a render script, and tests.
 const files = new Map<string, string>([
+  ['content/valley/layout_rules.gd', 'extends RefCounted\nconst COLS := 32\n'],
+  [
+    'sim/map/valley/layout.gd',
+    'class_name Layout\nconst L := preload("res://content/valley/layout_rules.gd")\n',
+  ],
+  ['tests/sim/valley/test_layout.gd', 'var l := Layout.new()\n'],
   ['sim/map/grid.gd', 'class_name Grid\nextends RefCounted\n'],
   ['sim/combat/hit.gd', 'class_name Hit\nvar g: Grid\n'],
   ['render/view.gd', 'const H = preload("res://sim/combat/hit.gd")\n'],
@@ -30,6 +36,21 @@ describe('select-tests: what runs', () => {
     '.nvmrc',
   ])('keeps the Godot job for %s but runs no GUT test', path => {
     expect(select([path], graph)).toEqual({godot: true, gut: 'none'});
+  });
+
+  it("traces the valley's content like code instead of running everything", () => {
+    const result = select(['godot/content/valley/layout_rules.gd'], graph);
+    expect(result).toEqual({
+      godot: true,
+      gut: 'res://tests/sim/valley/test_layout.gd',
+    });
+  });
+
+  it('still runs everything for other content', () => {
+    expect(select(['godot/content/towers.gd'], graph)).toEqual({
+      godot: true,
+      gut: 'all',
+    });
   });
 
   it('runs the tests that reach a changed class through class_name', () => {
