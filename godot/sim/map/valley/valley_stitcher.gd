@@ -119,7 +119,8 @@ static func _grid(map: GameMap) -> Array[PackedByteArray]:
 
 ## The curves foes walk, one per route: the sections' spline roads joined end to end (a section
 ## with no spline contributes its cell centres), and the second route as its own cells and then
-## the main curve from the join on, so both are the same line after the join. Empty when no
+## the main curve from the join on, so both are the same line after the join. The second's own
+## part is the feeder curve a section gives, else the feeder cells' centres. Empty when no
 ## section has a spline.
 static func _route_curves(map: GameMap, results: Array[SectionResult]) -> Array:
 	var any_spline := false
@@ -133,7 +134,17 @@ static func _route_curves(map: GameMap, results: Array[SectionResult]) -> Array:
 		return []
 	var curves: Array = [main]
 	if map.routes.size() > 1:
-		var second := RoadCurve.from_cells(map.routes[1].slice(0, map.feeder_length))
+		var second := RoadCurve.new()
+		var feeder_curve: RoadCurve = null
+		for result in results:
+			feeder_curve = result.feeder_curve if result.feeder_curve != null else feeder_curve
+		second.append_curve(
+			(
+				feeder_curve
+				if feeder_curve != null
+				else RoadCurve.from_cells(map.routes[1].slice(0, map.feeder_length))
+			)
+		)
 		var tail := RoadCurve.new()
 		var first_point := main.cell_points[map.join_index]
 		for index in range(first_point, main.xs.size()):
