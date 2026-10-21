@@ -6,6 +6,11 @@ The game was previously titled **Papercraft Kingdom Defense** (and earlier Scrap
 
 - **Roster visual references:** [`generated poster crop`](docs/art/roster/roster-generated-reference.jpg) · [editable SVG](docs/art/roster/roster-overview.svg)
 - **Folded Valley map references:** [`generated poster crop`](docs/art/maps/folded-valley-generated-reference.jpg) · [editable tactical SVG](docs/art/maps/folded-valley-tactical-concept.svg)
+- **Download:** each tagged release carries the Linux, Windows and macOS builds ([releases](https://github.com/juanpalopez/psychic-bassoon/releases), newest first, pre-releases included); the iPhone build is installed locally for now (`scripts/ios-run.sh`; setup guide in [docs/IPHONE.md](docs/IPHONE.md)). The web build is retired, and https://juanpalopez.github.io/psychic-bassoon/ links to releases.
+- **Plan and roadmap:** [`docs/PLAN.md`](docs/PLAN.md) (phases 0–8, each closed by a gate)
+- **Project board:** https://github.com/users/juanpalopez/projects/4 (codename _Project Slag_)
+
+> **Status:** The Godot 4 greybox runs with map, sockets, foes, towers, HUD, win/loss flow and simulation speeds. The production game remains in alpha: map readability/performance and content integration still need in-device checks. This PR changes design documentation only; no runtime gameplay is added.
 
 
 ## Getting started
