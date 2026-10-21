@@ -114,7 +114,7 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	return []
 
 
-## Cells beside a drop of two terraces or more.
+## Cells at the top of a drop of two terraces or more (the rim; the foot stays walkable).
 func _cliffs(result: SectionResult) -> Array[Vector2i]:
 	var found: Array[Vector2i] = []
 	var rect := result.rect
@@ -128,7 +128,7 @@ func _cliffs(result: SectionResult) -> Array[Vector2i]:
 				if (
 					result.has_cell(next)
 					and not _in_block(result, next)
-					and absi(result.height_at(next) - result.height_at(cell)) >= REGION.RIDGE_LEVEL
+					and result.height_at(cell) - result.height_at(next) >= REGION.RIDGE_LEVEL
 				):
 					found.append(cell)
 					break
