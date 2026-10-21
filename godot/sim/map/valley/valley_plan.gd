@@ -53,6 +53,8 @@ var bend_run: int = 1
 ## closer than `lane_gap` cells in a straight line (0: no rule, the strip valley).
 var lane_gap: int = 0
 var lane_run: int = 0
+## How often the stitcher draws a failing section again before it gives up.
+var section_attempts: int = RULES.MAX_SECTION_ATTEMPTS
 
 
 ## The plan for a seed on a board of `cols` by `rows` cells (the widths add up to 32 columns).

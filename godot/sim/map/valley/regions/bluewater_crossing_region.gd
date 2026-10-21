@@ -17,7 +17,7 @@ func socket_range() -> Vector2i:
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var result := SectionResult.create(slot)
 	var row := slot.entry.y
-	var curve := RoadSpline.build(_waypoints(slot, _span(slot.river, row)))
+	var curve := RoadSpline.build(waypoints(slot, _span(slot.river, row)))
 	result.road = curve.cells
 	result.road_curve = curve
 	var hero_row := _hero_row(slot, rng, row)
@@ -91,9 +91,9 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	return found
 
 
-## The road's waypoints: level into the river on the entry row, level out of it, then a smooth
-## bend to the exit.
-func _waypoints(slot: ValleyPlan.Slot, span: Vector2i) -> Array[Vector2]:
+## The road's waypoints, which the layout also gives the slot as its spine: level into the river
+## on the entry row, level out of it, then a smooth bend to the exit.
+static func waypoints(slot: ValleyPlan.Slot, span: Vector2i) -> Array[Vector2]:
 	var reach: int = BLUEWATER.APPROACH_REACH
 	var row := float(slot.entry.y) + HALF
 	var points: Array[Vector2] = [Vector2(slot.entry) + Vector2(HALF, HALF)]
