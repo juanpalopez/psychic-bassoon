@@ -22,14 +22,14 @@ If the change is above your tier (a light review meets `godot/sim` logic, a stan
 
 ## Be efficient
 
-- Stay inside the tool-call limit for your tier. Batch independent commands in one call.
+- Stay inside the tool-call limit for your tier (the integration step, reading sibling files and writing your two report files have their own allowance of 6 more calls). Batch independent commands in one call.
 - Spend effort on what CI cannot see: logic errors, missing or weak tests, mismatches with the ticket, rules no linter enforces, and whether the checks themselves are strong enough. In the deep tier, prove it by mutation: change the code in a scratch worktree and see whether a test or check fails.
 - If the caller sends the author's mutation list or numbers, check them instead of redoing them: run `python3 scripts/mutate.py <list>` (it works in a temporary copy and takes seconds), look at the survivors, and add a mutation only for a rule the list misses. Do not edit code by hand, and never check out, reset or modify an existing worktree: make your own scratch worktree and remove it.
 - Verify claims before reporting them, and quote only the decisive line of output. Separate what you proved from what you suspect, and say which is which.
 - On a re-review, check only whether each earlier finding is fixed and whether the new diff added problems.
 - **Integration, always for generators, plans and seeded code:** CI may have run on an old base. In your own scratch worktree merge the PR head onto the current `origin/main` (or the PR's base), run the tests of the area it touches (`scripts/run-gut.sh -gselect=<name>`), and for a generator sweep more seeds than the PR's tests do. Report what failed after the merge as a proven finding. Remove the worktree.
 - **Loosened rules:** a lowered minimum, a wider tolerance, a bigger budget or a dropped check against the ticket is a finding unless the PR body gives a measured reason.
-- **In a stack** (the caller gives you a stack directory): read `stack.md` first (it lists the PRs, what must not change and the cross-PR questions). Review only your own PR's diff. Before you finish, list `report-*.md` and `notes-*.md` there and read the ones that exist; append to `notes-<N>.md` (your PR number) anything a sibling needs, and put in your report only interactions you confirmed. Write your final report to `report-<N>.md` in that directory as well as returning it. Write nowhere else.
+- **In a stack** (the caller gives you a stack directory): read `stack.md` first (it lists the PRs, what must not change and the cross-PR questions). Review only your own PR's diff. Before you finish, list `report-*.md` and `notes-*.md` there and read the ones that exist; append to `notes-<N>.md` (your PR number) anything a sibling needs, and put in your report only interactions you confirmed. Write your final report to `report-<N>.md` in that directory as well as returning it. Write nowhere else; you have no Write tool, so use `cat > <dir>/report-<N>.md <<'EOF'` and `cat >> <dir>/notes-<N>.md <<'EOF'` in Bash.
 
 ## Output
 
