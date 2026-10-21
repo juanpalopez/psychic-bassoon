@@ -124,5 +124,29 @@ func test_every_seed_has_a_layout_that_passes_its_own_checks() -> void:
 	for seed in range(1, SWEEP + 1):
 		var layout := _layout(seed)
 		assert_not_null(layout, "seed %d" % seed)
-		if layout != null:
-			assert_eq(layout.problems().size(), 0, "seed %d" % seed)
+		if layout == null:
+			continue
+		assert_eq(layout.problems().size(), 0, "seed %d" % seed)
+		var covered := 0
+		for index in 6:
+			var slot := layout.slots[index]
+			covered += slot.rect.size.x * slot.rect.size.y
+			if index < 5:
+				var next := layout.slots[index + 1]
+				assert_eq((next.entry - slot.exit).length_squared(), 1, "gate, seed %d" % seed)
+				assert_true(slot.rect.has_point(slot.exit) and next.rect.has_point(next.entry))
+				assert_false(slot.rect.has_point(next.entry), "gate off the border, seed %d" % seed)
+			for other in range(index + 1, 6):
+				assert_false(slot.rect.intersects(layout.slots[other].rect), "overlap")
+			for cell in RoadSpline.build(slot.spine).cells:
+				assert_true(slot.rect.has_point(cell), "spine, seed %d" % seed)
+		assert_eq(covered, 32 * 20, "tiling, seed %d" % seed)
+
+
+func test_the_crossing_must_wade_the_river_once_from_dry_banks() -> void:
+	var dry := _layout(42)
+	dry.river_cells.clear()
+	assert_gt(dry.problems().size(), 0, "no crossing")
+	var wet := _layout(42)
+	wet.river_cells.append(wet.slots[ValleyLayout.Region.BLUEWATER_CROSSING].entry)
+	assert_gt(wet.problems().size(), 0, "a wet entry")

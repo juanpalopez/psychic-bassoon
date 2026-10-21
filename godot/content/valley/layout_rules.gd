@@ -45,4 +45,4 @@ const RIVER_MIDS := 2
 const RIVER_WOBBLE := 2
 const RIVER_WIDTH := 2
 ## A layout that fails its own checks is drawn again, at most this often.
-const MAX_ATTEMPTS := 40
+const MAX_ATTEMPTS := 400

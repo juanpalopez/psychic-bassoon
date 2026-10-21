@@ -56,9 +56,22 @@ func problems() -> Array[String]:
 		var wades := cells.any(func(cell: Vector2i) -> bool: return wet.has(cell))
 		if dry and (wades or wet.has(slot.entry) or wet.has(slot.exit)):
 			found.append("region %d: the road touches the river" % slot.id)
-		elif not dry and not wades:
-			found.append("region %d: the road does not cross the river" % slot.id)
+		elif not dry and _wet_runs(cells, wet) != 1:
+			found.append("region %d: the road must wade the river in exactly one stretch" % slot.id)
+		if not dry and (wet.has(slot.entry) or wet.has(slot.exit)):
+			found.append("region %d: the gates must be on dry banks" % slot.id)
 	return found
+
+
+## How many separate stretches of the road are on the river.
+static func _wet_runs(cells: Array[Vector2i], wet: Dictionary) -> int:
+	var runs := 0
+	var inside := false
+	for cell in cells:
+		if wet.has(cell) and not inside:
+			runs += 1
+		inside = wet.has(cell)
+	return runs
 
 
 static func _draw(seed: int, rng: Rng) -> ValleyLayout:
