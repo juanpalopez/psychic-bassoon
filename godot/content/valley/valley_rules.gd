@@ -37,3 +37,8 @@ const BEND_COVER_REACH := 3.5
 ## The straight stand-in sections (before a real section replaces one) keep this many blocks.
 const STUB_SOCKET_MIN := 2
 const STUB_SOCKET_MAX := 4
+
+## High-ground sockets stay scarce: at most this share (percent) of all sockets, and each has a
+## low-ground socket within this many cells (centre to centre) to fall back on.
+const HIGH_MAX_PERCENT := 20
+const HIGH_ALTERNATIVE_REACH := 6.0
