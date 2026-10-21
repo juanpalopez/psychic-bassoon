@@ -25,6 +25,9 @@ var road_curve: RoadCurve = null
 ## The second road's cells before the main road (the feeder), ending next to the cell where it
 ## joins; only the section that holds the merge fills it.
 var feeder: Array[Vector2i] = []
+## The curve foes walk along the feeder when it is a spline (`feeder` is its cells), else null:
+## the stitcher then joins the feeder's cell centres.
+var feeder_curve: RoadCurve = null
 ## The road cell the feeder joins (-1, -1 without a feeder).
 var feeder_join := Vector2i(-1, -1)
 ## The anchors (top-left cells) of the 2x2 socket blocks, each with its elevation level (0 to 2)
