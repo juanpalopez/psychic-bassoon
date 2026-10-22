@@ -34,6 +34,23 @@ static func create(results: Array[SectionResult]) -> HeroGraph:
 	return graph
 
 
+## The graph of a finished board (#449): its walkable cells and both kinds of bridge. A board with
+## no walkable layer (the boards before the sectioned valley) is open everywhere.
+static func from_map(map: GameMap) -> HeroGraph:
+	var graph := HeroGraph.new()
+	graph.cols = map.cols
+	graph.rows = map.rows
+	graph.open.resize(graph.cols * graph.rows)
+	for y in graph.rows:
+		for x in graph.cols:
+			graph.open[y * graph.cols + x] = 1 if map.is_walkable(Vector2i(x, y)) else 0
+	for bridge in map.bridges:
+		graph.open[bridge.cell.y * graph.cols + bridge.cell.x] = 1
+	for cell in map.hero_bridges:
+		graph.open[cell.y * graph.cols + cell.x] = 1
+	return graph
+
+
 ## Steps of the shortest walk between two cells, or -1 when either is closed or they are cut off.
 static func travel_steps(results: Array[SectionResult], from: Vector2i, to: Vector2i) -> int:
 	return create(results).steps(from, to)
@@ -96,6 +113,29 @@ func steps(from: Vector2i, to: Vector2i) -> int:
 	if not _is_open(from) or not _is_open(to):
 		return -1
 	return _distances(from)[to.y * cols + to.x]
+
+
+## The shortest walk from `from` to `to`, both ends included, or an empty one when either end is
+## closed or they are cut off. Of equally short walks it takes, at every cell, the first step in
+## `NEIGHBOURS` order that gets closer, so the same ends always give the same walk.
+func path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	if not _is_open(from) or not _is_open(to):
+		return cells
+	var distance := _distances(to)
+	if distance[from.y * cols + from.x] < 0:
+		return cells
+	var cell := from
+	cells.append(cell)
+	while cell != to:
+		var closer := distance[cell.y * cols + cell.x] - 1
+		for step in NEIGHBOURS:
+			var next := cell + step
+			if _is_open(next) and distance[next.y * cols + next.x] == closer:
+				cell = next
+				break
+		cells.append(cell)
+	return cells
 
 
 ## The result of the section of this kind (`ValleyPlan.Id`).
