@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0-alpha.6](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2026-10-22)
+
+
+### Features
+
+* **sim:** add the road segment library with five tested templates ([#436](https://github.com/juanpalopez/psychic-bassoon/issues/436)) ([1f811b0](https://github.com/juanpalopez/psychic-bassoon/commit/1f811b052352c63a60792b7d983821bfc17bc74c))
+* **sim:** compose each region's road from segments in place of spines ([#439](https://github.com/juanpalopez/psychic-bassoon/issues/439)) ([b4ee466](https://github.com/juanpalopez/psychic-bassoon/commit/b4ee46604f649fd78beeb6331ea6873c6d515814))
+* **sim:** fit a road template between two gates of a region ([#438](https://github.com/juanpalopez/psychic-bassoon/issues/438)) ([d50cef4](https://github.com/juanpalopez/psychic-bassoon/commit/d50cef4ebd71553d44c773b93c69b0c226590073))
+
+
+### Bug Fixes
+
+* **sim:** sweep all 300 seeds and drop dead crossing rules ([#442](https://github.com/juanpalopez/psychic-bassoon/issues/442)) ([23f14e2](https://github.com/juanpalopez/psychic-bassoon/commit/23f14e2420b072e2916d5fdb40c3b31f7b3ec230)), closes [#433](https://github.com/juanpalopez/psychic-bassoon/issues/433)
+
 ## [0.1.0-alpha.5](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.4...v0.1.0-alpha.5) (2026-10-21)
 
 
