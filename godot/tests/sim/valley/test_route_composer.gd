@@ -2,7 +2,8 @@ extends GutTest
 
 const ROUTES := preload("res://content/valley/route_rules.gd")
 const SEEDS: Array[int] = [1, 42, 2026, 104729]
-const SWEEP_LAST := 40
+## The ticket's guarantee (#433): every seed in 1..300 composes.
+const SWEEP_LAST := 300
 
 
 func _layout(seed: int) -> ValleyLayout:
@@ -66,6 +67,6 @@ func test_a_seed_always_composes_the_same_route() -> void:
 		assert_eq(_layout(seed).slots[1].spine, _layout(seed).slots[1].spine)
 
 
-func test_a_sample_of_seeds_all_compose() -> void:
+func test_every_seed_up_to_300_composes() -> void:
 	for seed in range(1, SWEEP_LAST + 1):
 		assert_not_null(_layout(seed), "seed %d" % seed)
