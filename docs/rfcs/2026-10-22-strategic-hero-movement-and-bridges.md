@@ -1,14 +1,23 @@
 ---
 type: rfc
 date: 2026-10-22
-status: proposed
-links: [#275, #404, #432]
+status: accepted
+links: [#275, #335, #404, #432]
 ---
 # RFC: strategic hero movement and bridge tactics
 
 ## Status and decision sought
 
-**Status:** Proposed; requires owner review.
+**Status:** Accepted with amendments (owner, 2026-10-22; `docs/lessons/2026-10-22-hero-movement-fixed-seed.md`). The amendments below win over the sections they name.
+
+### Amendments (owner, 2026-10-22)
+
+1. **A fixed seed, not a hand-authored map** (replaces the hand-authored map in sections 9, 12 and 13). `Game.create` generates the valley on the default board, so a hand-made layout would be a second kind of map. The prototype plays one fixed seed of the generated valley, chosen in its ticket for two usable crossings, with the strategic positions as content data for that seed. It isolates the movement loop from the generator just as well, and the generator constraints of step 6 still come only after it works.
+2. **Open question 1 is settled: both.** A command targets any walkable cell (the contract of #275 and #335); strategic positions are highlighted, named destinations on top.
+3. **Open question 4 is settled: the second bridge is hero-only.** The generated Bluewater Crossing already builds one road bridge and one hero-only bridge at least 5 rows apart (`HERO_BRIDGE_MIN_ROW_GAP` in `godot/content/valley/bluewater_rules.gd`) (`GameMap.hero_bridges`), so the road keeps its single river crossing.
+4. **Open question 5 is answered** (code on `main`, 2026-10-22): the sim has walkable cells and `HeroGraph` (`godot/sim/map/valley/hero_graph.gd`, #385), a 4-neighbour flood fill with `travel_steps`, used today only as a map check. There is no hero unit, move command, path following, arrival or failure state yet (#275), and no bridge-specific guard rule (the guard post is #323). Step 1 of section 12 is therefore done, and the first implementation step is #275.
+5. **The path is on the cell grid:** #275 (update of 2026-10-18) already asks for a deterministic path on the cell grid, which is what `HeroGraph` counts, while foes walk curved routes. The travel-time test of section 11 measures that cell path; any smoothing #275 adds for the look must not change it.
+6. Open questions 2 and 3 (standing on the span, what ends a bridge lock) stay open for the prototype; the hero has hp and blocks like a guard (#275), so a lock lasts only while it lives.
 
 This RFC proposes a tactical movement layer for *Kingdom of the Fold*: a hero supports tower coverage by moving between strategically meaningful places, while bridges create consequential choices about where to defend. It does not implement the system.
 
