@@ -131,9 +131,13 @@ trap 'exit 143' TERM
 sed "s|^${TEAM_KEY}=.*|${TEAM_KEY}=\"${team}\"|" "$backup" > "$PRESET"
 
 echo "==> Exporting the Xcode project with Godot"
+# Godot refuses to export into a folder that holds files it did not write, and in an iCloud-synced
+# folder (~/Documents) iCloud adds "name 2" copies of earlier exports. build/ is generated and
+# ignored by git, so start from an empty folder every time.
+rm -rf build/ios
 mkdir -p build/ios
 "$godot_bin" --headless --path godot --export-debug iOS "../${PROJECT}" \
-  || fail "the Godot export failed. Are the ${GODOT_VERSION} export templates installed (Editor → Manage Export Templates)?"
+  || fail "the Godot export failed: read the Godot ERROR lines above this one. If they name a missing template, install the ${GODOT_VERSION} export templates (Editor → Manage Export Templates)."
 restore_preset
 [ -d "$PROJECT" ] || fail "Godot did not write ${PROJECT}."
 
