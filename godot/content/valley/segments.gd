@@ -24,23 +24,23 @@ const CLEARANCE := 2.0
 ## `min_turn_radius` (the tightest bend, cells) and `scale` (the least and most the fitter may
 ## stretch it).
 const DATA := {
-	# A broad quarter bend.
+	# A quarter bend that grows broader where the region has room (to radius about 4).
 	SWEEP:
 	{
 		"points":
 		[
 			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.73, 0.46),
-			Vector2(4.01, 1.73),
-			Vector2(4.47, 3.47),
-			Vector2(4.47, 4.47),
+			Vector2(2.48, 0.4),
+			Vector2(3.57, 1.48),
+			Vector2(3.97, 2.97),
+			Vector2(3.97, 3.97),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
 		"tag": &"bend",
-		"min_turn_radius": 3.0,
-		"scale": Vector2(0.7, 1.25),
+		"min_turn_radius": 2.7,
+		"scale": Vector2(0.75, 1.8),
 	},
 	# A broad S: a long diagonal with a gentle inflection, ending a quarter turn on. It keeps
 	# running one way in both axes, so no cell is visited twice wherever it is placed.
@@ -63,17 +63,18 @@ const DATA := {
 		"min_turn_radius": 2.8,
 		"scale": Vector2(0.75, 1.25),
 	},
-	# Straight and flat from end to end, square to the river: 4 cells of approach, a span of at
-	# least 2 cells (from x 4 to 6) and 4 cells of approach. It is never shrunk, only stretched,
-	# so the approaches are at least 4 cells at every scale.
+	# Straight and flat from end to end, square to the river: 2 cells of approach, a span of at
+	# least 2 cells (centres 1 apart, x 2 to 3) and 1 cell past it, where the next bend's own
+	# straight stub carries on (the valley's crossing leaves no more room). It is stretched, never
+	# shrunk, so a longer approach or span only adds to the straight.
 	BRIDGE:
 	{
-		"points": [Vector2(0.0, 0.0), Vector2(4.0, 0.0), Vector2(6.0, 0.0), Vector2(10.0, 0.0)],
+		"points": [Vector2(0.0, 0.0), Vector2(2.0, 0.0), Vector2(3.0, 0.0), Vector2(4.0, 0.0)],
 		"entry_heading": RIGHT,
 		"exit_heading": RIGHT,
 		"tag": &"crossing",
 		"min_turn_radius": 0.0,
-		"scale": Vector2(1.0, 2.0),
+		"scale": Vector2(1.0, 3.0),
 	},
 	# A broad bend (radius 4 or more) round high ground.
 	RIDGE_WRAP:
@@ -92,7 +93,7 @@ const DATA := {
 		"exit_heading": DOWN,
 		"tag": &"wrap",
 		"min_turn_radius": 4.0,
-		"scale": Vector2(0.7, 1.25),
+		"scale": Vector2(0.7, 1.8),
 	},
 	# A gentle curve, then a straight stretch along the exit beside a ruin or the Heartstone.
 	LANDMARK:
@@ -104,13 +105,13 @@ const DATA := {
 			Vector2(2.48, 0.4),
 			Vector2(3.57, 1.48),
 			Vector2(3.97, 2.97),
-			Vector2(3.97, 4.47),
-			Vector2(3.97, 5.97),
+			Vector2(3.97, 3.97),
+			Vector2(3.97, 4.97),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
 		"tag": &"landmark",
 		"min_turn_radius": 2.8,
-		"scale": Vector2(0.7, 1.25),
+		"scale": Vector2(0.7, 1.8),
 	},
 }

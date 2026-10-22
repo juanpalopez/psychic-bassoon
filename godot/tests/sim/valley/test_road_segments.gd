@@ -14,9 +14,10 @@ const NEAR_STEPS := 6
 const FRACTIONS: Array[float] = [0.1, 0.25, 0.5, 0.75]
 const BASE := 10.0
 const ORIGIN := Vector2(10.5, 10.5)
-## The least span a bridge crosses: its middle cells, from x 4 to 6.
-const SPAN_LEAST := 2.0
-const APPROACH := 4.0
+## The least span a bridge crosses: its middle cells, from x 2 to 3 (centres of two cells).
+const SPAN_LEAST := 1.0
+const APPROACH := 2.0
+const RUN_ON := 1.0
 
 
 ## The template scaled by `scale` along its axes and turned: local x to `axis`, local y to the
@@ -163,9 +164,9 @@ func test_the_bridge_is_straight_and_flat_at_every_scale() -> void:
 	# Stretched, never shrunk: a span of at least two cells and four cells of approach on each
 	# side at the least scale, so at every allowed scale.
 	assert_gte(segment.scale_range.x, 1.0)
-	assert_gte(segment.exit.x * segment.scale_range.x, APPROACH + SPAN_LEAST + APPROACH)
+	assert_gte(segment.exit.x * segment.scale_range.x, APPROACH + SPAN_LEAST + RUN_ON)
 	assert_gte(segment.points[1].x, APPROACH, "approach before the span")
-	assert_gte(segment.exit.x - segment.points[2].x, APPROACH, "approach after the span")
+	assert_gte(segment.exit.x - segment.points[2].x, RUN_ON, "run on after the span")
 	for scale in [segment.scale_range.x, 1.5, segment.scale_range.y]:
 		var curve := _placed(segment, ORIGIN, Vector2(scale, 1.0), Vector2.RIGHT, 1.0)
 		for index in curve.ys.size():
