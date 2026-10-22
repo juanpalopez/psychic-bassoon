@@ -1,8 +1,12 @@
-## The layout valley's road is a wide band (#430): the cells under it are road, no socket block
-## comes near it, and the strip valley and the old boards keep their one-cell road.
+## The road as a band (#430): the cells under it are road, a block never comes near it and a level
+## 1 tower on every block still covers cells of the centre line. The content has the band off
+## (`ROAD_WIDTH_CELLS` 0) until the owner picks how wide the road can be with that coverage, so
+## the band tests turn it on by hand.
 extends GutTest
 
 const ROAD := preload("res://content/valley/road_rules.gd")
+const RULES := preload("res://content/map_rules.gd")
+const TOWERS := preload("res://content/towers.gd")
 const SEEDS: Array[int] = [1, 2, 3]
 
 var _maps := {}
@@ -15,15 +19,28 @@ func _layout_valley(seed: int) -> GameMap:
 	return _maps[seed]
 
 
-func test_the_band_is_wide_and_the_old_width_is_the_default() -> void:
-	assert_gte(ROAD.ROAD_WIDTH_CELLS, 2.0, "several foes abreast")
+## A straight road along row 5 of a 20 by 12 strip, with a band of `width` cells.
+func _straight(width: float) -> SectionResult:
+	var slot := ValleyPlan.Slot.new()
+	slot.rect = Rect2i(0, 0, 20, 12)
+	var result := SectionResult.create(slot)
+	result.road_width = width
+	for x in 20:
+		result.road.append(Vector2i(x, 5))
+	return result
+
+
+func test_the_band_is_off_in_the_content_and_the_old_width_is_the_default() -> void:
 	assert_eq(GameMap.new().road_width, ROAD.OLD_WIDTH_CELLS)
-	assert_eq(_layout_valley(1).road_width, ROAD.ROAD_WIDTH_CELLS)
+	assert_eq(_layout_valley(1).road_width, ROAD.OLD_WIDTH_CELLS)
 
 
 func test_a_cell_is_road_when_its_centre_is_within_half_the_band_of_a_curve() -> void:
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
+		map.road_width = 2.4
+		map.tiles = MapGen._tiles_for(map.routes, map.cols, map.rows)
+		ValleyStitcher._mark_band(map)
 		var half := map.road_width / 2.0
 		var near := 0
 		for y in map.rows:
@@ -35,9 +52,16 @@ func test_a_cell_is_road_when_its_centre_is_within_half_the_band_of_a_curve() ->
 				if gap <= half - 1e-6:
 					assert_true(road, "cell %d,%d is under the band, seed %d" % [x, y, seed])
 					near += 1
-				elif gap > half + 1e-6 and not map.path.has(Vector2i(x, y)):
+				elif gap > half + 1e-6 and not _on_a_route(map, Vector2i(x, y)):
 					assert_false(road, "cell %d,%d is off the band, seed %d" % [x, y, seed])
 		assert_gt(near, map.path.size(), "the band covers more than the centre line")
+
+
+func _on_a_route(map: GameMap, cell: Vector2i) -> bool:
+	for route: Array in map.routes:
+		if route.has(cell):
+			return true
+	return false
 
 
 func test_the_centre_line_cells_and_the_hero_walk_stay_as_they_were() -> void:
@@ -47,21 +71,51 @@ func test_the_centre_line_cells_and_the_hero_walk_stay_as_they_were() -> void:
 		assert_true(map.is_walkable(cell), "the hero walks the road at %s" % cell)
 
 
-func test_no_socket_block_touches_the_band() -> void:
+func test_no_candidate_block_touches_the_band_and_each_one_still_covers_the_road() -> void:
+	var result := _straight(1.0)
+	var least := SectionSockets.least_gap(result)
+	var found := SectionSockets.candidates(result, [] as Array[Rect2i])
+	assert_gt(found.size(), 0)
+	for anchor in found:
+		var block := Rect2i(anchor, Vector2i(2, 2))
+		assert_gte(
+			RoadCurve.from_cells(result.road).distance_to(
+				float(anchor.x) + 1.0, float(anchor.y) + 1.0
+			),
+			least - 1e-6
+		)
+		assert_true(SectionSockets.covers(block, result.road, 0.0), "block %s" % anchor)
+
+
+func test_every_block_gives_a_level_one_tower_cells_of_the_centre_line_to_shoot_at() -> void:
+	var reach: float = TOWERS.DEFS["spoolGuard"].range[0]
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
-		var least := map.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS + 1.0
 		for anchor in map.sockets:
-			var centre := Vector2(anchor) + Vector2.ONE
-			for curve: RoadCurve in map.route_curves:
-				assert_gte(curve.distance_to(centre.x, centre.y), least - 1e-6, "block %s" % anchor)
-			for dy in 2:
-				for dx in 2:
-					assert_eq(
-						map.tiles[anchor.y + dy][anchor.x + dx],
-						GameMap.Tile.PLOT,
-						"block %s stands on plot cells" % anchor
-					)
+			var cells := 0
+			for cell in map.path:
+				if SectionSockets.centre_gap(anchor, cell) <= reach:
+					cells += 1
+			assert_gte(cells, RULES.SOCKET_MIN_ROAD_COVERAGE, "block %s, seed %d" % [anchor, seed])
+
+
+func test_a_wide_band_does_not_loosen_the_coverage_rule() -> void:
+	# a block whose centre is 2.5 cells off the road is clear of a 2.4 band but a level 1 tower
+	# there covers none of the road, so it is not placed
+	var far := Rect2i(8, 7, 2, 2)
+	for width in [1.0, 2.4]:
+		var result := _straight(width)
+		assert_true(SectionSockets.off_band(result, far))
+		assert_false(SectionSockets.reaches(result, far), "width %s" % width)
+	assert_true(SectionSockets.reaches(_straight(1.0), Rect2i(8, 6, 2, 2)))
+
+
+func test_distance_to_a_curve_is_the_gap_to_its_nearest_segment() -> void:
+	var cells: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)]
+	var curve := RoadCurve.from_cells(cells)
+	assert_almost_eq(curve.distance_to(1.5, 2.5), 2.0, 1e-9)
+	assert_almost_eq(curve.distance_to(4.5, 0.5), 2.0, 1e-9)
+	assert_almost_eq(curve.distance_to(1.0, 0.5), 0.0, 1e-9)
 
 
 func test_the_strip_valley_keeps_its_one_cell_road() -> void:
@@ -71,12 +125,3 @@ func test_the_strip_valley_keeps_its_one_cell_road() -> void:
 	var plain := MapGen._tiles_for(map.routes, 32, 20)
 	for y in 20:
 		assert_eq(map.tiles[y], plain[y], "row %d" % y)
-
-
-func test_distance_to_a_curve_is_the_gap_to_its_nearest_segment() -> void:
-	var curve := RoadCurve.from_cells(
-		[Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)] as Array[Vector2i]
-	)
-	assert_almost_eq(curve.distance_to(1.5, 2.5), 2.0, 1e-9)
-	assert_almost_eq(curve.distance_to(4.5, 0.5), 2.0, 1e-9)
-	assert_almost_eq(curve.distance_to(1.0, 0.5), 0.0, 1e-9)

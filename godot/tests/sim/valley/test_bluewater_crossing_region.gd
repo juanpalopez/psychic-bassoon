@@ -114,7 +114,7 @@ func test_sockets_sit_on_both_banks_where_the_west_bank_has_room() -> void:
 		var east := result.sockets.any(func(anchor: Vector2i) -> bool: return anchor.x > bridge.x)
 		assert_true(east, "seed %d east bank" % seed)
 		both += 1 if west else 0
-	assert_gte(both, 44, "seeds with a west-bank block out of 60 (the road band takes room)")
+	assert_gt(both, 48, "seeds with a west-bank block out of 60")
 
 
 func test_the_same_seed_draws_the_same_crossing() -> void:

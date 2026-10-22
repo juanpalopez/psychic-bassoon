@@ -103,18 +103,13 @@ static func covers(block: Rect2i, road: Array[Vector2i], extra: float) -> bool:
 	return near >= RULES.SOCKET_MIN_ROAD_COVERAGE
 
 
-## The reach rule of a section: the cell rule of `reaches_road` for the one-cell road, and with a
-## band the block's centre within `ROAD_TOUCH_SLACK` of its nearest allowed distance from the
-## curve (the cells are up to a cell off the curve, so they cannot tell touching from near) and
-## the coverage widened by `reach_extra`.
+## The reach rule of a section: the same for the one-cell road and for a band. A level 1 tower on
+## the block covers at least `SOCKET_MIN_ROAD_COVERAGE` road cells (the centre line) within
+## `SOCKET_COVERAGE_REACH`; a block the band keeps too far from the road is not placed (#430).
 static func reaches(result: SectionResult, block: Rect2i) -> bool:
 	if result.road_width <= 0.0:
 		return reaches_road(block, result.road)
-	var gap := _curve_gap(result, block)
-	return (
-		gap <= least_gap(result) + ROAD.ROAD_TOUCH_SLACK
-		and covers(block, result.road, reach_extra(result) + ROAD.ROAD_TOUCH_SLACK)
-	)
+	return covers(block, result.road, 0.0)
 
 
 ## How far a block's centre (a 2x2 block's centre is on a cell corner) is from a cell's centre.
@@ -155,7 +150,7 @@ static func blocks_apart(a: Vector2i, b: Vector2i) -> bool:
 static func reach_extra(result: SectionResult) -> float:
 	if result.road_width <= 0.0:
 		return 0.0
-	return result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS - RULES.CELL_CENTRE
+	return maxf(0.0, result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS - RULES.CELL_CENTRE)
 
 
 ## The reach of a block's centre that covers a bend of the road, wider with a band.

@@ -40,13 +40,13 @@ func test_the_valley_builds_with_no_problems_for_seeds_1_to_300() -> void:
 			assert_true(map.heartstone.has_point(map.path[map.path.size() - 1]))
 
 
-func test_some_attempt_of_the_budget_passes_the_section_checks_with_four_to_six_blocks() -> void:
+func test_some_attempt_of_the_budget_passes_the_section_checks_with_five_or_six_blocks() -> void:
 	var first_failures := 0
 	for seed in range(1, LAST_SEED + 1):
 		var layout := ValleyLayout.generate(seed, 32, 20)
 		var slot := layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH]
 		var section := HeartkeepApproachRegion.new()
-		assert_eq(section.socket_range(), Vector2i(4, 6))
+		assert_eq(section.socket_range(), Vector2i(5, 6))
 		var passed := false
 		for attempt in ATTEMPTS:
 			var result := section.generate(slot, layout.rng_for(slot.id, attempt))

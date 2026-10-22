@@ -9,9 +9,8 @@ const LAST_SEED := 300
 const ATTEMPTS := 20
 ## Most seeds pass on the first draw; the stitcher redraws the rest.
 const MAX_FIRST_FAIL_PERCENT := 25
-## The S reaches at least this near the region's right edge (6: the road band's room redraws
-## the layouts, and a few seeds keep a shorter S).
-const FAR_REACH := 6
+## The S reaches at least this near the region's right edge.
+const FAR_REACH := 5
 
 
 func _drawn(seed: int) -> Array:

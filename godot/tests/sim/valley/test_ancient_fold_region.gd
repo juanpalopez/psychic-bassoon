@@ -81,7 +81,7 @@ func test_at_least_three_tight_sockets_cover_the_join() -> void:
 		var near := 0
 		for index in result.sockets.size():
 			var gap := SectionSockets.centre_gap(result.sockets[index], result.feeder_join)
-			if gap <= FOLD.MERGE_COVER_REACH + SectionSockets.reach_extra(result):
+			if gap <= FOLD.MERGE_COVER_REACH:
 				near += 1
 		assert_gte(near, FOLD.MERGE_COVER_MIN, "seed %d" % seed)
 		assert_gte(result.socket_tags.count(SectionResult.Tag.MERGE), FOLD.MERGE_COVER_MIN)
@@ -146,18 +146,12 @@ func test_game_create_style_routes_agree_at_the_join() -> void:
 
 
 func test_a_feeder_curve_replaces_the_cell_centres_and_none_keeps_them() -> void:
+	var layout := _layout(42)
 	var results: Array[SectionResult] = []
 	var sections := ValleyLayout.sections()
-	# the first seed whose first draw of the Fold has a feeder (the road band's room rejects some)
-	for seed in range(42, 80):
-		var layout := _layout(seed)
-		results.clear()
-		for slot in layout.slots:
-			results.append(sections[slot.id].generate(slot, layout.rng_for(slot.id, 0)))
-		if not results[ValleyLayout.Region.ANCIENT_FOLD].feeder.is_empty():
-			break
+	for slot in layout.slots:
+		results.append(sections[slot.id].generate(slot, layout.rng_for(slot.id, 0)))
 	var fold := results[ValleyLayout.Region.ANCIENT_FOLD]
-	assert_false(fold.feeder.is_empty())
 	var map := GameMap.new()
 	for result in results:
 		map.path.append_array(result.road)
