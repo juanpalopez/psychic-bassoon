@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-22 | decision | Prototype hero movement and bridge tactics on a fixed seed of the generated valley | sim | none | docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md, GDD |
 | 2026-10-21 | decision | Lay the six sections out as 2D regions and walk a smooth spline road through them | sim | none | CLAUDE.md |
 | 2026-10-22 | decision | Build the valley's roads from a library of tested segment templates joined at ports | sim | none | CLAUDE.md |
 | 2026-10-21 | decision | Review a stack with one reviewer per PR, in parallel, sharing notes | review | none | CLAUDE.md, docs/REVIEW-CHECKLIST.md, .claude/commands/review-stack.md |

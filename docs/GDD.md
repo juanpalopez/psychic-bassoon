@@ -68,6 +68,7 @@ Keep the HUD in a `CanvasLayer`; it is not part of the world geometry. The inter
 - One-finger drag pans with bounded easing; two-finger pinch controls zoom.
 - Tapping a socket opens a contextual build/upgrade menu offset above the finger.
 - The hero is selected and issued movement commands by tapping or dragging to walkable terrain.
+- Named strategic positions (bridge holds, the crossroads, the ridge, the Heartkeep line) are highlighted destinations on top of free movement, never the only targets (`docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md`, accepted 2026-10-22).
 - Spells use drag-to-target placement, a ground-projected preview and a clear cancel action.
 - The camera stays smooth; characters and projectiles may use stepped 12 fps stop-motion animation.
 
