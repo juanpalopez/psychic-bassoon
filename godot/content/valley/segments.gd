@@ -29,61 +29,64 @@ const DATA := {
 	{
 		"points":
 		[
-			Vector2(0.0, 0.0),
+			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.75, 0.47),
-			Vector2(4.03, 1.75),
-			Vector2(4.5, 3.5),
-			Vector2(4.5, 4.5),
+			Vector2(2.73, 0.46),
+			Vector2(4.01, 1.73),
+			Vector2(4.47, 3.47),
+			Vector2(4.47, 4.47),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
 		"tag": &"bend",
 		"min_turn_radius": 3.0,
-		"scale": Vector2(0.6, 1.25),
+		"scale": Vector2(0.7, 1.25),
 	},
-	# A small counter-bend, then the main bend: a broad S that ends a quarter turn on.
+	# A broad S: a long diagonal with a gentle inflection, ending a quarter turn on. It keeps
+	# running one way in both axes, so no cell is visited twice wherever it is placed.
 	S_BEND:
 	{
 		"points":
 		[
-			Vector2(0.0, 0.0),
-			Vector2(1.5, -0.1),
-			Vector2(3.0, -0.7),
-			Vector2(4.5, -0.5),
-			Vector2(5.6, 0.6),
-			Vector2(6.0, 2.2),
-			Vector2(6.0, 4.0),
+			Vector2(0, 0),
+			Vector2(1.2, 0),
+			Vector2(2.8, 0.45),
+			Vector2(4.2, 1.4),
+			Vector2(5.4, 2.2),
+			Vector2(6.5, 3.2),
+			Vector2(6.97, 4.7),
+			Vector2(6.97, 5.7),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
 		"tag": &"weave",
-		"min_turn_radius": 2.2,
-		"scale": Vector2(0.6, 1.25),
+		"min_turn_radius": 2.8,
+		"scale": Vector2(0.75, 1.25),
 	},
-	# Straight and flat from end to end, square to the river: at least four cells of approach on
-	# each side of a span; the fitter stretches it to the river.
+	# Straight and flat from end to end, square to the river: 4 cells of approach, a span of at
+	# least 2 cells (from x 4 to 6) and 4 cells of approach. It is never shrunk, only stretched,
+	# so the approaches are at least 4 cells at every scale.
 	BRIDGE:
 	{
-		"points": [Vector2(0.0, 0.0), Vector2(4.0, 0.0), Vector2(8.0, 0.0), Vector2(12.0, 0.0)],
+		"points": [Vector2(0.0, 0.0), Vector2(4.0, 0.0), Vector2(6.0, 0.0), Vector2(10.0, 0.0)],
 		"entry_heading": RIGHT,
 		"exit_heading": RIGHT,
 		"tag": &"crossing",
 		"min_turn_radius": 0.0,
-		"scale": Vector2(0.25, 2.5),
+		"scale": Vector2(1.0, 2.0),
 	},
 	# A broad bend (radius 4 or more) round high ground.
 	RIDGE_WRAP:
 	{
 		"points":
 		[
-			Vector2(0.0, 0.0),
+			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.72, 0.34),
-			Vector2(4.18, 1.32),
-			Vector2(5.16, 2.78),
-			Vector2(5.5, 4.5),
-			Vector2(5.5, 5.5),
+			Vector2(2.71, 0.34),
+			Vector2(4.16, 1.31),
+			Vector2(5.13, 2.76),
+			Vector2(5.47, 4.47),
+			Vector2(5.47, 5.47),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
@@ -96,18 +99,18 @@ const DATA := {
 	{
 		"points":
 		[
-			Vector2(0.0, 0.0),
+			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.5, 0.4),
-			Vector2(3.6, 1.5),
-			Vector2(4.0, 3.0),
-			Vector2(4.0, 4.5),
-			Vector2(4.0, 6.0),
+			Vector2(2.48, 0.4),
+			Vector2(3.57, 1.48),
+			Vector2(3.97, 2.97),
+			Vector2(3.97, 4.47),
+			Vector2(3.97, 5.97),
 		],
 		"entry_heading": RIGHT,
 		"exit_heading": DOWN,
 		"tag": &"landmark",
 		"min_turn_radius": 2.8,
-		"scale": Vector2(0.6, 1.25),
+		"scale": Vector2(0.7, 1.25),
 	},
 }
