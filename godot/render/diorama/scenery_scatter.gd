@@ -265,20 +265,23 @@ class Obstacles:
 	extends RefCounted
 	## Cells round an obstacle that a prop near it may stand in: more than the biggest tree's
 	## footprint (a broadleaf at full size outside, about 1.15 cells) plus the largest keep-off
-	## (0.5) and the bed's half width (0.475).
-	const REACH := 3
+	## (0.5) and the bed's half width (0.475; 1.25 on the wide band).
+	const REACH := 4
 	var _from := PackedVector2Array()
 	var _to := PackedVector2Array()
 	## Each rectangle and how far a prop of each kind keeps off it ("socket", "bridge", "river").
 	var _rects: Array[Rect2] = []
 	var _rect_kinds: Array[String] = []
 	var _buckets := {}
+	## Half the road bed's width: the map's (`GameMap.road_width`).
+	var _road_half := LOOKS.ROAD_WIDTH / 2.0
 
 	## Everything `field` keeps clear, or nothing for a null field (add to it by hand).
 	func _init(field: TerrainField) -> void:
 		if field == null:
 			return
 		var map := field.map
+		_road_half = map.road_width / 2.0
 		for line in RoadBedBuilder.centrelines(field.routes):
 			for k in line.size() - 1:
 				add_segment(line[k], line[k + 1])
@@ -294,7 +297,7 @@ class Obstacles:
 	func clear(placement: Placement) -> bool:
 		var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
 		var kind := placement.kind
-		var half := LOOKS.ROAD_WIDTH / 2.0 + LOOKS.ROAD_WOBBLE
+		var half := _road_half + LOOKS.ROAD_WOBBLE
 		for index: int in _buckets.get(cell, []):
 			if index >= 0:
 				var closest := Geometry2D.get_closest_point_to_segment(

@@ -20,6 +20,7 @@ enum Region {
 
 const LAYOUT := preload("res://content/valley/layout_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
+const ROAD := preload("res://content/valley/road_rules.gd")
 const HALF := 0.5
 
 ## The river's centre line (a spline from the top edge to the bottom edge).
@@ -192,6 +193,7 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	layout.rows = LAYOUT.ROWS
 	layout.hero_caps = LAYOUT.HERO_CAPS
 	layout.bend_run = LAYOUT.BEND_RUN
+	layout.road_width = ROAD.ROAD_WIDTH_CELLS
 	layout.lane_gap = LAYOUT.LANE_GAP
 	layout.lane_run = LAYOUT.LANE_RUN
 	layout.section_attempts = LAYOUT.SECTION_ATTEMPTS
@@ -255,6 +257,7 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		slot.exit = exits[index]
 		slot.margin = LAYOUT.BLOCK_MARGIN
 		slot.bend_run = layout.bend_run
+		slot.road_width = layout.road_width
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):
 				slot.river.append(cell)

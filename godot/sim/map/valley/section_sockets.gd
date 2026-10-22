@@ -6,6 +6,7 @@ extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
+const ROAD := preload("res://content/valley/road_rules.gd")
 
 
 ## The road's bends: the cells where it turns. With `min_run` above 1 only a turn between two
@@ -43,7 +44,11 @@ static func candidates(result: SectionResult, blocked: Array[Rect2i]) -> Array[V
 	for y in range(result.rect.position.y, result.rect.end.y - size - result.margin.y + 1):
 		for x in range(result.rect.position.x, last_x + 1):
 			var block := Rect2i(x, y, size, size)
-			if _free(block, result.road, blocked) and reaches_road(block, result.road):
+			if (
+				_free(block, result.road, blocked)
+				and off_band(result, block)
+				and reaches(result, block)
+			):
 				out.append(Vector2i(x, y))
 	return out
 
@@ -62,7 +67,7 @@ static func place(
 	var target: int = blocks.x + rng.next_int(blocks.y - blocks.x + 1)
 	for bend in bends(result.road, result.bend_run):
 		var best := _nearest(sites, bend, result.sockets)
-		if best != Vector2i(-1, -1) and centre_gap(best, bend) <= VALLEY.BEND_COVER_REACH:
+		if best != Vector2i(-1, -1) and centre_gap(best, bend) <= bend_reach(result):
 			result.add_socket(best, 0, SectionResult.Tag.BEND)
 	for site in sites:
 		if result.sockets.size() >= target:
@@ -83,15 +88,28 @@ static func _free(block: Rect2i, road: Array[Vector2i], blocked: Array[Rect2i]) 
 
 static func reaches_road(block: Rect2i, road: Array[Vector2i]) -> bool:
 	var touch := false
-	var near := 0
-	var touch_reach: float = RULES.SOCKET_BLOCK_TOUCH_DISTANCE
-	var cover_reach: float = RULES.SOCKET_COVERAGE_REACH
 	for cell in road:
-		var gap := centre_gap(block.position, cell)
-		touch = touch or gap <= touch_reach
-		if gap <= cover_reach:
+		touch = touch or centre_gap(block.position, cell) <= RULES.SOCKET_BLOCK_TOUCH_DISTANCE
+	return touch and covers(block, road, 0.0)
+
+
+## True when at least `SOCKET_MIN_ROAD_COVERAGE` road cells are within the coverage reach (plus
+## `extra`) of the block's centre.
+static func covers(block: Rect2i, road: Array[Vector2i], extra: float) -> bool:
+	var near := 0
+	for cell in road:
+		if centre_gap(block.position, cell) <= RULES.SOCKET_COVERAGE_REACH + extra:
 			near += 1
-	return touch and near >= RULES.SOCKET_MIN_ROAD_COVERAGE
+	return near >= RULES.SOCKET_MIN_ROAD_COVERAGE
+
+
+## The reach rule of a section: the same for the one-cell road and for a band. A level 1 tower on
+## the block covers at least `SOCKET_MIN_ROAD_COVERAGE` road cells (the centre line) within
+## `SOCKET_COVERAGE_REACH`; a block the band keeps too far from the road is not placed (#430).
+static func reaches(result: SectionResult, block: Rect2i) -> bool:
+	if result.road_width <= 0.0:
+		return reaches_road(block, result.road)
+	return covers(block, result.road, 0.0)
 
 
 ## How far a block's centre (a 2x2 block's centre is on a cell corner) is from a cell's centre.
@@ -124,3 +142,45 @@ static func keeps_distance(site: Vector2i, chosen: Array[Vector2i]) -> bool:
 static func blocks_apart(a: Vector2i, b: Vector2i) -> bool:
 	var apart: int = RULES.GAME_SOCKET_FOOTPRINT + RULES.SOCKET_BLOCK_GAP
 	return absi(a.x - b.x) >= apart or absi(a.y - b.y) >= apart
+
+
+## How much further a block stands from the road's cell centres because of its band (#430): the
+## band's half width plus the clearance, less the half cell the one-cell road already takes. 0
+## without a band.
+static func reach_extra(result: SectionResult) -> float:
+	if result.road_width <= 0.0:
+		return 0.0
+	return maxf(0.0, result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS - RULES.CELL_CENTRE)
+
+
+## The reach of a block's centre that covers a bend of the road, wider with a band.
+static func bend_reach(result: SectionResult) -> float:
+	return VALLEY.BEND_COVER_REACH + reach_extra(result)
+
+
+## The nearest a block's centre may be to the road's curve with a band: the band's half width,
+## the clearance and the block's own half width.
+static func least_gap(result: SectionResult) -> float:
+	var half := float(RULES.GAME_SOCKET_FOOTPRINT) / 2.0
+	return result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS + half
+
+
+## True when the block's edge keeps `ROAD_CLEARANCE_CELLS` from the road band's edge. Always true
+## without a band.
+static func off_band(result: SectionResult, block: Rect2i) -> bool:
+	return result.road_width <= 0.0 or _curve_gap(result, block) >= least_gap(result)
+
+
+## How far the block's centre is from the road's curve (the main road and the feeder).
+static func _curve_gap(result: SectionResult, block: Rect2i) -> float:
+	var half := float(RULES.GAME_SOCKET_FOOTPRINT) / 2.0
+	var centre := Vector2(block.position) + Vector2(half, half)
+	var main := (
+		result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)
+	)
+	var gap := main.distance_to(centre.x, centre.y)
+	if result.feeder_curve != null:
+		gap = minf(gap, result.feeder_curve.distance_to(centre.x, centre.y))
+	elif not result.feeder.is_empty():
+		gap = minf(gap, RoadCurve.from_cells(result.feeder).distance_to(centre.x, centre.y))
+	return gap

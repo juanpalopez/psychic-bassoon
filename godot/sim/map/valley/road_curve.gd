@@ -32,3 +32,33 @@ func append_curve(other: RoadCurve) -> void:
 	ys.append_array(other.ys)
 	for point in other.cell_points:
 		cell_points.append(point + shift)
+
+
+## The distance from the point (x, y) to the curve's nearest segment, in cells. Plain floats, no
+## vectors: the socket placers call it for every anchor of a strip.
+func distance_to(x: float, y: float) -> float:
+	var best := 1.0e30
+	for index in xs.size():
+		best = minf(best, _gap_squared(index, x, y))
+	return sqrt(best)
+
+
+## The distance from the point (x, y) to the segment that starts at point `index` (the last
+## point stands alone).
+func segment_gap(index: int, x: float, y: float) -> float:
+	return sqrt(_gap_squared(index, x, y))
+
+
+func _gap_squared(index: int, x: float, y: float) -> float:
+	var next := mini(index + 1, xs.size() - 1)
+	var ax := xs[index]
+	var ay := ys[index]
+	var abx := xs[next] - ax
+	var aby := ys[next] - ay
+	var along := 0.0
+	var length_squared := abx * abx + aby * aby
+	if length_squared > 0.0:
+		along = clampf(((x - ax) * abx + (y - ay) * aby) / length_squared, 0.0, 1.0)
+	var dx := ax + abx * along - x
+	var dy := ay + aby * along - y
+	return dx * dx + dy * dy

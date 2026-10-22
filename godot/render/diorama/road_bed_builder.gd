@@ -102,10 +102,14 @@ static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) ->
 		var drop := 0.0 if i == 0 else LOOKS.JOIN_DROP
 		var along := 0.0
 		for piece in _clip_out(lines[i], cuts):
-			along = _ribbon(ribbon, piece, i, along, drop, others, yard, map.seed, height_fn)
+			along = _ribbon(
+				ribbon, piece, i, along, drop, others, yard, map.seed, map.road_width, height_fn
+			)
 	if yard.z > 0.0:
 		var ground := float(height_fn.call(map.path[map.path.size() - 1]))
-		_yard(ribbon, yard, ground + LOOKS.BED_LIFT - LOOKS.JOIN_DROP, ground, lines)
+		_yard(
+			ribbon, yard, ground + LOOKS.BED_LIFT - LOOKS.JOIN_DROP, ground, lines, map.road_width
+		)
 	return ribbon.commit(bed_material())
 
 
@@ -314,9 +318,10 @@ static func _ribbon(
 	others: Array[PackedVector2Array],
 	yard: Vector3,
 	map_seed: int,
+	road_width: float,
 	height_fn: Callable
 ) -> float:
-	var half := LOOKS.ROAD_WIDTH / 2.0
+	var half := road_width / 2.0
 	var open_reach := half + LOOKS.ROAD_WOBBLE
 	var first := ribbon.vertex_count()
 	var count := piece.size()
@@ -397,14 +402,19 @@ static func _wobble(along: float, line: int, map_seed: int, salt: int) -> float:
 ## The round yard at the Heartstone (`heart_yard`): a disc of bed with a lip round it, the lip
 ## open where a road comes in.
 static func _yard(
-	ribbon: Ribbon, yard: Vector3, top: float, ground: float, lines: Array[PackedVector2Array]
+	ribbon: Ribbon,
+	yard: Vector3,
+	top: float,
+	ground: float,
+	lines: Array[PackedVector2Array],
+	road_width: float
 ) -> void:
 	var centre := Vector2(yard.x, yard.y)
 	var radius := yard.z
 	var segments := LOOKS.HEART_YARD_SEGMENTS
 	var middle := ribbon.vertex_count()
 	ribbon.add(_world(centre, top), Vector2(0.0, 0.0))
-	var reach := LOOKS.ROAD_WIDTH / 2.0 + LOOKS.ROAD_WOBBLE
+	var reach := road_width / 2.0 + LOOKS.ROAD_WOBBLE
 	for s in segments:
 		var angle := TAU * float(s) / float(segments)
 		var out := Vector2(cos(angle), sin(angle))

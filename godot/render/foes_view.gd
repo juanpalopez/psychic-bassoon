@@ -246,7 +246,12 @@ func update(game: GameState, alpha: float, hold: HitHold = null) -> void:
 		var walked := to - from
 		var lift := 0.0
 		if spread_enabled:
-			var spread := FoeSpread.offset(foe.id, _headings.get(foe.id, Vector2.RIGHT), foe.flying)
+			var spread := FoeSpread.offset(
+				foe.id,
+				_headings.get(foe.id, Vector2.RIGHT),
+				foe.flying,
+				FoeSpread.LANE if game.map == null else FoeSpread.lane_for(game.map.road_width)
+			)
 			position.x += spread.x
 			position.z += spread.z
 			lift = spread.y

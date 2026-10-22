@@ -10,6 +10,8 @@ extends RefCounted
 ## `LIP_HEIGHT` above it along each edge, so it reads as a bed sunk between its lips. The lip's
 ## crest is `LIP_CREST` in from the outer edge and it falls to the bed over `LIP_WIDTH`; the outer
 ## edge meets the ground `EDGE_LIFT` above the terrain top.
+## This is the old boards' width (`GameMap.road_width` defaults to it, a test checks); a map with a
+## wide band carries its own.
 const ROAD_WIDTH := 0.9
 const ROAD_WOBBLE := 0.025
 ## How far along the road the wobble changes its mind, in cells.
