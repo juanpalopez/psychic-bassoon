@@ -8,7 +8,7 @@ links: [#275, #335, #444]
 # Prototype hero movement and bridge tactics on a fixed seed of the generated valley
 
 ## Context
-The RFC `docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md` (#444) proposed a hand-authored map for the first hero prototype. `Game.create` always generates the valley, so a hand-made layout would be a second kind of map, and the generated Bluewater Crossing already has a road bridge and a hero-only bridge.
+The RFC `docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md` (#444) proposed a hand-authored map for the first hero prototype. `Game.create` generates the valley on the default board, so a hand-made layout would be a second kind of map, and the generated Bluewater Crossing already has a road bridge and a hero-only bridge.
 
 ## Decision
 Accept the RFC with amendments (its "Amendments" section): the prototype plays one fixed seed of the generated valley with strategic positions as content data for it; commands target any walkable cell and strategic positions are highlighted destinations; the second bridge is hero-only; the first step is the sim hero of #275. The GDD's interaction list names the strategic positions.
