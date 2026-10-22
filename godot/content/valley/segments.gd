@@ -31,8 +31,9 @@ const DATA := {
 		[
 			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.48, 0.4),
-			Vector2(3.57, 1.48),
+			Vector2(2.14, 0.23),
+			Vector2(3.1, 0.87),
+			Vector2(3.74, 1.83),
 			Vector2(3.97, 2.97),
 			Vector2(3.97, 3.97),
 		],
@@ -102,8 +103,9 @@ const DATA := {
 		[
 			Vector2(0, 0),
 			Vector2(1.0, 0.0),
-			Vector2(2.48, 0.4),
-			Vector2(3.57, 1.48),
+			Vector2(2.14, 0.23),
+			Vector2(3.1, 0.87),
+			Vector2(3.74, 1.83),
 			Vector2(3.97, 2.97),
 			Vector2(3.97, 3.97),
 			Vector2(3.97, 4.97),
