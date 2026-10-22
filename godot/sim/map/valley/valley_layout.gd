@@ -110,8 +110,8 @@ func _straight_problems() -> Array[String]:
 
 
 ## The rows from `first` down where the Crossing can enter: both gate cells dry, the river at
-## least `APPROACH_STRAIGHT` cells in from the entry and its far side `APPROACH_REACH` cells short
-## of the Ridge's gate column, less the room the bend to the Ridge needs.
+## least `APPROACH_STRAIGHT` cells in from the entry and its far side `CROSSING_REACH` plus
+## `CROSSING_BEND_ROOM` cells short of the Ridge's gate column.
 func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
 	var straight: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
 	var wet := {}

@@ -35,6 +35,8 @@ const RIDGE_GATE_REACH := Vector2i(5, 5)
 ## it runs a long way up beside room for socket blocks.
 const RIDGE_EXIT_ROWS := Vector2i(2, 3)
 ## No straight leg is longer than MAX_STRAIGHT cells (the Crossing's level approaches excepted).
+## Measured on seeds 1..300 (#439 review): with no limit the longest is 13 (17 seeds), so 12 trims
+## only those; 10 would double the mean layout time.
 const MAX_STRAIGHT := 12
 ## A road point is on a diagonal when its heading is between 20 and 70 degrees off an axis: the
 ## ratio of the steps either side, times 1000, between these (tan 20 and tan 70).
