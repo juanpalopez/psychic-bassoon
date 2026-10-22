@@ -27,6 +27,8 @@ const HALF := 0.5
 var river: RoadCurve = null
 ## Every cell of the river: the centre line and the cells beside it that make it wide.
 var river_cells: Array[Vector2i] = []
+## The template ids the road is made of, in road order (`RouteComposer`).
+var route_segments: Array[StringName] = []
 
 
 ## The layout for a seed, or null (with an error) when no draw passes `problems` and stitches with
@@ -36,7 +38,7 @@ static func generate(seed: int, cols: int, rows: int) -> ValleyLayout:
 	var rng := Rng.derive(seed, Streams.VALLEY_LAYOUT)
 	for attempt in LAYOUT.MAX_ATTEMPTS:
 		var layout := _draw(seed, rng)
-		if layout.problems().is_empty() and _stitches(layout):
+		if layout != null and layout.problems().is_empty() and _stitches(layout):
 			return layout
 	push_error("valley layout seed %d: no draw passes its checks" % seed)
 	return null
@@ -109,10 +111,9 @@ func _straight_problems() -> Array[String]:
 
 
 ## The rows from `first` down where the Crossing can enter: both gate cells dry, the river at
-## least `APPROACH_STRAIGHT` cells in from the entry and its far side `APPROACH_REACH` cells short
-## of the Ridge's gate column.
+## least `APPROACH_STRAIGHT` cells in from the entry and its far side `CROSSING_REACH` plus
+## `CROSSING_BEND_ROOM` cells short of the Ridge's gate column.
 func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
-	var reach: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_REACH
 	var straight: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
 	var wet := {}
 	var span := {}
@@ -127,7 +128,7 @@ func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
 			not wet.has(Vector2i(left - 1, y))
 			and not wet.has(Vector2i(left, y))
 			and here.x - left >= straight
-			and here.y + reach <= ridge_x
+			and here.y + LAYOUT.CROSSING_REACH + LAYOUT.CROSSING_BEND_ROOM <= ridge_x
 		):
 			rows.append(y)
 	return rows
@@ -260,9 +261,8 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):
 				slot.river.append(cell)
-		slot.spine = _spine(rng, slot)
 		layout.slots.append(slot)
-	return layout
+	return layout if RouteComposer.compose(layout, rng) else null
 
 
 ## Source and mouth, with a wobble in between, as a spline; the cells beside the centre line
@@ -288,48 +288,6 @@ func _draw_river(rng: Rng) -> void:
 			if not seen.has(wet) and wet.x < LAYOUT.COLS:
 				seen[wet] = true
 				river_cells.append(wet)
-
-
-## The road's waypoints through a region, a sweeping curve: the entry, a short lead along the
-## heading into the region (square to the border), one or two middle points pushed off the chord
-## between the leads towards the region's middle (one gives a C, two a S), a lead before the
-## exit, and the exit. The spline does the curving, so the road runs on diagonals, not in legs.
-## The Crossing's road is the one its section draws.
-static func _spine(rng: Rng, slot: Slot) -> Array[Vector2]:
-	var start := Vector2(slot.entry) + Vector2(HALF, HALF)
-	var finish := Vector2(slot.exit) + Vector2(HALF, HALF)
-	if slot.id == Region.BLUEWATER_CROSSING:
-		return BluewaterCrossingRegion.waypoints(
-			slot, BluewaterCrossingRegion._span(slot.river, slot.entry.y)
-		)
-	var lead_in := start + Vector2(_inward(slot.rect, slot.entry)) * _lead(rng)
-	var lead_out := finish + Vector2(_inward(slot.rect, slot.exit)) * _lead(rng)
-	var chord := lead_out - lead_in
-	var length := chord.length()
-	var normal := Vector2(-chord.y, chord.x) / maxf(length, 1.0)
-	var middle := Vector2(slot.rect.position) + Vector2(slot.rect.size) * HALF
-	var side := 1.0 if (middle - (lead_in + lead_out) * HALF).dot(normal) >= 0.0 else -1.0
-	var push := float(LAYOUT.PUSH.x + rng.next_int(LAYOUT.PUSH.y + 1))
-	push = minf(push, length * LAYOUT.PUSH_SHARE)
-	var bends := 1 if length >= LAYOUT.S_LENGTH else 0
-	var low := (
-		Vector2(slot.rect.position + Vector2i.ONE * LAYOUT.SPINE_MARGIN) + Vector2(HALF, HALF)
-	)
-	var high := Vector2(slot.rect.end - Vector2i.ONE * LAYOUT.SPINE_MARGIN) - Vector2(HALF, HALF)
-	var spine: Array[Vector2] = [start, lead_in]
-	for step in range(1, bends + 1):
-		var point := lead_in + chord * (float(step) / float(bends + 1))
-		point += normal * (push * side * (1.0 if step % 2 == 1 else -1.0))
-		spine.append(
-			Vector2(maxf(low.x, minf(point.x, high.x)), maxf(low.y, minf(point.y, high.y)))
-		)
-	spine.append(lead_out)
-	spine.append(finish)
-	return spine
-
-
-static func _lead(rng: Rng) -> float:
-	return float(LAYOUT.LEAD.x + rng.next_int(LAYOUT.LEAD.y + 1))
 
 
 ## The longest straight run of road cells (steps in one direction), for the rule that a region's

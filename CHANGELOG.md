@@ -1,5 +1,41 @@
 # Changelog
 
+## [0.1.0-alpha.6](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2026-10-22)
+
+
+### Features
+
+* **sim:** add the road segment library with five tested templates ([#436](https://github.com/juanpalopez/psychic-bassoon/issues/436)) ([1f811b0](https://github.com/juanpalopez/psychic-bassoon/commit/1f811b052352c63a60792b7d983821bfc17bc74c))
+* **sim:** compose each region's road from segments in place of spines ([#439](https://github.com/juanpalopez/psychic-bassoon/issues/439)) ([b4ee466](https://github.com/juanpalopez/psychic-bassoon/commit/b4ee46604f649fd78beeb6331ea6873c6d515814))
+* **sim:** fit a road template between two gates of a region ([#438](https://github.com/juanpalopez/psychic-bassoon/issues/438)) ([d50cef4](https://github.com/juanpalopez/psychic-bassoon/commit/d50cef4ebd71553d44c773b93c69b0c226590073))
+
+
+### Bug Fixes
+
+* **sim:** sweep all 300 seeds and drop dead crossing rules ([#442](https://github.com/juanpalopez/psychic-bassoon/issues/442)) ([23f14e2](https://github.com/juanpalopez/psychic-bassoon/commit/23f14e2420b072e2916d5fdb40c3b31f7b3ec230)), closes [#433](https://github.com/juanpalopez/psychic-bassoon/issues/433)
+
+## [0.1.0-alpha.5](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.4...v0.1.0-alpha.5) (2026-10-21)
+
+
+### Features
+
+* **sim:** add the lane rule for valley roads ([#423](https://github.com/juanpalopez/psychic-bassoon/issues/423)) ([96c122e](https://github.com/juanpalopez/psychic-bassoon/commit/96c122e3f5a624b81e035bed300b9763e3476d22))
+* **sim:** build roads from a spline and walk the curve ([#414](https://github.com/juanpalopez/psychic-bassoon/issues/414)) ([8faf66e](https://github.com/juanpalopez/psychic-bassoon/commit/8faf66ec82b49494694acd5d03bb471eae507d33))
+* **sim:** build the ridge and meadow regions on spline roads ([#424](https://github.com/juanpalopez/psychic-bassoon/issues/424)) ([51184f0](https://github.com/juanpalopez/psychic-bassoon/commit/51184f0a21df12e990826004bc6194d21bfda709))
+* **sim:** cross the winding river on a bridge in the Crossing region ([#419](https://github.com/juanpalopez/psychic-bassoon/issues/419)) ([6d66adc](https://github.com/juanpalopez/psychic-bassoon/commit/6d66adcd55a28fe3fb49932912db4fb8a4938798)), closes [#409](https://github.com/juanpalopez/psychic-bassoon/issues/409)
+* **sim:** give each layout region its own section class ([#418](https://github.com/juanpalopez/psychic-bassoon/issues/418)) ([7e31f13](https://github.com/juanpalopez/psychic-bassoon/commit/7e31f13ceaa13e7a907b75ffe0c47ca2fb919cac))
+* **sim:** lay each region's road out as one wide bend ([#426](https://github.com/juanpalopez/psychic-bassoon/issues/426)) ([69f31e6](https://github.com/juanpalopez/psychic-bassoon/commit/69f31e606b12564c1e3bfd25a217703ddd2f9b3d))
+* **sim:** lay the valley out as 2D regions with a river spline ([#416](https://github.com/juanpalopez/psychic-bassoon/issues/416)) ([80fb604](https://github.com/juanpalopez/psychic-bassoon/commit/80fb6049a488e697c23a574e5191155891446c72))
+* **sim:** outer march s-bend and heartkeep approach on regions ([#420](https://github.com/juanpalopez/psychic-bassoon/issues/420)) ([ccf5fd5](https://github.com/juanpalopez/psychic-bassoon/commit/ccf5fd5a3a1ecdeb89af21b95bc47456a673adf8))
+* **sim:** ruins and a diagonal spline feeder in the Ancient Fold ([#421](https://github.com/juanpalopez/psychic-bassoon/issues/421)) ([3a0187a](https://github.com/juanpalopez/psychic-bassoon/commit/3a0187a675c18cac90b3f243bf2ad6b061857057))
+* **sim:** stitch the 2D layout with stand-in sections and a print tool ([#417](https://github.com/juanpalopez/psychic-bassoon/issues/417)) ([f4b951e](https://github.com/juanpalopez/psychic-bassoon/commit/f4b951e45d15a8e2032ffae9a6ddf51005ec3efe))
+* **sim:** sweep each region's road on diagonals and dump the valley ([#427](https://github.com/juanpalopez/psychic-bassoon/issues/427)) ([caf17ed](https://github.com/juanpalopez/psychic-bassoon/commit/caf17ed69a765e32997b417ced7bff66183c2620))
+
+
+### Bug Fixes
+
+* **sim:** stop uneven waypoints from looping the road spline ([#422](https://github.com/juanpalopez/psychic-bassoon/issues/422)) ([548f28c](https://github.com/juanpalopez/psychic-bassoon/commit/548f28c89722fc1e9537cc774a279b9f57e5b341)), closes [#404](https://github.com/juanpalopez/psychic-bassoon/issues/404)
+
 ## [0.1.0-alpha.4](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.3...v0.1.0-alpha.4) (2026-10-21)
 
 

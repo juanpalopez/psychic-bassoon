@@ -91,26 +91,10 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	return found
 
 
-## The road's waypoints, which the layout also gives the slot as its spine: level into the river
-## on the entry row, level out of it, then a smooth bend to the exit.
+## The road's waypoints, which the layout also gives the slot as its spine (`RouteComposer`): a
+## bridge level with the entry row, then a bend to the exit.
 static func waypoints(slot: ValleyPlan.Slot, span: Vector2i) -> Array[Vector2]:
-	var reach: int = BLUEWATER.APPROACH_REACH
-	var row := float(slot.entry.y) + HALF
-	var points: Array[Vector2] = [Vector2(slot.entry) + Vector2(HALF, HALF)]
-	if span.x - reach > slot.entry.x:
-		points.append(Vector2(float(span.x - reach) + HALF, row))
-	var out := Vector2(float(span.y + reach) + HALF, row)
-	points.append(out)
-	var finish := Vector2(slot.exit) + Vector2(HALF, HALF)
-	var lead := finish + Vector2(0.0, float(BLUEWATER.EXIT_LEAD))
-	if lead.y > row - float(BLUEWATER.EXIT_LEAD_CLEAR):
-		lead = finish
-	else:
-		var middle := (out + lead) * HALF
-		points.append(middle)
-		points.append(lead)
-	points.append(finish)
-	return points
+	return RouteComposer.crossing_waypoints(slot, span).points
 
 
 ## The first and last column of the river cells in a row, or (0, -1) when the row has none.

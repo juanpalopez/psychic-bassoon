@@ -13,7 +13,7 @@ const ROLES: Array[int] = [0, 3, 2, 1, 4, 5]
 ## Base borders: the two vertical cuts (left|middle, middle|right) and the three horizontal
 ## ones (left column, middle column, right column). The seed moves each by up to `JITTER`.
 const LEFT_X := 10
-const RIGHT_X := 23
+const RIGHT_X := 24
 const LEFT_Y := 9
 const MIDDLE_Y := 9
 const RIGHT_Y := 9
@@ -27,30 +27,27 @@ const GATE_INSET := 3
 ## The gate columns (inclusive) from the March to the Meadow, and (cells in from the Fold's left
 ## border) from the Fold to Heartkeep, kept off the corners so the road can sweep on a diagonal.
 const MEADOW_GATE := Vector2i(4, 5)
-const HEARTKEEP_GATE := Vector2i(3, 4)
+const HEARTKEEP_GATE := Vector2i(3, 3)
 ## The road crosses from the crossing to the ridge this far (min, max) left of the right border
 ## of the middle column, on the river's far bank.
 const RIDGE_GATE_REACH := Vector2i(5, 5)
 ## The Ridge's road leaves for the Fold on one of these rows (inclusive), high on the plateau, so
 ## it runs a long way up beside room for socket blocks.
 const RIDGE_EXIT_ROWS := Vector2i(2, 3)
-## A region's road is a sweeping curve (see `ValleyLayout._spine`): a lead of LEAD (min, span)
-## cells square to the border at both gates, one middle point (a C) or two (a S, on chords of at
-## least S_LENGTH cells) pushed off the chord by PUSH (min, span) cells but never more than
-## PUSH_SHARE of its length, kept SPINE_MARGIN cells in from the region's edge. No straight leg
-## is longer than MAX_STRAIGHT cells (the Crossing's level approaches excepted).
-const LEAD := Vector2i(1, 0)
-const PUSH := Vector2i(2, 1)
-const PUSH_SHARE := 0.3
-const S_LENGTH := 10.0
-const SPINE_MARGIN := 1
-const MAX_STRAIGHT := 6
+## No straight leg is longer than MAX_STRAIGHT cells (the Crossing's level approaches excepted).
+## Measured on seeds 1..300 (#439 review): with no limit the longest is 13 (17 seeds), so 12 trims
+## only those; 10 would double the mean layout time.
+const MAX_STRAIGHT := 12
 ## A road point is on a diagonal when its heading is between 20 and 70 degrees off an axis: the
 ## ratio of the steps either side, times 1000, between these (tan 20 and tan 70).
 const DIAGONAL := Vector2(364.0, 2747.0)
 ## The Crossing's road enters the river this many rows or more below the Ridge's border, so it
 ## has room to turn north on the far bank.
 const CROSSING_DROP := 5
+## The bridge runs on this many cells past the river, then the bend away from it needs this many
+## more before the Ridge's gate column (`RouteComposer`, `ValleyLayout._crossing_rows`).
+const CROSSING_REACH := 1
+const CROSSING_BEND_ROOM := 3
 ## The river: its source is one of TOP_X (min, span) on the top row, its mouth one of
 ## BOTTOM_X on the bottom row, with RIVER_MIDS waypoints that wander by up to RIVER_WOBBLE
 ## cells off the straight line. It is RIVER_WIDTH cells wide (to the right of its centre line).
