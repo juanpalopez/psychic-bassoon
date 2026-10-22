@@ -10,7 +10,7 @@ const ATTEMPTS := 20
 ## Most seeds pass on the first draw; the stitcher redraws the rest.
 const MAX_FIRST_FAIL_PERCENT := 25
 ## The S reaches at least this near the region's right edge.
-const FAR_REACH := 5
+const FAR_REACH := 6
 
 
 func _drawn(seed: int) -> Array:

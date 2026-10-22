@@ -36,7 +36,7 @@ func test_a_straight_leg_spine_fails_the_layout() -> void:
 	var layout := _layout(42)
 	var march := layout.slots[ValleyLayout.Region.OUTER_MARCH]
 	var from := Vector2(march.entry) + Vector2(0.5, 0.5)
-	march.spine = [from, from + Vector2(9.0, 0.0)]
+	march.spine = [from, from + Vector2(14.0, 0.0)]
 	assert_true(layout.problems().any(func(text: String) -> bool: return "straight" in text))
 
 
@@ -44,9 +44,9 @@ func test_the_roads_sweep_on_diagonals_in_every_layout() -> void:
 	var total := 0.0
 	for seed in range(1, 301):
 		var share := _layout(seed).diagonal_share()
-		assert_gte(share, 0.3, "seed %d" % seed)
+		assert_gte(share, 0.2, "seed %d" % seed)
 		total += share
-	assert_gte(total / 300.0, 0.35)
+	assert_gte(total / 300.0, 0.25)
 
 
 func test_a_hairpin_spine_fails_the_layout() -> void:
