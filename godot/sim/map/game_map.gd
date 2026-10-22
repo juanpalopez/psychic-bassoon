@@ -9,6 +9,7 @@ enum Tile { PLOT, ROAD }
 enum Region { MEADOW, FOREST, ROCKS, DIRT }
 
 const RULES := preload("res://content/map_rules.gd")
+const ROAD := preload("res://content/valley/road_rules.gd")
 ## What `socket_anchor_at` returns for a cell that is in no socket.
 const NO_SOCKET := Vector2i(-1, -1)
 
@@ -43,6 +44,9 @@ var routes: Array = []
 ## For each route, the `RoadCurve` foes walk, or null to round its grid path's corners (the old
 ## boards, and any route a section gave no spline for, #404). Empty when no route has one.
 var route_curves: Array = []
+## How wide the road is drawn and walked, in cells: the layout valley's wide band (#430, its
+## cells are `Tile.ROAD`), 0.9 on every older board. Foes still walk the centre line.
+var road_width: float = ROAD.OLD_WIDTH_CELLS
 ## With a second spawn source: how many cells of `routes[1]` come before the main road (the
 ## feeder), and the index in `path` of the cell where it joins. Both are 0 without one.
 var feeder_length: int = 0

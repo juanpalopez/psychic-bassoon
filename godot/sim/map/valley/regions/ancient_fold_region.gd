@@ -149,7 +149,7 @@ func _place_sockets(slot: ValleyPlan.Slot, rng: Rng, result: SectionResult) -> v
 		blocked.append(Rect2i(cell, Vector2i.ONE))
 	var near: Array[Vector2i] = []
 	for site in SectionSockets.candidates(result, blocked):
-		if SectionSockets.centre_gap(site, result.feeder_join) <= FOLD.MERGE_COVER_REACH:
+		if SectionSockets.centre_gap(site, result.feeder_join) <= _merge_reach(result):
 			near.append(site)
 	var merge: Array[Vector2i] = []
 	_pack(near, 0, merge)
@@ -171,10 +171,15 @@ func _pack(sites: Array[Vector2i], from: int, chosen: Array[Vector2i]) -> bool:
 	return false
 
 
+## How far from the join a block's centre may be to cover the merge: wider by the band's room.
+func _merge_reach(result: SectionResult) -> float:
+	return FOLD.MERGE_COVER_REACH + SectionSockets.reach_extra(result)
+
+
 func _near_join(result: SectionResult) -> int:
 	var near := 0
 	for anchor in result.sockets:
-		if SectionSockets.centre_gap(anchor, result.feeder_join) <= FOLD.MERGE_COVER_REACH:
+		if SectionSockets.centre_gap(anchor, result.feeder_join) <= _merge_reach(result):
 			near += 1
 	return near
 

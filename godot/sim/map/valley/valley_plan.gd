@@ -34,6 +34,8 @@ class Slot:
 	var margin := Vector2i(RULES.STRIP_RIGHT_MARGIN, 0)
 	## The shortest straight runs on both sides of a turn that make it a bend to cover.
 	var bend_run: int = 1
+	## The road band's width in cells (#430); 0 keeps the one-cell road (the strip valley).
+	var road_width: float = 0.0
 	## The road's waypoints in cell units, when the layout gives them (the 2D layout).
 	var spine: Array[Vector2] = []
 	## The cells of the river inside the rect, when the layout has one.
@@ -49,6 +51,8 @@ var slots: Array[Slot] = []
 var hero_caps: Array[Vector2i] = HERO.CAPS
 ## The bend rule of the slots (`Slot.bend_run`), for the bends where two sections join.
 var bend_run: int = 1
+## The road band's width in cells (`Slot.road_width`); 0 for the strip valley.
+var road_width: float = 0.0
 ## The lane rule (#406): no two road cells `lane_run` or more cells apart along the road may be
 ## closer than `lane_gap` cells in a straight line (0: no rule, the strip valley).
 var lane_gap: int = 0

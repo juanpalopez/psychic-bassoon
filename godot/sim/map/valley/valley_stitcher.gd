@@ -71,10 +71,33 @@ static func _assemble(plan: ValleyPlan, results: Array[SectionResult]) -> GameMa
 			map.join_index = join
 	map.route_curves = _route_curves(map, results)
 	map.tiles = MapGen._tiles_for(map.routes, plan.cols, plan.rows)
+	if plan.road_width > 0.0 and not map.route_curves.is_empty():
+		map.road_width = plan.road_width
+		_mark_band(map)
 	var last := map.path[map.path.size() - 1]
 	map.heartstone = MapGen._heartstone_block(last, plan.cols, plan.rows, map.footprint)
 	_merge_layers(map, results)
 	return map
+
+
+## Every cell whose centre is within half the band's width of a route's curve is `Tile.ROAD`
+## (#430), so nothing treats it as ground to build on. The centre-line cells (`path`) stay as
+## they are.
+static func _mark_band(map: GameMap) -> void:
+	var half := map.road_width / 2.0
+	for curve: RoadCurve in map.route_curves:
+		for index in curve.xs.size() - 1:
+			var a := Vector2(curve.xs[index], curve.ys[index])
+			var b := Vector2(curve.xs[index + 1], curve.ys[index + 1])
+			var low := a.min(b) - Vector2(half, half)
+			var high := a.max(b) + Vector2(half, half)
+			for y in range(maxi(int(floor(low.y)), 0), mini(int(floor(high.y)) + 1, map.rows)):
+				for x in range(maxi(int(floor(low.x)), 0), mini(int(floor(high.x)) + 1, map.cols)):
+					var centre := Vector2(
+						float(x) + RULES.CELL_CENTRE, float(y) + RULES.CELL_CENTRE
+					)
+					if curve.segment_gap(index, centre.x, centre.y) <= half:
+						map.tiles[y][x] = GameMap.Tile.ROAD
 
 
 static func _merge_layers(map: GameMap, results: Array[SectionResult]) -> void:

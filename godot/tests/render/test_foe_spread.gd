@@ -229,3 +229,40 @@ func test_draw_calls_unchanged_one_multimesh_per_type() -> void:
 	view.update(_game_with(foes), 1.0)
 	assert_eq(view.get_child_count(), FOES.FOE_IDS.size() + 1)
 	assert_eq(view.visible_count("scrapGoblin"), 30)
+
+
+func test_the_lanes_of_a_wide_band_stay_inside_it_and_there_are_many() -> void:
+	var band := 2.4
+	var reach := FoeSpread.lane_for(band)
+	var seen := {}
+	for id in 500:
+		var o := FoeSpread.offset(id, HEADING, false, reach)
+		assert_lte(
+			absf(o.z) + FoeSpread.FOE_RADIUS,
+			band / 2.0 + FoeSpread.JITTER + 1e-6,
+			"the foe stays on the band %d" % id
+		)
+		seen[snappedf(o.z, 0.05)] = true
+	assert_gte(FoeSpread.LANES, 7)
+	assert_gte(seen.size(), 7, "a crowd fills the band's width")
+	# five foes of a radius abreast fit in the lanes
+	assert_gte(2.0 * reach / (2.0 * FoeSpread.FOE_RADIUS), 4.0)
+
+
+func test_the_old_road_keeps_its_lane() -> void:
+	assert_almost_eq(FoeSpread.lane_for(0.9), FoeSpread.LANE, 1e-9)
+
+
+func test_the_foes_view_spreads_by_the_maps_road_width() -> void:
+	var view := _drawn_view()
+	var foes: Array[Foe] = []
+	for id in 1:
+		foes.append(_foe(1, "scrapGoblin", 4.0, 3.5))
+	var game := _game_with(foes)
+	game.map = GameMap.new()
+	game.map.road_width = 2.4
+	view.update(game, 1.0)
+	var truth := BoardSpace.point_to_world(4.0, 3.5)
+	var o := FoeSpread.offset(1, Vector2.RIGHT, false, FoeSpread.lane_for(2.4))
+	var at := view.drawn_position("scrapGoblin", 0)
+	assert_almost_eq(at.z, truth.z + o.z, 1e-5)

@@ -23,6 +23,8 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 func _try_lows(slot: ValleyPlan.Slot, road: Array[Vector2i], rng: Rng) -> SectionResult:
 	var base := SectionResult.create(slot)
 	base.road = road
+	# the band rules measure from the curve, so the checks while drawing see the final one
+	base.road_curve = RoadSpline.build(slot.spine)
 	SectionSockets.place(base, REGION.LOW_BLOCKS, rng, reserved(slot))
 	var sites := SectionSockets.candidates(base, reserved(slot))
 	for i in range(sites.size() - 1, 0, -1):
@@ -55,6 +57,7 @@ func reserved(slot: ValleyPlan.Slot) -> Array[Rect2i]:
 func _finish(slot: ValleyPlan.Slot, base: SectionResult, ridge: Vector2i) -> SectionResult:
 	var result := SectionResult.create(slot)
 	result.road = base.road
+	result.road_curve = base.road_curve
 	result.add_socket(ridge, REGION.RIDGE_LEVEL, SectionResult.Tag.HIGH)
 	for index in base.sockets.size():
 		result.add_socket(base.sockets[index], 0, base.socket_tags[index])

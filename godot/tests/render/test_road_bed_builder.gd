@@ -483,3 +483,33 @@ func _triangles(mesh: Mesh) -> int:
 	if mesh.get_surface_count() == 0:
 		return 0
 	return (mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size() / 3
+
+
+func test_the_bed_is_as_wide_as_the_maps_road_width() -> void:
+	assert_eq(LOOKS.ROAD_WIDTH, GameMap.new().road_width, "the old boards keep their look")
+	var s := _setup(1)
+	var map: GameMap = s["map"]
+	var narrow := RoadBedBuilder.bed_mesh(map, s["game"].routes, s["top"]).get_aabb()
+	map.road_width = 2.4
+	var wide := RoadBedBuilder.bed_mesh(map, s["game"].routes, s["top"]).get_aabb()
+	assert_gt(wide.get_volume(), 0.0)
+	assert_gt(wide.size.x * wide.size.z, narrow.size.x * narrow.size.z, "a wider bed spreads out")
+	# the bed vertices reach half the width (plus the lip) from the centre line
+	var vertices: PackedVector3Array = (
+		RoadBedBuilder
+		. bed_mesh(map, s["game"].routes, s["top"])
+		. surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	)
+	var line := RoadBedBuilder.centrelines(s["game"].routes)[0]
+	var far := 0.0
+	for v in vertices:
+		far = maxf(far, RoadBedBuilder._distance_to_line(Vector2(v.x, v.z), _world_line(line)))
+	assert_gt(far, 2.4 / 2.0 - 0.05)
+
+
+func _world_line(line: PackedVector2Array) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for p in line:
+		var w := BoardSpace.point_to_world(p.x, p.y)
+		out.append(Vector2(w.x, w.z))
+	return out

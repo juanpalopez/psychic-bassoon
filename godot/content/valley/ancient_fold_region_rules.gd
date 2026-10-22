@@ -3,7 +3,7 @@
 extends RefCounted
 
 ## Socket blocks the region keeps, as (least, most).
-const SOCKET_MIN := 4
+const SOCKET_MIN := 3
 const SOCKET_MAX := 5
 ## At least this many socket blocks have their centre within `MERGE_COVER_REACH` cells of the
 ## road cell where the feeder joins (tight: 4.5 centre to centre), so the merge has coverage.

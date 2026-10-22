@@ -16,6 +16,8 @@ var role: int = 0
 var margin := Vector2i(VALLEY.STRIP_RIGHT_MARGIN, 0)
 ## The shortest straight runs on both sides of a turn that make it a bend (see `SectionSockets`).
 var bend_run: int = 1
+## The road band's width in cells; 0 (the strip valley) keeps blocks to the one-cell road rules.
+var road_width: float = 0.0
 var rect := Rect2i()
 ## The main road through the strip, from the slot's entry to its exit.
 var road: Array[Vector2i] = []
@@ -54,6 +56,7 @@ static func create(slot: ValleyPlan.Slot) -> SectionResult:
 	result.role = slot.role if slot.role >= 0 else slot.id
 	result.margin = slot.margin
 	result.bend_run = slot.bend_run
+	result.road_width = slot.road_width
 	result.rect = slot.rect
 	var count := slot.rect.size.x * slot.rect.size.y
 	result.heights.resize(count)

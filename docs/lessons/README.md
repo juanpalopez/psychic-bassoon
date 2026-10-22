@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-22 | lesson | Measure the room a wider road takes before fixing a clearance in a ticket | sim | none | |
 | 2026-10-21 | decision | Lay the six sections out as 2D regions and walk a smooth spline road through them | sim | none | CLAUDE.md |
 | 2026-10-21 | decision | Review a stack with one reviewer per PR, in parallel, sharing notes | review | none | CLAUDE.md, docs/REVIEW-CHECKLIST.md, .claude/commands/review-stack.md |
 | 2026-10-21 | lesson | Push a new commit after retargeting a PR to main, never just rerun its checks | ci | none | |

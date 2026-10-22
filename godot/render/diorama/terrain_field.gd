@@ -228,6 +228,9 @@ func _lay_map() -> void:
 			if map.is_socket_cell(cell):
 				guard = GUARD_SOCKET
 			var level := map.height_at(cell)
+			if guard == GUARD_ROAD:
+				# the wide band's outer cells (#430) lie on the valley floor like the centre line
+				level = 0
 			if guard == GUARD_HEARTSTONE:
 				# the Heartstone stands level with the end of the road
 				level = map.height_at(map.path[map.path.size() - 1])

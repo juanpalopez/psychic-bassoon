@@ -2,7 +2,7 @@
 ## gentle rise around the Heartstone block and five or six sockets.
 extends RefCounted
 
-const SOCKET_MIN := 5
+const SOCKET_MIN := 4
 const SOCKET_MAX := 6
 ## The road runs straight down from the gate this many cells, sweeps to the far side (this far
 ## from the region's edge) about `SWEEP_AT` of the way to the exit row, and turns east for the

@@ -147,12 +147,12 @@ static func _block_fits(
 			and not SectionSockets.blocks_apart(result.sockets[index], result.sockets[other])
 		):
 			return false
-	return SectionSockets.reaches_road(block, result.road)
+	return SectionSockets.off_band(result, block) and SectionSockets.reaches(result, block)
 
 
 static func _covered(result: SectionResult, bend: Vector2i) -> bool:
 	for anchor in result.sockets:
-		if SectionSockets.centre_gap(anchor, bend) <= VALLEY.BEND_COVER_REACH:
+		if SectionSockets.centre_gap(anchor, bend) <= SectionSockets.bend_reach(result):
 			return true
 	return false
 
