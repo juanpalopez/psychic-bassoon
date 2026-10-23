@@ -9,13 +9,16 @@ const SAMPLES_PER_CELL := 4
 ## for (the rasterised cells stay on the curve).
 const MAX_CELL_DEVIATION := 1.0
 
-## The road as a band several foes walk side by side (#430). The layout valley's road is this
-## wide, in cells; 0 keeps the one-cell road (and the old boards keep `OLD_WIDTH_CELLS`). The
-## owner's target is 2.4, but the strict reach rule (a level 1 tower covers
-## `SOCKET_MIN_ROAD_COVERAGE` road cells from every block) leaves no valley that stitches above
-## about 1.1 cells (tables in the PR), so the band is off until the owner picks a way out.
-const ROAD_WIDTH_CELLS := 0.0
+## The old boards' road width, in cells: the width the road bed is drawn at (`DioramaLooks.ROAD_WIDTH`
+## holds the same number, a test checks) and `GameMap.road_width`'s default.
 const OLD_WIDTH_CELLS := 0.9
+## The road as a band several foes walk side by side (#430). The layout valley's road is this
+## wide, in cells, and every cell the band touches is road (#469); 0 keeps the one-cell road. The
+## owner's target is 2.4 (#446), but the strict reach rule (a level 1 tower covers
+## `SOCKET_MIN_ROAD_COVERAGE` road cells from every block) leaves no valley that stitches above
+## about 1.1 cells (tables in #441), so the band is the drawn width for now.
+const ROAD_WIDTH_CELLS := OLD_WIDTH_CELLS
 ## A socket block's edge keeps at least this many cells from the band's edge: it may stand
 ## against the band but never on it (1.0 left a third of the blocks, #430).
 const ROAD_CLEARANCE_CELLS := 0.0
+const BAND_SLACK := 0.1

@@ -14,9 +14,13 @@ var _maps := {}
 
 func _layout_valley(seed: int) -> GameMap:
 	if not _maps.has(seed):
-		var layout := ValleyLayout.generate(seed, 32, 20)
-		_maps[seed] = ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		_maps[seed] = _fresh_valley(seed)
 	return _maps[seed]
+
+
+func _fresh_valley(seed: int) -> GameMap:
+	var layout := ValleyLayout.generate(seed, 32, 20)
+	return ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
 
 
 ## A straight road along row 5 of a 20 by 12 strip, with a band of `width` cells.
@@ -30,31 +34,88 @@ func _straight(width: float) -> SectionResult:
 	return result
 
 
-func test_the_band_is_off_in_the_content_and_the_old_width_is_the_default() -> void:
+func test_the_layout_valleys_band_is_the_drawn_width_from_the_content() -> void:
+	assert_eq(ROAD.ROAD_WIDTH_CELLS, ROAD.OLD_WIDTH_CELLS)
+	assert_eq(ROAD.OLD_WIDTH_CELLS, 0.9)
 	assert_eq(GameMap.new().road_width, ROAD.OLD_WIDTH_CELLS)
-	assert_eq(_layout_valley(1).road_width, ROAD.OLD_WIDTH_CELLS)
+	for seed in SEEDS:
+		assert_eq(ValleyLayout.generate(seed, 32, 20).road_width, ROAD.ROAD_WIDTH_CELLS)
+		assert_eq(_layout_valley(seed).road_width, ROAD.ROAD_WIDTH_CELLS)
 
 
-func test_a_cell_is_road_when_its_centre_is_within_half_the_band_of_a_curve() -> void:
+func test_a_cell_is_road_when_the_band_reaches_any_part_of_it() -> void:
+	for width in [ROAD.ROAD_WIDTH_CELLS, 2.4]:
+		for seed in SEEDS:
+			var map := _fresh_valley(seed)
+			map.road_width = width
+			map.tiles = MapGen._tiles_for(map.routes, map.cols, map.rows)
+			ValleyStitcher._mark_band(map)
+			var half := map.road_width / 2.0
+			var near := 0
+			for y in map.rows:
+				for x in map.cols:
+					var gap := _gap_to_cell(map, x, y)
+					var road := map.tiles[y][x] == GameMap.Tile.ROAD
+					var label := "cell %d,%d, width %s, seed %d" % [x, y, width, seed]
+					if gap <= half - 1e-3:
+						assert_true(road, "%s is under the band" % label)
+						near += 1
+					elif gap > half + 1e-3 and not _on_a_route(map, Vector2i(x, y)):
+						assert_false(road, "%s is off the band" % label)
+			assert_gt(near, map.path.size(), "the band covers more than the centre line")
+
+
+## The least distance from the curves to any point of the cell, by walking the curves finely.
+func _gap_to_cell(map: GameMap, x: int, y: int) -> float:
+	var rect := Rect2(Vector2(x, y), Vector2.ONE)
+	var best := 1.0e30
+	for curve: RoadCurve in map.route_curves:
+		for index in curve.xs.size() - 1:
+			var a := Vector2(curve.xs[index], curve.ys[index])
+			var b := Vector2(curve.xs[index + 1], curve.ys[index + 1])
+			for step in 21:
+				var at := a.lerp(b, float(step) / 20.0)
+				best = minf(best, at.distance_to(at.clamp(rect.position, rect.end)))
+	return best
+
+
+func test_the_gap_from_a_segment_to_a_cell_is_zero_when_it_crosses_the_cell() -> void:
+	var cells: Array[Vector2i] = [Vector2i(0, 0), Vector2i(1, 0), Vector2i(2, 0)]
+	var curve := RoadCurve.from_cells(cells)
+	# the curve runs along y 0.5 from x 0.5 to 2.5
+	assert_almost_eq(curve.segment_rect_gap(0, 0, 0, 1), 0.0, 1e-9)
+	assert_almost_eq(curve.segment_rect_gap(0, 1, 0, 1), 0.0, 1e-9)
+	assert_almost_eq(curve.segment_rect_gap(0, 1, 1, 1), 0.5, 1e-9)
+	assert_almost_eq(curve.segment_rect_gap(0, 3, 0, 1), 1.5, 1e-9)
+	assert_almost_eq(curve.segment_rect_gap(0, 3, 1, 1), sqrt(2.5), 1e-9)
+	# a segment that passes through a cell without an end inside it
+	var long := RoadCurve.new()
+	long.xs = PackedFloat64Array([-1.0, 3.0])
+	long.ys = PackedFloat64Array([1.5, 1.5])
+	assert_almost_eq(long.segment_rect_gap(0, 1, 1, 1), 0.0, 1e-9)
+	assert_almost_eq(long.segment_rect_gap(0, 1, 3, 1), 1.5, 1e-9)
+
+
+func test_no_socket_cell_is_road_or_near_the_band_and_the_route_cells_are_road() -> void:
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
-		map.road_width = 2.4
-		map.tiles = MapGen._tiles_for(map.routes, map.cols, map.rows)
-		ValleyStitcher._mark_band(map)
 		var half := map.road_width / 2.0
-		var near := 0
-		for y in map.rows:
-			for x in map.cols:
-				var gap := 1.0e30
-				for curve: RoadCurve in map.route_curves:
-					gap = minf(gap, curve.distance_to(float(x) + 0.5, float(y) + 0.5))
-				var road := map.tiles[y][x] == GameMap.Tile.ROAD
-				if gap <= half - 1e-6:
-					assert_true(road, "cell %d,%d is under the band, seed %d" % [x, y, seed])
-					near += 1
-				elif gap > half + 1e-6 and not _on_a_route(map, Vector2i(x, y)):
-					assert_false(road, "cell %d,%d is off the band, seed %d" % [x, y, seed])
-		assert_gt(near, map.path.size(), "the band covers more than the centre line")
+		for anchor in map.sockets:
+			for dy in map.footprint:
+				for dx in map.footprint:
+					var cell := anchor + Vector2i(dx, dy)
+					assert_ne(map.tiles[cell.y][cell.x], GameMap.Tile.ROAD, "socket %s" % anchor)
+					assert_gte(_gap_to_cell(map, cell.x, cell.y), half - 1e-3, "socket %s" % anchor)
+		for route: Array in map.routes:
+			for index in route.size():
+				assert_eq(map.tiles[route[index].y][route[index].x], GameMap.Tile.ROAD)
+				if index > 0:
+					assert_eq(
+						absi(route[index].x - route[index - 1].x)
+						+ absi(route[index].y - route[index - 1].y),
+						1,
+						"route cells %s and %s touch" % [route[index - 1], route[index]]
+					)
 
 
 func _on_a_route(map: GameMap, cell: Vector2i) -> bool:
@@ -125,3 +186,20 @@ func test_the_strip_valley_keeps_its_one_cell_road() -> void:
 	var plain := MapGen._tiles_for(map.routes, 32, 20)
 	for y in 20:
 		assert_eq(map.tiles[y], plain[y], "row %d" % y)
+
+
+func test_a_block_beside_a_diagonal_road_is_judged_by_its_square_not_its_centre() -> void:
+	# a diagonal road: the block's corner cell reaches the band though the centre keeps 1.3 away
+	var cells: Array[Vector2i] = []
+	for step in 12:
+		cells.append(Vector2i(step, step))
+	var result := SectionResult.create(ValleyPlan.Slot.new())
+	result.road_width = 0.9
+	result.road = cells
+	var curve := RoadCurve.from_cells(cells)
+	assert_almost_eq(curve.rect_gap(5, 3, 2), curve.segment_rect_gap(4, 5, 3, 2), 1e-9)
+	var near := Rect2i(5, 3, 2, 2)
+	var far := Rect2i(7, 3, 2, 2)
+	assert_gt(curve.distance_to(6.0, 4.0), SectionSockets.least_gap(result) - 0.2)
+	assert_false(SectionSockets.off_band(result, near))
+	assert_true(SectionSockets.off_band(result, far))
