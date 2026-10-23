@@ -146,6 +146,11 @@ static func _of_role(results: Array[SectionResult], role: int) -> SectionResult:
 	return results[role]
 
 
+## True when the hero can stand on the cell (false off the board).
+func is_open(cell: Vector2i) -> bool:
+	return _is_open(cell)
+
+
 func _is_open(cell: Vector2i) -> bool:
 	return (
 		cell.x >= 0

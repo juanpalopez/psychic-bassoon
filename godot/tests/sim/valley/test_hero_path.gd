@@ -58,6 +58,15 @@ func test_equally_short_paths_are_broken_by_the_neighbour_order() -> void:
 	assert_eq(graph.path(Vector2i(0, 0), Vector2i(2, 2)), expected)
 
 
+func test_going_up_and_left_the_walk_also_takes_the_row_first() -> void:
+	# pins the other two directions of the order, so swapping them fails a test
+	var graph := HeroGraph.from_map(MapGen.generate(1, 16, 11))
+	var expected: Array[Vector2i] = [
+		Vector2i(2, 2), Vector2i(1, 2), Vector2i(0, 2), Vector2i(0, 1), Vector2i(0, 0)
+	]
+	assert_eq(graph.path(Vector2i(2, 2), Vector2i(0, 0)), expected)
+
+
 func test_a_path_is_a_shortest_walk_of_open_neighbouring_cells() -> void:
 	for seed in SEEDS:
 		var map := MapGen.game_map(seed)
@@ -72,6 +81,8 @@ func test_a_path_is_a_shortest_walk_of_open_neighbouring_cells() -> void:
 			var gap := cells[index] - cells[index - 1]
 			assert_eq(absi(gap.x) + absi(gap.y), 1, "seed %d step %d" % [seed, index])
 			assert_eq(graph.steps(cells[index], cells[index]), 0, "seed %d open" % seed)
+			var ground := map.is_walkable(cells[index]) or _is_bridge(map, cells[index])
+			assert_true(ground, "seed %d at %s" % [seed, cells[index]])
 
 
 func test_a_path_crosses_the_river_only_on_a_bridge() -> void:

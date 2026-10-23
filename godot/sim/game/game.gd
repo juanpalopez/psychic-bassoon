@@ -8,6 +8,7 @@ extends RefCounted
 const RULES := preload("res://content/game_rules.gd")
 const MAP_RULES := preload("res://content/map_rules.gd")
 const TOWERS := preload("res://content/towers.gd")
+const HEROES := preload("res://content/heroes.gd")
 
 ## Length of every simulation tick, in seconds. It never changes.
 const TICK_SECONDS := 1.0 / RULES.TICK_RATE
@@ -54,6 +55,10 @@ static func create(
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)
 	game.route_rng = Rng.derive(seed, Streams.ROUTES)
+	# every run on the game board starts with the Knight (owner, 2026-10-22); a mechanic test
+	# places it on its own board when it needs it
+	if _is_game_board(cols, rows, with_detour, footprint, second_source):
+		Heroes.place(game, HEROES.START_HERO)
 	return game
 
 
@@ -64,16 +69,22 @@ static func create(
 static func _map_for(
 	seed: int, cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
 ) -> GameMap:
-	var valley := (
+	if _is_game_board(cols, rows, with_detour, footprint, second_source):
+		return MapGen.game_map(seed)
+	return MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
+
+
+## The game board: 32 by 20, one road, 2x2 sockets and a second spawn source.
+static func _is_game_board(
+	cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
+) -> bool:
+	return (
 		cols == MAP_RULES.GRID_COLS
 		and rows == MAP_RULES.GRID_ROWS
 		and footprint == MAP_RULES.GAME_SOCKET_FOOTPRINT
 		and second_source
 		and not with_detour
 	)
-	if valley:
-		return MapGen.game_map(seed)
-	return MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
 
 
 ## Queues a command for the next tick. Does not change the game itself.
@@ -90,6 +101,7 @@ static func tick(game: GameState) -> void:
 	for command in commands:
 		_apply(game, command)
 	if not game.over and not game.won:
+		Heroes.step(game)
 		WaveRunner.step_spawners(game)
 		Combat.step(game)
 		if not game.over:
@@ -212,3 +224,5 @@ static func _apply(game: GameState, command: Command) -> void:
 			Specs.choose(game, command)
 		Command.Kind.ACTIVATE_ABILITY:
 			Specs.activate(game, command)
+		Command.Kind.MOVE_HERO:
+			Heroes.order(game, command)
