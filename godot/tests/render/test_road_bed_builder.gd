@@ -14,6 +14,9 @@ const SUBSTEPS := 4
 const EPSILON := 1e-4
 ## How far a curve's bed may reach past the road cells, where it cuts an inner corner.
 const CORNER_TOLERANCE := 0.1
+## Layout valley seeds (#458): a river two or three cells wide, crossed on two or three bridge
+## cells side by side (6 and 259 on three).
+const LAYOUT_SEEDS: Array[int] = [1, 6, 10, 259, 7920]
 
 
 func _flat(_cell: Vector2i) -> float:
@@ -24,24 +27,74 @@ func _flat(_cell: Vector2i) -> float:
 func _setup(map_seed: int) -> Dictionary:
 	var game := Game.create(map_seed)
 	var field := TerrainField.from_map(game.map, game.routes)
-	return {"game": game, "map": game.map, "field": field, "top": Callable(field, "top_at")}
+	return {
+		"game": game,
+		"routes": game.routes,
+		"map": game.map,
+		"field": field,
+		"top": Callable(field, "top_at"),
+		"label": "seed %d" % map_seed,
+	}
+
+
+## The same for the layout valley (#458), with the routes the game would walk on it.
+func _layout(map_seed: int) -> Dictionary:
+	var map := MapGen.generate_layout_valley(map_seed)
+	var field := TerrainField.from_map(map)
+	return {
+		"routes": field.routes,
+		"map": map,
+		"field": field,
+		"top": Callable(field, "top_at"),
+		"label": "layout seed %d" % map_seed,
+	}
+
+
+## Every setup the bed and bridge tests draw: the game board's seeds and the layout valley's.
+func _setups() -> Array[Dictionary]:
+	var all: Array[Dictionary] = []
+	for map_seed in SEEDS:
+		all.append(_setup(map_seed))
+	for map_seed in LAYOUT_SEEDS:
+		all.append(_layout(map_seed))
+	return all
 
 
 func test_the_game_walks_curved_routes_and_the_valley_has_one_road_bridge() -> void:
 	for map_seed in [1, 259, 7920]:
 		var game := Game.create(map_seed)
 		assert_true(game.routes[0].curved, "the game's routes are the curves of #321")
-		assert_eq(
-			game.map.bridges.size(), 1, "the Bluewater Crossing's road bridge, seed %d" % map_seed
-		)
-		assert_gte(game.map.bridges[0].path_index, 0, "on the main road, not the feeder")
+		# one road crossing (its bridge cells side by side; one on the strip valley's narrow river)
+		var crossings := RoadBedBuilder.crossings(game.map)
+		assert_eq(crossings.size(), 1, "the Bluewater Crossing's road bridge, seed %d" % map_seed)
+		for bridge: GameMap.Bridge in crossings[0]:
+			assert_gte(bridge.path_index, 0, "on the main road, not the feeder")
+
+
+## The layout valley's river runs across the whole valley, two or three cells wide (owner,
+## 2026-10-23): the main road crosses it once, on a bridge cell for each wet road cell, side by
+## side, and the builder draws one bridge over them (the hero crosses on its own bridge cells).
+func test_the_layout_valley_crosses_its_river_on_bridge_cells_side_by_side() -> void:
+	for map_seed in LAYOUT_SEEDS:
+		var map := MapGen.generate_layout_valley(map_seed)
+		var label := "layout seed %d" % map_seed
+		assert_between(map.bridges.size(), 2, 3, label)
+		assert_between(map.hero_bridges.size(), 2, 3, label)
+		var crossings := RoadBedBuilder.crossings(map)
+		assert_eq(crossings.size(), 1, "one crossing, " + label)
+		var run: Array = crossings[0]
+		assert_eq(run.size(), map.bridges.size(), label)
+		for k in run.size():
+			var bridge: GameMap.Bridge = run[k]
+			assert_gte(bridge.path_index, 0, "on the main road, " + label)
+			if k > 0:
+				var step := bridge.cell - (run[k - 1] as GameMap.Bridge).cell
+				assert_eq(step.length_squared(), 1, "side by side, " + label)
 
 
 func test_every_point_foes_walk_lies_on_the_bed_or_a_bridge() -> void:
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
-		var game: GameState = setup.game
-		assert_eq(_off_bed(setup, game.routes), 0, "walked points off the bed, seed %d" % map_seed)
+	for setup in _setups():
+		assert_eq(_off_bed(setup, setup.routes), 0, "walked points off the bed, " + setup.label)
 
 
 func test_the_curves_built_from_the_cells_lie_on_the_bed_too() -> void:
@@ -86,20 +139,19 @@ func test_the_bed_keeps_to_the_road_cells() -> void:
 
 
 func test_the_bed_never_sinks_into_the_gorge() -> void:
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
-		var bed := _bed(setup, (setup.game as GameState).routes)
+	for setup in _setups():
+		var bed := _bed(setup, setup.routes)
 		var lowest := INF
 		for v in bed:
 			lowest = minf(lowest, v.y)
 		# every road cell and every bank of a bridge is on the valley floor
-		assert_gte(lowest, 0.0, "seed %d" % map_seed)
+		assert_gte(lowest, 0.0, setup.label)
 
 
 func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> void:
 	var seen := 0
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
+	for setup in _setups():
+		var map_seed: int = (setup.map as GameMap).seed
 		var map: GameMap = setup.map
 		var field: TerrainField = setup.field
 		var mesh := RoadBedBuilder.bridge_mesh(map, setup.top)
@@ -137,7 +189,7 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 				if normals[i].y > 0.99 and on_deck:
 					plank_top = maxf(plank_top, vertices[i].y)
 			assert_almost_eq(plank_top, top, 1e-4, label)
-	assert_gte(seen, SEEDS.size(), "every seed has its road bridge")
+	assert_gte(seen, SEEDS.size() + 2 * LAYOUT_SEEDS.size(), "every seed has its road bridge")
 
 
 func test_a_deck_rests_on_the_higher_bank() -> void:
@@ -151,10 +203,10 @@ func test_a_deck_rests_on_the_higher_bank() -> void:
 
 
 func test_the_bed_stops_at_the_gorge_and_the_deck_covers_its_ends() -> void:
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
+	for setup in _setups():
+		var map_seed: int = (setup.map as GameMap).seed
 		var map: GameMap = setup.map
-		var bed := _bed(setup, (setup.game as GameState).routes)
+		var bed := _bed(setup, setup.routes)
 		var wet := 0
 		for v in bed:
 			var sim := _sim(v)
@@ -163,10 +215,13 @@ func test_the_bed_stops_at_the_gorge_and_the_deck_covers_its_ends() -> void:
 					wet += 1
 		assert_eq(wet, 0, "no bed over the river, seed %d" % map_seed)
 		# the bed runs to each bank's edge, under the deck's end, on every road over the bridge
-		for bridge in map.bridges:
-			var along := 0 if bridge.horizontal else 1
-			var middle := Vector2(bridge.cell) + Vector2(0.5, 0.5)
+		# (the first and last of a crossing's bridge cells)
+		for run in RoadBedBuilder.crossings(map):
+			var ends := {-1.0: run[0], 1.0: run[run.size() - 1]}
 			for end: float in [-1.0, 1.0]:
+				var bridge: GameMap.Bridge = ends[end]
+				var along := 0 if bridge.horizontal else 1
+				var middle := Vector2(bridge.cell) + Vector2(0.5, 0.5)
 				var found := false
 				for v in bed:
 					var sim := _sim(v)
@@ -257,22 +312,54 @@ func test_it_stands_on_the_terrain_it_is_given() -> void:
 
 
 func test_a_bridge_over_the_gorge_gets_trestle_legs_to_its_floor() -> void:
-	var setup := _setup(1)
+	for setup: Dictionary in [_setup(1), _layout(1), _layout(259)]:
+		var map: GameMap = setup.map
+		var flat := RoadBedBuilder.bridge_mesh(map, _flat)
+		var deep := RoadBedBuilder.bridge_mesh(map, setup.top)
+		assert_gt(_triangles(deep), _triangles(flat), "legs added, " + setup.label)
+		# the legs reach the floor; a post whose corner of the bank the river bites into stands
+		# on the floor too, sunk a little into it
+		var floor_y := TerrainField.GORGE_FLOOR
+		assert_between(_lowest(deep), floor_y - 0.06, floor_y + 0.03, setup.label)
+		assert_gt(_lowest(flat), -0.1)
+		# a bent of legs stands in every bridge cell's gorge
+		var vertices: PackedVector3Array = deep.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		for bridge in map.bridges:
+			var feet := 0
+			for v in vertices:
+				var sim := _sim(v)
+				var cell := Vector2i(floori(sim.x), floori(sim.y))
+				if cell == bridge.cell and v.y < TerrainField.GORGE_FLOOR + 0.05:
+					feet += 1
+			assert_gt(feet, 0, "legs in %s, %s" % [bridge.cell, setup.label])
+
+
+## Over a river two cells wide the deck rests on the banks past both bridge cells, so every
+## cell of the crossing has the same deck top, on the banks' level.
+func test_a_crossing_of_several_cells_rests_on_the_banks_past_it() -> void:
+	var setup := _layout(1)
 	var map: GameMap = setup.map
-	var flat := RoadBedBuilder.bridge_mesh(map, _flat)
-	var deep := RoadBedBuilder.bridge_mesh(map, setup.top)
-	assert_gt(_triangles(deep), _triangles(flat), "legs added")
-	assert_almost_eq(_lowest(deep), TerrainField.GORGE_FLOOR, 0.03, "the legs reach the floor")
-	assert_gt(_lowest(flat), -0.1)
+	var run: Array = RoadBedBuilder.crossings(map)[0]
+	for bridge: GameMap.Bridge in run:
+		assert_almost_eq(RoadBedBuilder.deck_top(bridge, setup.top), TerrainField.ROAD_HEIGHT, 1e-6)
+	var first: GameMap.Bridge = run[0]
+	var step := Vector2i(1, 0) if first.horizontal else Vector2i(0, 1)
+	var high_bank := first.cell - step
+	var banks := func(cell: Vector2i) -> float:
+		if cell == high_bank:
+			return 0.75
+		return float(setup.top.call(cell))
+	for bridge: GameMap.Bridge in run:
+		assert_almost_eq(
+			RoadBedBuilder.deck_top(bridge, banks), 0.75 + TerrainField.ROAD_HEIGHT, 1e-6
+		)
 
 
 func test_every_triangle_faces_up_or_out() -> void:
-	for map_seed in [1, 259]:
-		var setup := _setup(map_seed)
-		var game: GameState = setup.game
-		var arrays := RoadBedBuilder.bed_mesh(game.map, game.routes, setup.top).surface_get_arrays(
-			0
-		)
+	for setup: Dictionary in [_setup(1), _setup(259), _layout(1), _layout(259)]:
+		var map_seed: int = (setup.map as GameMap).seed
+		var map: GameMap = setup.map
+		var arrays := RoadBedBuilder.bed_mesh(map, setup.routes, setup.top).surface_get_arrays(0)
 		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
 		var wrong := 0
 		for i in range(0, vertices.size(), 3):
@@ -282,7 +369,7 @@ func test_every_triangle_faces_up_or_out() -> void:
 				wrong += 1
 		assert_eq(wrong, 0, "bed triangles wound away from the sky, seed %d" % map_seed)
 		assert_eq(_wrongly_wound(arrays), 0, "and against their normals, seed %d" % map_seed)
-		var bridges := RoadBedBuilder.bridge_mesh(game.map, setup.top).surface_get_arrays(0)
+		var bridges := RoadBedBuilder.bridge_mesh(map, setup.top).surface_get_arrays(0)
 		assert_eq(_wrongly_wound(bridges), 0, "bridge facets wound inward, seed %d" % map_seed)
 
 
@@ -306,10 +393,8 @@ func test_the_same_map_draws_the_same_road() -> void:
 func test_the_road_is_two_draw_calls_and_a_few_thousand_triangles() -> void:
 	var most_bed := 0
 	var most_bridges := 0
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
-		var game: GameState = setup.game
-		var root := RoadBedBuilder.build(game.map, game.routes, setup.top)
+	for setup in _setups():
+		var root := RoadBedBuilder.build(setup.map, setup.routes, setup.top)
 		assert_eq(root.get_child_count(), 2)
 		var bed: Mesh = (root.get_node("RoadBed") as MeshInstance3D).mesh
 		var bridges: Mesh = (root.get_node("Bridges") as MeshInstance3D).mesh

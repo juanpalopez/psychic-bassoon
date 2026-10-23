@@ -7,6 +7,9 @@ const SEEDS: Array[int] = [1, 7920, 15839]
 ## Maps whose river meets the edges hard: seed 22's runs down column 1, beside the edge the
 ## main road leaves by; seed 1's bridge carries a road running down the board.
 const RIVER_SEEDS: Array[int] = [1, 22]
+## Layout valley seeds (#458): its river is two or three cells wide, so the road crosses it on
+## two or three bridge cells side by side.
+const LAYOUT_SEEDS: Array[int] = [1, 6, 259, 7920]
 ## Points of a cell, as offsets from its centre, where nothing may stand above a guarded cell.
 const INSIDE: Array[Vector2] = [
 	Vector2(0, 0),
@@ -40,6 +43,25 @@ func _board(map_seed: int) -> Board:
 	board.map_seed = map_seed
 	add_child_autofree(board)
 	return board
+
+
+## A board drawing the layout valley (#458) for a seed.
+func _layout_board(map_seed: int) -> Board:
+	var board := Board.new()
+	board.build_on_ready = false
+	add_child_autofree(board)
+	board.show_map(MapGen.generate_layout_valley(map_seed))
+	return board
+
+
+## The game board's boards for `seeds` and the layout valley's for `LAYOUT_SEEDS`, with a label.
+func _boards(seeds: Array[int]) -> Array[Array]:
+	var all: Array[Array] = []
+	for map_seed in seeds:
+		all.append([_board(map_seed), "seed %d" % map_seed])
+	for map_seed in LAYOUT_SEEDS:
+		all.append([_layout_board(map_seed), "layout seed %d" % map_seed])
+	return all
 
 
 ## The top faces (facing up) of every mesh a builder drew, binned by the map cells their
@@ -204,8 +226,8 @@ func test_the_ground_drawn_under_each_cell_is_the_height_the_views_use() -> void
 
 
 func test_nothing_stands_over_a_socket_or_the_road() -> void:
-	for map_seed in SEEDS:
-		var board := _board(map_seed)
+	for pair in _boards(SEEDS):
+		var board: Board = pair[0]
 		var map := board.map
 		var terraces := _tops(board.diorama.builder("Terraces"), map)
 		for row in map.rows:
@@ -219,7 +241,7 @@ func test_nothing_stands_over_a_socket_or_the_road() -> void:
 				var at := BoardSpace.cell_to_world(col, row)
 				for offset in INSIDE:
 					var top := _height_at(terraces, map, at.x + offset.x, at.z + offset.y)
-					assert_almost_eq(top, level, 1e-5, "seed %d %s %s" % [map_seed, cell, offset])
+					assert_almost_eq(top, level, 1e-5, "%s %s %s" % [pair[1], cell, offset])
 
 
 func test_a_socket_block_is_flat_on_its_elevation_level() -> void:
@@ -454,18 +476,22 @@ func test_the_cliffs_have_walls_and_a_soil_lip() -> void:
 
 
 func test_a_bridge_over_the_river_has_its_gorge_and_its_deck_either_way_round() -> void:
-	for map_seed in RIVER_SEEDS:
-		var board := _board(map_seed)
+	for pair in _boards(RIVER_SEEDS):
+		var board: Board = pair[0]
 		var field := board.diorama.field
-		assert_gt(board.map.bridges.size(), 0, "seed %d has a bridge" % map_seed)
+		assert_gt(board.map.bridges.size(), 0, "%s has a bridge" % pair[1])
 		for bridge in board.map.bridges:
 			assert_true(field.is_gorge(bridge.cell), "the gorge runs under the bridge")
 			assert_eq(field.guard_at(bridge.cell), TerrainField.GUARD_ROAD)
 			assert_almost_eq(board.surface_height(bridge.cell), Board.ROAD_HEIGHT, 1e-9)
-			# the banks the road reaches the bridge from stay on the floor
-			var along := Vector2i.RIGHT if bridge.horizontal else Vector2i.DOWN
-			for side in [along, -along]:
-				assert_eq(field.level_at(bridge.cell + side), 0, "seed %d bank" % map_seed)
+		# the banks the road reaches a crossing from (past its first and last bridge cells, side
+		# by side over a wide river) stay on the floor
+		for run in RoadBedBuilder.crossings(board.map):
+			var first: GameMap.Bridge = run[0]
+			var last: GameMap.Bridge = run[run.size() - 1]
+			var along := Vector2i.RIGHT if first.horizontal else Vector2i.DOWN
+			assert_eq(field.level_at(first.cell - along), 0, "%s bank" % pair[1])
+			assert_eq(field.level_at(last.cell + along), 0, "%s bank" % pair[1])
 		assert_true(field.river.size() > board.map.river.size(), "the river runs on past the map")
 
 
