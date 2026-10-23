@@ -62,10 +62,10 @@ static func create(
 	return game
 
 
-## The game board (32 by 20, one road, 2x2 sockets, a second spawn source) is the sectioned
-## valley (#381); any other board is the route-first generator, which the mechanic tests and the
-## frozen fixtures name. The valley falls back to the route-first map if its sections cannot be
-## made to pass (the stitcher has already logged why).
+## The game board (32 by 20, one road, 2x2 sockets, a second spawn source) is the layout valley
+## with the composed road (#458, `MapGen.game_map`, which falls back to the strip valley and then
+## the route-first map); any other board is the route-first generator, which the mechanic tests
+## and the frozen fixtures name.
 static func _map_for(
 	seed: int, cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
 ) -> GameMap:

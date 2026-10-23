@@ -119,9 +119,48 @@ func test_most_maps_get_one_detour_and_never_more() -> void:
 	assert_gt(with_detour, 30)
 
 
-## The game board and the Board draw the same map: both ask `MapGen.game_map`. Its fallback to
-## the route-first map cannot be tested: no seed makes the valley fail, and the stitcher takes
-## no injected sections.
+## The game board and the Board draw the same map: both ask `MapGen.game_map`. No seed makes the
+## valleys fail, so the fallback order is tested through `MapGen.first_map` below.
 func test_the_game_map_is_the_map_the_game_plays() -> void:
 	for map_seed in [1, 2, 3]:
 		assert_eq(MapGen.game_map(map_seed).path, Game.create(map_seed).map.path)
+
+
+## The game board plays the layout valley with the composed road (#458): the map `print_valley
+## --layout` stitches from `ValleyLayout` and its region classes.
+func test_the_game_map_is_the_layout_valley() -> void:
+	for map_seed in [1, 42, 2026]:
+		var layout := ValleyLayout.generate(map_seed, RULES.GRID_COLS, RULES.GRID_ROWS)
+		var expected := ValleyStitcher.build(
+			map_seed, RULES.GRID_COLS, RULES.GRID_ROWS, ValleyLayout.sections(), layout
+		)
+		var map := MapGen.game_map(map_seed)
+		assert_eq(map.path, expected.path, "seed %d road" % map_seed)
+		assert_eq(map.sockets, expected.sockets, "seed %d sockets" % map_seed)
+		assert_eq(map.routes, expected.routes, "seed %d routes" % map_seed)
+		assert_eq(MapGen.generate_layout_valley(map_seed).path, expected.path)
+
+
+## The fallback order: the first builder that gives a map wins, and the ones after it are not
+## asked. The game map's chain is layout valley, strip valley, route-first map.
+func test_the_first_map_that_builds_wins_in_order() -> void:
+	var asked: Array[String] = []
+	var plain := MapGen.generate(7)
+	var builders: Array[Callable] = [
+		func(_s: int) -> GameMap:
+			asked.append("layout")
+			return null,
+		func(_s: int) -> GameMap:
+			asked.append("strip")
+			return plain,
+		func(_s: int) -> GameMap:
+			asked.append("route-first")
+			return null,
+	]
+	assert_eq(MapGen.first_map(7, builders), plain)
+	assert_eq(asked, ["layout", "strip"] as Array[String])
+
+
+func test_no_map_when_every_builder_gives_up() -> void:
+	var none: Array[Callable] = [func(_s: int) -> GameMap: return null]
+	assert_null(MapGen.first_map(7, none))

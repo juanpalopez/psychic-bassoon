@@ -2,9 +2,9 @@
 ##
 ##   godot --headless --path godot -s tools/print_valley.gd -- --seed=42 [--layout]
 ##
-## Without `--layout` it prints the map the game plays on; with it, the 2D layout (#407) stitched
-## from its stand-in sections, with the region letters in road order: A Outer March, D Sunken
-## Meadow, C Bluewater Crossing, B Broken Ridge, E Ancient Fold, F Heartkeep Approach.
+## Without `--layout` it prints the map the game plays on (the layout valley since #458); with it,
+## the same layout drawn with the region letters in road order: A Outer March, D Sunken Meadow,
+## C Bluewater Crossing, B Broken Ridge, E Ancient Fold, F Heartkeep Approach.
 ## `~` river, `#` road, `S` socket block anchor, `>` spawn, `H` Heartstone, `f` feeder.
 extends SceneTree
 

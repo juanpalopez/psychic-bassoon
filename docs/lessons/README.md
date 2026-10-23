@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-23 | decision | Play the layout valley with the composed road on the game board | sim | none | CLAUDE.md |
 | 2026-10-23 | decision | Start every run on the game board with the Knight, moved by a command anywhere walkable | sim | none | CLAUDE.md |
 | 2026-10-22 | decision | Prototype hero movement and bridge tactics on a fixed seed of the generated valley | sim | none | docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md, GDD |
 | 2026-10-22 | lesson | Measure the room a wider road takes before fixing a clearance in a ticket | sim | none | |
