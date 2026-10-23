@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.1.0-alpha.8](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.7...v0.1.0-alpha.8) (2026-10-23)
+
+
+### Features
+
+* **sim:** add the hook and u_turn road templates ([#471](https://github.com/juanpalopez/psychic-bassoon/issues/471)) ([baf9afd](https://github.com/juanpalopez/psychic-bassoon/commit/baf9afd5f0176021c300b8775d0b741f20c9e549)), closes [#460](https://github.com/juanpalopez/psychic-bassoon/issues/460)
+* **sim:** lay the composed road in every region of the layout valley ([#457](https://github.com/juanpalopez/psychic-bassoon/issues/457)) ([af863d6](https://github.com/juanpalopez/psychic-bassoon/commit/af863d608d3626b2ca19ce59865753c26fe5e4ee))
+* **sim:** let the knight hold and fight foes ([#467](https://github.com/juanpalopez/psychic-bassoon/issues/467)) ([03eb1f7](https://github.com/juanpalopez/psychic-bassoon/commit/03eb1f7188228ded9f5d91b207e95406d27cd01d)), closes [#451](https://github.com/juanpalopez/psychic-bassoon/issues/451)
+
+
+### Bug Fixes
+
+* **render:** draw one bridge over each road crossing of the river ([#466](https://github.com/juanpalopez/psychic-bassoon/issues/466)) ([9cda3df](https://github.com/juanpalopez/psychic-bassoon/commit/9cda3dfa7a96766ccb269a9d7c81f8c3c88f62b7)), closes [#461](https://github.com/juanpalopez/psychic-bassoon/issues/461)
+* **sim:** spawn an east-edge road past that edge and share the routes ([#465](https://github.com/juanpalopez/psychic-bassoon/issues/465)) ([9ce6864](https://github.com/juanpalopez/psychic-bassoon/commit/9ce686497c75672cfcc942c1b43c1fc8b0002873)), closes [#461](https://github.com/juanpalopez/psychic-bassoon/issues/461)
+* **sim:** start the second road on the top edge of the layout valley ([#463](https://github.com/juanpalopez/psychic-bassoon/issues/463)) ([cbd345e](https://github.com/juanpalopez/psychic-bassoon/commit/cbd345eff088cb103023e11e3a84ea630df63948)), closes [#462](https://github.com/juanpalopez/psychic-bassoon/issues/462)
+
 ## [0.1.0-alpha.7](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.6...v0.1.0-alpha.7) (2026-10-23)
 
 
