@@ -174,3 +174,12 @@ func test_a_feeder_curve_replaces_the_cell_centres_and_none_keeps_them() -> void
 		without[1].xs.size(),
 		fold.feeder.size() + with_curve[0].xs.size() - with_curve[0].cell_points[map.join_index]
 	)
+
+
+func test_the_road_is_the_composed_spine() -> void:
+	# the section draws no road of its own (#434): it lays the layout's composed road
+	for seed in SEEDS:
+		var layout := ValleyLayout.generate(seed, 32, 20)
+		var slot := layout.slots[ValleyLayout.Region.ANCIENT_FOLD]
+		var result := AncientFoldRegion.new().generate(slot, layout.rng_for(slot.id, 0))
+		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)

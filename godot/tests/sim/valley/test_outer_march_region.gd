@@ -9,8 +9,6 @@ const LAST_SEED := 300
 const ATTEMPTS := 20
 ## Most seeds pass on the first draw; the stitcher redraws the rest.
 const MAX_FIRST_FAIL_PERCENT := 25
-## The S reaches at least this near the region's right edge.
-const FAR_REACH := 6
 
 
 func _drawn(seed: int) -> Array:
@@ -60,16 +58,6 @@ func test_the_road_enters_on_the_west_edge_and_bends_smoothly_without_lanes() ->
 				assert_gte(gap, LANE_GAP, "seed %d, %s and %s" % [seed, road[a], road[b]])
 
 
-func test_the_road_runs_far_across_the_region_before_it_turns_back() -> void:
-	for seed in SEEDS:
-		var drawn := _drawn(seed)
-		var slot: ValleyPlan.Slot = drawn[1]
-		var far := 0
-		for step in drawn[3].road:
-			far = maxi(far, step.x)
-		assert_gte(far, slot.rect.end.x - FAR_REACH, "seed %d" % seed)
-
-
 func test_forest_keeps_its_gap_and_the_ground_is_low_and_walkable() -> void:
 	for seed in SEEDS:
 		var result: SectionResult = _drawn(seed)[3]
@@ -98,3 +86,12 @@ func test_the_same_seed_draws_the_same_region() -> void:
 		assert_eq(a.road, b.road)
 		assert_eq(a.sockets, b.sockets)
 		assert_eq(a.heights, b.heights)
+
+
+func test_the_road_is_the_composed_spine() -> void:
+	# the section draws no road of its own (#434): it lays the layout's composed road
+	for seed in SEEDS:
+		var layout := ValleyLayout.generate(seed, 32, 20)
+		var slot := layout.slots[ValleyLayout.Region.OUTER_MARCH]
+		var result := OuterMarchRegion.new().generate(slot, layout.rng_for(slot.id, 0))
+		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)
