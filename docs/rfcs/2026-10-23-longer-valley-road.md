@@ -8,7 +8,7 @@ links: [#404, #458, #460, #469]
 
 ## Status and decision sought
 
-**Status:** Proposed. On 2026-10-23 the owner accepted the layout library (section 5) in two steps: 3A on today's layout, then more layouts. Still open: cells or time in range, and `GATE_INSET`; the step 1 measurement informs both.
+**Status:** Proposed. On 2026-10-23 the owner accepted the layout library (section 5) in two steps: 3A on today's layout, then more layouts. The target is time under fire, not cells (section 7). Still open: `GATE_INSET`, which the step 1 measurement settles.
 
 The owner wants the layout valley's composed road to run 100 to 150 cells (2026-10-23), with one road crossing of the river plus the hero-only crossing. Today it runs 65 to 76 (median 71, seeds 1..300). Two measured attempts showed that tuning can't close the gap (section 2). This memo explains why, proposes two road shapes that can, and asks the owner to pick one.
 
@@ -101,8 +101,31 @@ Today the spawn is always on the west edge (rows 1 to 3) and the Heartstone alwa
 3. The region sections checked again on the new roads (sockets, ruins, the feeder and the ridge plateau), and the decision record.
 4. Then the board switch (#458), with #469 (road cells) and #461's stack in.
 
-## 7. Open questions
+## 7. The target is time, not cells (owner, 2026-10-23)
+
+The owner chose time as the reference: what decides a wave is how long foes are under fire. Road cells are a guide.
+
+- **Time under fire:** the seconds a Scrap Goblin (the fastest ground foe, 1.6 cells per second) spends within a level-1 Spool Guard's reach (2.3 cells, times the socket's elevation bonus) of at least one socket, on its walk from the spawn to the Heartstone. Total walk time is reported beside it.
+- **Gate for #460:** the layout valley's median time under fire is within 90 to 110 % of the strip valley's median (the map today's balance was tuned on), and no seed falls below 75 % of it, over seeds 1..300. A foe-speed setting in content, chosen by a balance sweep, closes any small remaining gap.
+- **Outside references** (research, 2026-10-23; search snippets only, unverified pages):
+
+  | Game | Normal foe, spawn to goal | Fast foe |
+  |---|---|---|
+  | Bloons TD 6 beginner maps | 29 to 46 s | about 10 to 25 s |
+  | Plants vs Zombies | 42 to 45 s | about 33 s |
+
+  No source measures time under fire directly.
+- **Suggested bands to check our numbers against:**
+  - the fastest ground foe walks 25 to 35 s;
+  - a normal foe walks 45 to 75 s;
+  - the slowest brute is capped at about 90 to 100 s;
+  - about 60 to 80 % of the walk is under fire, leaving the first 15 to 20 % as a reaction window.
+
+  On a 70-cell road the Goblin walks about 44 s (inside the band). The Corrugated Orc walks about 123 s and the Golem about 167 s, beyond the brute cap. That points to tuning the slow foes' speeds as well as the road length.
+
+## 8. Open questions
 
 1. ~~3A, 3B, or slower foes?~~ The layout library, starting with 3A on today's layout (owner, 2026-10-23); 3B is the fallback if 3A misses its measurement.
 2. If 3A: may `GATE_INSET` drop to 1 or 2, so gates can sit near a region's corners?
-3. Are cells the target, or is time in tower range (the slower-foes row)?
+3. ~~Cells or time?~~ Time under fire (owner, 2026-10-23; section 7).
+4. Do the slow foes' speeds change, so their walks stay under about 100 s (section 7)?
