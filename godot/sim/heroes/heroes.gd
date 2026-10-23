@@ -99,8 +99,13 @@ static func fight(game: GameState) -> void:
 		_wait_to_return(game, hero)
 		return
 	_chase(game, hero)
+	if hero.hp <= 0.0:
+		_fall(game, hero)
+		return
 	var held := Melee.held_foe(game, hero)
-	if held == null:
+	if held != null:
+		hero.chaser_id = -1
+	else:
 		hero.foe_id = -1
 		if hero.path.is_empty():
 			held = _take_a_foe(game, hero)
@@ -110,10 +115,14 @@ static func fight(game: GameState) -> void:
 		if not held.alive:
 			Melee.release(held, hero)
 	if hero.hp <= 0.0:
-		Melee.fall(hero, Melee.held_foe(game, hero), float(HEROES.DEFS[hero.type].respawn))
-		hero.path = [] as Array[Vector2i]
-		hero.chaser_id = -1
-		game.events.append(GameEvent.of(GameEvent.Kind.HERO_FELL))
+		_fall(game, hero)
+
+
+static func _fall(game: GameState, hero: Hero) -> void:
+	Melee.fall(hero, Melee.held_foe(game, hero), float(HEROES.DEFS[hero.type].respawn))
+	hero.path = [] as Array[Vector2i]
+	hero.chaser_id = -1
+	game.events.append(GameEvent.of(GameEvent.Kind.HERO_FELL))
 
 
 static func _chase(game: GameState, hero: Hero) -> void:
@@ -122,6 +131,8 @@ static func _chase(game: GameState, hero: Hero) -> void:
 	var chaser: Foe = null
 	for foe in game.foes:
 		if foe.id == hero.chaser_id and foe.alive and _in_reach(hero, foe):
+			if foe.engaged_guard_id != -1:
+				break
 			chaser = foe
 	if chaser == null:
 		hero.chaser_id = -1
