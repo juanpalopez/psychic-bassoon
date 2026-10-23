@@ -171,6 +171,23 @@ func test_a_chaser_taken_back_strikes_once_in_that_tick() -> void:
 	Heroes.fight(game)
 	assert_eq(game.hero.foe_id, foe.id, "taken back")
 	assert_eq(hp - game.hero.hp, Melee.blow(foe, float(game.hero.armor)))
+	# a chaser stays a chaser while the Knight holds another foe: it keeps striking in reach
+	var other := _game()
+	var chaser := _foe_with_hero_near(other, "corrugatedOrc", 0.5)
+	var held := _foe_with_hero_near(other, "corrugatedOrc", 0.2)
+	chaser.x = other.hero.x - 0.5
+	other.hero.chaser_id = chaser.id
+	chaser.attack_cooldown = 0.0
+	held.attack_cooldown = 0.0
+	Heroes.fight(other)
+	assert_eq(other.hero.foe_id, held.id, "the nearer foe is held")
+	assert_eq(other.hero.chaser_id, chaser.id, "and the chaser is still a chaser")
+	var before := other.hero.hp
+	chaser.attack_cooldown = 0.0
+	held.attack_cooldown = 1.0
+	Heroes.fight(other)
+	assert_eq(before - other.hero.hp, Melee.blow(chaser, float(other.hero.armor)))
+	assert_eq(other.hero.chaser_id, chaser.id)
 
 
 func test_a_retaken_chaser_strikes_once_a_tick() -> void:
