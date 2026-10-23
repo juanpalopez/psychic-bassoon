@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.1.0-alpha.7](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.6...v0.1.0-alpha.7) (2026-10-23)
+
+
+### Features
+
+* **sim:** give the hero a deterministic cell path on any board ([#454](https://github.com/juanpalopez/psychic-bassoon/issues/454)) ([b36d6fc](https://github.com/juanpalopez/psychic-bassoon/commit/b36d6fc0d828216166b57aa62fc0f306c24c0db4)), closes [#449](https://github.com/juanpalopez/psychic-bassoon/issues/449)
+* **sim:** make the layout valley's road a wide band foes walk abreast ([#441](https://github.com/juanpalopez/psychic-bassoon/issues/441)) ([01f1dd3](https://github.com/juanpalopez/psychic-bassoon/commit/01f1dd3585cf1866fd37303280c70f8ae4e904f7))
+* **sim:** start the game board with the knight and add a move command ([#455](https://github.com/juanpalopez/psychic-bassoon/issues/455)) ([e66d1d1](https://github.com/juanpalopez/psychic-bassoon/commit/e66d1d12f8180ce248ddfe78f4e14267bb2f8a9f))
+
+
+### Bug Fixes
+
+* **build:** start the iOS export from an empty folder ([#447](https://github.com/juanpalopez/psychic-bassoon/issues/447)) ([3d9b7bf](https://github.com/juanpalopez/psychic-bassoon/commit/3d9b7bfcadc076bb2dad4585240518ea3e13e371))
+
 ## [0.1.0-alpha.6](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.5...v0.1.0-alpha.6) (2026-10-22)
 
 
