@@ -25,9 +25,9 @@ const CURVE_COS := 0.82
 ## the Sunken Meadow, the Bluewater Crossing (a bridge, then a bend away from the river), the
 ## Broken Ridge, the Ancient Fold and the Heartkeep Approach. The seed picks one.
 const ALLOWED: Array = [
-	[[SEGMENTS.SWEEP], [SEGMENTS.S_BEND]],
-	[[SEGMENTS.S_BEND], [SEGMENTS.SWEEP]],
-	[[SEGMENTS.BRIDGE, SEGMENTS.SWEEP]],
+	[[SEGMENTS.HOOK]],
+	[[SEGMENTS.HOOK]],
+	[[SEGMENTS.BRIDGE, SEGMENTS.HOOK]],
 	[[SEGMENTS.RIDGE_WRAP]],
 	[[SEGMENTS.LANDMARK]],
 	[[SEGMENTS.SWEEP], [SEGMENTS.LANDMARK]],

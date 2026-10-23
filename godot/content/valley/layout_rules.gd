@@ -14,19 +14,19 @@ const ROLES: Array[int] = [0, 3, 2, 1, 4, 5]
 ## ones (left column, middle column, right column). The seed moves each by up to `JITTER`.
 const LEFT_X := 10
 const RIGHT_X := 24
-const LEFT_Y := 9
-const MIDDLE_Y := 9
+const LEFT_Y := 11
+const MIDDLE_Y := 8
 const RIGHT_Y := 9
 const JITTER := 1
 ## The spawn is on the west edge, on one of these rows (inclusive); the road ends on the east
 ## edge on one of the end rows.
-const SPAWN_ROWS := Vector2i(1, 3)
+const SPAWN_ROWS := Vector2i(1, 2)
 const END_ROWS := Vector2i(15, 17)
 ## Gates stay this many cells from the corners of the border they cross.
-const GATE_INSET := 3
+const GATE_INSET := 2
 ## The gate columns (inclusive) from the March to the Meadow, and (cells in from the Fold's left
 ## border) from the Fold to Heartkeep, kept off the corners so the road can sweep on a diagonal.
-const MEADOW_GATE := Vector2i(4, 5)
+const MEADOW_GATE := Vector2i(1, 1)
 const HEARTKEEP_GATE := Vector2i(3, 3)
 ## The road crosses from the crossing to the ridge this far (min, max) left of the right border
 ## of the middle column, on the river's far bank.
@@ -43,11 +43,17 @@ const MAX_STRAIGHT := 12
 const DIAGONAL := Vector2(364.0, 2747.0)
 ## The Crossing's road enters the river this many rows or more below the Ridge's border, so it
 ## has room to turn north on the far bank.
-const CROSSING_DROP := 5
+const CROSSING_DROP := 8
 ## The bridge runs on this many cells past the river, then the bend away from it needs this many
 ## more before the Ridge's gate column (`RouteComposer`, `ValleyLayout._crossing_rows`).
 const CROSSING_REACH := 1
-const CROSSING_BEND_ROOM := 3
+const CROSSING_BEND_ROOM := 1
+## The Ridge's gate column is at most this many cells past the bridge's far end plus the reach, so
+## the hook's head lead (`LEAD_MAX`) can close the gap.
+const CROSSING_BEND_MAX := 5
+## The Crossing's row is this many rows (least, most) below the Meadow's top border: the Meadow's
+## hook is that far ahead of its entry.
+const MEADOW_FORWARD := Vector2i(1, 5)
 ## The river: its source is one of TOP_X (min, span) on the top row, its mouth one of
 ## BOTTOM_X on the bottom row, with RIVER_MIDS waypoints that wander by up to RIVER_WOBBLE
 ## cells off the straight line. It is RIVER_WIDTH cells wide (to the right of its centre line).

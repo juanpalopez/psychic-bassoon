@@ -113,7 +113,7 @@ func _straight_problems() -> Array[String]:
 ## The rows from `first` down where the Crossing can enter: both gate cells dry, the river at
 ## least `APPROACH_STRAIGHT` cells in from the entry and its far side `CROSSING_REACH` plus
 ## `CROSSING_BEND_ROOM` cells short of the Ridge's gate column.
-func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
+func _crossing_rows(left: int, ridge_x: int, first: int, last: int) -> Array[int]:
 	var straight: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
 	var wet := {}
 	var span := {}
@@ -122,13 +122,14 @@ func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
 		var old: Vector2i = span.get(cell.y, Vector2i(cell.x, cell.x))
 		span[cell.y] = Vector2i(mini(old.x, cell.x), maxi(old.y, cell.x))
 	var rows: Array[int] = []
-	for y in range(first, LAYOUT.ROWS - LAYOUT.GATE_INSET):
+	for y in range(first, mini(last + 1, LAYOUT.ROWS - LAYOUT.GATE_INSET)):
 		var here: Vector2i = span.get(y, Vector2i(-1, -1))
 		if (
 			not wet.has(Vector2i(left - 1, y))
 			and not wet.has(Vector2i(left, y))
 			and here.x - left >= straight
 			and here.y + LAYOUT.CROSSING_REACH + LAYOUT.CROSSING_BEND_ROOM <= ridge_x
+			and ridge_x <= here.y + LAYOUT.CROSSING_REACH + LAYOUT.CROSSING_BEND_MAX
 		):
 			rows.append(y)
 	return rows
@@ -210,7 +211,6 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		Rect2i(right, 0, LAYOUT.COLS - right, ys[2]),
 		Rect2i(right, ys[2], LAYOUT.COLS - right, LAYOUT.ROWS - ys[2]),
 	]
-	var inset: int = LAYOUT.GATE_INSET
 	var reach: Vector2i = LAYOUT.RIDGE_GATE_REACH
 	var spawn: Vector2i = LAYOUT.SPAWN_ROWS
 	var end: Vector2i = LAYOUT.END_ROWS
@@ -224,12 +224,13 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	var ridge_x := _between(rng, right - reach.y, right - reach.x)
 	# Crossing: right of the Meadow, on a row where the river leaves room for straight approaches
 	# and for the bank to turn north to the Ridge; the river is drawn again until one does.
-	var first := maxi(ys[0] + inset, ys[1] + LAYOUT.CROSSING_DROP)
+	var first := maxi(ys[0] + LAYOUT.MEADOW_FORWARD.x, ys[1] + LAYOUT.CROSSING_DROP)
+	var last: int = ys[0] + LAYOUT.MEADOW_FORWARD.y
 	var rows: Array[int] = []
 	for _try in LAYOUT.RIVER_TRIES:
 		layout.river_cells.clear()
 		layout._draw_river(rng)
-		rows = layout._crossing_rows(left, ridge_x, first)
+		rows = layout._crossing_rows(left, ridge_x, first, last)
 		if not rows.is_empty():
 			break
 	if rows.is_empty():
