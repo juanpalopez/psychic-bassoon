@@ -422,14 +422,20 @@ func _middle_values(
 		var inside := 0
 		var guarded_in := 0
 		var guarded_out := 0
+		var bridged_out := 0
 		for m in 4:
 			var is_in := levels[m] >= steps[s]
 			inside += 1 if is_in else 0
 			if guard > 0 and _field.guards[nodes[m]] == guard:
 				guarded_in += 1 if is_in else 0
 				guarded_out += 0 if is_in else 1
+				bridged_out += 1 if not is_in and levels[m] == TerrainField.GORGE else 0
 		var value := float(inside) / 4.0 + wobble
 		if guarded_in > 0 and guarded_out == 0:
+			value = 0.5 + GUARD_EPSILON
+		elif guarded_in == inside and guarded_in > 0 and guarded_out == bridged_out:
+			# a road cell beside a bridge over the gorge, nothing else on the floor (a river two
+			# cells wide): the outline runs through the middle, so both stay square
 			value = 0.5 + GUARD_EPSILON
 		elif guarded_out > 0 and guarded_in == 0:
 			value = 0.5 - GUARD_EPSILON

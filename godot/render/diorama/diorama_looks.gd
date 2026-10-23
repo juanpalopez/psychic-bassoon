@@ -46,9 +46,12 @@ const HEART_YARD_SEGMENTS := 20
 ## The bridges: a flat deck `BRIDGE_SPAN` cells long centred on the bridge cell (its ends rest on
 ## the banks, over the road bed's cut ends), of `PLANKS` planks `DECK_WIDTH` across (an odd count,
 ## so one lies over the cell's middle). Its top is where foes and guards stand on a bridge cell
-## (`TerrainField.ROAD_HEIGHT` above the banks), so it does not sag. The road bed stops at the
+## (`TerrainField.ROAD_HEIGHT` above the banks), so it does not sag. A crossing of several bridge
+## cells is one bridge, `BRIDGE_SPAN` plus a cell for each cell more. The road bed stops at the
 ## bridge cell's edges.
 const BRIDGE_SPAN := 1.7
+## The most bridge cells one crossing spans (the deck finds its banks no further out).
+const BRIDGE_MAX_CELLS := 4
 const PLANKS := 11
 const DECK_WIDTH := 0.96
 const PLANK_THICKNESS := 0.035
