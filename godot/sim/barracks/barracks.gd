@@ -97,7 +97,7 @@ static func step(game: GameState) -> void:
 		if not guard.alive:
 			_wait_to_return(game, guard)
 			continue
-		var held := _held_foe(game, guard)
+		var held := Melee.held_foe(game, guard)
 		if held == null:
 			guard.foe_id = -1
 			guard.hp = minf(
@@ -184,17 +184,6 @@ static func _tent_of(game: GameState, guard: Guard) -> Tower:
 	return null
 
 
-static func _held_foe(game: GameState, guard: Guard) -> Foe:
-	if guard.foe_id == -1:
-		return null
-	for foe in game.foes:
-		if foe.id == guard.foe_id:
-			if foe.alive:
-				return foe
-			break
-	return null
-
-
 ## How far along the main route the foe is, or -1 when it is not on the main road yet: a foe
 ## of the second route is on it from the join on, `second_offset` further along its own route.
 ## On the old random detour (`random_lanes`) a foe of another lane is never on the main road.
@@ -228,10 +217,7 @@ static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 			best_along = along
 	if best == null:
 		return null
-	best.engaged_guard_id = guard.id
-	best.attack_cooldown = 0.0
-	guard.foe_id = best.id
-	guard.cooldown = 0.0
+	Melee.hold(guard, best)
 	var event := GameEvent.of(GameEvent.Kind.FOE_ENGAGED)
 	event.tower_id = guard.tent_id
 	event.guard_id = guard.id
@@ -243,60 +229,25 @@ static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 
 static func _fight(game: GameState, guard: Guard, foe: Foe) -> void:
 	var tent := _tent_of(game, guard)
-	guard.cooldown -= Game.TICK_SECONDS
-	if guard.cooldown <= RULES.TIMER_EPSILON:
-		guard.cooldown += guard.interval / (1.0 + guard.speed_bonus)
-		Damage.apply(game, foe, guard.damage, Damage.Kind.PHYSICAL)
+	if Melee.strike(game, guard, foe, guard.speed_bonus):
 		Specs.guard_struck(game, tent, foe)
-	# a frozen foe does not strike, and its next blow waits for the ice to go
-	if foe.freeze_timer <= RULES.TIMER_EPSILON:
-		foe.attack_cooldown -= Game.TICK_SECONDS
-	if foe.attack_cooldown <= RULES.TIMER_EPSILON and foe.alive:
-		foe.attack_cooldown += foe.attack_interval
-		var blow := maxf(
-			foe.attack_damage * RULES.MIN_DAMAGE_FRACTION,
-			foe.attack_damage - Specs.guard_armor(guard, tent)
-		)
-		if not _blind_miss(foe):
+	if Melee.foe_strikes(foe):
+		var blow := Melee.blow(foe, Specs.guard_armor(guard, tent))
+		if not Melee.blind_miss(foe):
 			guard.hp -= Specs.guard_absorb(guard, blow)
 			Specs.guard_hurt(game, tent, foe, blow)
 	# a guard at 0 hp falls even when its blow was answered by a reflection that killed the foe
 	if guard.hp <= 0.0:
-		_free(foe, guard)
-		guard.alive = false
-		guard.hp = 0.0
 		var def: Dictionary = TOWERS.DEFS[tent.type]
-		guard.respawn_timer = float(def.respawn[tent.level])
+		Melee.fall(guard, foe, float(def.respawn[tent.level]))
 		_announce(game, GameEvent.Kind.GUARD_FELL, guard)
 	elif not foe.alive:
-		_free(foe, guard)
-
-
-## Whether a blind foe's blow misses: each blow adds its blind share to a tally and a whole tally
-## is a miss, so the misses are exactly the share and no random number is drawn.
-static func _blind_miss(foe: Foe) -> bool:
-	if foe.blind <= 0.0:
-		return false
-	foe.miss_tally += foe.blind
-	if foe.miss_tally >= 1.0 - RULES.TIMER_EPSILON:
-		foe.miss_tally -= 1.0
-		return true
-	return false
-
-
-static func _free(foe: Foe, guard: Guard) -> void:
-	foe.engaged_guard_id = -1
-	guard.foe_id = -1
+		Melee.release(foe, guard)
 
 
 static func _wait_to_return(game: GameState, guard: Guard) -> void:
-	guard.respawn_timer -= Game.TICK_SECONDS
-	if guard.respawn_timer > RULES.TIMER_EPSILON:
-		return
-	guard.alive = true
-	guard.hp = guard.max_hp
-	guard.respawn_timer = 0.0
-	_announce(game, GameEvent.Kind.GUARD_RAISED, guard)
+	if Melee.wait_to_return(guard):
+		_announce(game, GameEvent.Kind.GUARD_RAISED, guard)
 
 
 static func _announce(game: GameState, kind: GameEvent.Kind, guard: Guard) -> void:

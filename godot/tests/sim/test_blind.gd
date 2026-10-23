@@ -7,7 +7,7 @@ func _misses(share: float, blows: int) -> Array[int]:
 	foe.blind = share
 	var at: Array[int] = []
 	for i in blows:
-		if Barracks._blind_miss(foe):
+		if Melee.blind_miss(foe):
 			at.append(i + 1)
 	return at
 
@@ -57,7 +57,7 @@ func test_a_blind_that_ends_forgets_its_tally() -> void:
 	var foe := Foe.new()
 	game.foes.append(foe)
 	Status.apply_blind(foe, 0.4, 0.1)
-	assert_false(Barracks._blind_miss(foe))
+	assert_false(Melee.blind_miss(foe))
 	assert_gt(foe.miss_tally, 0.0)
 	for i in 5:
 		Status.step_blind(game)
