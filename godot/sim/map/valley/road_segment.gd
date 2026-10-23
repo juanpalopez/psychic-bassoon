@@ -43,6 +43,8 @@ static func ids() -> Array[StringName]:
 		SEGMENTS.BRIDGE,
 		SEGMENTS.RIDGE_WRAP,
 		SEGMENTS.LANDMARK,
+		SEGMENTS.HOOK,
+		SEGMENTS.U_TURN,
 	]
 
 

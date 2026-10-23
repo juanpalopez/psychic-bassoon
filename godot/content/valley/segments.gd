@@ -11,9 +11,12 @@ const S_BEND := &"s_bend"
 const BRIDGE := &"bridge"
 const RIDGE_WRAP := &"ridge_wrap"
 const LANDMARK := &"landmark"
+const HOOK := &"hook"
+const U_TURN := &"u_turn"
 
 const RIGHT := Vector2(1.0, 0.0)
 const DOWN := Vector2(0.0, 1.0)
+const LEFT := Vector2(-1.0, 0.0)
 
 ## The road is about this wide (#430); the clearance is the half width it needs free beside the
 ## road, the band's half plus a margin.
@@ -115,5 +118,74 @@ const DATA := {
 		"tag": &"landmark",
 		"min_turn_radius": 2.8,
 		"scale": Vector2(0.7, 1.8),
+	},
+	# A U-turn and then a quarter turn back: the road runs on, turns right through half a circle
+	# (lanes 5.6 apart, so the lane rule holds from scale 0.95) and a left quarter turn leaves it
+	# heading right of where it came in: a net quarter turn like the sweep, but about 25 cells
+	# long. The tip is straight for a cell, so a half circle never grazes a cell edge and visits
+	# a cell twice.
+	HOOK:
+	{
+		"points":
+		[
+			Vector2(0, 0),
+			Vector2(4.3, 0),
+			Vector2(4.9, 0.08),
+			Vector2(5.45, 0.31),
+			Vector2(5.93, 0.67),
+			Vector2(6.29, 1.15),
+			Vector2(6.52, 1.7),
+			Vector2(6.6, 2.3),
+			Vector2(6.6, 3.3),
+			Vector2(6.52, 3.9),
+			Vector2(6.29, 4.45),
+			Vector2(5.93, 4.93),
+			Vector2(5.45, 5.29),
+			Vector2(4.9, 5.52),
+			Vector2(4.3, 5.6),
+			Vector2(3.3, 5.6),
+			Vector2(2.7, 5.68),
+			Vector2(2.15, 5.91),
+			Vector2(1.67, 6.27),
+			Vector2(1.31, 6.75),
+			Vector2(1.08, 7.3),
+			Vector2(1, 7.9),
+			Vector2(1, 8.2),
+		],
+		"entry_heading": RIGHT,
+		"exit_heading": DOWN,
+		"tag": &"hook",
+		"min_turn_radius": 2.3,
+		"scale": Vector2(0.95, 1.6),
+	},
+	# A half circle: the road comes in along one line and leaves back along the next, 5.6 cells over
+	# (both gates on one border of a region). Only its side is fixed by the scale, never a lead.
+	U_TURN:
+	{
+		"points":
+		[
+			Vector2(0, 0),
+			Vector2(4.3, 0),
+			Vector2(4.9, 0.08),
+			Vector2(5.45, 0.31),
+			Vector2(5.93, 0.67),
+			Vector2(6.29, 1.15),
+			Vector2(6.52, 1.7),
+			Vector2(6.6, 2.3),
+			Vector2(6.6, 3.3),
+			Vector2(6.52, 3.9),
+			Vector2(6.29, 4.45),
+			Vector2(5.93, 4.93),
+			Vector2(5.45, 5.29),
+			Vector2(4.9, 5.52),
+			Vector2(4.3, 5.6),
+			Vector2(2.15, 5.6),
+			Vector2(0, 5.6),
+		],
+		"entry_heading": RIGHT,
+		"exit_heading": LEFT,
+		"tag": &"u_turn",
+		"min_turn_radius": 2.3,
+		"scale": Vector2(0.95, 1.6),
 	},
 }

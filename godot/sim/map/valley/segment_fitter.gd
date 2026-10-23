@@ -116,6 +116,17 @@ static func _scale_bounds(segment: RoadSegment, want: Vector2) -> Array[Vector2]
 		var wanted := absf(want[axis])
 		var most := minf(segment.scale_range.y, wanted / extent)
 		var least := maxf(segment.scale_range.x, (wanted - FIT.LEAD_MAX) / extent)
+		if not _closable(segment, axis):
+			# no straight lead runs along this axis (a U-turn's side), so the scale alone
+			# must reach the gate
+			var exact := wanted / extent
+			if (
+				exact < segment.scale_range.x - FIT.EPSILON
+				or exact > segment.scale_range.y + FIT.EPSILON
+			):
+				return []
+			least = exact
+			most = exact
 		if least > most + FIT.EPSILON:
 			return []
 		found.append(Vector2(least, maxf(most, least)))
@@ -126,6 +137,11 @@ static func _scale_bounds(segment: RoadSegment, want: Vector2) -> Array[Vector2]
 			if absf(segment.exit[axis]) >= FIT.EPSILON:
 				found[axis] = Vector2(low, high)
 	return found
+
+
+## Whether a straight lead before or after the template can make up a gap along this local axis.
+static func _closable(segment: RoadSegment, axis: int) -> bool:
+	return absf(segment.entry_heading[axis]) > 0.5 or absf(segment.exit_heading[axis]) > 0.5
 
 
 ## The lengths of the leads (head, tail) that close `residual`, or nothing when none can.

@@ -83,3 +83,43 @@ func test_the_fit_is_the_same_every_time() -> void:
 	var first := _fit(SEGMENTS.LANDMARK, ENTRY, Vector2.RIGHT, EXIT, Vector2.DOWN)
 	var second := _fit(SEGMENTS.LANDMARK, ENTRY, Vector2.RIGHT, EXIT, Vector2.DOWN)
 	assert_eq(first.points, second.points)
+
+
+func test_a_hook_runs_a_u_turn_inside_a_tall_region() -> void:
+	var region := Rect2i(0, 0, 10, 12)
+	var entry := Vector2(0.5, 1.5)
+	var exit := Vector2(1.5, 10.5)
+	var fitted := SegmentFitter.fit(
+		RoadSegment.get_segment(SEGMENTS.HOOK),
+		entry,
+		Vector2.RIGHT,
+		exit,
+		Vector2.DOWN,
+		region,
+		1.0
+	)
+	assert_true(fitted.ok(), fitted.reason)
+	assert_eq(fitted.points[fitted.points.size() - 1], exit)
+	assert_gt(RoadSpline.build(fitted.points).cells.size(), 20)
+
+
+func test_a_u_turn_joins_two_gates_on_one_border() -> void:
+	var region := Rect2i(0, 0, 12, 10)
+	var entry := Vector2(2.5, 0.5)
+	var exit := Vector2(8.5, 0.5)
+	for bias in [0.0, 0.7, 1.0]:
+		var fitted := SegmentFitter.fit(
+			RoadSegment.get_segment(SEGMENTS.U_TURN),
+			entry,
+			Vector2.DOWN,
+			exit,
+			Vector2.UP,
+			region,
+			bias
+		)
+		assert_true(fitted.ok(), "bias %s: %s" % [bias, fitted.reason])
+		var cells := RoadSpline.build(fitted.points).cells
+		assert_eq(cells[0], Vector2i(2, 0))
+		assert_eq(cells[cells.size() - 1], Vector2i(8, 0))
+		for cell in cells:
+			assert_true(region.has_point(cell))
