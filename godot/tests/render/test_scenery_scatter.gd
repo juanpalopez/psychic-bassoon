@@ -7,6 +7,8 @@ extends GutTest
 
 const LOOKS := preload("res://render/diorama/diorama_looks.gd")
 const SEEDS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 42, 259, 7920]
+## Layout valley seeds (#458): 6, 8, 10 and 7920 start the feeder on the east edge.
+const LAYOUT_SEEDS: Array[int] = [1, 6, 8, 10, 259, 7920]
 ## The scenery's share of the frame at the overview zoom, from the owner's provisional budget
 ## (2026-10-18: 200k a frame; terrain and road beds 40k, scenery 32k), in view, before shadows;
 ## and its draw calls there.
@@ -18,6 +20,11 @@ const EPSILON := 1e-4
 func _field(map_seed: int) -> TerrainField:
 	var game := Game.create(map_seed)
 	return TerrainField.from_map(game.map, game.routes)
+
+
+## The field of the layout valley (#458) for a seed, with the routes the game would walk.
+func _layout_field(map_seed: int) -> TerrainField:
+	return TerrainField.from_map(MapGen.generate_layout_valley(map_seed))
 
 
 func test_no_prop_covers_a_socket_the_heartstone_the_road_a_bridge_or_the_river() -> void:
@@ -53,24 +60,31 @@ func test_no_prop_covers_a_socket_the_heartstone_the_road_a_bridge_or_the_river(
 
 func test_no_prop_stands_in_the_gorge_across_a_step_or_on_a_road_lead() -> void:
 	for map_seed in SEEDS:
-		var field := _field(map_seed)
-		var leads := {}
-		for lead: Array in field.leads:
-			for cell: Vector2i in lead:
-				leads[cell] = true
-		var wrong := 0
-		for placement in SceneryScatter.placements(field):
-			var at := placement.at
-			var own := field.level_at(Vector2i(floori(at.x), floori(at.y)))
-			# every cell the footprint reaches into, checked on a ring of points round it
-			for k in 16:
-				var angle := TAU * float(k) / 16.0
-				var edge := at + Vector2(cos(angle), sin(angle)) * (placement.radius - EPSILON)
-				var cell := Vector2i(floori(edge.x), floori(edge.y))
-				if field.is_gorge(cell) or field.level_at(cell) != own or leads.has(cell):
-					wrong += 1
-					break
-		assert_eq(wrong, 0, "props off their terrace, seed %d" % map_seed)
+		_assert_on_their_terrace(_field(map_seed), "seed %d" % map_seed)
+	# the layout valley's feeder may come in from the east edge: its lead runs out that way, and
+	# the road is drawn coming in from there too, not from the top (#461)
+	for map_seed in LAYOUT_SEEDS:
+		_assert_on_their_terrace(_layout_field(map_seed), "layout seed %d" % map_seed)
+
+
+func _assert_on_their_terrace(field: TerrainField, label: String) -> void:
+	var leads := {}
+	for lead: Array in field.leads:
+		for cell: Vector2i in lead:
+			leads[cell] = true
+	var wrong := 0
+	for placement in SceneryScatter.placements(field):
+		var at := placement.at
+		var own := field.level_at(Vector2i(floori(at.x), floori(at.y)))
+		# every cell the footprint reaches into, checked on a ring of points round it
+		for k in 16:
+			var angle := TAU * float(k) / 16.0
+			var edge := at + Vector2(cos(angle), sin(angle)) * (placement.radius - EPSILON)
+			var cell := Vector2i(floori(edge.x), floori(edge.y))
+			if field.is_gorge(cell) or field.level_at(cell) != own or leads.has(cell):
+				wrong += 1
+				break
+	assert_eq(wrong, 0, "props off their terrace, %s" % label)
 
 
 ## The keep-offs, at their edge: a prop just inside its distance from a deck, a socket, the river
