@@ -14,8 +14,6 @@
 class_name TerrainField
 extends RefCounted
 
-const MAP_RULES := preload("res://content/map_rules.gd")
-
 ## Metres from one terrace to the next, for every view (the socket rises included). Three
 ## quarters of a metre shows the kraft cliffs from the 56 to 62 degree camera (half a metre read
 ## as thin lines), and a bank beside the road (one terrace) hides less than half a cell of it.
@@ -93,14 +91,8 @@ var lead_directions: Array[Vector2i] = []
 static func from_map(source: GameMap, walked: Array[Route] = []) -> TerrainField:
 	var field := TerrainField.new()
 	field.map = source
-	field.routes = walked
-	if walked.is_empty():
-		for cells in source.routes:
-			var typed: Array[Vector2i] = []
-			typed.assign(cells)
-			# as the game builds them: curved through the corners on the valley board (#321)
-			var curved := source.cols >= MAP_RULES.VALLEY_MIN_COLS
-			field.routes.append(Route.build_curved(typed) if curved else Route.build(typed))
+	# as the game builds them when it gives none (`Route.for_map`)
+	field.routes = walked if not walked.is_empty() else Route.for_map(source)
 	field.seed = source.seed
 	field.size = Vector2i(source.cols + 2 * MARGIN, source.rows + 2 * MARGIN)
 	field.levels.resize(field.size.x * field.size.y)

@@ -99,14 +99,19 @@ static func build_curved(cells: Array[Vector2i]) -> Route:
 
 ## Builds the route for a road that has its own curve (the sectioned valley's spline roads, #404):
 ## the spawn point, then the curve's points; each of `cells` stands for the point the curve gives
-## it. Returns null for an empty path.
-static func build_from_curve(cells: Array[Vector2i], curve: RoadCurve) -> Route:
+## it. With the board's width `cols`, a road that starts on the east edge below the top row
+## spawns past that edge (the layout valley's feeder, #411). Returns null for an empty path.
+static func build_from_curve(cells: Array[Vector2i], curve: RoadCurve, cols: int = 0) -> Route:
 	if cells.is_empty():
 		push_error("a route needs at least one cell")
 		return null
 	var route := Route.new()
 	route.curved = true
-	_add_spawn(route, cells)
+	if cols > 0 and cells[0].x == cols - 1 and cells[0].y > 0:
+		route.xs.append(float(cols) + RULES.SPAWN_OFFSET)
+		route.ys.append(float(cells[0].y) + RULES.CELL_CENTRE)
+	else:
+		_add_spawn(route, cells)
 	var shift := route.xs.size()
 	route.xs.append_array(curve.xs)
 	route.ys.append_array(curve.ys)
@@ -114,6 +119,24 @@ static func build_from_curve(cells: Array[Vector2i], curve: RoadCurve) -> Route:
 		route.cell_points.append(point + shift)
 	_measure(route)
 	return route
+
+
+## The routes foes walk on `map`, one per map route (`routes[0]` the main road): a road with its
+## own curve walks it, the valley board (`VALLEY_MIN_COLS` wide or more) rounds the grid path's
+## corners (#321), and the classic boards keep the grid route their tests pin. The game and the
+## diorama both build them here, so they cannot differ.
+static func for_map(map: GameMap) -> Array[Route]:
+	var curved := map.cols >= RULES.VALLEY_MIN_COLS
+	var routes: Array[Route] = []
+	for index in map.routes.size():
+		var cells: Array[Vector2i] = []
+		cells.assign(map.routes[index])
+		var curve: RoadCurve = map.route_curves[index] if index < map.route_curves.size() else null
+		if curve != null:
+			routes.append(build_from_curve(cells, curve, map.cols))
+		else:
+			routes.append(build_curved(cells) if curved else build(cells))
+	return routes
 
 
 ## A straight line from one point to another (the flight of a flying foe). It has no road cells,

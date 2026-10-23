@@ -109,6 +109,17 @@ static func generate_valley(seed: int) -> GameMap:
 	return ValleyStitcher.build(seed, RULES.GRID_COLS, RULES.GRID_ROWS)
 
 
+## The layout valley (#407, #458): six 2D regions the composed road crosses in turn, stitched with
+## the region classes. Null (with an error) when no layout draw passes its checks.
+static func generate_layout_valley(seed: int) -> GameMap:
+	var layout := ValleyLayout.generate(seed, RULES.GRID_COLS, RULES.GRID_ROWS)
+	if layout == null:
+		return null
+	return ValleyStitcher.build(
+		seed, RULES.GRID_COLS, RULES.GRID_ROWS, ValleyLayout.sections(), layout
+	)
+
+
 ## The map the game plays on its default board: the sectioned valley, or the route-first map
 ## when the valley's sections cannot be made to pass. `Game.create` and the board both use it.
 static func game_map(seed: int) -> GameMap:
