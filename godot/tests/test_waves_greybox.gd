@@ -60,6 +60,8 @@ func test_the_button_is_disabled_while_foes_are_still_coming_then_offers_an_earl
 func test_a_foe_that_gets_through_costs_the_heartstone_health() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
+	# the Knight would hold the foes at the Heartstone
+	game.hero = null
 	var start := game.heartstone_health
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	while game.heartstone_health == start and game.tick_count < 4000:
@@ -70,6 +72,8 @@ func test_a_foe_that_gets_through_costs_the_heartstone_health() -> void:
 func test_game_over_is_shown_and_the_button_stops_working() -> void:
 	var main := await _main()
 	var game: GameState = main.game()
+	# the Knight would hold the foes at the Heartstone
+	game.hero = null
 	game.heartstone_health = 1
 	(main.get_node("Hud/LaunchWave") as Button).pressed.emit()
 	while not game.over and game.tick_count < 4000:

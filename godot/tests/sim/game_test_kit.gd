@@ -124,7 +124,15 @@ static func snapshot(game: GameState) -> Dictionary:
 		for cell in route:
 			cells.append([cell.x, cell.y])
 		routes.append(cells)
+	var hero := []
+	if game.hero != null:
+		var h: Hero = game.hero
+		hero = [h.type, h.x, h.y, h.cell.x, h.cell.y, h.path.size(), h.hp, h.alive]
+		hero.append_array([h.respawn_timer, h.cooldown, h.foe_id, h.chaser_id])
+		for cell in h.path:
+			hero.append([cell.x, cell.y])
 	return {
+		"hero": hero,
 		"seed": game.seed,
 		"won": game.won,
 		"tick": game.tick_count,

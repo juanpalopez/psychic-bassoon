@@ -73,9 +73,11 @@ static func blind_miss(foe: Foe) -> bool:
 	return false
 
 
-## `fighter` falls: it lets `foe` go and returns after `respawn` seconds.
+## `fighter` falls: it lets `foe` (if it holds one) go and returns after `respawn` seconds.
 static func fall(fighter: Fighter, foe: Foe, respawn: float) -> void:
-	release(foe, fighter)
+	if foe != null:
+		release(foe, fighter)
+	fighter.foe_id = -1
 	fighter.alive = false
 	fighter.hp = 0.0
 	fighter.respawn_timer = respawn

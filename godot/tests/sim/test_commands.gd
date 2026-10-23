@@ -9,6 +9,14 @@ const REASON := GameEvent.RejectReason
 const KIND := GameEvent.Kind
 
 
+## The commands do not involve the Knight, so the game starts without it and ids from 0.
+func _game() -> GameState:
+	var game := Game.create(SEED)
+	game.hero = null
+	game.next_id = 0
+	return game
+
+
 func assert_rejected_by(events: Array[GameEvent], command: Command, reason: REASON) -> void:
 	assert_eq(events.size(), 1)
 	assert_eq(events[0].kind, KIND.COMMAND_REJECTED)
@@ -17,7 +25,7 @@ func assert_rejected_by(events: Array[GameEvent], command: Command, reason: REAS
 
 
 func test_build_places_a_level_1_tower_and_charges_its_cost() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var cell := GameTestKit.socket(game)
 	var events := GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
 	var cost: int = TOWERS.DEFS.spoolGuard.cost[0]
@@ -35,7 +43,7 @@ func test_build_places_a_level_1_tower_and_charges_its_cost() -> void:
 
 
 func test_each_tower_gets_its_own_id() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	GameTestKit.run(
 		game,
 		[
@@ -47,21 +55,21 @@ func test_each_tower_gets_its_own_id() -> void:
 
 
 func test_build_on_the_path_is_rejected() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var command := GameTestKit.build_at("spoolGuard", game.map.path[3])
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NOT_A_SOCKET)
 	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_unknown_tower_is_rejected_not_thrown() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var command := GameTestKit.build_at("laser", GameTestKit.socket(game))
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.UNKNOWN_TOWER)
 	assert_eq(game.buttons, RULES.START_BUTTONS)
 
 
 func test_build_off_the_board_is_rejected() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	for cell in [
 		Vector2i(-1, 0),
 		Vector2i(MAP_RULES.GRID_COLS, 0),
@@ -73,7 +81,7 @@ func test_build_off_the_board_is_rejected() -> void:
 
 
 func test_build_on_an_occupied_plot_is_rejected() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var cell := GameTestKit.socket(game)
 	GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
 	var command := GameTestKit.build_at("spoolGuard", cell)
@@ -82,7 +90,7 @@ func test_build_on_an_occupied_plot_is_rejected() -> void:
 
 
 func test_build_needs_the_buttons_and_allows_an_exact_fit() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var cost: int = TOWERS.DEFS.prismSpire.cost[0]
 	game.buttons = cost - 1
 	var command := GameTestKit.build_at("prismSpire", GameTestKit.socket(game))
@@ -94,7 +102,7 @@ func test_build_needs_the_buttons_and_allows_an_exact_fit() -> void:
 
 
 func _with_tower(type: String) -> GameState:
-	var game := Game.create(SEED)
+	var game := _game()
 	GameTestKit.run(game, [GameTestKit.build_at(type, GameTestKit.socket(game))])
 	game.buttons = 1000
 	return game
@@ -131,13 +139,13 @@ func test_upgrade_needs_the_buttons() -> void:
 
 
 func test_upgrade_of_an_unknown_tower_is_rejected() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var command := Command.upgrade(99)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NO_SUCH_TOWER)
 
 
 func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var cell := GameTestKit.socket(game)
 	GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])
 	game.buttons = 1000
@@ -158,7 +166,7 @@ func test_sell_refunds_70_percent_rounded_down_and_frees_the_plot() -> void:
 
 func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
 	# 90 * 0.7 is 62.99999999999999 in 64-bit floats, so the refund is 62, not 63
-	var game := Game.create(SEED)
+	var game := _game()
 	GameTestKit.run(game, [GameTestKit.build_at("thimbleMortar", GameTestKit.socket(game))])
 	game.buttons = 0
 	GameTestKit.run(game, [Command.sell(0)])
@@ -166,19 +174,19 @@ func test_sell_rounds_the_refund_down_like_the_typescript() -> void:
 
 
 func test_build_checks_the_tower_before_the_cell() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var command := Command.build("laser", -1, 0)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.UNKNOWN_TOWER)
 
 
 func test_sell_of_an_unknown_tower_is_rejected() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var command := Command.sell(3)
 	assert_rejected_by(GameTestKit.run(game, [command]), command, REASON.NO_SUCH_TOWER)
 
 
 func test_launch_wave_starts_wave_1_with_no_bonus() -> void:
-	var game := Game.create(SEED)
+	var game := _game()
 	var events := GameTestKit.run(game, [Command.launch_wave()])
 	assert_eq(game.wave, 1)
 	assert_true(game.running)

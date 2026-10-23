@@ -68,8 +68,10 @@ func test_a_mechanic_board_has_no_hero_unless_a_test_places_one() -> void:
 	assert_not_null(_knight_on_open_board().hero)
 
 
-func test_the_knight_takes_no_id_from_the_towers() -> void:
-	assert_eq(_valley().next_id, Game.create(SEED, 16, 11).next_id)
+func test_the_knight_has_an_id_no_tower_shares() -> void:
+	var game := _valley()
+	assert_eq(game.next_id, Game.create(SEED, 16, 11).next_id + 1)
+	assert_ne(game.hero.id, game.next_id)
 
 
 func test_a_move_is_ordered_then_walked_to_the_cell_centre() -> void:

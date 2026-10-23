@@ -14,6 +14,12 @@ static func place(game: GameState, type: String) -> void:
 	var def: Dictionary = HEROES.DEFS[type]
 	var hero := Hero.new()
 	hero.type = type
+	hero.id = game.next_id
+	game.next_id += 1
+	hero.armor = def.armor
+	hero.damage = def.damage
+	hero.interval = def.interval
+	hero.radius = def.radius
 	hero.max_hp = def.hp
 	hero.hp = hero.max_hp
 	hero.speed = def.speed
@@ -28,6 +34,8 @@ static func place(game: GameState, type: String) -> void:
 static func order(game: GameState, command: Command) -> void:
 	if game.hero == null:
 		return Game.reject(game, command, GameEvent.RejectReason.NO_HERO)
+	if not game.hero.alive:
+		return Game.reject(game, command, GameEvent.RejectReason.HERO_FALLEN)
 	var to := Vector2i(command.col, command.row)
 	if not game.hero_graph.is_open(to):
 		return Game.reject(game, command, GameEvent.RejectReason.NOT_WALKABLE)
@@ -42,6 +50,11 @@ static func order(game: GameState, command: Command) -> void:
 		if cells[1] == ahead[0]:
 			cells.remove_at(0)
 	game.hero.path = cells
+	# a new move lets go of the held foe; it keeps striking while it stays in reach
+	var held := Melee.held_foe(game, game.hero)
+	if held != null:
+		Melee.release(held, game.hero)
+		game.hero.chaser_id = held.id
 	var event := GameEvent.of(GameEvent.Kind.HERO_ORDERED)
 	event.x = float(to.x) + HALF
 	event.y = float(to.y) + HALF
@@ -73,6 +86,93 @@ static func step(game: GameState) -> void:
 	event.x = hero.x
 	event.y = hero.y
 	game.events.append(event)
+
+
+## One tick of the hero's fighting, after the foes have walked: a fallen hero waits to return;
+## a standing one takes the nearest free foe in reach and trades blows with it; a foe it broke off
+## from keeps striking while the hero stays in its reach.
+static func fight(game: GameState) -> void:
+	var hero := game.hero
+	if hero == null:
+		return
+	if not hero.alive:
+		_wait_to_return(game, hero)
+		return
+	_chase(game, hero)
+	var held := Melee.held_foe(game, hero)
+	if held == null:
+		hero.foe_id = -1
+		if hero.path.is_empty():
+			held = _take_a_foe(game, hero)
+	if held != null:
+		Melee.strike(game, hero, held, 0.0)
+		_take_a_blow(hero, held)
+		if not held.alive:
+			Melee.release(held, hero)
+	if hero.hp <= 0.0:
+		Melee.fall(hero, Melee.held_foe(game, hero), float(HEROES.DEFS[hero.type].respawn))
+		hero.path = [] as Array[Vector2i]
+		hero.chaser_id = -1
+		game.events.append(GameEvent.of(GameEvent.Kind.HERO_FELL))
+
+
+static func _chase(game: GameState, hero: Hero) -> void:
+	if hero.chaser_id == -1:
+		return
+	var chaser: Foe = null
+	for foe in game.foes:
+		if foe.id == hero.chaser_id and foe.alive and _in_reach(hero, foe):
+			chaser = foe
+	if chaser == null:
+		hero.chaser_id = -1
+		return
+	_take_a_blow(hero, chaser)
+
+
+static func _take_a_blow(hero: Hero, foe: Foe) -> void:
+	if Melee.foe_strikes(foe) and not Melee.blind_miss(foe):
+		hero.hp -= Melee.blow(foe, float(hero.armor))
+
+
+static func _take_a_foe(game: GameState, hero: Hero) -> Foe:
+	var best: Foe = null
+	var best_gap := INF
+	for foe in game.foes:
+		if not foe.alive or not foe.blockable or foe.flying or foe.engaged_guard_id != -1:
+			continue
+		if not _in_reach(hero, foe):
+			continue
+		var gap := _gap(hero, foe)
+		if gap < best_gap or (gap == best_gap and foe.id < best.id):
+			best = foe
+			best_gap = gap
+	if best == null:
+		return null
+	Melee.hold(hero, best)
+	var event := GameEvent.of(GameEvent.Kind.HERO_ENGAGED)
+	event.foe_id = best.id
+	event.foe_type = best.type
+	game.events.append(event)
+	return best
+
+
+static func _gap(hero: Hero, foe: Foe) -> float:
+	var dx := foe.x - hero.x
+	var dy := foe.y - hero.y
+	return sqrt(dx * dx + dy * dy)
+
+
+static func _in_reach(hero: Hero, foe: Foe) -> bool:
+	return _gap(hero, foe) <= hero.radius + foe.radius + HEROES.REACH
+
+
+static func _wait_to_return(game: GameState, hero: Hero) -> void:
+	if not Melee.wait_to_return(hero):
+		return
+	hero.cell = _home(game)
+	hero.x = float(hero.cell.x) + HALF
+	hero.y = float(hero.cell.y) + HALF
+	game.events.append(GameEvent.of(GameEvent.Kind.HERO_ROSE))
 
 
 ## The last cell of the main road the hero can stand on: where the road meets the Heartstone.
