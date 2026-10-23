@@ -107,6 +107,14 @@ The owner chose time as the reference: what decides a wave is how long foes are 
 
 - **Time under fire:** the seconds a Scrap Goblin (the fastest ground foe, 1.6 cells per second) spends within a level-1 Spool Guard's reach (2.3 cells, times the socket's elevation bonus) of at least one socket, on its walk from the spawn to the Heartstone. Total walk time is reported beside it.
 - **Gate for #460:** the layout valley's median time under fire is within 90 to 110 % of the strip valley's median (the map today's balance was tuned on), and no seed falls below 75 % of it, over seeds 1..300. A foe-speed setting in content, chosen by a balance sweep, closes any small remaining gap.
+- **Measured baseline** (seeds 1..300, 2026-10-23, `godot/tools/measure_road_time.gd` on branch `feat/road-regate`):
+
+  | Map | Road cells (median) | Goblin walk (median) | Time under fire (median, min) |
+  |---|---|---|---|
+  | Strip valley (the game board today) | 150 | 89.5 s | 63.9 s, 42.5 s |
+  | Layout valley today | 71 | 39.7 s | 33.9 s, 29.9 s |
+
+  The layout valley has 0.53 of the strip valley's time under fire. The gate asks for 57.5 to 70.3 s at the median and at least about 48 s on every seed, which takes roughly 1.7 times today's road (about 105 route cells).
 - **Outside references** (research, 2026-10-23; search snippets only, unverified pages):
 
   | Game | Normal foe, spawn to goal | Fast foe |
