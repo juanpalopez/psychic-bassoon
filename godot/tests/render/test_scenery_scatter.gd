@@ -7,7 +7,7 @@ extends GutTest
 
 const LOOKS := preload("res://render/diorama/diorama_looks.gd")
 const SEEDS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 42, 259, 7920]
-## Layout valley seeds (#458): 6, 8, 10 and 7920 start the feeder on the east edge.
+## Layout valley seeds (#458): today 6, 8, 10 and 7920 start the feeder on the east edge.
 const LAYOUT_SEEDS: Array[int] = [1, 6, 8, 10, 259, 7920]
 ## The scenery's share of the frame at the overview zoom, from the owner's provisional budget
 ## (2026-10-18: 200k a frame; terrain and road beds 40k, scenery 32k), in view, before shadows;
