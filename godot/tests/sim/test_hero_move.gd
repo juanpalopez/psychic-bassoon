@@ -191,3 +191,60 @@ func test_the_same_seed_and_orders_walk_the_same_way() -> void:
 	assert_eq(_at(first), _at(second))
 	assert_eq(first.hero.cell, second.hero.cell)
 	assert_eq(first.hero.path, second.hero.path)
+
+
+func test_repeating_an_order_mid_walk_keeps_the_hero_walking() -> void:
+	# a drag or a double tap sends the same order again before a cell is walked; the hero must
+	# carry on, not go back to the cell it left (#455 review)
+	var game := _knight_on_open_board()
+	var from := _at(game)
+	var to := game.hero.cell + Vector2i(-6, 0)
+	for count in 60:
+		_move(game, to)
+	var expected: float = float(HEROES.DEFS[HEROES.KNIGHT].speed) * 60.0 * Game.TICK_SECONDS
+	assert_almost_eq(from.x - game.hero.x, expected, 0.000001)
+
+
+func test_a_new_order_mid_walk_goes_back_only_when_its_way_turns() -> void:
+	var game := _knight_on_open_board()
+	var start := game.hero.cell
+	_move(game, start + Vector2i(-6, 0))
+	for count in 5:
+		Game.tick(game)
+	# still on the first leg, now sent down: it finishes nothing and turns back to its cell
+	_move(game, start + Vector2i(0, 3))
+	assert_eq(game.hero.path[0], start)
+
+
+func test_the_order_event_names_the_target_cell_centre() -> void:
+	var game := _knight_on_open_board()
+	var to := game.hero.cell + Vector2i(-2, 1)
+	var events := _move(game, to)
+	for event in events:
+		if event.kind == GameEvent.Kind.HERO_ORDERED:
+			assert_eq(Vector2(event.x, event.y), _centre(to))
+
+
+func test_an_order_to_its_own_cell_arrives_at_once() -> void:
+	var game := _knight_on_open_board()
+	var kinds := _kinds(_move(game, game.hero.cell))
+	assert_true(kinds.has(GameEvent.Kind.HERO_ORDERED))
+	assert_true(kinds.has(GameEvent.Kind.HERO_ARRIVED))
+
+
+func test_the_hero_stops_when_the_game_is_won_or_over() -> void:
+	for flag in ["won", "over"]:
+		var game := _knight_on_open_board()
+		_move(game, game.hero.cell + Vector2i(-6, 0))
+		var at := _at(game)
+		game.set(flag, true)
+		for count in 30:
+			Game.tick(game)
+		assert_eq(_at(game), at, flag)
+
+
+func test_a_move_after_the_game_is_won_is_rejected() -> void:
+	var game := _valley()
+	game.won = true
+	var events := _move(game, game.hero.cell)
+	assert_eq(events[0].reason, GameEvent.RejectReason.GAME_WON)

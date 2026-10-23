@@ -34,7 +34,13 @@ static func order(game: GameState, command: Command) -> void:
 	var cells := game.hero_graph.path(game.hero.cell, to)
 	if cells.is_empty():
 		return Game.reject(game, command, GameEvent.RejectReason.UNREACHABLE)
-	# the walk starts at the cell it last stood in, so a hero between two cells goes back to it
+	# the walk starts at the cell it last stood in; a hero between two cells goes back to it only
+	# when the new walk turns away, else it carries on to the cell ahead (a repeated order would
+	# otherwise pull it back every time)
+	var ahead := game.hero.path
+	if not ahead.is_empty() and ahead[0] != game.hero.cell and cells.size() > 1:
+		if cells[1] == ahead[0]:
+			cells.remove_at(0)
 	game.hero.path = cells
 	var event := GameEvent.of(GameEvent.Kind.HERO_ORDERED)
 	event.x = float(to.x) + HALF
