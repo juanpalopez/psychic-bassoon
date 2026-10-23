@@ -147,14 +147,6 @@ func test_a_knight_at_the_heartstone_holds_a_foe_that_would_leak() -> void:
 	assert_eq(game.heartstone_health, 20)
 
 
-func test_melee_fall_without_a_foe_clears_the_held_id() -> void:
-	var fighter := Fighter.new()
-	fighter.foe_id = 7
-	Melee.fall(fighter, null, 5.0)
-	assert_eq(fighter.foe_id, -1)
-	assert_false(fighter.alive)
-
-
 func test_a_fall_while_walking_stops_the_walk() -> void:
 	var game := _game()
 	game.hero.path = [game.hero.cell + Vector2i(0, 1)] as Array[Vector2i]
@@ -162,6 +154,23 @@ func test_a_fall_while_walking_stops_the_walk() -> void:
 	Heroes.fight(game)
 	assert_false(game.hero.alive, "exactly 0 hp falls")
 	assert_true(game.hero.path.is_empty())
+	# and a fall that holds nothing clears the held id
+	var fighter := Fighter.new()
+	fighter.foe_id = 7
+	Melee.fall(fighter, null, 5.0)
+	assert_eq(fighter.foe_id, -1)
+	assert_false(fighter.alive)
+
+
+func test_a_chaser_taken_back_strikes_once_in_that_tick() -> void:
+	var game := _game()
+	var foe := _foe_with_hero_near(game, "corrugatedOrc", 0.3)
+	game.hero.chaser_id = foe.id
+	foe.attack_cooldown = 0.0
+	var hp := game.hero.hp
+	Heroes.fight(game)
+	assert_eq(game.hero.foe_id, foe.id, "taken back")
+	assert_eq(hp - game.hero.hp, Melee.blow(foe, float(game.hero.armor)))
 
 
 func test_a_retaken_chaser_strikes_once_a_tick() -> void:

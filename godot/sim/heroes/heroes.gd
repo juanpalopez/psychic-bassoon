@@ -98,20 +98,20 @@ static func fight(game: GameState) -> void:
 	if not hero.alive:
 		_wait_to_return(game, hero)
 		return
-	_chase(game, hero)
+	var struck_by := _chase(game, hero)
 	if hero.hp <= 0.0:
 		_fall(game, hero)
 		return
 	var held := Melee.held_foe(game, hero)
-	if held != null:
-		hero.chaser_id = -1
-	else:
+	if held == null:
 		hero.foe_id = -1
 		if hero.path.is_empty():
 			held = _take_a_foe(game, hero)
 	if held != null:
 		Melee.strike(game, hero, held, 0.0)
-		_take_a_blow(hero, held)
+		# a chaser taken back already struck this tick; holding it resets its cooldown
+		if held.id != struck_by:
+			_take_a_blow(hero, held)
 		if not held.alive:
 			Melee.release(held, hero)
 	if hero.hp <= 0.0:
@@ -125,9 +125,10 @@ static func _fall(game: GameState, hero: Hero) -> void:
 	game.events.append(GameEvent.of(GameEvent.Kind.HERO_FELL))
 
 
-static func _chase(game: GameState, hero: Hero) -> void:
+## Returns the id of the chaser that struck this tick, or -1.
+static func _chase(game: GameState, hero: Hero) -> int:
 	if hero.chaser_id == -1:
-		return
+		return -1
 	var chaser: Foe = null
 	for foe in game.foes:
 		if foe.id == hero.chaser_id and foe.alive and _in_reach(hero, foe):
@@ -136,8 +137,9 @@ static func _chase(game: GameState, hero: Hero) -> void:
 			chaser = foe
 	if chaser == null:
 		hero.chaser_id = -1
-		return
+		return -1
 	_take_a_blow(hero, chaser)
+	return chaser.id
 
 
 static func _take_a_blow(hero: Hero, foe: Foe) -> void:
