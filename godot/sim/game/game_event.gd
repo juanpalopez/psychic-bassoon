@@ -24,6 +24,8 @@ enum Kind {
 	ABILITY_USED,
 	ZONE_OPENED,
 	ZONE_CLOSED,
+	HERO_ORDERED,
+	HERO_ARRIVED,
 }
 
 ## Why a command did nothing. A rejection is an event, never an error.
@@ -44,6 +46,9 @@ enum RejectReason {
 	NO_SPEC,
 	ABILITY_COOLING_DOWN,
 	NO_TARGET,
+	NO_HERO,
+	NOT_WALKABLE,
+	UNREACHABLE,
 }
 
 var kind: Kind = Kind.TOWER_BUILT

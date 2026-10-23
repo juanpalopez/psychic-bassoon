@@ -24,6 +24,10 @@ var won: bool = false
 var towers: Array[Tower] = []
 ## The guards of the Guard Tents, in the order they were raised.
 var guards: Array[Guard] = []
+## The hero the player moves (the Knight on the game board), or null, and the walkable graph it
+## paths on.
+var hero: Hero = null
+var hero_graph: HeroGraph = null
 ## Areas an ability opened that act for a while (Ink Vortex), in the order they opened.
 var zones: Array[Zone] = []
 ## Foes on the board, in the order they spawned.
