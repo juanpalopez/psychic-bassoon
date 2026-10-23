@@ -14,6 +14,7 @@ static func step(game: GameState) -> void:
 	Zones.step(game)
 	_move_foes(game)
 	Barracks.step(game)
+	Heroes.fight(game)
 	TowerFire.step(game)
 	Status.step_bleed(game)
 	Status.step_blind(game)

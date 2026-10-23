@@ -10,6 +10,8 @@ const SEED := 42
 
 func _launched(map_seed: int = SEED) -> GameState:
 	var game := Game.create(map_seed)
+	# the Knight at the Heartstone would hold the foes these tests wait for
+	game.hero = null
 	GameTestKit.run(game, [Command.launch_wave()])
 	return game
 

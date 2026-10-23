@@ -6,6 +6,8 @@ const SEED := 42
 
 func _launched(map_seed: int = SEED) -> GameState:
 	var game := Game.create(map_seed)
+	# the Knight stands at the Heartstone and would hold the foes that leak
+	game.hero = null
 	GameTestKit.run(game, [Command.launch_wave()])
 	return game
 
