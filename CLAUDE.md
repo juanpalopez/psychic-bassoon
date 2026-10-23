@@ -135,6 +135,12 @@ Every PR gets an adversarial review before it merges, scaled to its risk so revi
 - **Not a substitute for CI.** `ci` and `PR checks` must still pass. Move any finding a tool could catch (an ESLint rule, `actionlint`, a script) into CI, so the reviewer does not pay for it again.
 - Other reviewers (a human, or Copilot when quota allows) are welcome extras, never the only review.
 
+### Who implements (owner, 2026-10-23)
+
+- **Opus designs and mentors:** architecture proposals, RFCs, design memos, the plan and brief for each ticket, decisions the owner must take, and deep reviews. It implements only when the owner asks.
+- **Haiku or Sonnet implements:** Haiku (`model: haiku`) for well-defined tickets (a clear "Done when", one area, no open design choice), Sonnet (`model: sonnet`) for the rest. Either may propose a simple architectural change in its PR; a change that needs a real design choice stops and goes back to Opus and the owner.
+- The caller picks the model when it launches the agent and says which in the PR (`docs/lessons/2026-10-23-model-roles.md`).
+
 ### Stacked PRs
 
 - Use `gh stack` for work that builds on an unmerged change: `gh stack add <branch>` for the next layer, `gh stack submit` to push and link the PRs. One ticket per PR.
