@@ -98,3 +98,12 @@ func test_the_same_seed_draws_the_same_region() -> void:
 		assert_eq(a.road, b.road)
 		assert_eq(a.sockets, b.sockets)
 		assert_eq(a.heights, b.heights)
+
+
+func test_the_road_is_the_composed_spine() -> void:
+	# the section draws no road of its own (#434): it lays the layout's composed road
+	for seed in SEEDS:
+		var layout := ValleyLayout.generate(seed, 32, 20)
+		var slot := layout.slots[ValleyLayout.Region.OUTER_MARCH]
+		var result := OuterMarchRegion.new().generate(slot, layout.rng_for(slot.id, 0))
+		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)

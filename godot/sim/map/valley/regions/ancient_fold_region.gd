@@ -12,20 +12,18 @@ const HALF := Vector2(0.5, 0.5)
 
 
 func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
-	for _draw in FOLD.ROAD_DRAWS:
-		var curve := _road(slot, rng)
-		if curve == null:
+	# the road is the layout's composed spine (#434); only the feeder and the blocks are drawn
+	var curve := RoadSpline.build(slot.spine)
+	for _try in FOLD.FEEDERS_TRIED:
+		var result := SectionResult.create(slot)
+		result.road = curve.cells
+		result.road_curve = curve
+		if not _add_feeder(slot, rng, result):
 			continue
-		for _try in FOLD.FEEDERS_TRIED:
-			var result := SectionResult.create(slot)
-			result.road = curve.cells
-			result.road_curve = curve
-			if not _add_feeder(slot, rng, result):
-				continue
-			_place_sockets(slot, rng, result)
-			if ValleyChecks.section_problems(slot, result, self).is_empty():
-				_lay_ruins(rng, result)
-				return result
+		_place_sockets(slot, rng, result)
+		if ValleyChecks.section_problems(slot, result, self).is_empty():
+			_lay_ruins(rng, result)
+			return result
 	# no draw worked: the stand-in goes out and `extra_problems` asks for another draw
 	return super(slot, rng)
 
@@ -40,33 +38,6 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 	if found.is_empty() and near < FOLD.MERGE_COVER_MIN:
 		found.append("%d socket blocks cover the merge, want %d" % [near, FOLD.MERGE_COVER_MIN])
 	return found
-
-
-## A wide S through the region: east, then a long way down to the exit. Null when the curve
-## leaves the region or crosses itself.
-func _road(slot: ValleyPlan.Slot, rng: Rng) -> RoadCurve:
-	var start := Vector2(slot.entry) + HALF
-	var end := Vector2(slot.exit) + HALF
-	var across := end.x - start.x
-	var down := end.y - start.y
-	var bend_x := float(FOLD.BEND_X.x + rng.next_int(FOLD.BEND_X.y)) / 10.0
-	var bend_y := float(FOLD.BEND_Y.x + rng.next_int(FOLD.BEND_Y.y)) / 10.0
-	var low_y := float(FOLD.LOW_Y.x + rng.next_int(FOLD.LOW_Y.y)) / 10.0
-	var lift := float(rng.next_int(FOLD.LIFT_MAX + 1))
-	var inset := float(rng.next_int(FOLD.INSET_MAX + 1))
-	var waypoints: Array[Vector2] = [
-		start,
-		Vector2(start.x + across * bend_x, start.y + down * bend_y - lift),
-		Vector2(end.x - inset, start.y + down * low_y),
-		end
-	]
-	var curve := RoadSpline.build(waypoints)
-	var seen := {}
-	for cell in curve.cells:
-		if seen.has(cell) or not slot.rect.has_point(cell):
-			return null
-		seen[cell] = true
-	return curve
 
 
 ## Draws a feeder from the top right corner to a neighbour of a road cell and keeps it when it

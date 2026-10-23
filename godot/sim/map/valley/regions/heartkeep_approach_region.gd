@@ -1,6 +1,7 @@
-## Region 5, Heartkeep Approach: the final defence, bottom right (#408). The road bends twice on
-## its way to the Heartstone on the east edge; the ground rises in terraces around the Heartstone
-## block while the road stays on the floor and every cell stays walkable for the hero.
+## Region 5, Heartkeep Approach: the final defence, bottom right (#408). The road is the layout's
+## composed spine to the Heartstone on the east edge (#434); the ground rises in terraces around
+## the Heartstone block while the road stays on the floor and every cell stays walkable for the
+## hero.
 class_name HeartkeepApproachRegion
 extends RegionStraightSection
 
@@ -18,7 +19,7 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 
 func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var result := SectionResult.create(slot)
-	var curve := RoadSpline.build(_waypoints(slot, rng))
+	var curve := RoadSpline.build(slot.spine)
 	result.road = curve.cells
 	result.road_curve = curve
 	var blocked := reserved(slot)
@@ -31,30 +32,6 @@ func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 		result, KEEP.TERRACE_GAP, KEEP.FOREST_GAP, reserved(slot)[0], KEEP.RISE_GAP, KEEP.RISE_REACH
 	)
 	return result
-
-
-## Gate, straight down, a sweep to the far side, and a last stretch east along the exit row.
-func _waypoints(slot: ValleyPlan.Slot, rng: Rng) -> Array[Vector2]:
-	var rect := slot.rect
-	var gate_x := float(slot.entry.x) + 0.5
-	var top := float(rect.position.y)
-	var exit_y := float(slot.exit.y) + 0.5
-	var near := gate_x - float(rect.position.x) < float(rect.size.x) / 2.0
-	var side := (
-		float(rect.end.x) - KEEP.SIDE_MARGIN - float(rng.next_int(2))
-		if near
-		else float(rect.position.x) + KEEP.SIDE_MARGIN + float(rng.next_int(2))
-	)
-	var sweep_y := top + (exit_y - top) * KEEP.SWEEP_AT
-	var final_x := float(rect.end.x) - KEEP.FINAL_LEAD
-	return [
-		Vector2(slot.entry) + Vector2(0.5, 0.5),
-		Vector2(gate_x, top + KEEP.LEAD),
-		Vector2(side, sweep_y),
-		Vector2(minf(final_x, (side + final_x) / 2.0), exit_y),
-		Vector2(final_x, exit_y),
-		Vector2(slot.exit) + Vector2(0.5, 0.5),
-	]
 
 
 func socket_range() -> Vector2i:
