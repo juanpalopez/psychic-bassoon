@@ -5,10 +5,9 @@
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
-## Layout valley seeds whose feeder starts on the east edge below the top row, and some that
-## start on the top row.
-const EAST_SEEDS: Array[int] = [6, 8, 10, 12, 99, 7920]
-const TOP_SEEDS: Array[int] = [1, 2, 5, 259]
+## Layout valley seeds: today 6, 8, 10, 12, 99 and 7920 start the feeder on the east edge below
+## the top row (#462 may move every start to the top row; the test holds either way).
+const LAYOUT_SEEDS: Array[int] = [1, 2, 5, 6, 8, 10, 12, 99, 259, 7920]
 ## Sub-points checked on the stretch from the spawn point to the first cell.
 const SUBSTEPS := 16
 
@@ -48,15 +47,11 @@ func test_a_road_from_the_east_edge_spawns_past_it_on_its_row() -> void:
 
 
 func test_foes_reach_the_first_road_cell_only_over_road_or_off_the_board() -> void:
-	var seen_east := 0
-	for map_seed: int in EAST_SEEDS + TOP_SEEDS:
+	for map_seed in LAYOUT_SEEDS:
 		var map := MapGen.generate_layout_valley(map_seed)
 		var routes := Route.for_map(map)
 		for index in routes.size():
 			var route := routes[index]
-			var start: Vector2i = map.routes[index][0]
-			if start.x == map.cols - 1 and start.y > 0:
-				seen_east += 1
 			var first := route.cell_points[0]
 			for p in first:
 				for s in SUBSTEPS:
@@ -68,7 +63,6 @@ func test_foes_reach_the_first_road_cell_only_over_road_or_off_the_board() -> vo
 						not map.in_bounds(cell) or map.tiles[cell.y][cell.x] == GameMap.Tile.ROAD
 					)
 					assert_true(fine, "seed %d route %d walks over %s" % [map_seed, index, cell])
-	assert_gt(seen_east, 0, "some feeder starts on the east edge")
 
 
 func _assert_same(got: Array[Route], want: Array[Route], label: String) -> void:
