@@ -8,7 +8,7 @@ links: [#404, #458, #460, #469]
 
 ## Status and decision sought
 
-**Status:** Proposed; needs the owner's choice of shape (section 4) before any code.
+**Status:** Proposed. On 2026-10-23 the owner accepted the layout library (section 5) in two steps: 3A on today's layout, then more layouts. Still open: cells or time in range, and `GATE_INSET`; the step 1 measurement informs both.
 
 The owner wants the layout valley's composed road to run 100 to 150 cells (2026-10-23), with one road crossing of the river plus the hero-only crossing. Today it runs 65 to 76 (median 71, seeds 1..300). Two measured attempts showed that tuning can't close the gap (section 2). This memo explains why, proposes two road shapes that can, and asks the owner to pick one.
 
@@ -76,15 +76,33 @@ The road becomes five runs from top to bottom, joined by U-turns of radius 3 at 
 
 **Recommendation: 3A, measured first.** The first PR adds the hook and U templates and the re-gating, and reports the length over seeds 1..300. If it reaches 100 on fewer than 95 % of seeds, stop and switch to 3B. The slower-foes row matters in its own right: what the game needs is time in tower range. If the owner cares about time in range rather than cells, that row is the cheapest.
 
-## 5. PR plan for 3A (each under 300 production lines, Sonnet implementing)
+## 5. A layout library: more starts and Heartstones (owner, 2026-10-23)
+
+Today the spawn is always on the west edge (rows 1 to 3) and the Heartstone always on the east edge (rows 15 to 17). That fixes the road's overall shape, which is why seeds 1, 42 and 2026 look nearly the same (4 template sequences over 300 seeds). The research recommends placing the important pieces first and building the road around them (`docs/research/procedural-map-generation.md`, section 4.2).
+
+- **A layout** is data in `godot/content/valley/`: the spawn edge and its rows, the Heartstone's place, the six region rectangles (or the cuts that make them, with their jitter), the gate borders between them, the river's source and mouth, and the feeder's edge. The seed picks a layout, then mirrors it (and rotates it where the board allows), then varies the details as today.
+- **Candidates:**
+  - today's west-to-east layout;
+  - a spawn on the top edge with the Heartstone near the centre;
+  - corner to opposite corner;
+  - the Heartstone inside a bend of the river (the river runs across the board, as the owner decided, so every layout keeps one road crossing).
+- **Each layout must pass the same checks:** a road of 100 to 150 cells, the lane rule, one road crossing plus the hero crossing, sockets in range (21 to 30), the hero graph caps, generation time, and stitch success over seeds 1..300.
+- **Variety:** a handful of layouts, each mirrored, gives 8 to 12 overall shapes before the seed varies the details. The variety report counts distinct shapes, and layouts stop being added when the count stops growing.
+- **Costs:** region positions become data, not code. The camera's opening view has to frame wherever the spawn is (CLAUDE.md, Camera: "a run starts near the spawn"). The prototype seed of the hero RFC (#453) has to name its layout.
+
+**Two steps:**
+1. Today's layout with 3A (section 6), until the road is 100 to 150 cells.
+2. Two or three more layouts, one PR each, measured the same way.
+
+## 6. PR plan for 3A (each under 300 production lines, Sonnet implementing)
 
 1. The hook and U templates in `segments.gd`, with their tests (alone, every symmetry and scale, lanes at least 5 apart).
 2. Re-gating in `ValleyLayout._draw` and `layout_rules.gd` (gate positions, `GATE_INSET`), the `ALLOWED` options, and `ROUTES.LENGTH` raised to (100, 150). Measured over seeds 1..300: length, variety, generation time (0.15 s mean budget) and stitch success. This PR has the stop condition above.
 3. The region sections checked again on the new roads (sockets, ruins, the feeder and the ridge plateau), and the decision record.
 4. Then the board switch (#458), with #469 (road cells) and #461's stack in.
 
-## 6. Open questions
+## 7. Open questions
 
-1. 3A, 3B, or slower foes on today's map?
+1. ~~3A, 3B, or slower foes?~~ The layout library, starting with 3A on today's layout (owner, 2026-10-23); 3B is the fallback if 3A misses its measurement.
 2. If 3A: may `GATE_INSET` drop to 1 or 2, so gates can sit near a region's corners?
 3. Are cells the target, or is time in tower range (the slower-foes row)?
