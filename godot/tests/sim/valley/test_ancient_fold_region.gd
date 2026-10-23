@@ -52,12 +52,29 @@ func test_the_feeder_enters_at_the_top_right_and_runs_diagonally() -> void:
 		var start := result.feeder[0]
 		var end := result.feeder[result.feeder.size() - 1]
 		var right := result.rect.end.x - 1
-		assert_true(start.y == 0 or start.x == right, "seed %d starts at %s" % [seed, start])
+		assert_eq(start.y, 0, "seed %d starts at %s" % [seed, start])
 		assert_true(_gap(start, Vector2i(right, 0)) <= FOLD.START_REACH, "seed %d" % seed)
 		assert_gte(absi(start.x - end.x), FOLD.FEEDER_MIN_SPAN, "seed %d" % seed)
 		assert_gte(absi(start.y - end.y), FOLD.FEEDER_MIN_SPAN, "seed %d" % seed)
 		assert_gte(result.feeder.size(), RULES.FEEDER_MIN_CELLS)
 		assert_eq(result.feeder_curve.cells, result.feeder, "seed %d" % seed)
+
+
+func test_the_second_roads_foes_enter_at_the_board_edge() -> void:
+	# #462: a feeder that started on the east edge below the top row spawned its foes above the
+	# board and walked them down into it, entering 2 to 3 cells inside (seeds 7920 and 47515)
+	var seeds: Array[int] = [7920, 47515]
+	for seed in range(1, LAST_SEED + 1):
+		seeds.append(seed)
+	for seed in seeds:
+		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), _layout(seed), true)
+		var start: Vector2i = map.routes[1][0]
+		assert_eq(start.y, 0, "seed %d starts on the top edge at %s" % [seed, start])
+		var second := Route.build_from_curve(map.routes[1], map.route_curves[1])
+		assert_lt(second.ys[0], 0.0, "seed %d spawns off the board" % seed)
+		assert_lte(
+			second.cumulative[1], RULES.CELL_CENTRE + RULES.SPAWN_OFFSET + 1e-9, "seed %d" % seed
+		)
 
 
 func test_the_feeder_joins_inside_the_region_and_keeps_clear_of_the_road() -> void:

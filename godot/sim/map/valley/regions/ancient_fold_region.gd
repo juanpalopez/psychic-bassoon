@@ -48,10 +48,11 @@ func _add_feeder(slot: ValleyPlan.Slot, rng: Rng, result: SectionResult) -> bool
 	if inner < 1:
 		return false
 	var join := road[FOLD.JOIN_ENDS + rng.next_int(inner)]
-	# the start is on the top row or the east edge, up to `START_REACH` steps from the corner
+	# the start is on the top row (the board's top edge), up to `START_REACH` steps west of the
+	# corner: foes of the second source spawn above the board, so a start lower down the east
+	# edge would have them walk down into the board before the road begins (#462)
 	var along := rng.next_int(FOLD.START_REACH + 1)
-	var corner := Vector2i(slot.rect.end.x - 1, slot.rect.position.y)
-	var start := corner + (Vector2i(-along, 0) if rng.next_int(2) == 0 else Vector2i(0, along))
+	var start := Vector2i(slot.rect.end.x - 1 - along, slot.rect.position.y)
 	# the join's neighbours that face the corner the feeder comes from
 	var facing: Array[Vector2i] = []
 	for step in DIRECTIONS:
@@ -79,9 +80,9 @@ func _add_feeder(slot: ValleyPlan.Slot, rng: Rng, result: SectionResult) -> bool
 	return true
 
 
-## Why a feeder does not work (none when it does): it runs from the top right corner on unit
-## steps to a road cell's neighbour, inside the region, a diagonal, long enough and clear of the
-## road except at the join.
+## Why a feeder does not work (none when it does): it runs from the top row near the top right
+## corner on unit steps to a road cell's neighbour, inside the region, a diagonal, long enough
+## and clear of the road except at the join.
 func _feeder_problems(
 	rect: Rect2i, road: Array[Vector2i], feeder: Array[Vector2i], join: Vector2i
 ) -> Array[String]:
@@ -95,8 +96,8 @@ func _feeder_problems(
 	var last := feeder[feeder.size() - 1]
 	if _gap(last, join) != 1:
 		found.append("the feeder does not end next to the join")
-	if first.y != rect.position.y and first.x != rect.end.x - 1:
-		found.append("the feeder does not start on the top row or the east edge")
+	if first.y != rect.position.y:
+		found.append("the feeder does not start on the top row")
 	if _gap(first, Vector2i(rect.end.x - 1, rect.position.y)) > FOLD.START_REACH:
 		found.append("the feeder does not start at the top right corner")
 	var span := Vector2i(absi(first.x - last.x), absi(first.y - last.y))

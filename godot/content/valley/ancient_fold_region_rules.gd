@@ -11,7 +11,7 @@ const SOCKET_MAX := 5
 ## `FEEDER_JOIN_MAX_PERCENT` does not apply: the valley joins late, in this region.
 const MERGE_COVER_MIN := 3
 const MERGE_COVER_REACH := 4.5
-## The feeder starts within this many steps of the board's top right corner cell.
+## The feeder starts on the top row within this many steps of the board's top right corner cell.
 const START_REACH := 3
 ## The feeder spans at least this many cells across and down, so it is a diagonal.
 const FEEDER_MIN_SPAN := 3
