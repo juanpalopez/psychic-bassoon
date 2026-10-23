@@ -59,9 +59,9 @@ func _steps(curve: RoadCurve) -> Array[Vector2]:
 	return found
 
 
-func test_five_templates_with_their_ports() -> void:
+func test_seven_templates_with_their_ports() -> void:
 	var keys: Array = SEGMENTS.DATA.keys()
-	assert_eq(RoadSegment.ids().size(), 5)
+	assert_eq(RoadSegment.ids().size(), 7)
 	assert_eq(keys.size(), RoadSegment.ids().size())
 	for id in keys:
 		assert_true(RoadSegment.ids().has(id), "%s is listed" % id)
@@ -173,3 +173,26 @@ func test_the_bridge_is_straight_and_flat_at_every_scale() -> void:
 			assert_almost_eq(curve.ys[index], ORIGIN.y, 0.0001)
 		for cell in curve.cells:
 			assert_eq(cell.y, int(ORIGIN.y), "level")
+
+
+func test_the_hook_turns_a_half_circle_then_a_quarter_the_other_way() -> void:
+	var segment := RoadSegment.get_segment(SEGMENTS.HOOK)
+	assert_eq(segment.entry_heading, Vector2.RIGHT)
+	assert_eq(segment.exit_heading, Vector2.DOWN)
+	# the exit is a little ahead of the entry and more than a lane and a half to the side
+	assert_gt(segment.exit.x, 0.0)
+	assert_gt(segment.exit.y, LAYOUT.LANE_GAP * 1.5)
+	var curve := _placed(segment, ORIGIN, Vector2.ONE, Vector2.RIGHT, 1.0)
+	assert_gt(curve.cells.size(), 20, "a hook is a long piece of road")
+	# the road runs back on itself: x grows past the exit, then falls back to it
+	var peak := 0.0
+	for x in curve.xs:
+		peak = maxf(peak, x)
+	assert_gt(peak - ORIGIN.x, segment.exit.x + LAYOUT.LANE_GAP * 0.5)
+
+
+func test_the_u_turn_leaves_back_along_the_line_it_came_in_on() -> void:
+	var segment := RoadSegment.get_segment(SEGMENTS.U_TURN)
+	assert_eq(segment.exit_heading, -segment.entry_heading)
+	assert_eq(segment.exit.x, 0.0)
+	assert_gte(segment.exit.y * segment.scale_range.x, float(LAYOUT.LANE_GAP))
