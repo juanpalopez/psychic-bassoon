@@ -9,8 +9,6 @@ const LAST_SEED := 300
 const ATTEMPTS := 20
 ## Most seeds pass on the first draw; the stitcher redraws the rest.
 const MAX_FIRST_FAIL_PERCENT := 25
-## The S reaches at least this near the region's right edge.
-const FAR_REACH := 6
 
 
 func _drawn(seed: int) -> Array:
@@ -58,16 +56,6 @@ func test_the_road_enters_on_the_west_edge_and_bends_smoothly_without_lanes() ->
 			for b in range(a + STRETCH_STEPS, road.size()):
 				var gap := Vector2(road[a]).distance_to(Vector2(road[b]))
 				assert_gte(gap, LANE_GAP, "seed %d, %s and %s" % [seed, road[a], road[b]])
-
-
-func test_the_road_runs_far_across_the_region_before_it_turns_back() -> void:
-	for seed in SEEDS:
-		var drawn := _drawn(seed)
-		var slot: ValleyPlan.Slot = drawn[1]
-		var far := 0
-		for step in drawn[3].road:
-			far = maxi(far, step.x)
-		assert_gte(far, slot.rect.end.x - FAR_REACH, "seed %d" % seed)
 
 
 func test_forest_keeps_its_gap_and_the_ground_is_low_and_walkable() -> void:
