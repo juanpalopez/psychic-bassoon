@@ -15,6 +15,8 @@ const LAYOUT_SEEDS: Array[int] = [1, 6, 8, 10, 259, 7920]
 const OVERVIEW_TRIANGLES := 32000
 const MAX_DRAW_CALLS := 18
 const EPSILON := 1e-4
+## How many times denser per cell a kind grows in its own region than elsewhere on the board.
+const REGION_CROWDING := 5.0
 
 
 func _field(map_seed: int) -> TerrainField:
@@ -187,21 +189,34 @@ func test_the_forest_is_thicker_further_out() -> void:
 
 
 ## The valley has far more meadow than rock, so the share of boulders that lie in the rocks would
-## be low whatever the table says; what follows the region is the density per cell.
+## be low whatever the table says; what follows the region is the density per cell. The same holds
+## for dirt and trees: the layout valley (#458) paints far less forest and dirt than the strip
+## valley (about 5 and 3 per cent of its cells against 9 and 11), so their share in their region
+## drops while the scatter follows the regions as before (#461).
 func test_the_board_scatter_follows_the_regions() -> void:
-	var counts := {"boulder": [0, 0], "dirt": [0, 0], "tree": [0, 0]}
+	var fields: Array[TerrainField] = []
+	for map_seed in SEEDS:
+		fields.append(_field(map_seed))
+	for map_seed in LAYOUT_SEEDS:
+		fields.append(_layout_field(map_seed))
+	_assert_follows_the_regions(fields.slice(0, SEEDS.size()), "game board")
+	_assert_follows_the_regions(fields.slice(SEEDS.size()), "layout valley")
+
+
+## Each kind is at least `REGION_CROWDING` times as dense per cell in its region as elsewhere on
+## the board.
+func _assert_follows_the_regions(fields: Array[TerrainField], label: String) -> void:
 	var wanted := {
 		"boulder": GameMap.Region.ROCKS, "dirt": GameMap.Region.DIRT, "tree": GameMap.Region.FOREST
 	}
-	var cells_in := 0
-	var cells_out := 0
-	for map_seed in SEEDS:
-		var field := _field(map_seed)
+	# per kind: props in its region, props elsewhere, cells in its region, cells elsewhere
+	var counts := {"boulder": [0, 0, 0, 0], "dirt": [0, 0, 0, 0], "tree": [0, 0, 0, 0]}
+	for field in fields:
 		for row in field.map.rows:
 			for col in field.map.cols:
 				var region := field.map.region_at(Vector2i(col, row))
-				cells_in += 1 if region == GameMap.Region.ROCKS else 0
-				cells_out += 0 if region == GameMap.Region.ROCKS else 1
+				for key: String in counts:
+					counts[key][2 if region == wanted[key] else 3] += 1
 		for placement in SceneryScatter.placements(field):
 			var cell := Vector2i(floori(placement.at.x), floori(placement.at.y))
 			if not field.map.in_bounds(cell):
@@ -209,19 +224,15 @@ func test_the_board_scatter_follows_the_regions() -> void:
 			var key := "tree" if SceneryScatter.TREES.has(placement.kind) else placement.kind
 			if not counts.has(key):
 				continue
-			counts[key][0] += 1
-			if field.map.region_at(cell) == wanted[key]:
-				counts[key][1] += 1
+			counts[key][0 if field.map.region_at(cell) == wanted[key] else 1] += 1
 	for key: String in counts:
-		assert_gt(counts[key][0], 0, key)
-	assert_gt(cells_in, 0, "the valley has rocks")
-	var rock_cells := float(cells_in)
-	var other_cells := float(cells_out)
-	var in_rocks := float(counts["boulder"][1]) / rock_cells
-	var elsewhere := float(counts["boulder"][0] - counts["boulder"][1]) / other_cells
-	assert_gt(in_rocks, elsewhere * 5.0, "boulders crowd the rocks")
-	for key: String in ["dirt", "tree"]:
-		assert_gt(float(counts[key][1]) / float(counts[key][0]), 0.7, "%s in its region" % key)
+		var tally: Array = counts[key]
+		assert_gt(tally[0], 0, "%s in its region, %s" % [key, label])
+		assert_gt(tally[2], 0, "the %s has %s cells" % [label, key])
+		var inside := float(tally[0]) / float(tally[2])
+		var elsewhere := float(tally[1]) / float(tally[3])
+		gut.p("%s, %s: %.3f a cell in its region, %.3f elsewhere" % [label, key, inside, elsewhere])
+		assert_gt(inside, elsewhere * REGION_CROWDING, "%s crowd their region, %s" % [key, label])
 
 
 func test_the_same_seed_scatters_the_same_props() -> void:
