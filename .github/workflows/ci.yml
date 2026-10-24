@@ -230,8 +230,9 @@ jobs:
             bash scripts/run-gut-parallel.sh
           else
             # only the tests that reach a changed file (scripts/select-tests.mjs)
+            # (same parallel runner, same failure checks as the full suite)
             echo "GUT subset: ${GUT_TESTS}"
-            "$GODOT" --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 -gtest="$GUT_TESTS" -gexit
+            bash scripts/run-gut-parallel.sh -t "$GUT_TESTS"
           fi
 
       - name: Headless game time budget
