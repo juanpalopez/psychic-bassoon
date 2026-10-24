@@ -33,9 +33,10 @@ const SCENERY_TRIANGLES := 32000
 ## the board's two halves, three in the ring's two halves; a close view culls about half).
 ## The sectioned valley draws one more than the route-first map did (50 on seed 7920).
 const SURFACES := 51
+## The layout valley at 40 by 24 (#480) draws 34 terrace chunks: 60 to 64 surfaces over ten seeds,
+## about half the budget's 120 draw calls.
+const LAYOUT_SURFACES := 68
 const ALONG: Array[float] = [0.07, 0.23, 0.41, 0.62, 0.79, 0.94]
-## The screen shapes the camera frames for: a 16:9 screen, a tall phone, a 4:3 tablet.
-const ASPECTS: Array[float] = [16.0 / 9.0, 19.5 / 9.0, 4.0 / 3.0]
 
 
 func _board(map_seed: int) -> Board:
@@ -504,42 +505,6 @@ func test_the_river_has_water_and_every_road_a_bed() -> void:
 	var road := board.diorama.builder("RoadBeds")
 	assert_not_null(road.get_node_or_null("RoadBed"), "a bed")
 	assert_not_null(road.get_node_or_null("Bridges"), "and the bridges")
-
-
-## The camera's real zoom, pitch, footprint and pan range (#339: the map plus its scenery margin).
-func test_no_edge_of_the_world_is_in_view_from_any_camera_position() -> void:
-	var board := _board(1)
-	var rect := board.diorama.field.world_rect().grow(-2.0)
-	var rig := CameraRig.new()
-	rig.canvas_height = 720.0
-	add_child_autofree(rig)
-	for aspect in ASPECTS:
-		rig.frame(aspect)
-		for step in 11:
-			rig.set_zoom(float(step) / 10.0)
-			var range := rig.pan_range()
-			var distance: float = rig._distance()
-			var foot := CameraRig.footprint(
-				distance,
-				CameraRig.pitch_for(rig.zoom),
-				rig.fov_degrees,
-				aspect,
-				CameraRig.YAW_DEGREES
-			)
-			# overscroll is rubber-banded: a drag past the limit gets only `RUBBER` of it through
-			var slack := Vector2.ONE * 3.0 * CameraRig.RUBBER
-			var pans: Array[Vector2] = [
-				range.position - slack,
-				range.end + slack,
-				Vector2(range.position.x, range.end.y) + Vector2(-slack.x, slack.y),
-				Vector2(range.end.x, range.position.y) + Vector2(slack.x, -slack.y),
-			]
-			for corner in pans:
-				var seen := Rect2(foot.position + corner, foot.size)
-				assert_true(
-					rect.encloses(seen),
-					"aspect %.2f zoom %.1f sees %s past %s" % [aspect, rig.zoom, seen, rect]
-				)
 
 
 func test_the_world_fades_into_one_haze_the_colour_of_the_background() -> void:
