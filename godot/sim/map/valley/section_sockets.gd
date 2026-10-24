@@ -7,6 +7,7 @@ extends RefCounted
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 const ROAD := preload("res://content/valley/road_rules.gd")
+const TOWERS := preload("res://content/towers.gd")
 
 
 ## The road's bends: the cells where it turns. With `min_run` above 1 only a turn between two
@@ -107,11 +108,19 @@ static func covers(
 
 ## The reach rule of a section: the same for the one-cell road and for a band. A level 1 tower on
 ## the block covers at least `SOCKET_MIN_ROAD_COVERAGE` road cells (the centre line) within
-## `BAND_COVERAGE_REACH`; a block the band keeps too far from the road is not placed (#430).
+## `coverage_reach`; a block the band keeps too far from the road is not placed (#430).
 static func reaches(result: SectionResult, block: Rect2i) -> bool:
 	if result.road_width <= 0.0:
 		return reaches_road(block, result.road)
-	return covers(block, result.road, 0.0, ROAD.BAND_COVERAGE_REACH)
+	return covers(block, result.road, 0.0, coverage_reach(result.road_width))
+
+
+## How far from a block's centre the centre line still counts towards its coverage on a band of
+## `width` cells: a level 1 Spool Guard's range plus the reach margin the band gives a tower
+## (`GameMap.reach_margin`, half the width; #446).
+static func coverage_reach(width: float) -> float:
+	var range_1: float = TOWERS.DEFS["spoolGuard"].range[0]
+	return range_1 + width / 2.0
 
 
 ## How far a block's centre (a 2x2 block's centre is on a cell corner) is from a cell's centre.
