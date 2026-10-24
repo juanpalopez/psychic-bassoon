@@ -141,7 +141,7 @@ static func _aura_bonuses(game: GameState, guard: Guard, tents: Array[Tower]) ->
 		var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
 		var dx := at.x - centre.x
 		var dy := at.y - centre.y
-		var reach := TowerFire.reach_of(game, tent)
+		var reach := TowerFire.ground_reach_of(game, tent)
 		if dx * dx + dy * dy > reach * reach:
 			continue
 		guard.speed_bonus = maxf(guard.speed_bonus, float(def.guard_speed_bonus[tent.level]))

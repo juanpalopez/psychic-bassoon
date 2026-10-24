@@ -46,6 +46,17 @@ static func reach_of(game: GameState, tower: Tower) -> float:
 	return base * game.map.range_multiplier(Vector2i(tower.col, tower.row)) * seen
 
 
+## How far the tower hits a ground foe on the centre line: its reach plus half the map's reach
+## band (#446). The band is added after the elevation bonus, so the bonus does not scale it.
+static func ground_reach_of(game: GameState, tower: Tower) -> float:
+	return reach_of(game, tower) + game.map.reach_margin()
+
+
+## How far the tower hits this foe: a flying foe has no road, so no band.
+static func reach_to(game: GameState, tower: Tower, foe: Foe) -> float:
+	return reach_of(game, tower) if foe.flying else ground_reach_of(game, tower)
+
+
 ## The foe the tower shoots: of the live foes in reach, the one with the least
 ## distance left to walk on its own route (routes differ in length, so the
 ## distance walked is not comparable); the foe that spawned first wins a tie. A support foe in
@@ -54,7 +65,7 @@ static func target_for(game: GameState, tower: Tower, ground_only: bool = false)
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	var best: Foe = null
 	var best_left := 0.0
-	for foe in foes_within(game, centre.x, centre.y, reach_of(game, tower)):
+	for foe in foes_within_reach(game, centre.x, centre.y, reach_of(game, tower)):
 		if not can_hit(TOWERS.DEFS[tower.type], foe) or (ground_only and foe.flying):
 			continue
 		var left := (game.air_routes if foe.flying else game.routes)[foe.route].total - foe.distance
@@ -80,6 +91,20 @@ static func foes_within(game: GameState, x: float, y: float, radius: float) -> A
 		var dx := foe.x - x
 		var dy := foe.y - y
 		if foe.alive and dx * dx + dy * dy <= limit:
+			found.append(foe)
+	return found
+
+
+## The live foes in reach of a point whose reach (without the band) is `radius`, in spawn order: a
+## ground foe up to half the map's reach band further out, a flying foe exactly `radius`.
+static func foes_within_reach(game: GameState, x: float, y: float, radius: float) -> Array[Foe]:
+	var found: Array[Foe] = []
+	var ground := radius + game.map.reach_margin()
+	for foe in game.foes:
+		var reach := radius if foe.flying else ground
+		var dx := foe.x - x
+		var dy := foe.y - y
+		if foe.alive and dx * dx + dy * dy <= reach * reach:
 			found.append(foe)
 	return found
 
@@ -123,7 +148,7 @@ static func _locked_foe(game: GameState, tower: Tower) -> Foe:
 		return null
 	var reach := reach_of(game, tower)
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
-	for foe in foes_within(game, centre.x, centre.y, reach):
+	for foe in foes_within_reach(game, centre.x, centre.y, reach):
 		if foe.id == tower.target_id and can_hit(TOWERS.DEFS[tower.type], foe):
 			return foe
 	return null

@@ -105,7 +105,7 @@ static func frostbite_bonus(game: GameState, foe: Foe) -> float:
 		if passive.get("kind", "") != "frostbite" or float(passive.bonus) <= best:
 			continue
 		var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
-		var reach := TowerFire.reach_of(game, tower)
+		var reach := TowerFire.reach_to(game, tower, foe)
 		var dx := foe.x - centre.x
 		var dy := foe.y - centre.y
 		if dx * dx + dy * dy <= reach * reach:
@@ -228,7 +228,7 @@ static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	# the foes on the line, by how far along it they stand (spawn order breaks a tie)
 	var along: Array[float] = []
 	var hit: Array[Foe] = []
-	for foe in TowerFire.foes_within(game, centre.x, centre.y, reach):
+	for foe in TowerFire.foes_within_reach(game, centre.x, centre.y, reach):
 		if not TowerFire.can_hit(def, foe):
 			continue
 		var rel_x := foe.x - centre.x
@@ -255,8 +255,10 @@ static func _skewer(game: GameState, tower: Tower, active: Dictionary) -> bool:
 	event.foe_id = target.id
 	event.x = target.x
 	event.y = target.y
-	event.x2 = centre.x + dir_x * reach
-	event.y2 = centre.y + dir_y * reach
+	# the bolt runs to the far edge of the band, where a ground foe is still in reach
+	var end := TowerFire.ground_reach_of(game, tower)
+	event.x2 = centre.x + dir_x * end
+	event.y2 = centre.y + dir_y * end
 	game.events.append(event)
 	return true
 
@@ -270,7 +272,7 @@ static func _flash_freeze(game: GameState, tower: Tower, active: Dictionary) -> 
 	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
 	var reach := TowerFire.reach_of(game, tower)
 	var def: Dictionary = TOWERS.DEFS[tower.type]
-	for foe in TowerFire.foes_within(game, centre.x, centre.y, reach):
+	for foe in TowerFire.foes_within_reach(game, centre.x, centre.y, reach):
 		if TowerFire.can_hit(def, foe):
 			foe.freeze_timer = maxf(foe.freeze_timer, float(active.seconds))
 	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
@@ -394,7 +396,9 @@ static func _precision_snipe(game: GameState, tent: Tower, active: Dictionary) -
 		return false
 	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
 	var best: Foe = null
-	for foe in TowerFire.foes_within(game, centre.x, centre.y, TowerFire.reach_of(game, tent)):
+	for foe in TowerFire.foes_within_reach(
+		game, centre.x, centre.y, TowerFire.reach_of(game, tent)
+	):
 		if foe.flying:
 			continue
 		if best == null or foe.hp > best.hp:
@@ -415,7 +419,7 @@ static func _precision_snipe(game: GameState, tent: Tower, active: Dictionary) -
 static func _guards_in_aura(game: GameState, mess: Tower) -> Array[Guard]:
 	var found: Array[Guard] = []
 	var centre := game.map.socket_centre(Vector2i(mess.col, mess.row))
-	var reach := TowerFire.reach_of(game, mess)
+	var reach := TowerFire.ground_reach_of(game, mess)
 	for guard in game.guards:
 		if not guard.alive:
 			continue

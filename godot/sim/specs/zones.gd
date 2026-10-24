@@ -143,7 +143,7 @@ static func _patrol(game: GameState, zone: Zone) -> void:
 	zone.clock += zone.every
 	var foes: Array[Foe] = []
 	var left: Array[float] = []
-	for foe in TowerFire.foes_within(game, zone.x, zone.y, zone.radius):
+	for foe in TowerFire.foes_within_reach(game, zone.x, zone.y, zone.radius):
 		var route := (game.air_routes if foe.flying else game.routes)[foe.route]
 		var remaining := route.total - foe.distance
 		var at := foes.size()
