@@ -10,7 +10,7 @@ var _layouts := {}
 
 func _layout(seed: int) -> ValleyLayout:
 	if not _layouts.has(seed):
-		_layouts[seed] = ValleyLayout.generate(seed, 32, 20)
+		_layouts[seed] = ValleyLayout.generate(seed, 40, 24)
 	return _layouts[seed]
 
 
@@ -53,7 +53,7 @@ func test_the_road_is_the_spline_of_the_spine_on_the_floor() -> void:
 func test_the_high_block_has_a_range_bonus_and_a_low_block_within_reach() -> void:
 	for seed in SEEDS:
 		var layout := _layout(seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 		var best := 1.0
 		var high := Vector2i.ZERO
 		for anchor in map.sockets:
@@ -107,7 +107,7 @@ func test_a_ramp_climbs_through_heights_zero_one_two() -> void:
 func test_every_seed_stitches_a_valley_with_no_problems() -> void:
 	for seed in range(1, SWEEP + 1, STITCH_STEP):
 		var layout := _layout(seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 		assert_not_null(map, "seed %d stitches" % seed)
 
 

@@ -10,7 +10,7 @@ const MAX_FIRST_FAIL_PERCENT := 25
 
 
 func _drawn(seed: int) -> Array:
-	var layout := ValleyLayout.generate(seed, 32, 20)
+	var layout := ValleyLayout.generate(seed, 40, 24)
 	var slot := layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH]
 	var section := HeartkeepApproachRegion.new()
 	return [layout, slot, section, section.generate(slot, layout.rng_for(slot.id, 0))]
@@ -32,9 +32,9 @@ func _reach(result: SectionResult, start: Vector2i) -> Dictionary:
 
 func test_the_valley_builds_with_no_problems_for_seeds_1_to_300() -> void:
 	for seed in range(1, LAST_SEED + 1):
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		assert_not_null(layout, "seed %d" % seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout, true)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout, true)
 		assert_not_null(map, "seed %d" % seed)
 		if map != null:
 			assert_true(map.heartstone.has_point(map.path[map.path.size() - 1]))
@@ -43,7 +43,7 @@ func test_the_valley_builds_with_no_problems_for_seeds_1_to_300() -> void:
 func test_some_attempt_of_the_budget_passes_the_section_checks_with_five_or_six_blocks() -> void:
 	var first_failures := 0
 	for seed in range(1, LAST_SEED + 1):
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		var slot := layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH]
 		var section := HeartkeepApproachRegion.new()
 		assert_eq(section.socket_range(), Vector2i(5, 6))
@@ -65,7 +65,7 @@ func test_the_road_ends_on_the_east_edge_on_the_floor_without_lanes() -> void:
 		var result: SectionResult = drawn[3]
 		var road := result.road
 		assert_eq(road[road.size() - 1], slot.exit)
-		assert_eq(slot.exit.x, 31)
+		assert_eq(slot.exit.x, 39)
 		assert_not_null(result.road_curve)
 		for step in road:
 			assert_eq(result.height_at(step), 0)
@@ -111,7 +111,7 @@ func test_the_same_seed_draws_the_same_region() -> void:
 func test_the_road_is_the_composed_spine() -> void:
 	# the section draws no road of its own (#434): it lays the layout's composed road
 	for seed in SEEDS:
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		var slot := layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH]
 		var result := HeartkeepApproachRegion.new().generate(slot, layout.rng_for(slot.id, 0))
 		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)

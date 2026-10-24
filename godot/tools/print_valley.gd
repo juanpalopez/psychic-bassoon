@@ -22,8 +22,10 @@ func _init() -> void:
 	var plan: ValleyLayout = null
 	var map: GameMap = null
 	if layout:
-		plan = ValleyLayout.generate(seed, 32, 20)
-		map = ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), plan)
+		plan = ValleyLayout.generate(seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS)
+		map = ValleyStitcher.build(
+			seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS, ValleyLayout.sections(), plan
+		)
 	else:
 		map = MapGen.game_map(seed)
 	if map == null:

@@ -7,7 +7,7 @@ const SWEEP_LAST := 300
 
 
 func _layout(seed: int) -> ValleyLayout:
-	return ValleyLayout.generate(seed, 32, 20)
+	return ValleyLayout.generate(seed, 40, 24)
 
 
 func test_the_composed_route_passes_the_layout_checks_and_the_stitcher() -> void:
@@ -16,7 +16,7 @@ func test_the_composed_route_passes_the_layout_checks_and_the_stitcher() -> void
 		assert_not_null(layout, "seed %d" % seed)
 		assert_true(layout.problems().is_empty(), "seed %d" % seed)
 		assert_not_null(
-			ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout), "seed %d" % seed
+			ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout), "seed %d" % seed
 		)
 
 

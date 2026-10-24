@@ -14,8 +14,8 @@ var _maps := {}
 
 func _layout_valley(seed: int) -> GameMap:
 	if not _maps.has(seed):
-		var layout := ValleyLayout.generate(seed, 32, 20)
-		_maps[seed] = ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		var layout := ValleyLayout.generate(seed, 40, 24)
+		_maps[seed] = ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 	return _maps[seed]
 
 
