@@ -95,21 +95,23 @@ static func reaches_road(block: Rect2i, road: Array[Vector2i]) -> bool:
 
 ## True when at least `SOCKET_MIN_ROAD_COVERAGE` road cells are within the coverage reach (plus
 ## `extra`) of the block's centre.
-static func covers(block: Rect2i, road: Array[Vector2i], extra: float) -> bool:
+static func covers(
+	block: Rect2i, road: Array[Vector2i], extra: float, reach: float = RULES.SOCKET_COVERAGE_REACH
+) -> bool:
 	var near := 0
 	for cell in road:
-		if centre_gap(block.position, cell) <= RULES.SOCKET_COVERAGE_REACH + extra:
+		if centre_gap(block.position, cell) <= reach + extra:
 			near += 1
 	return near >= RULES.SOCKET_MIN_ROAD_COVERAGE
 
 
 ## The reach rule of a section: the same for the one-cell road and for a band. A level 1 tower on
 ## the block covers at least `SOCKET_MIN_ROAD_COVERAGE` road cells (the centre line) within
-## `SOCKET_COVERAGE_REACH`; a block the band keeps too far from the road is not placed (#430).
+## `BAND_COVERAGE_REACH`; a block the band keeps too far from the road is not placed (#430).
 static func reaches(result: SectionResult, block: Rect2i) -> bool:
 	if result.road_width <= 0.0:
 		return reaches_road(block, result.road)
-	return covers(block, result.road, 0.0)
+	return covers(block, result.road, 0.0, ROAD.BAND_COVERAGE_REACH)
 
 
 ## How far a block's centre (a 2x2 block's centre is on a cell corner) is from a cell's centre.
@@ -159,26 +161,49 @@ static func bend_reach(result: SectionResult) -> float:
 
 
 ## The nearest a block's centre may be to the road's curve with a band: the band's half width,
-## the clearance and the block's own half width.
+## the clearance and the block's own half width. A block nearer than this is on the band.
 static func least_gap(result: SectionResult) -> float:
 	var half := float(RULES.GAME_SOCKET_FOOTPRINT) / 2.0
 	return result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS + half
 
 
-## True when the block's edge keeps `ROAD_CLEARANCE_CELLS` from the road band's edge. Always true
-## without a band.
+## True when no cell of the block is within the band (`ROAD_CLEARANCE_CELLS` more): the block's
+## square, not its centre, keeps off the curve, because a cell the curve reaches is road (#469).
+## Always true without a band.
 static func off_band(result: SectionResult, block: Rect2i) -> bool:
-	return result.road_width <= 0.0 or _curve_gap(result, block) >= least_gap(result)
-
-
-## How far the block's centre is from the road's curve (the main road and the feeder).
-static func _curve_gap(result: SectionResult, block: Rect2i) -> float:
+	if result.road_width <= 0.0:
+		return true
 	var half := float(RULES.GAME_SOCKET_FOOTPRINT) / 2.0
 	var centre := Vector2(block.position) + Vector2(half, half)
-	var main := (
-		result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)
-	)
-	var gap := main.distance_to(centre.x, centre.y)
+	var keep := result.road_width / 2.0 + ROAD.ROAD_CLEARANCE_CELLS
+	var gap := _curve_gap(result, centre)
+	# the block's centre is at least half a block from its square's edge, at most the diagonal
+	if gap < keep + half:
+		return false
+	if gap >= keep + half * sqrt(2.0):
+		return true
+	return _square_gap(result, block) >= keep
+
+
+static func _square_gap(result: SectionResult, block: Rect2i) -> float:
+	var gap := _main_curve(result).rect_gap(block.position.x, block.position.y, block.size.x)
+	if result.feeder_curve != null:
+		gap = minf(
+			gap, result.feeder_curve.rect_gap(block.position.x, block.position.y, block.size.x)
+		)
+	elif not result.feeder.is_empty():
+		var feeder := RoadCurve.from_cells(result.feeder)
+		gap = minf(gap, feeder.rect_gap(block.position.x, block.position.y, block.size.x))
+	return gap
+
+
+static func _main_curve(result: SectionResult) -> RoadCurve:
+	return result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)
+
+
+## How far a point is from the road's curve (the main road and the feeder).
+static func _curve_gap(result: SectionResult, centre: Vector2) -> float:
+	var gap := _main_curve(result).distance_to(centre.x, centre.y)
 	if result.feeder_curve != null:
 		gap = minf(gap, result.feeder_curve.distance_to(centre.x, centre.y))
 	elif not result.feeder.is_empty():

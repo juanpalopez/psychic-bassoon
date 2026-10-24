@@ -68,7 +68,7 @@ Notes for picking this work up in a local session. GitHub (tickets, PRs, comment
 ## Work queue (in order; the epics are the umbrellas)
 
 **Epic #404: map depth (the layout valley)**
-1. **#469, road cells under the curve:** the owner picks one of four options (below). It blocks the wide road and #461.
+1. **#469, road cells under the curve:** resolved by PR #490 (options 2 and 3). The wide road (#446) and #461 are unblocked.
 2. **#480, grow the layout valley to 40 by 24:** done in part. The sim grows the layout valley (PR #485), `BoardSpace` takes its size from the map in use (PR #484), and this docs PR records it. Still open: the camera limits and the terrain and scenery caps at 40 by 24 (PR-D, `feat/layout-valley-render-budget`); #480 closes when that merges.
 3. **#481, fork the road into two river crossings** for foes and the hero. Foes pick a branch from the seed; the gate is measured per branch.
 4. **#460, the longer road:** re-plan step 2 on the 40 by 24 grid, beside #481.
@@ -94,11 +94,7 @@ Put these on the project board by hand: #446, #449–#453, #458, #460–#462, #4
 
 ## Decisions waiting for the owner
 
-- **#469 (road cells under the curve):** marking every cell the 0.9 bed overlaps makes almost no layout stitch under the "3 centre-line cells in reach" socket rule (2 of 89 draws). The work is on the branch `wip/469-road-band`, not for merge (it has `BAND_SLACK` experiment constants). Options:
-  1. Count curve length in reach instead of cells.
-  2. Raise `SOCKET_COVERAGE_REACH` to about 2.7.
-  3. Fix it on the render side instead: clip the bed or snap the cells.
-  4. Reject roads with many diagonals.
+- **#469 (road cells under the curve):** resolved by PR #490 with the owner's options 2 and 3 (2026-10-24): the band is on at 0.9, every cell the bed touches is road, and bands count the centre line within 2.7 (`BAND_COVERAGE_REACH`). The wider band stays in #446. The branch `wip/469-road-band` is superseded.
 - **Knight balance (#467):** the Knight at its home spot adds about 4 median waves to the bot's runs, and losses fall from 8 to 5 of 12. Tune `godot/content/heroes.gd` or keep it.
 - **The 3A re-gating:**
   - May `GATE_INSET` be 2?

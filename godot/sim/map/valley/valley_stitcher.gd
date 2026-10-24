@@ -5,6 +5,7 @@ extends RefCounted
 
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
+const ROAD := preload("res://content/valley/road_rules.gd")
 
 
 ## The valley for a seed, or null (with an error, unless `quiet`) when a section keeps failing its
@@ -80,9 +81,10 @@ static func _assemble(plan: ValleyPlan, results: Array[SectionResult]) -> GameMa
 	return map
 
 
-## Every cell whose centre is within half the band's width of a route's curve is `Tile.ROAD`
-## (#430), so nothing treats it as ground to build on. The centre-line cells (`path`) stay as
-## they are.
+## Every cell any part of which is within half the band's width of a route's curve is `Tile.ROAD`
+## (#430, #469), so nothing treats it as ground to build on and the drawn bed never leaves the
+## road cells (a curve running diagonally across a staircase of cells touches cells whose centres
+## lie further off). The centre-line cells (`path`) stay as they are.
 static func _mark_band(map: GameMap) -> void:
 	var half := map.road_width / 2.0
 	for curve: RoadCurve in map.route_curves:
@@ -93,10 +95,7 @@ static func _mark_band(map: GameMap) -> void:
 			var high := a.max(b) + Vector2(half, half)
 			for y in range(maxi(int(floor(low.y)), 0), mini(int(floor(high.y)) + 1, map.rows)):
 				for x in range(maxi(int(floor(low.x)), 0), mini(int(floor(high.x)) + 1, map.cols)):
-					var centre := Vector2(
-						float(x) + RULES.CELL_CENTRE, float(y) + RULES.CELL_CENTRE
-					)
-					if curve.segment_gap(index, centre.x, centre.y) <= half:
+					if curve.segment_rect_gap(index, x, y, 1) < half:
 						map.tiles[y][x] = GameMap.Tile.ROAD
 
 

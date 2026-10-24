@@ -49,6 +49,86 @@ func segment_gap(index: int, x: float, y: float) -> float:
 	return sqrt(_gap_squared(index, x, y))
 
 
+## The distance from the curve to the square of `size` cells whose corner cell is (`cell_x`,
+## `cell_y`): 0 where it touches it. A road band covers a cell, and a socket block must keep off
+## the band, by this.
+func rect_gap(cell_x: int, cell_y: int, size: int) -> float:
+	var best := 1.0e30
+	var left := float(cell_x)
+	var top := float(cell_y)
+	var right := left + float(size)
+	var bottom := top + float(size)
+	for index in xs.size():
+		# a segment whose box is further than the best so far cannot be nearer
+		var reach := sqrt(best) if best < 1.0e29 else 1.0e30
+		var next := mini(index + 1, xs.size() - 1)
+		if (
+			maxf(xs[index], xs[next]) < left - reach
+			or minf(xs[index], xs[next]) > right + reach
+			or maxf(ys[index], ys[next]) < top - reach
+			or minf(ys[index], ys[next]) > bottom + reach
+		):
+			continue
+		best = minf(best, _rect_gap_squared(index, left, top, right, bottom))
+	return sqrt(best)
+
+
+## The same for the segment that starts at point `index` (the last point stands alone).
+func segment_rect_gap(index: int, cell_x: int, cell_y: int, size: int) -> float:
+	var left := float(cell_x)
+	var top := float(cell_y)
+	return sqrt(_rect_gap_squared(index, left, top, left + float(size), top + float(size)))
+
+
+func _rect_gap_squared(index: int, left: float, top: float, right: float, bottom: float) -> float:
+	var next := mini(index + 1, xs.size() - 1)
+	var ax := xs[index]
+	var ay := ys[index]
+	var bx := xs[next]
+	var by := ys[next]
+	if _crosses(ax, ay, bx, by, left, top, right, bottom):
+		return 0.0
+	# the segments do not cross the square, so the nearest pair is an end against the square or a
+	# corner against the segment
+	var best := _gap_squared(index, left, top)
+	best = minf(best, _gap_squared(index, right, top))
+	best = minf(best, _gap_squared(index, left, bottom))
+	best = minf(best, _gap_squared(index, right, bottom))
+	var dx := maxf(maxf(left - ax, ax - right), 0.0)
+	var dy := maxf(maxf(top - ay, ay - bottom), 0.0)
+	best = minf(best, dx * dx + dy * dy)
+	dx = maxf(maxf(left - bx, bx - right), 0.0)
+	dy = maxf(maxf(top - by, by - bottom), 0.0)
+	return minf(best, dx * dx + dy * dy)
+
+
+## Whether the segment a to b meets the rectangle (Liang-Barsky clipping).
+static func _crosses(
+	ax: float, ay: float, bx: float, by: float, left: float, top: float, right: float, bottom: float
+) -> bool:
+	var enter := 0.0
+	var leave := 1.0
+	var step := bx - ax
+	if step == 0.0:
+		if ax < left or ax > right:
+			return false
+	else:
+		var t0 := (left - ax) / step
+		var t1 := (right - ax) / step
+		enter = maxf(enter, minf(t0, t1))
+		leave = minf(leave, maxf(t0, t1))
+	step = by - ay
+	if step == 0.0:
+		if ay < top or ay > bottom:
+			return false
+	else:
+		var t0 := (top - ay) / step
+		var t1 := (bottom - ay) / step
+		enter = maxf(enter, minf(t0, t1))
+		leave = minf(leave, maxf(t0, t1))
+	return enter <= leave
+
+
 func _gap_squared(index: int, x: float, y: float) -> float:
 	var next := mini(index + 1, xs.size() - 1)
 	var ax := xs[index]

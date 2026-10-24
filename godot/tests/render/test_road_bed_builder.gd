@@ -122,10 +122,11 @@ func test_the_curves_built_from_the_cells_lie_on_the_bed_too() -> void:
 
 
 func test_the_bed_keeps_to_the_road_cells() -> void:
-	for map_seed in SEEDS:
-		var setup := _setup(map_seed)
+	# the layout valley's road is a diagonal spline over a staircase of cells; its band marks every
+	# cell the bed touches as road (#469), so the bed has nothing to poke out of
+	for setup in _setups():
 		var map: GameMap = setup.map
-		var bed := _bed(setup, (setup.game as GameState).routes)
+		var bed := _bed(setup, setup.routes)
 		var worst := 0.0
 		for i in range(0, bed.size(), 3):
 			var a := bed[i]
@@ -135,7 +136,7 @@ func test_the_bed_keeps_to_the_road_cells() -> void:
 				a, b, c, (a + b + c) / 3.0, (a + b) / 2.0, (b + c) / 2.0, (a + c) / 2.0
 			]:
 				worst = maxf(worst, _past_the_road(map, at))
-		assert_lt(worst, CORNER_TOLERANCE, "the bed leaves the road cells, seed %d" % map_seed)
+		assert_lt(worst, CORNER_TOLERANCE, "the bed leaves the road cells, %s" % setup.label)
 
 
 func test_the_bed_never_sinks_into_the_gorge() -> void:
