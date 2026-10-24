@@ -419,7 +419,7 @@ static func _guards_in_aura(game: GameState, mess: Tower) -> Array[Guard]:
 	for guard in game.guards:
 		if not guard.alive:
 			continue
-		var at := game.routes[0].position_at(guard.post)
+		var at := Barracks.post_point(game, guard)
 		var dx := at.x - centre.x
 		var dy := at.y - centre.y
 		if dx * dx + dy * dy <= reach * reach:

@@ -1,0 +1,107 @@
+[
+  {
+    "name": "the branch's head is exclusive",
+    "file": "sim/map/route_link.gd",
+    "old": "\tif distance <= head:",
+    "new": "\tif distance < head:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the branch's tail is inclusive of the last own point",
+    "file": "sim/map/route_link.gd",
+    "old": "\tif distance < tail_route:",
+    "new": "\tif distance <= tail_route:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "from_main head is exclusive",
+    "file": "sim/map/route_link.gd",
+    "old": "\tif along <= head:",
+    "new": "\tif along < head:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "from_main tail is inclusive",
+    "file": "sim/map/route_link.gd",
+    "old": "\tif along < tail_main:",
+    "new": "\tif along <= tail_main:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the tail offset is dropped going onto the branch",
+    "file": "sim/map/route_link.gd",
+    "old": "\treturn along + offset()",
+    "new": "\treturn along",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the tail offset has the wrong sign",
+    "file": "sim/map/route_link.gd",
+    "old": "\treturn distance - offset()",
+    "new": "\treturn distance + offset()",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "main_distance ignores the links",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\tif game.links.has(foe.route):",
+    "new": "\tif false:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "a foe of the guard's own branch is mapped through the main road",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\tif foe.route == route:\n\t\treturn foe.distance",
+    "new": "\tif foe.route == route and route == 0:\n\t\treturn foe.distance",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "guards hold foes by the main road only",
+    "file": "sim/barracks/barracks.gd",
+    "old": "along(game, foe, guard.route)",
+    "new": "along(game, foe, 0)",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "guards never leave the main road",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\t\tguard.route = spot.route",
+    "new": "\t\tguard.route = 0",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the branch is never nearer",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\t\t\tif squared < best_distance:\n\t\t\t\tbest_distance = squared\n\t\t\t\tspot.route",
+    "new": "\t\t\tif false:\n\t\t\t\tbest_distance = squared\n\t\t\t\tspot.route",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the aura reads the main road",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\tvar at := post_point(game, guard)\n\tfor tent in tents:",
+    "new": "\tvar at := game.routes[0].position_at(guard.post)\n\tfor tent in tents:",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "post_point reads the main road",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\treturn game.routes[guard.route].position_at(guard.post)",
+    "new": "\treturn game.routes[0].position_at(guard.post)",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "Fortified Feast reads the main road",
+    "file": "sim/specs/specs.gd",
+    "old": "\t\tvar at := Barracks.post_point(game, guard)\n\t\tvar dx",
+    "new": "\t\tvar at := game.routes[0].position_at(guard.post)\n\t\tvar dx",
+    "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the links are never built",
+    "file": "sim/game/game.gd",
+    "old": "\t\tgame.links[fork.route] = RouteLink.of(",
+    "new": "\t\tgame.links[fork.route + 100] = RouteLink.of(",
+    "tests": ["test_fork_guards"]
+  }
+]

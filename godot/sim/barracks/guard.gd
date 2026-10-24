@@ -4,7 +4,9 @@ extends Fighter
 
 ## The tower (a Guard Tent) it belongs to.
 var tent_id: int = 0
-## Where it stands, in cells walked along `routes[0]`.
+## The route it stands on (0 is the main road, or a branch of a fork).
+var route: int = 0
+## Where it stands, in cells walked along `routes[route]`.
 var post: float = 0.0
 ## Bonuses from a Kitchen Mess Tent whose aura holds the guard's post, set each tick:
 ## a share more blows, and hp a second more regeneration.

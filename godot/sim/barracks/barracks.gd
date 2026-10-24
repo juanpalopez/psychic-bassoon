@@ -9,11 +9,18 @@ const TOWERS := preload("res://content/towers.gd")
 const RULES := preload("res://content/game_rules.gd")
 
 
+## Where a tent's guards stand: a route and the distance along it.
+class PostSpot:
+	extends RefCounted
+	var route: int = 0
+	var along: float = 0.0
+
+
 ## Raises the guards of a freshly built Guard Tent at their post.
 static func raise_guards(game: GameState, tent: Tower) -> void:
 	var def: Dictionary = TOWERS.DEFS[tent.type]
 	var count: int = def.guard_count
-	var middle := post_for(game, tent)
+	var spot := post_spot(game, tent)
 	for i in count:
 		var guard := Guard.new()
 		guard.id = game.next_id
@@ -21,7 +28,8 @@ static func raise_guards(game: GameState, tent: Tower) -> void:
 		guard.tent_id = tent.id
 		guard.radius = def.guard_radius
 		var offset: float = (float(i) - float(count - 1) / 2.0) * float(def.guard_spacing)
-		guard.post = clampf(middle + offset, 0.0, game.routes[0].total)
+		guard.route = spot.route
+		guard.post = clampf(spot.along + offset, 0.0, game.routes[spot.route].total)
 		_set_level(guard, def, tent.level)
 		guard.hp = guard.max_hp
 		game.guards.append(guard)
@@ -61,20 +69,48 @@ static func release_guards(game: GameState, tent: Tower) -> void:
 ## The tent's `range` is the reach shown to the player; a socket is always within
 ## the block touch distance of the road (`MapRules`), so the nearest point is in reach.
 static func post_for(game: GameState, tent: Tower) -> float:
-	var route := game.routes[0]
+	return post_spot(game, tent).along
+
+
+## Where the guards of the tent stand: the main road's post (`post_for`), unless a branch of a
+## fork has a point strictly nearer the tent's block, on the branch's own stretch only (the
+## shared stretches are the main road's). A tent equally near both keeps the main road.
+static func post_spot(game: GameState, tent: Tower) -> PostSpot:
 	var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
-	var best := 0.0
+	var spot := PostSpot.new()
+	var route := game.routes[0]
 	var best_distance := INF
 	for i in int(floor(route.total / RULES.GUARD_POST_STEP)) + 1:
-		var along := float(i) * RULES.GUARD_POST_STEP
-		var at := route.position_at(along)
-		var dx := at.x - centre.x
-		var dy := at.y - centre.y
-		var squared := dx * dx + dy * dy
+		var step := float(i) * RULES.GUARD_POST_STEP
+		var squared := _squared_gap(route, step, centre)
 		if squared <= best_distance:
 			best_distance = squared
-			best = along
-	return best
+			spot.along = step
+	for fork in game.map.forks:
+		var link: RouteLink = game.links[fork.route]
+		var branch := game.routes[fork.route]
+		for i in int(floor(branch.total / RULES.GUARD_POST_STEP)) + 1:
+			var step := float(i) * RULES.GUARD_POST_STEP
+			if step <= link.head or step >= link.tail_route:
+				continue
+			var squared := _squared_gap(branch, step, centre)
+			if squared < best_distance:
+				best_distance = squared
+				spot.route = fork.route
+				spot.along = step
+	return spot
+
+
+static func _squared_gap(route: Route, along: float, centre: Vector2) -> float:
+	var at := route.position_at(along)
+	var dx := at.x - centre.x
+	var dy := at.y - centre.y
+	return dx * dx + dy * dy
+
+
+## Where a guard stands on the board.
+static func post_point(game: GameState, guard: Guard) -> RoutePoint:
+	return game.routes[guard.route].position_at(guard.post)
 
 
 ## One tick of every guard: raise, heal, take a foe, fight.
@@ -135,7 +171,7 @@ static func _apply_auras(game: GameState) -> void:
 static func _aura_bonuses(game: GameState, guard: Guard, tents: Array[Tower]) -> Array[float]:
 	var toughness := 0.0
 	var rush := 0.0
-	var at := game.routes[0].position_at(guard.post)
+	var at := post_point(game, guard)
 	for tent in tents:
 		var def: Dictionary = TOWERS.DEFS[tent.type]
 		var centre := game.map.socket_centre(Vector2i(tent.col, tent.row))
@@ -185,7 +221,9 @@ static func _tent_of(game: GameState, guard: Guard) -> Tower:
 
 
 ## How far along the main route the foe is, or -1 when it is not on the main road yet: a foe
-## of the second route is on it from the join on, `second_offset` further along its own route.
+## of the second route is on it from the join on, `second_offset` further along its own route,
+## and a foe on a branch of a fork is on it where the branch shares the main road's line (its
+## `RouteLink`), and not on the branch's own stretch.
 ## On the old random detour (`random_lanes`) a foe of another lane is never on the main road.
 ## The join is tested in main-road terms (the main road's join cell): on curved routes the
 ## second route's own join point maps a little past it, which would let a foe walk through a
@@ -195,10 +233,24 @@ static func main_distance(game: GameState, foe: Foe) -> float:
 		return foe.distance
 	if game.random_lanes:
 		return -1.0
+	if game.links.has(foe.route):
+		return (game.links[foe.route] as RouteLink).to_main(foe.distance)
 	var along := foe.distance - game.second_offset
 	if along < game.routes[0].cell_distance(game.map.join_index):
 		return -1.0
 	return along
+
+
+## How far along `route` the foe is, or -1 when it is not on that route's line: a foe on the
+## route has its own distance; any other is placed on the main road (`main_distance`) and from
+## there onto the branch (-1 on the main road's stretch beside the branch's own).
+static func along(game: GameState, foe: Foe, route: int) -> float:
+	if foe.route == route:
+		return foe.distance
+	var main := main_distance(game, foe)
+	if route == 0 or main < 0.0:
+		return main
+	return (game.links[route] as RouteLink).from_main(main)
 
 
 ## The blockable, free foe nearest the guard's post that has walked up to it.
@@ -208,13 +260,13 @@ static func _take_a_foe(game: GameState, guard: Guard) -> Foe:
 	for foe in game.foes:
 		if not foe.alive or not foe.blockable or foe.engaged_guard_id != -1:
 			continue
-		var along := main_distance(game, foe)
+		var reached := along(game, foe, guard.route)
 		var stop := guard.post - guard.radius - foe.radius
-		if along < 0.0 or along < stop or along > guard.post:
+		if reached < 0.0 or reached < stop or reached > guard.post:
 			continue
-		if best == null or along > best_along:
+		if best == null or reached > best_along:
 			best = foe
-			best_along = along
+			best_along = reached
 	if best == null:
 		return null
 	Melee.hold(guard, best)
