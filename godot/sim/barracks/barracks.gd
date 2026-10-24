@@ -223,7 +223,8 @@ static func _tent_of(game: GameState, guard: Guard) -> Tower:
 ## How far along the main route the foe is, or -1 when it is not on the main road yet: a foe
 ## of the second route is on it from the join on, `second_offset` further along its own route,
 ## and a foe on a branch of a fork is on it where the branch shares the main road's line (its
-## `RouteLink`), and not on the branch's own stretch.
+## `RouteLink`), and not on the branch's own stretch. (Known gap, #502: the Ink Vortex and zones
+## read this too, so they ignore a foe on a branch's own stretch.)
 ## On the old random detour (`random_lanes`) a foe of another lane is never on the main road.
 ## The join is tested in main-road terms (the main road's join cell): on curved routes the
 ## second route's own join point maps a little past it, which would let a foe walk through a

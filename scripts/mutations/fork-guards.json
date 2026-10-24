@@ -103,5 +103,54 @@
     "old": "\t\tgame.links[fork.route] = RouteLink.of(",
     "new": "\t\tgame.links[fork.route + 100] = RouteLink.of(",
     "tests": ["test_fork_guards"]
+  },
+  {
+    "name": "the branch point wins a tie",
+    "file": "sim/barracks/barracks.gd",
+    "old": "\t\t\tif squared < best_distance:",
+    "new": "\t\t\tif squared <= best_distance:",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "a point at the head is on the branch's own stretch",
+    "file": "sim/barracks/barracks.gd",
+    "old": "if step <= link.head",
+    "new": "if step < link.head",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "a point at the tail is on the branch's own stretch",
+    "file": "sim/barracks/barracks.gd",
+    "old": "step >= link.tail_route",
+    "new": "step > link.tail_route",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "the head ignores the settle cells",
+    "file": "sim/map/route_link.gd",
+    "old": "maxi(fork.fork_index - settle, 0)",
+    "new": "fork.fork_index",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "the merge on the main road ignores the settle cells",
+    "file": "sim/map/route_link.gd",
+    "old": "mini(fork.merge_index + settle,",
+    "new": "mini(fork.merge_index,",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "the merge on the branch ignores the settle cells",
+    "file": "sim/map/route_link.gd",
+    "old": "fork.fork_index + 1 + fork.branch_length + settle",
+    "new": "fork.fork_index + 1 + fork.branch_length",
+    "tests": ["test_fork_guards_curved"]
+  },
+  {
+    "name": "guards are clamped to the main road's length",
+    "file": "sim/barracks/barracks.gd",
+    "old": "game.routes[spot.route].total",
+    "new": "game.routes[0].total",
+    "tests": ["test_fork_guards_curved"]
   }
 ]

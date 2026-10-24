@@ -20,15 +20,20 @@ const BRANCH_SOCKET := Vector2i(6, 1)
 const MAIN_SOCKET := Vector2i(6, 6)
 const TAIL_SOCKET := Vector2i(11, 6)
 const AURA_SOCKET := Vector2i(7, 3)
+## Equally near the main road and the branch (both rows are one cell from its middle).
+const TIE_SOCKET := Vector2i(6, 3)
+## A board this wide draws curved routes (`Route.for_map`): the branch's corners at the fork and
+## the merge round, so its line differs from the main road's for a few cells there.
+const CURVED_COLS := 24
 
 
 ## The map with a fork: routes `[main, feeder, branch]` and sources `[[0, 2], [1]]`.
-static func map() -> GameMap:
+static func map(cols: int = COLS) -> GameMap:
 	var map := GameMap.new()
-	map.cols = COLS
+	map.cols = cols
 	map.rows = ROWS
-	map.heartstone = Rect2i(COLS - 1, MAIN_ROW, 1, 1)
-	for x in COLS:
+	map.heartstone = Rect2i(cols - 1, MAIN_ROW, 1, 1)
+	for x in cols:
 		map.path.append(Vector2i(x, MAIN_ROW))
 	var feeder: Array[Vector2i] = []
 	for x in range(0, FEEDER_JOIN + 1):
@@ -56,8 +61,13 @@ static func map() -> GameMap:
 	fork.merge_index = MERGE_CELL
 	fork.branch_length = branch.size() - map.path.size() + (MERGE_CELL - FORK_CELL - 1)
 	map.forks = [fork]
-	map.sockets = [BRANCH_SOCKET, MAIN_SOCKET, TAIL_SOCKET, AURA_SOCKET]
+	map.sockets = [BRANCH_SOCKET, MAIN_SOCKET, TAIL_SOCKET, AURA_SOCKET, TIE_SOCKET]
 	return map
+
+
+## The map on a board wide enough for curved routes.
+static func curved_map() -> GameMap:
+	return map(CURVED_COLS)
 
 
 ## The same map without the fork: no branch route, no sources.
