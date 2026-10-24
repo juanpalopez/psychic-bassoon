@@ -80,6 +80,9 @@ var _camera: Camera3D
 var _aspect := 16.0 / 9.0
 # the whole-board distance for the current aspect, so a drag never recomputes it
 var _fit := 0.0
+# the board size `_fit` and `_range` were measured for (the map in use can change)
+var _fit_board := Vector2.ZERO
+var _range_board := Vector2.ZERO
 var _pan_raw := Vector2.ZERO
 var _range := Rect2()
 var _range_key := Vector4(-1.0, -1.0, -1.0, -1.0)
@@ -307,7 +310,7 @@ func camera() -> Camera3D:
 ## Places the camera for a screen of this aspect ratio.
 func frame(aspect: float) -> void:
 	_aspect = maxf(aspect, MIN_ASPECT)
-	_fit = _fit_now()
+	_fit = 0.0
 	_place()
 
 
@@ -345,10 +348,12 @@ func ground_under(pixel: Vector2) -> Vector2:
 ## plus `SCENERY_MARGIN`, so the map's outer rows can come to the middle of the screen with
 ## scenery around them.
 func pan_range() -> Rect2:
-	# the range only changes with the zoom, the screen shape, the fit and the canvas height
+	# the range only changes with the zoom, the screen shape, the fit, the canvas height and the board
+	_current_fit()
 	var key := Vector4(zoom, _aspect, _fit, canvas_height)
-	if key != _range_key:
+	if key != _range_key or BoardSpace.size() != _range_board:
 		_range_key = key
+		_range_board = BoardSpace.size()
 		_range = pan_range_at(zoom)
 	return _range
 
@@ -538,10 +543,18 @@ func _distance() -> float:
 
 
 func _distance_at(zoom_value: float) -> float:
-	if _fit <= 0.0:
+	var fit := _current_fit()
+	var closest := closest_distance(fov_degrees, _viewport_height(), fit)
+	return lerpf(fit, closest, clampf(zoom_value, 0.0, 1.0))
+
+
+## The whole-board distance for the board in use, measured again when the map's size changed.
+func _current_fit() -> float:
+	var board := BoardSpace.size()
+	if _fit <= 0.0 or board != _fit_board:
+		_fit_board = board
 		_fit = _fit_now()
-	var closest := closest_distance(fov_degrees, _viewport_height(), _fit)
-	return lerpf(_fit, closest, clampf(zoom_value, 0.0, 1.0))
+	return _fit
 
 
 func _place() -> void:

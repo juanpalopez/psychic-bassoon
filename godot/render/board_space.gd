@@ -6,6 +6,11 @@
 ## the left edge and ends at the right. This is the one place that knows (render
 ## code never converts on its own). A cell is one unit wide and the board is
 ## centred on the origin, on the ground plane y = 0.
+##
+## The board is the map in use: `Board` sets its size when it draws a map
+## (`use_map`) and it is the game board (`RULES`) until then. The size is
+## static, so a board that is freed gives it back (`reset`), and tests name the
+## board they use.
 class_name BoardSpace
 extends RefCounted
 
@@ -14,14 +19,26 @@ const RULES := preload("res://content/map_rules.gd")
 ## What `world_to_cell` and the cell picker return for a point off the board.
 const NO_CELL := Vector2i(-1, -1)
 
+## The board's size in cells, as the map in use has it (the game board until `use_map`).
+static var _cols: int = RULES.GRID_COLS
+static var _rows: int = RULES.GRID_ROWS
+
+
+## Makes the board `cols` by `rows` cells, for every conversion, the size and the
+## corners, until `reset` (or another `use_map`).
+static func use_map(cols: int, rows: int) -> void:
+	_cols = cols
+	_rows = rows
+
+
+## Gives the board back to the game board's size.
+static func reset() -> void:
+	use_map(RULES.GRID_COLS, RULES.GRID_ROWS)
+
 
 ## The centre of a cell, on the ground.
 static func cell_to_world(col: int, row: int) -> Vector3:
-	return Vector3(
-		float(col) - float(RULES.GRID_COLS - 1) / 2.0,
-		0.0,
-		float(row) - float(RULES.GRID_ROWS - 1) / 2.0
-	)
+	return Vector3(float(col) - float(_cols - 1) / 2.0, 0.0, float(row) - float(_rows - 1) / 2.0)
 
 
 ## The middle of a square block of `footprint` cells whose top-left cell is
@@ -35,7 +52,7 @@ static func footprint_centre(anchor: Vector2i, footprint: int) -> Vector3:
 ## The board's footprint in cells: x is across the screen (the columns), y is
 ## its depth (the rows).
 static func size() -> Vector2:
-	return Vector2(float(RULES.GRID_COLS), float(RULES.GRID_ROWS))
+	return Vector2(float(_cols), float(_rows))
 
 
 ## The four outer corners of the board, on the ground.
@@ -54,15 +71,15 @@ static func corners() -> Array[Vector3]:
 ## starts by going right has its spawn point a little left of column 0
 ## (negative x). At a cell centre this agrees with `cell_to_world`.
 static func point_to_world(sim_x: float, sim_y: float) -> Vector3:
-	return Vector3(sim_x - float(RULES.GRID_COLS) / 2.0, 0.0, sim_y - float(RULES.GRID_ROWS) / 2.0)
+	return Vector3(sim_x - float(_cols) / 2.0, 0.0, sim_y - float(_rows) / 2.0)
 
 
 ## The cell under a point on the ground, or `NO_CELL` when it is off the board.
 ## The inverse of `cell_to_world` (any point inside a cell gives that cell).
 static func world_to_cell(point: Vector3) -> Vector2i:
-	var col := int(floor(point.x + float(RULES.GRID_COLS) / 2.0))
-	var row := int(floor(point.z + float(RULES.GRID_ROWS) / 2.0))
-	if row < 0 or row >= RULES.GRID_ROWS or col < 0 or col >= RULES.GRID_COLS:
+	var col := int(floor(point.x + float(_cols) / 2.0))
+	var row := int(floor(point.z + float(_rows) / 2.0))
+	if row < 0 or row >= _rows or col < 0 or col >= _cols:
 		return NO_CELL
 	return Vector2i(col, row)
 
