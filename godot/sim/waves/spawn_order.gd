@@ -6,7 +6,8 @@ extends RefCounted
 var type: String = ""
 ## Seconds to wait after this foe.
 var gap: float = 0.0
-## The route it walks (an index into `GameState.routes`), or -1 to let the game choose.
+## The spawn source it comes from, or -1 to let the game choose. Where a map lists no sources
+## (every board without a fork) a source is a route, an index into `GameState.routes`.
 var route: int = -1
 
 

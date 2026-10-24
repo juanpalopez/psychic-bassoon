@@ -13,7 +13,7 @@ const WAVES := preload("res://content/waves.gd")
 static func start(game: GameState) -> void:
 	var spawner := Spawner.new()
 	# a second spawn source splits the waves; the old random detour does not
-	var sources := 1 if game.random_lanes else game.routes.size()
+	var sources := 1 if game.random_lanes else game.map.source_count()
 	spawner.queue = WaveBuilder.build(game.wave, game.rng, sources)
 	spawner.timer = WAVES.FIRST_SPAWN_DELAY
 	spawner.wave = game.wave
@@ -26,7 +26,8 @@ static func step_spawners(game: GameState) -> void:
 		spawner.timer -= Game.TICK_SECONDS
 		while spawner.timer <= 0.0 and not spawner.queue.is_empty():
 			var order: SpawnOrder = spawner.queue.pop_front()
-			FoeSpawner.spawn(game, order.type, spawner.wave, order.route)
+			var route := FoeSpawner.route_of_source(game, order.route)
+			FoeSpawner.spawn(game, order.type, spawner.wave, route)
 			spawner.timer += order.gap
 	var finished := false
 	for spawner in game.spawners:
