@@ -19,10 +19,15 @@ Notes for picking this work up in a local session. GitHub (tickets, PRs, comment
 - **The Knight** is on the game board in every run. Mechanic test boards add it only when needed. It moves anywhere walkable. A new move order releases the foe it holds, but a foe that keeps attacking it chases it while it is in reach (`docs/lessons/2026-10-23-knight-on-the-game-board.md`, CLAUDE.md).
 - **Models** (CLAUDE.md, "Who implements"): Opus designs, mentors, proposes architecture and runs deep reviews. Haiku implements well-defined tickets; Sonnet implements the rest and every Deep-tier area (`docs/lessons/2026-10-23-model-roles.md`).
 - **The map** (`docs/rfcs/2026-10-23-longer-valley-road.md`, #470):
-  - The layout valley keeps one road crossing plus the hero-only crossing. The river crosses the whole valley.
+  - ~~The layout valley keeps one road crossing plus the hero-only crossing.~~ Superseded on 2026-10-24 (below). The river crosses the whole valley.
   - The road's target is **time under fire**, not cells. The layout valley's median must land within 90–110 % of the strip valley's, and no seed below 75 %, over seeds 1..300. Cells (100–150) are a guide.
   - The plan is a layout library: 3A first (today's layout, one U-turn per region), then more spawn and Heartstone layouts. 3B (five-run serpentine) is the fallback.
 - **Wide road (#441):** the plumbing is merged with the band off. Option B (range measured to the band's edge) is ticket #446.
+
+- **After the cutoff (2026-10-24, `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`, RFC section 9):**
+  - The road forks before the river into two crossings that foes and the hero both use. This supersedes one road crossing plus the hero-only crossing.
+  - The road is wider: the band is on, so the valley doesn't read as a strip.
+  - The layout valley grows to about 40 by 24.
 
 ## Merged this session
 
