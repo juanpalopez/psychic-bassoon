@@ -20,7 +20,8 @@ on, a later PR of #446). `TowerFire.ground_reach_of`, `reach_to` and `foes_withi
 `reach_band / 2` to the reach of a ground foe, after the elevation bonus, and compare squared
 distances as before (no sqrt, so 0.0 changes no bit). A flying foe has no road and keeps the plain
 reach. The tower target and beam lock, frostbite, skewer (and its bolt's end), flash freeze,
-precision snipe, the Mess Tent aura and Fortified Feast, and the squadron patrol use it. Splash
+precision snipe, the Guard Tent aura (`barracks.gd`, through `ground_reach_of`), the Mess Tent
+aura and Fortified Feast, and the squadron patrol use it. Splash
 and blast radii, pulls and soaks stay areas around a point and do not use it.
 
 ## Alternatives considered
@@ -41,6 +42,8 @@ and blast radii, pulls and soaks stay areas around a point and do not use it.
   `godot/tools/write_specs_golden.gd`; the re-record belongs to that PR under its own record.
 - Still open for the later PRs of #446: the hero's reach, the scripted bot, range display,
   socket placement and the switch-on itself. The ability rings stay at the plain reach for now:
-  the flash freeze, precision snipe and Mess Tent `event.splash` in `specs.gd` (about lines 362,
-  383 and 447) and the squadron's `zone.radius` in `zones.gd` (about line 73, which the patrol
-  widens by the margin when it measures).
+  `event.splash` in `specs.gd` for the flash freeze (`_flash_freeze`, about line 283), the
+  squadron (`_squadron`, 362), the Guard Tent shield wall (`_shield_wall`, 383) and Fortified
+  Feast (`_fortified_feast`, 447), and the squadron's `zone.radius` in `zones.gd` (about line 73,
+  which the patrol widens by the margin when it measures). The precision snipe has no plain
+  ring (`_precision_snipe`).
