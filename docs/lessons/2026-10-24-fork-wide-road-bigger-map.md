@@ -2,19 +2,20 @@
 type: decision
 date: 2026-10-24
 status: accepted
-decided-by: owner, on seeing the layout valley in the app
+decided-by: owner
 links: [#404, #441, #446, #458, #460, #461, #469]
 ---
 # Fork the road over the river, widen it and grow the layout valley to 40 by 24
 
 ## Context
-On 2026-10-23 the owner ran the layout valley (`feat/board-layout-valley`). The maps look better, but most seeds look alike (only the sockets move), and the hero-only crossing reads as a second crossing nobody can use. The road was 71 cells, at 0.53 of the strip valley's time under fire.
+On 2026-10-23 the owner ran the layout valley (`feat/board-layout-valley`). The maps look better, but most seeds look alike (only the sockets move), and the hero-only crossing reads as a second crossing nobody can use. The road was a median 71 cells (RFC section 2), at 0.53 of the strip valley's time under fire.
 
 ## Decision
 - **Two crossings, both open to foes and the hero.** The road forks before the river and joins again after it, so each crossing is a strategic point. This supersedes "one road crossing plus the hero-only crossing" (2026-10-23).
-- **A wider road**, so the valley does not read as a strip, and foes and the hero move a little more freely: the road band of #441 is turned on, with the bed drawn to match.
+- **A wider road**, so the valley does not read as a strip, and foes and the hero move a little more freely: the road band of #441 is turned on, with the bed drawn to match, once #469 and #446 are settled.
 - **The layout valley grows to about 40 by 24** to give the fork, the wider road and the hook and u_turn pieces room. The strip valley stays 32 by 20 until #458 switches the board.
 - The road's target is still time under fire (RFC section 7). Road length is fine if it meets that target.
+- The rules live in CLAUDE.md (the map line) and RFC `2026-10-23-longer-valley-road.md` section 9.
 
 ## Alternatives considered
 - One road crossing plus a hero-only footbridge, drawn: rejected; the owner wants two fronts.
