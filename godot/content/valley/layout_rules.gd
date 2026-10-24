@@ -83,9 +83,9 @@ const LANE_RUN := 12
 
 ## The fork (#481, `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`): the road forks at the
 ## Meadow's entry gate into two lanes, an upper one (today's road) and a lower one, that cross
-## the river on two bridges and meet again at the Ridge's gate. Off until the stitcher builds the
-## second lane (the layout then draws as it did before the fork).
-const FORK_LANES := false
+## the river on two bridges and meet again at the Ridge's gate. On: the stitcher builds the second
+## lane as a route of its own. A layout asked for with `forked` false draws as before the fork.
+const FORK_LANES := true
 ## The upper lane enters the Crossing this many rows or more below the Ridge's border (the lower
 ## lane `CROSSING_DROP`), so both have room to turn north on the far bank.
 const FORK_UPPER_DROP := 4

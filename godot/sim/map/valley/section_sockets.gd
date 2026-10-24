@@ -45,11 +45,7 @@ static func candidates(result: SectionResult, blocked: Array[Rect2i]) -> Array[V
 	for y in range(result.rect.position.y, result.rect.end.y - size - result.margin.y + 1):
 		for x in range(result.rect.position.x, last_x + 1):
 			var block := Rect2i(x, y, size, size)
-			if (
-				_free(block, result.road, blocked)
-				and off_band(result, block)
-				and reaches(result, block)
-			):
+			if _free(block, result, blocked) and off_band(result, block) and reaches(result, block):
 				out.append(Vector2i(x, y))
 	return out
 
@@ -65,6 +61,8 @@ static func place(
 		var held := sites[i]
 		sites[i] = sites[j]
 		sites[j] = held
+	if not result.branch.is_empty():
+		sites = _main_road_first(result, sites)
 	var target: int = blocks.x + rng.next_int(blocks.y - blocks.x + 1)
 	for bend in bends(result.road, result.bend_run):
 		var best := _nearest(sites, bend, result.sockets)
@@ -77,8 +75,27 @@ static func place(
 			result.add_socket(site, 0, SectionResult.Tag.LOW)
 
 
-static func _free(block: Rect2i, road: Array[Vector2i], blocked: Array[Rect2i]) -> bool:
-	for cell in road:
+## The sites in the same order, those that reach the main road first: with the fork's lower lane
+## (#481) a block that reaches only the lower lane is taken only once the main road's sites run
+## out, so the main road keeps the blocks it had (the checks of the lanes come with their ticket).
+static func _main_road_first(result: SectionResult, sites: Array[Vector2i]) -> Array[Vector2i]:
+	var first: Array[Vector2i] = []
+	var rest: Array[Vector2i] = []
+	for site in sites:
+		var block := Rect2i(site, Vector2i.ONE * RULES.GAME_SOCKET_FOOTPRINT)
+		if covers(block, result.road, 0.0, coverage_reach(result.road_width)):
+			first.append(site)
+		else:
+			rest.append(site)
+	first.append_array(rest)
+	return first
+
+
+static func _free(block: Rect2i, result: SectionResult, blocked: Array[Rect2i]) -> bool:
+	for cell in result.road:
+		if block.has_point(cell):
+			return false
+	for cell in result.branch:
 		if block.has_point(cell):
 			return false
 	for rect in blocked:
@@ -108,11 +125,17 @@ static func covers(
 
 ## The reach rule of a section: the same for the one-cell road and for a band. A level 1 tower on
 ## the block covers at least `SOCKET_MIN_ROAD_COVERAGE` road cells (the centre line) within
-## `coverage_reach`; a block the band keeps too far from the road is not placed (#430).
+## `coverage_reach` (of the fork's lower lane, when the strip has one); a block the band keeps too
+## far from the road is not placed (#430).
 static func reaches(result: SectionResult, block: Rect2i) -> bool:
 	if result.road_width <= 0.0:
 		return reaches_road(block, result.road)
-	return covers(block, result.road, 0.0, coverage_reach(result.road_width))
+	var reach := coverage_reach(result.road_width)
+	# a block beside the fork's lower lane (#481) covers that lane instead
+	return (
+		covers(block, result.road, 0.0, reach)
+		or (not result.branch.is_empty() and covers(block, result.branch, 0.0, reach))
+	)
 
 
 ## How far from a block's centre the centre line still counts towards its coverage on a band of
@@ -203,18 +226,33 @@ static func _square_gap(result: SectionResult, block: Rect2i) -> float:
 	elif not result.feeder.is_empty():
 		var feeder := RoadCurve.from_cells(result.feeder)
 		gap = minf(gap, feeder.rect_gap(block.position.x, block.position.y, block.size.x))
+	var lane := _branch_curve(result)
+	if lane != null:
+		gap = minf(gap, lane.rect_gap(block.position.x, block.position.y, block.size.x))
 	return gap
+
+
+## The curve of the fork's second lane through the strip, or null without one (#481).
+static func _branch_curve(result: SectionResult) -> RoadCurve:
+	if result.branch.is_empty():
+		return null
+	return (
+		result.branch_curve if result.branch_curve != null else RoadCurve.from_cells(result.branch)
+	)
 
 
 static func _main_curve(result: SectionResult) -> RoadCurve:
 	return result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)
 
 
-## How far a point is from the road's curve (the main road and the feeder).
+## How far a point is from the road's curve (the main road, the feeder and the fork's lane).
 static func _curve_gap(result: SectionResult, centre: Vector2) -> float:
 	var gap := _main_curve(result).distance_to(centre.x, centre.y)
 	if result.feeder_curve != null:
 		gap = minf(gap, result.feeder_curve.distance_to(centre.x, centre.y))
 	elif not result.feeder.is_empty():
 		gap = minf(gap, RoadCurve.from_cells(result.feeder).distance_to(centre.x, centre.y))
+	var lane := _branch_curve(result)
+	if lane != null:
+		gap = minf(gap, lane.distance_to(centre.x, centre.y))
 	return gap

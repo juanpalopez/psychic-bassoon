@@ -137,8 +137,9 @@ func test_the_section_is_reproducible() -> void:
 func test_game_create_style_routes_agree_at_the_join() -> void:
 	for seed in range(1, LAST_SEED + 1, STEP):
 		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), _layout(seed), true)
-		assert_eq(map.routes.size(), 2)
-		assert_eq(map.route_curves.size(), 2)
+		# [the main road, the feeder, the fork's lower lane]: the join is routes 0 and 1 as before
+		assert_eq(map.routes.size(), 3)
+		assert_eq(map.route_curves.size(), 3)
 		var main := Route.build_from_curve(map.routes[0], map.route_curves[0])
 		var second := Route.build_from_curve(map.routes[1], map.route_curves[1])
 		var offset := Route.join_offset(main, second, map.feeder_length, map.join_index)

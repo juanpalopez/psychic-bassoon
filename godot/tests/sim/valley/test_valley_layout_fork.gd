@@ -1,7 +1,7 @@
 extends GutTest
 ## The fork of the layout valley's road into two lanes (#481, layout side): the Meadow's entry
 ## gate to the Ridge's gate, a lower lane `FORK_ROW_GAP` rows under the road through the Meadow and
-## across the river. The stitcher ignores the lower lane until its own ticket.
+## across the river. The stitcher builds the lower lane as a route (`test_valley_stitcher_fork.gd`).
 
 const LAYOUT := preload("res://content/valley/layout_rules.gd")
 const SEEDS: Array[int] = [1, 42, 2026, 104729]
@@ -14,10 +14,12 @@ func _forked(seed: int) -> ValleyLayout:
 	return ValleyLayout.generate(seed, 40, 24, true)
 
 
-func test_the_layout_has_no_second_lane_while_the_fork_is_off() -> void:
-	assert_false(LAYOUT.FORK_LANES)
+func test_the_layout_has_no_second_lane_when_the_fork_is_off() -> void:
+	assert_true(
+		LAYOUT.FORK_LANES, "the layout valley forks by default since the stitcher builds it"
+	)
 	for seed in SEEDS:
-		var layout := ValleyLayout.generate(seed, 40, 24)
+		var layout := ValleyLayout.generate(seed, 40, 24, false)
 		for slot in layout.slots:
 			assert_false(slot.has_branch(), "seed %d region %d" % [seed, slot.id])
 			assert_eq(slot.branch_entry, Vector2i(-1, -1))
@@ -120,9 +122,10 @@ func test_the_same_seed_gives_the_same_forked_layout() -> void:
 		assert_eq(first.lane_segments, second.lane_segments)
 
 
-func test_the_stitcher_still_builds_the_forked_layouts() -> void:
+func test_the_stitcher_builds_the_forked_layouts_as_three_routes() -> void:
 	for seed in SEEDS:
 		var layout := _forked(seed)
 		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 		assert_not_null(map, "seed %d" % seed)
-		assert_eq(map.routes.size(), 2, "seed %d: one lane until the stitcher builds two" % seed)
+		# [the main road, the feeder, the lower lane]: it was two while the stitcher ignored the lane
+		assert_eq(map.routes.size(), 3, "seed %d" % seed)

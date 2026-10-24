@@ -1,8 +1,9 @@
 ## Region 2, Bluewater Crossing (#409, epic #404): the middle of the valley, where the winding
 ## river meets the road. The road runs level into the river on its entry row, crosses it head on
 ## once on a road bridge (a bridge per wet road cell) and bends away to the exit on the far bank.
-## A second bridge, for the hero only, spans the river on a row far from the road's. Socket blocks
-## sit on both banks, off the river and off the hero bridge's approaches.
+## With the fork (#481) the lower lane crosses on a bridge of its own. A bridge for the hero only
+## spans the river on a row far from both lanes'. Socket blocks sit on both banks, off the river
+## and off the hero bridge's approaches.
 class_name BluewaterCrossingRegion
 extends ValleySection
 
@@ -20,17 +21,24 @@ func generate(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	var curve := RoadSpline.build(waypoints(slot, _span(slot.river, row)))
 	result.road = curve.cells
 	result.road_curve = curve
-	var hero_row := _hero_row(slot, rng, row)
+	var lane_row := slot.branch_entry.y if slot.has_branch() else -1
+	if slot.has_branch():
+		var lane := RoadSpline.build(slot.branch_spine)
+		result.branch = lane.cells
+		result.branch_curve = lane
+	var hero_row := _hero_row(slot, rng, row, lane_row)
 	var hero := _row_cells(slot.river, hero_row)
 	var blocked := reserved(slot)
 	for cell in slot.river:
 		result.river.append(cell)
 		var wet_road := curve.cells.has(cell)
-		result.set_walkable(cell, wet_road or hero.has(cell))
+		var wet_lane := result.branch.has(cell)
+		result.set_walkable(cell, wet_road or wet_lane or hero.has(cell))
 		blocked.append(Rect2i(cell, Vector2i.ONE))
-		if wet_road:
+		if wet_road or wet_lane:
 			var bridge := GameMap.Bridge.new()
 			bridge.cell = cell
+			bridge.on_branch = wet_lane
 			result.bridges.append(bridge)
 	result.hero_bridges = hero
 	if not hero.is_empty():
@@ -50,8 +58,16 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 			wet.append(index)
 	if wet.is_empty() or wet[-1] - wet[0] != wet.size() - 1:
 		return ["the road must meet the river in exactly one stretch"]
-	if result.bridges.size() != wet.size():
+	var spans := result.bridges.filter(
+		func(bridge: GameMap.Bridge) -> bool: return not bridge.on_branch
+	)
+	if spans.size() != wet.size():
 		found.append("the road bridge must span every wet road cell")
+	var lane_wet := result.branch.filter(
+		func(cell: Vector2i) -> bool: return result.river.has(cell)
+	)
+	if result.bridges.size() != spans.size() + lane_wet.size():
+		found.append("the lane's bridge must span every wet lane cell")
 	var level := result.road[wet[0]].y
 	var reach: int = BLUEWATER.APPROACH_STRAIGHT
 	if wet[0] < reach or wet[-1] + reach >= result.road.size():
@@ -65,17 +81,26 @@ func extra_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Strin
 		if after != result.road[wet[-1]] + Vector2i.RIGHT * step:
 			found.append("the bridge approaches are not straight")
 			break
-	if result.hero_bridges.is_empty():
+	# with the fork the hero has the lower lane's bridge as a second crossing, so its own bridge
+	# stays only where a row far enough from both lanes has river (#481)
+	if result.hero_bridges.is_empty() and not slot.has_branch():
 		found.append("the river has no hero bridge")
 	for cell in result.hero_bridges:
-		if not result.river.has(cell) or result.road.has(cell) or not result.is_walkable(cell):
+		if (
+			not result.river.has(cell)
+			or result.road.has(cell)
+			or result.branch.has(cell)
+			or not result.is_walkable(cell)
+		):
 			found.append("the hero bridge is not a walkable river cell off the road")
 			break
 		if absi(cell.y - level) < BLUEWATER.HERO_BRIDGE_MIN_ROW_GAP:
 			found.append("the hero bridge is too near the road bridge")
 			break
 	for cell in result.river:
-		var open := result.road.has(cell) or result.hero_bridges.has(cell)
+		var open := (
+			result.road.has(cell) or result.branch.has(cell) or result.hero_bridges.has(cell)
+		)
 		if result.is_walkable(cell) != open:
 			found.append("river cell %s is walkable off the bridges" % cell)
 			break
@@ -115,11 +140,13 @@ static func _row_cells(cells: Array[Vector2i], row: int) -> Array[Vector2i]:
 
 
 ## A row for the hero's bridge: far from the road's, off the region's edges, with river on it.
-func _hero_row(slot: ValleyPlan.Slot, rng: Rng, road_row: int) -> int:
+func _hero_row(slot: ValleyPlan.Slot, rng: Rng, road_row: int, lane_row: int = -1) -> int:
 	var rows: Array[int] = []
 	var edge: int = BLUEWATER.HERO_BRIDGE_EDGE
+	var gap: int = BLUEWATER.HERO_BRIDGE_MIN_ROW_GAP
 	for y in range(slot.rect.position.y + edge, slot.rect.end.y - edge):
-		if absi(y - road_row) >= BLUEWATER.HERO_BRIDGE_MIN_ROW_GAP and _span(slot.river, y).y >= 0:
+		var near_lane := lane_row >= 0 and absi(y - lane_row) < gap
+		if absi(y - road_row) >= gap and not near_lane and _span(slot.river, y).y >= 0:
 			rows.append(y)
 	if rows.is_empty():
 		return -1

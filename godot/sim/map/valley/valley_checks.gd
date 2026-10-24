@@ -49,6 +49,7 @@ static func section_problems(
 			)
 		if index > 0 and (road[index] - road[index - 1]).length_squared() != 1:
 			found.append(Problem.make(id, "the road jumps at %s" % road[index]))
+	found.append_array(_branch_problems(slot, result))
 	if not found.is_empty():
 		return found
 	if result.socket_levels.size() != result.sockets.size():
@@ -134,6 +135,9 @@ static func _block_fits(
 	for cell in result.road:
 		if block.has_point(cell):
 			return false
+	for cell in result.branch:
+		if block.has_point(cell):
+			return false
 	for rect in blocked:
 		if block.intersects(rect):
 			return false
@@ -189,8 +193,28 @@ static func _link_problems(id: int, result: SectionResult) -> Array[Problem]:
 		elif (result.feeder_join - last).length_squared() != 1:
 			found.append(Problem.make(id, "the feeder does not end beside %s" % result.feeder_join))
 	for bridge in result.bridges:
-		if not result.road.has(bridge.cell):
+		var lane := result.branch if bridge.on_branch else result.road
+		if not lane.has(bridge.cell):
 			found.append(Problem.make(id, "the bridge at %s is off the road" % bridge.cell))
+	return found
+
+
+## The fork's lane (#481) runs from the slot's `branch_entry` to its `branch_exit` in unit steps,
+## inside the strip and on the valley floor; a strip without a branch in its slot has none.
+static func _branch_problems(slot: ValleyPlan.Slot, result: SectionResult) -> Array[Problem]:
+	var found: Array[Problem] = []
+	var lane := result.branch
+	if not slot.has_branch():
+		if not lane.is_empty():
+			found.append(Problem.make(slot.id, "the strip has a branch its slot does not plan"))
+		return found
+	if lane.is_empty() or lane[0] != slot.branch_entry or lane[lane.size() - 1] != slot.branch_exit:
+		return [Problem.make(slot.id, "the branch does not run from its entry to its exit")]
+	for index in lane.size():
+		if not slot.rect.has_point(lane[index]) or result.height_at(lane[index]) != 0:
+			found.append(Problem.make(slot.id, "branch cell %s is outside the strip" % lane[index]))
+		if index > 0 and (lane[index] - lane[index - 1]).length_squared() != 1:
+			found.append(Problem.make(slot.id, "the branch jumps at %s" % lane[index]))
 	return found
 
 
