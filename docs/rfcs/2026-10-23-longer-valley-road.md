@@ -10,13 +10,13 @@ links: [#404, #458, #460, #469]
 
 **Status:** Proposed. On 2026-10-23 the owner accepted the layout library (section 5) in two steps: 3A on today's layout, then more layouts. The target is time under fire, not cells (section 7). Still open: `GATE_INSET`, which the step 1 measurement settles.
 
-The owner first asked for a composed road of 100 to 150 cells on the layout valley, then set the target as time under fire (2026-10-23, section 7); cells stay a guide. The valley keeps one road crossing of the river plus the hero-only crossing. Today the road runs 65 to 76 cells (median 71, seeds 1..300) and gives 0.53 of the strip valley's time under fire. Two measured attempts showed that tuning can't close the gap (section 2). This memo explains why and proposes two road shapes that can.
+The owner first asked for a composed road of 100 to 150 cells on the layout valley, then set the target as time under fire (2026-10-23, section 7); cells stay a guide. The valley keeps one road crossing of the river plus the hero-only crossing (superseded on 2026-10-24 by two crossings for foes and the hero, section 9). Today the road runs 65 to 76 cells (median 71, seeds 1..300) and gives 0.53 of the strip valley's time under fire. Two measured attempts showed that tuning can't close the gap (section 2). This memo explains why and proposes two road shapes that can.
 
 ## 1. What we keep
 
 - The six regions in road order: Outer March, Sunken Meadow, Bluewater Crossing, Broken Ridge, Ancient Fold, Heartkeep Approach. Each is a 2D area (`docs/lessons/2026-10-21-spline-valley.md`), not a strip 4 to 7 columns wide with a snake of lanes 2 to 3 cells apart.
 - Broad bends: the owner's reference has bend radii of 3 to 5 cells. The lane rule stays at 5 (`LAYOUT.LANE_GAP`): two stretches 12 or more cells apart along the road stay at least 5 apart.
-- The segment library, fitter and composer (`docs/lessons/2026-10-22-road-segment-library.md`); the river from top to bottom; one road crossing and the hero-only crossing; the feeder from the top edge; the 32 by 20 board.
+- The segment library, fitter and composer (`docs/lessons/2026-10-22-road-segment-library.md`); the river from top to bottom; one road crossing and the hero-only crossing; the feeder from the top edge; the 32 by 20 board. (Section 9 supersedes the crossing and the board size, 2026-10-24.)
 
 ## 2. Why the road is short (measured 2026-10-23, #460)
 
@@ -138,3 +138,13 @@ The owner chose time as the reference: what decides a wave is how long foes are 
 3. ~~Cells or time?~~ Time under fire (owner, 2026-10-23; section 7).
 4. Do the slow foes' speeds change, so their walks stay under about 100 s (section 7)?
 5. Step 1 found that the Ridge cannot hold a hook: its side would need `ridge_x` of 15 or less, and the river keeps it at 17 or more. With hooks in the March, Meadow and Crossing only, the estimate is about 94 route cells and 50 s under fire, short of 57.5 s. Which gives the rest: a hook or `u_turn` in the Heartkeep, a wider middle column, or the river further west? (Estimate from geometry, not measured; the work is on `feat/road-regate`.)
+
+## 9. Amendments (owner, 2026-10-24)
+
+After running the layout valley in the app (`docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`):
+
+- **Two crossings for foes and the hero.** The road forks before the river and joins after it, replacing the one road crossing and the hero-only crossing. The time-under-fire gate of section 7 applies to each route.
+- **A wider road band** (#441 turned on, with the bed drawn to match), once #469 and #446 are settled.
+- **The layout valley grows to about 40 by 24.** This also answers question 5: the Ridge and every other region gain room for a hook or a `u_turn`, so the gates need less moving. Section 6's step 2 is re-planned on the larger grid.
+- Most seeds looked alike because the layout is fixed, so the layout library (section 5) moves up to run beside step 2.
+
