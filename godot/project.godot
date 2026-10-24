@@ -21,6 +21,10 @@ window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=0
 
+[editor]
+
+import/use_multiple_threads=false
+
 [rendering]
 
 renderer/rendering_method="forward_plus"

@@ -33,6 +33,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GODOT = os.environ.get("GODOT", "godot")
 # repo-root files the tests read through `res://../` (test_project, test_camera_pitch_rule)
 ROOT_FILES = ("CLAUDE.md", ".godot-version")
+# appended to the output of a Godot run that ended on a signal
+CRASHED = "mutate.py: godot crashed"
 
 
 def run_godot(project, *args):
@@ -41,7 +43,9 @@ def run_godot(project, *args):
                               capture_output=True, text=True)
     except FileNotFoundError:
         sys.exit("godot not found (%s): put it on the PATH or set GODOT" % GODOT)
-    return done.stdout + done.stderr
+    # killed by a signal (negative) or by its own crash handler (128 + signal)
+    crashed = "\n" + CRASHED if done.returncode < 0 or done.returncode >= 128 else ""
+    return done.stdout + done.stderr + crashed
 
 
 def prepare(tmp, name):
@@ -52,7 +56,9 @@ def prepare(tmp, name):
     for root_file in ROOT_FILES:
         shutil.copyfile(os.path.join(REPO, root_file), os.path.join(tmp, root_file))
     out = run_godot(dest, "--import")
-    if re.search(r"SCRIPT ERROR|Parse Error", out):
+    if CRASHED in out:
+        out = run_godot(dest, "--import")
+    if CRASHED in out or re.search(r"SCRIPT ERROR|Parse Error", out):
         sys.exit("%s: the project does not import:\n%s" % (name, out[-1500:]))
     return dest
 
@@ -60,8 +66,15 @@ def prepare(tmp, name):
 def tests_fail(project, tests):
     """The name of the first test script that fails (or breaks), else None."""
     for test in tests:
-        out = run_godot(project, "-s", "addons/gut/gut_cmdln.gd", "-gdir=res://tests",
-                        "-ginclude_subdirs", "-gselect=" + test, "-gexit")
+        args = ("-s", "addons/gut/gut_cmdln.gd", "-gdir=res://tests", "-ginclude_subdirs",
+                "-gselect=" + test, "-gexit")
+        out = run_godot(project, *args)
+        if CRASHED in out:
+            # one crash is not a test failure (Godot crashes now and then, #504): run it again;
+            # a crash that repeats is the mutation's doing, and is named as such
+            out = run_godot(project, *args)
+            if CRASHED in out:
+                return test + " (godot crashed twice)"
         failing = re.search(r"Failing Tests\s+(\d+)", out)
         passing = re.search(r"Passing Tests\s+(\d+)", out)
         if failing and int(failing.group(1)) > 0:

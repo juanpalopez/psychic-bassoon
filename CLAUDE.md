@@ -17,7 +17,7 @@ godot --path godot                                   # open or run the project
 godot --headless --path godot --import                # once per fresh checkout, so class_name scripts resolve
 godot --headless --path godot -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexit   # GUT tests
 (cd godot && gdformat . && gdlint .)                 # gdtoolkit: format and lint (config in godot/)
-scripts/run-gut-parallel.sh                          # the whole GUT suite, one Godot process per test script, one worker per core (up to 8); prints the slowest scripts
+scripts/run-gut-parallel.sh                          # the whole GUT suite, one Godot process per test script; half the cores up to 4 (on CI one per core up to 8; -j or GUT_JOBS overrides); reruns a crashed run once and reports it; prints the slowest scripts
 godot --path godot -- --stress=80 --fps             # from #319: the phone-check crowd and the fps overlay
 scripts/ios-run.sh                                   # export the Xcode project, build, install and launch on a connected iPhone (macOS with Xcode)
 mkdir -p build/linux && godot --headless --path godot --export-release "Linux" ../build/linux/papercraft-kingdom-defense.x86_64   # desktop export, as CI runs it
