@@ -37,7 +37,8 @@ function run(...args: string[]): {
       '[ -n "${t:-}" ] || exit 0',
       `echo "$t" >> "${record}"`,
       'case "$t" in',
-      '  *fps*) echo "Failing Tests  1"; echo "Failed: test_x" ;;',
+      '  *audio*) echo "Abort trap: 6"; exit 134 ;;',
+      '  *fps*) echo "$t"; echo "Failing Tests  1"; echo "Failed: test_x"; echo "Failed: test_x" ;;',
       '  *) echo "Passing Tests  2" ;;',
       'esac',
       '',
@@ -104,7 +105,9 @@ describe('parallel GUT runner: explicit test list', () => {
 });
 
 describe('parallel GUT runner: recorded durations', () => {
-  const C = 'res://tests/test_audio_flow.gd';
+  const C = 'res://tests/test_block_flow.gd';
+  // the fake Godot crashes (exit 134, no summary) on a path containing "audio"
+  const D = 'res://tests/test_audio_flow.gd';
   const rel = (res: string) => `godot/${res.slice('res://'.length)}`;
   const times = () => join(dir, 'times.json');
 
@@ -140,6 +143,21 @@ describe('parallel GUT runner: recorded durations', () => {
     expect(r.status).toBe(1);
     expect(r.out).toContain('failure in');
     expect(r.out).toContain('Failed: test_x');
+  });
+
+  it('names the failing script of a batch once', () => {
+    writeFileSync(times(), JSON.stringify({[rel(A)]: 1, [rel(B)]: 1}));
+    const r = run('-t', `${A},${B}`);
+    expect(r.out).toContain(`failure in`);
+    expect(r.out).toContain(B);
+    expect(r.out.split('Failed: test_x').length - 1).toBe(1);
+  });
+
+  it('fails when Godot crashes, even with no summary', () => {
+    writeFileSync(times(), JSON.stringify({[rel(A)]: 1, [rel(D)]: 1}));
+    const r = run('-t', `${A},${D}`);
+    expect(r.status).toBe(1);
+    expect(r.out).toContain('godot exit code 134');
   });
 
   it('still runs everything when the times file is missing', () => {

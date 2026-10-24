@@ -78,16 +78,22 @@ run_one() {
   start=$(date +%s)
   "$GODOT_BIN" --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 \
     -gtest="$list" -gexit >"$dir/godot_tests_$id.log" 2>&1
+  echo "$?" >"$dir/godot_tests_$id.rc"
   echo "$(( $(date +%s) - start )) $list" >>"$dir/times.txt"
 }
 export -f run_one
 xargs -P "$jobs" -L1 bash -c 'run_one "$0" "$1"' <"$dir/queue.txt"
 status=0
 for log in "$dir"/godot_tests_*.log; do
-  if grep -qE "Failing Tests|Parse Error|SCRIPT ERROR" "$log"; then
+  rc="$(cat "${log%.log}.rc" 2>/dev/null || echo 1)"
+  # a crash exits non-zero or leaves no summary; the rest of its batch never ran
+  if [ "$rc" != 0 ] || ! grep -qE "^(Passing|Failing) Tests" "$log" \
+    || grep -qE "Failing Tests|Parse Error|SCRIPT ERROR" "$log"; then
     status=1
-    echo "failure in $log"
-    grep -E "Failed|Failing Tests|at line|SCRIPT ERROR|Parse Error" "$log" | cut -c1-200 | head -20
+    echo "failure in $log (godot exit code $rc)"
+    # the scripts of the run, then the distinct failure lines
+    grep -E "^res://.*\.gd" "$log" | cut -c1-200 | sort -u
+    grep -E "Failed|Failing Tests|at line|SCRIPT ERROR|Parse Error" "$log" | cut -c1-200 | sort -u | head -20
   fi
 done
 cat "$dir"/godot_tests_*.log | grep -E "^(Passing|Failing) Tests" \
