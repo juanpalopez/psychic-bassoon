@@ -69,7 +69,7 @@ Notes for picking this work up in a local session. GitHub (tickets, PRs, comment
 
 **Epic #404: map depth (the layout valley)**
 1. **#469, road cells under the curve:** the owner picks one of four options (below). It blocks the wide road and #461.
-2. **#480, grow the layout valley to 40 by 24:** this comes first among the map tickets. Check the camera limits and the terrain and scenery caps again.
+2. **#480, grow the layout valley to 40 by 24:** done in part. The sim grows the layout valley (PR #485), `BoardSpace` takes its size from the map in use (PR #484), and this docs PR records it. Still open: the camera limits and the terrain and scenery caps at 40 by 24 (PR-D, `feat/layout-valley-render-budget`); #480 closes when that merges.
 3. **#481, fork the road into two river crossings** for foes and the hero. Foes pick a branch from the seed; the gate is measured per branch.
 4. **#460, the longer road:** re-plan step 2 on the 40 by 24 grid, beside #481.
    - Keep `godot/tools/measure_road_time.gd` from `feat/road-regate` (786759e). Run it in the background: `godot --headless --path godot -s res://tools/measure_road_time.gd -- --n=300`.
