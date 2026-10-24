@@ -30,6 +30,13 @@ func test_export_presets_are_native_and_carry_no_team_id() -> void:
 	assert_true(presets.get_value(options, "application/export_project_only"))
 
 
+## Threaded import crashes Godot 4.7.2 now and then: the import threads of the .ogg files
+## race on ClassDB's default-value cache while saving (#504,
+## docs/lessons/2026-10-24-threaded-import-crash.md). One thread costs under a second.
+func test_import_runs_on_one_thread() -> void:
+	assert_false(ProjectSettings.get_setting("editor/import/use_multiple_threads", true))
+
+
 func test_game_is_landscape_only() -> void:
 	# 0 is landscape in Godot's DisplayServer.ScreenOrientation
 	assert_eq(ProjectSettings.get_setting("display/window/handheld/orientation"), 0)

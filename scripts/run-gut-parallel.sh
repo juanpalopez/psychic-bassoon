@@ -10,7 +10,14 @@
 # paid once; a failing batch is reported with its log. A missing, empty or stale file only costs
 # speed, never a run.
 #
-# usage: scripts/run-gut-parallel.sh            # one worker per core, up to 8
+# Crashes (#504): the one `--import` before the workers is checked and tried twice, and a run
+# that crashes (a signal, or no GUT summary) runs once more and is reported as a crash; a crash
+# that repeats fails the run, and a test failure is never run again. Each worker gets its own
+# user:// (HOME), so runs on one machine do not share logs or files.
+#
+# usage: scripts/run-gut-parallel.sh            # half the cores, up to 4 (on CI, where the
+#                                               # runner has the machine to itself: one per
+#                                               # core, up to 8); GUT_JOBS=n overrides
 #        scripts/run-gut-parallel.sh -j 4       # four workers
 #        scripts/run-gut-parallel.sh -t res://tests/a/test_x.gd,res://tests/b/test_y.gd
 #                                               # only these scripts (what scripts/select-tests.mjs
@@ -52,15 +59,36 @@ if [ -n "$shard" ] && [ "$write_times" = 1 ]; then
   echo "run-gut-parallel: --write-times needs the whole suite, not a shard" >&2
   exit 2
 fi
+[ "$jobs" = 0 ] && jobs="${GUT_JOBS:-0}"
+case "$jobs" in ''|*[!0-9]*) echo "run-gut-parallel: -j and GUT_JOBS want a number" >&2; exit 2 ;; esac
 if [ "$jobs" -le 0 ]; then
-  jobs=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
-  [ "$jobs" -gt 8 ] && jobs=8
+  cores=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
+  if [ -n "${CI:-}" ]; then
+    jobs=$((cores > 8 ? 8 : cores))
+  else
+    # a developer machine is shared: several agents' suites at once took the load past 100
+    # on 12 cores, and that load is when Godot crashed (#504)
+    jobs=$((cores / 2 > 4 ? 4 : cores / 2))
+    [ "$jobs" -lt 1 ] && jobs=1
+  fi
 fi
 dir="$(mktemp -d /tmp/gut-par.XXXXXX)"
 # the Godot binary: CI sets GODOT, a developer machine has `godot` on the PATH
 export GODOT_BIN="${GODOT:-godot}"
 export dir
-"$GODOT_BIN" --headless --path godot --import >/dev/null 2>&1
+# one import here, never one per worker (they would all write the same .godot); a crashed
+# import leaves the cache half-written, so it is tried twice and then stops the run
+for attempt in 1 2; do
+  "$GODOT_BIN" --headless --path godot --import >"$dir/import.log" 2>&1
+  rc=$?
+  [ "$rc" = 0 ] && break
+  echo "run-gut-parallel: godot --import exited $rc (attempt $attempt of 2)" >&2
+  if [ "$attempt" = 2 ]; then
+    tail -20 "$dir/import.log" >&2
+    echo "run-gut-parallel: the import failed twice; log: $dir/import.log" >&2
+    exit 2
+  fi
+done
 if [ -n "$tests" ]; then
   # an explicit list: a path that does not exist fails here instead of silently running nothing
   : >"$dir/scripts.txt"
@@ -112,10 +140,20 @@ while read -r path; do echo "$(wc -c <"$path") $path"; done <"$dir/scripts.txt" 
 run_one() {
   id="$1"
   list="$2"
+  log="$dir/godot_tests_$id.log"
   start=$(date +%s)
-  "$GODOT_BIN" --headless --path godot -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 \
-    -gtest="$list" -gexit >"$dir/godot_tests_$id.log" 2>&1
-  echo "$?" >"$dir/godot_tests_$id.rc"
+  mkdir -p "$dir/home_$id"
+  for attempt in 1 2; do
+    HOME="$dir/home_$id" "$GODOT_BIN" --headless --path godot -s addons/gut/gut_cmdln.gd \
+      -gconfig= -glog=1 -gtest="$list" -gexit >"$log" 2>&1
+    rc=$?
+    # a test failure ends with GUT's summary and a small exit code: never run it again
+    if [ "$rc" -lt 128 ] && grep -qE "^(Passing|Failing) Tests" "$log"; then break; fi
+    [ "$attempt" = 2 ] && break
+    mv "$log" "$dir/crash_$id.log"
+    echo "$rc $id $list" >>"$dir/crashes.txt"
+  done
+  echo "$rc" >"$dir/godot_tests_$id.rc"
   echo "$(( $(date +%s) - start )) $list" >>"$dir/times.txt"
 }
 export -f run_one
@@ -133,6 +171,13 @@ for log in "$dir"/godot_tests_*.log; do
     grep -E "Failed|Failing Tests|at line|SCRIPT ERROR|Parse Error" "$log" | cut -c1-200 | sort -u | head -20
   fi
 done
+if [ -s "$dir/crashes.txt" ]; then
+  # never silent: a crash that passed on its second run is still a crash to look into
+  while read -r rc id list; do
+    echo "CRASH: godot exit code $rc running $list; ran it once more (first log: $dir/crash_$id.log)"
+  done <"$dir/crashes.txt"
+  echo "crashes: $(wc -l <"$dir/crashes.txt" | tr -d ' ') (a failure above means it crashed again)"
+fi
 cat "$dir"/godot_tests_*.log | grep -E "^(Passing|Failing) Tests" \
   | awk '{n[$1]+=$3} END{print "Passing Tests", n["Passing"]+0; print "Failing Tests", n["Failing"]+0}'
 echo "slowest scripts (seconds):"
