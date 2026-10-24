@@ -32,10 +32,12 @@ static func create(
 
 ## Creates the game on a map that is already made, on tick 0 (`create` calls it, and a test
 ## plays a hand-made map with it). `with_detour` is the old random lane; `with_hero` places the
-## starting hero.
+## starting hero. The game keeps `map` itself, not a copy. The old random detour (`with_detour`)
+## and `map.sources` are two ways to pick a lane and are not supported together.
 static func from_map(
 	seed: int, map: GameMap, with_detour: bool = false, with_hero: bool = false
 ) -> GameState:
+	assert(not (with_detour and not map.sources.is_empty()), "detour and sources do not mix")
 	var game := GameState.new()
 	game.seed = seed
 	game.map = map

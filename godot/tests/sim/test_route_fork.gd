@@ -61,6 +61,20 @@ func test_a_wave_sends_foes_down_both_branches_and_the_feeder() -> void:
 	assert_true(routes.has(2))
 
 
+func test_a_wave_with_no_source_given_draws_once_per_foe_between_the_branches() -> void:
+	# up to wave 10 every order has source -1, which means the first source
+	var game := ForkKit.game(9)
+	var routes := ForkKit.routes_spawned(game, 3)
+	assert_gt(routes.size(), 4)
+	assert_true(routes.has(0))
+	assert_true(routes.has(2))
+	assert_false(routes.has(1), "the feeder source is not used before the split")
+	var twin := Rng.derive(9, Streams.ROUTES)
+	for i in routes.size():
+		assert_eq(routes[i], [0, 2][twin.next_int(2)])
+	assert_eq(game.route_rng.state, twin.state, "one draw per foe, no more")
+
+
 func test_a_replay_on_a_forked_map_is_reproducible() -> void:
 	var first := ForkKit.game(11)
 	var second := ForkKit.game(11)
@@ -73,7 +87,8 @@ func test_a_replay_on_a_forked_map_is_reproducible() -> void:
 	assert_ne(ForkKit.routes_spawned(other, BIG_WAVE), a, "another seed picks differently")
 
 
-func test_foes_walk_the_curve_of_the_branch_they_took() -> void:
+## Grid routes: the positions are checked against the cells each route is made of.
+func test_foes_walk_the_grid_route_of_the_branch_they_took() -> void:
 	var game := ForkKit.game(2)
 	var main := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	var branch := FoeSpawner.spawn(game, "scrapGoblin", 1, 2)
@@ -83,15 +98,15 @@ func test_foes_walk_the_curve_of_the_branch_they_took() -> void:
 		Game.tick(game)
 	# 2 s at 1 cell per second would be 2 cells on route 0; both follow their own line
 	assert_almost_eq(main.y, float(ForkKit.MAIN_ROW) + 0.5, 1e-9)
-	var expected := game.routes[2].position_at(branch.distance)
-	assert_almost_eq(branch.x, expected.x, 1e-9)
-	assert_almost_eq(branch.y, expected.y, 1e-9)
-	# past the fork cell the branch leaves row 4 for row 2; the main road never does
-	for foe in [main, branch]:
-		foe.distance = game.routes[foe.route].cell_distance(ForkKit.FORK_CELL + 4)
-		var at := game.routes[foe.route].position_at(foe.distance)
-		var row := ForkKit.MAIN_ROW if foe.route == 0 else ForkKit.BRANCH_ROW
-		assert_almost_eq(at.y, float(row) + 0.5, 1e-9)
+	assert_gt(branch.distance, 0.0)
+	assert_almost_eq(branch.y, float(ForkKit.MAIN_ROW) + 0.5, 1e-9, "still on the shared road")
+	# on the branch's turn (column 3, row 2) it is on row 2; the main road is on row 4 there
+	var top := game.routes[2].position_at(game.routes[2].cell_distance(ForkKit.FORK_CELL + 2))
+	assert_almost_eq(top.x, float(ForkKit.FORK_CELL) + 0.5, 1e-9)
+	assert_almost_eq(top.y, float(ForkKit.BRANCH_ROW) + 0.5, 1e-9)
+	var main_at := game.routes[0].position_at(game.routes[0].cell_distance(ForkKit.FORK_CELL + 2))
+	assert_almost_eq(main_at.x, float(ForkKit.FORK_CELL) + 2.5, 1e-9)
+	assert_almost_eq(main_at.y, float(ForkKit.MAIN_ROW) + 0.5, 1e-9)
 
 
 func test_a_map_without_a_fork_draws_nothing() -> void:

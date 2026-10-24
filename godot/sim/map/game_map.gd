@@ -27,6 +27,7 @@ class Bridge:
 	## The route whose own cells the bridge spans (0 is the main road). `path_index` counts cells
 	## of that route; a bridge on a fork's branch names the branch's route (#481).
 	var route: int = 0
+	## (Nothing writes it until the stitcher builds forks, so a feeder bridge reads 0 as well.)
 
 
 ## Where a route leaves the main road and where it rejoins it, a fork of the road (#481). The
