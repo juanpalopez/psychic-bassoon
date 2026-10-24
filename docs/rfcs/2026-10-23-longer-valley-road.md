@@ -138,3 +138,13 @@ The owner chose time as the reference: what decides a wave is how long foes are 
 3. ~~Cells or time?~~ Time under fire (owner, 2026-10-23; section 7).
 4. Do the slow foes' speeds change, so their walks stay under about 100 s (section 7)?
 5. Step 1 found that the Ridge cannot hold a hook: its side would need `ridge_x` of 15 or less, and the river keeps it at 17 or more. With hooks in the March, Meadow and Crossing only, the estimate is about 94 route cells and 50 s under fire, short of 57.5 s. Which gives the rest: a hook or `u_turn` in the Heartkeep, a wider middle column, or the river further west? (Estimate from geometry, not measured; the work is on `feat/road-regate`.)
+
+## 9. Amendments (owner, 2026-10-24)
+
+After running the layout valley in the app (`docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`):
+
+- **Two crossings for foes and the hero.** The road forks before the river and joins after it, replacing the one road crossing and the hero-only crossing. The time-under-fire gate of section 7 applies to each route.
+- **A wider road band** (#441 turned on, with the bed drawn to match), once #469 and #446 are settled.
+- **The layout valley grows to about 40 by 24.** This also answers question 5: the Ridge and every other region gain room for a hook or a `u_turn`, so the gates need less moving. Section 6's step 2 is re-planned on the larger grid.
+- Most seeds looked alike because the layout is fixed, so the layout library (section 5) moves up to run beside step 2.
+

@@ -63,6 +63,13 @@ Notes for picking this work up in a local session. GitHub (tickets, PRs, comment
   - The move UI (#335: tap the hero, then a spot).
   - The minimap and edge markers (#329).
 
+## Owner decisions after the cutoff (2026-10-24)
+
+- The road forks before the river into two crossings that foes and the hero both use (this supersedes one road crossing).
+- The road is wider: the band is on, so foes and the hero move more freely and the valley doesn't read as a strip.
+- The layout valley grows to about 40 by 24.
+- See `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md` and RFC section 9. Re-plan #460 step 2 on the larger grid, before the WIP on `feat/road-regate`, which was planned for 32 by 20.
+
 ## Decisions waiting for the owner
 
 - **#469 (road cells under the curve):** marking every cell the 0.9 bed overlaps makes almost no layout stitch under the "3 centre-line cells in reach" socket rule (2 of 89 draws). The work is on the branch `wip/469-road-band`, not for merge (it has `BAND_SLACK` experiment constants). Options:
