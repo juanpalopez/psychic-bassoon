@@ -45,6 +45,7 @@ static func ids() -> Array[StringName]:
 		SEGMENTS.LANDMARK,
 		SEGMENTS.HOOK,
 		SEGMENTS.U_TURN,
+		SEGMENTS.JOG,
 	]
 
 
