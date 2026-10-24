@@ -145,6 +145,26 @@ After running the layout valley in the app (`docs/lessons/2026-10-24-fork-wide-r
 
 - **Two crossings for foes and the hero.** The road forks before the river and joins after it, replacing the one road crossing and the hero-only crossing. The time-under-fire gate of section 7 applies to each route.
 - **A wider road band** (#441 turned on, with the bed drawn to match), once #469 and #446 are settled.
-- **The layout valley grows to about 40 by 24.** This also answers question 5: the Ridge and every other region gain room for a hook or a `u_turn`, so the gates need less moving. Section 6's step 2 is re-planned on the larger grid.
+- **The layout valley grows to about 40 by 24.** This also answers question 5: the Ridge and every other region gain room for a hook or a `u_turn`, so the gates need less moving. Section 6's step 2 is re-planned on the larger grid. Done in #480 (size only; the measured result is in section 10).
 - Most seeds looked alike because the layout is fixed, so the layout library (section 5) moves up to run beside step 2.
+
+## 10. Result of the 40 by 24 growth (#480, 2026-10-24)
+
+Measured over seeds 1..300, before (32 by 20) and after (40 by 24, PR #485 and its review):
+
+| Measure | 32 by 20 | 40 by 24 |
+| --- | --- | --- |
+| Stitch success | 300 / 300 | 300 / 300 |
+| Generation time, mean | 82.6 ms | about 31 ms |
+| Generation time, slowest | 652.8 ms | 85.5 ms |
+| Road cells (median) | 65 to 76 (71) | 81 to 96 (89) |
+| Time under fire, median | 33.9 s (29.9 to 38.5) | 38.2 s (33.8 to 45.3) |
+| Walk, median | 39.7 s | 49.1 s |
+| Layout / strip time-under-fire ratio | 0.531 | 0.598 |
+
+- The gate of section 7 (0.90 to 1.10 of the strip valley, no seed below 0.75) is not met yet, and re-gating is held by the owner until #480 and #481 (the fork) land (`docs/lessons/2026-10-24-handoff-owner-calls.md`).
+- Seeds 3001 to 4000 also stitch and pass the checks.
+- `HERO_CAPS` are now 48, 27 and 40. Sockets are 23 to 30 in total.
+- **Design note:** the layout road is still far shorter than the strip road (89 cells against 150). Turning the layout valley on as the game board (#458) needs balance work before it can switch.
+- **Finding:** `MAX_STRAIGHT` went from 12 to 15. At 12, 793 of the 800 draws on seeds 1..40 were rejected, so the segment composer could not fill the larger grid.
 
