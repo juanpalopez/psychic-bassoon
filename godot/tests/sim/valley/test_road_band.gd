@@ -7,6 +7,8 @@ const ROAD := preload("res://content/valley/road_rules.gd")
 const RULES := preload("res://content/map_rules.gd")
 const TOWERS := preload("res://content/towers.gd")
 const SEEDS: Array[int] = [1, 2, 3]
+## The fewest centre-line cells within a level 1 Spool Guard's range of any block, seeds 1..300.
+const MIN_CELLS_IN_OWN_RANGE := 1
 
 var _maps := {}
 
@@ -130,19 +132,26 @@ func test_no_candidate_block_touches_the_band_and_each_one_still_covers_the_road
 		)
 
 
-func test_every_block_has_cells_of_the_centre_line_within_the_band_reach() -> void:
-	# a level 1 Spool Guard reaches 2.3, a little under the band's reach (owner, 2026-10-24, #469);
-	# the road the tower shoots at is the band, which lies nearer than its centre line
-	var reach: float = ROAD.BAND_COVERAGE_REACH
-	assert_gte(reach, TOWERS.DEFS["spoolGuard"].range[0])
+func test_every_block_keeps_centre_line_cells_within_a_level_one_towers_own_range() -> void:
+	# Measured over seeds 1..300 on the 40 by 24 layout valley (#469): the fewest centre-line cells
+	# within the Spool Guard's 2.3 of a block's centre is 1 (3 within the band reach 2.7). A
+	# further loosening of `BAND_COVERAGE_REACH` shows up here as a block with none.
+	var range_1: float = TOWERS.DEFS["spoolGuard"].range[0]
+	var fewest := 1000
+	var fewest_in_band_reach := 1000
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
 		for anchor in map.sockets:
-			var cells := 0
+			var own := 0
+			var wide := 0
 			for cell in map.path:
-				if SectionSockets.centre_gap(anchor, cell) <= reach:
-					cells += 1
-			assert_gte(cells, RULES.SOCKET_MIN_ROAD_COVERAGE, "block %s, seed %d" % [anchor, seed])
+				var gap := SectionSockets.centre_gap(anchor, cell)
+				own += 1 if gap <= range_1 else 0
+				wide += 1 if gap <= ROAD.BAND_COVERAGE_REACH else 0
+			fewest = mini(fewest, own)
+			fewest_in_band_reach = mini(fewest_in_band_reach, wide)
+	assert_gte(fewest, MIN_CELLS_IN_OWN_RANGE, "cells within the Spool Guard's range")
+	assert_gte(fewest_in_band_reach, RULES.SOCKET_MIN_ROAD_COVERAGE, "cells within the band reach")
 
 
 func test_a_wide_band_does_not_loosen_the_coverage_rule() -> void:
