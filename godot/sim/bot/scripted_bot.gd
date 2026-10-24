@@ -80,7 +80,7 @@ func _socket_for(game: GameState, type: String) -> Vector2i:
 		if _is_taken(game, anchor):
 			continue
 		var centre := game.map.socket_centre(anchor)
-		var reach := reach_base * game.map.range_multiplier(anchor)
+		var reach := reach_base * game.map.range_multiplier(anchor) + game.map.reach_margin()
 		var covered := 0
 		var distance := 0.0
 		for guard in game.guards:
@@ -156,7 +156,7 @@ func _rank_sockets(game: GameState) -> void:
 	var scores := {}
 	for anchor in _map.sockets:
 		var centre := _map.socket_centre(anchor)
-		var reach := reach_base * _map.range_multiplier(anchor)
+		var reach := reach_base * _map.range_multiplier(anchor) + _map.reach_margin()
 		var covered := 0
 		for cell in _map.path:
 			var road := Vector2(float(cell.x) + 0.5, float(cell.y) + 0.5)
