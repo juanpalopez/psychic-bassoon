@@ -40,6 +40,15 @@ class Slot:
 	var spine: Array[Vector2] = []
 	## The cells of the river inside the rect, when the layout has one.
 	var river: Array[Vector2i] = []
+	## The fork's second lane through this section (#481): its first and last cells and its
+	## waypoints, or (-1, -1) and empty when the section has one road. In the first section of the
+	## fork `branch_entry == entry` (the fork); in the last `branch_exit == exit` (the merge).
+	var branch_entry := Vector2i(-1, -1)
+	var branch_exit := Vector2i(-1, -1)
+	var branch_spine: Array[Vector2] = []
+
+	func has_branch() -> bool:
+		return not branch_spine.is_empty()
 
 
 var seed: int = 0

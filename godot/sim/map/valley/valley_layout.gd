@@ -35,18 +35,23 @@ var river: RoadCurve = null
 var river_cells: Array[Vector2i] = []
 ## The template ids the road is made of, in road order (`RouteComposer`).
 var route_segments: Array[StringName] = []
+## The same for the fork's lower lane (#481), over the slots that have one; empty without a fork.
+var lane_segments: Array[StringName] = []
 
 
 ## The layout for a seed, or null (with an error) when no draw passes `problems` and stitches with
 ## the stand-in sections (each retry draws the next layout from the same stream).
-static func generate(seed: int, cols: int, rows: int) -> ValleyLayout:
+static func generate(
+	seed: int, cols: int, rows: int, forked: bool = LAYOUT.FORK_LANES
+) -> ValleyLayout:
 	assert(
 		cols == LAYOUT.COLS and rows == LAYOUT.ROWS,
 		"the layout is made for its own size (LAYOUT.COLS by LAYOUT.ROWS)"
 	)
 	var rng := Rng.derive(seed, Streams.VALLEY_LAYOUT)
+	var fork_rng := Rng.derive(seed, Streams.VALLEY_FORK) if forked else null
 	for attempt in LAYOUT.MAX_ATTEMPTS:
-		var layout := _draw(seed, rng)
+		var layout := _draw(seed, rng, fork_rng)
 		if layout != null and layout.problems().is_empty() and _stitches(layout):
 			return layout
 	push_error("valley layout seed %d: no draw passes its checks" % seed)
@@ -100,10 +105,70 @@ func problems() -> Array[String]:
 			found.append("region %d: the gates must be on dry banks" % slot.id)
 		all_cells.append_array(cells)
 		if not dry:
-			found.append_array(_crossing_problems(slot, cells))
+			found.append_array(_crossing_problems(slot, cells, slot.entry.y))
 	found.append_array(_lane_problems(all_cells))
 	found.append_array(_straight_problems())
+	found.append_array(_fork_problems(wet))
 	return found
+
+
+## What is wrong with the fork's lower lane (#481): it stays in its regions, keeps dry but for
+## one wade of the river on its own level row, follows the lane rule and the straight-leg rule
+## as a whole road, and keeps `LANE_APART` cells from the upper lane but near the fork and the
+## merge.
+func _fork_problems(wet: Dictionary) -> Array[String]:
+	var found: Array[String] = []
+	if not slots.any(func(slot: Slot) -> bool: return slot.has_branch()):
+		return found
+	var road: Array[Vector2i] = []
+	var own: Array[Vector2i] = []
+	var upper: Array[Vector2i] = []
+	for slot in slots:
+		var cells := RoadSpline.build(slot.spine).cells
+		if not slot.has_branch():
+			road.append_array(cells)
+			continue
+		var lane := RoadSpline.build(slot.branch_spine).cells
+		for cell in lane:
+			if not slot.rect.has_point(cell):
+				found.append("region %d: the lower lane leaves it at %s" % [slot.id, cell])
+				break
+		var dry := slot.id != Region.BLUEWATER_CROSSING
+		if dry and lane.any(func(cell: Vector2i) -> bool: return wet.has(cell)):
+			found.append("region %d: the lower lane touches the river" % slot.id)
+		elif not dry:
+			if _wet_runs(lane, wet) != 1:
+				found.append("region %d: the lower lane must wade the river once" % slot.id)
+			found.append_array(_crossing_problems(slot, lane, slot.branch_entry.y))
+		road.append_array(lane)
+		own.append_array(lane)
+		upper.append_array(cells)
+	found.append_array(_lane_problems(road))
+	found.append_array(_apart_problems(own, upper))
+	for group in STRAIGHT_GROUPS:
+		var cells: Array[Vector2i] = []
+		for id in group:
+			cells.append_array(
+				(
+					RoadSpline
+					. build(slots[id].branch_spine if slots[id].has_branch() else slots[id].spine)
+					. cells
+				)
+			)
+		if _longest_straight(cells) > LAYOUT.MAX_STRAIGHT:
+			found.append("regions %s: the lower lane runs straight for too long" % [group])
+	return found
+
+
+## The lower lane's own cells keep `LANE_APART` cells from the upper lane's, but within
+## `LANE_JOIN` cells of either end of the stretch (the fork and the merge).
+static func _apart_problems(own: Array[Vector2i], upper: Array[Vector2i]) -> Array[String]:
+	var apart: int = LAYOUT.LANE_APART
+	for index in range(LAYOUT.LANE_JOIN, own.size() - LAYOUT.LANE_JOIN):
+		for cell in upper:
+			if (own[index] - cell).length_squared() < apart * apart:
+				return ["the lanes run within %d cells of each other at %s" % [apart, own[index]]]
+	return []
 
 
 ## No straight leg longer than `MAX_STRAIGHT` cells, also across the gates between regions (the
@@ -145,8 +210,8 @@ func _crossing_rows(left: int, ridge_x: int, first: int) -> Array[int]:
 
 ## The Crossing's road meets the river level on one row, with straight approaches before and
 ## after the wet stretch and the far bank in reach of the exit (the real section draws that road).
-static func _crossing_problems(slot: Slot, cells: Array[Vector2i]) -> Array[String]:
-	var span := BluewaterCrossingRegion._span(slot.river, slot.entry.y)
+static func _crossing_problems(slot: Slot, cells: Array[Vector2i], row: int) -> Array[String]:
+	var span := BluewaterCrossingRegion._span(slot.river, row)
 	var reach: int = BluewaterCrossingRegion.BLUEWATER.APPROACH_STRAIGHT
 	var found: Array[String] = []
 	var first := -1
@@ -164,7 +229,7 @@ static func _crossing_problems(slot: Slot, cells: Array[Vector2i]) -> Array[Stri
 		):
 			found.append("the bridge approaches are not straight")
 			break
-	if cells[last].y != slot.entry.y:
+	if cells[last].y != row:
 		found.append("the bridge is not level with the entry")
 	return found
 
@@ -195,7 +260,7 @@ static func _wet_runs(cells: Array[Vector2i], wet: Dictionary) -> int:
 	return runs
 
 
-static func _draw(seed: int, rng: Rng) -> ValleyLayout:
+static func _draw(seed: int, rng: Rng, fork_rng: Rng = null) -> ValleyLayout:
 	var layout := ValleyLayout.new()
 	layout.seed = seed
 	layout.cols = LAYOUT.COLS
@@ -235,17 +300,33 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 	# and for the bank to turn north to the Ridge; the river is drawn again until one does.
 	var first := maxi(ys[0] + inset, ys[1] + LAYOUT.CROSSING_DROP)
 	var rows: Array[int] = []
+	var dry_rows: Array[int] = []
 	for _try in LAYOUT.RIVER_TRIES:
 		layout.river_cells.clear()
 		layout._draw_river(rng)
 		rows = layout._crossing_rows(left, ridge_x, first)
+		var open_rows := rows
+		if fork_rng != null:
+			# The upper lane may enter higher; only the lower one needs the drop to turn north.
+			open_rows = layout._crossing_rows(
+				left, ridge_x, maxi(ys[0] + inset, ys[1] + LAYOUT.FORK_UPPER_DROP)
+			)
+			rows = _with_lower_row(open_rows, first)
 		if not rows.is_empty():
+			dry_rows = open_rows
 			break
 	if rows.is_empty():
+		if fork_rng != null:
+			return null
 		rows.append(first)
 	var y: int = rows[rng.next_int(rows.size())]
 	exits.append(Vector2i(left - 1, y))
 	entries.append(Vector2i(left, y))
+	# The fork's lower lane: it leaves the Meadow's entry gate and reaches the Crossing on the row
+	# `gap` rows below, from its own stream.
+	var lower := -1
+	if fork_rng != null:
+		lower = y + _gap_below(dry_rows, y, first, fork_rng)
 	exits.append(Vector2i(ridge_x, ys[1]))
 	entries.append(Vector2i(ridge_x, ys[1] - 1))
 	# Fold: right of the Ridge.
@@ -270,8 +351,38 @@ static func _draw(seed: int, rng: Rng) -> ValleyLayout:
 		for cell in layout.river_cells:
 			if slot.rect.has_point(cell):
 				slot.river.append(cell)
+		if lower >= 0 and index == Region.SUNKEN_MEADOW:
+			slot.branch_entry = slot.entry
+			slot.branch_exit = Vector2i(left - 1, lower)
+		elif lower >= 0 and index == Region.BLUEWATER_CROSSING:
+			slot.branch_entry = Vector2i(left, lower)
+			slot.branch_exit = slot.exit
 		layout.slots.append(slot)
 	return layout if RouteComposer.compose(layout, rng) else null
+
+
+## The rows that can enter the Crossing with a second row `FORK_ROW_GAP` below that can too.
+static func _with_lower_row(rows: Array[int], lowest: int) -> Array[int]:
+	var found: Array[int] = []
+	for row in rows:
+		if _gaps_below(rows, row, lowest).size() > 0:
+			found.append(row)
+	return found
+
+
+## The row gaps (from `FORK_ROW_GAP`) at which `row` has a lower row among `rows`, `lowest` or
+## below.
+static func _gaps_below(rows: Array[int], row: int, lowest: int) -> Array[int]:
+	var gaps: Array[int] = []
+	for gap in range(LAYOUT.FORK_ROW_GAP.x, LAYOUT.FORK_ROW_GAP.y + 1):
+		if rows.has(row + gap) and row + gap >= lowest:
+			gaps.append(gap)
+	return gaps
+
+
+static func _gap_below(rows: Array[int], row: int, lowest: int, fork_rng: Rng) -> int:
+	var gaps := _gaps_below(rows, row, lowest)
+	return gaps[fork_rng.next_int(gaps.size())]
 
 
 ## Source and mouth, with a wobble in between, as a spline; the cells beside the centre line
