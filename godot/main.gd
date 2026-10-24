@@ -48,6 +48,8 @@ var _card := TowerCard.new()
 var _glow_shown := false
 ## How many foes the phone check keeps walking (the `?stress=` page parameter), 0 for none.
 var _stress_foes := 0
+## Play the 40 by 24 layout valley (`--layout-valley`, a debug flag).
+var _layout_valley := false
 var _fps := FpsOverlay.new()
 var _guide := GuidePanel.new()
 var _auto := AutoWave.new()
@@ -92,6 +94,11 @@ func _ready() -> void:
 	RenderQuality.apply(level as RenderQuality.Level, _world.environment, _sun, _tilt_shift())
 	_lens.shadow_cap = RenderQuality.shadow_cap(level as RenderQuality.Level)
 	var from_url: Variant = _seed_from_url()
+	var launch_args := OS.get_cmdline_user_args()
+	_layout_valley = LaunchArgs.layout_valley(launch_args)
+	var from_args: Variant = LaunchArgs.seed_value(launch_args)
+	if from_args is int:
+		from_url = from_args
 	_rig.flight_ended.connect(_on_flight_ended)
 	_start(from_url if from_url is int else _board.map_seed)
 	add_child(_audio)
@@ -433,7 +440,11 @@ func select_cell(cell: Vector2i) -> void:
 func _start(map_seed: int) -> void:
 	_crow.clear()
 	_auto.cancel()
-	_game = Game.create(map_seed)
+	_game = Game.create_on_layout_valley(map_seed) if _layout_valley else Game.create(map_seed)
+	if _game == null:
+		# the layout valley could not be made for this seed: play the default board instead
+		push_warning("layout valley failed for seed %d, playing the default board" % map_seed)
+		_game = Game.create(map_seed)
 	# the board draws the game's own map (the diorama is built from its snapshot)
 	_board.show_map(_game.map, _game.routes)
 	_clock = Clock.new()

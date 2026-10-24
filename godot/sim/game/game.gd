@@ -30,6 +30,17 @@ static func create(
 	return from_map(seed, game_map, with_detour, on_game_board)
 
 
+## Creates the game on the 40 by 24 layout valley for a seed, with the Knight, as the game board
+## does. A debug entry (`--layout-valley`, #513): the default board is unchanged. Null, with an
+## error, when no layout draw passes its checks.
+static func create_on_layout_valley(seed: int) -> GameState:
+	var layout_map := MapGen.generate_layout_valley(seed)
+	if layout_map == null:
+		push_error("no layout valley for seed %d" % seed)
+		return null
+	return from_map(seed, layout_map, false, true)
+
+
 ## Creates the game on a map that is already made, on tick 0 (`create` calls it, and a test
 ## plays a hand-made map with it). `with_detour` is the old random lane; `with_hero` places the
 ## starting hero. The game keeps `map` itself, not a copy. The old random detour (`with_detour`)
