@@ -6,10 +6,20 @@
 #
 # usage: scripts/run-gut-parallel.sh            # one worker per core, up to 8
 #        scripts/run-gut-parallel.sh -j 4       # four workers
+#        scripts/run-gut-parallel.sh -t res://tests/a/test_x.gd,res://tests/b/test_y.gd
+#                                               # only these scripts (what scripts/select-tests.mjs
+#                                               # prints for a pull request), same checks and exit code
 set -u
 cd "$(dirname "$0")/.."
 jobs=0
-if [ "${1:-}" = "-j" ]; then jobs="$2"; shift 2; fi
+tests=""
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -j) jobs="${2:?-j needs a number}"; shift 2 ;;
+    -t) tests="${2:?-t needs a comma-separated list of res:// test paths}"; shift 2 ;;
+    *) echo "usage: $0 [-j workers] [-t res://tests/test_a.gd,res://tests/test_b.gd]" >&2; exit 2 ;;
+  esac
+done
 if [ "$jobs" -le 0 ]; then
   jobs=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
   [ "$jobs" -gt 8 ] && jobs=8
@@ -19,9 +29,22 @@ dir="$(mktemp -d /tmp/gut-par.XXXXXX)"
 export GODOT_BIN="${GODOT:-godot}"
 export dir
 "$GODOT_BIN" --headless --path godot --import >/dev/null 2>&1
-# biggest first
-find godot/tests -name 'test_*.gd' -exec wc -c {} + | grep -v ' total$' | sort -rn \
-  | awk '{print $2}' >"$dir/scripts.txt"
+if [ -n "$tests" ]; then
+  # an explicit list: a path that does not exist fails here instead of silently running nothing
+  : >"$dir/scripts.txt"
+  for res in $(echo "$tests" | tr ',' ' '); do
+    path="godot/${res#res://}"
+    if [ "$res" = "$path" ] || [ ! -f "$path" ]; then
+      echo "run-gut-parallel: no test script at $res" >&2
+      exit 2
+    fi
+    echo "$path" >>"$dir/scripts.txt"
+  done
+else
+  # biggest first
+  find godot/tests -name 'test_*.gd' -exec wc -c {} + | grep -v ' total$' | sort -rn \
+    | awk '{print $2}' >"$dir/scripts.txt"
+fi
 run_one() {
   path="$1"
   name="$(echo "$path" | tr '/' '_')"
