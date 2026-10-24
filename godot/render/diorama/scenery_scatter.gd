@@ -289,7 +289,7 @@ class Obstacles:
 			add_rect(Rect2(Vector2(anchor), Vector2(map.footprint, map.footprint)), "socket")
 		add_rect(Rect2(map.heartstone), "socket")
 		for bridge in map.bridges:
-			add_rect(RoadBedBuilder.deck_rect(bridge), "bridge")
+			add_rect(RoadBedBuilder.deck_rect(bridge, map.road_width), "bridge")
 		for cell in field.river:
 			add_rect(Rect2(Vector2(cell), Vector2.ONE), "river")
 
