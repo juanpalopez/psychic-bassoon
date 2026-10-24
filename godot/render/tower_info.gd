@@ -7,11 +7,11 @@ const TOWERS := preload("res://content/towers.gd")
 const RULES := preload("res://content/game_rules.gd")
 
 
-## How far the tower reaches, in cells: its level's range times the bonus of
-## its cell's elevation.
+## How far the tower reaches a foe on the road, in cells: its level's range times the bonus of
+## its cell's elevation, plus half the map's reach band (0 without one; #446), as the sim measures.
 static func effective_range(map: GameMap, tower: Tower) -> float:
 	var base: float = TOWERS.DEFS[tower.type].range[tower.level]
-	return base * map.range_multiplier(Vector2i(tower.col, tower.row))
+	return base * map.range_multiplier(Vector2i(tower.col, tower.row)) + map.reach_margin()
 
 
 ## Buttons the next upgrade costs, or -1 at the top level.

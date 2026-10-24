@@ -43,6 +43,18 @@ func test_a_level_2_socket_reaches_15_percent_further() -> void:
 	assert_true(found, "a level 2 socket exists")
 
 
+func test_the_range_adds_half_the_reach_band_and_nothing_without_one() -> void:
+	var map := MapGen.generate(1)
+	var cell := map.sockets[0]
+	var tower := _tower("spoolGuard", 0)
+	tower.col = cell.x
+	tower.row = cell.y
+	map.reach_band = 0.0
+	var plain := TowerInfo.effective_range(map, tower)
+	map.reach_band = 1.2
+	assert_almost_eq(TowerInfo.effective_range(map, tower), plain + 0.6, 1e-9)
+
+
 func test_the_next_upgrade_cost_and_none_at_the_top() -> void:
 	assert_eq(TowerInfo.next_cost(_tower("spoolGuard", 0)), 60)
 	assert_eq(TowerInfo.next_cost(_tower("spoolGuard", 1)), 110)

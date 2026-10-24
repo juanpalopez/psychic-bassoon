@@ -131,7 +131,7 @@ static func _chase(game: GameState, hero: Hero) -> int:
 		return -1
 	var chaser: Foe = null
 	for foe in game.foes:
-		if foe.id == hero.chaser_id and foe.alive and _in_reach(hero, foe):
+		if foe.id == hero.chaser_id and foe.alive and _in_reach(game, hero, foe):
 			if foe.engaged_guard_id != -1:
 				break
 			chaser = foe
@@ -153,7 +153,7 @@ static func _take_a_foe(game: GameState, hero: Hero) -> Foe:
 	for foe in game.foes:
 		if not foe.alive or not foe.blockable or foe.flying or foe.engaged_guard_id != -1:
 			continue
-		if not _in_reach(hero, foe):
+		if not _in_reach(game, hero, foe):
 			continue
 		var gap := _gap(hero, foe)
 		if gap < best_gap or (gap == best_gap and foe.id < best.id):
@@ -175,8 +175,10 @@ static func _gap(hero: Hero, foe: Foe) -> float:
 	return sqrt(dx * dx + dy * dy)
 
 
-static func _in_reach(hero: Hero, foe: Foe) -> bool:
-	return _gap(hero, foe) <= hero.radius + foe.radius + HEROES.REACH
+## Measured to the road band's edge like a tower's (#446): a foe walks the centre line, so the
+## hero standing anywhere on the band reaches it. One line, easy to revert if the owner says no.
+static func _in_reach(game: GameState, hero: Hero, foe: Foe) -> bool:
+	return _gap(hero, foe) <= hero.radius + foe.radius + HEROES.REACH + game.map.reach_margin()
 
 
 static func _wait_to_return(game: GameState, hero: Hero) -> void:
