@@ -72,6 +72,7 @@ func test_with_no_band_the_ground_reach_is_the_reach_to_the_bit() -> void:
 
 func test_a_ground_foe_just_past_the_reach_is_hit_only_with_a_band() -> void:
 	var plain := TowerFireKit.scene()
+	plain.game.map.reach_band = 0.0
 	var reach := TowerFire.reach_of(plain.game, plain.tower)
 	var foe := _foe_at(plain.game, _centre(plain.game, plain.tower), reach + INSIDE)
 	Game.tick(plain.game)
@@ -146,6 +147,7 @@ func test_frostbite_counts_a_slowed_foe_inside_the_margin() -> void:
 	var reach := TowerFire.reach_of(game, scene.tower)
 	var foe := _foe_at(game, _centre(game, scene.tower), reach + INSIDE)
 	Status.apply_slow(foe, 0.3, 5.0)
+	game.map.reach_band = 0.0
 	assert_eq(Specs.frostbite_bonus(game, foe), 0.0, "no band, out of the spire's reach")
 	game.map.reach_band = BAND
 	assert_gt(Specs.frostbite_bonus(game, foe), 0.0, "inside the margin")
@@ -244,6 +246,7 @@ func test_the_mess_aura_holds_a_guard_post_inside_the_margin() -> void:
 	assert_false(found.is_empty(), "some seed has a socket just past a level 1 aura")
 	var game: GameState = found[0]
 	var gap: float = found[2]
+	game.map.reach_band = 0.0
 	GameTestKit.run(game, [Command.build("messTent", found[1].x, found[1].y)])
 	GuardKit.tick(game, 1)
 	assert_eq(game.guards[0].speed_bonus, 0.0, "without a band the post is out of reach")
@@ -262,6 +265,7 @@ func test_fortified_feast_shields_a_guard_whose_post_is_inside_the_margin() -> v
 	var game: GameState = found[0]
 	var gap: float = found[2]
 	game.buttons = 100000
+	game.map.reach_band = 0.0
 	GameTestKit.run(game, [Command.build("messTent", found[1].x, found[1].y)])
 	var mess: Tower = game.towers[1]
 	Game.submit(game, Command.upgrade(mess.id))
@@ -276,3 +280,60 @@ func test_fortified_feast_shields_a_guard_whose_post_is_inside_the_margin() -> v
 	Game.submit(game, Command.activate(mess.id))
 	Game.tick(game)
 	assert_gt(game.guards[0].shield_hp, 0.0, "the band brings the post into the aura")
+
+
+# --- areas around a point are not reaches: the band does not widen them ---
+
+
+func test_a_mortar_blast_does_not_get_the_band() -> void:
+	var scene := TowerFireKit.scene("thimbleMortar")
+	var game := scene.game
+	game.map.reach_band = BAND
+	var centre := _centre(game, scene.tower)
+	var splash: float = TOWERS.DEFS.thimbleMortar.splash[0]
+	var target := _foe_at(game, centre, 1.0)
+	target.distance = 20.0
+	var beside := _foe_at(game, centre, 1.0 + splash - 0.05)
+	var past := _foe_at(game, centre, 1.0 + splash + INSIDE)
+	Game.tick(game)
+	assert_lt(target.hp, target.max_hp, "the shell landed")
+	assert_lt(beside.hp, beside.max_hp, "inside the blast")
+	assert_eq(past.hp, past.max_hp, "just past the blast, inside what the band would add")
+
+
+func test_a_pool_does_not_get_the_band() -> void:
+	var scene := _top("thimbleMortar", "stickyGlueMortar")
+	var game := scene.game
+	game.map.reach_band = BAND
+	var centre := _centre(game, scene.tower)
+	var target := _foe_at(game, centre, 1.0)
+	Game.tick(game)
+	assert_eq(game.zones.size(), 1, "the shell left a pool")
+	var pool: Zone = game.zones[0]
+	scene.tower.cooldown = 1000.0
+	var inside := _foe_at(game, Vector2(pool.x, pool.y), pool.radius - 0.05)
+	var past := _foe_at(game, Vector2(pool.x, pool.y), pool.radius + INSIDE)
+	Game.tick(game)
+	assert_gt(target.slow, 0.0)
+	assert_gt(inside.slow, 0.0, "inside the pool")
+	assert_eq(past.slow, 0.0, "just past the pool")
+
+
+func test_a_squadron_bomb_does_not_get_the_band() -> void:
+	var scene := _top("spoolGuard", "paperPlaneAviary")
+	var game := scene.game
+	game.map.reach_band = BAND
+	var centre := _centre(game, scene.tower)
+	var reach := TowerFire.reach_of(game, scene.tower)
+	var foe := _foe_at(game, centre, reach + INSIDE)
+	scene.tower.cooldown = 1000.0
+	Game.submit(game, Command.activate(scene.tower.id))
+	Game.tick(game)
+	var zone: Zone = game.zones[0]
+	# out of the patrol (past the margin), just past the bomb's blast from the foe the planes hit
+	var past := _foe_at(game, centre, reach + INSIDE + zone.splash + INSIDE)
+	var every := int(zone.every * 30.0) + 2
+	for i in every:
+		Game.tick(game)
+	assert_lt(foe.hp, foe.max_hp, "the planes bombed the foe in the margin")
+	assert_eq(past.hp, past.max_hp, "the blast stopped short of the foe past it")

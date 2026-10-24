@@ -1,6 +1,6 @@
 ---
 type: decision
-date: 2026-10-25
+date: 2026-10-24
 status: accepted
 decided-by: owner on Claude's proposal
 links: [#446, #498, #441]
@@ -31,5 +31,16 @@ and blast radii, pulls and soaks stay areas around a point and do not use it.
 
 ## Consequences
 - With the band off, replay, spec and socket goldens and the frozen fixtures are byte-equal.
+  `MapGen.game_map` on main still returns the strip valley (the layout valley is not the board
+  until #458), so no golden runs on a banded map yet.
+- The recon bonus (`seen` in `TowerFire.reach_of`) multiplies the reach but intentionally does
+  not scale the band: the band is added after it, so it stays the road's width.
+- The switch-on PR (with #458) moves `godot/tests/goldens/replays.json` and the six `specs*.json`
+  goldens (specs, specs_prism, specs_mortar, specs_aviary, specs_guard, specs_mess), which run on
+  `Game.create(1)`. The tools that write them are `godot/tools/write_replays_golden.gd` and
+  `godot/tools/write_specs_golden.gd`; the re-record belongs to that PR under its own record.
 - Still open for the later PRs of #446: the hero's reach, the scripted bot, range display,
-  socket placement and the switch-on with its golden re-record (#458).
+  socket placement and the switch-on itself. The ability rings stay at the plain reach for now:
+  the flash freeze, precision snipe and Mess Tent `event.splash` in `specs.gd` (about lines 362,
+  383 and 447) and the squadron's `zone.radius` in `zones.gd` (about line 73, which the patrol
+  widens by the margin when it measures).

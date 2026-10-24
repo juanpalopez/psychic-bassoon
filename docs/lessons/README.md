@@ -8,7 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
-| 2026-10-25 | decision | Measure a ground foe's distance to the road band's edge through one combat seam, off until the band is switched on | sim | none | |
+| 2026-10-24 | decision | Measure a ground foe's distance to the road band's edge through one combat seam, off until the band is switched on | sim | none | |
 | 2026-10-24 | decision | Fix #469 with a reach of about 2.7 plus a render-side clip, and hold the other map calls | sim | none | |
 | 2026-10-24 | decision | Fork the road over the river, widen it and grow the layout valley to 40 by 24 | sim | none | CLAUDE.md, docs/rfcs/2026-10-23-longer-valley-road.md |
 | 2026-10-24 | lesson | Send every GUT run through the parallel runner, whatever the test selection | ci | script | scripts/run-gut-parallel.sh, scripts/run-gut-parallel.test.ts |
