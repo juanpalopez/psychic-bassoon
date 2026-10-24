@@ -64,7 +64,7 @@ func test_the_distance_to_a_square_is_zero_where_the_curve_crosses_it() -> void:
 
 
 func test_the_band_reach_is_wider_than_the_one_cell_roads_and_only_for_the_band() -> void:
-	assert_eq(ROAD.BAND_COVERAGE_REACH, 2.7)
+	assert_eq(SectionSockets.coverage_reach(ROAD.OLD_WIDTH_CELLS), 2.3 + 0.45)
 	assert_eq(RULES.SOCKET_COVERAGE_REACH, 2.3, "the strip valley and old boards keep theirs")
 	# three road cells 2.55 cells from the block's centre: in the band's reach, out of the other
 	var road: Array[Vector2i] = [Vector2i(8, 5), Vector2i(9, 5), Vector2i(6, 7)]
@@ -127,16 +127,17 @@ func test_no_candidate_block_touches_the_band_and_each_one_still_covers_the_road
 			least - 1e-6
 		)
 		assert_true(
-			SectionSockets.covers(block, result.road, 0.0, ROAD.BAND_COVERAGE_REACH),
+			SectionSockets.covers(block, result.road, 0.0, SectionSockets.coverage_reach(1.0)),
 			"block %s" % anchor
 		)
 
 
 func test_every_block_keeps_centre_line_cells_within_a_level_one_towers_own_range() -> void:
 	# Measured over seeds 1..300 on the 40 by 24 layout valley (#469): the fewest centre-line cells
-	# within the Spool Guard's 2.3 of a block's centre is 1 (3 within the band reach 2.7). A
-	# further loosening of `BAND_COVERAGE_REACH` shows up here as a block with none.
+	# within the Spool Guard's 2.3 of a block's centre is 1 (3 within the band reach 2.75). A
+	# further loosening of `coverage_reach` shows up here as a block with none.
 	var range_1: float = TOWERS.DEFS["spoolGuard"].range[0]
+	var band_reach := SectionSockets.coverage_reach(ROAD.OLD_WIDTH_CELLS)
 	var fewest := 1000
 	var fewest_in_band_reach := 1000
 	for seed in SEEDS:
@@ -147,21 +148,52 @@ func test_every_block_keeps_centre_line_cells_within_a_level_one_towers_own_rang
 			for cell in map.path:
 				var gap := SectionSockets.centre_gap(anchor, cell)
 				own += 1 if gap <= range_1 else 0
-				wide += 1 if gap <= ROAD.BAND_COVERAGE_REACH else 0
+				wide += 1 if gap <= band_reach else 0
 			fewest = mini(fewest, own)
 			fewest_in_band_reach = mini(fewest_in_band_reach, wide)
 	assert_gte(fewest, MIN_CELLS_IN_OWN_RANGE, "cells within the Spool Guard's range")
 	assert_gte(fewest_in_band_reach, RULES.SOCKET_MIN_ROAD_COVERAGE, "cells within the band reach")
 
 
+func test_the_coverage_reach_is_the_level_one_range_plus_the_reach_margin() -> void:
+	var range_1: float = TOWERS.DEFS["spoolGuard"].range[0]
+	for width in [0.9, 1.0, 2.4]:
+		var map := GameMap.new()
+		map.reach_band = width
+		assert_eq(SectionSockets.coverage_reach(width), range_1 + map.reach_margin())
+	assert_almost_eq(SectionSockets.coverage_reach(2.4), 3.5, 1e-9, "the owner's band")
+
+
+func test_a_wider_band_widens_the_reach_and_blocks_are_chosen_by_it() -> void:
+	# three centre-line cells 2.92 cells from the block's centre: out of reach on the 0.9 band
+	# (2.75), in reach on the owner's 2.4 band (3.5)
+	var block := Rect2i(8, 7, 2, 2)
+	var road: Array[Vector2i] = [Vector2i(7, 5), Vector2i(10, 5), Vector2i(6, 6)]
+	var narrow := _straight(ROAD.OLD_WIDTH_CELLS)
+	narrow.road = road
+	var wide := _straight(2.4)
+	wide.road = road
+	assert_false(SectionSockets.reaches(narrow, block))
+	assert_true(SectionSockets.reaches(wide, block))
+	# on a straight road a wider band keeps blocks further off it, so it reaches further out
+	var found := SectionSockets.candidates(_straight(2.4), [] as Array[Rect2i])
+	assert_gt(found.size(), 0)
+	for anchor in found:
+		assert_true(SectionSockets.reaches(_straight(2.4), Rect2i(anchor, Vector2i(2, 2))))
+
+
 func test_a_wide_band_does_not_loosen_the_coverage_rule() -> void:
-	# a block whose centre is 2.5 cells off the road is clear of a 2.4 band but a level 1 tower
-	# there covers none of the road, so it is not placed
+	# a block whose centre is 2.5 cells off the road has two centre-line cells in a 1.0 band's
+	# reach (2.8), too few to be placed; the wider the band, the further out blocks are placed,
+	# but a block 4.5 off the road is out of reach even of a 2.4 band (3.5)
 	var far := Rect2i(8, 7, 2, 2)
-	for width in [1.0, 2.4]:
-		var result := _straight(width)
-		assert_true(SectionSockets.off_band(result, far))
-		assert_false(SectionSockets.reaches(result, far), "width %s" % width)
+	assert_false(SectionSockets.reaches(_straight(1.0), far))
+	assert_true(SectionSockets.off_band(_straight(1.0), far))
+	var wide := _straight(2.4)
+	var beyond := Rect2i(8, 9, 2, 2)
+	assert_true(SectionSockets.off_band(wide, beyond))
+	assert_false(SectionSockets.reaches(wide, beyond), "4.5 off the road, reach 3.5")
+	assert_true(SectionSockets.reaches(wide, far), "2.5 off the road is in reach 3.5")
 	assert_true(SectionSockets.reaches(_straight(1.0), Rect2i(8, 6, 2, 2)))
 
 

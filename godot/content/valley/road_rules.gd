@@ -20,7 +20,3 @@ const ROAD_WIDTH_CELLS := OLD_WIDTH_CELLS
 ## A socket block's edge keeps at least this many cells from the band's edge: it may stand
 ## against the band but never on it (1.0 left a third of the blocks, #430).
 const ROAD_CLEARANCE_CELLS := 0.0
-## How far from a block's centre the centre-line cells count towards its coverage on a band
-## (owner, 2026-10-24, #469). The one-cell roads keep `SOCKET_COVERAGE_REACH`: the band's cells
-## lie further from the blocks, so the same three cells need a little more reach.
-const BAND_COVERAGE_REACH := 2.7
