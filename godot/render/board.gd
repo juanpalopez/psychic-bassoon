@@ -79,6 +79,12 @@ func _ready() -> void:
 		rebuild()
 
 
+## Gives the board's size back to the game board, so no later board inherits a map's size.
+func _exit_tree() -> void:
+	if map != null:
+		BoardSpace.reset()
+
+
 ## Draws the map for `map_seed` again from scratch.
 func rebuild() -> void:
 	# the default board is the map the game plays (the sectioned valley, or its fallback)
@@ -126,6 +132,8 @@ func _draw(source: GameMap, routes: Array[Route] = []) -> void:
 	_built.clear()
 	_socket_transforms.clear()
 	map = source
+	# every BoardSpace conversion, the camera's framing and the pan limits follow this map's size
+	BoardSpace.use_map(map.cols, map.rows)
 	if diorama == null:
 		diorama = Diorama.new()
 		diorama.name = "Diorama"
