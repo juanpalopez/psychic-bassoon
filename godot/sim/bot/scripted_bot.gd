@@ -84,7 +84,7 @@ func _socket_for(game: GameState, type: String) -> Vector2i:
 		var covered := 0
 		var distance := 0.0
 		for guard in game.guards:
-			var at := game.routes[0].position_at(guard.post)
+			var at := Barracks.post_point(game, guard)
 			var gap := centre.distance_to(Vector2(at.x, at.y))
 			if gap <= reach:
 				covered += 1

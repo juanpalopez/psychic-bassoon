@@ -57,6 +57,8 @@ static func from_map(
 		game.second_offset = Route.join_offset(
 			game.routes[0], game.routes[1], game.map.feeder_length, game.map.join_index
 		)
+	for fork in game.map.forks:
+		game.links[fork.route] = RouteLink.of(game.routes[0], game.routes[fork.route], fork)
 	game.buttons = RULES.START_BUTTONS
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)

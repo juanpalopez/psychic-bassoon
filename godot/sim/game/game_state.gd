@@ -39,6 +39,9 @@ var rng: Rng = null
 ## With a second spawn source: how much further along `routes[1]` a point of the main road
 ## is than along `routes[0]` (the second route's feeder is the extra length).
 var second_offset: float = 0.0
+## For each branch route of a fork (the route index is the key), its `RouteLink` to the main
+## road; empty on a map without a fork.
+var links: Dictionary = {}
 ## Whether a foe with no route given draws one at random (the detour of the old fixtures);
 ## otherwise it walks the main road.
 var random_lanes: bool = false

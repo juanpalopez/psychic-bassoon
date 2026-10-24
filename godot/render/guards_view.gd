@@ -54,7 +54,7 @@ func update(game: GameState) -> void:
 			add_child(node)
 			_state[guard.id] = "idle" if guard.alive else "down"
 			_play(node, _state[guard.id])
-		var route: Route = game.routes[0]
+		var route: Route = game.routes[guard.route]
 		var at := route.position_at(guard.post)
 		var world := BoardSpace.point_to_world(at.x, at.y)
 		node.position = Vector3(world.x, GROUND, world.z)
