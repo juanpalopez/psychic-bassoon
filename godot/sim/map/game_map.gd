@@ -71,6 +71,11 @@ var route_curves: Array = []
 ## How wide the road is drawn and walked, in cells: the layout valley's wide band (#430, its
 ## cells are `Tile.ROAD`), 0.9 on every older board. Foes still walk the centre line.
 var road_width: float = ROAD.OLD_WIDTH_CELLS
+## How wide a band, in cells, a tower's reach counts as the road's: a ground foe on the centre
+## line is in reach up to half of it further than the reach in `TowerFire.reach_of` (option B of
+## #446, the wide road's rule). Its own field, not `road_width`, which is 0.9 on every older board
+## and must not move their reach. 0 (no band) on every board until the stitcher sets it.
+var reach_band: float = 0.0
 ## With a second spawn source: how many cells of `routes[1]` come before the main road (the
 ## feeder), and the index in `path` of the cell where it joins. Both are 0 without one.
 var feeder_length: int = 0
@@ -150,6 +155,12 @@ func elevation_at(cell: Vector2i) -> int:
 func range_multiplier(cell: Vector2i) -> float:
 	# off the sockets the level is 0, which has no bonus
 	return 1.0 + RULES.ELEVATION_RANGE_BONUS[elevation_at(cell)]
+
+
+## How much further than its reach a tower hits a ground foe on the centre line: half the reach
+## band (0.0 without one, so adding it changes no bit of a reach).
+func reach_margin() -> float:
+	return reach_band / 2.0
 
 
 ## True when the cell is on the board.
