@@ -17,10 +17,16 @@ func _init() -> void:
 			seed = int(arg.trim_prefix("--seed="))
 		elif arg.begins_with("--out="):
 			out = arg.trim_prefix("--out=")
-	var layout := ValleyLayout.generate(seed, 32, 20)
+	var layout := ValleyLayout.generate(seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS)
 	var map: GameMap = null
 	if layout != null:
-		map = ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		map = ValleyStitcher.build(
+			seed,
+			ValleyLayout.LAYOUT.COLS,
+			ValleyLayout.LAYOUT.ROWS,
+			ValleyLayout.sections(),
+			layout
+		)
 	if map == null:
 		print("seed %d: no valley" % seed)
 		quit(1)

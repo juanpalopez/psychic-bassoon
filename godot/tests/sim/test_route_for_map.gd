@@ -5,9 +5,9 @@
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
-## Layout valley seeds: today 6, 8, 10, 12, 99 and 7920 start the feeder on the east edge below
-## the top row (#462 may move every start to the top row; the test holds either way).
-const LAYOUT_SEEDS: Array[int] = [1, 2, 5, 6, 8, 10, 12, 99, 259, 7920]
+## Layout valley seeds on the 40 by 24 board (#480); the feeder starts on the top row there, and the
+## test holds wherever a start is.
+const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5, 6, 8, 10, 11]
 ## Sub-points checked on the stretch from the spawn point to the first cell.
 const SUBSTEPS := 16
 
@@ -22,9 +22,15 @@ func test_the_game_walks_the_routes_for_its_map() -> void:
 
 func test_the_layout_valley_is_the_layout_stitched_with_its_regions() -> void:
 	for map_seed in [1, 42, 2026]:
-		var layout := ValleyLayout.generate(map_seed, RULES.GRID_COLS, RULES.GRID_ROWS)
+		var layout := ValleyLayout.generate(
+			map_seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS
+		)
 		var expected := ValleyStitcher.build(
-			map_seed, RULES.GRID_COLS, RULES.GRID_ROWS, ValleyLayout.sections(), layout
+			map_seed,
+			ValleyLayout.LAYOUT.COLS,
+			ValleyLayout.LAYOUT.ROWS,
+			ValleyLayout.sections(),
+			layout
 		)
 		var map := MapGen.generate_layout_valley(map_seed)
 		assert_eq(map.path, expected.path, "seed %d road" % map_seed)

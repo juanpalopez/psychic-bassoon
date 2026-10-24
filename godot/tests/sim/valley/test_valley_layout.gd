@@ -9,7 +9,7 @@ const LAST_SEED := 3000
 
 
 func _layout(seed: int) -> ValleyLayout:
-	return ValleyLayout.generate(seed, 32, 20)
+	return ValleyLayout.generate(seed, 40, 24)
 
 
 func _wet(layout: ValleyLayout) -> Dictionary:
@@ -30,9 +30,9 @@ func test_six_regions_in_road_order_tile_the_board() -> void:
 				for x in range(slot.rect.position.x, slot.rect.end.x):
 					assert_false(owner_of.has(Vector2i(x, y)), "overlap, seed %d" % seed)
 					owner_of[Vector2i(x, y)] = slot.id
-		assert_eq(owner_of.size(), 32 * 20, "seed %d" % seed)
+		assert_eq(owner_of.size(), 40 * 24, "seed %d" % seed)
 		assert_eq(layout.slots[ValleyLayout.Region.OUTER_MARCH].rect.position, Vector2i.ZERO)
-		assert_eq(layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH].rect.end, Vector2i(32, 20))
+		assert_eq(layout.slots[ValleyLayout.Region.HEARTKEEP_APPROACH].rect.end, Vector2i(40, 24))
 
 
 func test_regions_sit_where_the_reference_puts_them() -> void:
@@ -41,8 +41,8 @@ func test_regions_sit_where_the_reference_puts_them() -> void:
 		assert_eq(s[ValleyLayout.Region.SUNKEN_MEADOW].rect.position.x, 0)
 		assert_eq(s[ValleyLayout.Region.SUNKEN_MEADOW].rect.position.y, s[0].rect.end.y)
 		assert_eq(s[ValleyLayout.Region.BROKEN_RIDGE].rect.position.y, 0)
-		assert_eq(s[ValleyLayout.Region.BLUEWATER_CROSSING].rect.end.y, 20)
-		assert_eq(s[ValleyLayout.Region.ANCIENT_FOLD].rect.end.x, 32)
+		assert_eq(s[ValleyLayout.Region.BLUEWATER_CROSSING].rect.end.y, 24)
+		assert_eq(s[ValleyLayout.Region.ANCIENT_FOLD].rect.end.x, 40)
 		assert_eq(s[ValleyLayout.Region.ANCIENT_FOLD].rect.position.y, 0)
 
 
@@ -62,9 +62,9 @@ func test_the_road_starts_on_the_west_edge_and_ends_in_the_last_region() -> void
 	for seed in SEEDS:
 		var s := _layout(seed).slots
 		assert_eq(s[0].entry.x, 0)
-		assert_eq(s[5].exit.x, 31)
+		assert_eq(s[5].exit.x, 39)
 		assert_true(s[5].rect.has_point(s[5].exit))
-		assert_gte(s[5].exit.y, 15)
+		assert_gte(s[5].exit.y, 19)
 
 
 func test_spines_stay_inside_their_regions() -> void:
@@ -78,7 +78,7 @@ func test_the_river_runs_from_the_top_edge_to_the_bottom_edge_in_unit_steps() ->
 	for seed in SEEDS:
 		var cells := _layout(seed).river.cells
 		assert_eq(cells[0].y, 0)
-		assert_eq(cells[cells.size() - 1].y, 19)
+		assert_eq(cells[cells.size() - 1].y, 23)
 		for index in cells.size() - 1:
 			assert_eq((cells[index + 1] - cells[index]).length_squared(), 1)
 		for cell in cells:
@@ -144,7 +144,7 @@ func test_every_seed_has_a_layout_that_passes_its_own_checks() -> void:
 				assert_false(slot.rect.intersects(layout.slots[other].rect), "overlap")
 			for cell in RoadSpline.build(slot.spine).cells:
 				assert_true(slot.rect.has_point(cell), "spine, seed %d" % seed)
-		assert_eq(covered, 32 * 20, "tiling, seed %d" % seed)
+		assert_eq(covered, 40 * 24, "tiling, seed %d" % seed)
 
 
 func test_the_crossing_must_wade_the_river_once_from_dry_banks() -> void:
@@ -158,7 +158,7 @@ func test_the_crossing_must_wade_the_river_once_from_dry_banks() -> void:
 
 func _stitch_problems(seed: int) -> void:
 	var layout := _layout(seed)
-	var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+	var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 	assert_not_null(map, "seed %d" % seed)
 	if map == null:
 		return
@@ -179,6 +179,16 @@ func _stitch_problems(seed: int) -> void:
 func test_the_stitched_stand_in_valley_passes_the_checks_for_every_seed() -> void:
 	for seed in range(1, LAST_SEED + 1, STITCH_STEP):
 		_stitch_problems(seed)
+
+
+## Measured on seeds 1..300 at 40 by 24 (#480): every seed stitches, and the sockets stay between
+## 23 and 30 (the six regions' own ranges, which do not grow with the board).
+func test_every_seed_to_300_stitches_with_23_to_30_sockets() -> void:
+	for seed in range(1, 301):
+		var map := MapGen.generate_layout_valley(seed)
+		assert_not_null(map, "seed %d" % seed)
+		if map != null:
+			assert_between(map.sockets.size(), 23, 30, "seed %d" % seed)
 
 
 func test_seeds_that_once_failed_to_stitch_now_do() -> void:

@@ -12,7 +12,7 @@ const MAX_FIRST_FAIL_PERCENT := 25
 
 
 func _drawn(seed: int) -> Array:
-	var layout := ValleyLayout.generate(seed, 32, 20)
+	var layout := ValleyLayout.generate(seed, 40, 24)
 	var slot := layout.slots[ValleyLayout.Region.OUTER_MARCH]
 	var section := OuterMarchRegion.new()
 	return [layout, slot, section, section.generate(slot, layout.rng_for(slot.id, 0))]
@@ -20,16 +20,16 @@ func _drawn(seed: int) -> Array:
 
 func test_the_valley_builds_with_no_problems_for_seeds_1_to_300() -> void:
 	for seed in range(1, LAST_SEED + 1):
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		assert_not_null(layout, "seed %d" % seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout, true)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout, true)
 		assert_not_null(map, "seed %d" % seed)
 
 
 func test_some_attempt_of_the_budget_passes_the_section_checks_with_four_or_five_blocks() -> void:
 	var first_failures := 0
 	for seed in range(1, LAST_SEED + 1):
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		var slot := layout.slots[ValleyLayout.Region.OUTER_MARCH]
 		var section := OuterMarchRegion.new()
 		assert_eq(section.socket_range(), Vector2i(4, 5))
@@ -91,7 +91,7 @@ func test_the_same_seed_draws_the_same_region() -> void:
 func test_the_road_is_the_composed_spine() -> void:
 	# the section draws no road of its own (#434): it lays the layout's composed road
 	for seed in SEEDS:
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		var slot := layout.slots[ValleyLayout.Region.OUTER_MARCH]
 		var result := OuterMarchRegion.new().generate(slot, layout.rng_for(slot.id, 0))
 		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)

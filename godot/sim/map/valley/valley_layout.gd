@@ -22,6 +22,12 @@ const LAYOUT := preload("res://content/valley/layout_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 const ROAD := preload("res://content/valley/road_rules.gd")
 const HALF := 0.5
+## The regions whose roads run end to end across their gates, for the straight-leg rule: the March
+## and the Meadow, then the Ridge, the Fold and Heartkeep (the Crossing breaks the road).
+const STRAIGHT_GROUPS: Array = [
+	[Region.OUTER_MARCH, Region.SUNKEN_MEADOW],
+	[Region.BROKEN_RIDGE, Region.ANCIENT_FOLD, Region.HEARTKEEP_APPROACH],
+]
 
 ## The river's centre line (a spline from the top edge to the bottom edge).
 var river: RoadCurve = null
@@ -34,7 +40,10 @@ var route_segments: Array[StringName] = []
 ## The layout for a seed, or null (with an error) when no draw passes `problems` and stitches with
 ## the stand-in sections (each retry draws the next layout from the same stream).
 static func generate(seed: int, cols: int, rows: int) -> ValleyLayout:
-	assert(cols == LAYOUT.COLS and rows == LAYOUT.ROWS, "the layout is made for 32 by 20")
+	assert(
+		cols == LAYOUT.COLS and rows == LAYOUT.ROWS,
+		"the layout is made for its own size (LAYOUT.COLS by LAYOUT.ROWS)"
+	)
 	var rng := Rng.derive(seed, Streams.VALLEY_LAYOUT)
 	for attempt in LAYOUT.MAX_ATTEMPTS:
 		var layout := _draw(seed, rng)
@@ -101,7 +110,7 @@ func problems() -> Array[String]:
 ## Crossing's level approaches to the bridge excepted).
 func _straight_problems() -> Array[String]:
 	var found: Array[String] = []
-	for group in [[0, 1], [3, 4, 5]]:
+	for group in STRAIGHT_GROUPS:
 		var cells: Array[Vector2i] = []
 		for id in group:
 			cells.append_array(RoadSpline.build(slots[id].spine).cells)

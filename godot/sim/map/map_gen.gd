@@ -112,11 +112,11 @@ static func generate_valley(seed: int) -> GameMap:
 ## The layout valley (#407, #458): six 2D regions the composed road crosses in turn, stitched with
 ## the region classes. Null (with an error) when no layout draw passes its checks.
 static func generate_layout_valley(seed: int) -> GameMap:
-	var layout := ValleyLayout.generate(seed, RULES.GRID_COLS, RULES.GRID_ROWS)
+	var layout := ValleyLayout.generate(seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS)
 	if layout == null:
 		return null
 	return ValleyStitcher.build(
-		seed, RULES.GRID_COLS, RULES.GRID_ROWS, ValleyLayout.sections(), layout
+		seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS, ValleyLayout.sections(), layout
 	)
 
 

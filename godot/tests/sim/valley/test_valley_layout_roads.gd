@@ -2,7 +2,7 @@ extends GutTest
 
 
 func _layout(seed: int) -> ValleyLayout:
-	return ValleyLayout.generate(seed, 32, 20)
+	return ValleyLayout.generate(seed, 40, 24)
 
 
 func _spine_cells(layout: ValleyLayout) -> Array[Vector2i]:
@@ -36,7 +36,7 @@ func test_a_straight_leg_spine_fails_the_layout() -> void:
 	var layout := _layout(42)
 	var march := layout.slots[ValleyLayout.Region.OUTER_MARCH]
 	var from := Vector2(march.entry) + Vector2(0.5, 0.5)
-	march.spine = [from, from + Vector2(14.0, 0.0)]
+	march.spine = [from, from + Vector2(float(ValleyLayout.LAYOUT.MAX_STRAIGHT) + 2.0, 0.0)]
 	assert_true(layout.problems().any(func(text: String) -> bool: return "straight" in text))
 
 

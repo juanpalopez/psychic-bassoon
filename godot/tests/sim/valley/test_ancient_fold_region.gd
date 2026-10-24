@@ -13,7 +13,7 @@ var _layouts := {}
 
 func _layout(seed: int) -> ValleyLayout:
 	if not _layouts.has(seed):
-		_layouts[seed] = ValleyLayout.generate(seed, 32, 20)
+		_layouts[seed] = ValleyLayout.generate(seed, 40, 24)
 	return _layouts[seed]
 
 
@@ -37,7 +37,7 @@ func test_the_layout_places_the_region_top_right_and_the_stitch_passes() -> void
 	for seed in range(1, LAST_SEED + 1, STEP):
 		var layout := _layout(seed)
 		assert_not_null(layout, "seed %d" % seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout, true)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout, true)
 		assert_not_null(map, "seed %d" % seed)
 
 
@@ -67,7 +67,7 @@ func test_the_second_roads_foes_enter_at_the_board_edge() -> void:
 	for seed in range(1, LAST_SEED + 1):
 		seeds.append(seed)
 	for seed in seeds:
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), _layout(seed), true)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), _layout(seed), true)
 		var start: Vector2i = map.routes[1][0]
 		assert_eq(start.y, 0, "seed %d starts on the top edge at %s" % [seed, start])
 		var second := Route.build_from_curve(map.routes[1], map.route_curves[1])
@@ -136,7 +136,7 @@ func test_the_section_is_reproducible() -> void:
 
 func test_game_create_style_routes_agree_at_the_join() -> void:
 	for seed in range(1, LAST_SEED + 1, STEP):
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), _layout(seed), true)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), _layout(seed), true)
 		assert_eq(map.routes.size(), 2)
 		assert_eq(map.route_curves.size(), 2)
 		var main := Route.build_from_curve(map.routes[0], map.route_curves[0])
@@ -196,7 +196,7 @@ func test_a_feeder_curve_replaces_the_cell_centres_and_none_keeps_them() -> void
 func test_the_road_is_the_composed_spine() -> void:
 	# the section draws no road of its own (#434): it lays the layout's composed road
 	for seed in SEEDS:
-		var layout := ValleyLayout.generate(seed, 32, 20)
+		var layout := ValleyLayout.generate(seed, 40, 24)
 		var slot := layout.slots[ValleyLayout.Region.ANCIENT_FOLD]
 		var result := AncientFoldRegion.new().generate(slot, layout.rng_for(slot.id, 0))
 		assert_eq(result.road, RoadSpline.build(slot.spine).cells, "seed %d" % seed)

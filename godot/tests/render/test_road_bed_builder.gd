@@ -15,8 +15,8 @@ const EPSILON := 1e-4
 ## How far a curve's bed may reach past the road cells, where it cuts an inner corner.
 const CORNER_TOLERANCE := 0.1
 ## Layout valley seeds (#458): a river two or three cells wide, crossed on two or three bridge
-## cells side by side (6 and 259 on three).
-const LAYOUT_SEEDS: Array[int] = [1, 6, 10, 259, 7920]
+## cells side by side (2, 5 and 11 on three).
+const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5, 11]
 
 
 func _flat(_cell: Vector2i) -> float:

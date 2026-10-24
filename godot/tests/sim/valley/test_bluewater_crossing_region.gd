@@ -13,7 +13,7 @@ static var _layouts := {}
 
 func _layout(seed: int) -> ValleyLayout:
 	if not _layouts.has(seed):
-		_layouts[seed] = ValleyLayout.generate(seed, 32, 20)
+		_layouts[seed] = ValleyLayout.generate(seed, 40, 24)
 	return _layouts[seed]
 
 
@@ -54,7 +54,7 @@ func test_every_seed_has_a_passing_attempt_and_most_pass_the_first() -> void:
 func test_the_valley_stitches_with_no_problems() -> void:
 	for seed in range(1, LAST_SEED + 1, STITCH_STEP):
 		var layout := _layout(seed)
-		var map := ValleyStitcher.build(seed, 32, 20, ValleyLayout.sections(), layout)
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), layout)
 		assert_not_null(map, "seed %d" % seed)
 
 

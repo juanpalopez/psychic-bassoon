@@ -9,7 +9,7 @@ const SEEDS: Array[int] = [1, 7920, 15839]
 const RIVER_SEEDS: Array[int] = [1, 22]
 ## Layout valley seeds (#458): its river is two or three cells wide, so the road crosses it on
 ## two or three bridge cells side by side.
-const LAYOUT_SEEDS: Array[int] = [1, 6, 259, 7920]
+const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5]
 ## Points of a cell, as offsets from its centre, where nothing may stand above a guarded cell.
 const INSIDE: Array[Vector2] = [
 	Vector2(0, 0),
@@ -229,6 +229,8 @@ func test_nothing_stands_over_a_socket_or_the_road() -> void:
 	for pair in _boards(SEEDS):
 		var board: Board = pair[0]
 		var map := board.map
+		# the boards are all built first, and the space follows the last one drawn
+		BoardSpace.use_map(map.cols, map.rows)
 		var terraces := _tops(board.diorama.builder("Terraces"), map)
 		for row in map.rows:
 			for col in map.cols:
