@@ -123,3 +123,58 @@ func test_a_u_turn_joins_two_gates_on_one_border() -> void:
 		assert_eq(cells[cells.size() - 1], Vector2i(8, 0))
 		for cell in cells:
 			assert_true(region.has_point(cell))
+
+
+## A jog across a wide region, from a gate on row 2 (or row 7, mirrored north) to a gate `rows`
+## away, both heading east.
+func _jog(rows: int, north: bool) -> SegmentFitter.Fitted:
+	var wide := Rect2i(0, 0, 16, 10)
+	var start_row: float = 7.5 if north else 2.5
+	var end_row: float = start_row - rows if north else start_row + rows
+	return SegmentFitter.fit(
+		RoadSegment.get_segment(SEGMENTS.JOG),
+		Vector2(0.5, start_row),
+		Vector2.RIGHT,
+		Vector2(12.5, end_row),
+		Vector2.RIGHT,
+		wide,
+		1.0
+	)
+
+
+func test_a_jog_fits_a_gate_four_or_five_rows_over_either_way() -> void:
+	for rows in [4, 5]:
+		for north in [false, true]:
+			var fitted := _jog(rows, north)
+			assert_true(fitted.ok(), "%d rows north %s: %s" % [rows, north, fitted.reason])
+			if not fitted.ok():
+				continue
+			var count := fitted.points.size()
+			var end_row: float = 7.5 - rows if north else 2.5 + rows
+			assert_eq(fitted.points[count - 1], Vector2(12.5, end_row))
+			var cells := RoadSpline.build(fitted.points).cells
+			for cell in cells:
+				assert_true(Rect2i(0, 0, 16, 10).has_point(cell))
+
+
+func test_a_jog_leaves_the_gate_row_and_lands_on_the_new_row() -> void:
+	var fitted := _jog(5, false)
+	assert_true(fitted.ok(), fitted.reason)
+	var cells := RoadSpline.build(fitted.points).cells
+	assert_eq(cells[0].y, 2, "starts on the entry row")
+	assert_eq(cells[cells.size() - 1].y, 7, "ends five rows down")
+	assert_eq(cells[cells.size() - 1].x, 12)
+
+
+func test_a_jog_fit_is_the_same_every_time() -> void:
+	var first := _jog(4, true)
+	var second := _jog(4, true)
+	assert_eq(first.points, second.points)
+
+
+func test_seeded_gate_rows_all_fit_as_jogs() -> void:
+	var rng := Rng.create(11)
+	for draw in 200:
+		var rows := 4 + rng.next_int(2)
+		var fitted := _jog(rows, draw % 2 == 1)
+		assert_true(fitted.ok(), "draw %d, %d rows: %s" % [draw, rows, fitted.reason])

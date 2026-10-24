@@ -13,6 +13,7 @@ const RIDGE_WRAP := &"ridge_wrap"
 const LANDMARK := &"landmark"
 const HOOK := &"hook"
 const U_TURN := &"u_turn"
+const JOG := &"jog"
 
 const RIGHT := Vector2(1.0, 0.0)
 const DOWN := Vector2(0.0, 1.0)
@@ -187,5 +188,29 @@ const DATA := {
 		"tag": &"u_turn",
 		"min_turn_radius": 2.3,
 		"scale": Vector2(0.95, 1.6),
+	},
+	# A sideways step: a cosine S from the entry row to a row 4 below it. The points sample
+	# y = 2 (1 - cos(pi x / 7.5)) after a flat lead, then a flat tail so both ports run along
+	# the road. Its ends are the tightest bends (radius about 2.85 at scale 1). The fitter scales
+	# it to the gate, so at scale 1 it steps 4 rows and at 1.25 it steps 5 (the drawn 4 to 5).
+	JOG:
+	{
+		"points":
+		[
+			Vector2(0, 0),
+			Vector2(1.0, 0.0),
+			Vector2(2.25, 0.27),
+			Vector2(3.5, 1.0),
+			Vector2(4.75, 2.0),
+			Vector2(6.0, 3.0),
+			Vector2(7.25, 3.73),
+			Vector2(8.5, 4.0),
+			Vector2(9.5, 4.0),
+		],
+		"entry_heading": RIGHT,
+		"exit_heading": RIGHT,
+		"tag": &"jog",
+		"min_turn_radius": 2.7,
+		"scale": Vector2(1.0, 1.25),
 	},
 }

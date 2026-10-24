@@ -2,6 +2,7 @@ extends GutTest
 
 const SEGMENTS := preload("res://content/valley/segments.gd")
 const LAYOUT := preload("res://content/valley/layout_rules.gd")
+const ROUTES := preload("res://content/valley/route_rules.gd")
 ## Each road step is about a cell long when the curve is resampled, and two of them turn by less
 ## than about 30 degrees (cosine above 0.85).
 const MIN_TURN_COS := 0.85
@@ -18,6 +19,12 @@ const ORIGIN := Vector2(10.5, 10.5)
 const SPAN_LEAST := 1.0
 const APPROACH := 2.0
 const RUN_ON := 1.0
+## The jog steps this many rows (least, most) across its scale range (D4: 4 to 5 rows).
+const JOG_ROWS := Vector2(4.0, 5.0)
+## A jog at its least scale is about this many cells (least, most) along the road.
+const JOG_CELLS := Vector2i(9, 16)
+## The spline's overshoot past its flat ends (cells).
+const JOG_OVERSHOOT := 0.05
 
 
 ## The template scaled by `scale` along its axes and turned: local x to `axis`, local y to the
@@ -59,9 +66,9 @@ func _steps(curve: RoadCurve) -> Array[Vector2]:
 	return found
 
 
-func test_seven_templates_with_their_ports() -> void:
+func test_eight_templates_with_their_ports() -> void:
 	var keys: Array = SEGMENTS.DATA.keys()
-	assert_eq(RoadSegment.ids().size(), 7)
+	assert_eq(RoadSegment.ids().size(), 8)
 	assert_eq(keys.size(), RoadSegment.ids().size())
 	for id in keys:
 		assert_true(RoadSegment.ids().has(id), "%s is listed" % id)
@@ -196,3 +203,56 @@ func test_the_u_turn_leaves_back_along_the_line_it_came_in_on() -> void:
 	assert_eq(segment.exit_heading, -segment.entry_heading)
 	assert_eq(segment.exit.x, 0.0)
 	assert_gte(segment.exit.y * segment.scale_range.x, float(LAYOUT.LANE_GAP))
+
+
+func test_the_jog_steps_sideways_four_rows_at_least_scale_and_five_at_most() -> void:
+	var segment := RoadSegment.get_segment(SEGMENTS.JOG)
+	assert_eq(segment.entry_heading, Vector2.RIGHT)
+	assert_eq(segment.exit_heading, Vector2.RIGHT)
+	assert_almost_eq(segment.exit.y * segment.scale_range.x, JOG_ROWS.x, 0.0001)
+	assert_almost_eq(segment.exit.y * segment.scale_range.y, JOG_ROWS.y, 0.0001)
+	# the fitter scales the step to the gate, so both ends of the range are straight and flat
+	assert_eq(segment.points[1].y, 0.0, "the entry is flat")
+	assert_almost_eq(segment.exit.y - segment.points[segment.points.size() - 2].y, 0.0, 0.0001)
+
+
+func test_the_jog_is_a_short_s_bend_of_about_ten_cells() -> void:
+	var segment := RoadSegment.get_segment(SEGMENTS.JOG)
+	var curve := _placed(segment, ORIGIN, Vector2.ONE, Vector2.RIGHT, 1.0)
+	assert_gte(curve.cells.size(), JOG_CELLS.x, "a jog is a real stretch of road")
+	assert_lte(curve.cells.size(), JOG_CELLS.y, "a jog is about ten cells, not a lane run")
+	# the spline overshoots its flat ends by a hundredth of a cell, never more: the road stays
+	# between its two rows
+	for y in curve.ys:
+		assert_gte(y, ORIGIN.y - JOG_OVERSHOOT, "the jog stays on its rows")
+		assert_lte(y, ORIGIN.y + segment.exit.y + JOG_OVERSHOOT, "the jog stays on its rows")
+
+
+func test_a_jog_turns_no_tighter_than_declared_at_its_widest_scale() -> void:
+	var segment := RoadSegment.get_segment(SEGMENTS.JOG)
+	var steps := _steps(
+		_placed(
+			segment,
+			ORIGIN,
+			Vector2(segment.scale_range.y, segment.scale_range.y),
+			Vector2.RIGHT,
+			1.0
+		)
+	)
+	var tightest := 1.0e9
+	for index in range(1, steps.size() - 1):
+		var before := steps[index] - steps[index - 1]
+		var after := steps[index + 1] - steps[index]
+		var cross := absf(before.cross(after))
+		if cross > 0.0001:
+			var chord := (steps[index + 1] - steps[index - 1]).length()
+			tightest = minf(tightest, before.length() * after.length() * chord / (2.0 * cross))
+	assert_gte(tightest, segment.min_turn_radius * RADIUS_SLACK, "the jog radius")
+
+
+## The layout valley's compositions are unchanged by adding a template: the jog waits for the
+## fork's crossing (#481), so no composer may use it yet.
+func test_no_composition_uses_the_jog_yet() -> void:
+	for options in ROUTES.ALLOWED:
+		for sequence in options:
+			assert_false(sequence.has(SEGMENTS.JOG), "the jog is not in ALLOWED yet")
