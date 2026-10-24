@@ -42,6 +42,12 @@ const JOIN_DROP := 0.003
 const HEART_YARD_RADIUS := 0.92
 const HEART_CAP_RADIUS := 0.47
 const HEART_YARD_SEGMENTS := 20
+## On a road wider than the old one, the yard is at least this much wider than the road's half
+## width (a lip's width, so the yard still reads as a round end to the road).
+const HEART_YARD_MARGIN := 0.1
+## The bed is cut for a bridge over its cell grown this far across the road (cells each side) at
+## the old width; `RoadDimensions.bed_cut_across` grows it for a wider road.
+const BED_CUT_ACROSS := 1.0
 
 ## The bridges: a flat deck `BRIDGE_SPAN` cells long centred on the bridge cell (its ends rest on
 ## the banks, over the road bed's cut ends), of `PLANKS` planks `DECK_WIDTH` across (an odd count,

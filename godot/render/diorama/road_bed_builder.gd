@@ -67,10 +67,13 @@ static func centrelines(routes: Array[Route]) -> Array[PackedVector2Array]:
 
 
 ## Where the bridge over `bridge` lies, in sim cells: its deck from one end to the other, and
-## from one row of posts to the other. A crossing of several bridge cells is the union of theirs.
-static func deck_rect(bridge: GameMap.Bridge) -> Rect2:
+## from one row of posts to the other (`road_width` is the map's, `GameMap.road_width`). A
+## crossing of several bridge cells is the union of theirs.
+static func deck_rect(bridge: GameMap.Bridge, road_width: float = LOOKS.ROAD_WIDTH) -> Rect2:
 	var centre := Vector2(bridge.cell) + Vector2(0.5, 0.5)
-	var half := Vector2(LOOKS.BRIDGE_SPAN / 2.0, LOOKS.POST_OUT + LOOKS.POST_SIZE / 2.0)
+	var half := Vector2(
+		LOOKS.BRIDGE_SPAN / 2.0, RoadDimensions.post_out(road_width) + LOOKS.POST_SIZE / 2.0
+	)
 	if not bridge.horizontal:
 		half = Vector2(half.y, half.x)
 	return Rect2(centre - half, half * 2.0)
@@ -122,7 +125,7 @@ static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) ->
 	var lines := centrelines(routes)
 	var cuts: Array[Rect2] = []
 	for bridge in map.bridges:
-		cuts.append(_bed_cut(bridge))
+		cuts.append(_bed_cut(bridge, map.road_width))
 	var yard := heart_yard(map, height_fn)
 	var ribbon := Ribbon.new()
 	for i in lines.size():
@@ -159,7 +162,7 @@ static func bed_material() -> ShaderMaterial:
 static func bridge_mesh(map: GameMap, height_fn: Callable) -> ArrayMesh:
 	var mesh := FacetMesh.new()
 	for run in crossings(map):
-		_bridge(mesh, run, map.seed, height_fn)
+		_bridge(mesh, run, map.seed, map.road_width, height_fn)
 	return mesh.commit(PaperLook.material("painted"))
 
 
@@ -275,11 +278,12 @@ static func _thin(points: PackedVector2Array) -> PackedVector2Array:
 
 ## Where the bed stops for a bridge: the bridge cell from one bank to the other, and wide
 ## enough across that no bed edge crosses it (the deck covers the bed's cut ends on the banks).
-static func _bed_cut(bridge: GameMap.Bridge) -> Rect2:
+static func _bed_cut(bridge: GameMap.Bridge, road_width: float) -> Rect2:
 	var cell := Rect2(Vector2(bridge.cell), Vector2.ONE)
+	var across := RoadDimensions.bed_cut_across(road_width)
 	if bridge.horizontal:
-		return cell.grow_individual(0.0, 1.0, 0.0, 1.0)
-	return cell.grow_individual(1.0, 0.0, 1.0, 0.0)
+		return cell.grow_individual(0.0, across, 0.0, across)
+	return cell.grow_individual(across, 0.0, across, 0.0)
 
 
 ## The pieces of `line` outside every rectangle in `cuts`, each cut exactly at a rectangle's edge.
@@ -352,8 +356,10 @@ static func heart_yard(map: GameMap, height_fn: Callable) -> Vector3:
 				flat = false
 	if flat:
 		var middle := Vector2(block.position) + Vector2(block.size) / 2.0
-		return Vector3(middle.x, middle.y, LOOKS.HEART_YARD_RADIUS)
-	return Vector3(float(last.x) + 0.5, float(last.y) + 0.5, LOOKS.HEART_CAP_RADIUS)
+		return Vector3(middle.x, middle.y, RoadDimensions.heart_yard_radius(map.road_width))
+	return Vector3(
+		float(last.x) + 0.5, float(last.y) + 0.5, RoadDimensions.heart_cap_radius(map.road_width)
+	)
 
 
 ## One piece of a centreline as a ribbon: six points across (outer edge, lip crest, bed edge on
@@ -495,7 +501,9 @@ static func _world(at: Vector2, height: float) -> Vector3:
 ## One bridge over a crossing's cells (`run`, in order along the road): planks across the span,
 ## a post at each corner on the banks, a hand rope along each side with thin hangers to the deck,
 ## and trestle legs under each cell over a gorge.
-static func _bridge(mesh: FacetMesh, run: Array, map_seed: int, height_fn: Callable) -> void:
+static func _bridge(
+	mesh: FacetMesh, run: Array, map_seed: int, road_width: float, height_fn: Callable
+) -> void:
 	var first: GameMap.Bridge = run[0]
 	var last: GameMap.Bridge = run[run.size() - 1]
 	var centre := (Vector2(first.cell) + Vector2(last.cell)) / 2.0 + Vector2(0.5, 0.5)
@@ -504,6 +512,7 @@ static func _bridge(mesh: FacetMesh, run: Array, map_seed: int, height_fn: Calla
 	var span := LOOKS.BRIDGE_SPAN + float(run.size() - 1)
 	var top := deck_top(first, height_fn)
 	var cell := first.cell
+	var deck := RoadDimensions.deck_width(road_width)
 	var along_3 := _direction(axis)
 	var across_3 := _direction(across)
 	var flat := Basis(along_3, Vector3.UP, across_3)
@@ -519,17 +528,17 @@ static func _bridge(mesh: FacetMesh, run: Array, map_seed: int, height_fn: Calla
 		var colour := TerrainPalette.PLANK.darkened(maxf(0.0, -tone) * LOOKS.PLANK_TONE)
 		colour = colour.lightened(maxf(0.0, tone) * LOOKS.PLANK_TONE)
 		var turn := (CellHash.of(k, cell.x, cell.y, map_seed + SALT_PLANK + 1) - 0.5) * 0.08
-		var length := LOOKS.DECK_WIDTH * (0.96 + 0.06 * CellHash.of(k, cell.y, cell.x, map_seed))
+		var length := deck * (0.96 + 0.06 * CellHash.of(k, cell.y, cell.x, map_seed))
 		var basis := Basis(Vector3.UP, turn) * flat
 		var size := Vector3(pitch * LOOKS.PLANK_FILL, LOOKS.PLANK_THICKNESS, length)
 		mesh.box(_world(at, y), basis, size, colour)
 	# two ropes under the plank ends, pulled taut
 	for side: float in [-1.0, 1.0]:
-		var under := across * side * (LOOKS.DECK_WIDTH / 2.0 - 0.06)
+		var under := across * side * (deck / 2.0 - 0.06)
 		_rope(mesh, centre + under, axis, span, top - LOOKS.PLANK_THICKNESS, 0.0)
 	# posts on the banks and the hand ropes between them
 	for side: float in [-1.0, 1.0]:
-		var out := across * side * LOOKS.POST_OUT
+		var out := across * side * RoadDimensions.post_out(road_width)
 		for end: float in [-1.0, 1.0]:
 			var foot := centre + axis * end * span / 2.0 + out
 			var bank := float(height_fn.call(Vector2i(floori(foot.x), floori(foot.y))))
@@ -544,14 +553,23 @@ static func _bridge(mesh: FacetMesh, run: Array, map_seed: int, height_fn: Calla
 			var s := (float(h) + 1.0) / float(hangers + 1)
 			var at := centre + axis * (s - 0.5) * span
 			var from := _world(at + out, rail - _sag(s, LOOKS.ROPE_SAG))
-			var edge := at + across * side * (LOOKS.DECK_WIDTH / 2.0 - 0.02)
+			var edge := at + across * side * (deck / 2.0 - 0.02)
 			var to := _world(edge, top)
 			mesh.beam(from, to, LOOKS.HANGER_THICKNESS, TerrainPalette.ROPE)
 	for bridge: GameMap.Bridge in run:
 		var floor_y := float(height_fn.call(bridge.cell))
 		if top - floor_y > LOOKS.TRESTLE_MIN_DROP:
 			var middle := Vector2(bridge.cell) + Vector2(0.5, 0.5)
-			_trestles(mesh, middle, axis, across, top, floor_y, flat)
+			_trestles(
+				mesh,
+				middle,
+				axis,
+				across,
+				top,
+				floor_y,
+				flat,
+				RoadDimensions.trestle_out(road_width)
+			)
 
 
 ## A rope from one end of the span to the other along `axis`, starting `height` up and sagging
@@ -576,14 +594,15 @@ static func _trestles(
 	across: Vector2,
 	top: float,
 	floor_y: float,
-	flat: Basis
+	flat: Basis,
+	out: float
 ) -> void:
 	for s: float in LOOKS.TRESTLE_AT:
 		var at := centre + axis * (s - 0.5) * LOOKS.BRIDGE_SPAN
 		var under := top - LOOKS.PLANK_THICKNESS
 		var legs: Array[Vector3] = []
 		for side: float in [-1.0, 1.0]:
-			var foot := at + across * side * LOOKS.TRESTLE_OUT
+			var foot := at + across * side * out
 			var height := under - floor_y
 			var size := Vector3(LOOKS.TRESTLE_SIZE, height, LOOKS.TRESTLE_SIZE)
 			mesh.box(
