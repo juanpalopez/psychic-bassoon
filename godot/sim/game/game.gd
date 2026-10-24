@@ -23,9 +23,22 @@ static func create(
 	footprint: int = MAP_RULES.GAME_SOCKET_FOOTPRINT,
 	second_source: bool = MAP_RULES.GAME_SECOND_SOURCE
 ) -> GameState:
+	var game_map := _map_for(seed, cols, rows, with_detour, footprint, second_source)
+	# every run on the game board starts with the Knight (owner, 2026-10-22); a mechanic test
+	# places it on its own board when it needs it
+	var on_game_board := _is_game_board(cols, rows, with_detour, footprint, second_source)
+	return from_map(seed, game_map, with_detour, on_game_board)
+
+
+## Creates the game on a map that is already made, on tick 0 (`create` calls it, and a test
+## plays a hand-made map with it). `with_detour` is the old random lane; `with_hero` places the
+## starting hero.
+static func from_map(
+	seed: int, map: GameMap, with_detour: bool = false, with_hero: bool = false
+) -> GameState:
 	var game := GameState.new()
 	game.seed = seed
-	game.map = _map_for(seed, cols, rows, with_detour, footprint, second_source)
+	game.map = map
 	# the valley board walks curves through the road's corners (#321); the classic boards keep
 	# the grid route their tests pin
 	game.routes = Route.for_map(game.map)
@@ -46,9 +59,7 @@ static func create(
 	game.heartstone_health = RULES.START_HEARTSTONE_HEALTH
 	game.rng = Rng.derive(seed, Streams.WAVES)
 	game.route_rng = Rng.derive(seed, Streams.ROUTES)
-	# every run on the game board starts with the Knight (owner, 2026-10-22); a mechanic test
-	# places it on its own board when it needs it
-	if _is_game_board(cols, rows, with_detour, footprint, second_source):
+	if with_hero:
 		Heroes.place(game, HEROES.START_HERO)
 	return game
 

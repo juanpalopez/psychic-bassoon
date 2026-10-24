@@ -5,6 +5,19 @@ extends RefCounted
 const FOES := preload("res://content/foes.gd")
 
 
+## The route a foe of spawn source `source` walks (-1 is the first source). Where the map lists
+## no sources the source is the route and nothing is drawn, so `source` comes back as it was
+## (-1 stays -1, for `spawn` to choose). A source with several routes (a fork, #481) draws one
+## from the route stream, one draw per foe; a source with one route draws nothing.
+static func route_of_source(game: GameState, source: int) -> int:
+	if game.map.sources.is_empty():
+		return source
+	var routes := game.map.sources[maxi(source, 0)]
+	if routes.size() == 1:
+		return routes[0]
+	return routes[game.route_rng.next_int(routes.size())]
+
+
 ## Spawns a foe of `type` for `wave`. Where foes pick a lane at random (the old detour) the
 ## route stream picks one (one draw per foe); otherwise a foe with no route given walks
 ## the main road and nothing is drawn. Pass `route` to choose it yourself. Returns null for

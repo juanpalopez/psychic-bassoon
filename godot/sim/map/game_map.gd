@@ -24,6 +24,23 @@ class Bridge:
 	## The bridge's index in `path` (the main road), or -1 only when it is on the second road's
 	## own cells (the feeder, before it joins the main road).
 	var path_index: int = -1
+	## The route whose own cells the bridge spans (0 is the main road). `path_index` counts cells
+	## of that route; a bridge on a fork's branch names the branch's route (#481).
+	var route: int = 0
+
+
+## Where a route leaves the main road and where it rejoins it, a fork of the road (#481). The
+## branch's route is `path[0..fork_index]` + its own cells + `path[merge_index..]`.
+class Fork:
+	extends RefCounted
+	## The branch's index in `GameMap.routes`.
+	var route: int = 0
+	## The index in `path` of the last cell the branch shares with the main road before it leaves.
+	var fork_index: int = 0
+	## The index in `path` of the first cell it shares with the main road after it rejoins.
+	var merge_index: int = 0
+	## How many cells the branch has of its own, between the fork and the merge.
+	var branch_length: int = 0
 
 
 var seed: int = 0
@@ -41,6 +58,12 @@ var path: Array[Vector2i] = []
 ## a second one leaves the main road, runs beside it and rejoins it. Each item
 ## is an `Array[Vector2i]`.
 var routes: Array = []
+## Per spawn source, the indices of the routes a foe of that source may walk; it picks one with a
+## draw from the route stream when there are several (#481). Empty means one source per route:
+## every board without a fork.
+var sources: Array[PackedInt32Array] = []
+## The forks of the main road, one per branch route (empty on every board that has none).
+var forks: Array[Fork] = []
 ## For each route, the `RoadCurve` foes walk, or null to round its grid path's corners (the old
 ## boards, and any route a section gave no spline for, #404). Empty when no route has one.
 var route_curves: Array = []
@@ -82,6 +105,11 @@ var bridges: Array[Bridge] = []
 var walkable: Array[PackedByteArray] = []
 ## The cells of bridges only a hero uses (the sectioned valley's second crossing).
 var hero_bridges: Array[Vector2i] = []
+
+
+## How many places foes come from: the sources, or one per route when none are listed.
+func source_count() -> int:
+	return sources.size() if not sources.is_empty() else routes.size()
 
 
 ## True when a tower can be built on the cell.
