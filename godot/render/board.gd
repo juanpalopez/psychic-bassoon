@@ -79,6 +79,13 @@ func _ready() -> void:
 		rebuild()
 
 
+## A board that left the tree and came back takes its map's size again (`_exit_tree` gave it up).
+## Two boards in the tree at once are not supported: the size is shared, the last one wins.
+func _enter_tree() -> void:
+	if map != null:
+		BoardSpace.use_map(map.cols, map.rows)
+
+
 ## Gives the board's size back to the game board, so no later board inherits a map's size.
 func _exit_tree() -> void:
 	if map != null:

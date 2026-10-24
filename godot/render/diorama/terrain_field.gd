@@ -18,8 +18,9 @@ extends RefCounted
 ## quarters of a metre shows the kraft cliffs from the 56 to 62 degree camera (half a metre read
 ## as thin lines), and a bank beside the road (one terrace) hides less than half a cell of it.
 const TERRACE_STEP := 0.75
-## Cells of country past each edge of the map (the overview sees about 27 past it).
-const MARGIN := 34
+## Cells of country past each edge of the map (the overview of the 40 by 24 map on a tall phone
+## sees about 34 past it, plus the rubber band: #480).
+const MARGIN := 37
 ## The level of a gorge cell (the river), below the valley floor (level 0).
 const GORGE := -1
 ## The floor of the gorge and the water in it, in metres.
