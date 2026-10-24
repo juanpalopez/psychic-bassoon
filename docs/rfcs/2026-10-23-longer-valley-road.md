@@ -162,7 +162,7 @@ Measured over seeds 1..300, before (32 by 20) and after (40 by 24, PR #485 and i
 | Walk, median | 39.7 s | 49.1 s |
 | Layout / strip time-under-fire ratio | 0.531 | 0.598 |
 
-- The gate of section 7 (0.90 to 1.10 of the strip valley, no seed below 0.75) is not met yet, and re-gating is held by the owner until #481 (the fork) and #460 land (`docs/lessons/2026-10-24-handoff-owner-calls.md`).
+- The gate of section 7 (0.90 to 1.10 of the strip valley, no seed below 0.75) is not met yet, and re-gating is held by the owner until #480 and #481 (the fork) land (`docs/lessons/2026-10-24-handoff-owner-calls.md`).
 - Seeds 3001 to 4000 also stitch and pass the checks.
 - `HERO_CAPS` are now 48, 27 and 40. Sockets are 23 to 30 in total.
 - **Design note:** the layout road is still far shorter than the strip road (89 cells against 150). Turning the layout valley on as the game board (#458) needs balance work before it can switch.

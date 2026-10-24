@@ -27,7 +27,7 @@ Notes for picking this work up in a local session. GitHub (tickets, PRs, comment
 - **After the cutoff (2026-10-24, `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`, RFC section 9):**
   - The road forks before the river into two crossings that foes and the hero both use. This supersedes one road crossing plus the hero-only crossing.
   - The road is wider: the band goes on once #469 and #446 are settled, so the valley doesn't read as a strip.
-  - The layout valley grows to about 40 by 24.
+  - The layout valley is 40 by 24 (done in #480).
 
 ## Merged this session
 
