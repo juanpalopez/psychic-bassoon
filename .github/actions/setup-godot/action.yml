@@ -1,0 +1,64 @@
+name: Set up Godot
+description: >-
+  Restore (or download and verify) the pinned Godot and the desktop export templates, put the
+  binary in GODOT, and import the project. Run after actions/checkout.
+
+runs:
+  using: composite
+  steps:
+    - name: Read the pinned Godot version
+      id: version
+      shell: bash
+      run: |
+        version="$(tr -d '[:space:]' < .godot-version)"
+        echo "version=${version}" >> "$GITHUB_OUTPUT"
+        echo "templates=${version/-/.}" >> "$GITHUB_OUTPUT"
+
+    - name: Restore Godot and the desktop export templates
+      id: cache
+      uses: actions/cache@v6
+      with:
+        path: |
+          ~/godot-bin
+          ~/.local/share/godot/export_templates
+        # one key for every run: a tag run can only restore caches saved on main, so the
+        # release templates are cached by the main runs too instead of downloaded per release
+        key: godot-${{ steps.version.outputs.version }}-desktop-v3
+
+    - name: Download Godot and the desktop templates (verified)
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+        TEMPLATES: ${{ steps.version.outputs.templates }}
+      run: |
+        base="https://github.com/godotengine/godot/releases/download/${VERSION}"
+        binary="Godot_v${VERSION}_linux.x86_64.zip"
+        tpz="Godot_v${VERSION}_export_templates.tpz"
+        curl -sSfL --retry 3 -O "${base}/SHA512-SUMS.txt" -O "${base}/${binary}" -O "${base}/${tpz}"
+        grep -E " (${binary}|${tpz})$" SHA512-SUMS.txt > wanted.txt
+        test "$(wc -l < wanted.txt)" -eq 2
+        sha512sum -c wanted.txt
+        # export-release needs only the release templates (all three desktops, so the
+        # one cache serves both CI and releases)
+        wanted=(templates/version.txt templates/linux_release.x86_64)
+        wanted+=(templates/windows_release_x86_64.exe templates/macos.zip)
+        mkdir -p ~/godot-bin ~/.local/share/godot/export_templates/"${TEMPLATES}"
+        unzip -q "${binary}" -d ~/godot-bin
+        unzip -q -j "${tpz}" "${wanted[@]}" -d ~/.local/share/godot/export_templates/"${TEMPLATES}"
+        rm -f "${binary}" "${tpz}" wanted.txt SHA512-SUMS.txt
+
+    - name: Locate Godot
+      shell: bash
+      run: |
+        binary=("$HOME"/godot-bin/Godot_v*_linux.x86_64)
+        chmod +x "${binary[0]}"
+        echo "GODOT=${binary[0]}" >> "$GITHUB_ENV"
+
+    - name: Import the project
+      # --import exits 0 even when a script fails to parse: the checker also fails on any
+      # ERROR, SCRIPT ERROR or SHADER ERROR line, a non-zero exit or a timeout
+      shell: bash
+      run: |
+        binary=("$HOME"/godot-bin/Godot_v*_linux.x86_64)
+        bash scripts/run-godot-checked.sh 600 import.log -- "${binary[0]}" --headless --path godot --import

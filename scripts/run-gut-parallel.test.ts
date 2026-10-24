@@ -27,6 +27,7 @@ function run(...args: string[]): {
 } {
   const fake = join(dir, 'godot');
   const record = join(dir, 'ran.txt');
+  rmSync(record, {force: true});
   writeFileSync(
     fake,
     [
@@ -195,5 +196,74 @@ describe('parallel GUT runner: recorded durations', () => {
     const before = readFileSync(times(), 'utf8');
     expect(run('--write-times', '-t', B).status).toBe(1);
     expect(readFileSync(times(), 'utf8')).toBe(before);
+  });
+});
+
+describe('parallel GUT runner: shards', () => {
+  const T = [
+    'res://tests/render/test_board.gd',
+    'res://tests/render/test_camera_rig.gd',
+    'res://tests/render/test_camera_yaw.gd',
+    'res://tests/render/test_cell_highlight.gd',
+    'res://tests/render/test_board_space.gd',
+  ];
+  const rel = (res: string) => `godot/${res.slice('res://'.length)}`;
+  const times = () => join(dir, 'times.json');
+  const list = T.join(',');
+  const one = T[0] as string;
+
+  beforeEach(() => {
+    dir = mkdtempSync(join(tmpdir(), 'pkd-gut-'));
+  });
+  afterEach(() => {
+    rmSync(dir, {recursive: true, force: true});
+  });
+
+  it('deals the longest scripts onto the least-loaded shard', () => {
+    // 50, 40, 30, 20, 10 seconds: shard 0 gets 50 + 20 + 10, shard 1 gets 40 + 30
+    writeFileSync(
+      times(),
+      JSON.stringify(Object.fromEntries(T.map((p, i) => [rel(p), 50 - 10 * i])))
+    );
+    const s0 = run('-j', '1', '--shard', '0/2', '-t', list);
+    const s1 = run('-j', '1', '--shard', '1/2', '-t', list);
+    expect(s0.status).toBe(0);
+    expect(s0.order).toEqual([T[0], T[3], T[4]]);
+    expect(s1.order).toEqual([T[1], T[2]]);
+    expect(s0.out).toContain('shard 0 of 2: 3 scripts');
+  });
+
+  it('gives every script to exactly one shard, the same way each time', () => {
+    const first = [0, 1, 2].map(i => run('--shard', `${i}/3`, '-t', list).ran);
+    const again = [0, 1, 2].map(i => run('--shard', `${i}/3`, '-t', list).ran);
+    expect(again).toEqual(first);
+    expect(first.flat().sort()).toEqual([...T].sort());
+  });
+
+  it('weighs a script with no recorded time at 20 seconds', () => {
+    writeFileSync(times(), JSON.stringify({[rel(one)]: 25}));
+    // T[0] weighs 25 and goes to shard 0; the two unknown scripts (20 each) both fit shard 1
+    // before it reaches 25
+    const s0 = run('--shard', '0/2', '-t', T.slice(0, 3).join(','));
+    expect(s0.ran).toEqual([T[0]]);
+  });
+
+  it('an empty shard exits 0 without running anything', () => {
+    const r = run('--shard', '1/2', '-t', one);
+    expect(r.status).toBe(0);
+    expect(r.ran).toEqual([]);
+    expect(r.out).toContain('nothing in this shard');
+  });
+
+  it('a failing script in a shard fails that shard', () => {
+    const r = run('--shard', '0/1', '-t', 'res://tests/ui/test_fps_text.gd');
+    expect(r.status).toBe(1);
+  });
+
+  it('rejects a malformed shard and --write-times with a shard', () => {
+    expect(run('--shard', '2/2', '-t', one).status).toBe(2);
+    expect(run('--shard', 'x/2', '-t', one).status).toBe(2);
+    expect(run('--shard', '0', '-t', one).status).toBe(2);
+    expect(run('--shard', '0/2', '--write-times', '-t', one).status).toBe(2);
   });
 });

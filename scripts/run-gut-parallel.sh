@@ -15,6 +15,14 @@
 #        scripts/run-gut-parallel.sh -t res://tests/a/test_x.gd,res://tests/b/test_y.gd
 #                                               # only these scripts (what scripts/select-tests.mjs
 #                                               # prints for a pull request), same checks and exit code
+#        scripts/run-gut-parallel.sh --shard 1/4
+#                                               # only shard 1 of 4 (0-based; CI runs one per matrix
+#                                               # job). The list (all scripts, or -t) is dealt out
+#                                               # greedily by recorded seconds, longest first onto the
+#                                               # least-loaded shard, ties by path, so every shard sees
+#                                               # the same split on every machine. A script with no
+#                                               # entry weighs GUT_UNKNOWN_SECONDS (20). An empty shard
+#                                               # exits 0.
 #        scripts/run-gut-parallel.sh --write-times
 #                                               # one process per script (no batching), then rewrite
 #                                               # scripts/gut-times.json from the run if it passed
@@ -23,14 +31,27 @@ cd "$(dirname "$0")/.."
 jobs=0
 tests=""
 write_times=0
+shard=""
+shards=1
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -j) jobs="${2:?-j needs a number}"; shift 2 ;;
     -t) tests="${2:?-t needs a comma-separated list of res:// test paths}"; shift 2 ;;
     --write-times) write_times=1; shift ;;
-    *) echo "usage: $0 [-j workers] [--write-times] [-t res://tests/test_a.gd,res://tests/test_b.gd]" >&2; exit 2 ;;
+    --shard)
+      shard="${2:?--shard needs i/n}"; shift 2
+      shards="${shard#*/}"; shard="${shard%/*}"
+      case "$shard$shards" in ''|*[!0-9]*) echo "run-gut-parallel: --shard wants i/n, e.g. 0/4" >&2; exit 2 ;; esac
+      if [ "$shards" -lt 1 ] || [ "$shard" -ge "$shards" ]; then
+        echo "run-gut-parallel: --shard i/n needs 0 <= i < n" >&2; exit 2
+      fi ;;
+    *) echo "usage: $0 [-j workers] [--shard i/n] [--write-times] [-t res://tests/test_a.gd,res://tests/test_b.gd]" >&2; exit 2 ;;
   esac
 done
+if [ -n "$shard" ] && [ "$write_times" = 1 ]; then
+  echo "run-gut-parallel: --write-times needs the whole suite, not a shard" >&2
+  exit 2
+fi
 if [ "$jobs" -le 0 ]; then
   jobs=$(sysctl -n hw.ncpu 2>/dev/null || nproc 2>/dev/null || echo 4)
   [ "$jobs" -gt 8 ] && jobs=8
@@ -58,6 +79,22 @@ times_file="${GUT_TIMES_FILE:-scripts/gut-times.json}"
 # "path seconds" lines; a missing or unreadable file gives none
 { grep -oE '"[^"]+" *: *[0-9.]+' "$times_file" 2>/dev/null || true; } \
   | sed -E 's/^"([^"]+)" *: *([0-9.]+)$/\1 \2/' >"$dir/known.txt"
+if [ -n "$shard" ]; then
+  # greedy split: heaviest first onto the least-loaded shard (lowest index on a tie)
+  LC_ALL=C awk -v known="$dir/known.txt" -v dflt="${GUT_UNKNOWN_SECONDS:-20}" '
+    BEGIN { while ((getline line < known) > 0) { split(line, f, " "); t[f[1]] = f[2] } }
+    { print (($1 in t) ? t[$1] : dflt), $1 }' "$dir/scripts.txt" \
+    | LC_ALL=C sort -k1,1nr -k2,2 \
+    | awk -v n="$shards" -v me="$shard" '
+      { best = 0; for (i = 1; i < n; i++) if (load[i] < load[best]) best = i
+        load[best] += $1; if (best == me) print $2 }' >"$dir/shard.txt"
+  mv "$dir/shard.txt" "$dir/scripts.txt"
+  echo "shard $shard of $shards: $(wc -l <"$dir/scripts.txt" | tr -d ' ') scripts"
+  if [ ! -s "$dir/scripts.txt" ]; then
+    echo "nothing in this shard"
+    exit 0
+  fi
+fi
 # "S <sort key> <path>" for a script of its own, "B <path>" for one to batch
 while read -r path; do echo "$(wc -c <"$path") $path"; done <"$dir/scripts.txt" \
   | awk -v known="$dir/known.txt" -v limit="${GUT_BATCH_SECONDS:-5}" -v batch="$((1 - write_times))" '
