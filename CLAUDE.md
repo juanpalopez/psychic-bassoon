@@ -19,6 +19,7 @@ godot --headless --path godot -s addons/gut/gut_cmdln.gd -gdir=res://tests -gexi
 (cd godot && gdformat . && gdlint .)                 # gdtoolkit: format and lint (config in godot/)
 scripts/run-gut-parallel.sh                          # the whole GUT suite, one Godot process per test script; half the cores up to 4 (on CI one per core up to 8; -j or GUT_JOBS overrides); reruns a crashed run once and reports it; prints the slowest scripts
 godot --path godot -- --stress=80 --fps             # from #319: the phone-check crowd and the fps overlay
+godot --path godot -- --layout-valley --seed=7      # #513: play the 40 by 24 layout valley for that seed (debug flag; the default board is unchanged)
 scripts/ios-run.sh                                   # export the Xcode project, build, install and launch on a connected iPhone (macOS with Xcode)
 mkdir -p build/linux && godot --headless --path godot --export-release "Linux" ../build/linux/papercraft-kingdom-defense.x86_64   # desktop export, as CI runs it
 ```
