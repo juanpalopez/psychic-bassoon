@@ -30,7 +30,7 @@ const ROAD_BEND_DEGREES := 6.0
 ## A road carries on this many cells past the board edge it enters from, into the haze: past the
 ## diorama's own margin (`TerrainField.MARGIN`, the floor it carries the road on), so its end is
 ## never in view.
-const ROAD_RUN_OUT := 36.0
+const ROAD_RUN_OUT := 39.0
 ## A point of a later route this close to an earlier route's line is on that road already (the
 ## second route runs on the main road after the join).
 const JOIN_EPSILON := 0.02
