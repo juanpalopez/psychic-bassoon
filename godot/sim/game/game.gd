@@ -250,6 +250,9 @@ static func _apply(game: GameState, command: Command) -> void:
 		Command.Kind.CHOOSE_SPEC:
 			Specs.choose(game, command)
 		Command.Kind.ACTIVATE_ABILITY:
-			Specs.activate(game, command)
+			if game.hero != null and command.tower_id == game.hero.id:
+				Heroes.whirl(game, command)
+			else:
+				Specs.activate(game, command)
 		Command.Kind.MOVE_HERO:
 			Heroes.order(game, command)

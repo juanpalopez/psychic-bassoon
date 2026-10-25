@@ -4,6 +4,7 @@ class_name Heroes
 extends RefCounted
 
 const HEROES := preload("res://content/heroes.gd")
+const RULES := preload("res://content/game_rules.gd")
 const HALF := 0.5
 
 
@@ -61,6 +62,53 @@ static func order(game: GameState, command: Command) -> void:
 	game.events.append(event)
 
 
+## ACTIVATE_ABILITY naming the hero: Blade Whirl hurts every ground foe next to it (physical
+## damage), then cools down. Nothing is spent and the cooldown does not start when it is refused.
+static func whirl(game: GameState, command: Command) -> void:
+	var hero := game.hero
+	if not hero.alive:
+		return Game.reject(game, command, GameEvent.RejectReason.HERO_FALLEN)
+	if hero.ability_cooldown > RULES.TIMER_EPSILON:
+		return Game.reject(game, command, GameEvent.RejectReason.ABILITY_COOLING_DOWN)
+	var whirl: Dictionary = HEROES.DEFS[hero.type].blade_whirl
+	var reach: float = float(whirl.radius) + hero.radius + game.map.reach_margin()
+	# pick them all before the first blow, which can split a foe or remove one
+	var hit: Array[Foe] = []
+	for foe in game.foes:
+		if foe.alive and not foe.flying and _gap(hero, foe) <= reach + foe.radius:
+			hit.append(foe)
+	if hit.is_empty():
+		return Game.reject(game, command, GameEvent.RejectReason.NO_TARGET)
+	for foe in hit:
+		Damage.apply(game, foe, float(whirl.damage), Damage.Kind.PHYSICAL)
+	hero.ability_cooldown = float(whirl.cooldown)
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = hero.id
+	event.foe_id = -1
+	event.x = hero.x
+	event.y = hero.y
+	game.events.append(event)
+
+
+## Rally Cry: whether a standing hero's aura is on, so callers skip their distance work otherwise.
+static func rallying(game: GameState) -> bool:
+	return game.hero != null and game.hero.alive
+
+
+## Rally Cry: the share (`key` is `attack_speed` or `regen` in the hero's `rally_cry`) a friendly
+## unit standing at `at` gets, 0.0 out of reach or without a standing hero. One hero, so it never
+## adds to itself.
+static func rally_share(game: GameState, at: Vector2, key: String) -> float:
+	if not rallying(game):
+		return 0.0
+	var rally: Dictionary = HEROES.DEFS[game.hero.type].rally_cry
+	var dx := at.x - game.hero.x
+	var dy := at.y - game.hero.y
+	if dx * dx + dy * dy > float(rally.radius) * float(rally.radius):
+		return 0.0
+	return float(rally[key])
+
+
 ## Walks the hero one tick along its path, from cell centre to cell centre.
 static func step(game: GameState) -> void:
 	var hero := game.hero
@@ -95,6 +143,7 @@ static func fight(game: GameState) -> void:
 	var hero := game.hero
 	if hero == null:
 		return
+	hero.ability_cooldown = maxf(0.0, hero.ability_cooldown - Game.TICK_SECONDS)
 	if not hero.alive:
 		_wait_to_return(game, hero)
 		return
