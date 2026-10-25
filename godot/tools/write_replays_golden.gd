@@ -6,17 +6,19 @@
 ##   godot --headless --path godot -s tools/write_replays_golden.gd
 extends SceneTree
 
-## Seed, bot profile and waves on the sectioned valley (#381): two won runs (mix 6, spoolOnly 3),
-## lost runs (spoolOnly 1, mortarHeavy 4, guardMix 11), a run stopped at the wave cap (prismHeavy)
-## and each strategy. guardMix 11 builds Guard Tents and a Mess Tent, so the barracks tick path
-## is covered (Mess Tents are rare on the valley).
+## Seed, bot profile and waves on the layout valley, the game board since #458 (foes at half pace,
+## the Knight's skills): two won runs (spoolOnly 5 and 8, the second by 6 Heartstone health), lost
+## runs (mix 2, mortarHeavy 7, guardMix 7), a run stopped at the wave cap (prismHeavy) and each
+## strategy. A game must end inside the bot's thirty minutes, which the half pace makes tight: the
+## mix never clears wave 20 on seeds 1 to 12. guardMix 7 builds Guard Tents and a Mess Tent, so the
+## barracks tick path is covered.
 const GAMES := [
-	[6, "mix", 20],
-	[1, "spoolOnly", 20],
-	[4, "mortarHeavy", 20],
-	[3, "spoolOnly", 20],
+	[5, "spoolOnly", 20],
+	[8, "spoolOnly", 20],
+	[2, "mix", 20],
+	[7, "mortarHeavy", 20],
 	[3, "prismHeavy", 6],
-	[11, "guardMix", 20],
+	[7, "guardMix", 20],
 ]
 const PATH := "res://tests/goldens/replays.json"
 

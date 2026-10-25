@@ -29,7 +29,7 @@ func _flat(_cell: Vector2i) -> float:
 
 ## The game for a seed, its field, and the field's tops as the height callable.
 func _setup(map_seed: int) -> Dictionary:
-	var game := Game.create(map_seed)
+	var game := Game.create_on_strip_valley(map_seed)
 	var field := TerrainField.from_map(game.map, game.routes)
 	return {
 		"game": game,
@@ -206,7 +206,7 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 
 
 func test_a_deck_rests_on_the_higher_bank() -> void:
-	var map := Game.create(1).map
+	var map := Game.create_on_strip_valley(1).map
 	var bridge: GameMap.Bridge = map.bridges[0]
 	var step := Vector2i(1, 0) if bridge.horizontal else Vector2i(0, 1)
 	var low_bank := bridge.cell - step
@@ -317,7 +317,7 @@ func test_the_heartstone_yard_keeps_to_the_road_level() -> void:
 
 
 func test_it_stands_on_the_terrain_it_is_given() -> void:
-	var game := Game.create(3)
+	var game := Game.create_on_strip_valley(3)
 	var high := func(_cell: Vector2i) -> float: return 1.5
 	var bed := RoadBedBuilder.bed_mesh(game.map, game.routes, high)
 	for v: Vector3 in bed.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]:

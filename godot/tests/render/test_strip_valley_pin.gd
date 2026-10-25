@@ -35,21 +35,16 @@ const PINS := {
 const PLANKS := {1: [23, 16], 2: [16, 16], 5: [16, 16]}
 
 
-## `Game.create` plays the strip valley until the layout valley becomes the game board (#458), so
-## the pin above is the game board's. At that flip this fails: re-point the board tests on purpose
-## and keep `create_on_strip_valley` as the pin of the unforked bed.
-func test_the_game_board_is_still_the_strip_valley() -> void:
+## The game board is the layout valley since #458; the pins below name the strip valley, which
+## `Game.create_on_strip_valley` (and `--strip-valley`) still plays.
+func test_the_game_board_is_the_layout_valley_and_not_the_pinned_strip() -> void:
 	for map_seed: int in PINS:
 		var board := Game.create(map_seed).map
-		var strip := Game.create_on_strip_valley(map_seed).map
+		var layout := MapGen.generate_layout_valley(map_seed)
 		var label := "seed %d" % map_seed
-		assert_eq([board.cols, board.rows, board.seed], [strip.cols, strip.rows, strip.seed], label)
-		assert_eq(board.tiles, strip.tiles, label + ": tiles")
-		assert_eq(board.sockets, strip.sockets, label + ": sockets")
-		assert_eq(board.river, strip.river, label + ": river")
-		assert_eq(board.routes, strip.routes, label + ": routes")
-		assert_eq(board.bridges.size(), strip.bridges.size(), label + ": bridges")
-		assert_eq(board.road_width, strip.road_width, label + ": road width")
+		assert_eq([board.cols, board.rows], [40, 24], label)
+		assert_eq(board.routes, layout.routes, label + ": routes")
+		assert_eq(board.sockets, layout.sockets, label + ": sockets")
 
 
 func test_a_layout_crossing_has_the_planks_it_had() -> void:

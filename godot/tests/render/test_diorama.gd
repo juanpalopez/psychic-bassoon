@@ -39,10 +39,12 @@ const LAYOUT_SURFACES := 68
 const ALONG: Array[float] = [0.07, 0.23, 0.41, 0.62, 0.79, 0.94]
 
 
+## A board drawing the strip valley, the game board until #458 (the layout valley's are below).
 func _board(map_seed: int) -> Board:
 	var board := Board.new()
-	board.map_seed = map_seed
+	board.build_on_ready = false
 	add_child_autofree(board)
+	board.show_map(Game.create_on_strip_valley(map_seed).map)
 	return board
 
 
@@ -55,7 +57,7 @@ func _layout_board(map_seed: int) -> Board:
 	return board
 
 
-## The game board's boards for `seeds` and the layout valley's for `LAYOUT_SEEDS`, with a label.
+## The strip valley's boards for `seeds` and the layout valley's for `LAYOUT_SEEDS`, with a label.
 func _boards(seeds: Array[int]) -> Array[Array]:
 	var all: Array[Array] = []
 	for map_seed in seeds:

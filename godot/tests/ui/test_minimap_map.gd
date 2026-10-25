@@ -43,3 +43,18 @@ func test_a_drawn_position_comes_back_through_the_pixel() -> void:
 	var world := MinimapMap.to_world(pixel, 32, 20, SIZE)
 	assert_almost_eq(world.x, sim.x - 16.0, 0.0001)
 	assert_almost_eq(world.y, sim.y - 10.0, 0.0001)
+
+
+func test_a_jump_on_the_layout_valley_centres_the_tapped_cell() -> void:
+	# #550: the 40 by 24 layout valley is the game board, the board space follows the map
+	var map := MapGen.generate_layout_valley(1)
+	assert_eq([map.cols, map.rows], [40, 24])
+	BoardSpace.use_map(map.cols, map.rows)
+	var fitted := MinimapMap.fit(map.cols, map.rows, SIZE)
+	var cell := Vector2i(30, 5)
+	var pixel := MinimapMap.to_pixel(Vector2(cell) + Vector2(0.5, 0.5), map.cols, map.rows, fitted)
+	var jump := MinimapMap.to_world(pixel, map.cols, map.rows, fitted)
+	var centre := BoardSpace.cell_to_world(cell.x, cell.y)
+	BoardSpace.reset()
+	assert_almost_eq(jump.x, centre.x, 0.0001)
+	assert_almost_eq(jump.y, centre.z, 0.0001)

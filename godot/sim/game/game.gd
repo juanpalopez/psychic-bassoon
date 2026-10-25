@@ -31,8 +31,8 @@ static func create(
 
 
 ## Creates the game on the 40 by 24 layout valley for a seed, with the Knight, as the game board
-## does. A debug entry (`--layout-valley`, #513): the default board is unchanged. Null, with an
-## error, when no layout draw passes its checks.
+## plays it (#458). Null, with an error, when no layout draw passes its checks, where `create`
+## falls back to the strip valley.
 static func create_on_layout_valley(seed: int) -> GameState:
 	var layout_map := MapGen.generate_layout_valley(seed)
 	if layout_map == null:
@@ -42,8 +42,8 @@ static func create_on_layout_valley(seed: int) -> GameState:
 
 
 ## Creates the game on the 32 by 20 strip valley for a seed, with the Knight, as the game board
-## plays it today (`MapGen.generate_valley`, then the route-first map when no draw passes). The
-## mechanic tests name it so that a change of the default board (#458) does not move them.
+## played it until #458 (`MapGen.generate_valley`, then the route-first map when no draw passes).
+## The mechanic tests name it, and `--strip-valley` plays it.
 static func create_on_strip_valley(seed: int) -> GameState:
 	var strip_map := MapGen.generate_valley(seed)
 	if strip_map == null:
@@ -89,10 +89,10 @@ static func from_map(
 	return game
 
 
-## The game board (32 by 20, one road, 2x2 sockets, a second spawn source) is the sectioned
-## valley (#381); any other board is the route-first generator, which the mechanic tests and the
-## frozen fixtures name. The valley falls back to the route-first map if its sections cannot be
-## made to pass (the stitcher has already logged why).
+## The game board (the default arguments: one road, 2x2 sockets, a second spawn source; the map it
+## gives is the 40 by 24 layout valley, #458, with the strip valley and the route-first map as
+## fallbacks, see `MapGen.game_map`); any other board is the route-first generator, which the
+## mechanic tests and the frozen fixtures name.
 static func _map_for(
 	seed: int, cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
 ) -> GameMap:
@@ -101,7 +101,8 @@ static func _map_for(
 	return MapGen.generate(seed, cols, rows, with_detour, footprint, second_source)
 
 
-## The game board: 32 by 20, one road, 2x2 sockets and a second spawn source.
+## The game board's arguments: the 32 by 20 default size, one road, 2x2 sockets, a second
+## spawn source.
 static func _is_game_board(
 	cols: int, rows: int, with_detour: bool, footprint: int, second_source: bool
 ) -> bool:

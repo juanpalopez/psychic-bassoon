@@ -1,6 +1,6 @@
 extends GutTest
 
-## The hero's path on a finished board (#449).
+## The hero's path on a finished strip valley (#449; the strip has the hero-only bridge).
 
 const SEEDS: Array[int] = [1, 42, 2026]
 
@@ -25,7 +25,7 @@ func _bank(map: GameMap, cell: Vector2i, step: Vector2i) -> Vector2i:
 
 
 func test_the_graph_of_a_valley_opens_its_walkable_cells_and_both_bridges() -> void:
-	var map := MapGen.game_map(42)
+	var map := MapGen.generate_valley(42)
 	var graph := HeroGraph.from_map(map)
 	assert_eq(graph.cols, map.cols)
 	assert_eq(graph.rows, map.rows)
@@ -69,7 +69,7 @@ func test_going_up_and_left_the_walk_also_takes_the_row_first() -> void:
 
 func test_a_path_is_a_shortest_walk_of_open_neighbouring_cells() -> void:
 	for seed in SEEDS:
-		var map := MapGen.game_map(seed)
+		var map := MapGen.generate_valley(seed)
 		var graph := HeroGraph.from_map(map)
 		var from: Vector2i = map.path[0]
 		var to: Vector2i = map.path[map.path.size() - 1]
@@ -87,7 +87,7 @@ func test_a_path_is_a_shortest_walk_of_open_neighbouring_cells() -> void:
 
 func test_a_path_crosses_the_river_only_on_a_bridge() -> void:
 	for seed in SEEDS:
-		var map := MapGen.game_map(seed)
+		var map := MapGen.generate_valley(seed)
 		var cells := HeroGraph.from_map(map).path(map.path[0], map.path[map.path.size() - 1])
 		for cell in cells:
 			if _on_river(map, cell):
@@ -96,7 +96,7 @@ func test_a_path_crosses_the_river_only_on_a_bridge() -> void:
 
 func test_the_hero_bridge_gives_a_straight_crossing_on_its_row() -> void:
 	for seed in SEEDS:
-		var map := MapGen.game_map(seed)
+		var map := MapGen.generate_valley(seed)
 		assert_false(map.hero_bridges.is_empty(), "seed %d" % seed)
 		var bridge: Vector2i = map.hero_bridges[0]
 		var west := _bank(map, bridge, Vector2i.LEFT)
@@ -107,7 +107,7 @@ func test_the_hero_bridge_gives_a_straight_crossing_on_its_row() -> void:
 
 
 func test_a_closed_or_cut_off_end_gives_an_empty_path() -> void:
-	var map := MapGen.game_map(42)
+	var map := MapGen.generate_valley(42)
 	var graph := HeroGraph.from_map(map)
 	var wet := Vector2i(-1, -1)
 	for cell in map.river:
@@ -121,7 +121,7 @@ func test_a_closed_or_cut_off_end_gives_an_empty_path() -> void:
 
 
 func test_the_same_ends_always_give_the_same_path() -> void:
-	var map := MapGen.game_map(2026)
+	var map := MapGen.generate_valley(2026)
 	var from: Vector2i = map.path[0]
 	var to: Vector2i = map.path[map.path.size() - 1]
 	assert_eq(HeroGraph.from_map(map).path(from, to), HeroGraph.from_map(map).path(from, to))

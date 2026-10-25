@@ -249,28 +249,38 @@ func test_a_tap_on_another_socket_during_a_flight_selects_that_socket() -> void:
 func test_a_flight_from_a_closer_zoom_never_zooms_out() -> void:
 	var main: Node = await _main()
 	var game: GameState = main.game()
-	var rig := _rig(main)
-	var size := _size(main)
 	var spawn := BoardSpace.cell_to_world(game.map.path[0].x, game.map.path[0].y)
 	# a zoom above what a centred socket needs, where a socket high on the screen is still
 	# drawn under 44 pt: its flight only needs to centre it
-	for zoom_level in [0.72, 0.7, 0.68]:
-		rig.show_point(spawn + Vector3(6.0, 0.0, 0.0), zoom_level)
-		for anchor in game.map.sockets:
-			var at := rig.camera().unproject_position(_top(main, anchor))
-			if not Rect2(Vector2.ZERO, size).grow(-20.0).has_point(at):
-				continue
-			if main.socket_tappable(anchor):
-				continue
-			if rig.zoom_to_show(_top(main, anchor), 2.0, main.tap_pixels()) >= zoom_level:
-				continue
-			_tap_socket(main, anchor)
-			assert_true(rig.flying())
-			_land(main)
-			assert_gte(rig.zoom, zoom_level - 1e-9, "the flight kept the closer zoom")
-			assert_eq(main.selected_cell(), anchor)
-			return
+	for offset in [6.0, 3.0, 9.0, 12.0, 15.0, 18.0]:
+		for zoom_level in [0.72, 0.7, 0.68]:
+			if _flight_from(main, spawn + Vector3(offset, 0.0, 0.0), zoom_level):
+				return
 	fail_test("no socket on screen was small yet needed less zoom than the view had")
+
+
+## Looks at `point` from `zoom_level` and, when a socket there is drawn small yet needs less zoom,
+## taps it, checks that the flight kept the closer zoom, and says true.
+func _flight_from(main: Node, point: Vector3, zoom_level: float) -> bool:
+	var game: GameState = main.game()
+	var rig := _rig(main)
+	var size := _size(main)
+	rig.show_point(point, zoom_level)
+	for anchor in game.map.sockets:
+		var at := rig.camera().unproject_position(_top(main, anchor))
+		if not Rect2(Vector2.ZERO, size).grow(-20.0).has_point(at):
+			continue
+		if main.socket_tappable(anchor):
+			continue
+		if rig.zoom_to_show(_top(main, anchor), 2.0, main.tap_pixels()) >= zoom_level:
+			continue
+		_tap_socket(main, anchor)
+		assert_true(rig.flying())
+		_land(main)
+		assert_gte(rig.zoom, zoom_level - 1e-9, "the flight kept the closer zoom")
+		assert_eq(main.selected_cell(), anchor)
+		return true
+	return false
 
 
 func test_the_tap_size_reads_the_window_and_the_screen_scale() -> void:

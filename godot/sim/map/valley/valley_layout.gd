@@ -40,9 +40,10 @@ var lane_segments: Array[StringName] = []
 
 
 ## The layout for a seed, or null (with an error) when no draw passes `problems` and stitches with
-## the stand-in sections (each retry draws the next layout from the same stream).
+## the stand-in sections (no error when `quiet`). Each retry draws the next layout from the same
+## stream.
 static func generate(
-	seed: int, cols: int, rows: int, forked: bool = LAYOUT.FORK_LANES
+	seed: int, cols: int, rows: int, forked: bool = LAYOUT.FORK_LANES, quiet: bool = false
 ) -> ValleyLayout:
 	assert(
 		cols == LAYOUT.COLS and rows == LAYOUT.ROWS,
@@ -54,7 +55,8 @@ static func generate(
 		var layout := _draw(seed, rng, fork_rng)
 		if layout != null and layout.problems().is_empty() and _stitches(layout):
 			return layout
-	push_error("valley layout seed %d: no draw passes its checks" % seed)
+	if not quiet:
+		push_error("valley layout seed %d: no draw passes its checks" % seed)
 	return null
 
 

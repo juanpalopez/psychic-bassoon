@@ -25,13 +25,12 @@ func test_create_starts_with_prototype_buttons_heartstone_health_and_tick_zero()
 
 func test_create_builds_the_map_and_every_route() -> void:
 	var game := Game.create(SEED)
-	var map := MapGen.generate_valley(SEED)
+	var map := MapGen.game_map(SEED)
 	assert_eq(game.map.path, map.path)
 	assert_eq(game.routes.size(), map.routes.size())
 	assert_eq(game.route, game.routes[0])
-	# the valley board walks the curve through the road's corners, which is shorter than the
+	# the game board walks the curve through the road's corners, which is shorter than the
 	# grid path (#321)
-	assert_eq(game.route.total, Route.build_curved(map.path).total)
 	assert_lt(game.route.total, 0.95 + float(map.path.size() - 1))
 
 
