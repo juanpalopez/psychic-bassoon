@@ -7,16 +7,24 @@ const RULES := preload("res://content/game_rules.gd")
 const PROFILES := preload("res://content/bot_profiles.gd")
 const DEFAULT_SEEDS: Array[int] = [1, 2, 3, 4, 5, 6, 7, 8]
 const DEFAULT_WAVES := 20
+## The boards the bot can play (#458): the strip valley, the layout valley, and whatever
+## `Game.create` plays on its default board.
+const BOARDS: Array[String] = ["strip", "layout", "default"]
+## `--pace=` waits for the per-map foe pace (#458, PR 5): until it lands the option is an error.
+const PACE_AVAILABLE := false
 
 
-## What the options say: `seeds`, `profiles`, `waves`, `detail`, and `error`, which
-## is empty when every argument was understood.
+## What the options say: `seeds`, `profiles`, `waves`, `detail`, `board` (empty when
+## `--board=` is not given, which plays the default board and prints no board line),
+## `pace` (0.0 when not given) and `error`, which is empty when every argument was understood.
 static func parse(args: PackedStringArray) -> Dictionary:
 	var out := {
 		"seeds": DEFAULT_SEEDS.duplicate(),
 		"profiles": PROFILES.PROFILE_IDS.duplicate(),
 		"waves": DEFAULT_WAVES,
 		"detail": false,
+		"board": "",
+		"pace": 0.0,
 		"error": "",
 	}
 	for arg in args:
@@ -45,6 +53,18 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			if int(text) > RULES.WIN_WAVE:
 				return _bad(out, arg, "a run ends at wave %d, when it is won" % RULES.WIN_WAVE)
 			out.waves = int(text)
+		elif arg.begins_with("--board="):
+			var board := arg.trim_prefix("--board=")
+			if not BOARDS.has(board):
+				return _bad(out, arg, "unknown board %s (use %s)" % [board, "|".join(BOARDS)])
+			out.board = board
+		elif arg.begins_with("--pace="):
+			var text := arg.trim_prefix("--pace=")
+			if not text.is_valid_float() or float(text) <= 0.0:
+				return _bad(out, arg, "pace must be a number above 0")
+			if not PACE_AVAILABLE:
+				return _bad(out, arg, "not available yet: the game has no per-map foe pace")
+			out.pace = float(text)
 		elif arg == "--detail":
 			out.detail = true
 		else:
@@ -55,7 +75,10 @@ static func parse(args: PackedStringArray) -> Dictionary:
 static func usage() -> String:
 	return (
 		"usage: godot --headless --path godot -s tools/balance_run.gd -- "
-		+ "[--seeds=1,2,3] [--profiles=%s] [--waves=20] [--detail]" % "|".join(PROFILES.PROFILE_IDS)
+		+ (
+			"[--seeds=1,2,3] [--profiles=%s] [--waves=20] [--board=%s] [--pace=1.0] [--detail]"
+			% ["|".join(PROFILES.PROFILE_IDS), "|".join(BOARDS)]
+		)
 	)
 
 

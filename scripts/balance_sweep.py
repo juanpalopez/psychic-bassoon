@@ -3,6 +3,9 @@
 
 usage: python3 scripts/balance_sweep.py '<configs json>' [seeds] [workers]
 
+The board the bot plays on is the BALANCE_BOARD environment variable (`strip`, `layout` or
+`default`, passed to the tool as `--board=`); unset plays the game's default board as before.
+
 A config is a dict: {"waves:HP_QUADRATIC": 0.03, "sub:towers#1": ["old", "new"]}.
 `file:CONSTANT` sets a `const` of godot/content/<file>.gd (waves, foes, towers,
 rules or profiles); `sub:<file>#<n>` replaces `old` by `new` in that file (the `#n` only keeps
@@ -28,6 +31,8 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GODOT = os.environ.get("GODOT", "godot")
 # the profiles to play: the BALANCE_PROFILES environment variable (comma separated), else all
 ALL_PROFILES = "spoolOnly,mortarHeavy,prismHeavy,mix,guardMix"
+# the board to play (the tool's --board=): the BALANCE_BOARD environment variable, else none
+BOARD = (os.environ.get("BALANCE_BOARD") or "").strip()
 PROFILES = [p.strip() for p in (os.environ.get("BALANCE_PROFILES") or ALL_PROFILES).split(",")]
 FILES = {
     "waves": "content/waves.gd",
@@ -91,7 +96,8 @@ def run_job(job):
     index, profile, dest, seeds = job
     run = subprocess.run(
         [GODOT, "--headless", "--path", dest, "-s", "tools/balance_run.gd", "--",
-         "--seeds=" + seeds, "--waves=20", "--profiles=" + profile],
+         "--seeds=" + seeds, "--waves=20", "--profiles=" + profile]
+        + (["--board=" + BOARD] if BOARD else []),
         capture_output=True, text=True)
     out = run.stdout
     # a number that breaks a script makes godot print a script error and play a game

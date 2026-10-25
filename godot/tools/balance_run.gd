@@ -8,7 +8,10 @@
 ## and 20 waves; a mistyped option prints the usage and exits with 1. `--detail`
 ## adds, for each profile, a table of the waves averaged over the seeds (how long
 ## a wave took to clear, kills, leaks, towers, Buttons), the mean road length and
-## a table of what each wave is made of.
+## a table of what each wave is made of. `--board=strip|layout|default` plays the
+## strip valley, the layout valley or the game's default board (no option is the
+## default board and the output is as before); `--pace=` is parsed but refused
+## until the game has a per-map foe pace.
 extends SceneTree
 
 const PROFILES := preload("res://content/bot_profiles.gd")
@@ -24,6 +27,9 @@ func _init() -> void:
 		return
 	var seeds: Array[int] = args.seeds
 	var max_waves: int = args.waves
+	var board: String = args.board if args.board != "" else "default"
+	if args.board != "":
+		print("board: %s" % board)
 	print(
 		(
 			"profile        seed  cleared  died  heart  sockets  towers  levels(0/1/2)"
@@ -34,7 +40,11 @@ func _init() -> void:
 		var cleared: Array[int] = []
 		var results: Array[Dictionary] = []
 		for map_seed in seeds:
-			var r := BotRunner.play(map_seed, PROFILES.PROFILES[id], max_waves)
+			var r := BalanceBoard.play(board, map_seed, PROFILES.PROFILES[id], max_waves)
+			if r.is_empty():
+				printerr("no %s board for seed %d" % [board, map_seed])
+				quit(1)
+				return
 			results.append(r)
 			cleared.append(r.waves_cleared)
 			print(
@@ -63,8 +73,8 @@ func _init() -> void:
 		if args.detail:
 			_print_waves(id, results, max_waves)
 	if args.detail:
-		_print_road_length(seeds)
-		_print_composition(seeds[0], max_waves)
+		_print_road_length(seeds, args.board)
+		_print_composition(seeds[0], max_waves, board, args.board != "")
 	quit()
 
 
@@ -101,7 +111,18 @@ func _print_waves(id: String, results: Array[Dictionary], max_waves: int) -> voi
 
 ## The mean length of the main road, in cells, on the given seeds, against the
 ## original 9 by 13 board (the numbers behind "the road is much longer").
-func _print_road_length(seeds: Array[int]) -> void:
+func _print_road_length(seeds: Array[int], named_board: String) -> void:
+	if named_board != "":
+		var total := 0.0
+		for map_seed in seeds:
+			total += float(BalanceBoard.game_for(named_board, map_seed).map.path.size())
+		print(
+			(
+				"\nmean main road on the %s board over %d seeds: %.1f cells"
+				% [named_board, seeds.size(), total / seeds.size()]
+			)
+		)
+		return
 	var landscape := 0.0
 	var legacy := 0.0
 	for map_seed in seeds:
@@ -116,15 +137,15 @@ func _print_road_length(seeds: Array[int]) -> void:
 
 
 ## What each wave is made of on one seed: foes, by kind, and their total hp.
-func _print_composition(map_seed: int, max_waves: int) -> void:
-	print("\nwave composition on seed %d" % map_seed)
+func _print_composition(map_seed: int, max_waves: int, board: String, named: bool) -> void:
+	print("\nwave composition on seed %d%s" % [map_seed, " (%s board)" % board if named else ""])
 	print(
 		(
 			"wave  foes  goblins  orcs  golems  moths  shamans  total hp"
 			+ "  first foe in (s)  last foe in (s)"
 		)
 	)
-	var game := Game.create(map_seed)
+	var game := BalanceBoard.game_for(board, map_seed)
 	for wave in range(1, max_waves + 1):
 		var orders := WaveBuilder.build(wave, game.rng)
 		var counts := {
