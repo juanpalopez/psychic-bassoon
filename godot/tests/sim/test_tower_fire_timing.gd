@@ -85,7 +85,7 @@ func test_a_foe_that_walks_off_the_end_this_tick_leaks_before_a_tower_can_shoot_
 
 
 func test_reach_includes_its_exact_edge_and_nothing_beyond() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := TowerFireKit.foe(game, 0.0)
 	# a 3-4-5 triangle: exactly 5 cells from the origin
 	foe.x = 3.0

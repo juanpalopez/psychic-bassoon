@@ -41,6 +41,16 @@ static func create_on_layout_valley(seed: int) -> GameState:
 	return from_map(seed, layout_map, false, true)
 
 
+## Creates the game on the 32 by 20 strip valley for a seed, with the Knight, as the game board
+## plays it today (`MapGen.generate_valley`, then the route-first map when no draw passes). The
+## mechanic tests name it so that a change of the default board (#458) does not move them.
+static func create_on_strip_valley(seed: int) -> GameState:
+	var strip_map := MapGen.generate_valley(seed)
+	if strip_map == null:
+		strip_map = MapGen.generate(seed)
+	return from_map(seed, strip_map, false, true)
+
+
 ## Creates the game on a map that is already made, on tick 0 (`create` calls it, and a test
 ## plays a hand-made map with it). `with_detour` is the old random lane; `with_hero` places the
 ## starting hero. The game keeps `map` itself, not a copy. The old random detour (`with_detour`)

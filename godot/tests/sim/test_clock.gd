@@ -56,7 +56,7 @@ func test_invalid_speed_is_reported_and_runs_nothing() -> void:
 
 
 func test_step_runs_the_ticks_the_clock_allows() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var clock := Clock.new()
 	assert_eq(Frame.step(game, clock, TICK, 1), 1)
 	assert_eq(game.tick_count, 1)
@@ -65,14 +65,14 @@ func test_step_runs_the_ticks_the_clock_allows() -> void:
 
 
 func test_step_stops_once_the_game_is_over() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	game.over = true
 	assert_eq(Frame.step(game, Clock.new(), TICK, 3), 0)
 	assert_eq(game.tick_count, 0)
 
 
 func test_before_tick_sees_the_tick_about_to_run() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var seen: Array[int] = []
 	var hook := func(g: GameState) -> void: seen.append(g.tick_count)
 	Frame.step(game, Clock.new(), TICK, 3, hook)
@@ -80,7 +80,7 @@ func test_before_tick_sees_the_tick_about_to_run() -> void:
 
 
 func test_after_tick_sees_the_tick_that_ran() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var seen: Array[int] = []
 	var hook := func(g: GameState) -> void: seen.append(g.tick_count)
 	Frame.step(game, Clock.new(), TICK, 3, Callable(), hook)
@@ -88,7 +88,7 @@ func test_after_tick_sees_the_tick_that_ran() -> void:
 
 
 func test_step_stops_exactly_at_the_tick_limit() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	assert_eq(Frame.step(game, Clock.new(), TICK, 3, Callable(), Callable(), 2), 2)
 	assert_eq(game.tick_count, 2)
 
@@ -116,7 +116,7 @@ func test_speed_and_frame_rate_never_change_the_game() -> void:
 
 ## A scripted player: builds, upgrades and launches on fixed ticks.
 func _play(frame_seconds: float, speed: int, ticks: int) -> GameState:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var clock := Clock.new()
 	var cells := game.map.sockets
 	var script := {

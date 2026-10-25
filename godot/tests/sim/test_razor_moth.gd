@@ -7,7 +7,7 @@ const TOWERS := preload("res://content/towers.gd")
 
 
 func _game() -> GameState:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.heartstone_health = 100
 	return game
 

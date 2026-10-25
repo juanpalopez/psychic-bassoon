@@ -216,7 +216,7 @@ func test_a_non_beam_tower_never_holds_a_lock() -> void:
 
 func test_the_beam_draws_no_random_numbers() -> void:
 	var with_tower := TowerFireKit.scene("prismSpire")
-	var without := Game.create(1)
+	var without := Game.create_on_strip_valley(1)
 	for game in [with_tower.game, without]:
 		Game.submit(game, Command.launch_wave())
 	for i in 600:

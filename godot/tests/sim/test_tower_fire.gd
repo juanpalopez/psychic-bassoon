@@ -64,7 +64,7 @@ func test_the_reach_is_the_levels_range_times_the_elevation_bonus() -> void:
 
 func test_a_level_2_socket_reaches_a_foe_a_level_0_socket_would_miss() -> void:
 	for map_seed in range(1, 80):
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		var route := game.routes[0]
 		for socket in game.map.sockets:
 			if game.map.elevation_at(socket) != 2:
@@ -178,7 +178,7 @@ func test_a_mortar_shell_hurts_every_foe_within_its_splash() -> void:
 
 func test_firing_draws_no_random_numbers() -> void:
 	var with_tower := TowerFireKit.scene()
-	var without := Game.create(1)
+	var without := Game.create_on_strip_valley(1)
 	for game in [with_tower.game, without]:
 		Game.submit(game, Command.launch_wave())
 	for i in 600:
@@ -200,7 +200,7 @@ func test_the_same_seed_and_commands_replay_the_same_with_towers() -> void:
 
 
 func test_towers_clear_a_first_wave() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var scene := TowerFireKit.scene()
 	game = scene.game
 	game.buttons = 1000

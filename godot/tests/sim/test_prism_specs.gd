@@ -296,7 +296,7 @@ func test_ink_vortex_with_only_a_flyer_in_reach_is_refused() -> void:
 func test_ink_vortex_pulls_a_foe_of_the_second_spawn_source_on_the_main_road() -> void:
 	var found := false
 	for map_seed in range(1, 40):
-		var probe := Game.create(map_seed)
+		var probe := Game.create_on_strip_valley(map_seed)
 		if probe.routes.size() < 2 or probe.random_lanes:
 			continue
 		# the second road joins the main road far along it (section E): stand past the join

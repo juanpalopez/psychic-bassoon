@@ -7,7 +7,7 @@ const RULES := preload("res://content/game_rules.gd")
 
 
 func _game_with(type: String, wave: int = 1) -> Array:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := FoeSpawner.spawn(game, type, wave, 0)
 	game.events = []
 	return [game, foe]

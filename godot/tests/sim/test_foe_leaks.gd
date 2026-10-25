@@ -5,7 +5,7 @@ const SEED := 42
 
 
 func _launched(map_seed: int = SEED) -> GameState:
-	var game := Game.create(map_seed)
+	var game := Game.create_on_strip_valley(map_seed)
 	# the Knight stands at the Heartstone and would hold the foes that leak
 	game.hero = null
 	GameTestKit.run(game, [Command.launch_wave()])
@@ -96,7 +96,7 @@ func test_nothing_moves_once_the_game_is_over() -> void:
 
 
 func test_a_big_leak_takes_what_is_left_and_health_stops_at_zero() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	game.heartstone_health = 1
 	var orc := FoeSpawner.spawn(game, "corrugatedOrc", 1, 0)
 	orc.distance = game.routes[0].total - 0.001
@@ -111,7 +111,7 @@ func test_a_big_leak_takes_what_is_left_and_health_stops_at_zero() -> void:
 
 
 func test_a_leak_takes_the_foes_own_leak_from_the_health() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var start := game.heartstone_health
 	var golem := FoeSpawner.spawn(game, "cardboardGolem", 10, 0)
 	golem.distance = game.routes[0].total - 0.001

@@ -64,7 +64,7 @@ func test_the_foes_and_pauses_do_not_change_only_the_routes() -> void:
 func test_a_launched_wave_11_puts_foes_on_both_routes() -> void:
 	var game: GameState = null
 	for map_seed in range(1, 40):
-		var candidate := Game.create(map_seed)
+		var candidate := Game.create_on_strip_valley(map_seed)
 		if candidate.routes.size() == 2:
 			game = candidate
 			break

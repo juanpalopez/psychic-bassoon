@@ -11,7 +11,7 @@ const KIND := GameEvent.Kind
 
 ## The commands do not involve the Knight, so the game starts without it and ids from 0.
 func _game() -> GameState:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	game.hero = null
 	game.next_id = 0
 	return game

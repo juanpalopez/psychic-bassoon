@@ -49,12 +49,12 @@ func test_every_foe_that_splits_says_how_many_and_how_far_apart() -> void:
 
 
 func test_a_foe_knows_the_wave_it_came_in() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	assert_eq(FoeSpawner.spawn(game, "scrapGoblin", 7, 0).wave, 7)
 
 
 func test_a_destroyed_golem_leaves_four_goblins() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game)
 	_kill(game, golem)
 	assert_false(golem.alive)
@@ -62,7 +62,7 @@ func test_a_destroyed_golem_leaves_four_goblins() -> void:
 
 
 func test_the_goblins_stand_on_the_golems_route_a_little_apart_behind_it() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game, 10, 12.0)
 	_kill(game, golem)
 	var spacing: float = FOES.DEFS.cardboardGolem.split_spacing
@@ -75,7 +75,7 @@ func test_the_goblins_stand_on_the_golems_route_a_little_apart_behind_it() -> vo
 
 
 func test_a_golem_near_the_start_does_not_put_goblins_before_the_start() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game, 10, 0.5)
 	_kill(game, golem)
 	for goblin in _goblins(game):
@@ -83,7 +83,7 @@ func test_a_golem_near_the_start_does_not_put_goblins_before_the_start() -> void
 
 
 func test_the_goblins_have_the_strength_of_the_golems_wave() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game, 20, 12.0)
 	game.wave = 30
 	_kill(game, golem)
@@ -96,7 +96,7 @@ func test_the_goblins_have_the_strength_of_the_golems_wave() -> void:
 
 
 func test_the_goblins_are_reported_after_the_kill_and_take_the_next_ids() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game)
 	var next := game.next_id
 	_kill(game, golem)
@@ -112,7 +112,7 @@ func test_the_goblins_are_reported_after_the_kill_and_take_the_next_ids() -> voi
 
 
 func test_the_kill_pays_the_golems_reward_once() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game)
 	var before := game.buttons
 	_kill(game, golem)
@@ -125,7 +125,7 @@ func test_the_kill_pays_the_golems_reward_once() -> void:
 ## A guard for the future: a leaking foe never goes through `Damage`, so nothing
 ## splits on the leak path today.
 func test_a_golem_that_leaks_splits_nothing() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var golem := _golem(game, 10, game.routes[0].total - 0.01)
 	golem.speed = 1.0
 	Game.tick(game)
@@ -136,7 +136,7 @@ func test_a_golem_that_leaks_splits_nothing() -> void:
 
 
 func test_other_foes_split_nothing() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	for type in ["scrapGoblin", "corrugatedOrc"]:
 		var foe := FoeSpawner.spawn(game, type, 5, 0)
 		var before := game.foes.size()
@@ -146,7 +146,7 @@ func test_other_foes_split_nothing() -> void:
 
 
 func test_the_wave_is_not_cleared_while_the_goblins_live() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.running = true
 	game.wave = 10
 	var golem := _golem(game)
@@ -177,7 +177,7 @@ func test_a_split_draws_no_random_numbers_even_with_two_routes() -> void:
 
 
 func test_a_mortar_shell_that_kills_the_golem_does_not_hit_the_goblins_it_makes() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var scene := TowerFireKit.scene("thimbleMortar", 1, false, game)
 	var golem := _golem(game, 10, scene.near)
 	golem.hp = 1.0
