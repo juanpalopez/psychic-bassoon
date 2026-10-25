@@ -35,10 +35,11 @@ func _layout_map(pace: float = LAYOUT.FOE_PACE) -> GameMap:
 
 
 func test_pace_is_one_on_every_board() -> void:
-	# The default board and MapGen.game_map are not the layout valley yet: only the layout valley
-	# (Game.create_on_layout_valley) gets a pace, until the #458 flip.
+	# Only the layout valley (Game.create_on_layout_valley) gets a pace; the game board's own
+	# pace is pinned here too, so a pace on MapGen.game_map shows up.
 	assert_eq(GameMap.new().foe_pace, 1.0)
 	for map_seed in [1, 2, 3]:
+		assert_eq(Game.create(map_seed, 32, 20).map.foe_pace, 1.0)
 		assert_eq(Game.create_on_strip_valley(map_seed).map.foe_pace, 1.0)
 		assert_eq(MapGen.generate(map_seed).foe_pace, 1.0)
 		assert_eq(MapGen.generate_valley(map_seed).foe_pace, 1.0)

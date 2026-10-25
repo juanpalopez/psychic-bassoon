@@ -12,6 +12,8 @@ var _seeds: Array[int] = []
 func before_all() -> void:
 	for map_seed in range(1, 21):
 		_seeds.append(map_seed)
+	# the two seeds of 3001..3300 that reach the 31-socket top of the range
+	_seeds.append_array([3063, 3218])
 
 
 func test_the_layout_board_is_40_by_24_with_the_knight() -> void:
