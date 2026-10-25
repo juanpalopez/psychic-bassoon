@@ -9,3 +9,6 @@ const CAPS: Array[Vector2i] = [Vector2i(1, 32), Vector2i(2, 26), Vector2i(5, 20)
 const ISLAND_MAX_CELLS := 3
 ## Cells around a socket block that count as its neighbours.
 const SOCKET_RING := 1
+## How far (cells) a straight walk keeps from a closed cell: the Knight's body (0.2) with room to
+## spare, so a line never clips a corner. Used by `HeroGraph.walk`.
+const WALK_CLEARANCE := 0.25

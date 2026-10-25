@@ -40,15 +40,17 @@ static func order(game: GameState, command: Command) -> void:
 	var to := Vector2i(command.col, command.row)
 	if not game.hero_graph.is_open(to):
 		return Game.reject(game, command, GameEvent.RejectReason.NOT_WALKABLE)
-	var cells := game.hero_graph.path(game.hero.cell, to)
+	var cells := game.hero_graph.walk(game.hero.cell, to)
 	if cells.is_empty():
 		return Game.reject(game, command, GameEvent.RejectReason.UNREACHABLE)
-	# the walk starts at the cell it last stood in; a hero between two cells goes back to it only
-	# when the new walk turns away, else it carries on to the cell ahead (a repeated order would
-	# otherwise pull it back every time)
-	var ahead := game.hero.path
-	if not ahead.is_empty() and ahead[0] != game.hero.cell and cells.size() > 1:
-		if cells[1] == ahead[0]:
+	# a hero between two cell centres walks on from where it is when that line is clear, else it
+	# first goes back to the centre of its cell (a repeated order would otherwise pull it back
+	# every time)
+	var hero := game.hero
+	var at_centre := hero.x == float(hero.cell.x) + HALF and hero.y == float(hero.cell.y) + HALF
+	if not at_centre and cells.size() > 1:
+		var ahead := Vector2(float(cells[1].x) + HALF, float(cells[1].y) + HALF)
+		if game.hero_graph.clear_segment(Vector2(hero.x, hero.y), ahead):
 			cells.remove_at(0)
 	game.hero.path = cells
 	# a new move lets go of the held foe; it keeps striking while it stays in reach
@@ -109,7 +111,14 @@ static func rally_share(game: GameState, at: Vector2, key: String) -> float:
 	return float(rally[key])
 
 
-## Walks the hero one tick along its path, from cell centre to cell centre.
+## Keeps `hero.cell` the cell the hero stands in while it walks a long straight leg.
+static func _stand_in_cell(game: GameState, hero: Hero) -> void:
+	var here := Vector2i(int(floor(hero.x)), int(floor(hero.y)))
+	if game.hero_graph.is_open(here):
+		hero.cell = here
+
+
+## Walks the hero one tick along its path of waypoints, each reached at its cell's centre.
 static func step(game: GameState) -> void:
 	var hero := game.hero
 	if hero == null or hero.path.is_empty():
@@ -119,11 +128,14 @@ static func step(game: GameState) -> void:
 		var next := hero.path[0]
 		var to_x := float(next.x) + HALF
 		var to_y := float(next.y) + HALF
-		# every leg runs along a row or a column, so this is its length
-		var gap := absf(to_x - hero.x) + absf(to_y - hero.y)
+		var dx := to_x - hero.x
+		var dy := to_y - hero.y
+		# a leg along a row or a column keeps its exact length; any other is a straight line
+		var gap := absf(dx) + absf(dy) if dx == 0.0 or dy == 0.0 else sqrt(dx * dx + dy * dy)
 		if gap > budget:
 			hero.x += (to_x - hero.x) * (budget / gap)
 			hero.y += (to_y - hero.y) * (budget / gap)
+			_stand_in_cell(game, hero)
 			return
 		budget -= gap
 		hero.x = to_x

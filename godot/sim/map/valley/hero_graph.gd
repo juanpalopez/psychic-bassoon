@@ -138,6 +138,89 @@ func path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	return cells
 
 
+## The hero's walk from `from` to `to` at any angle: the shortest 4-neighbour path pulled tight
+## by line of sight, so only the cells where it must bend are kept (both ends included; empty
+## when either end is closed or they are cut off). Never longer than `path`. It is the shortest
+## chain of clear straight lines between the path's own cells, the lowest cell winning a tie.
+func walk(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var cells := path(from, to)
+	if cells.size() < 3:
+		return cells
+	var best: Array[float] = []
+	var before: Array[int] = []
+	best.resize(cells.size())
+	before.resize(cells.size())
+	best.fill(INF)
+	before.fill(-1)
+	best[0] = 0.0
+	for i in cells.size() - 1:
+		var reach := i + 1
+		while reach < cells.size():
+			# the next cell on the path is always clear; a farther one needs a clear line
+			if reach > i + 1 and not clear_line(cells[i], cells[reach]):
+				break
+			var length: float = best[i] + Vector2(cells[reach] - cells[i]).length()
+			if length < best[reach]:
+				best[reach] = length
+				before[reach] = i
+			reach += 1
+	var waypoints: Array[Vector2i] = []
+	var at := cells.size() - 1
+	while at >= 0:
+		waypoints.push_front(cells[at])
+		at = before[at]
+	return waypoints
+
+
+## Whether the hero can walk the straight line between the centres of two cells: the line, with the
+## walk clearance either side, touches no closed cell (so it cannot clip a corner either).
+func clear_line(a: Vector2i, b: Vector2i) -> bool:
+	return clear_segment(
+		Vector2(float(a.x) + 0.5, float(a.y) + 0.5), Vector2(float(b.x) + 0.5, float(b.y) + 0.5)
+	)
+
+
+## The same for any two points (cells, a cell's centre is its column and row plus a half).
+func clear_segment(from: Vector2, to: Vector2) -> bool:
+	var pad: float = HERO.WALK_CLEARANCE
+	var first := Vector2i(
+		int(floor(minf(from.x, to.x) - pad)), int(floor(minf(from.y, to.y) - pad))
+	)
+	var last := Vector2i(int(floor(maxf(from.x, to.x) + pad)), int(floor(maxf(from.y, to.y) + pad)))
+	for y in range(first.y, last.y + 1):
+		for x in range(first.x, last.x + 1):
+			if _is_open(Vector2i(x, y)):
+				continue
+			var low := Vector2(float(x) - pad, float(y) - pad)
+			var high := Vector2(float(x + 1) + pad, float(y + 1) + pad)
+			if _meets(from, to, low, high):
+				return false
+	return true
+
+
+## Whether the segment crosses the box (the slab test on each axis).
+static func _meets(from: Vector2, to: Vector2, low: Vector2, high: Vector2) -> bool:
+	var enter := 0.0
+	var leave := 1.0
+	var delta := to - from
+	for axis in 2:
+		var start := from.x if axis == 0 else from.y
+		var step := delta.x if axis == 0 else delta.y
+		var near := low.x if axis == 0 else low.y
+		var far := high.x if axis == 0 else high.y
+		if step == 0.0:
+			if start < near or start > far:
+				return false
+			continue
+		var t_near := (near - start) / step
+		var t_far := (far - start) / step
+		enter = maxf(enter, minf(t_near, t_far))
+		leave = minf(leave, maxf(t_near, t_far))
+		if enter > leave:
+			return false
+	return true
+
+
 ## The result of the section of this kind (`ValleyPlan.Id`).
 static func _of_role(results: Array[SectionResult], role: int) -> SectionResult:
 	for result in results:
