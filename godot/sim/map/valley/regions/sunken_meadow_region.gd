@@ -31,6 +31,13 @@ func _draw(slot: ValleyPlan.Slot, rng: Rng) -> SectionResult:
 	for cell in curve.cells:
 		result.set_region(cell, GameMap.Region.DIRT)
 		taken[cell] = true
+	if slot.has_branch():
+		var lane := RoadSpline.build(slot.branch_spine)
+		result.branch = lane.cells
+		result.branch_curve = lane
+		for cell in lane.cells:
+			result.set_region(cell, GameMap.Region.DIRT)
+			taken[cell] = true
 	var blocked := reserved(slot)
 	for cell in slot.river:
 		result.river.append(cell)

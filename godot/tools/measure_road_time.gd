@@ -6,14 +6,26 @@ const ROAD := preload("res://content/valley/road_rules.gd")
 const BAND := preload("res://tools/road_band_reach.gd")
 
 
+## The routes a foe of the main source may walk: the sources' first list, else the main road
+## (#481: on the forked layout valley the main road and the lower lane).
+func _lanes(map: GameMap) -> Array[int]:
+	var lanes: Array[int] = []
+	if map.sources.is_empty():
+		lanes.append(0)
+	else:
+		lanes.assign(Array(map.sources[0]))
+	return lanes
+
+
 ## Returns (walk seconds, fire seconds measured to the centre line, fire seconds measured to the
-## band's edge at `width`). Only the walk comes from the route; the two fire times differ by reach.
-func _stats(map: GameMap, width: float) -> Vector3:
+## band's edge at `width`) along route `index`. Only the walk comes from the route; the two fire
+## times differ by reach.
+func _stats(map: GameMap, width: float, index: int = 0) -> Vector3:
 	var route: Route = null
 	if map.route_curves.is_empty():
-		route = Route.build_curved(map.routes[0])
+		route = Route.build_curved(map.routes[index])
 	else:
-		route = Route.build_from_curve(map.routes[0], map.route_curves[0])
+		route = Route.build_from_curve(map.routes[index], map.route_curves[index])
 	var speed: float = FOES.DEFS["scrapGoblin"]["speed"]
 	var base: float = TOWERS.DEFS["spoolGuard"]["range"][0]
 	var centres: Array[Vector3] = []
@@ -72,14 +84,20 @@ func _init() -> void:
 	var fire_t: Array[float] = []
 	var fire_e: Array[float] = []
 	var per_region: Array = [[], [], [], [], [], []]
+	var lane_fire: Array = [[], []]
+	var lane_min: Array[float] = []
+	var socket_counts: Array[float] = []
 	var n := 300
+	var first := 1
 	var width: float = ROAD.ROAD_WIDTH_CELLS
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--n="):
 			n = int(arg.trim_prefix("--n="))
+		if arg.begins_with("--from="):
+			first = int(arg.trim_prefix("--from="))
 		if arg.begins_with("--width="):
 			width = float(arg.trim_prefix("--width="))
-	for seed in range(1, n + 1):
+	for seed in range(first, first + n):
 		var t := Time.get_ticks_usec()
 		var layout := ValleyLayout.generate(
 			seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS
@@ -105,6 +123,14 @@ func _init() -> void:
 			walk.append(st.x)
 			fire_t.append(st.y)
 			fire_e.append(st.z)
+			socket_counts.append(float(map.sockets.size()))
+			var worst := 1.0e30
+			var lanes := _lanes(map)
+			for k in lanes.size():
+				var lane := _stats(map, width, lanes[k])
+				lane_fire[k].append(lane.y)
+				worst = minf(worst, lane.y)
+			lane_min.append(worst)
 		var all: Array[Vector2i] = []
 		for slot in layout.slots:
 			var c := RoadSpline.build(slot.spine).cells
@@ -170,6 +196,12 @@ func _init() -> void:
 	print("STRIP walk s ", _med(sw))
 	print("STRIP fire s centre line ", _med(sf))
 	print("STRIP fire s band edge ", _med(sfe))
+	print("LAYOUT sockets ", _med(socket_counts))
+	for k in 2:
+		var lane_times: Array[float] = []
+		lane_times.assign(lane_fire[k])
+		if lane_times.size() > 0:
+			print("LAYOUT lane ", k, " fire s centre line ", _med(lane_times))
 	var sfm := sf.duplicate()
 	sfm.sort()
 	var sfem := sfe.duplicate()
@@ -184,6 +216,27 @@ func _init() -> void:
 		" min ratio ",
 		fire_t[0] / med
 	)
+	for k in 2:
+		var lane_times: Array[float] = []
+		lane_times.assign(lane_fire[k])
+		if lane_times.size() > 0:
+			lane_times.sort()
+			print(
+				"LAYOUT/STRIP lane ",
+				k,
+				" fire median ratio centre line ",
+				lane_times[lane_times.size() / 2] / med,
+				" min ratio ",
+				lane_times[0] / med
+			)
+	if lane_min.size() > 0:
+		lane_min.sort()
+		print(
+			"LAYOUT/STRIP shorter lane per seed, fire median ratio centre line ",
+			lane_min[lane_min.size() / 2] / med,
+			" min ratio ",
+			lane_min[0] / med
+		)
 	print(
 		"LAYOUT/STRIP fire median ratio band edge ",
 		fire_e[fire_e.size() / 2] / med_edge,

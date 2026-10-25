@@ -142,13 +142,22 @@ func test_every_block_keeps_centre_line_cells_within_a_level_one_towers_own_rang
 	var fewest_in_band_reach := 1000
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
+		# a block reaches the lane it covers best: the fork's lower lane has blocks of its own (#481)
+		var lanes: Array = [map.path]
+		for fork in map.forks:
+			lanes.append(map.routes[fork.route])
 		for anchor in map.sockets:
 			var own := 0
 			var wide := 0
-			for cell in map.path:
-				var gap := SectionSockets.centre_gap(anchor, cell)
-				own += 1 if gap <= range_1 else 0
-				wide += 1 if gap <= band_reach else 0
+			for lane: Array in lanes:
+				var lane_own := 0
+				var lane_wide := 0
+				for cell: Vector2i in lane:
+					var gap := SectionSockets.centre_gap(anchor, cell)
+					lane_own += 1 if gap <= range_1 else 0
+					lane_wide += 1 if gap <= band_reach else 0
+				own = maxi(own, lane_own)
+				wide = maxi(wide, lane_wide)
 			fewest = mini(fewest, own)
 			fewest_in_band_reach = mini(fewest_in_band_reach, wide)
 	assert_gte(fewest, MIN_CELLS_IN_OWN_RANGE, "cells within the Spool Guard's range")

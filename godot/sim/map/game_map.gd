@@ -25,9 +25,12 @@ class Bridge:
 	## own cells (the feeder, before it joins the main road).
 	var path_index: int = -1
 	## The route whose own cells the bridge spans (0 is the main road). `path_index` counts cells
-	## of that route; a bridge on a fork's branch names the branch's route (#481).
+	## of that route; a bridge on a fork's branch names the branch's route (#481). A feeder
+	## bridge reads 0 as well, with its `path_index` of -1.
 	var route: int = 0
-	## (Nothing writes it until the stitcher builds forks, so a feeder bridge reads 0 as well.)
+	## True when a section built the bridge on its branch road, the fork's second lane (#481):
+	## the stitcher gives it the branch's `route`.
+	var on_branch: bool = false
 
 
 ## Where a route leaves the main road and where it rejoins it, a fork of the road (#481). The

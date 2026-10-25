@@ -66,11 +66,14 @@ func test_the_road_crosses_the_river_once_on_a_road_bridge_with_straight_approac
 			if result.river.has(cell):
 				wet.append(cell)
 		assert_gte(wet.size(), 1, "seed %d" % seed)
-		assert_eq(result.bridges.size(), wet.size(), "seed %d: a bridge per wet cell" % seed)
+		var on_road := result.bridges.filter(
+			func(b: GameMap.Bridge) -> bool: return not b.on_branch
+		)
+		assert_eq(on_road.size(), wet.size(), "seed %d: a bridge per wet cell" % seed)
 		var first := result.road.find(wet[0])
 		var last := result.road.find(wet[wet.size() - 1])
 		assert_eq(last - first, wet.size() - 1, "seed %d: one wet stretch" % seed)
-		for bridge in result.bridges:
+		for bridge in on_road:
 			assert_true(bridge.horizontal, "seed %d" % seed)
 			assert_true(wet.has(bridge.cell))
 		for step in range(1, RULES.APPROACH_STRAIGHT + 1):
@@ -78,16 +81,27 @@ func test_the_road_crosses_the_river_once_on_a_road_bridge_with_straight_approac
 			assert_eq(result.road[last + step], wet[-1] + Vector2i.RIGHT * step, "seed %d" % seed)
 
 
-func test_the_hero_bridge_is_a_second_walkable_crossing_off_the_road() -> void:
+func test_the_hero_bridge_is_a_walkable_crossing_off_both_lanes_where_a_row_has_room() -> void:
+	var kept := 0
 	for seed in range(1, LAST_SEED + 1):
 		var result := _good(_layout(seed))
-		var bridge_row: int = result.bridges[0].cell.y
+		var rows: Array[int] = []
+		for bridge in result.bridges:
+			rows.append(bridge.cell.y)
+		# with the fork the hero crosses on the lower lane's bridge too, so its own bridge is
+		# there only where a row far enough from both lanes has river (#481)
+		if result.hero_bridges.is_empty():
+			continue
+		kept += 1
 		assert_gte(result.hero_bridges.size(), 2, "seed %d: two cells wide" % seed)
 		for cell in result.hero_bridges:
 			assert_true(result.river.has(cell))
 			assert_false(result.road.has(cell))
+			assert_false(result.branch.has(cell))
 			assert_true(result.is_walkable(cell))
-			assert_gte(absi(cell.y - bridge_row), RULES.HERO_BRIDGE_MIN_ROW_GAP, "seed %d" % seed)
+			for row in rows:
+				assert_gte(absi(cell.y - row), RULES.HERO_BRIDGE_MIN_ROW_GAP, "seed %d" % seed)
+	assert_gt(kept, 0, "some layouts keep the hero bridge")
 
 
 func test_river_cells_are_unwalkable_except_bridges_and_no_socket_touches_them() -> void:

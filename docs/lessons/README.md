@@ -11,6 +11,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 | 2026-10-24 | lesson | Import on one thread, and name a stripped Godot crash from the strings its frames reference | tooling | script | godot/project.godot, scripts/run-gut-parallel.sh, scripts/mutate.py |
 | 2026-10-24 | decision | Measure a ground foe's distance to the road band's edge through one combat seam, off until the band is switched on | sim | none | |
 | 2026-10-24 | lesson | Fit the real templates to the real gates before fixing a plan, and let the fit decide the shape | sim | none | |
+| 2026-10-24 | lesson | A second lane starves every rule that assumed one road | sim | none | |
 | 2026-10-24 | decision | Fix #469 with a reach of about 2.7 plus a render-side clip, and hold the other map calls | sim | none | |
 | 2026-10-24 | decision | Fork the road over the river, widen it and grow the layout valley to 40 by 24 | sim | none | CLAUDE.md, docs/rfcs/2026-10-23-longer-valley-road.md |
 | 2026-10-24 | lesson | Send every GUT run through the parallel runner, whatever the test selection | ci | script | scripts/run-gut-parallel.sh, scripts/run-gut-parallel.test.ts |

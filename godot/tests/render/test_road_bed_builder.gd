@@ -72,24 +72,30 @@ func test_the_game_walks_curved_routes_and_the_valley_has_one_road_bridge() -> v
 
 
 ## The layout valley's river runs across the whole valley, two or three cells wide (owner,
-## 2026-10-23): the main road crosses it once, on a bridge cell for each wet road cell, side by
-## side, and the builder draws one bridge over them (the hero crosses on its own bridge cells).
+## 2026-10-23): each lane crosses it once (the fork's two lanes, #481), on a bridge cell for each
+## wet road cell, side by side, and the builder draws one bridge over each lane's cells (the hero
+## crosses on its own bridge cells).
 func test_the_layout_valley_crosses_its_river_on_bridge_cells_side_by_side() -> void:
 	for map_seed in LAYOUT_SEEDS:
 		var map := MapGen.generate_layout_valley(map_seed)
 		var label := "layout seed %d" % map_seed
-		assert_between(map.bridges.size(), 2, 3, label)
-		assert_between(map.hero_bridges.size(), 2, 3, label)
+		assert_between(map.bridges.size(), 4, 6, label)
+		# the hero's own bridge stays only where a row far from both lanes has river
+		assert_lte(map.hero_bridges.size(), 3, label)
 		var crossings := RoadBedBuilder.crossings(map)
-		assert_eq(crossings.size(), 1, "one crossing, " + label)
-		var run: Array = crossings[0]
-		assert_eq(run.size(), map.bridges.size(), label)
-		for k in run.size():
-			var bridge: GameMap.Bridge = run[k]
-			assert_gte(bridge.path_index, 0, "on the main road, " + label)
-			if k > 0:
-				var step := bridge.cell - (run[k - 1] as GameMap.Bridge).cell
-				assert_eq(step.length_squared(), 1, "side by side, " + label)
+		assert_eq(crossings.size(), 2, "one crossing a lane, " + label)
+		var cells := 0
+		for run: Array in crossings:
+			cells += run.size()
+			assert_between(run.size(), 2, 3, label)
+		assert_eq(cells, map.bridges.size(), label)
+		for run: Array in crossings:
+			for k in run.size():
+				var bridge: GameMap.Bridge = run[k]
+				assert_gte(bridge.path_index, 0, "on its lane, " + label)
+				if k > 0:
+					var step := bridge.cell - (run[k - 1] as GameMap.Bridge).cell
+					assert_eq(step.length_squared(), 1, "side by side, " + label)
 
 
 func test_every_point_foes_walk_lies_on_the_bed_or_a_bridge() -> void:
@@ -406,7 +412,8 @@ func test_the_road_is_two_draw_calls_and_a_few_thousand_triangles() -> void:
 		root.free()
 	gut.p("most triangles: bed %d, bridges %d" % [most_bed, most_bridges])
 	assert_lt(most_bed, 5500, "the bed fits the terrain and road budget")
-	assert_lt(most_bridges, 1500, "the bridges fit it too")
+	# the layout valley draws two bridges since the fork's second lane (#481): 1,636 at most
+	assert_lt(most_bridges, 2500, "the bridges fit it too")
 
 
 func test_the_diorama_slot_draws_the_road_from_the_field() -> void:

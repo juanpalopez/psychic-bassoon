@@ -70,6 +70,7 @@ static func _assemble(plan: ValleyPlan, results: Array[SectionResult]) -> GameMa
 			map.routes.append(route)
 			map.feeder_length = result.feeder.size()
 			map.join_index = join
+	_add_branch_route(map, results)
 	map.route_curves = _route_curves(map, results)
 	map.tiles = MapGen._tiles_for(map.routes, plan.cols, plan.rows)
 	if plan.road_width > 0.0 and not map.route_curves.is_empty():
@@ -118,7 +119,9 @@ static func _merge_layers(map: GameMap, results: Array[SectionResult]) -> void:
 		map.river.append_array(result.river)
 		map.hero_bridges.append_array(result.hero_bridges)
 		for bridge in result.bridges:
-			bridge.path_index = map.path.find(bridge.cell)
+			var route: Array = map.routes[map.forks[0].route] if bridge.on_branch else map.path
+			bridge.route = map.forks[0].route if bridge.on_branch else 0
+			bridge.path_index = route.find(bridge.cell)
 			map.bridges.append(bridge)
 	map.regions = regions
 	map.sockets.sort_custom(
@@ -137,6 +140,35 @@ static func _grid(map: GameMap) -> Array[PackedByteArray]:
 		line.resize(map.cols)
 		grid.append(line)
 	return grid
+
+
+## The fork's second lane (#481): route B is each section's branch where it has one and its road
+## where it does not, appended after the feeder, in the main source with the main road
+## (`sources`). Its `Fork` runs from the first branch's first cell, a cell the main road shares, to
+## the last branch's last cell. Nothing is added when no section has a branch.
+static func _add_branch_route(map: GameMap, results: Array[SectionResult]) -> void:
+	var lane: Array[Vector2i] = []
+	var first := -1
+	var last := -1
+	for result in results:
+		if result.branch.is_empty():
+			lane.append_array(result.road)
+			continue
+		first = map.path.find(result.branch[0]) if first < 0 else first
+		last = map.path.find(result.branch[result.branch.size() - 1])
+		lane.append_array(result.branch)
+	if first < 0:
+		return
+	var fork := GameMap.Fork.new()
+	fork.route = map.routes.size()
+	fork.fork_index = first
+	fork.merge_index = last
+	fork.branch_length = lane.size() - map.path.size() + (last - first - 1)
+	map.forks.append(fork)
+	map.sources.append(PackedInt32Array([0, fork.route]))
+	if map.routes.size() > 1:
+		map.sources.append(PackedInt32Array([1]))
+	map.routes.append(lane)
 
 
 ## The curves foes walk, one per route: the sections' spline roads joined end to end (a section
@@ -177,4 +209,20 @@ static func _route_curves(map: GameMap, results: Array[SectionResult]) -> Array:
 			tail.cell_points.append(main.cell_points[index] - first_point)
 		second.append_curve(tail)
 		curves.append(second)
+	if not map.forks.is_empty():
+		var lane := RoadCurve.new()
+		for result in results:
+			lane.append_curve(_lane_curve(result))
+		curves.append(lane)
 	return curves
+
+
+## The curve of a section on the branch route: its branch's, else its road's.
+static func _lane_curve(result: SectionResult) -> RoadCurve:
+	if not result.branch.is_empty():
+		return (
+			result.branch_curve
+			if result.branch_curve != null
+			else RoadCurve.from_cells(result.branch)
+		)
+	return result.road_curve if result.road_curve != null else RoadCurve.from_cells(result.road)

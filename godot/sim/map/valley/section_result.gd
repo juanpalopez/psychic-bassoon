@@ -24,6 +24,12 @@ var road: Array[Vector2i] = []
 ## The curve foes walk through this strip when its road is a spline (`road` is its cells), else
 ## null: the stitcher then joins the road's cell centres.
 var road_curve: RoadCurve = null
+## The fork's second lane through this strip (#481), from the slot's `branch_entry` to its
+## `branch_exit` in unit steps; empty when the strip has one road. The stitcher builds the branch
+## route from each strip's branch where it has one and its road where it does not.
+var branch: Array[Vector2i] = []
+## The curve foes walk along the branch when it is a spline, else null (the cells' centres).
+var branch_curve: RoadCurve = null
 ## The second road's cells before the main road (the feeder), ending next to the cell where it
 ## joins; only the section that holds the merge fills it.
 var feeder: Array[Vector2i] = []
