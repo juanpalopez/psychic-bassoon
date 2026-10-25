@@ -283,9 +283,16 @@ func _tokens(theme: Theme, display: FontFile) -> void:
 	theme.set_constant("line_spacing", "BarToken", -2)
 
 
-## Colours of the edge arrows, read by `EdgeIndicators`.
+## Colours of the edge arrows and the minimap, read by `EdgeIndicators` and `Minimap`.
 func _indicators(theme: Theme) -> void:
 	theme.add_type("Arrow")
 	theme.set_color("foe", "Arrow", SHORT)
 	theme.set_color("hero", "Arrow", ACTION)
 	theme.set_color("edge", "Arrow", NOTE)
+	theme.add_type("Minimap")
+	theme.set_color("paper", "Minimap", Color(NOTE, 0.85))
+	theme.set_color("road", "Minimap", KRAFT)
+	theme.set_color("socket", "Minimap", CARD_EDGE)
+	theme.set_color("foe", "Minimap", SHORT)
+	theme.set_color("hero", "Minimap", ACTION)
+	theme.set_color("view", "Minimap", INK)
