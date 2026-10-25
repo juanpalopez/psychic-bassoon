@@ -19,6 +19,7 @@ class_name RoadBedBuilder
 extends RefCounted
 
 const LOOKS := preload("res://render/diorama/diorama_looks.gd")
+const FORK := preload("res://content/valley/road_bed_rules.gd")
 ## Salts for `CellHash`, so the bed's edges and the planks draw different values.
 const SALT_LEFT := 11
 const SALT_RIGHT := 12
@@ -50,7 +51,7 @@ static func build(map: GameMap, routes: Array[Route], height_fn: Callable) -> No
 ## centre is col + 0.5): the main road first, then each later route from its spawn to where it
 ## joins a road drawn before it. Each starts `ROAD_RUN_OUT` cells off the board. The scenery
 ## (#326) keeps off these lines.
-static func centrelines(routes: Array[Route]) -> Array[PackedVector2Array]:
+static func centrelines(routes: Array[Route], coarse: bool = false) -> Array[PackedVector2Array]:
 	var lines: Array[PackedVector2Array] = []
 	var drawn: Array[PackedVector2Array] = []
 	for route in routes:
@@ -61,7 +62,7 @@ static func centrelines(routes: Array[Route]) -> Array[PackedVector2Array]:
 				var out := _run_out(raw)
 				out.append_array(points)
 				points = out
-			lines.append(_thin(_rounded(points)))
+			lines.append(_thin(_rounded(points), coarse))
 		drawn.append(raw)
 	return lines
 
@@ -122,7 +123,8 @@ static func crossings(map: GameMap) -> Array[Array]:
 ## The road bed: every centreline as a ribbon with lips, broken over the bridges, and the yard
 ## under the Heartstone. One surface in `road_bed.gdshader`.
 static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) -> ArrayMesh:
-	var lines := centrelines(routes)
+	# a forked map (#481) thins its beds further to stay inside the terrain's triangle cap
+	var lines := centrelines(routes, not map.forks.is_empty())
 	var cuts: Array[Rect2] = []
 	for bridge in map.bridges:
 		cuts.append(_bed_cut(bridge, map.road_width))
@@ -261,16 +263,17 @@ static func _rounded(points: PackedVector2Array) -> PackedVector2Array:
 
 ## The line with the points it does not need dropped: at most `ROAD_STEP` apart on the straight,
 ## and as close as it takes to bend by no more than `ROAD_BEND_DEGREES` a point.
-static func _thin(points: PackedVector2Array) -> PackedVector2Array:
+static func _thin(points: PackedVector2Array, coarse: bool = false) -> PackedVector2Array:
 	if points.size() < 3:
 		return points
-	var bend := deg_to_rad(LOOKS.ROAD_BEND_DEGREES)
+	var step: float = FORK.FORK_ROAD_STEP if coarse else LOOKS.ROAD_STEP
+	var bend := deg_to_rad(FORK.FORK_ROAD_BEND_DEGREES if coarse else LOOKS.ROAD_BEND_DEGREES)
 	var kept := PackedVector2Array([points[0]])
 	for k in range(1, points.size() - 1):
 		var last := kept[kept.size() - 1]
 		var ahead := points[k + 1] - points[k]
 		var here := points[k] - last
-		if points[k + 1].distance_to(last) > LOOKS.ROAD_STEP or absf(here.angle_to(ahead)) > bend:
+		if points[k + 1].distance_to(last) > step or absf(here.angle_to(ahead)) > bend:
 			kept.append(points[k])
 	kept.append(points[points.size() - 1])
 	return kept
