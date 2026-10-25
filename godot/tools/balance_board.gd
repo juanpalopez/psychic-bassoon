@@ -11,9 +11,15 @@ static func game_for(board: String, map_seed: int) -> GameState:
 		"layout":
 			return Game.create_on_layout_valley(map_seed)
 		"strip":
-			# the strip valley is what `Game.create` plays on today; when
-			# `Game.create_on_strip_valley` lands, this branch becomes that one call
-			return Game.create(map_seed)
+			# named after the generator, not `Game.create`: the default board flips to the layout
+			# valley in #458 and `strip` must keep meaning the strip valley (the same arguments
+			# `Game.create` uses on its board); when `Game.create_on_strip_valley` lands, this
+			# branch becomes that one call
+			var strip_map := MapGen.generate_valley(map_seed)
+			if strip_map == null:
+				push_error("no strip valley for seed %d" % map_seed)
+				return null
+			return Game.from_map(map_seed, strip_map, false, true)
 		_:
 			return Game.create(map_seed)
 

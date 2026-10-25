@@ -62,10 +62,27 @@ func test_the_usage_names_the_new_options() -> void:
 	assert_string_contains(BalanceArgs.usage(), "--pace=")
 
 
-func test_each_board_makes_its_own_game() -> void:
-	var default_game := BalanceBoard.game_for("default", 1)
-	var layout_game := BalanceBoard.game_for("layout", 1)
-	assert_not_null(default_game)
-	assert_not_null(layout_game)
-	assert_eq(BalanceBoard.game_for("strip", 1).map.sockets.size(), default_game.map.sockets.size())
-	assert_gt(layout_game.map.cols, default_game.map.cols, "the layout valley is the wider board")
+func _mean_road(board: String) -> float:
+	var total := 0.0
+	for map_seed in [1, 2, 3]:
+		total += float(BalanceBoard.game_for(board, map_seed).map.path.size())
+	return total / 3.0
+
+
+func test_strip_is_the_strip_valley_whatever_the_default_board_is() -> void:
+	for map_seed in [1, 2, 3]:
+		var strip_game := BalanceBoard.game_for("strip", map_seed)
+		var valley := MapGen.generate_valley(map_seed)
+		assert_eq(strip_game.map.path, valley.path)
+		assert_eq(strip_game.map.sockets.size(), valley.sockets.size())
+		assert_eq(strip_game.map.cols, valley.cols)
+
+
+func test_layout_is_a_different_and_shorter_road_than_the_strip() -> void:
+	var strip_road := _mean_road("strip")
+	var layout_road := _mean_road("layout")
+	assert_gt(strip_road, 120.0, "the strip valley's road is about 150 cells")
+	assert_lt(layout_road, 110.0, "the layout valley's road is about 83 cells")
+	assert_gt(
+		BalanceBoard.game_for("layout", 1).map.cols, BalanceBoard.game_for("strip", 1).map.cols
+	)
