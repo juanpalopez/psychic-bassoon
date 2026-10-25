@@ -19,7 +19,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 | 2026-10-25 | lesson | Reaching the second lane costs the first one blocks until the strip gets one more | sim | none | |
 | 2026-10-25 | decision | The layout valley forks into two lanes that foes and the hero both cross | sim | none | CLAUDE.md, docs/rfcs/2026-10-23-longer-valley-road.md |
 | 2026-10-25 | decision | Switch the layout valley's road band on at 2.0 cells, not 2.4, for the generation cost | sim | none | |
-| 2026-10-25 | decision | Foes walk the layout valley at half their content speed (FOE_PACE 0.5) | sim | none | |
+| 2026-10-25 | decision | Foes walk the layout valley at half their content speed (FOE_PACE 0.5) | sim | none | #460 |
 | 2026-10-23 | decision | Opus designs and mentors; Haiku and Sonnet implement | harness | none | CLAUDE.md |
 | 2026-10-23 | decision | Start every run on the game board with the Knight, moved by a command anywhere walkable | sim | none | CLAUDE.md |
 | 2026-10-22 | decision | Prototype hero movement and bridge tactics on a fixed seed of the generated valley | sim | none | docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md, GDD |
