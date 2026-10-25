@@ -122,7 +122,7 @@ func test_sockets_sit_on_both_banks_where_the_west_bank_has_room() -> void:
 	var both := 0
 	for seed in range(1, 61):
 		var result := _good(_layout(seed))
-		assert_between(result.sockets.size(), 4, 5, "seed %d" % seed)
+		assert_between(result.sockets.size(), 5, 6, "seed %d" % seed)
 		var bridge: Vector2i = result.bridges[0].cell
 		var west := result.sockets.any(func(anchor: Vector2i) -> bool: return anchor.x < bridge.x)
 		var east := result.sockets.any(func(anchor: Vector2i) -> bool: return anchor.x > bridge.x)

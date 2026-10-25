@@ -150,15 +150,20 @@ static func _add_branch_route(map: GameMap, results: Array[SectionResult]) -> vo
 	var lane: Array[Vector2i] = []
 	var first := -1
 	var last := -1
+	var branched := false
 	for result in results:
 		if result.branch.is_empty():
 			lane.append_array(result.road)
 			continue
+		branched = true
 		first = map.path.find(result.branch[0]) if first < 0 else first
 		last = map.path.find(result.branch[result.branch.size() - 1])
 		lane.append_array(result.branch)
-	if first < 0:
+	if not branched:
 		return
+	# the gates are cells of the main road (the curves' gates define the fork, not a cell the lanes
+	# stop sharing), so a miss would give a corrupt Fork
+	assert(first >= 0 and last >= 0, "the branch must start and end on a cell of the main road")
 	var fork := GameMap.Fork.new()
 	fork.route = map.routes.size()
 	fork.fork_index = first

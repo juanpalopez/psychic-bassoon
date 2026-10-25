@@ -39,9 +39,11 @@ class Fork:
 	extends RefCounted
 	## The branch's index in `GameMap.routes`.
 	var route: int = 0
-	## The index in `path` of the last cell the branch shares with the main road before it leaves.
+	## The index in `path` of the cell where the branch's curve leaves the main road (its entry gate).
+	## The first few cells of the branch may still be cells of `path`: the gates define the fork, not
+	## the last cell the two lanes share.
 	var fork_index: int = 0
-	## The index in `path` of the first cell it shares with the main road after it rejoins.
+	## The index in `path` of the cell where the branch's curve rejoins the main road (its exit gate).
 	var merge_index: int = 0
 	## How many cells the branch has of its own, between the fork and the merge.
 	var branch_length: int = 0

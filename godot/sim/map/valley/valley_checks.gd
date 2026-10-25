@@ -6,6 +6,7 @@ extends RefCounted
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 const HERO := preload("res://content/valley/hero_rules.gd")
+const LAYOUT := preload("res://content/valley/layout_rules.gd")
 
 
 ## One problem and the section whose attempt should change.
@@ -72,6 +73,10 @@ static func section_problems(
 	for bend in SectionSockets.bends(road, slot.bend_run):
 		if not _covered(result, bend):
 			found.append(Problem.make(id, "no socket block covers the bend at %s" % bend))
+	for bend in SectionSockets.bends(result.branch, slot.bend_run):
+		if not _covered(result, bend):
+			found.append(Problem.make(id, "no socket block covers the branch bend at %s" % bend))
+	found.append_array(_lane_reach_problems(id, result))
 	for text in section.extra_problems(slot, result):
 		found.append(Problem.make(id, text))
 	return found
@@ -196,6 +201,31 @@ static func _link_problems(id: int, result: SectionResult) -> Array[Problem]:
 		var lane := result.branch if bridge.on_branch else result.road
 		if not lane.has(bridge.cell):
 			found.append(Problem.make(id, "the bridge at %s is off the road" % bridge.cell))
+	return found
+
+
+## The sockets reach both lanes (#516): in a strip with the lower lane, `BRANCH_MIN_BLOCKS` blocks
+## reach its own stretch and some block reaches each lane's bridge.
+static func _lane_reach_problems(id: int, result: SectionResult) -> Array[Problem]:
+	var found: Array[Problem] = []
+	if result.branch.is_empty():
+		return found
+	var reaching := SectionSockets.blocks_reaching(result, SectionSockets.own_branch(result))
+	if reaching < LAYOUT.BRANCH_MIN_BLOCKS:
+		found.append(
+			Problem.make(
+				id,
+				(
+					"%d socket blocks reach the lower lane, want %d"
+					% [reaching, LAYOUT.BRANCH_MIN_BLOCKS]
+				)
+			)
+		)
+	for on_branch in [false, true]:
+		var span := SectionSockets.bridge_cells(result, on_branch)
+		if not span.is_empty() and not SectionSockets.reaches_cells(result, span, result.sockets):
+			var lane := "lower" if on_branch else "upper"
+			found.append(Problem.make(id, "no socket block reaches the %s bridge" % lane))
 	return found
 
 

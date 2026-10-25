@@ -8,6 +8,7 @@ const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 const ROAD := preload("res://content/valley/road_rules.gd")
 const TOWERS := preload("res://content/towers.gd")
+const LAYOUT := preload("res://content/valley/layout_rules.gd")
 
 
 ## The road's bends: the cells where it turns. With `min_run` above 1 only a turn between two
@@ -65,14 +66,95 @@ static func place(
 		sites = _main_road_first(result, sites)
 	var target: int = blocks.x + rng.next_int(blocks.y - blocks.x + 1)
 	for bend in bends(result.road, result.bend_run):
-		var best := _nearest(sites, bend, result.sockets)
-		if best != Vector2i(-1, -1) and centre_gap(best, bend) <= bend_reach(result):
-			result.add_socket(best, 0, SectionResult.Tag.BEND)
+		_cover_bend(result, sites, bend)
+	for bend in bends(result.branch, result.bend_run):
+		_cover_bend(result, sites, bend)
+	if not result.branch.is_empty():
+		_reach_lanes(result, sites)
 	for site in sites:
 		if result.sockets.size() >= target:
 			break
 		if keeps_distance(site, result.sockets):
 			result.add_socket(site, 0, SectionResult.Tag.LOW)
+
+
+static func _cover_bend(result: SectionResult, sites: Array[Vector2i], bend: Vector2i) -> void:
+	var best := _nearest(sites, bend, result.sockets)
+	if best != Vector2i(-1, -1) and centre_gap(best, bend) <= bend_reach(result):
+		result.add_socket(best, 0, SectionResult.Tag.BEND)
+
+
+## The cells of the lower lane the upper lane does not share (#516).
+static func own_branch(result: SectionResult) -> Array[Vector2i]:
+	var own: Array[Vector2i] = []
+	for cell in result.branch:
+		if not result.road.has(cell):
+			own.append(cell)
+	return own
+
+
+## How many blocks of the result have `SOCKET_MIN_ROAD_COVERAGE` of `cells` in reach.
+static func blocks_reaching(result: SectionResult, cells: Array[Vector2i]) -> int:
+	var count := 0
+	var reach := coverage_reach(result.road_width)
+	for anchor in result.sockets:
+		var block := Rect2i(anchor, Vector2i.ONE * RULES.GAME_SOCKET_FOOTPRINT)
+		count += 1 if covers(block, cells, 0.0, reach) else 0
+	return count
+
+
+## The cells of the bridges on the lower lane (`on_branch`) or on the upper road.
+static func bridge_cells(result: SectionResult, on_branch: bool) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = []
+	for bridge in result.bridges:
+		if bridge.on_branch == on_branch:
+			cells.append(bridge.cell)
+	return cells
+
+
+## True when a block's centre is in coverage reach of one of the cells (a bridge's span).
+static func reaches_cells(
+	result: SectionResult, cells: Array[Vector2i], anchors: Array[Vector2i]
+) -> bool:
+	var reach := coverage_reach(result.road_width)
+	for anchor in anchors:
+		for cell in cells:
+			if centre_gap(anchor, cell) <= reach:
+				return true
+	return false
+
+
+## Sockets for the lower lane (#516): `BRANCH_MIN_BLOCKS` blocks that reach its own stretch, then
+## a block in reach of each lane's bridge, taken from the sites before the rest are filled, so the
+## lanes keep the time under fire the main road had.
+static func _reach_lanes(result: SectionResult, sites: Array[Vector2i]) -> void:
+	var own := own_branch(result)
+	var size := Vector2i.ONE * RULES.GAME_SOCKET_FOOTPRINT
+	var reach := coverage_reach(result.road_width)
+	var have := blocks_reaching(result, own)
+	# a block between the lanes serves both, so those go first and the main road keeps its cover
+	for both in [true, false]:
+		for site in sites:
+			if have >= LAYOUT.BRANCH_MIN_BLOCKS:
+				break
+			var block := Rect2i(site, size)
+			if not covers(block, own, 0.0, reach) or not keeps_distance(site, result.sockets):
+				continue
+			if both and not covers(block, result.road, 0.0, reach):
+				continue
+			result.add_socket(site, 0, SectionResult.Tag.LOW)
+			have += 1
+	for on_branch in [false, true]:
+		var span := bridge_cells(result, on_branch)
+		if span.is_empty() or reaches_cells(result, span, result.sockets):
+			continue
+		for site in sites:
+			if (
+				reaches_cells(result, span, [site] as Array[Vector2i])
+				and keeps_distance(site, result.sockets)
+			):
+				result.add_socket(site, 0, SectionResult.Tag.LOW)
+				break
 
 
 ## The sites in the same order, those that reach the main road first: with the fork's lower lane

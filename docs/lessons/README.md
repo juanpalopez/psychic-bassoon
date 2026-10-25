@@ -15,6 +15,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 | 2026-10-24 | decision | Fix #469 with a reach of about 2.7 plus a render-side clip, and hold the other map calls | sim | none | |
 | 2026-10-24 | decision | Fork the road over the river, widen it and grow the layout valley to 40 by 24 | sim | none | CLAUDE.md, docs/rfcs/2026-10-23-longer-valley-road.md |
 | 2026-10-24 | lesson | Send every GUT run through the parallel runner, whatever the test selection | ci | script | scripts/run-gut-parallel.sh, scripts/run-gut-parallel.test.ts |
+| 2026-10-25 | lesson | Reaching the second lane costs the first one blocks until the strip gets one more | sim | none | |
 | 2026-10-23 | decision | Opus designs and mentors; Haiku and Sonnet implement | harness | none | CLAUDE.md |
 | 2026-10-23 | decision | Start every run on the game board with the Knight, moved by a command anywhere walkable | sim | none | CLAUDE.md |
 | 2026-10-22 | decision | Prototype hero movement and bridge tactics on a fixed seed of the generated valley | sim | none | docs/rfcs/2026-10-22-strategic-hero-movement-and-bridges.md, GDD |
