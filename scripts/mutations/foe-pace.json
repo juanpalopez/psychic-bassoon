@@ -1,0 +1,58 @@
+[
+  {
+    "name": "the spawner ignores the map's pace",
+    "file": "sim/combat/foe_spawner.gd",
+    "old": "foe.speed = stats.speed * game.map.foe_pace",
+    "new": "foe.speed = stats.speed",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the pace is applied twice",
+    "file": "sim/combat/foe_spawner.gd",
+    "old": "foe.speed = stats.speed * game.map.foe_pace",
+    "new": "foe.speed = stats.speed * game.map.foe_pace * game.map.foe_pace",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the pace divides instead of multiplying",
+    "file": "sim/combat/foe_spawner.gd",
+    "old": "foe.speed = stats.speed * game.map.foe_pace",
+    "new": "foe.speed = stats.speed / game.map.foe_pace",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the pace defaults to something else",
+    "file": "sim/map/game_map.gd",
+    "old": "var foe_pace: float = 1.0",
+    "new": "var foe_pace: float = 0.9",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the layout valley is not given the content pace",
+    "file": "sim/map/valley/valley_stitcher.gd",
+    "old": "\t\t\t\tmap.foe_pace = foe_pace\n",
+    "new": "\t\t\t\tmap.foe_pace = 0.5\n",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the stitcher sets the pace on the strip valley too",
+    "file": "sim/map/valley/valley_stitcher.gd",
+    "old": "\t\t\tif layout != null:\n\t\t\t\tmap.foe_pace = foe_pace",
+    "new": "\t\t\tif true:\n\t\t\t\tmap.foe_pace = 0.5",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the stitcher forgets to set the pace",
+    "file": "sim/map/valley/valley_stitcher.gd",
+    "old": "map.foe_pace = foe_pace",
+    "new": "pass",
+    "tests": ["test_foe_pace"]
+  },
+  {
+    "name": "the pace is clamped to a speed of 1.0",
+    "file": "sim/combat/foe_spawner.gd",
+    "old": "foe.speed = stats.speed * game.map.foe_pace",
+    "new": "foe.speed = minf(stats.speed, 1.0) * game.map.foe_pace",
+    "tests": ["test_foe_pace"]
+  }
+]

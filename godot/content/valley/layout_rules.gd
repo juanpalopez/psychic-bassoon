@@ -82,6 +82,11 @@ const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 37), Vector2i(2, 25), Vector2i(5
 const LANE_GAP := 5
 const LANE_RUN := 12
 
+## The share of its content speed every foe walks on the layout valley, set on its map by the
+## stitcher (`GameMap.foe_pace`). Applied to the layout valley only; the value is chosen by the
+## #460 speed sweep. 1.0 changes nothing.
+const FOE_PACE := 1.0
+
 ## The fork (#481, `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`): the road forks at the
 ## Meadow's entry gate into two lanes, an upper one (today's road) and a lower one, that cross
 ## the river on two bridges and meet again at the Ridge's gate. On: the stitcher builds the second

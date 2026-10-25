@@ -81,6 +81,11 @@ var road_width: float = ROAD.OLD_WIDTH_CELLS
 ## #446, the wide road's rule). Its own field, not `road_width`, which is 0.9 on every older board
 ## and must not move their reach. 0 (no band) on every board until the stitcher sets it.
 var reach_band: float = 0.0
+## The share of its content speed every foe of this map walks (1.0 = as the content says), applied
+## once when a foe spawns in `FoeSpawner`. Its own field like `reach_band`: 1.0 on every board
+## until the stitcher sets the layout valley's number (#458, #460), and a multiplication by 1.0
+## leaves every bit of the speed as it was.
+var foe_pace: float = 1.0
 ## With a second spawn source: how many cells of `routes[1]` come before the main road (the
 ## feeder), and the index in `path` of the cell where it joins. Both are 0 without one.
 var feeder_length: int = 0
