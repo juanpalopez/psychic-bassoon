@@ -1,0 +1,37 @@
+[
+  {
+    "name": "ignore the forks",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "if map.forks.is_empty():",
+    "new": "if true:",
+    "tests": ["test_bot_fork"]
+  },
+  {
+    "name": "branch lane read as the main route",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "map.routes[fork.route]",
+    "new": "map.routes[0]",
+    "tests": ["test_bot_fork"]
+  },
+  {
+    "name": "shared cells counted twice",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "if not seen.has(cell):",
+    "new": "if true:",
+    "tests": ["test_bot_fork"]
+  },
+  {
+    "name": "fork cells weighted double",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "\t\t\t\tcells.append(cell)\n",
+    "new": "\t\t\t\tcells.append(cell)\n\t\t\t\tcells.append(cell)\n",
+    "tests": ["test_bot_fork"]
+  },
+  {
+    "name": "drop the reach margin from the ranking",
+    "file": "sim/bot/scripted_bot.gd",
+    "old": "var reach := reach_base * _map.range_multiplier(anchor) + _map.reach_margin()",
+    "new": "var reach := reach_base * _map.range_multiplier(anchor)",
+    "tests": ["test_bot_fork"]
+  }
+]
