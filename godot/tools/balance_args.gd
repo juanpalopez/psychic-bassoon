@@ -10,8 +10,6 @@ const DEFAULT_WAVES := 20
 ## The boards the bot can play (#458): the strip valley, the layout valley, and whatever
 ## `Game.create` plays on its default board.
 const BOARDS: Array[String] = ["strip", "layout", "default"]
-## `--pace=` waits for the per-map foe pace (#458, PR 5): until it lands the option is an error.
-const PACE_AVAILABLE := false
 
 
 ## What the options say: `seeds`, `profiles`, `waves`, `detail`, `board` (empty when
@@ -62,8 +60,6 @@ static func parse(args: PackedStringArray) -> Dictionary:
 			var text := arg.trim_prefix("--pace=")
 			if not text.is_valid_float() or float(text) <= 0.0:
 				return _bad(out, arg, "pace must be a number above 0")
-			if not PACE_AVAILABLE:
-				return _bad(out, arg, "not available yet: the game has no per-map foe pace")
 			out.pace = float(text)
 		elif arg == "--detail":
 			out.detail = true

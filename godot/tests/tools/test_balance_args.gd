@@ -44,11 +44,11 @@ func test_the_board_goes_with_the_other_options() -> void:
 	assert_true(out.detail)
 
 
-func test_pace_is_refused_until_the_game_has_a_foe_pace() -> void:
-	assert_false(BalanceArgs.PACE_AVAILABLE)
+func test_a_pace_is_read_as_a_number_above_0() -> void:
 	var out := _parse(["--pace=0.55"])
-	assert_string_contains(out.error, "--pace=0.55")
-	assert_string_contains(out.error, "not available yet")
+	assert_eq(out.error, "")
+	assert_eq(out.pace, 0.55)
+	assert_eq(_parse(["--pace=1.0"]).pace, 1.0)
 
 
 func test_a_bad_pace_says_what_is_wrong_with_it() -> void:
@@ -67,6 +67,14 @@ func _mean_road(board: String) -> float:
 	for map_seed in [1, 2, 3]:
 		total += float(BalanceBoard.game_for(board, map_seed).map.path.size())
 	return total / 3.0
+
+
+func test_a_pace_is_set_on_the_map_of_every_board_before_any_foe() -> void:
+	for board in ["strip", "layout", "default"]:
+		var paced := BalanceBoard.game_for(board, 1, 0.5)
+		assert_eq(paced.map.foe_pace, 0.5, board)
+		assert_true(paced.foes.is_empty(), "no foe has spawned when the pace is set: " + board)
+	assert_eq(BalanceBoard.game_for("strip", 1).map.foe_pace, 1.0, "no pace keeps the board's own")
 
 
 func test_strip_is_the_strip_valley_whatever_the_default_board_is() -> void:

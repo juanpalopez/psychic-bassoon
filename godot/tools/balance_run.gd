@@ -10,8 +10,8 @@
 ## a wave took to clear, kills, leaks, towers, Buttons), the mean road length and
 ## a table of what each wave is made of. `--board=strip|layout|default` plays the
 ## strip valley, the layout valley or the game's default board (no option is the
-## default board and the output is as before); `--pace=` is parsed but refused
-## until the game has a per-map foe pace.
+## default board and the output is as before); `--pace=` sets the foe pace of the map
+## (`GameMap.foe_pace`, a number above 0; no option keeps the board's own pace).
 extends SceneTree
 
 const PROFILES := preload("res://content/bot_profiles.gd")
@@ -28,8 +28,9 @@ func _init() -> void:
 	var seeds: Array[int] = args.seeds
 	var max_waves: int = args.waves
 	var board: String = args.board if args.board != "" else "default"
-	if args.board != "":
-		print("board: %s" % board)
+	var pace: float = args.pace
+	if args.board != "" or pace > 0.0:
+		print("board: %s%s" % [board, _pace_text(pace, ", ")])
 	print(
 		(
 			"profile        seed  cleared  died  heart  sockets  towers  levels(0/1/2)"
@@ -40,7 +41,9 @@ func _init() -> void:
 		var cleared: Array[int] = []
 		var results: Array[Dictionary] = []
 		for map_seed in seeds:
-			var r := BalanceBoard.play(board, map_seed, PROFILES.PROFILES[id], max_waves)
+			var r := BalanceBoard.play(
+				board, map_seed, PROFILES.PROFILES[id], max_waves, BotRunner.DEFAULT_MAX_TICKS, pace
+			)
 			if r.is_empty():
 				printerr("no %s board for seed %d" % [board, map_seed])
 				quit(1)
@@ -71,17 +74,17 @@ func _init() -> void:
 		cleared.sort()
 		print("%-14s median waves cleared: %d" % [id, cleared[cleared.size() / 2]])
 		if args.detail:
-			_print_waves(id, results, max_waves)
+			_print_waves(id, results, max_waves, pace)
 	if args.detail:
 		_print_road_length(seeds, args.board)
-		_print_composition(seeds[0], max_waves, board, args.board != "")
+		_print_composition(seeds[0], max_waves, board, args.board != "", pace)
 	quit()
 
 
 ## The waves of every run of a profile, averaged: only the runs that cleared a
 ## wave count for it.
-func _print_waves(id: String, results: Array[Dictionary], max_waves: int) -> void:
-	print("\n%s, waves averaged over the runs that cleared them" % id)
+func _print_waves(id: String, results: Array[Dictionary], max_waves: int, pace: float) -> void:
+	print("\n%s%s, waves averaged over the runs that cleared them" % [id, _pace_text(pace, " at ")])
 	print("wave  runs  clear(s)  kills  leaks  towers  buttons")
 	for wave in range(1, max_waves + 1):
 		var n := 0
@@ -137,8 +140,16 @@ func _print_road_length(seeds: Array[int], named_board: String) -> void:
 
 
 ## What each wave is made of on one seed: foes, by kind, and their total hp.
-func _print_composition(map_seed: int, max_waves: int, board: String, named: bool) -> void:
-	print("\nwave composition on seed %d%s" % [map_seed, " (%s board)" % board if named else ""])
+func _print_composition(
+	map_seed: int, max_waves: int, board: String, named: bool, pace: float
+) -> void:
+	var parts: Array[String] = []
+	if named:
+		parts.append("%s board" % board)
+	if pace > 0.0:
+		parts.append("foe pace %s" % pace)
+	var note := " (%s)" % ", ".join(parts) if not parts.is_empty() else ""
+	print("\nwave composition on seed %d%s" % [map_seed, note])
 	print(
 		(
 			"wave  foes  goblins  orcs  golems  moths  shamans  total hp"
@@ -179,3 +190,9 @@ func _print_composition(map_seed: int, max_waves: int, board: String, named: boo
 				]
 			)
 		)
+
+
+## The pace in the output, after `lead`, when `--pace=` is given; nothing otherwise, so the
+## output without the option is unchanged.
+func _pace_text(pace: float, lead: String) -> String:
+	return "%sfoe pace %s" % [lead, pace] if pace > 0.0 else ""
