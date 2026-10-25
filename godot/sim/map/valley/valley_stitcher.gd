@@ -26,8 +26,12 @@ static func build(
 		results.append(_draw(plan, sections, slot.id, 0))
 	while true:
 		var problems := ValleyChecks.all_problems(plan, sections, results)
+		var map: GameMap = null
 		if problems.is_empty():
-			return _assemble(plan, results)
+			map = _assemble(plan, results)
+			problems = _road_problems(map, results)
+		if problems.is_empty():
+			return map
 		var again := {}
 		for problem in problems:
 			again[problem.section] = true
@@ -41,6 +45,30 @@ static func build(
 				return null
 			results[id] = _draw(plan, sections, id, attempts[id])
 	return null
+
+
+## A socket block on a cell the stitched map marks as road (#517): the band is marked from the
+## joined curves, and the join of the feeder with the main road is a segment no section sees, so
+## only the stitched map can tell. The section that owns the block draws again.
+static func _road_problems(
+	map: GameMap, results: Array[SectionResult]
+) -> Array[ValleyChecks.Problem]:
+	var found: Array[ValleyChecks.Problem] = []
+	for result in results:
+		for anchor in result.sockets:
+			if _on_road(map, anchor):
+				found.append(
+					ValleyChecks.Problem.make(result.id, "socket block %s is on the road" % anchor)
+				)
+	return found
+
+
+static func _on_road(map: GameMap, anchor: Vector2i) -> bool:
+	for dy in map.footprint:
+		for dx in map.footprint:
+			if map.tiles[anchor.y + dy][anchor.x + dx] == GameMap.Tile.ROAD:
+				return true
+	return false
 
 
 static func _draw(

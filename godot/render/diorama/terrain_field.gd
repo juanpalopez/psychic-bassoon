@@ -268,12 +268,13 @@ func _lay_leads() -> void:
 	leads.clear()
 	lead_directions.clear()
 	var starts := {}
-	for route in map.routes:
+	for index in map.routes.size():
+		var route: Array = map.routes[index]
 		var start: Vector2i = route[0]
 		if starts.has(start):
 			continue
 		starts[start] = true
-		var out := _outward(start, route[1] - start)
+		var out := _outward(start, _entering(index, route[1] - start))
 		if out == Vector2i.ZERO:
 			continue
 		var cells: Array[Vector2i] = []
@@ -291,6 +292,21 @@ func _lay_leads() -> void:
 					_put(bank, 0, GUARD_ROAD if k == 0 else GUARD_NONE)
 				else:
 					_put(bank, mini(level_at(bank), 1))
+
+
+## The way route `index` comes in from its start, as the road bed draws it: along the first step of
+## its walked line, which a route built from a curve opens with a point off the board (a feeder
+## from a corner may step along the edge in its cells and still come in across it); `fallback`
+## (its first step in cells) when there is no such line. It assumes `routes[index]` pairs with
+## `map.routes[index]`, which holds for `for_map` and for the game's routes in the same order.
+func _entering(index: int, fallback: Vector2i) -> Vector2i:
+	if index >= routes.size() or routes[index].xs.size() < 2:
+		return fallback
+	var line := routes[index]
+	var step := Vector2(line.xs[1] - line.xs[0], line.ys[1] - line.ys[0])
+	if absf(step.x) > absf(step.y):
+		return Vector2i(1 if step.x > 0.0 else -1, 0)
+	return Vector2i(0, 1 if step.y > 0.0 else -1)
 
 
 ## The way out of the map from an edge cell, away from the road's next cell; zero when the
