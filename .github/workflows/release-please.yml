@@ -43,7 +43,7 @@ jobs:
       # skip-github-release is set in the config: this step only opens or
       # updates the release PR; release.yml creates the GitHub Release.
       - name: Open or update the release PR
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           token: ${{ steps.app.outputs.token }}
           config-file: release-please-config.json
