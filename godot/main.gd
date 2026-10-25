@@ -53,6 +53,7 @@ var _stress_foes := 0
 ## Play the 40 by 24 layout valley (`--layout-valley`, a debug flag).
 var _layout_valley := false
 var _fps := FpsOverlay.new()
+var _arrows := EdgeIndicators.new()
 var _guide := GuidePanel.new()
 var _auto := AutoWave.new()
 var _progress := IntroProgress.default()
@@ -123,6 +124,7 @@ func _ready() -> void:
 	_intro.bind(_flow)
 	_flow.finished.connect(_on_intro_finished)
 	$Hud.add_child(_card)
+	$Hud.add_child(_arrows)
 	$Hud.add_child(_fps)
 	_read_phone_check_params()
 	add_child(_glow)
@@ -195,6 +197,7 @@ func _process(delta: float) -> void:
 	_audio.set_music(SoundMap.music_for(_game))
 	_update_launch_button()
 	_sync_intro()
+	_arrows.show_state(_game, _camera)
 	_menu.set_buttons(_game.buttons)
 	_close_if_zoomed_out()
 	_refresh_panel()
