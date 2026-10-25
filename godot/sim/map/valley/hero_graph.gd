@@ -140,8 +140,9 @@ func path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 
 ## The hero's walk from `from` to `to` at any angle: the shortest 4-neighbour path pulled tight
 ## by line of sight, so only the cells where it must bend are kept (both ends included; empty
-## when either end is closed or they are cut off). Never longer than `path`. It is the shortest
-## chain of clear straight lines between the path's own cells, the lowest cell winning a tie.
+## when either end is closed or they are cut off). A tight chain of clear lines between the path's
+## own cells, never longer than `path` (each line extends from a cell while the next one stays
+## clear, and the shortest such chain is kept; it is not promised to be the shortest of all).
 func walk(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	var cells := path(from, to)
 	if cells.size() < 3:
@@ -156,7 +157,9 @@ func walk(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	for i in cells.size() - 1:
 		var reach := i + 1
 		while reach < cells.size():
-			# the next cell on the path is always clear; a farther one needs a clear line
+			# the next cell on the path is always clear (two open cells side by side: the line
+			# runs 0.5 from the edge of any cell beside it, past the clearance); a farther one
+			# needs a clear line
 			if reach > i + 1 and not clear_line(cells[i], cells[reach]):
 				break
 			var length: float = best[i] + Vector2(cells[reach] - cells[i]).length()

@@ -155,3 +155,62 @@ func test_a_hero_at_a_centre_keeps_its_own_cell_first_in_its_walk() -> void:
 	Heroes.order(game, Command.move_hero(start.x - 2, start.y + 1))
 	assert_eq(game.hero.path[0], start)
 	assert_eq(game.hero.path.back(), start + Vector2i(-2, 1))
+
+
+## A game whose Knight stands at `at` (cells, between two centres) on `graph`.
+func _knight_at(graph: HeroGraph, cell: Vector2i, at: Vector2) -> GameState:
+	var game := Game.create(42, 16, 11)
+	Heroes.place(game, "knightOfCardboard")
+	game.hero_graph = graph
+	game.hero.cell = cell
+	game.hero.x = at.x
+	game.hero.y = at.y
+	return game
+
+
+func test_an_order_mid_leg_goes_back_to_its_cell_when_the_line_ahead_is_shut() -> void:
+	var wall: Array[Vector2i] = []
+	for y in range(3, 7):
+		for x in range(3, 5):
+			wall.append(Vector2i(x, y))
+	var graph := _graph(12, 12, wall)
+	# in cell (2, 5) but hard against the wall at column 3: the way round starts up the column
+	var game := _knight_at(graph, Vector2i(2, 5), Vector2(2.95, 5.5))
+	Heroes.order(game, Command.move_hero(10, 5))
+	assert_eq(game.hero.path[0], Vector2i(2, 5), "it goes back to the centre of its cell first")
+	assert_gt(game.hero.path.size(), 2)
+	for i in game.hero.path.size() - 1:
+		assert_true(_body_clear(graph, game.hero.path[i], game.hero.path[i + 1]), "leg %d" % i)
+
+
+func test_an_order_mid_leg_beside_a_river_does_not_cut_across_it() -> void:
+	var river: Array[Vector2i] = []
+	for y in range(0, 12):
+		if y != 9:
+			river.append(Vector2i(5, y))
+	var graph := _graph(12, 12, river)
+	var game := _knight_at(graph, Vector2i(4, 2), Vector2(4.9, 2.5))
+	Heroes.order(game, Command.move_hero(8, 2))
+	# the only way over is the bridge cell (5, 9): the first leg may not run into the bank
+	var crosses := false
+	for i in game.hero.path.size() - 1:
+		crosses = crosses or _passes(game.hero.path[i], game.hero.path[i + 1], Vector2i(5, 9))
+	assert_true(crosses)
+	assert_eq(game.hero.path[0], Vector2i(4, 2))
+	for i in game.hero.path.size() - 1:
+		assert_true(_body_clear(graph, game.hero.path[i], game.hero.path[i + 1]), "leg %d" % i)
+
+
+func test_an_order_mid_leg_walks_on_from_where_it_is_when_the_line_is_clear() -> void:
+	var graph := _graph(12, 12)
+	var game := _knight_at(graph, Vector2i(2, 2), Vector2(2.9, 2.5))
+	Heroes.order(game, Command.move_hero(8, 6))
+	assert_eq(game.hero.path, [Vector2i(8, 6)] as Array[Vector2i])
+
+
+## The clearance is between 0.2 (the Knight's body) and 0.3: a line may pass a closed cell at 0.3
+## and not at 0.2.
+func test_a_line_passes_a_closed_cell_at_three_tenths_and_not_at_two_tenths() -> void:
+	var graph := _graph(9, 9, [Vector2i(4, 3)] as Array[Vector2i])
+	assert_true(graph.clear_segment(Vector2(0.5, 4.3), Vector2(8.5, 4.3)))
+	assert_false(graph.clear_segment(Vector2(0.5, 4.2), Vector2(8.5, 4.2)))
