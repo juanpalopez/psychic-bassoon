@@ -88,3 +88,4 @@ Promote a lesson when it has happened twice, or when one failure was costly. Pic
 4. **mode**: a named way of working for a kind of task (for example a balance mode: which agents run the sweeps, which files may change, which checks must pass, what to write at the end), kept as a skill or a command that sets those rules for the session.
 5. **mcp / plugin**: an MCP server when the task needs a tool that talks to an outside system (the board, a build farm, a device), and a plugin only when several skills, hooks, agents and servers ship together.
 6. Fill in `promoted-to`, update the index row, and use the commit type `ci`, `docs` or `chore`, referencing the lesson file.
+| 2026-10-25 | lesson | Test a HUD control inside its real node tree, not only its pure functions | ui | checklist | docs/REVIEW-CHECKLIST.md |

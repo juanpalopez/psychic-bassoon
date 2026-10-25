@@ -22,7 +22,9 @@ var _left := PackedFloat64Array()
 func _ready() -> void:
 	theme = preload("res://ui/hud_theme.tres")
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# offsets too: the anchors alone keep the old offsets, and under a CanvasLayer the control
+	# then ended 0 by 0 and drew nothing
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	set_process(not reduced_motion)
 
 
