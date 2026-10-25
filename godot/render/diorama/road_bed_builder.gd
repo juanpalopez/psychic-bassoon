@@ -360,7 +360,9 @@ static func heart_yard(map: GameMap, height_fn: Callable) -> Vector3:
 	if flat:
 		var middle := Vector2(block.position) + Vector2(block.size) / 2.0
 		# never wider than the block: on a 2 cell band the yard would run 0.1 past it (#446)
-		var radius := minf(RoadDimensions.heart_yard_radius(map.road_width), minf(block.size.x, block.size.y) / 2.0)
+		var radius := minf(
+			RoadDimensions.heart_yard_radius(map.road_width), minf(block.size.x, block.size.y) / 2.0
+		)
 		return Vector3(middle.x, middle.y, radius)
 	return Vector3(
 		float(last.x) + 0.5, float(last.y) + 0.5, RoadDimensions.heart_cap_radius(map.road_width)
