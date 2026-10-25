@@ -1,4 +1,5 @@
 ## The debug entry that plays the layout valley (#513), and the default board it must not move.
+## Its layout board facts are in test_layout_board.gd.
 extends GutTest
 
 const SEED := 1

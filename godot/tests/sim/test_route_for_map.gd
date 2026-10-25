@@ -14,7 +14,7 @@ const SUBSTEPS := 16
 
 func test_the_game_walks_the_routes_for_its_map() -> void:
 	for map_seed in [1, 2, 3]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		_assert_same(Route.for_map(game.map), game.routes, "game board, seed %d" % map_seed)
 	var classic := Game.create(4, 16, 11)
 	_assert_same(Route.for_map(classic.map), classic.routes, "classic board")

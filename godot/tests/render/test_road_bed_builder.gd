@@ -62,7 +62,7 @@ func _setups() -> Array[Dictionary]:
 
 func test_the_game_walks_curved_routes_and_the_valley_has_one_road_bridge() -> void:
 	for map_seed in [1, 259, 7920]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		assert_true(game.routes[0].curved, "the game's routes are the curves of #321")
 		# one road crossing (its bridge cells side by side; one on the strip valley's narrow river)
 		var crossings := RoadBedBuilder.crossings(game.map)

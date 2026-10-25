@@ -10,7 +10,7 @@ const EPSILON := 1e-6
 
 func test_every_point_of_the_curved_routes_lies_on_the_road_bed() -> void:
 	for map_seed in [1, 2, 3, 42, 7920]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		var board := Board.new()
 		board.build_on_ready = false
 		add_child_autofree(board)

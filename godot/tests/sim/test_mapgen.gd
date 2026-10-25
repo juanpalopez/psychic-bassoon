@@ -122,6 +122,7 @@ func test_most_maps_get_one_detour_and_never_more() -> void:
 ## The game board and the Board draw the same map: both ask `MapGen.game_map`. Its fallback to
 ## the route-first map cannot be tested: no seed makes the valley fail, and the stitcher takes
 ## no injected sections.
+## About THE GAME BOARD: follows the default board, whatever `Game.create` plays.
 func test_the_game_map_is_the_map_the_game_plays() -> void:
 	for map_seed in [1, 2, 3]:
 		assert_eq(MapGen.game_map(map_seed).path, Game.create(map_seed).map.path)

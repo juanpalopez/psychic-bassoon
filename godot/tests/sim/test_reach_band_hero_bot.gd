@@ -90,8 +90,8 @@ func _first_tower_at(game: GameState) -> Vector2i:
 func test_the_first_tower_goes_where_the_reach_with_the_margin_covers_the_most_road() -> void:
 	var differs := false
 	for map_seed in [1, 7, 42, 99]:
-		var plain := Game.create(map_seed)
-		var banded := Game.create(map_seed)
+		var plain := Game.create_on_strip_valley(map_seed)
+		var banded := Game.create_on_strip_valley(map_seed)
 		banded.map.reach_band = WIDE_BAND
 		var want := _best(banded)
 		if want != _best(plain):
@@ -115,7 +115,7 @@ func _guards_covered(game: GameState, anchor: Vector2i, margin: float) -> int:
 func test_a_mess_tent_counts_the_guards_its_aura_reaches_with_the_margin() -> void:
 	var differs := false
 	for map_seed in [1, 2, 3, 5, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		game.map.reach_band = WIDE_BAND
 		game.buttons = 100000
 		var bot := ScriptedBot.new(
@@ -148,6 +148,6 @@ func test_a_mess_tent_counts_the_guards_its_aura_reaches_with_the_margin() -> vo
 
 func test_without_a_band_the_bot_ranks_by_the_plain_reach() -> void:
 	for map_seed in [1, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		assert_eq(game.map.reach_band, 0.0)
 		assert_eq(_first_tower_at(game), _best(game), "seed %d" % map_seed)

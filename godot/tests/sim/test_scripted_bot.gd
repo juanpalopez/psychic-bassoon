@@ -50,7 +50,7 @@ func test_there_are_five_profiles_with_real_towers() -> void:
 
 
 func test_the_prism_heavy_profile_builds_prism_spires_first_and_most() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	_play(game, _bot("prismHeavy"), 30)
 	assert_gte(game.towers.size(), 6)
@@ -64,7 +64,7 @@ func test_the_prism_heavy_profile_builds_prism_spires_first_and_most() -> void:
 
 func test_the_first_tower_goes_on_the_socket_that_reaches_the_most_road() -> void:
 	for map_seed in [1, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		game.buttons = 1000
 		var best := game.map.sockets[0]
 		for anchor in game.map.sockets:
@@ -76,7 +76,7 @@ func test_the_first_tower_goes_on_the_socket_that_reaches_the_most_road() -> voi
 
 
 func test_the_next_towers_go_on_the_next_best_sockets() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	_play(game, _bot("spoolOnly"), 8)
 	assert_gte(game.towers.size(), 4)
@@ -88,7 +88,7 @@ func test_the_next_towers_go_on_the_next_best_sockets() -> void:
 
 
 func test_it_builds_the_profiles_towers_in_order_and_cycles() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	var bot := _bot("mix")
 	var order: Array = PROFILES.PROFILES.mix.build_order
@@ -99,7 +99,7 @@ func test_it_builds_the_profiles_towers_in_order_and_cycles() -> void:
 
 
 func test_it_waits_until_it_can_pay_and_never_overspends() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 10
 	var bot := _bot("spoolOnly")
 	_play(game, bot, 5)
@@ -113,14 +113,14 @@ func test_it_waits_until_it_can_pay_and_never_overspends() -> void:
 
 func test_it_never_sends_a_command_the_sim_rejects() -> void:
 	for profile_id in PROFILES.PROFILE_IDS:
-		var game := Game.create(7)
+		var game := Game.create_on_strip_valley(7)
 		var rejected := _play(game, _bot(profile_id), 3000)
 		assert_eq(rejected, 0, profile_id)
 		assert_gte(game.buttons, 0, profile_id)
 
 
 func test_it_never_sends_an_upgrade_it_cannot_pay_for() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	# a tower on every socket and almost nothing to spend: it must wait, not try
 	game.buttons = 50 * game.map.sockets.size()
 	game.heartstone_health = 100000
@@ -140,7 +140,7 @@ func test_it_never_sends_an_upgrade_it_cannot_pay_for() -> void:
 
 
 func test_it_builds_at_most_max_towers_and_then_upgrades() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	assert_gt(game.map.sockets.size(), PROFILES.MAX_TOWERS, "the valley has sockets to spare")
 	# enough for MAX_TOWERS Spool Guards and one upgrade (60), not for another tower as well
 	game.buttons = 50 * PROFILES.MAX_TOWERS + 60
@@ -155,7 +155,7 @@ func test_it_builds_at_most_max_towers_and_then_upgrades() -> void:
 
 
 func test_a_profile_can_set_its_own_tower_cap() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	game.heartstone_health = 100000
 	var profile: Dictionary = PROFILES.PROFILES.spoolOnly.duplicate(true)
@@ -166,7 +166,7 @@ func test_a_profile_can_set_its_own_tower_cap() -> void:
 
 
 func test_it_upgrades_once_every_socket_has_a_tower() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	game.heartstone_health = 100000
 	var bot := _bot("spoolOnly")
@@ -183,7 +183,7 @@ func test_it_upgrades_once_every_socket_has_a_tower() -> void:
 
 
 func test_it_upgrades_the_lowest_level_tower_first() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	# exactly enough for a Spool Guard on every socket it fills and nothing over
 	var towers := mini(game.map.sockets.size(), PROFILES.MAX_TOWERS)
 	game.buttons = 50 * towers
@@ -206,7 +206,7 @@ func test_it_upgrades_the_lowest_level_tower_first() -> void:
 
 
 func test_it_launches_the_first_wave_on_the_first_tick_and_waits_while_a_wave_runs() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 0
 	var bot := _bot("spoolOnly")
 	bot.act(game)
@@ -225,7 +225,7 @@ func test_it_launches_the_first_wave_on_the_first_tick_and_waits_while_a_wave_ru
 ## Plays `ticks` ticks and counts the waves launched while foes were still walking
 ## (the early calls).
 func _early_calls(profile: Dictionary, ticks: int) -> int:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var bot := ScriptedBot.new(profile)
 	game.buttons = 0
 	game.heartstone_health = 100000
@@ -257,7 +257,7 @@ func test_a_profile_with_a_high_threshold_calls_waves_early() -> void:
 
 
 func test_a_profile_that_calls_early_does_so_when_few_foes_are_left() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var profile := {"build_order": ["spoolGuard"], "call_early": true, "early_foes_left": 100}
 	var bot := ScriptedBot.new(profile)
 	game.buttons = 0
@@ -273,7 +273,7 @@ func test_a_profile_that_calls_early_does_so_when_few_foes_are_left() -> void:
 
 
 func test_it_uses_only_commands_and_leaves_the_game_to_the_tick() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 1000
 	_bot("mix").act(game)
 	assert_eq(game.towers.size(), 0, "a command waits for the tick")

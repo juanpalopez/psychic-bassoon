@@ -9,7 +9,7 @@ const FOES := preload("res://content/foes.gd")
 
 
 func _walk_ticks(pace: float, type: String = "corrugatedOrc") -> int:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.hero = null
 	game.map.foe_pace = pace
 	var foe := FoeSpawner.spawn(game, type, 1, 0)
@@ -39,8 +39,7 @@ func test_pace_is_one_on_every_board() -> void:
 	# (Game.create_on_layout_valley) gets a pace, until the #458 flip.
 	assert_eq(GameMap.new().foe_pace, 1.0)
 	for map_seed in [1, 2, 3]:
-		assert_eq(Game.create(map_seed).map.foe_pace, 1.0)
-		assert_eq(Game.create(map_seed, 32, 20).map.foe_pace, 1.0)
+		assert_eq(Game.create_on_strip_valley(map_seed).map.foe_pace, 1.0)
 		assert_eq(MapGen.generate(map_seed).foe_pace, 1.0)
 		assert_eq(MapGen.generate_valley(map_seed).foe_pace, 1.0)
 	assert_eq(TowerFireKit.landscape(1).map.foe_pace, 1.0)
@@ -78,7 +77,7 @@ func test_the_pace_is_off_until_the_speed_sweep() -> void:
 
 func test_a_spawned_foe_walks_the_paced_speed() -> void:
 	for type in FOES.DEFS:
-		var game := Game.create(1)
+		var game := Game.create_on_strip_valley(1)
 		var plain := FoeSpawner.spawn(game, type, 3, 0)
 		game.map.foe_pace = 0.5
 		var slow := FoeSpawner.spawn(game, type, 3, 0)
@@ -94,7 +93,7 @@ func test_a_foe_takes_twice_as_long_to_walk_at_half_pace() -> void:
 
 
 func test_a_slow_stacks_on_the_paced_speed() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.hero = null
 	game.map.foe_pace = 0.5
 	var foe := FoeSpawner.spawn(game, "corrugatedOrc", 1, 0)

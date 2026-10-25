@@ -131,7 +131,7 @@ func test_the_second_route_joins_the_main_one_at_a_known_distance() -> void:
 
 func _two_route_game() -> GameState:
 	for map_seed in range(1, 40):
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		if game.routes.size() == 2:
 			return game
 	return null
@@ -142,7 +142,7 @@ func test_the_second_roads_foes_enter_at_the_edge_their_road_starts_on() -> void
 	# the top edge and crossed the whole board)
 	var checked := 0
 	for map_seed in _seeds:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		if game.routes.size() < 2:
 			continue
 		checked += 1

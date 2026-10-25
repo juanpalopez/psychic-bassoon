@@ -95,7 +95,7 @@ func test_a_refused_command_is_counted() -> void:
 
 func test_the_result_says_how_many_sockets_the_map_had() -> void:
 	var result := BotRunner.play(1, PROFILES.PROFILES.mix, 1)
-	assert_eq(result.sockets, Game.create(1).map.sockets.size())
+	assert_eq(result.sockets, Game.create_on_strip_valley(1).map.sockets.size())
 	assert_lte(result.towers, result.sockets)
 
 
