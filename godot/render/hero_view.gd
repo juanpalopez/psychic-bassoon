@@ -11,10 +11,6 @@ const RING_THICKNESS := 0.04
 const MARKER_SIZE := 0.8
 ## How far the marker and the path rest above the ground, so neither sinks into a terrace.
 const LIFT := 0.06
-const BODY_COLOUR := Color(0.95, 0.8, 0.25)
-const RING_COLOUR := Color(0.2, 0.9, 0.9, 0.8)
-const TARGET_COLOUR := Color(0.2, 0.9, 0.9, 0.5)
-const PATH_COLOUR := Color(0.2, 0.9, 0.9, 0.9)
 
 var _body := MeshInstance3D.new()
 var _ring := MeshInstance3D.new()
@@ -30,7 +26,7 @@ func _init() -> void:
 	capsule.radius = BODY_RADIUS
 	capsule.height = BODY_HEIGHT
 	_body.mesh = capsule
-	_body.material_override = _unshaded(BODY_COLOUR)
+	_body.material_override = _unshaded(TerrainPalette.HERO_BODY)
 	_body.position.y = BODY_HEIGHT / 2.0
 	add_child(_body)
 	var disc := CylinderMesh.new()
@@ -38,10 +34,10 @@ func _init() -> void:
 	disc.bottom_radius = RING_RADIUS
 	disc.height = RING_THICKNESS
 	_ring.mesh = disc
-	_ring.material_override = _unshaded(RING_COLOUR)
+	_ring.material_override = _unshaded(TerrainPalette.HERO_RING)
 	add_child(_ring)
 	_path.mesh = _line
-	_path.material_override = _unshaded(PATH_COLOUR)
+	_path.material_override = _unshaded(TerrainPalette.HERO_PATH)
 	_path.top_level = true
 	add_child(_path)
 	_target.top_level = true
@@ -95,11 +91,14 @@ func _draw_walk(cells: Array[Vector2i], surface_height: Callable) -> void:
 			_line.surface_add_vertex(point)
 		_line.surface_end()
 	var end := cells[cells.size() - 1]
-	_target.show_cell(end, float(surface_height.call(end)), TARGET_COLOUR)
+	_target.show_cell(end, float(surface_height.call(end)), TerrainPalette.HERO_TARGET)
 	_target.scale = Vector3(MARKER_SIZE, 1.0, MARKER_SIZE)
 
 
 func _hide_walk() -> void:
+	# idle frames come here too: do nothing, and allocate nothing, when it is already hidden
+	if _drawn.is_empty() and not _path.visible:
+		return
 	_path.visible = false
 	_target.hide_cell()
 	_drawn = []

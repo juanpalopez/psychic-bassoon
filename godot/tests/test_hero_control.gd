@@ -23,6 +23,13 @@ func _open_cell_far_from(game: GameState, from: Vector2i) -> Vector2i:
 	return best
 
 
+## The top of a cell's tile, where a tap on it lands.
+func _surface_point(main: Node, cell: Vector2i) -> Vector3:
+	var at := BoardSpace.cell_to_world(cell.x, cell.y)
+	at.y = main._board.surface_height(cell)
+	return at
+
+
 func test_a_tap_on_the_hero_selects_it() -> void:
 	var main := await _main()
 	assert_false(main.hero_selected())
@@ -36,9 +43,31 @@ func test_a_tap_on_a_walkable_cell_sends_the_selected_hero_by_command() -> void:
 	main._on_tap(main._hero_on_screen(game.hero))
 	var goal := _open_cell_far_from(game, game.hero.cell)
 	assert_ne(goal, game.hero.cell)
-	main._on_tap(main._camera.unproject_position(BoardSpace.cell_to_world(goal.x, goal.y)))
+	main._on_tap(main._camera.unproject_position(_surface_point(main, goal)))
 	assert_eq(game.pending.size(), 1, "one command waits for the tick")
-	assert_eq((game.pending[0] as Command).kind, Command.Kind.MOVE_HERO)
+	var order := game.pending[0] as Command
+	assert_eq(order.kind, Command.Kind.MOVE_HERO)
+	assert_eq(Vector2i(order.col, order.row), goal, "it goes to the cell that was tapped")
+
+
+func test_an_order_while_paused_says_it_waits_for_the_resume() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	main._speed.paused = true
+	main._on_tap(main._hero_on_screen(game.hero))
+	var goal := _open_cell_far_from(game, game.hero.cell)
+	main._on_tap(main._camera.unproject_position(_surface_point(main, goal)))
+	assert_eq((main.get_node("Hud/Message") as Label).text, "Paused: orders run when you resume")
+
+
+func test_the_hero_rejections_have_words() -> void:
+	for reason in [
+		GameEvent.RejectReason.NO_HERO,
+		GameEvent.RejectReason.NOT_WALKABLE,
+		GameEvent.RejectReason.UNREACHABLE,
+		GameEvent.RejectReason.HERO_FALLEN,
+	]:
+		assert_ne(RejectText.of(reason), "That did not work")
 
 
 func test_the_walk_and_its_target_are_drawn_once_the_order_runs() -> void:
