@@ -9,7 +9,7 @@ const SEED := 42
 
 
 func _launched(map_seed: int = SEED) -> GameState:
-	var game := Game.create(map_seed)
+	var game := Game.create_on_strip_valley(map_seed)
 	# the Knight at the Heartstone would hold the foes these tests wait for
 	game.hero = null
 	GameTestKit.run(game, [Command.launch_wave()])
@@ -226,8 +226,8 @@ func test_with_one_route_the_route_stream_is_not_touched() -> void:
 
 
 func test_the_same_seed_and_commands_give_the_same_game() -> void:
-	var a := Game.create(7)
-	var b := Game.create(7)
+	var a := Game.create_on_strip_valley(7)
+	var b := Game.create_on_strip_valley(7)
 	for game in [a, b]:
 		game.heartstone_health = 100000
 		GameTestKit.run(game, [Command.launch_wave()])
@@ -260,7 +260,7 @@ func test_the_route_each_foe_takes_is_the_next_draw_of_the_route_stream() -> voi
 
 
 func test_several_foes_with_no_gap_come_out_in_one_tick() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var spawner := Spawner.new()
 	spawner.wave = 1
 	spawner.timer = 0.0

@@ -48,7 +48,7 @@ func _fired(game: GameState) -> int:
 
 func test_no_board_has_a_reach_band_until_the_stitcher_sets_one() -> void:
 	for map_seed in [1, 2, 3]:
-		var map := Game.create(map_seed).map
+		var map := Game.create_on_strip_valley(map_seed).map
 		assert_eq(map.reach_band, 0.0)
 		assert_eq(map.reach_margin(), 0.0)
 		assert_eq(map.road_width, 0.9, "the old width is not the band")
@@ -57,7 +57,7 @@ func test_no_board_has_a_reach_band_until_the_stitcher_sets_one() -> void:
 
 
 func test_the_margin_is_half_the_band() -> void:
-	var map := Game.create(1).map
+	var map := Game.create_on_strip_valley(1).map
 	map.reach_band = BAND
 	assert_eq(map.reach_margin(), BAND / 2.0)
 

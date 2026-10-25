@@ -4,7 +4,7 @@ extends GutTest
 
 
 func _foe(type: String = "scrapGoblin") -> Foe:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := FoeSpawner.spawn(game, type, 1, 0)
 	game.events = []
 	return foe
@@ -73,7 +73,7 @@ func test_a_slow_cannot_take_more_than_all_of_a_foes_speed() -> void:
 
 
 func test_a_slowed_foe_walks_that_much_less_each_tick() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var fast := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	var slowed := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	Status.apply_slow(slowed, 0.5, 5.0)
@@ -83,7 +83,7 @@ func test_a_slowed_foe_walks_that_much_less_each_tick() -> void:
 
 
 func test_a_slow_lasts_exactly_its_time_in_ticks() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	Status.apply_slow(foe, 0.5, 0.1)
 	var walked: Array[float] = []
@@ -100,7 +100,7 @@ func test_a_slow_lasts_exactly_its_time_in_ticks() -> void:
 
 
 func test_a_slow_draws_no_random_numbers() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	var waves := game.rng.state
 	var routes := game.route_rng.state
@@ -111,7 +111,7 @@ func test_a_slow_draws_no_random_numbers() -> void:
 
 
 func test_a_slow_that_runs_out_this_tick_is_gone_at_once() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var foe := FoeSpawner.spawn(game, "scrapGoblin", 1, 0)
 	Status.apply_slow(foe, 0.5, 0.1)
 	for i in 3:

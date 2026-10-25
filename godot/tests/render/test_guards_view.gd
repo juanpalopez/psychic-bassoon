@@ -163,7 +163,7 @@ func test_reset_forgets_the_guards() -> void:
 
 
 func test_no_guards_means_nothing_is_drawn() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var view := _view()
 	view.update(game)
 	assert_eq(view.get_child_count(), 0)

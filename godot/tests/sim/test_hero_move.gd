@@ -7,7 +7,7 @@ const SEED := 42
 
 
 func _valley() -> GameState:
-	return Game.create(SEED)
+	return Game.create_on_strip_valley(SEED)
 
 
 func _knight_on_open_board() -> GameState:

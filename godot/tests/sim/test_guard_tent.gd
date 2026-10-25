@@ -19,7 +19,7 @@ func test_the_guard_tent_is_content_with_three_levels() -> void:
 
 
 func test_a_new_tent_raises_two_guards_at_full_health() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 500
 	var anchor := game.map.sockets[0]
 	var events := GameTestKit.run(game, [Command.build("guardTent", anchor.x, anchor.y)])
@@ -38,7 +38,7 @@ func test_a_new_tent_raises_two_guards_at_full_health() -> void:
 
 
 func test_other_towers_raise_no_guards() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	var anchor := game.map.sockets[0]
 	GameTestKit.run(game, [Command.build("spoolGuard", anchor.x, anchor.y)])
 	assert_eq(game.guards.size(), 0)

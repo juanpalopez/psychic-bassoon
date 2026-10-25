@@ -26,7 +26,7 @@ static func scene(
 	after: float = 0.0
 ) -> Scene:
 	var scene := Scene.new()
-	scene.game = existing if existing != null else Game.create(map_seed)
+	scene.game = existing if existing != null else Game.create_on_strip_valley(map_seed)
 	var route := scene.game.routes[0]
 	var best_socket := Vector2i(-1, -1)
 	scene.gap = INF
@@ -117,7 +117,7 @@ static func farthest_from(scene: Scene) -> Array:
 ## level-0 sockets that both reach the same point of the road, `near` along it.
 static func pair(type_a: String, type_b: String, map_seed: int = 1) -> Scene:
 	var scene := Scene.new()
-	scene.game = Game.create(map_seed)
+	scene.game = Game.create_on_strip_valley(map_seed)
 	var map := scene.game.map
 	var route := scene.game.routes[0]
 	var flat: Array[Vector2i] = []

@@ -14,7 +14,7 @@ func assert_rejected_by(events: Array[GameEvent], command: Command, reason: REAS
 
 
 func test_build_on_plain_ground_is_rejected_only_sockets_take_towers() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var ground := Vector2i(-1, -1)
 	for row in MAP_RULES.GRID_ROWS:
 		for col in MAP_RULES.GRID_COLS:
@@ -28,7 +28,7 @@ func test_build_on_plain_ground_is_rejected_only_sockets_take_towers() -> void:
 
 
 func test_every_socket_accepts_a_tower() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	game.buttons = 100000
 	for cell in game.map.sockets:
 		GameTestKit.run(game, [GameTestKit.build_at("spoolGuard", cell)])

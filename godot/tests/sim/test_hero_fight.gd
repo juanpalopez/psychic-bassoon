@@ -137,7 +137,7 @@ func test_a_flying_foe_that_is_blockable_is_skipped() -> void:
 
 
 func test_a_knight_at_the_heartstone_holds_a_foe_that_would_leak() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	var foe := FoeSpawner.spawn(game, "corrugatedOrc", 1, 0)
 	foe.x = game.hero.x
 	foe.y = game.hero.y
@@ -305,7 +305,7 @@ func test_the_knight_falls_rejects_orders_and_rises_at_home() -> void:
 
 
 func test_the_hero_id_is_unique_among_guards() -> void:
-	var game := Game.create(SEED)
+	var game := Game.create_on_strip_valley(SEED)
 	game.buttons = 5000
 	var anchor := game.map.sockets[0]
 	GameTestKit.run(game, [Command.build("guardTent", anchor.x, anchor.y)])

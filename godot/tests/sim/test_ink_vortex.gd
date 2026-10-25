@@ -40,7 +40,7 @@ func _kinds(game: GameState, kind: GameEvent.Kind) -> Array[GameEvent]:
 ## A game with a second spawn source and a Blot spire, where a foe of the second road stands on
 ## the shared main road. Returns the scene, or null when this seed has no such road.
 func _two_road_scene(map_seed: int) -> TowerFireKit.Scene:
-	var probe := Game.create(map_seed)
+	var probe := Game.create_on_strip_valley(map_seed)
 	if probe.routes.size() < 2 or probe.random_lanes:
 		return null
 	var main_join: float = (

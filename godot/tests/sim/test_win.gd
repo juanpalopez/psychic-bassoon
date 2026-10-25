@@ -9,7 +9,7 @@ const PROFILES := preload("res://content/bot_profiles.gd")
 ## A game one clear away from `wave`: it is running that wave with nothing left
 ## to fight, so the next tick settles it.
 func _about_to_clear(wave: int) -> GameState:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.wave = wave
 	game.running = true
 	return game
@@ -28,7 +28,7 @@ func test_the_win_wave_is_in_the_content() -> void:
 
 
 func test_a_new_game_is_not_won() -> void:
-	assert_false(Game.create(1).won)
+	assert_false(Game.create_on_strip_valley(1).won)
 
 
 func test_clearing_the_win_wave_wins_once_and_pays_its_bonus() -> void:

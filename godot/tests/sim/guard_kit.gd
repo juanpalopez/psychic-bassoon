@@ -5,7 +5,7 @@ extends RefCounted
 
 ## A game with Buttons to spare and a Guard Tent on its first socket.
 static func game_with_tent(map_seed: int = 1) -> GameState:
-	var game := Game.create(map_seed)
+	var game := Game.create_on_strip_valley(map_seed)
 	game.buttons = 5000
 	var anchor := game.map.sockets[0]
 	GameTestKit.run(game, [Command.build("guardTent", anchor.x, anchor.y)])
