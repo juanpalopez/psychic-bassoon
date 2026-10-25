@@ -118,3 +118,31 @@ func _check_no_edge(board: Board) -> void:
 					rect.encloses(seen),
 					"aspect %.2f zoom %.1f sees %s past %s" % [aspect, rig.zoom, seen, rect]
 				)
+
+
+## The lead of a route that starts at a corner runs the way the road bed comes in (the first step
+## of the walked route, which opens with a point off the board), not the way its first cell step
+## would suggest: seed 27's feeder steps from (39, 0) to (38, 0) but comes in from above (#517).
+func test_a_corner_feeders_lead_runs_out_the_way_the_road_comes_in() -> void:
+	var field := TerrainField.from_map(MapGen.generate_layout_valley(27))
+	assert_eq(field.lead_directions[1], Vector2i(0, -1))
+
+
+func test_every_lead_agrees_with_the_first_step_of_its_walked_route() -> void:
+	for map_seed in range(1, 61):
+		var field := TerrainField.from_map(MapGen.generate_layout_valley(map_seed))
+		var starts := {}
+		var lead := 0
+		for index in field.routes.size():
+			var start: Vector2i = field.map.routes[index][0]
+			if starts.has(start):
+				continue
+			starts[start] = true
+			var line := field.routes[index]
+			var step := Vector2(line.xs[0] - line.xs[1], line.ys[0] - line.ys[1])
+			var out := Vector2i(0, 1 if step.y > 0.0 else -1)
+			if absf(step.x) > absf(step.y):
+				out = Vector2i(1 if step.x > 0.0 else -1, 0)
+			assert_eq(field.lead_directions[lead], out, "seed %d route %d" % [map_seed, index])
+			lead += 1
+		assert_eq(field.lead_directions.size(), lead, "seed %d" % map_seed)

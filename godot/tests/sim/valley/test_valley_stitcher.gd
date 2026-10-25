@@ -102,3 +102,15 @@ func test_a_section_that_never_passes_gives_up_with_an_error() -> void:
 func test_every_seed_of_a_sweep_gives_a_valley() -> void:
 	for seed in range(1, 201):
 		assert_not_null(MapGen.generate_valley(seed), "seed %d" % seed)
+
+
+func test_a_block_with_road_on_a_cell_that_is_not_its_anchor_is_on_the_road() -> void:
+	var map := GameMap.new()
+	map.cols = 6
+	map.rows = 6
+	map.footprint = 2
+	map.tiles = MapGen._tiles_for([], 6, 6)
+	map.tiles[3][3] = GameMap.Tile.ROAD
+	assert_true(ValleyStitcher._on_road(map, Vector2i(2, 2)), "road on the block's far corner")
+	assert_true(ValleyStitcher._on_road(map, Vector2i(3, 3)), "road on the anchor")
+	assert_false(ValleyStitcher._on_road(map, Vector2i(4, 4)), "a block clear of the road")

@@ -297,7 +297,8 @@ func _lay_leads() -> void:
 ## The way route `index` comes in from its start, as the road bed draws it: along the first step of
 ## its walked line, which a route built from a curve opens with a point off the board (a feeder
 ## from a corner may step along the edge in its cells and still come in across it); `fallback`
-## (its first step in cells) when there is no such line.
+## (its first step in cells) when there is no such line. It assumes `routes[index]` pairs with
+## `map.routes[index]`, which holds for `for_map` and for the game's routes in the same order.
 func _entering(index: int, fallback: Vector2i) -> Vector2i:
 	if index >= routes.size() or routes[index].xs.size() < 2:
 		return fallback

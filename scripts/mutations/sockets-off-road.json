@@ -1,0 +1,23 @@
+[
+  {
+    "name": "the lead ignores the walked route",
+    "file": "render/diorama/terrain_field.gd",
+    "old": "\tif index >= routes.size() or routes[index].xs.size() < 2:",
+    "new": "\tif true:",
+    "tests": ["test_diorama_layout"]
+  },
+  {
+    "name": "the road check looks at the anchor cell only",
+    "file": "sim/map/valley/valley_stitcher.gd",
+    "old": "\tfor dy in map.footprint:\n\t\tfor dx in map.footprint:\n\t\t\tif map.tiles[anchor.y + dy]",
+    "new": "\tfor dy in 1:\n\t\tfor dx in 1:\n\t\t\tif map.tiles[anchor.y + dy]",
+    "tests": ["test_valley_stitcher"]
+  },
+  {
+    "name": "the stitcher never rejects a socket on the road",
+    "file": "sim/map/valley/valley_stitcher.gd",
+    "old": "\t\t\tproblems = _road_problems(map, results)",
+    "new": "\t\t\tproblems = []",
+    "tests": ["test_layout_valley_sockets_off_road"]
+  }
+]
