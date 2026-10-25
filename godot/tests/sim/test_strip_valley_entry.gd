@@ -13,6 +13,9 @@ func test_the_entry_plays_the_strip_valley_with_the_knight() -> void:
 		assert_eq([game.map.cols, game.map.rows], [32, 20], "seed %d" % map_seed)
 		assert_eq(game.map.path, strip.path, "seed %d" % map_seed)
 		assert_eq(game.map.foe_pace, 1.0)
+		assert_eq(
+			game.route.total, Route.build_curved(strip.path).total, "the curve of the grid path"
+		)
 		assert_not_null(game.hero, "seed %d keeps the Knight" % map_seed)
 
 

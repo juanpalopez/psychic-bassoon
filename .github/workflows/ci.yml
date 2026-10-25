@@ -213,18 +213,20 @@ jobs:
           # 13 s on the runner (PR #342; 14.5 s of CPU, 41 to 46 s wall in a busy 2-core
           # container), so the budget is about 4.5 times the runner's time: it catches a sim
           # that got several times slower, not noise (docs/BALANCE.md). Since #458 the game
-          # board is the 40 by 24 layout valley at half pace, where the mix clears wave 20 on
-          # none of seeds 1 to 12 inside the bot's thirty minutes, so this plays the spool-only
-          # profile on seed 5 (it wins with 20 Heartstone health; spoolOnly also wins 3, 7 and 8)
+          # board is the 40 by 24 layout valley at half pace, where a game of the mix does not
+          # clear wave 20 inside the bot's thirty minutes on seeds 1 to 12. So this plays the
+          # guard mix on seed 7 (it builds Guard Tents and a Mess Tent, so the barracks, beam and
+          # spec ticks are timed too) and requires that the game ENDED, the Heartstone lost, before
+          # the thirty minute cap: its row says fewer than 30.0 minutes (24.8 measured, 10 s wall)
           BUDGET_SECONDS: "60"
         run: |
           start=$SECONDS
           "$GODOT" --headless --path godot -s tools/balance_run.gd -- \
-            --seeds=5 --profiles=spoolOnly --waves=20 | tee game.log
+            --seeds=7 --profiles=guardMix --waves=20 | tee game.log
           elapsed=$((SECONDS - start))
           echo "A whole bot game took ${elapsed} s (budget ${BUDGET_SECONDS} s)"
-          if ! grep -q "median waves cleared: 20" game.log; then
-            echo "::error::The bot game did not reach wave 20"
+          if ! awk '$1 == "guardMix" && $2 == 7 && $4 > 0 && $NF < 30.0 { found = 1 } END { exit !found }' game.log; then
+            echo "::error::The bot game did not end (the Heartstone did not fall) inside the bot's thirty minutes"
             exit 1
           fi
           if [ "$elapsed" -gt "$BUDGET_SECONDS" ]; then

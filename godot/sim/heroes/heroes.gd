@@ -71,7 +71,7 @@ static func whirl(game: GameState, command: Command) -> void:
 	if hero.ability_cooldown > RULES.TIMER_EPSILON:
 		return Game.reject(game, command, GameEvent.RejectReason.ABILITY_COOLING_DOWN)
 	var whirl: Dictionary = HEROES.DEFS[hero.type].blade_whirl
-	var reach: float = float(whirl.radius) + hero.radius + game.map.reach_margin()
+	var reach: float = float(whirl.radius) + hero.radius
 	# pick them all before the first blow, which can split a foe or remove one
 	var hit: Array[Foe] = []
 	for foe in game.foes:

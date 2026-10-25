@@ -7,8 +7,8 @@ const HEROES := preload("res://content/heroes.gd")
 const TOWERS := preload("res://content/towers.gd")
 
 
-func _game() -> GameState:
-	var game := Game.create_on_strip_valley(7)
+func _game(on_layout: bool = false) -> GameState:
+	var game := Game.create(7) if on_layout else Game.create_on_strip_valley(7)
 	# a walking hero holds no foe, so only the whirl hurts them; at speed 0 it stays put
 	game.hero.speed = 0.0
 	game.hero.path = [game.hero.cell + Vector2i(1, 0)] as Array[Vector2i]
@@ -136,3 +136,44 @@ func test_the_whirl_can_finish_a_foe_and_pays_its_reward() -> void:
 	for event in events:
 		killed = killed or event.kind == GameEvent.Kind.FOE_KILLED
 	assert_true(killed)
+
+
+## Adjacent is the whirl's radius plus the Knight's and the foe's bodies, from the centres, on
+## every board: the road band's reach margin (1.0 on the layout valley) does not widen it.
+func test_the_reach_is_the_radii_and_not_the_road_band() -> void:
+	var whirl: Dictionary = HEROES.DEFS[HEROES.KNIGHT].blade_whirl
+	for on_layout in [false, true]:
+		var label := "layout" if on_layout else "strip"
+		var probe := _game(on_layout)
+		assert_eq(probe.map.reach_margin() > 0.0, on_layout, label)
+		var edge: float = (
+			float(whirl.radius) + probe.hero.radius + _foe_near(probe, "corrugatedOrc", 0.0).radius
+		)
+		var inside := _game(on_layout)
+		var near := _foe_near(inside, "corrugatedOrc", edge - 0.01)
+		var near_hp := near.hp
+		assert_eq(_reason(_whirl(inside)), -1, label + ": just inside")
+		assert_lt(near.hp, near_hp, label + ": just inside is hit")
+		var outside := _game(on_layout)
+		var far := _foe_near(outside, "corrugatedOrc", edge + 0.01)
+		var far_hp := far.hp
+		assert_eq(
+			_reason(_whirl(outside)), GameEvent.RejectReason.NO_TARGET, label + ": just outside"
+		)
+		assert_eq(far.hp, far_hp, label + ": just outside is spared")
+
+
+## The cooldown is a clock of the Knight and runs while it is fallen too (`Heroes.fight` counts it
+## down before it looks at `alive`), so a Knight that returns after 15 seconds can whirl at once.
+func test_the_cooldown_keeps_counting_while_the_knight_is_fallen() -> void:
+	var game := _game()
+	var foe := _foe_near(game, "corrugatedOrc", 0.6)
+	foe.hp = 100000.0
+	foe.max_hp = 100000.0
+	_whirl(game)
+	assert_gt(game.hero.ability_cooldown, 0.0)
+	game.hero.alive = false
+	game.hero.respawn_timer = 1000.0
+	for i in 460:
+		Game.tick(game)
+	assert_eq(game.hero.ability_cooldown, 0.0)

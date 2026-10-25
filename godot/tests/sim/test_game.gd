@@ -31,6 +31,9 @@ func test_create_builds_the_map_and_every_route() -> void:
 	assert_eq(game.route, game.routes[0])
 	# the game board walks the curve through the road's corners, which is shorter than the
 	# grid path (#321)
+	# the layout valley's own composed curve (`Route.for_map`; `Route.build_curved` of the grid path
+	# is the strip valley's and the old boards')
+	assert_eq(game.route.total, Route.for_map(map)[0].total)
 	assert_lt(game.route.total, 0.95 + float(map.path.size() - 1))
 
 
