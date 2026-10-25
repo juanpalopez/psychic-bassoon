@@ -54,6 +54,7 @@ var _stress_foes := 0
 var _layout_valley := false
 var _fps := FpsOverlay.new()
 var _arrows := EdgeIndicators.new()
+var _minimap := Minimap.new()
 var _guide := GuidePanel.new()
 var _auto := AutoWave.new()
 var _progress := IntroProgress.default()
@@ -125,6 +126,8 @@ func _ready() -> void:
 	_flow.finished.connect(_on_intro_finished)
 	$Hud.add_child(_card)
 	$Hud.add_child(_arrows)
+	$Hud.add_child(_minimap)
+	_minimap.jump_requested.connect(_on_minimap_jump)
 	$Hud.add_child(_fps)
 	_read_phone_check_params()
 	add_child(_glow)
@@ -198,6 +201,7 @@ func _process(delta: float) -> void:
 	_update_launch_button()
 	_sync_intro()
 	_arrows.show_state(_game, _camera)
+	_minimap.refresh(_rig.pan, delta)
 	_menu.set_buttons(_game.buttons)
 	_close_if_zoomed_out()
 	_refresh_panel()
@@ -397,6 +401,14 @@ func _fly_to_socket(anchor: Vector2i) -> void:
 	_fly_target = anchor
 
 
+## A tap or drag on the minimap puts the camera over that spot, at the zoom it has.
+func _on_minimap_jump(world: Vector2) -> void:
+	# the build bar and tower panel belong to a socket on screen
+	if _selected != BoardSpace.NO_CELL:
+		select_cell(BoardSpace.NO_CELL)
+	_rig.show_point(Vector3(world.x, 0.0, world.y), _rig.zoom)
+
+
 func _on_flight_ended(arrived: bool) -> void:
 	var target := _fly_target
 	_fly_target = BoardSpace.NO_CELL
@@ -502,6 +514,7 @@ func _start(map_seed: int) -> void:
 	_board.show_map(_game.map, _game.routes)
 	_clock = Clock.new()
 	_foes.reset()
+	_minimap.bind(_game)
 	_hold.reset()
 	_guards.reset()
 	_hero_selected = false
@@ -685,6 +698,8 @@ func _start_intro() -> void:
 	# started from the Menu: close it, or the tour's first tap on the board only closes it
 	_menu_button.button_pressed = false
 	_flow.start()
+	# the tour speaks in the minimap's margin
+	_minimap.visible = false
 	_tell_page_tour(true)
 
 
@@ -699,6 +714,7 @@ func _on_intro_finished(_skipped: bool) -> void:
 	_glow.hide_all()
 	_glow_shown = false
 	_intro.refresh()
+	_minimap.visible = true
 	_tell_page_tour(false)
 
 
