@@ -71,11 +71,6 @@ func test_a_foe_on_the_half_pace_layout_map_walks_half_the_content_speed() -> vo
 	assert_eq(FoeSpawner.spawn(game, "scrapGoblin", 1, 0).speed, content * 0.5)
 
 
-func test_the_pace_is_off_until_the_speed_sweep() -> void:
-	# Remove this pin when the #460 sweep chooses FOE_PACE; the stitcher tests above do not need it.
-	assert_eq(LAYOUT.FOE_PACE, 1.0)
-
-
 func test_a_spawned_foe_walks_the_paced_speed() -> void:
 	for type in FOES.DEFS:
 		var game := Game.create_on_strip_valley(1)
