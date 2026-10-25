@@ -129,6 +129,7 @@ static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) ->
 	for bridge in map.bridges:
 		cuts.append(_bed_cut(bridge, map.road_width))
 	var yard := heart_yard(map, height_fn)
+	var wet := _wet_cells(map)
 	var ribbon := Ribbon.new()
 	for i in lines.size():
 		var others: Array[PackedVector2Array] = []
@@ -139,7 +140,17 @@ static func bed_mesh(map: GameMap, routes: Array[Route], height_fn: Callable) ->
 		var along := 0.0
 		for piece in _clip_out(lines[i], cuts):
 			along = _ribbon(
-				ribbon, piece, i, along, drop, others, yard, map.seed, map.road_width, height_fn
+				ribbon,
+				piece,
+				i,
+				along,
+				drop,
+				others,
+				yard,
+				map.seed,
+				map.road_width,
+				height_fn,
+				wet
 			)
 	if yard.z > 0.0:
 		var ground := float(height_fn.call(map.path[map.path.size() - 1]))
@@ -382,7 +393,8 @@ static func _ribbon(
 	yard: Vector3,
 	map_seed: int,
 	road_width: float,
-	height_fn: Callable
+	height_fn: Callable,
+	wet: Dictionary
 ) -> float:
 	var half := road_width / 2.0
 	var open_reach := half + LOOKS.ROAD_WOBBLE
@@ -405,6 +417,8 @@ static func _ribbon(
 			half + _wobble(along, line, map_seed, SALT_LEFT),
 			half + _wobble(along, line, map_seed, SALT_RIGHT),
 		]
+		widths[0] = _dry_width(p, left, widths[0], wet)
+		widths[1] = _dry_width(p, -left, widths[1], wet)
 		# across from the left outer edge to the right one: edge, lip crest, bed edge, then back out
 		var across: Array[float] = [
 			widths[0],
@@ -433,6 +447,35 @@ static func _ribbon(
 			var b := a + 6
 			ribbon.quad(a, a + 1, b + 1, b)
 	return along
+
+
+## The river cells a bed must not reach over (a bridge's cells are cut out of the bed anyway):
+## on a map with a road band only. The band is wider than a cell, so beside a river that bends
+## along the road its edge would hang over the water by up to half a cell (#461); the old bed
+## stayed inside its road cells, and a map without a band keeps drawing exactly as it did.
+static func _wet_cells(map: GameMap) -> Dictionary:
+	var wet := {}
+	if map.reach_band <= 0.0:
+		return wet
+	for cell in map.river:
+		wet[cell] = true
+	for bridge in map.bridges:
+		wet.erase(bridge.cell)
+	return wet
+
+
+## `width` out from `from` along `direction`, cut short where the line enters a wet cell (but
+## never narrower than the lip is wide, so the cross section keeps its shape).
+static func _dry_width(from: Vector2, direction: Vector2, width: float, wet: Dictionary) -> float:
+	if wet.is_empty():
+		return width
+	var reach := LOOKS.BED_DRY_STEP
+	while reach < width:
+		var at := from + direction * reach
+		if wet.has(Vector2i(floori(at.x), floori(at.y))):
+			return maxf(reach - LOOKS.BED_DRY_STEP, LOOKS.LIP_WIDTH + LOOKS.LIP_CREST)
+		reach += LOOKS.BED_DRY_STEP
+	return width
 
 
 ## True when the lip at `crest` opens: another road or the Heartstone's yard comes in there.
