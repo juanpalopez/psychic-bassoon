@@ -168,3 +168,28 @@ Measured over seeds 1..300, before (32 by 20) and after (40 by 24, PR #485 and i
 - **Design note:** the layout road is still far shorter than the strip road (89 cells against 150). Turning the layout valley on as the game board (#458) needs balance work before it can switch.
 - **Finding:** `MAX_STRAIGHT` went from 12 to 15. At 12, 793 of the 800 draws on seeds 1..40 were rejected, so the segment composer could not fill the larger grid.
 
+
+## 11. Result of the fork (#481, 2026-10-25)
+
+The layout valley forks into two lanes (`FORK_LANES`): both leave the Sunken Meadow's entry gate, the lower one crosses the river on its own bridge 4 to 5 rows below the upper one, and they meet at the Crossing's exit. Foes pick a lane 50/50 (#493), guards post on the branch of their bridge (#500), and the hero-only bridge is gone (#521). The decision is `docs/lessons/2026-10-25-fork-two-lanes.md`.
+
+**The first shape failed.** A sideways jog inside the Crossing (the `JOG` template, #494, now unused) had no room: the west bank is 2 to 7 cells (median 4), the template is 9.5 cells long and cannot shrink, so the bank needs about 11.5 cells, not about 7. Fit within `MAX_ATTEMPTS` 60, seeds 1..300 (stop report on #495, probe `fit_probe.gd`): today's numbers 0 of 300; the memo's numbers (`LEFT_X` 9, Meadow gate (5, 6)) 44 of 300 at 31.2 attempts a layout; `LEFT_X` 9, gate (3, 4) 264 of 300 at 22.8; `LEFT_X` 8, gate (3, 4) 285 of 300 at 17.4; best, with `MIDDLE_Y` 9 as well, 293 of 300 at 15.1 attempts, about 15 times slower generation than today's and over the time target.
+
+**Shape (c) fits.** Two lanes through the Meadow and the Crossing, from the existing templates, no cut or river moved: fit 300 of 300 on seeds 1..300, mean 1.27 draws (1.12 without the fork), worst 4 (#510). Two diagonal arcs `g` rows apart are only about `g / sqrt(2)` cells apart, so the lane gap rules count cells, not rows.
+
+Time under fire, centre line, Scrap Goblin, median over seeds 1..300 (`tools/measure_road_time.gd`, strip valley 63.9 s), with the Crossing's blocks at 5 to 6 (#518):
+
+| | Main road (lane 0) | Lower lane (lane 1) |
+| --- | --- | --- |
+| Fork stitched (#515) | 32.6 s (0.510) | 28.1 s (0.440) |
+| With sockets reaching both lanes (#518) | 32.0 s (about 0.50) | 31.0 s (about 0.49) |
+| Seeds 3001..3300 (#518) | 31.8 s | 31.4 s |
+
+- **The gate of section 7 is still open.** Both lanes sit at about 0.5 of the strip valley against the 0.90 to 1.10 band. The fork's bar was no regression per lane (the main road moved 0.6 s, 2 %); the band is #460's job, and it must lengthen both lanes.
+- **Cost of the second lane:** a lane takes a share of a fixed block budget, so reaching the lower lane cost the main road 2 s until the Crossing got one more block (`docs/lessons/2026-10-25-reaching-a-lane-costs-blocks-on-the-other.md`).
+- **Generation time** (`ValleyLayout.generate`, stitch included): about 100 ms mean, slowest 197 to 317 ms (#521). Stitch 300 of 300 on 1..300 and 3001..3300, hero graph included.
+- **`HERO_CAPS`** are 37, 25 and 39 for the Broken Ridge, the Crossing and the Heartkeep Approach (measured worst 33, 21 and 35, plus 4; #521).
+- **Sockets** are 24 to 30 on seeds 1..300, and 31 on two of 3001..3300 (seeds 3063 and 3218). CLAUDE.md says 21 to 30 for the sectioned valley. Whether that line becomes "21 to 31" is an open owner question; this section does not decide it.
+- **Render:** `RoadBedBuilder.crossings` draws the two crossings with no new code; `test_diorama_fork.gd` holds both decks, the scatter off them, the lower lane's bed and the diorama caps for six seeds.
+- **Budget finding:** with the second lane on, seeds 17 and 22 went over the 40,000 terrain and road bed cap (40,248 and 40,437 before #520; the fork adds about 1,000 bed triangles). The cap was not touched: a forked map thins its road bed further (`FORK_ROAD_STEP` 1.25 cells, against 0.75, in `content/valley/road_bed_rules.gd`). The drawn line stays within 0.038 cell of the finer one on six seeds (the guard is 0.05), and seeds 1..160 are now all under the cap (worst 39,740; seed 17 at 39,428, seed 22 at 39,581). Beds of the strip valley, the game board and an unforked layout are byte-identical (hash of the bed mesh, 10 maps).
+- **Open:** the layout valley is still not the game board (#458); the sockets-on-road-cells fix (#517) is merged (#520).
