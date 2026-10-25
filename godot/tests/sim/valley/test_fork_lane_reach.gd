@@ -173,3 +173,39 @@ func test_the_placer_covers_a_bend_of_the_lower_lane_and_reaches_both_lanes() ->
 			assert_true(near, "seed %d: the bend at %s is covered" % [seed, bend])
 		var own := SectionSockets.own_branch(result)
 		assert_gte(SectionSockets.blocks_reaching(result, own), LAYOUT.BRANCH_MIN_BLOCKS)
+
+
+func _bridged(blocks: Array[Vector2i]) -> SectionResult:
+	var result := _lane_result()
+	result.sockets = blocks
+	for on_branch in [false, true]:
+		var bridge := GameMap.Bridge.new()
+		bridge.cell = Vector2i(8, 12 if on_branch else 4)
+		bridge.on_branch = on_branch
+		result.bridges.append(bridge)
+	return result
+
+
+func _lane_text(result: SectionResult) -> String:
+	var found := ValleyChecks._lane_reach_problems(0, result)
+	return " | ".join(found.map(func(p: ValleyChecks.Problem) -> String: return p.text))
+
+
+func test_exactly_one_block_on_the_lower_lane_fails_and_two_pass() -> void:
+	# (8, 5) is beside the upper bridge, (8, 13) beside the lower one
+	var one := _bridged([Vector2i(8, 5), Vector2i(8, 13)] as Array[Vector2i])
+	assert_string_contains(_lane_text(one), "1 socket blocks reach the lower lane")
+	var two := _bridged([Vector2i(8, 5), Vector2i(8, 13), Vector2i(12, 13)] as Array[Vector2i])
+	assert_eq(_lane_text(two), "")
+
+
+func test_a_block_at_only_one_bridge_fails_for_the_other() -> void:
+	var lower_only := _bridged([Vector2i(8, 13), Vector2i(12, 13)] as Array[Vector2i])
+	assert_string_contains(_lane_text(lower_only), "upper bridge")
+	assert_false(_lane_text(lower_only).contains("lower bridge"))
+	# two lane blocks far from the lower bridge, one beside the upper bridge
+	var upper_only := _bridged(
+		[Vector2i(8, 5), Vector2i(0, 13), Vector2i(16, 13)] as Array[Vector2i]
+	)
+	assert_string_contains(_lane_text(upper_only), "lower bridge")
+	assert_false(_lane_text(upper_only).contains("upper bridge"))

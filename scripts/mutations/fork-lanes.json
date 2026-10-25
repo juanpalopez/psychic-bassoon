@@ -61,5 +61,19 @@
     "old": "\t\t\tif centre_gap(anchor, cell) <= reach:\n\t\t\t\treturn true",
     "new": "\t\t\tif centre_gap(anchor, cell) <= reach + 100.0:\n\t\t\t\treturn true",
     "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "BRANCH_MIN_BLOCKS 2 -> 1",
+    "file": "content/valley/layout_rules.gd",
+    "old": "const BRANCH_MIN_BLOCKS := 2",
+    "new": "const BRANCH_MIN_BLOCKS := 1",
+    "tests": ["test_fork_lane_reach"]
+  },
+  {
+    "name": "only the lower bridge is checked",
+    "file": "sim/map/valley/valley_checks.gd",
+    "old": "for on_branch in [false, true]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "new": "for on_branch in [true]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "tests": ["test_fork_lane_reach"]
   }
 ]
