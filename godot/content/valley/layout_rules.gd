@@ -83,9 +83,10 @@ const LANE_GAP := 5
 const LANE_RUN := 12
 
 ## The share of its content speed every foe walks on the layout valley, set on its map by the
-## stitcher (`GameMap.foe_pace`). Applied to the layout valley only; the value is chosen by the
-## #460 speed sweep. 1.0 changes nothing.
-const FOE_PACE := 1.0
+## stitcher (`GameMap.foe_pace`). Applied to the layout valley only. 0.5 puts the median time under
+## fire at 0.91 (main road) and 0.98 (lower lane) of the strip valley's, from the #460 sweep
+## (`docs/lessons/2026-10-25-layout-pace.md`). 1.0 changes nothing.
+const FOE_PACE := 0.5
 
 ## The fork (#481, `docs/lessons/2026-10-24-fork-wide-road-bigger-map.md`): the road forks at the
 ## Meadow's entry gate into two lanes, an upper one (today's road) and a lower one, that cross

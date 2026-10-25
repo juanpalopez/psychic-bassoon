@@ -1,11 +1,18 @@
 ## The per-map foe pace (#458, #460): every foe of a map walks `foe_pace` times its content speed,
-## applied once when it spawns. 1.0 on every map until the layout valley's content number is
-## chosen, so no board moves. The slows and buffs stack on the paced speed, and nothing predicts a
-## foe's place from content speed: tower fire, guards and zones read the foe's own `speed`.
+## applied once when it spawns. 1.0 on every map but the layout valley, whose content number is 0.5
+## (`docs/lessons/2026-10-25-layout-pace.md`), so no other board moves.
+## The slows and buffs stack on the paced speed, and nothing predicts a foe's place from content
+## speed: tower fire, guards and zones read the foe's own `speed`.
 extends GutTest
 
 const LAYOUT := preload("res://content/valley/layout_rules.gd")
 const FOES := preload("res://content/foes.gd")
+
+
+func test_the_layout_valley_walks_at_half_pace() -> void:
+	assert_eq(
+		LAYOUT.FOE_PACE, 0.5, "chosen by the #460 sweep, docs/lessons/2026-10-25-layout-pace.md"
+	)
 
 
 func _walk_ticks(pace: float, type: String = "corrugatedOrc") -> int:
@@ -69,11 +76,6 @@ func test_a_foe_on_the_half_pace_layout_map_walks_half_the_content_speed() -> vo
 	var content := FoeStats.for_wave("scrapGoblin", 1).speed
 	assert_gt(content, 1.0, "a speed above 1.0 is sampled")
 	assert_eq(FoeSpawner.spawn(game, "scrapGoblin", 1, 0).speed, content * 0.5)
-
-
-func test_the_pace_is_off_until_the_speed_sweep() -> void:
-	# Remove this pin when the #460 sweep chooses FOE_PACE; the stitcher tests above do not need it.
-	assert_eq(LAYOUT.FOE_PACE, 1.0)
 
 
 func test_a_spawned_foe_walks_the_paced_speed() -> void:
