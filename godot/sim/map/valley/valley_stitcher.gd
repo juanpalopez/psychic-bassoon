@@ -10,14 +10,16 @@ const LAYOUT := preload("res://content/valley/layout_rules.gd")
 
 
 ## The valley for a seed, or null (with an error, unless `quiet`) when a section keeps failing its
-## checks. `layout` replaces the strip plan.
+## checks. `layout` replaces the strip plan. `foe_pace` is the layout valley's pace (a strip
+## valley keeps 1.0); callers keep the content default, a test passes its own.
 static func build(
 	seed: int,
 	cols: int,
 	rows: int,
 	sections: Array[ValleySection] = ValleySections.all(),
 	layout: ValleyPlan = null,
-	quiet: bool = false
+	quiet: bool = false,
+	foe_pace: float = LAYOUT.FOE_PACE
 ) -> GameMap:
 	var plan := layout if layout != null else ValleyPlan.create(seed, cols, rows)
 	var attempts: Array[int] = []
@@ -31,7 +33,7 @@ static func build(
 		if problems.is_empty():
 			map = _assemble(plan, results)
 			if layout != null:
-				map.foe_pace = LAYOUT.FOE_PACE
+				map.foe_pace = foe_pace
 			problems = _road_problems(map, results)
 		if problems.is_empty():
 			return map

@@ -21,7 +21,22 @@ func _walk_ticks(pace: float, type: String = "corrugatedOrc") -> int:
 	return ticks
 
 
+func _layout_map(pace: float = LAYOUT.FOE_PACE) -> GameMap:
+	var layout := ValleyLayout.generate(1, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS)
+	return ValleyStitcher.build(
+		1,
+		ValleyLayout.LAYOUT.COLS,
+		ValleyLayout.LAYOUT.ROWS,
+		ValleyLayout.sections(),
+		layout,
+		true,
+		pace
+	)
+
+
 func test_pace_is_one_on_every_board() -> void:
+	# The default board and MapGen.game_map are not the layout valley yet: only the layout valley
+	# (Game.create_on_layout_valley) gets a pace, until the #458 flip.
 	assert_eq(GameMap.new().foe_pace, 1.0)
 	for map_seed in [1, 2, 3]:
 		assert_eq(Game.create(map_seed).map.foe_pace, 1.0)
@@ -31,11 +46,34 @@ func test_pace_is_one_on_every_board() -> void:
 	assert_eq(TowerFireKit.landscape(1).map.foe_pace, 1.0)
 
 
-func test_the_layout_valley_takes_its_pace_from_content() -> void:
-	var map := MapGen.generate_layout_valley(1)
-	assert_not_null(map)
-	assert_eq(map.foe_pace, LAYOUT.FOE_PACE)
-	assert_eq(LAYOUT.FOE_PACE, 1.0, "off until the speed sweep chooses a number")
+func test_the_layout_valley_takes_its_pace_from_the_stitcher() -> void:
+	var half := _layout_map(0.5)
+	assert_not_null(half)
+	assert_gt(half.routes.size(), 2, "a forked layout map")
+	assert_eq(half.foe_pace, 0.5)
+	assert_eq(_layout_map().foe_pace, LAYOUT.FOE_PACE, "callers keep the content default")
+	assert_eq(MapGen.generate_layout_valley(1).foe_pace, LAYOUT.FOE_PACE)
+
+
+func test_a_strip_valley_keeps_its_pace_whatever_is_passed() -> void:
+	var strip := ValleyStitcher.build(1, 32, 20, ValleySections.all(), null, true, 0.5)
+	assert_not_null(strip)
+	assert_eq(strip.foe_pace, 1.0)
+
+
+func test_a_foe_on_the_half_pace_layout_map_walks_half_the_content_speed() -> void:
+	var game := Game.from_map(1, _layout_map(0.5), false, true)
+	for type in FOES.DEFS:
+		var foe := FoeSpawner.spawn(game, type, 1, 0)
+		assert_eq(foe.speed, FoeStats.for_wave(type, 1).speed * 0.5, type)
+	var content := FoeStats.for_wave("scrapGoblin", 1).speed
+	assert_gt(content, 1.0, "a speed above 1.0 is sampled")
+	assert_eq(FoeSpawner.spawn(game, "scrapGoblin", 1, 0).speed, content * 0.5)
+
+
+func test_the_pace_is_off_until_the_speed_sweep() -> void:
+	# Remove this pin when the #460 sweep chooses FOE_PACE; the stitcher tests above do not need it.
+	assert_eq(LAYOUT.FOE_PACE, 1.0)
 
 
 func test_a_spawned_foe_walks_the_paced_speed() -> void:
