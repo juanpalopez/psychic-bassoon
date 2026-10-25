@@ -28,6 +28,59 @@ const PINS := {
 	],
 }
 
+## Planks to a crossing on the layout valley, where a crossing is two or three cells long (on the
+## strip valley's one cell crossings the rounding of the plank count cannot show).
+## seed -> plank tops counted inside each crossing's deck, in `RoadBedBuilder.crossings` order (a
+## plank on the deck's edge may not count, so these are pins, not the plank counts themselves).
+const PLANKS := {1: [23, 16], 2: [16, 16], 5: [16, 16]}
+
+
+## `Game.create` plays the strip valley until the layout valley becomes the game board (#458), so
+## the pin above is the game board's. At that flip this fails: re-point the board tests on purpose
+## and keep `create_on_strip_valley` as the pin of the unforked bed.
+func test_the_game_board_is_still_the_strip_valley() -> void:
+	for map_seed: int in PINS:
+		var board := Game.create(map_seed).map
+		var strip := Game.create_on_strip_valley(map_seed).map
+		var label := "seed %d" % map_seed
+		assert_eq([board.cols, board.rows, board.seed], [strip.cols, strip.rows, strip.seed], label)
+		assert_eq(board.tiles, strip.tiles, label + ": tiles")
+		assert_eq(board.sockets, strip.sockets, label + ": sockets")
+		assert_eq(board.river, strip.river, label + ": river")
+		assert_eq(board.routes, strip.routes, label + ": routes")
+		assert_eq(board.bridges.size(), strip.bridges.size(), label + ": bridges")
+		assert_eq(board.road_width, strip.road_width, label + ": road width")
+
+
+func test_a_layout_crossing_has_the_planks_it_had() -> void:
+	for map_seed: int in PLANKS:
+		var map := MapGen.generate_layout_valley(map_seed)
+		var field := TerrainField.from_map(map)
+		var top := Callable(field, "top_at")
+		var arrays := RoadBedBuilder.bridge_mesh(map, top).surface_get_arrays(0)
+		var vertices: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
+		var normals: PackedVector3Array = arrays[Mesh.ARRAY_NORMAL]
+		var origin := BoardSpace.point_to_world(0.0, 0.0)
+		var found: Array[int] = []
+		for run: Array in RoadBedBuilder.crossings(map):
+			var first: GameMap.Bridge = run[0]
+			var deck := RoadBedBuilder.deck_rect(first, map.road_width)
+			for bridge: GameMap.Bridge in run:
+				deck = deck.merge(RoadBedBuilder.deck_rect(bridge, map.road_width))
+			var height := RoadBedBuilder.deck_top(first, top)
+			var corners := 0
+			for i in vertices.size():
+				var sim := Vector2(vertices[i].x - origin.x, vertices[i].z - origin.z)
+				if (
+					normals[i].y > 0.99
+					and absf(vertices[i].y - height) < 1e-4
+					and deck.has_point(sim)
+				):
+					corners += 1
+			# a plank's top is two triangles
+			found.append(int(corners / 6.0))
+		assert_eq(found, PLANKS[map_seed], "planks per crossing, layout seed %d" % map_seed)
+
 
 func test_the_strip_valley_draws_its_road_bed_and_bridges_as_pinned() -> void:
 	for map_seed: int in PINS:

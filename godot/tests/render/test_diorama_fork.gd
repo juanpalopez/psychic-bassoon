@@ -4,6 +4,7 @@
 extends GutTest
 
 const RULES := preload("res://content/valley/bluewater_region_rules.gd")
+const LOOKS := preload("res://render/diorama/diorama_looks.gd")
 const DIORAMA_TEST := preload("res://tests/render/test_diorama.gd")
 ## A handful of layout seeds, seeds 124, 22 and 17 the ones nearest the terrain cap (#523: 135, 508
 ## and 572 triangles under it on seeds 1 to 200, as the forked bed is thinned).
@@ -161,6 +162,28 @@ func test_the_thinner_bed_stays_within_a_twentieth_of_a_cell_of_the_finer_line()
 		assert_lt(points_coarse, points_fine, "layout seed %d: fewer points" % map_seed)
 
 
+## The thinner bed's cut at a bridge (`_clip_out`) holds next to long chords: no bed vertex lies
+## inside a bridge cell, so no bed hangs over the gap (#523).
+func test_the_thinner_bed_stops_at_every_bridge() -> void:
+	for map_seed in SEEDS:
+		var board := _layout_board(map_seed)
+		var map := board.map
+		var field := board.diorama.field
+		var bed: PackedVector3Array = (
+			RoadBedBuilder
+			. bed_mesh(map, field.routes, Callable(field, "top_at"))
+			. surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+		)
+		var inset := Vector2(0.1, 0.1)
+		var inside := 0
+		for v in bed:
+			for bridge in map.bridges:
+				var cell := Rect2(Vector2(bridge.cell) + inset, Vector2.ONE - inset * 2.0)
+				if cell.has_point(_sim(v)):
+					inside += 1
+		assert_eq(inside, 0, "layout seed %d: bed vertices inside a bridge cell" % map_seed)
+
+
 ## The scatter keeps off the bed as it is drawn: the forked map's thinner (coarse) line, which lies
 ## up to 0.043 cell from the finer one the scatter keeps off (#523). A prop's footprint never
 ## reaches the bed's edge, wobble and keep-off left aside.
@@ -184,7 +207,7 @@ func test_the_scatter_keeps_clear_of_the_coarse_bed_edge() -> void:
 				nearest = minf(nearest, placement.at.distance_to(closest))
 			worst = minf(worst, nearest - half - placement.radius)
 			assert_gt(
-				nearest - half,
+				nearest - half - LOOKS.ROAD_WOBBLE,
 				placement.radius,
 				(
 					"layout seed %d: %s at %s reaches the bed"

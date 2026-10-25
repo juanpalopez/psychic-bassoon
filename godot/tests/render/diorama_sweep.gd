@@ -15,6 +15,7 @@ func sweep(first: int, last: int) -> void:
 	var worst_ground := 0
 	var worst_scenery := 0
 	var worst_surfaces := 0
+	var checked := 0
 	for map_seed in range(first, last + 1):
 		var board := Board.new()
 		board.build_on_ready = false
@@ -30,6 +31,7 @@ func sweep(first: int, last: int) -> void:
 		var surfaces := diorama.surface_count()
 		remove_child(board)
 		board.free()
+		checked += 1
 		worst_ground = maxi(worst_ground, ground)
 		worst_scenery = maxi(worst_scenery, scenery)
 		worst_surfaces = maxi(worst_surfaces, surfaces)
@@ -37,6 +39,7 @@ func sweep(first: int, last: int) -> void:
 		assert_lte(ground, DIORAMA_TEST.TERRAIN_TRIANGLES, label + ": terrain and road beds")
 		assert_lte(scenery, DIORAMA_TEST.SCENERY_TRIANGLES, label + ": scenery")
 		assert_lte(surfaces, DIORAMA_TEST.LAYOUT_SURFACES, label + ": surfaces")
+	assert_eq(checked, last - first + 1, "every seed from %d to %d was checked" % [first, last])
 	(
 		gut
 		. p(
