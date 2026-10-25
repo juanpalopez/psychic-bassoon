@@ -6,6 +6,7 @@ extends RefCounted
 const RULES := preload("res://content/map_rules.gd")
 const VALLEY := preload("res://content/valley/valley_rules.gd")
 const ROAD := preload("res://content/valley/road_rules.gd")
+const LAYOUT := preload("res://content/valley/layout_rules.gd")
 
 
 ## The valley for a seed, or null (with an error, unless `quiet`) when a section keeps failing its
@@ -29,6 +30,8 @@ static func build(
 		var map: GameMap = null
 		if problems.is_empty():
 			map = _assemble(plan, results)
+			if layout != null:
+				map.foe_pace = LAYOUT.FOE_PACE
 			problems = _road_problems(map, results)
 		if problems.is_empty():
 			return map
