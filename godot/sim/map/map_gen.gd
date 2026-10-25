@@ -110,21 +110,56 @@ static func generate_valley(seed: int) -> GameMap:
 
 
 ## The layout valley (#407, #458): six 2D regions the composed road crosses in turn, stitched with
-## the region classes. Null (with an error) when no layout draw passes its checks.
-static func generate_layout_valley(seed: int) -> GameMap:
-	var layout := ValleyLayout.generate(seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS)
+## the region classes. Null (with an error, unless `quiet`) when no layout draw passes its checks.
+static func generate_layout_valley(seed: int, quiet: bool = false) -> GameMap:
+	var layout := ValleyLayout.generate(
+		seed,
+		ValleyLayout.LAYOUT.COLS,
+		ValleyLayout.LAYOUT.ROWS,
+		ValleyLayout.LAYOUT.FORK_LANES,
+		quiet
+	)
 	if layout == null:
 		return null
 	return ValleyStitcher.build(
-		seed, ValleyLayout.LAYOUT.COLS, ValleyLayout.LAYOUT.ROWS, ValleyLayout.sections(), layout
+		seed,
+		ValleyLayout.LAYOUT.COLS,
+		ValleyLayout.LAYOUT.ROWS,
+		ValleyLayout.sections(),
+		layout,
+		quiet
 	)
 
 
-## The map the game plays on its default board: the sectioned valley, or the route-first map
-## when the valley's sections cannot be made to pass. `Game.create` and the board both use it.
+## The map the game plays on its default board (#458): the layout valley with the composed road,
+## else the strip valley, else the route-first map. A builder that gives up warns (never an
+## error: the checked headless run fails on one) and the next is asked. `Game.create` and the
+## board both use it.
 static func game_map(seed: int) -> GameMap:
-	var valley := generate_valley(seed)
-	return valley if valley != null else generate(seed)
+	var builders: Array[Callable] = [
+		func(s: int) -> GameMap: return generate_layout_valley(s, true),
+		func(s: int) -> GameMap: return generate_valley_quietly(s),
+		func(s: int) -> GameMap: return generate(s),
+	]
+	return first_map(seed, builders)
+
+
+## The strip valley without an error when it gives up (the caller has the route-first map next).
+static func generate_valley_quietly(seed: int) -> GameMap:
+	return ValleyStitcher.build(
+		seed, RULES.GRID_COLS, RULES.GRID_ROWS, ValleySections.all(), null, true
+	)
+
+
+## The first map one of `builders` (each takes the seed) gives, asking them in order and warning
+## at each fallback; null when none does.
+static func first_map(seed: int, builders: Array[Callable]) -> GameMap:
+	for index in builders.size():
+		var map: GameMap = builders[index].call(seed)
+		if map != null:
+			return map
+		push_warning("map seed %d: builder %d gave no map, falling back" % [seed, index])
+	return null
 
 
 ## A map for these routes (in the tall grid when `wide`), before its sockets are placed.

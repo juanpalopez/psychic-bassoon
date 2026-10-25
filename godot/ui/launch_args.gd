@@ -1,16 +1,16 @@
-## The command-line user arguments of a desktop run (`godot --path godot -- --layout-valley
+## The command-line user arguments of a desktop run (`godot --path godot -- --strip-valley
 ## --seed=7`). Anything else is ignored.
 class_name LaunchArgs
 extends RefCounted
 
-const LAYOUT_VALLEY := "--layout-valley"
+const STRIP_VALLEY := "--strip-valley"
 const SEED := "--seed="
 const MAX_SEED_LENGTH := 16
 
 
-## Whether the layout valley is asked for.
-static func layout_valley(args: PackedStringArray) -> bool:
-	return args.has(LAYOUT_VALLEY)
+## Whether the 32 by 20 strip valley (the game board until #458) is asked for, to compare.
+static func strip_valley(args: PackedStringArray) -> bool:
+	return args.has(STRIP_VALLEY)
 
 
 ## The seed asked for with `--seed=N` (the last one wins), or null when there is none or it is

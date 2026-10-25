@@ -23,14 +23,19 @@ func _main_in(size: Vector2i) -> Array:
 	return [port, main]
 
 
-func test_a_window_resize_after_the_start_keeps_the_spawn_a_quarter_across() -> void:
+func test_a_window_resize_after_the_start_keeps_the_spawn_where_a_fresh_run_has_it() -> void:
 	var made := await _main_in(Vector2i(960, 720))
 	var port: SubViewport = made[0]
 	var main: Node = made[1]
 	port.size = Vector2i(1560, 720)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	assert_almost_eq(_spawn_share(main, port), 0.25, 0.01)
+	# a quarter across where the pan allows it; the layout valley's spawn sits near the map's edge,
+	# where the pan clamp keeps it a little further in (#458), so the share is the one a fresh run
+	# at that size has
+	var fresh := await _main_in(Vector2i(1560, 720))
+	assert_almost_eq(_spawn_share(main, port), _spawn_share(fresh[1], fresh[0]), 0.01)
+	assert_between(_spawn_share(main, port), 0.2, 0.35)
 	assert_gte(main.get("_rig").zoom, CameraRig.START_MIN_ZOOM)
 
 

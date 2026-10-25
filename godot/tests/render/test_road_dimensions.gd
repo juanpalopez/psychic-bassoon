@@ -67,7 +67,8 @@ func test_the_deck_rect_follows_the_map_width() -> void:
 
 
 func test_the_bridge_mesh_is_as_wide_as_the_maps_road() -> void:
-	var game := Game.create(1)
+	# the strip valley: one bridge, so the deck's growth is the road's
+	var game := Game.create_on_strip_valley(1)
 	var field := TerrainField.from_map(game.map, game.routes)
 	var top := Callable(field, "top_at")
 	var narrow := RoadBedBuilder.bridge_mesh(game.map, top).get_aabb()

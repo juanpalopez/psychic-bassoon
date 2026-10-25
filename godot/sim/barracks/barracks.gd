@@ -164,6 +164,7 @@ static func _apply_auras(game: GameState) -> void:
 			rush = held[1]
 		guard.speed_bonus += rush
 		_set_toughness(guard, toughness)
+		_rally(game, guard)
 
 
 ## The strongest Mess Tent aura over a guard's post gives its speed and regeneration (set on the
@@ -189,6 +190,19 @@ static func _aura_bonuses(game: GameState, guard: Guard, tents: Array[Tower]) ->
 			"sugar_rush":
 				rush = maxf(rush, float(passive.bonus))
 	return [toughness, rush]
+
+
+## The Knight's Rally Cry adds to the Mess Tent's bonuses (another source, so they add up): its
+## attack speed share, and its regeneration share of the hp a second the guard's level heals.
+static func _rally(game: GameState, guard: Guard) -> void:
+	if not Heroes.rallying(game):
+		return
+	var at := post_point(game, guard)
+	var point := Vector2(at.x, at.y)
+	guard.speed_bonus += Heroes.rally_share(game, point, "attack_speed")
+	var tent := _tent_of(game, guard)
+	var regen := float(TOWERS.DEFS[tent.type].regen[tent.level])
+	guard.regen_bonus += regen * Heroes.rally_share(game, point, "regen")
 
 
 ## Hardtack Toughness: the guard's max hp follows the share; added hp comes with it, and when the

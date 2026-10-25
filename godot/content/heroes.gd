@@ -14,7 +14,11 @@ const REACH := 0.5
 
 ## Per hero: `name`, `hp`, `armor`, `damage` (per blow), `interval` (seconds between blows),
 ## `radius` (body, in cells), `speed` (cells per second) and `respawn` (seconds before a fallen
-## hero stands again at the Heartstone).
+## hero stands again at the Heartstone), `rally_cry` (the passive aura: towers and guards within
+## `radius` cells of the standing hero get `attack_speed` and `regen`, both shares; the hero's
+## aura does not add to itself, and it adds to a Kitchen Mess Tent's) and `blade_whirl` (the
+## active: `damage` physical to every ground foe within `radius` cells of the hero's edge, then
+## `cooldown` seconds before the next). Interim numbers, tuned later with headless runs (#452).
 const DEFS := {
 	KNIGHT:
 	{
@@ -26,5 +30,7 @@ const DEFS := {
 		"radius": 0.2,
 		"speed": 1.5,
 		"respawn": 15.0,
+		"rally_cry": {"radius": 3.0, "attack_speed": 0.15, "regen": 0.1},
+		"blade_whirl": {"radius": 1.0, "damage": 80.0, "cooldown": 15.0},
 	},
 }

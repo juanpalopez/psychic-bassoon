@@ -27,7 +27,7 @@ func test_every_cell_is_a_road_tile_a_socket_or_ground() -> void:
 		var board := _board(map_seed)
 		assert_eq(
 			board.road_count + board.ground_count + board.socket_count * _cells_per_block(board),
-			RULES.GRID_COLS * RULES.GRID_ROWS
+			board.map.cols * board.map.rows
 		)
 		var road := {}
 		for route in board.map.routes:
@@ -44,7 +44,7 @@ func test_changing_the_seed_rebuilds_the_board() -> void:
 	assert_eq(board.map.path, Game.create(7920).map.path)
 	assert_eq(
 		board.road_count + board.ground_count + board.socket_count * _cells_per_block(board),
-		RULES.GRID_COLS * RULES.GRID_ROWS
+		board.map.cols * board.map.rows
 	)
 
 

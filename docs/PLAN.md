@@ -61,7 +61,7 @@ The ids in the code are stable keys; the GDD renames what the player sees and ad
 | Warlord | Cardboard Golem |
 | (none) | Razor Moth (flying), Ink Shaman (support), the hero, the spells, the tech tree |
 | Heartstone, lives | The Heartstone's health (the Heartstone returns in the 2026-10-12 GDD; the code says `heartstone_health`) |
-| Free plots on every non-road cell | 21 to 30 sockets on the 32x20 valley (#320, built from six fixed sections since #381, whose narrow strips can hold fewer; 12 to 15, mostly 12, on the 16x11 board before) |
+| Free plots on every non-road cell | 24 to 31 sockets on the 40x24 layout valley, the game board since #458 (21 to 30 on the 32x20 strip valley, #320, built from six fixed sections since #381, whose narrow strips can hold fewer; 12 to 15, mostly 12, on the 16x11 board before) |
 | Gold | Buttons (in a run), Golden Staples (between runs) |
 
 ### Gaps in the GDD

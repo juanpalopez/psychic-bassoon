@@ -115,7 +115,9 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 	# diorama (every chunk, before the camera culls most of them up close), its markers and their
 	# shadows keep to about a third of it; the coarse chunks out in the haze cast no shadow. The
 	# scatter (#326) takes 18 of them (10 casting), in four chunks so that a close view culls
-	# about half of it. The sectioned valley draws two or three more than the old maps (57 at most).
+	# about half of it. The sectioned valley draws two or three more than the old maps (57 at most),
+	# and the layout valley (the game board since #458: two crossings, two lanes) up to 69, with 32
+	# in the shadow map.
 	for map_seed in SEEDS:
 		var counts := {"drawn": 0, "shadows": 0}
 		_surfaces(_board(map_seed), counts)
@@ -125,5 +127,5 @@ func test_the_whole_board_keeps_to_its_share_of_the_draw_calls() -> void:
 				% [map_seed, counts["drawn"], counts["shadows"]]
 			)
 		)
-		assert_lte(counts["drawn"], 58, "seed %d: surfaces drawn" % map_seed)
-		assert_lte(counts["shadows"], 24, "seed %d: surfaces in the shadow map" % map_seed)
+		assert_lte(counts["drawn"], 70, "seed %d: surfaces drawn" % map_seed)
+		assert_lte(counts["shadows"], 32, "seed %d: surfaces in the shadow map" % map_seed)

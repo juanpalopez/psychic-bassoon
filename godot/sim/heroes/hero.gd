@@ -16,3 +16,5 @@ var y: float = 0.0
 var path: Array[Vector2i] = []
 ## The foe it broke off from that keeps striking while the hero stays in its reach, or -1.
 var chaser_id: int = -1
+## Seconds until Blade Whirl can be used again.
+var ability_cooldown: float = 0.0

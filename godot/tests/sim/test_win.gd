@@ -124,9 +124,9 @@ func test_no_wave_can_be_launched_after_the_win_wave() -> void:
 
 
 func test_the_scripted_bot_wins_a_20_wave_run() -> void:
-	# seed 6: on the sectioned valley (#381) the mix wins it with 4 Heartstone health left; of
-	# seeds 1 to 6 only 6 wins (the spool-only profile also wins seeds 3 and 6)
-	var result := BotRunner.play(6, PROFILES.PROFILES.mix, 20)
+	# seed 5 on the layout valley (#458, foes at half pace) with the spool-only profile, 20 Heartstone
+	# health left; the mix clears wave 20 on none of seeds 1 to 12 inside the bot's thirty minutes
+	var result := BotRunner.play(5, PROFILES.PROFILES.spoolOnly, 20)
 	assert_eq(result.waves_cleared, 20)
 	assert_true(result.won)
 	assert_false(result.over)

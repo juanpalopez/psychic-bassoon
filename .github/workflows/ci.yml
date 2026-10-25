@@ -209,22 +209,26 @@ jobs:
 
       - name: Headless game time budget
         env:
-          # one whole bot game (about 30 minutes of play, 20 waves, on the 32x20 valley) took
+          # a whole bot game is about 25 minutes of play (50k ticks); the old 32x20 valley game took
           # 13 s on the runner (PR #342; 14.5 s of CPU, 41 to 46 s wall in a busy 2-core
-          # container), so the budget is about 4.5 times the runner's time: it catches a sim
-          # that got several times slower, not noise (docs/BALANCE.md). A guard mix game
-          # (the barracks path) reaches wave 20 on no valley seed from 1 to 12, so this plays the
-          # mix on seed 6, its only win of seeds 1 to 6 (spoolOnly also wins 3 and 6). Measured
-          # 5.5 s on a quiet Mac (#381)
+          # container), and the budget is about 5.5 times the 10 s this game takes on a loaded Mac:
+          # it catches a sim that got several times slower, not noise (docs/BALANCE.md). Since #458
+          # the game board is the 40 by 24 layout valley at half pace, where a game of the mix
+          # does not clear wave 20 inside the bot's thirty minutes on seeds 1 to 12. So this plays
+          # the guard mix on seed 7 (it builds Guard Tents and a Mess Tent, so the barracks, beam
+          # and spec ticks are timed too) and requires a LONG game that ENDED: the Heartstone
+          # fell (died column above 0, or wave 20 cleared), 12 or more waves were cleared (14 measured) and the game
+          # lasted 20.0 to under 30.0 minutes (24.8 measured). The lower bounds stop a game that
+          # died on wave 3 from passing; the upper one, a game that hit the thirty minute cap.
           BUDGET_SECONDS: "60"
         run: |
           start=$SECONDS
           "$GODOT" --headless --path godot -s tools/balance_run.gd -- \
-            --seeds=6 --profiles=mix --waves=20 | tee game.log
+            --seeds=7 --profiles=guardMix --waves=20 | tee game.log
           elapsed=$((SECONDS - start))
           echo "A whole bot game took ${elapsed} s (budget ${BUDGET_SECONDS} s)"
-          if ! grep -q "median waves cleared: 20" game.log; then
-            echo "::error::The bot game did not reach wave 20"
+          if ! awk '$1 == "guardMix" && $2 == 7 && $3 >= 12 && ($4 > 0 || $3 >= 20) && $NF >= 20.0 && $NF < 30.0 { found = 1 } END { exit !found }' game.log; then
+            echo "::error::The bot game did not end (the Heartstone did not fall) inside the bot's thirty minutes"
             exit 1
           fi
           if [ "$elapsed" -gt "$BUDGET_SECONDS" ]; then

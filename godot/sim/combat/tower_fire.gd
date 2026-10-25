@@ -19,8 +19,9 @@ static func step(game: GameState) -> void:
 		if def.get("guards", false) or def.get("support", false):
 			continue
 		if def.get("beam", false):
-			_beam(game, tower, def)
+			_beam(game, tower, def, _rally(game, tower))
 			continue
+		var haste := _rally(game, tower)
 		var was_ready := tower.cooldown <= RULES.TIMER_EPSILON
 		tower.cooldown -= Game.TICK_SECONDS
 		if tower.cooldown > RULES.TIMER_EPSILON:
@@ -34,8 +35,16 @@ static func step(game: GameState) -> void:
 		# rate that does not divide the tick still averages out; a tower that was
 		# already waiting has no such remainder
 		var carried := 0.0 if was_ready else tower.cooldown
-		tower.cooldown = carried + 1.0 / float(def.rate[tower.level])
+		tower.cooldown = carried + 1.0 / (float(def.rate[tower.level]) * (1.0 + haste))
 		_fire(game, tower, def, target)
+
+
+## The share of attack speed the Knight's Rally Cry gives this tower (0.0 out of its reach).
+static func _rally(game: GameState, tower: Tower) -> float:
+	if not Heroes.rallying(game):
+		return 0.0
+	var centre := game.map.socket_centre(Vector2i(tower.col, tower.row))
+	return Heroes.rally_share(game, centre, "attack_speed")
 
 
 ## How far the tower reaches, in cells: its level's range times the bonus of the
@@ -127,7 +136,7 @@ static func release_fallen_locks(game: GameState) -> void:
 ## A beam tower's turn: keep the locked foe while it lives and stays in reach,
 ## else lock the foe the tower would target, and hurt it a tick's share of the
 ## beam's damage per second. No event is emitted: render reads `target_id`.
-static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
+static func _beam(game: GameState, tower: Tower, def: Dictionary, haste: float = 0.0) -> void:
 	var target := _locked_foe(game, tower)
 	var best := target_for(game, tower)
 	# a lock holds, except that a support foe coming into reach takes it from any other foe
@@ -136,7 +145,7 @@ static func _beam(game: GameState, tower: Tower, def: Dictionary) -> void:
 	tower.target_id = target.id if target != null else -1
 	if target == null:
 		return
-	var per_second := float(def.damage[tower.level])
+	var per_second := float(def.damage[tower.level]) * (1.0 + haste)
 	var kind := Damage.kind_named(def.damage_type)
 	Damage.apply_beam(game, target, per_second, kind, Game.TICK_SECONDS)
 	Specs.corrode(tower, target)

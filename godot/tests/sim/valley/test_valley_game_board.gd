@@ -1,6 +1,7 @@
 ## The game board is the sectioned valley (#389, `docs/lessons/2026-10-20-sectioned-valley.md`):
-## these tests read `Game.create(seed).map` and pin what the board promises, where the route-
-## first generator's tests (`test_terrain.gd`, `test_valley_map.gd`) pin the older generator.
+## these tests read `Game.create_on_strip_valley(seed).map` and pin what the strip valley (the game
+## board until #458) promises, where the route-first generator's tests (`test_terrain.gd`,
+## `test_valley_map.gd`) pin the older generator.
 extends GutTest
 
 const RULES := preload("res://content/map_rules.gd")
@@ -15,8 +16,8 @@ var _maps: Array[GameMap] = []
 
 func before_all() -> void:
 	for map_seed in range(FIRST_SEED, FIRST_SEED + SEED_COUNT):
-		_maps.append(Game.create(map_seed).map)
-	_maps.append(Game.create(4294967295).map)
+		_maps.append(Game.create_on_strip_valley(map_seed).map)
+	_maps.append(Game.create_on_strip_valley(4294967295).map)
 
 
 func _crossing(map: GameMap) -> Rect2i:
@@ -134,8 +135,8 @@ func test_one_road_bridge_and_the_hero_bridge_cross_the_river() -> void:
 
 
 func test_the_board_is_reproducible_and_the_road_leaves_room_for_the_sockets() -> void:
-	var a := Game.create(7).map
-	var b := Game.create(7).map
+	var a := Game.create_on_strip_valley(7).map
+	var b := Game.create_on_strip_valley(7).map
 	assert_eq(a.heights, b.heights)
 	assert_eq(a.regions, b.regions)
 	assert_eq(a.river, b.river)

@@ -178,7 +178,7 @@ func test_a_layout_without_the_fork_stitches_as_before() -> void:
 
 func test_the_game_board_and_the_strip_valley_have_no_fork() -> void:
 	for seed in [1, 42, 2026]:
-		for map in [Game.create(seed).map, MapGen.generate_valley(seed)]:
+		for map in [Game.create_on_strip_valley(seed).map, MapGen.generate_valley(seed)]:
 			assert_eq(map.routes.size(), 2, "seed %d" % seed)
 			assert_true(map.sources.is_empty())
 			assert_true(map.forks.is_empty())
