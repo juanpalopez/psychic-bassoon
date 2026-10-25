@@ -103,6 +103,8 @@ static func _assemble(plan: ValleyPlan, results: Array[SectionResult]) -> GameMa
 	map.tiles = MapGen._tiles_for(map.routes, plan.cols, plan.rows)
 	if plan.road_width > 0.0 and not map.route_curves.is_empty():
 		map.road_width = plan.road_width
+		# towers measure their reach to the band's edge only on a banded map (#446)
+		map.reach_band = plan.road_width
 		_mark_band(map)
 	var last := map.path[map.path.size() - 1]
 	map.heartstone = MapGen._heartstone_block(last, plan.cols, plan.rows, map.footprint)

@@ -343,9 +343,9 @@ static func _segment_in_rect(a: Vector2, b: Vector2, rect: Rect2) -> Vector2:
 
 ## The round yard the main road ends on, as (x, y) its middle in sim cells and z its radius
 ## (0 when the map has no road). Where the Heartstone's whole block stands at the road's level it
-## is a flagstone yard under the block (`HEART_YARD_RADIUS` round its middle); where part of the
-## block stands higher, a round end to the road in its last cell (`HEART_CAP_RADIUS`), so the
-## yard never runs into a terrace.
+## is a flagstone yard under the block (`HEART_YARD_RADIUS` round its middle, at most half the
+## block); where part of the block stands higher, a round end to the road in its last cell
+## (`HEART_CAP_RADIUS`), so the yard never runs into a terrace.
 static func heart_yard(map: GameMap, height_fn: Callable) -> Vector3:
 	if map.path.is_empty():
 		return Vector3.ZERO
@@ -359,7 +359,9 @@ static func heart_yard(map: GameMap, height_fn: Callable) -> Vector3:
 				flat = false
 	if flat:
 		var middle := Vector2(block.position) + Vector2(block.size) / 2.0
-		return Vector3(middle.x, middle.y, RoadDimensions.heart_yard_radius(map.road_width))
+		# never wider than the block: on a 2 cell band the yard would run 0.1 past it (#446)
+		var radius := minf(RoadDimensions.heart_yard_radius(map.road_width), block.size.x / 2.0)
+		return Vector3(middle.x, middle.y, radius)
 	return Vector3(
 		float(last.x) + 0.5, float(last.y) + 0.5, RoadDimensions.heart_cap_radius(map.road_width)
 	)

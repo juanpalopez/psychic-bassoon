@@ -1,6 +1,6 @@
 ## The road as a band (#430): the cells under it are road, a block never comes near it and a level
-## 1 tower on every block still covers cells of the centre line. The layout valley's band is the
-## drawn width (0.9, #469); the wider band (2.4) waits for #446, so those tests turn it on by hand.
+## 1 tower on every block still covers cells of the centre line. The layout valley's band is 2.0
+## cells (owner, 2026-10-25, #446); the tests that turn on a wider band (2.4) set it by hand.
 extends GutTest
 
 const ROAD := preload("res://content/valley/road_rules.gd")
@@ -31,17 +31,20 @@ func _straight(width: float) -> SectionResult:
 	return result
 
 
-func test_the_layout_valleys_band_is_the_drawn_width() -> void:
+func test_the_layout_valleys_band_is_two_cells_and_towers_reach_to_its_edge() -> void:
 	assert_eq(GameMap.new().road_width, ROAD.OLD_WIDTH_CELLS)
-	assert_eq(ROAD.ROAD_WIDTH_CELLS, ROAD.OLD_WIDTH_CELLS)
-	assert_eq(ValleyLayout.generate(1, 40, 24).road_width, ROAD.OLD_WIDTH_CELLS)
-	assert_eq(_layout_valley(1).road_width, ROAD.OLD_WIDTH_CELLS)
+	assert_eq(GameMap.new().reach_band, 0.0, "a map built another way has no band to reach")
+	assert_eq(ROAD.ROAD_WIDTH_CELLS, 2.0)
+	assert_eq(ValleyLayout.generate(1, 40, 24).road_width, ROAD.ROAD_WIDTH_CELLS)
+	assert_eq(_layout_valley(1).road_width, ROAD.ROAD_WIDTH_CELLS)
+	assert_eq(_layout_valley(1).reach_band, ROAD.ROAD_WIDTH_CELLS, "the drawn width")
+	assert_eq(_layout_valley(1).reach_margin(), ROAD.ROAD_WIDTH_CELLS / 2.0)
 
 
 func test_every_cell_the_drawn_bed_touches_is_road() -> void:
 	# a curve running diagonally across a staircase of cells touches cells whose centres lie
 	# further off than half the width; the bed would poke out of them (#469)
-	var half := ROAD.OLD_WIDTH_CELLS / 2.0
+	var half := ROAD.ROAD_WIDTH_CELLS / 2.0
 	for seed in SEEDS:
 		var map := _layout_valley(seed)
 		var touched := 0
@@ -134,10 +137,13 @@ func test_no_candidate_block_touches_the_band_and_each_one_still_covers_the_road
 
 func test_every_block_keeps_centre_line_cells_within_a_level_one_towers_own_range() -> void:
 	# Measured over seeds 1..300 on the 40 by 24 layout valley (#469): the fewest centre-line cells
-	# within the Spool Guard's 2.3 of a block's centre is 1 (3 within the band reach 2.75). A
-	# further loosening of `coverage_reach` shows up here as a block with none.
+	# within the Spool Guard's range of a block's centre is 1 on the 0.9 band; on the 2.0 band a
+	# tower reaches 3.3 (2.3 plus half the band) and the fewest is 3. A further loosening of
+	# `coverage_reach` shows up here as a block with too few.
 	var range_1: float = TOWERS.DEFS["spoolGuard"].range[0]
-	var band_reach := SectionSockets.coverage_reach(ROAD.OLD_WIDTH_CELLS)
+	var band_reach := SectionSockets.coverage_reach(ROAD.ROAD_WIDTH_CELLS)
+	# a tower on the banded map reaches its range plus half the band (`reach_margin`, #446)
+	range_1 += ROAD.ROAD_WIDTH_CELLS / 2.0
 	var fewest := 1000
 	var fewest_in_band_reach := 1000
 	for seed in SEEDS:
@@ -218,6 +224,7 @@ func test_the_strip_valley_keeps_its_one_cell_road() -> void:
 	var map := ValleyStitcher.build(1, 32, 20)
 	assert_not_null(map)
 	assert_eq(map.road_width, ROAD.OLD_WIDTH_CELLS)
+	assert_eq(map.reach_band, 0.0)
 	var plain := MapGen._tiles_for(map.routes, 32, 20)
 	for y in 20:
 		assert_eq(map.tiles[y], plain[y], "row %d" % y)

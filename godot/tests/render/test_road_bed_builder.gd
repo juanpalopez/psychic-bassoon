@@ -14,6 +14,9 @@ const SUBSTEPS := 4
 const EPSILON := 1e-4
 ## How far a curve's bed may reach past the road cells, where it cuts an inner corner.
 const CORNER_TOLERANCE := 0.1
+## How far the 2 cell bed may overhang the corner of a river cell at a bank (#446): the bed is
+## wider than the bridge's cell, so beside a diagonal bank it runs up to 0.095 over the lip.
+const RIVER_OVERHANG := 0.1
 ## Layout valley seeds (#458): a river two or three cells wide, crossed on two or three bridge
 ## cells side by side (2, 5 and 11 on three).
 const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5, 11]
@@ -173,13 +176,13 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 		for v in vertices:
 			var on_one := false
 			for bridge in map.bridges:
-				if RoadBedBuilder.deck_rect(bridge).grow(0.05).has_point(_sim(v)):
+				if RoadBedBuilder.deck_rect(bridge, map.road_width).grow(0.05).has_point(_sim(v)):
 					on_one = true
 			stray += 0 if on_one else 1
 		assert_eq(stray, 0, "bridge parts off the bridge cells, seed %d" % map_seed)
 		for bridge in map.bridges:
 			var label := "seed %d bridge %s" % [map_seed, bridge.cell]
-			var deck := RoadBedBuilder.deck_rect(bridge)
+			var deck := RoadBedBuilder.deck_rect(bridge, map.road_width)
 			assert_true(deck.encloses(Rect2(Vector2(bridge.cell), Vector2.ONE)), label)
 			assert_eq(map.tiles[bridge.cell.y][bridge.cell.x], GameMap.Tile.ROAD, label)
 			var top := RoadBedBuilder.deck_top(bridge, setup.top)
@@ -192,7 +195,8 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 			var plank_top := -INF
 			for i in vertices.size():
 				var off := _sim(vertices[i]) - middle
-				var on_deck := absf(off[along]) < 0.2 and absf(off[1 - along]) < 0.5
+				var half := RoadDimensions.deck_width(map.road_width) / 2.0
+				var on_deck := absf(off[along]) < 0.2 and absf(off[1 - along]) < maxf(0.5, half)
 				if normals[i].y > 0.99 and on_deck:
 					plank_top = maxf(plank_top, vertices[i].y)
 			assert_almost_eq(plank_top, top, 1e-4, label)
@@ -218,7 +222,8 @@ func test_the_bed_stops_at_the_gorge_and_the_deck_covers_its_ends() -> void:
 		for v in bed:
 			var sim := _sim(v)
 			for cell in map.river:
-				if Rect2(Vector2(cell) + Vector2(0.02, 0.02), Vector2(0.96, 0.96)).has_point(sim):
+				var inset := Vector2(RIVER_OVERHANG, RIVER_OVERHANG)
+				if Rect2(Vector2(cell) + inset, Vector2.ONE - inset * 2.0).has_point(sim):
 					wet += 1
 		assert_eq(wet, 0, "no bed over the river, seed %d" % map_seed)
 		# the bed runs to each bank's edge, under the deck's end, on every road over the bridge
@@ -233,7 +238,8 @@ func test_the_bed_stops_at_the_gorge_and_the_deck_covers_its_ends() -> void:
 				for v in bed:
 					var sim := _sim(v)
 					var gap := (sim[along] - middle[along]) * end
-					if absf(sim[1 - along] - middle[1 - along]) < 0.5 and absf(gap - 0.5) < 0.02:
+					var half := maxf(0.5, map.road_width / 2.0)
+					if absf(sim[1 - along] - middle[1 - along]) < half and absf(gap - 0.5) < 0.02:
 						found = true
 						break
 				assert_true(found, "the bed reaches the bank, seed %d %s" % [map_seed, bridge.cell])
@@ -335,8 +341,12 @@ func test_a_bridge_over_the_gorge_gets_trestle_legs_to_its_floor() -> void:
 			var feet := 0
 			for v in vertices:
 				var sim := _sim(v)
-				var cell := Vector2i(floori(sim.x), floori(sim.y))
-				if cell == bridge.cell and v.y < TerrainField.GORGE_FLOOR + 0.05:
+				# legs stand out across the road, in the cells beside the bridge cell
+				var along := 0 if bridge.horizontal else 1
+				var across := absf(sim[1 - along] - (float(bridge.cell[1 - along]) + 0.5))
+				var in_bent := floori(sim[along]) == bridge.cell[along]
+				var reach := RoadDimensions.trestle_out(map.road_width) + 0.5
+				if in_bent and across < reach and v.y < TerrainField.GORGE_FLOOR + 0.05:
 					feet += 1
 			assert_gt(feet, 0, "legs in %s, %s" % [bridge.cell, setup.label])
 
@@ -457,7 +467,7 @@ func _off_bed(setup: Dictionary, routes: Array[Route]) -> int:
 ## True on a bridge's planks: from one end of the deck to the other, edge to edge.
 func _on_deck(map: GameMap, at: Vector2) -> bool:
 	for bridge in map.bridges:
-		var deck := RoadBedBuilder.deck_rect(bridge)
+		var deck := RoadBedBuilder.deck_rect(bridge, map.road_width)
 		var trim := deck.size.y / 2.0 - LOOKS.DECK_WIDTH / 2.0
 		var walk := deck.grow_individual(0.0, -trim, 0.0, -trim)
 		if not bridge.horizontal:

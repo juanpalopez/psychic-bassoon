@@ -96,9 +96,12 @@ func test_at_least_three_tight_sockets_cover_the_join() -> void:
 	for seed in range(1, LAST_SEED + 1, STEP):
 		var result := _draw(seed)
 		var near := 0
+		# a block stands the band's room further off the road, and the rule widens by the same
+		# (`SectionSockets.reach_extra`, 0.5 on the 2.0 band, #446)
+		var reach := FOLD.MERGE_COVER_REACH + SectionSockets.reach_extra(result)
 		for index in result.sockets.size():
 			var gap := SectionSockets.centre_gap(result.sockets[index], result.feeder_join)
-			if gap <= FOLD.MERGE_COVER_REACH:
+			if gap <= reach:
 				near += 1
 		assert_gte(near, FOLD.MERGE_COVER_MIN, "seed %d" % seed)
 		assert_gte(result.socket_tags.count(SectionResult.Tag.MERGE), FOLD.MERGE_COVER_MIN)
