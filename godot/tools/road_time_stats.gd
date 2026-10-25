@@ -55,3 +55,38 @@ static func gate_passes(ratio_values: Array[float]) -> bool:
 		and med <= GATE_MEDIAN_HIGH
 		and minimum(ratio_values) >= GATE_SEED_MIN
 	)
+
+
+## The index of the first rect holding the point (cell coordinates, floats), or -1.
+static func region_of(rects: Array[Rect2i], x: float, y: float) -> int:
+	var cell := Vector2i(int(floor(x)), int(floor(y)))
+	for i in rects.size():
+		if rects[i].has_point(cell):
+			return i
+	return -1
+
+
+## Adds one step of `dt` walked seconds to region `region` (-1 is ignored). It counts as covered
+## when at least one level-1 tower reaches the point, and adds `dt` once per tower in reach to the
+## socket-seconds. The three arrays are indexed by region.
+static func add_step(
+	walk: Array[float],
+	covered: Array[float],
+	exposure: Array[float],
+	region: int,
+	towers_in_reach: int,
+	dt: float
+) -> void:
+	if region < 0 or region >= walk.size():
+		return
+	walk[region] += dt
+	if towers_in_reach > 0:
+		covered[region] += dt
+	exposure[region] += dt * float(towers_in_reach)
+
+
+## Covered over walked seconds of a region; 0 for a region the road never entered.
+static func coverage(walk_seconds: float, covered_seconds: float) -> float:
+	if walk_seconds <= 0.0:
+		return 0.0
+	return covered_seconds / walk_seconds

@@ -13,6 +13,15 @@ const STATS := preload("res://tools/road_time_stats.gd")
 const STEP := 0.1
 const MEASURED_FOES: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"]
 const LANE_NAMES: Array[String] = ["main road", "lower lane"]
+## In road order, the same as `ValleyLayout.Region` and the slot ids.
+const REGION_NAMES: Array[String] = [
+	"Outer March",
+	"Sunken Meadow",
+	"Bluewater Crossing",
+	"Broken Ridge",
+	"Ancient Fold",
+	"Heartkeep"
+]
 
 
 ## The routes a foe of the main source may walk: the sources' first list, else the main road
@@ -28,8 +37,10 @@ func _lanes(map: GameMap) -> Array[int]:
 
 ## Walks route `index` in 0.1 cell steps. Returns distances in cells, so a foe's seconds are the
 ## distance over its speed: `total` (the walk), `fire` (cells inside a level-1 tower's reach to
-## the centre line) and `edge` (the same measured to the band's edge at `width`).
-func _stats(map: GameMap, width: float, index: int) -> Dictionary:
+## the centre line), `edge` (the same measured to the band's edge at `width`) and, per region of
+## `rects`, `walk`, `cov` and `expo` (cells walked, cells covered, tower-cells; the last is the
+## socket-seconds once divided by a speed).
+func _stats(map: GameMap, width: float, index: int, rects: Array[Rect2i]) -> Dictionary:
 	var route: Route = null
 	if map.route_curves.is_empty():
 		route = Route.build_curved(map.routes[index])
@@ -42,6 +53,13 @@ func _stats(map: GameMap, width: float, index: int) -> Dictionary:
 		centres.append(Vector3(c.x, c.y, base * map.range_multiplier(a)))
 	var fire := 0.0
 	var fire_edge := 0.0
+	var walk: Array[float] = []
+	var cov: Array[float] = []
+	var expo: Array[float] = []
+	for _r in rects.size():
+		walk.append(0.0)
+		cov.append(0.0)
+		expo.append(0.0)
 	var d := 0.0
 	var k := 1
 	while d < route.total:
@@ -51,23 +69,29 @@ func _stats(map: GameMap, width: float, index: int) -> Dictionary:
 		var t := 0.0 if seg <= 0.0 else (d - route.cumulative[k - 1]) / seg
 		var x := route.xs[k - 1] + (route.xs[k] - route.xs[k - 1]) * t
 		var y := route.ys[k - 1] + (route.ys[k] - route.ys[k - 1]) * t
-		var hit := false
+		var in_reach := 0
 		var hit_edge := false
 		for c in centres:
 			var d2 := (c.x - x) * (c.x - x) + (c.y - y) * (c.y - y)
-			if not hit and d2 <= c.z * c.z:
-				hit = true
+			if d2 <= c.z * c.z:
+				in_reach += 1
 			var edge := BAND.edge_reach(c.z, width)
-			if not hit_edge and d2 <= edge * edge:
+			if d2 <= edge * edge:
 				hit_edge = true
-			if hit and hit_edge:
-				break
-		if hit:
+		if in_reach > 0:
 			fire += STEP
 		if hit_edge:
 			fire_edge += STEP
+		STATS.add_step(walk, cov, expo, STATS.region_of(rects, x, y), in_reach, STEP)
 		d += STEP
-	return {"total": route.total, "fire": fire, "edge": fire_edge}
+	return {
+		"total": route.total,
+		"fire": fire,
+		"edge": fire_edge,
+		"walk": walk,
+		"cov": cov,
+		"expo": expo,
+	}
 
 
 func _med(a: Array[float]) -> String:
@@ -115,10 +139,14 @@ func _init() -> void:
 	var under100 := 0
 	var per_region: Array = [[], [], [], [], [], []]
 	var socket_counts: Array[float] = []
-	# Per layout lane: the distances in cells of each seed.
+	# Per layout lane: the distances of each seed, and per region the cells walked, covered and
+	# tower-cells.
 	var lane_total: Array = [[], []]
 	var lane_fire: Array = [[], []]
 	var lane_edge: Array = [[], []]
+	var lane_walk: Array = [[], []]
+	var lane_cov: Array = [[], []]
+	var lane_expo: Array = [[], []]
 	var lane_min_fire: Array[float] = []
 	var n := 300
 	var first := 1
@@ -144,6 +172,10 @@ func _init() -> void:
 		if layout == null:
 			fails += 1
 			continue
+		var rects: Array[Rect2i] = []
+		rects.resize(layout.slots.size())
+		for slot in layout.slots:
+			rects[slot.id] = slot.rect
 		var map := ValleyStitcher.build(
 			seed,
 			ValleyLayout.LAYOUT.COLS,
@@ -159,10 +191,13 @@ func _init() -> void:
 			var worst := 1.0e30
 			var lanes := _lanes(map)
 			for k in mini(lanes.size(), 2):
-				var lane := _stats(map, width, lanes[k])
+				var lane := _stats(map, width, lanes[k], rects)
 				lane_total[k].append(lane["total"])
 				lane_fire[k].append(lane["fire"])
 				lane_edge[k].append(lane["edge"])
+				lane_walk[k].append(lane["walk"])
+				lane_cov[k].append(lane["cov"])
+				lane_expo[k].append(lane["expo"])
 				worst = minf(worst, lane["fire"])
 			lane_min_fire.append(worst)
 		var all: Array[Vector2i] = []
@@ -213,6 +248,7 @@ func _init() -> void:
 			print("region ", r, " min/med/max ", a[0], "/", a[a.size() / 2], "/", a[a.size() - 1])
 	print("band width ", width, " half ", BAND.half_band(width), " (cells)")
 	print("speed scale ", scale, " (layout only; strip valley at 1)")
+	var no_rects: Array[Rect2i] = []
 	var strip_total: Array[float] = []
 	var strip_fire: Array[float] = []
 	var strip_edge: Array[float] = []
@@ -221,7 +257,7 @@ func _init() -> void:
 		var m := MapGen.generate_valley(seed)
 		if m == null:
 			continue
-		var st := _stats(m, width, 0)
+		var st := _stats(m, width, 0, no_rects)
 		strip_total.append(st["total"])
 		strip_fire.append(st["fire"])
 		strip_edge.append(st["edge"])
@@ -256,4 +292,31 @@ func _init() -> void:
 			"RATIO shorter lane per seed centre line ",
 			_verdict(STATS.ratios(_times(lane_min_fire, foe, scale), strip_med))
 		)
+	# Coverage and socket-seconds per region, for the Scrap Goblin at the speed scale.
+	var goblin: float = STATS.scaled_speed(FOES.DEFS["scrapGoblin"]["speed"], scale)
+	for k in 2:
+		if lane_walk[k].is_empty():
+			continue
+		for r in REGION_NAMES.size():
+			var w: Array[float] = []
+			var c: Array[float] = []
+			var e: Array[float] = []
+			var share: Array[float] = []
+			for i in lane_walk[k].size():
+				var walked: float = lane_walk[k][i][r] / goblin
+				var covered: float = lane_cov[k][i][r] / goblin
+				w.append(walked)
+				c.append(covered)
+				e.append(lane_expo[k][i][r] / goblin)
+				share.append(STATS.coverage(walked, covered))
+			print(
+				"COVERAGE ",
+				LANE_NAMES[k],
+				" ",
+				REGION_NAMES[r],
+				(
+					" walk s %.1f covered s %.1f socket-s %.1f coverage %.2f"
+					% [STATS.median(w), STATS.median(c), STATS.median(e), STATS.median(share)]
+				)
+			)
 	quit()

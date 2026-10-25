@@ -66,3 +66,35 @@ func test_the_gate_fails_one_seed_below_75_percent() -> void:
 
 func test_the_gate_never_passes_an_empty_list() -> void:
 	assert_false(STATS.gate_passes(_floats([])))
+
+
+func test_region_of_finds_the_rect_holding_the_point() -> void:
+	var rects: Array[Rect2i] = [Rect2i(0, 0, 10, 10), Rect2i(10, 0, 10, 10)]
+	assert_eq(STATS.region_of(rects, 9.5, 3.2), 0)
+	assert_eq(STATS.region_of(rects, 10.5, 3.2), 1)
+	assert_eq(STATS.region_of(rects, 25.0, 3.2), -1)
+
+
+func test_add_step_counts_walk_always_cover_once_and_exposure_per_tower() -> void:
+	var walk := _floats([0.0, 0.0])
+	var covered := _floats([0.0, 0.0])
+	var exposure := _floats([0.0, 0.0])
+	STATS.add_step(walk, covered, exposure, 1, 3, 0.25)
+	STATS.add_step(walk, covered, exposure, 1, 0, 0.25)
+	assert_eq(walk, _floats([0.0, 0.5]))
+	assert_eq(covered, _floats([0.0, 0.25]))
+	assert_eq(exposure, _floats([0.0, 0.75]))
+
+
+func test_add_step_ignores_a_point_outside_every_region() -> void:
+	var walk := _floats([0.0])
+	var covered := _floats([0.0])
+	var exposure := _floats([0.0])
+	STATS.add_step(walk, covered, exposure, -1, 2, 1.0)
+	assert_eq(walk, _floats([0.0]))
+	assert_eq(exposure, _floats([0.0]))
+
+
+func test_coverage_is_the_covered_share_of_the_walk() -> void:
+	assert_eq(STATS.coverage(4.0, 1.0), 0.25)
+	assert_eq(STATS.coverage(0.0, 0.0), 0.0)
