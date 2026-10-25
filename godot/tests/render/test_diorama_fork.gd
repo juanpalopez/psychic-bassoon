@@ -5,8 +5,9 @@ extends GutTest
 
 const RULES := preload("res://content/valley/bluewater_region_rules.gd")
 const DIORAMA_TEST := preload("res://tests/render/test_diorama.gd")
-## A handful of layout seeds, seed 22 the one nearest the terrain cap.
-const SEEDS: Array[int] = [1, 2, 3, 5, 7, 22]
+## A handful of layout seeds, seeds 124, 22 and 17 the ones nearest the terrain cap (#523: 135, 508
+## and 572 triangles under it on seeds 1 to 200, as the forked bed is thinned).
+const SEEDS: Array[int] = [1, 2, 3, 5, 7, 17, 22, 124]
 ## Points checked on each stretch between two route points.
 const SUBSTEPS := 4
 ## How far the forked map's thinner bed may drift from the finer centreline (cells).
@@ -158,6 +159,44 @@ func test_the_thinner_bed_stays_within_a_twentieth_of_a_cell_of_the_finer_line()
 		)
 		assert_lte(worst, BED_DEVIATION, "layout seed %d" % map_seed)
 		assert_lt(points_coarse, points_fine, "layout seed %d: fewer points" % map_seed)
+
+
+## The scatter keeps off the bed as it is drawn: the forked map's thinner (coarse) line, which lies
+## up to 0.043 cell from the finer one the scatter keeps off (#523). A prop's footprint never
+## reaches the bed's edge, wobble and keep-off left aside.
+func test_the_scatter_keeps_clear_of_the_coarse_bed_edge() -> void:
+	for map_seed in SEEDS:
+		var board := _layout_board(map_seed)
+		var map := board.map
+		var field := board.diorama.field
+		var segments: Array[PackedVector2Array] = []
+		for line in RoadBedBuilder.centrelines(field.routes, true):
+			for k in line.size() - 1:
+				segments.append(PackedVector2Array([line[k], line[k + 1]]))
+		var half := map.road_width / 2.0
+		var worst := INF
+		for placement in SceneryScatter.placements(field):
+			var nearest := INF
+			for segment in segments:
+				var closest := Geometry2D.get_closest_point_to_segment(
+					placement.at, segment[0], segment[1]
+				)
+				nearest = minf(nearest, placement.at.distance_to(closest))
+			worst = minf(worst, nearest - half - placement.radius)
+			assert_gt(
+				nearest - half,
+				placement.radius,
+				(
+					"layout seed %d: %s at %s reaches the bed"
+					% [map_seed, placement.kind, placement.at]
+				)
+			)
+		gut.p(
+			(
+				"layout seed %d: scatter clear of the coarse bed edge by at least %.3f"
+				% [map_seed, worst]
+			)
+		)
 
 
 func test_the_forked_valley_keeps_to_the_diorama_budgets() -> void:
