@@ -1,9 +1,16 @@
 ## Room per shared region for the long road templates (#460). For each seed's real layout, every
 ## region is fitted with the real `SegmentFitter` at four biases, once at today's gates and once at
-## each gate variant (March exit column, Ridge exit row and entry, Fold exit offset, Heartkeep
-## entry offset and end row), under the lane rule (no cell twice, cells 12 or more apart along the
-## road at least 5 apart). Prints the rows that fit on at least `--min-fit=` percent of the seeds
-## (default 20), with the mean cell count.
+## each gate variant, with the candidate's cells put in the whole road in place of that region's
+## own, and the lane rule checked over the whole road like `ValleyLayout._lane_problems` (no cell
+## twice, cells `LANE_RUN` or more apart along the road at least `LANE_GAP` apart). The fork's
+## lower lane (`LANE_APART`, `LANE_JOIN`) is not checked: none of the probed regions (March,
+## Ridge, Fold, Heartkeep) holds the fork, but a longer March does move where the lanes part.
+## The gate ranges in `_variants()` (March exit column 1 to 9, Ridge exit row 2 to 9 and entry 0 to
+## 6 columns left, Fold exit offset 1 to 8, Heartkeep entry offset 1 to 8 and end row 2 below the
+## top in steps of 2) and the four biases (0.7 to 1.0) are this probe's own sweep, not the
+## sim's. The neighbours keep today's spines, so a moved gate is not re-fitted on their side.
+## Prints the rows that fit on at least `--min-fit=` percent of the seeds (default 20), with the
+## mean cell count.
 ## Run: godot --headless --path godot -s tools/probe_road_room.gd -- --n=60 --from=1
 extends SceneTree
 
@@ -12,8 +19,7 @@ const HALF := 0.5
 const BIASES := 4
 const BIAS_FIRST := 0.7
 const BIAS_STEP := 0.1
-const LANE_ALONG := 12
-const LANE_APART_SQ := 25
+const LAYOUT := preload("res://content/valley/layout_rules.gd")
 ## Only the templates that double back add length (every other template only moves forward).
 const IDS: Array[StringName] = [SEG.HOOK, SEG.U_TURN]
 const MARCH := 0
@@ -22,21 +28,35 @@ const FOLD := 4
 const HEARTKEEP := 5
 
 
-func _lane_ok(cells: Array[Vector2i]) -> bool:
+## The lane rule over the whole road: `before`, the candidate and `after` end to end.
+func _lane_ok(before: Array[Vector2i], cells: Array[Vector2i], after: Array[Vector2i]) -> bool:
+	var road: Array[Vector2i] = []
+	road.append_array(before)
+	road.append_array(cells)
+	road.append_array(after)
 	var seen := {}
-	for c in cells:
+	for c in road:
 		if seen.has(c):
 			return false
 		seen[c] = true
-	for later in range(LANE_ALONG, cells.size()):
-		for earlier in later - LANE_ALONG + 1:
-			if (cells[later] - cells[earlier]).length_squared() < LANE_APART_SQ:
+	var run: int = LAYOUT.LANE_RUN
+	var gap: int = LAYOUT.LANE_GAP
+	for later in range(run, road.size()):
+		for earlier in later - run + 1:
+			if (road[later] - road[earlier]).length_squared() < gap * gap:
 				return false
 	return true
 
 
 ## The best cell count of template `id` between the entry and exit cells in `rect`, or 0.
-func _best(id: StringName, rect: Rect2i, entry: Vector2i, exit: Vector2i) -> int:
+func _best(
+	id: StringName,
+	rect: Rect2i,
+	entry: Vector2i,
+	exit: Vector2i,
+	before: Array[Vector2i],
+	after: Array[Vector2i]
+) -> int:
 	var seg := RoadSegment.get_segment(id)
 	var h_in := Vector2(ValleyLayout._inward(rect, entry))
 	var h_out := -Vector2(ValleyLayout._inward(rect, exit))
@@ -53,7 +73,7 @@ func _best(id: StringName, rect: Rect2i, entry: Vector2i, exit: Vector2i) -> int
 		)
 		if f.ok():
 			var cells := RoadSpline.build(f.points).cells
-			if _lane_ok(cells):
+			if _lane_ok(before, cells, after):
 				best = maxi(best, cells.size())
 	return best
 
@@ -108,9 +128,16 @@ func _init() -> void:
 			continue
 		layouts += 1
 		for slot in lay.slots:
+			var before: Array[Vector2i] = []
+			var after: Array[Vector2i] = []
+			for other in lay.slots:
+				if other.id < slot.id:
+					before.append_array(RoadSpline.build(other.spine).cells)
+				elif other.id > slot.id:
+					after.append_array(RoadSpline.build(other.spine).cells)
 			for v in _variants(slot):
 				for id in IDS:
-					var cells := _best(id, slot.rect, v[1], v[2])
+					var cells := _best(id, slot.rect, v[1], v[2], before, after)
 					var key := "r%d %s %s" % [slot.id, v[0], id]
 					var s: Array = stats.get(key, [0, 0])
 					if cells > 0:
