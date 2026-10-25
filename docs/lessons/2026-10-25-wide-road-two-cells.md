@@ -23,6 +23,6 @@ that use the band (the layout valley); the strip valley, route-first maps and ol
 - 1.5: cheaper (3.2 draws, about 420 ms), but not the wide band the owner asked for.
 
 ## Consequences
-- The 0.90 to 1.10 time-under-fire gate is still #460's job (0.46 to 0.49 on the probe at 2.4).
+- The 0.90 to 1.10 time-under-fire gate is still #460's job (0.46 to 0.49 on the probe at 2.0).
 - `LAYOUT.MAX_ATTEMPTS` stays 60: the worst draw count was 20, a third of the limit.
 - No golden moves: the layout valley is not the game board until #458.
