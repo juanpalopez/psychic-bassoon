@@ -207,15 +207,17 @@ func test_repeating_an_order_mid_walk_keeps_the_hero_walking() -> void:
 	assert_almost_eq(from.x - game.hero.x, expected, 0.000001)
 
 
-func test_a_new_order_mid_walk_goes_back_only_when_its_way_turns() -> void:
+func test_a_new_order_mid_walk_carries_on_from_where_the_hero_is() -> void:
 	var game := _knight_on_open_board()
 	var start := game.hero.cell
 	_move(game, start + Vector2i(-6, 0))
 	for count in 5:
 		Game.tick(game)
-	# still on the first leg, now sent down: it finishes nothing and turns back to its cell
+	var here := _at(game)
+	# between two centres, sent down: on open ground it walks the straight line from where it is
 	_move(game, start + Vector2i(0, 3))
-	assert_eq(game.hero.path[0], start)
+	assert_eq(game.hero.path, [start + Vector2i(0, 3)] as Array[Vector2i])
+	assert_gt(_at(game).y, here.y, "it heads for the target, not back to its cell")
 
 
 func test_the_order_event_names_the_target_cell_centre() -> void:
