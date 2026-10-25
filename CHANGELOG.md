@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.1.0-alpha.9](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.8...v0.1.0-alpha.9) (2026-10-25)
+
+
+### Features
+
+* **content:** walk foes at half pace on the layout valley ([ce901a5](https://github.com/juanpalopez/psychic-bassoon/commit/ce901a53d54929853790a727294b2e7c4d68e33c))
+* **sim:** add a debug flag to play the layout valley ([#514](https://github.com/juanpalopez/psychic-bassoon/issues/514)) ([3a2933f](https://github.com/juanpalopez/psychic-bassoon/commit/3a2933ff6ed51b8fe3664a610b9964baabd6b4d5)), closes [#513](https://github.com/juanpalopez/psychic-bassoon/issues/513)
+* **sim:** add a per-map foe pace, off by default ([#533](https://github.com/juanpalopez/psychic-bassoon/issues/533)) ([6f5c849](https://github.com/juanpalopez/psychic-bassoon/commit/6f5c849b8415e2c93e0146b07240f1afcfa967e7))
+* **sim:** add the jog road segment template ([#494](https://github.com/juanpalopez/psychic-bassoon/issues/494)) ([0c6ec4b](https://github.com/juanpalopez/psychic-bassoon/commit/0c6ec4b16afad78c4f7f7707e873e44eec617332)), closes [#481](https://github.com/juanpalopez/psychic-bassoon/issues/481)
+* **sim:** add the road length measurement tools for the layout valley ([#525](https://github.com/juanpalopez/psychic-bassoon/issues/525)) ([ba479c3](https://github.com/juanpalopez/psychic-bassoon/commit/ba479c3e5f0480007d9be27dbdc15407443b166d))
+* **sim:** add the road room probe for hooks and u-turns ([#528](https://github.com/juanpalopez/psychic-bassoon/issues/528)) ([8088a8c](https://github.com/juanpalopez/psychic-bassoon/commit/8088a8ce5ee1f697c7d22d76f79369dbf2de5574))
+* **sim:** drop the hero-only bridge from the forked crossing ([#521](https://github.com/juanpalopez/psychic-bassoon/issues/521)) ([eee2888](https://github.com/juanpalopez/psychic-bassoon/commit/eee2888c8e53f38960d93cb195a2fdefef5f3cb8))
+* **sim:** grow the layout valley to 40 by 24 ([#485](https://github.com/juanpalopez/psychic-bassoon/issues/485)) ([8e99d38](https://github.com/juanpalopez/psychic-bassoon/commit/8e99d38d982028011c522c86313291f3cfdba488)), closes [#480](https://github.com/juanpalopez/psychic-bassoon/issues/480)
+* **sim:** lay two lanes out through the meadow and the crossing ([#510](https://github.com/juanpalopez/psychic-bassoon/issues/510)) ([3f2520a](https://github.com/juanpalopez/psychic-bassoon/commit/3f2520a705b39f6507520a6c8c30c3293f889139)), closes [#481](https://github.com/juanpalopez/psychic-bassoon/issues/481)
+* **sim:** let the balance tool play a named board ([#537](https://github.com/juanpalopez/psychic-bassoon/issues/537)) ([5ef0a6e](https://github.com/juanpalopez/psychic-bassoon/commit/5ef0a6e8ba6eee339fdcc7aef3b59aed188dd292))
+* **sim:** let the balance tool set the foe pace ([#539](https://github.com/juanpalopez/psychic-bassoon/issues/539)) ([5546518](https://github.com/juanpalopez/psychic-bassoon/commit/5546518f0c12d5241a6a129a15f4884ec8c8513f))
+* **sim:** make the sockets reach both lanes of the fork ([#518](https://github.com/juanpalopez/psychic-bassoon/issues/518)) ([4e55dde](https://github.com/juanpalopez/psychic-bassoon/commit/4e55dde55d4a37f26e53728fb9f149c98eede065))
+* **sim:** mark every cell the layout valley's road bed touches as road ([#490](https://github.com/juanpalopez/psychic-bassoon/issues/490)) ([cfab674](https://github.com/juanpalopez/psychic-bassoon/commit/cfab67472180d39d689eb22b4764426e093d35f8)), closes [#469](https://github.com/juanpalopez/psychic-bassoon/issues/469)
+* **sim:** measure coverage and socket-seconds per region for the road ([#529](https://github.com/juanpalopez/psychic-bassoon/issues/529)) ([91541f2](https://github.com/juanpalopez/psychic-bassoon/commit/91541f24be58bc4d84651cdab50f269da748e277))
+* **sim:** measure ground range to the road band's edge behind a reach band ([#499](https://github.com/juanpalopez/psychic-bassoon/issues/499)) ([395ccdb](https://github.com/juanpalopez/psychic-bassoon/commit/395ccdbda6599eb80483baa561fc3ea6df3e14d9)), closes [#446](https://github.com/juanpalopez/psychic-bassoon/issues/446)
+* **sim:** measure the hero, the bot and range rings to the road band's edge ([#506](https://github.com/juanpalopez/psychic-bassoon/issues/506)) ([726b06a](https://github.com/juanpalopez/psychic-bassoon/commit/726b06a48ea6ed6b178dc878ba50cbc1434ceed8)), closes [#446](https://github.com/juanpalopez/psychic-bassoon/issues/446)
+* **sim:** measure time under fire to the road band's edge ([#501](https://github.com/juanpalopez/psychic-bassoon/issues/501)) ([be48aa9](https://github.com/juanpalopez/psychic-bassoon/commit/be48aa93b2150561b172d426fff3156d25efa2d0)), closes [#446](https://github.com/juanpalopez/psychic-bassoon/issues/446)
+* **sim:** pick a branch for each foe on a forked map ([#493](https://github.com/juanpalopez/psychic-bassoon/issues/493)) ([0b8a7a8](https://github.com/juanpalopez/psychic-bassoon/commit/0b8a7a88b2d5fe69531f65c4cab368f64ba5765c)), closes [#481](https://github.com/juanpalopez/psychic-bassoon/issues/481)
+* **sim:** post guards on the branch of their bridge ([#500](https://github.com/juanpalopez/psychic-bassoon/issues/500)) ([ce13736](https://github.com/juanpalopez/psychic-bassoon/commit/ce137362d67345dce3b5cff3a71e72c48c6e687a)), closes [#481](https://github.com/juanpalopez/psychic-bassoon/issues/481)
+* **sim:** stitch the fork's second lane into the layout valley ([#515](https://github.com/juanpalopez/psychic-bassoon/issues/515)) ([6c05f57](https://github.com/juanpalopez/psychic-bassoon/commit/6c05f57b1e444a5b992fd89058367ef2083ebbbd))
+* **sim:** switch the two-cell road band on for the layout valley ([13fa969](https://github.com/juanpalopez/psychic-bassoon/commit/13fa969ebdf72219f73ca51a478fb2458da2dc02))
+* **ui:** add a minimap of the board that moves the camera ([853d101](https://github.com/juanpalopez/psychic-bassoon/commit/853d101f20d6d36ded2ff05a05908b4c1b3692ab))
+* **ui:** add edge arrows for foes near the Heartstone and the hero ([333d8e2](https://github.com/juanpalopez/psychic-bassoon/commit/333d8e2373a72fbd578cb1ce9ad99f7103e893a8))
+* **ui:** select the hero and send it across the map ([ddf2c30](https://github.com/juanpalopez/psychic-bassoon/commit/ddf2c300f8ece65e3af464b98f336d95c46155fb))
+
+
+### Bug Fixes
+
+* **build:** stop headless godot crashing in threaded imports ([#507](https://github.com/juanpalopez/psychic-bassoon/issues/507)) ([3a56b6f](https://github.com/juanpalopez/psychic-bassoon/commit/3a56b6f6524dc58bf6bd052e4b86cba84f5aa06e)), closes [#504](https://github.com/juanpalopez/psychic-bassoon/issues/504)
+* **render:** keep the two cell road bed off the water beside a river ([6207246](https://github.com/juanpalopez/psychic-bassoon/commit/62072469d41fa4e037208bc7a0c3532620713542))
+* **sim:** keep layout valley sockets off the road cells ([#520](https://github.com/juanpalopez/psychic-bassoon/issues/520)) ([d8db30e](https://github.com/juanpalopez/psychic-bassoon/commit/d8db30e91cade3d83b40c4f01dc9a88fe6011a61)), closes [#517](https://github.com/juanpalopez/psychic-bassoon/issues/517)
+* **sim:** rank the bot's sockets over every lane of the fork ([#534](https://github.com/juanpalopez/psychic-bassoon/issues/534)) ([04d76b8](https://github.com/juanpalopez/psychic-bassoon/commit/04d76b8b69a6b44ee0a2d2d128405f2119df71cc))
+
 ## [0.1.0-alpha.8](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.7...v0.1.0-alpha.8) (2026-10-23)
 
 
