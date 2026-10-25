@@ -154,13 +154,14 @@ func _rank_sockets(game: GameState) -> void:
 	_map = game.map
 	var reach_base: float = TOWERS.DEFS[SCOUT_TOWER].range[0]
 	var scores := {}
+	var road := _road_cells(_map)
 	for anchor in _map.sockets:
 		var centre := _map.socket_centre(anchor)
 		var reach := reach_base * _map.range_multiplier(anchor) + _map.reach_margin()
 		var covered := 0
-		for cell in _map.path:
-			var road := Vector2(float(cell.x) + 0.5, float(cell.y) + 0.5)
-			if centre.distance_to(road) <= reach:
+		for cell in road:
+			var middle := Vector2(float(cell.x) + 0.5, float(cell.y) + 0.5)
+			if centre.distance_to(middle) <= reach:
 				covered += 1
 		scores[anchor] = covered
 	_ranked = _map.sockets.duplicate()
@@ -174,3 +175,21 @@ func _rank_sockets(game: GameState) -> void:
 				return scores[a] > scores[b]
 			return index[a] < index[b]
 	)
+
+
+## The cells foes walk: the main path as it is, then each fork's branch route, every cell once at
+## equal weight (a fork's lane shares its head and tail with the path; the feeder joins the path
+## and stays out). Without a fork this is exactly the path, so the ranking does not move.
+func _road_cells(map: GameMap) -> Array[Vector2i]:
+	var cells: Array[Vector2i] = map.path.duplicate()
+	if map.forks.is_empty():
+		return cells
+	var seen := {}
+	for cell in cells:
+		seen[cell] = true
+	for fork in map.forks:
+		for cell in map.routes[fork.route]:
+			if not seen.has(cell):
+				seen[cell] = true
+				cells.append(cell)
+	return cells
