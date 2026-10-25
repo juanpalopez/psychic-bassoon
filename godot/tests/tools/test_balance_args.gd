@@ -92,15 +92,15 @@ func test_no_pace_leaves_the_map_pace_alone_and_a_pace_overwrites_it() -> void:
 func test_the_tool_passes_the_pace_to_the_bot_run() -> void:
 	var profile: Dictionary = PROFILES.PROFILES["mix"]
 	var unpaced := BalanceBoard.play_for_args(_args(["--board=layout", "--waves=3"]), 1, profile)
-	var paced := BalanceBoard.play_for_args(
-		_args(["--board=layout", "--waves=3", "--pace=0.5"]), 1, profile
-	)
-	var at_one := BalanceBoard.play_for_args(
+	var quick := BalanceBoard.play_for_args(
 		_args(["--board=layout", "--waves=3", "--pace=1.0"]), 1, profile
 	)
-	assert_eq(unpaced.waves_cleared, 3, "the unpaced run clears the three waves")
-	assert_gt(paced.waves[0].ticks, unpaced.waves[0].ticks, "half the pace takes longer per wave")
-	assert_eq(at_one, unpaced, "pace 1.0 is the unpaced run on the layout board")
+	var half := BalanceBoard.play_for_args(
+		_args(["--board=layout", "--waves=3", "--pace=0.5"]), 1, profile
+	)
+	assert_eq(quick.waves_cleared, 3, "the run at pace 1.0 clears the three waves")
+	assert_gt(half.waves[0].ticks, quick.waves[0].ticks, "half the pace takes longer per wave")
+	assert_eq(half, unpaced, "no pace plays the layout board's own pace, FOE_PACE")
 
 
 func _args(args: Array[String]) -> Dictionary:
