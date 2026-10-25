@@ -81,27 +81,100 @@ func test_the_road_crosses_the_river_once_on_a_road_bridge_with_straight_approac
 			assert_eq(result.road[last + step], wet[-1] + Vector2i.RIGHT * step, "seed %d" % seed)
 
 
-func test_the_hero_bridge_is_a_walkable_crossing_off_both_lanes_where_a_row_has_room() -> void:
-	var kept := 0
+func test_a_forked_crossing_has_two_road_bridges_and_no_hero_bridge() -> void:
 	for seed in range(1, LAST_SEED + 1):
-		var result := _good(_layout(seed))
-		var rows: Array[int] = []
-		for bridge in result.bridges:
-			rows.append(bridge.cell.y)
-		# with the fork the hero crosses on the lower lane's bridge too, so its own bridge is
-		# there only where a row far enough from both lanes has river (#481)
-		if result.hero_bridges.is_empty():
-			continue
-		kept += 1
+		var layout := _layout(seed)
+		var result := _good(layout)
+		assert_true(layout.slots[REGION].has_branch(), "seed %d is forked" % seed)
+		assert_true(result.hero_bridges.is_empty(), "seed %d: no hero-only bridge" % seed)
+		var upper := result.bridges.filter(func(b: GameMap.Bridge) -> bool: return not b.on_branch)
+		var lower := result.bridges.filter(func(b: GameMap.Bridge) -> bool: return b.on_branch)
+		assert_false(upper.is_empty(), "seed %d: the upper lane's bridge" % seed)
+		assert_false(lower.is_empty(), "seed %d: the lower lane's bridge" % seed)
+		assert_eq(upper.size() + lower.size(), result.bridges.size())
+		for bridge in upper:
+			assert_true(result.road.has(bridge.cell), "seed %d" % seed)
+		for bridge in lower:
+			assert_true(result.branch.has(bridge.cell), "seed %d" % seed)
+			assert_true(result.is_walkable(bridge.cell))
+		assert_gte(
+			absi(lower[0].cell.y - upper[0].cell.y), RULES.HERO_BRIDGE_MIN_ROW_GAP, "seed %d" % seed
+		)
+
+
+func test_the_stitched_forked_valley_has_bridges_on_route_0_and_2_and_no_hero_bridge() -> void:
+	for seed in range(1, LAST_SEED + 1, STITCH_STEP):
+		var map := ValleyStitcher.build(seed, 40, 24, ValleyLayout.sections(), _layout(seed))
+		assert_not_null(map, "seed %d" % seed)
+		assert_true(map.hero_bridges.is_empty(), "seed %d" % seed)
+		var routes := {}
+		for bridge in map.bridges:
+			routes[bridge.route] = true
+		assert_eq(routes.keys(), [0, 2], "seed %d: the bridge routes" % seed)
+
+
+func test_an_unforked_crossing_keeps_its_hero_bridge() -> void:
+	for seed in SEEDS:
+		var layout := ValleyLayout.generate(seed, 40, 24, false)
+		assert_not_null(layout, "seed %d" % seed)
+		var slot := layout.slots[REGION]
+		assert_false(slot.has_branch())
+		var result := BluewaterCrossingRegion.new().generate(slot, layout.rng_for(REGION, 0))
 		assert_gte(result.hero_bridges.size(), 2, "seed %d: two cells wide" % seed)
 		for cell in result.hero_bridges:
 			assert_true(result.river.has(cell))
 			assert_false(result.road.has(cell))
-			assert_false(result.branch.has(cell))
 			assert_true(result.is_walkable(cell))
-			for row in rows:
-				assert_gte(absi(cell.y - row), RULES.HERO_BRIDGE_MIN_ROW_GAP, "seed %d" % seed)
-	assert_gt(kept, 0, "some layouts keep the hero bridge")
+			assert_gte(absi(cell.y - slot.entry.y), RULES.HERO_BRIDGE_MIN_ROW_GAP, "seed %d" % seed)
+		assert_true(BluewaterCrossingRegion.new().extra_problems(slot, result).is_empty())
+
+
+func test_the_checks_require_the_hero_bridge_only_on_an_unforked_crossing() -> void:
+	var forked := _layout(1)
+	var result := _good(forked)
+	var region := BluewaterCrossingRegion.new()
+	assert_true(region.extra_problems(forked.slots[REGION], result).is_empty())
+	# a hero bridge that would pass every other check: walkable river cells on a row clear of
+	# both lanes
+	var rows: Array[int] = []
+	for bridge in result.bridges:
+		rows.append(bridge.cell.y)
+	for cell in result.river:
+		if rows.all(
+			func(row: int) -> bool: return absi(cell.y - row) >= RULES.HERO_BRIDGE_MIN_ROW_GAP
+		):
+			result.hero_bridges.append(cell)
+			result.set_walkable(cell, true)
+	assert_false(result.hero_bridges.is_empty(), "the river has a row clear of both bridges")
+	assert_false(
+		region.extra_problems(forked.slots[REGION], result).is_empty(),
+		"a forked crossing with a hero bridge fails"
+	)
+	var plain := ValleyLayout.generate(1, 40, 24, false)
+	var drawn := BluewaterCrossingRegion.new().generate(
+		plain.slots[REGION], plain.rng_for(REGION, 0)
+	)
+	drawn.hero_bridges.clear()
+	assert_false(
+		region.extra_problems(plain.slots[REGION], drawn).is_empty(),
+		"an unforked crossing without a hero bridge fails"
+	)
+
+
+func test_no_block_stands_on_either_bridge_and_blocks_stand_beside_both() -> void:
+	for seed in range(1, LAST_SEED + 1):
+		var result := _good(_layout(seed))
+		for lane in [false, true]:
+			var span := SectionSockets.bridge_cells(result, lane)
+			assert_false(span.is_empty(), "seed %d lane %s" % [seed, lane])
+			for anchor in result.sockets:
+				var block := Rect2i(anchor, Vector2i.ONE * 2)
+				for cell in span:
+					assert_false(block.has_point(cell), "seed %d: block on a bridge" % seed)
+			assert_true(
+				SectionSockets.reaches_cells(result, span, result.sockets),
+				"seed %d: a block beside the %s bridge" % [seed, "lower" if lane else "upper"]
+			)
 
 
 func test_river_cells_are_unwalkable_except_bridges_and_no_socket_touches_them() -> void:
