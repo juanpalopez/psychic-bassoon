@@ -131,7 +131,8 @@ func _hud_rects(width: int, height: int, shown: String = "") -> Dictionary:
 	await get_tree().process_frame
 	var rects := {}
 	for child in main.get_node("Hud").get_children():
-		if child is Control and (child as Control).visible:
+		# the arrows are a full-canvas overlay that never takes a tap
+		if child is Control and (child as Control).visible and not child is EdgeIndicators:
 			rects[child.name] = (child as Control).get_global_rect()
 	return rects
 

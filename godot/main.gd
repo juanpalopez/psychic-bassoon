@@ -66,6 +66,9 @@ var _paused_before_overlay := false
 var _fly_target := BoardSpace.NO_CELL
 # the zoom last frame, to see the player zoom out past a selected socket
 var _zoom_seen := 0.0
+# the view a run started in, to re-frame it while the player has not touched the camera
+var _start_zoom := 0.0
+var _start_pan := Vector2.ZERO
 
 @onready var _world: WorldEnvironment = $WorldEnvironment
 @onready var _sun: DirectionalLight3D = $Sun
@@ -104,6 +107,8 @@ func _ready() -> void:
 	if from_args is int:
 		from_url = from_args
 	_rig.flight_ended.connect(_on_flight_ended)
+	# the window may still be settling when a run starts: frame the start again once it has
+	get_viewport().size_changed.connect(_reframe_start_view, CONNECT_DEFERRED)
 	_start(from_url if from_url is int else _board.map_seed)
 	add_child(_audio)
 	_menu_button.toggled.connect(
@@ -529,11 +534,26 @@ func _start(map_seed: int) -> void:
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_update_launch_button()
 	# a run starts on the spawn side, at a zoom where its sockets can be tapped (#328)
+	_frame_start_view()
+
+
+## Puts the camera in the run's start view and remembers it.
+func _frame_start_view() -> void:
 	var spawn: Vector2i = _game.map.path[0]
 	_rig.start_view(
 		BoardSpace.cell_to_world(spawn.x, spawn.y), float(_game.map.footprint), tap_pixels()
 	)
 	_zoom_seen = _rig.zoom
+	_start_zoom = _rig.zoom
+	_start_pan = _rig.pan
+
+
+## The window changed size: while the camera still stands where the run put it, frame the start
+## again, so the view never depends on when the window size became known.
+func _reframe_start_view() -> void:
+	if _rig.flying() or _rig.zoom != _start_zoom or _rig.pan != _start_pan:
+		return
+	_frame_start_view()
 
 
 func _tower_on(cell: Vector2i) -> Tower:

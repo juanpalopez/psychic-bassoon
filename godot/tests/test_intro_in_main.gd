@@ -271,7 +271,8 @@ func test_the_bubble_stays_clear_of_every_other_hud_control_and_most_sockets() -
 			var bubble := view.bubble()
 			var rect := Rect2(bubble.global_position, bubble.size)
 			for node in main.get_node("Hud").get_children():
-				if node is Control and node != view and (node as Control).is_visible_in_tree():
+				var layer := node is EdgeIndicators
+				if node is Control and node != view and not layer and node.is_visible_in_tree():
 					assert_false(
 						rect.intersects((node as Control).get_global_rect()),
 						"step %d: bubble %s over %s at %s" % [i, rect, node.name, size]
