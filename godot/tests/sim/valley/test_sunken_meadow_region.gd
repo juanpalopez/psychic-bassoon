@@ -64,6 +64,17 @@ func test_boulders_never_cut_the_walkable_ground() -> void:
 	assert_gt(boulders, 0)
 
 
+func test_nothing_is_placed_on_either_lane() -> void:
+	for seed in range(1, SWEEP + 1):
+		var result: SectionResult = _drawn(seed)[2]
+		assert_false(result.branch.is_empty(), "seed %d is forked" % seed)
+		for cell in result.road + result.branch:
+			assert_eq(result.region_at(cell), GameMap.Region.DIRT, "seed %d at %s" % [seed, cell])
+			assert_true(result.is_walkable(cell), "seed %d at %s" % [seed, cell])
+			for anchor in result.sockets:
+				assert_false(Rect2i(anchor, Vector2i.ONE * 2).has_point(cell), "seed %d" % seed)
+
+
 func test_the_road_is_the_spline_of_the_spine() -> void:
 	for seed in SEEDS:
 		var drawn := _drawn(seed)

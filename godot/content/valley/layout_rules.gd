@@ -71,9 +71,10 @@ const BLOCK_MARGIN := Vector2i(1, 1)
 ## a spline road is a staircase of one-step runs).
 const BEND_RUN := 2
 ## The most steps the hero may need from the meadow to a kind of section (`ValleyPlan.Id`, steps).
-## Provisional until the real sections exist: measured over seeds 1..3000 on 40 by 24 with the
-## stand-in sections (worst Broken Ridge 44, Crossing 22, Heartkeep 36), plus 4 steps.
-const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 48), Vector2i(2, 27), Vector2i(5, 40)]
+## Measured over seeds 1..300 and 3001..3300 on 40 by 24 with the real regions and the fork on
+## (worst Broken Ridge 33, Crossing 21, Heartkeep 35; the hero crosses on either bridge), plus 4
+## steps. Before the fork and the regions: 44, 22, 36 over seeds 1..3000.
+const HERO_CAPS: Array[Vector2i] = [Vector2i(1, 37), Vector2i(2, 25), Vector2i(5, 39)]
 
 ## The lane rule (#406): two stretches of the road at least `LANE_RUN` cells apart along it are
 ## at least `LANE_GAP` cells apart in a straight line, so a bend is a wide curve, never a snake of
