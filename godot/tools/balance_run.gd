@@ -41,9 +41,7 @@ func _init() -> void:
 		var cleared: Array[int] = []
 		var results: Array[Dictionary] = []
 		for map_seed in seeds:
-			var r := BalanceBoard.play(
-				board, map_seed, PROFILES.PROFILES[id], max_waves, BotRunner.DEFAULT_MAX_TICKS, pace
-			)
+			var r := BalanceBoard.play_for_args(args, map_seed, PROFILES.PROFILES[id])
 			if r.is_empty():
 				printerr("no %s board for seed %d" % [board, map_seed])
 				quit(1)
