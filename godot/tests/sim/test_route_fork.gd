@@ -117,7 +117,7 @@ func test_a_map_without_a_fork_draws_nothing() -> void:
 
 
 func test_the_game_board_draws_nothing() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	assert_true(game.map.sources.is_empty())
 	assert_true(game.map.forks.is_empty())
 	var before := game.route_rng.state

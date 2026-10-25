@@ -290,7 +290,7 @@ func test_cell_distance_on_a_grid_route_is_the_distance_to_the_cell_centre() -> 
 
 func test_the_valley_game_walks_curved_routes() -> void:
 	for map_seed in [1, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		assert_gte(game.map.cols, RULES.VALLEY_MIN_COLS)
 		for r in game.routes.size():
 			var cells: Array[Vector2i] = []
@@ -322,7 +322,7 @@ func test_classic_boards_keep_the_grid_route() -> void:
 func test_after_the_join_both_routes_are_the_same_curve() -> void:
 	var checked := 0
 	for map_seed in _seeds:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		if game.routes.size() < 2:
 			continue
 		checked += 1
@@ -352,7 +352,7 @@ func test_a_second_route_foe_is_on_the_main_road_where_the_main_road_has_its_joi
 	# cell holds it (on the curve, route 1's own join point maps a little past it)
 	var checked := 0
 	for map_seed in _seeds:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		if game.routes.size() < 2:
 			continue
 		checked += 1
@@ -374,7 +374,7 @@ func test_a_second_route_foes_first_main_distance_is_no_later_than_the_join_cell
 	# before the main road's join cell (one step of slack for the walk itself)
 	var checked := 0
 	for map_seed in _seeds:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		if game.routes.size() < 2:
 			continue
 		checked += 1
@@ -400,7 +400,7 @@ func test_guard_posts_on_curved_routes_follow_the_nearest_point_rule() -> void:
 	var sockets := 0
 	var closest_gap := INF
 	for map_seed in [1, 2, 3, 42, 7920]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		var route := game.routes[0]
 		for anchor in game.map.sockets:
 			var tent := Tower.new()
@@ -433,7 +433,7 @@ func test_guard_posts_on_curved_routes_follow_the_nearest_point_rule() -> void:
 
 
 func test_flying_routes_start_where_the_curved_routes_start() -> void:
-	var game := Game.create(42)
+	var game := Game.create_on_strip_valley(42)
 	for r in game.routes.size():
 		var start := game.routes[r].position_at(0.0)
 		var air := game.air_routes[r].position_at(0.0)

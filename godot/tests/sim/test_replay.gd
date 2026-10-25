@@ -69,6 +69,7 @@ func test_a_changed_number_in_a_command_changes_the_final_state() -> void:
 	assert_ne(ReplayKit.replay(changed).final.hash, _rec.final.hash)
 
 
+## Follows the default board (`Game.create`): any board would do, the digest is the subject.
 func test_the_event_hash_follows_the_events() -> void:
 	var a := ReplayKit.EventDigest.new()
 	var b := ReplayKit.EventDigest.new()

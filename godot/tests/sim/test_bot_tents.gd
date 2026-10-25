@@ -31,7 +31,7 @@ func test_the_guard_mix_builds_both_tents_among_its_towers() -> void:
 	# always have, so look over a few seeds
 	var with_both: Array[int] = []
 	for map_seed in range(1, 9):
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		game.buttons = 100000
 		_play(game, 60)
 		var types := _types(game)
@@ -47,7 +47,7 @@ func test_the_guard_mix_builds_both_tents_among_its_towers() -> void:
 
 func test_a_mess_tent_goes_where_its_aura_reaches_the_guards() -> void:
 	for map_seed in [1, 2, 3, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		game.buttons = 100000
 		_play(game, 60)
 		for tower in game.towers:
@@ -64,7 +64,7 @@ func test_a_mess_tent_goes_where_its_aura_reaches_the_guards() -> void:
 
 
 func test_no_mess_tent_is_built_before_a_guard_tent_exists() -> void:
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	game.buttons = 100000
 	var bot := ScriptedBot.new(
 		{"build_order": ["messTent", "spoolGuard"], "call_early": false, "early_foes_left": 0}
@@ -80,7 +80,7 @@ func test_no_mess_tent_is_built_before_a_guard_tent_exists() -> void:
 ## replay golden (a whole 20 wave game) is the longer check.
 func test_the_guard_mix_never_sends_a_command_the_sim_rejects() -> void:
 	for map_seed in [1, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		assert_eq(_play(game, 3000), 0, "seed %d" % map_seed)
 
 
@@ -94,7 +94,7 @@ func test_the_guard_mix_plays_a_whole_run_and_replays_the_same() -> void:
 func test_a_guard_tent_of_the_bot_has_its_guards_on_road_within_touch_of_its_block() -> void:
 	var touch: float = MAP_RULES.SOCKET_BLOCK_TOUCH_DISTANCE
 	for map_seed in [1, 2, 3, 7, 42]:
-		var game := Game.create(map_seed)
+		var game := Game.create_on_strip_valley(map_seed)
 		game.buttons = 100000
 		_play(game, 60)
 		var tents := 0

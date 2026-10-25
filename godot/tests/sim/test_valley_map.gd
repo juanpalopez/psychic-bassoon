@@ -23,7 +23,7 @@ func _valley(map_seed: int) -> GameMap:
 func test_the_game_builds_the_valley_by_default() -> void:
 	assert_eq([RULES.GRID_COLS, RULES.GRID_ROWS], [COLS, ROWS])
 	assert_gte(RULES.GRID_COLS, RULES.VALLEY_MIN_COLS, "the game board uses the valley shape")
-	var game := Game.create(1)
+	var game := Game.create_on_strip_valley(1)
 	assert_eq([game.map.cols, game.map.rows], [COLS, ROWS])
 	assert_eq(game.map.footprint, 2)
 	assert_between(game.routes.size(), 1, 2, "the main road, and a feeder when it fits")
@@ -185,12 +185,12 @@ func test_the_game_road_length_and_sockets_on_average() -> void:
 
 
 func test_the_same_seed_gives_the_same_valley() -> void:
-	var a := Game.create(42).map
-	var b := Game.create(42).map
+	var a := Game.create_on_strip_valley(42).map
+	var b := Game.create_on_strip_valley(42).map
 	assert_eq(a.routes, b.routes)
 	assert_eq(a.sockets, b.sockets)
 	assert_eq(a.elevation, b.elevation)
-	assert_ne(Game.create(43).map.routes, a.routes)
+	assert_ne(Game.create_on_strip_valley(43).map.routes, a.routes)
 
 
 func test_the_classic_boards_keep_the_classic_shape() -> void:
