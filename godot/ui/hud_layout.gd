@@ -14,3 +14,10 @@ const GAP := 12.0
 const TOP_CLEAR := EDGE + ROW + GAP
 ## The bottom row and the gap above it: where floating pieces must stop.
 const BOTTOM_CLEAR := EDGE + ROW + GAP
+
+
+## The hero ability button, bottom-right, one row above the bottom row so the build bar stays
+## clear. The button and the edge arrows both read this rect.
+static func ability_rect(canvas: Vector2) -> Rect2:
+	var at := Vector2(canvas.x - EDGE - ROW, canvas.y - BOTTOM_CLEAR - ROW)
+	return Rect2(at, Vector2(ROW, ROW))

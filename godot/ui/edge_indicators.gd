@@ -46,10 +46,13 @@ func pulse() -> float:
 	return 1.0 + RULES.PULSE_SHARE * sin(_clock * TAU * RULES.PULSE_HERTZ)
 
 
-## The part of the canvas the HUD rows leave free: arrows stay inside it.
+## The part of the canvas the HUD rows leave free: arrows stay inside it, and stop above the
+## hero ability button.
 func room(canvas: Vector2) -> Rect2:
 	var top := HudLayout.TOP_CLEAR
-	var bottom := canvas.y - HudLayout.BOTTOM_CLEAR
+	var bottom := minf(
+		canvas.y - HudLayout.BOTTOM_CLEAR, HudLayout.ability_rect(canvas).position.y - HudLayout.GAP
+	)
 	var side := HudLayout.EDGE + RULES.ARROW_LENGTH
 	return Rect2(side, top, canvas.x - 2.0 * side, bottom - top)
 

@@ -47,6 +47,7 @@ var _glow := SocketGlow.new()
 var _card := TowerCard.new()
 var _hero_view := HeroView.new()
 var _hero_selected := false
+var _whirl := HeroAbilityButton.new()
 var _glow_shown := false
 ## How many foes the phone check keeps walking (the `?stress=` page parameter), 0 for none.
 var _stress_foes := 0
@@ -132,6 +133,8 @@ func _ready() -> void:
 	$Hud.add_child(_card)
 	$Hud.add_child(_arrows)
 	$Hud.add_child(_minimap)
+	$Hud.add_child(_whirl)
+	_whirl.cast_requested.connect(_on_whirl)
 	_minimap.jump_requested.connect(_on_minimap_jump)
 	$Hud.add_child(_fps)
 	_read_phone_check_params()
@@ -210,6 +213,7 @@ func _process(delta: float) -> void:
 	_menu.set_buttons(_game.buttons)
 	_close_if_zoomed_out()
 	_refresh_panel()
+	_whirl.show_hero(_game.hero, _menu.visible or _panel.visible, _speed.paused)
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_top_bar.show_state(_game)
@@ -603,6 +607,14 @@ func _on_ability(tower_id: int) -> void:
 	Game.submit(_game, Command.activate(tower_id))
 
 
+## Casts the Knight's Blade Whirl: the hero's id names it in ACTIVATE_ABILITY.
+func _on_whirl() -> void:
+	if _game.hero == null:
+		return
+	_note_if_paused()
+	Game.submit(_game, Command.activate(_game.hero.id))
+
+
 func _on_sell(tower_id: int) -> void:
 	_note_if_paused()
 	Game.submit(_game, Command.sell(tower_id))
@@ -667,6 +679,13 @@ func _after_tick(game: GameState) -> void:
 		elif event.kind == GameEvent.Kind.TOWER_FIRED:
 			_draw_shot(game, event)
 			_towers.fire(event.tower_id, ShotsView.body_point(event.x, event.y))
+		elif (
+			event.kind == GameEvent.Kind.ABILITY_USED
+			and game.hero != null
+			and event.tower_id == game.hero.id
+		):
+			# a cue that needs no motion, so it holds under Reduce motion
+			_show_message(HeroAbilityState.CAST_MESSAGE)
 		elif event.kind == GameEvent.Kind.GUARD_RAISED:
 			_towers.act(event.tower_id, "deploy")
 		elif event.kind == GameEvent.Kind.FOE_LEAKED:
