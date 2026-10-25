@@ -1,0 +1,79 @@
+[
+  {
+    "name": "sockets reach only the main road (lane clause removed)",
+    "file": "sim/map/valley/section_sockets.gd",
+    "old": "\t\tor (not result.branch.is_empty() and covers(block, result.branch, 0.0, reach))",
+    "new": "\t\tor false",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "own_branch counts the shared cells",
+    "file": "sim/map/valley/section_sockets.gd",
+    "old": "\t\tif not result.road.has(cell):\n\t\t\town.append(cell)",
+    "new": "\t\tif true:\n\t\t\town.append(cell)",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "one lane block is enough",
+    "file": "content/valley/layout_rules.gd",
+    "old": "const BRANCH_MIN_BLOCKS := 2",
+    "new": "const BRANCH_MIN_BLOCKS := 0",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "the lane check is off",
+    "file": "sim/map/valley/valley_checks.gd",
+    "old": "\tfound.append_array(_lane_reach_problems(id, result))\n",
+    "new": "",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "the lower bridge needs no block",
+    "file": "sim/map/valley/valley_checks.gd",
+    "old": "for on_branch in [false, true]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "new": "for on_branch in [false]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "branch bends need no block",
+    "file": "sim/map/valley/valley_checks.gd",
+    "old": "\tfor bend in SectionSockets.bends(result.branch, slot.bend_run):\n\t\tif not _covered(result, bend):",
+    "new": "\tfor bend in SectionSockets.bends(result.branch, slot.bend_run):\n\t\tif false:",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "the placer skips the lane blocks",
+    "file": "sim/map/valley/section_sockets.gd",
+    "old": "\tif not result.branch.is_empty():\n\t\t_reach_lanes(result, sites)",
+    "new": "\tif false:\n\t\t_reach_lanes(result, sites)",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "the placer skips branch bends",
+    "file": "sim/map/valley/section_sockets.gd",
+    "old": "\tfor bend in bends(result.branch, result.bend_run):\n\t\t_cover_bend(result, sites, bend)\n",
+    "new": "",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "a bridge is reached from any distance",
+    "file": "sim/map/valley/section_sockets.gd",
+    "old": "\t\t\tif centre_gap(anchor, cell) <= reach:\n\t\t\t\treturn true",
+    "new": "\t\t\tif centre_gap(anchor, cell) <= reach + 100.0:\n\t\t\t\treturn true",
+    "tests": ["test_fork_lane_reach", "test_valley_stitcher_fork"]
+  },
+  {
+    "name": "BRANCH_MIN_BLOCKS 2 -> 1",
+    "file": "content/valley/layout_rules.gd",
+    "old": "const BRANCH_MIN_BLOCKS := 2",
+    "new": "const BRANCH_MIN_BLOCKS := 1",
+    "tests": ["test_fork_lane_reach"]
+  },
+  {
+    "name": "only the lower bridge is checked",
+    "file": "sim/map/valley/valley_checks.gd",
+    "old": "for on_branch in [false, true]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "new": "for on_branch in [true]:\n\t\tvar span := SectionSockets.bridge_cells(result, on_branch)\n\t\tif not span.is_empty() and",
+    "tests": ["test_fork_lane_reach"]
+  }
+]

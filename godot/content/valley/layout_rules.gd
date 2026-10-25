@@ -96,3 +96,7 @@ const FORK_ROW_GAP := Vector2i(4, 5)
 ## of the merge (along the lower lane's own stretch) they may come closer.
 const LANE_APART := 3
 const LANE_JOIN := 10
+## The sockets reach both lanes (#516): in each strip that carries the lower lane at least this
+## many blocks have `SOCKET_MIN_ROAD_COVERAGE` cells of the lane's own stretch (the cells the
+## upper lane does not share) in reach, and some block reaches each lane's bridge.
+const BRANCH_MIN_BLOCKS := 2
