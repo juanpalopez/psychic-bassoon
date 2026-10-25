@@ -174,6 +174,7 @@ func test_the_cooldown_keeps_counting_while_the_knight_is_fallen() -> void:
 	assert_gt(game.hero.ability_cooldown, 0.0)
 	game.hero.alive = false
 	game.hero.respawn_timer = 1000.0
-	for i in 460:
+	var cooldown: float = HEROES.DEFS[HEROES.KNIGHT].blade_whirl.cooldown
+	for i in int(ceil(cooldown / Game.TICK_SECONDS)) + 1:
 		Game.tick(game)
 	assert_eq(game.hero.ability_cooldown, 0.0)
