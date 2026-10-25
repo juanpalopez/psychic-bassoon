@@ -5,8 +5,24 @@ class_name BalanceBoard
 extends RefCounted
 
 
-## The game for a seed on a board. Null (with an error) when the board cannot be made.
-static func game_for(board: String, map_seed: int) -> GameState:
+## The game for a seed on a board. Null (with an error) when the board cannot be made. A
+## `pace` above 0 sets the map's foe pace before any tick, so no foe has spawned yet (a foe takes
+## its speed when it spawns); 0 keeps the board's own pace.
+static func game_for(board: String, map_seed: int, pace: float = 0.0) -> GameState:
+	var game := _game_for(board, map_seed)
+	if game != null:
+		apply_pace(game, pace)
+	return game
+
+
+## Sets the foe pace of the game's map when `pace` is above 0; any other value leaves the map's
+## own pace alone. Called before the first tick.
+static func apply_pace(game: GameState, pace: float) -> void:
+	if pace > 0.0:
+		game.map.foe_pace = pace
+
+
+static func _game_for(board: String, map_seed: int) -> GameState:
 	match board:
 		"layout":
 			return Game.create_on_layout_valley(map_seed)
@@ -25,15 +41,16 @@ static func game_for(board: String, map_seed: int) -> GameState:
 
 
 ## Plays `map_seed` on `board` with `profile` like `BotRunner.play`, and returns the same
-## record (empty when the board cannot be made).
+## record (empty when the board cannot be made). `pace` is `game_for`'s.
 static func play(
 	board: String,
 	map_seed: int,
 	profile: Dictionary,
 	max_waves: int,
-	max_ticks: int = BotRunner.DEFAULT_MAX_TICKS
+	max_ticks: int = BotRunner.DEFAULT_MAX_TICKS,
+	pace: float = 0.0
 ) -> Dictionary:
-	var game := game_for(board, map_seed)
+	var game := game_for(board, map_seed, pace)
 	if game == null:
 		return {}
 	# keep the bot in a variable: a Callable on a temporary would lose its object
@@ -98,3 +115,11 @@ static func play(
 		"waves": waves,
 		"unfinished": since_clear,
 	}
+
+
+## The run `balance_run.gd` makes for one seed and one profile, from the parsed options: the
+## board (`default` when none is given), the waves and the pace. The tool calls this and nothing
+## else, so a test of it covers what the command line does.
+static func play_for_args(args: Dictionary, map_seed: int, profile: Dictionary) -> Dictionary:
+	var board: String = args.board if args.board != "" else "default"
+	return play(board, map_seed, profile, args.waves, BotRunner.DEFAULT_MAX_TICKS, args.pace)

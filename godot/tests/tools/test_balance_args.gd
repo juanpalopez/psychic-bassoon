@@ -1,6 +1,8 @@
 ## The balance tool's command line (#458): the boards, the pace and the defaults.
 extends GutTest
 
+const PROFILES := preload("res://content/bot_profiles.gd")
+
 
 func _parse(args: Array[String]) -> Dictionary:
 	return BalanceArgs.parse(PackedStringArray(args))
@@ -44,11 +46,11 @@ func test_the_board_goes_with_the_other_options() -> void:
 	assert_true(out.detail)
 
 
-func test_pace_is_refused_until_the_game_has_a_foe_pace() -> void:
-	assert_false(BalanceArgs.PACE_AVAILABLE)
+func test_a_pace_is_read_as_a_number_above_0() -> void:
 	var out := _parse(["--pace=0.55"])
-	assert_string_contains(out.error, "--pace=0.55")
-	assert_string_contains(out.error, "not available yet")
+	assert_eq(out.error, "")
+	assert_eq(out.pace, 0.55)
+	assert_eq(_parse(["--pace=1.0"]).pace, 1.0)
 
 
 func test_a_bad_pace_says_what_is_wrong_with_it() -> void:
@@ -67,6 +69,42 @@ func _mean_road(board: String) -> float:
 	for map_seed in [1, 2, 3]:
 		total += float(BalanceBoard.game_for(board, map_seed).map.path.size())
 	return total / 3.0
+
+
+func test_a_pace_is_set_on_the_map_of_every_board_before_any_foe() -> void:
+	for board in ["strip", "layout", "default"]:
+		var paced := BalanceBoard.game_for(board, 1, 0.5)
+		assert_eq(paced.map.foe_pace, 0.5, board)
+		assert_true(paced.foes.is_empty(), "no foe has spawned when the pace is set: " + board)
+
+
+func test_no_pace_leaves_the_map_pace_alone_and_a_pace_overwrites_it() -> void:
+	var game := BalanceBoard.game_for("strip", 1)
+	game.map.foe_pace = 0.7
+	BalanceBoard.apply_pace(game, 0.0)
+	assert_eq(game.map.foe_pace, 0.7, "a pace of 0 keeps the board's own pace")
+	BalanceBoard.apply_pace(game, -1.0)
+	assert_eq(game.map.foe_pace, 0.7, "a negative pace keeps it too")
+	BalanceBoard.apply_pace(game, 0.5)
+	assert_eq(game.map.foe_pace, 0.5, "a pace above 0 overwrites it")
+
+
+func test_the_tool_passes_the_pace_to_the_bot_run() -> void:
+	var profile: Dictionary = PROFILES.PROFILES["mix"]
+	var unpaced := BalanceBoard.play_for_args(_args(["--board=layout", "--waves=3"]), 1, profile)
+	var paced := BalanceBoard.play_for_args(
+		_args(["--board=layout", "--waves=3", "--pace=0.5"]), 1, profile
+	)
+	var at_one := BalanceBoard.play_for_args(
+		_args(["--board=layout", "--waves=3", "--pace=1.0"]), 1, profile
+	)
+	assert_eq(unpaced.waves_cleared, 3, "the unpaced run clears the three waves")
+	assert_gt(paced.waves[0].ticks, unpaced.waves[0].ticks, "half the pace takes longer per wave")
+	assert_eq(at_one, unpaced, "pace 1.0 is the unpaced run on the layout board")
+
+
+func _args(args: Array[String]) -> Dictionary:
+	return BalanceArgs.parse(PackedStringArray(args))
 
 
 func test_strip_is_the_strip_valley_whatever_the_default_board_is() -> void:
