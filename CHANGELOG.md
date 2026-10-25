@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.1.0-alpha.10](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.9...v0.1.0-alpha.10) (2026-10-25)
+
+
+### ⚠ BREAKING CHANGES
+
+* **sim:** play the layout valley on the game board ([#552](https://github.com/juanpalopez/psychic-bassoon/issues/552))
+
+### Features
+
+* **sim:** play the layout valley on the game board ([#552](https://github.com/juanpalopez/psychic-bassoon/issues/552)) ([9296bf5](https://github.com/juanpalopez/psychic-bassoon/commit/9296bf5e080b0f5ce0022a2527cce2cb2357e156))
+* **sim:** walk the Knight in straight lines across open ground ([fee6e0d](https://github.com/juanpalopez/psychic-bassoon/commit/fee6e0d7108510bb1dee7d31391db693e00f08f0))
+* **ui:** add a Blade Whirl button for the Knight ([3090edf](https://github.com/juanpalopez/psychic-bassoon/commit/3090edf360c5af45ffadc6169556e87dbaa9eb48))
+
+
+### Bug Fixes
+
+* **ui:** draw the edge arrows and frame the start view after a resize ([0b42202](https://github.com/juanpalopez/psychic-bassoon/commit/0b422022c66045c3703bc47f093da4d14ea23aa5))
+
+
+### Documentation
+
+* note that the pan clamp holds the start view's spawn further in ([bfc69f2](https://github.com/juanpalopez/psychic-bassoon/commit/bfc69f2e93a7be505b59f4d8735ab67550648ad3))
+
 ## [0.1.0-alpha.9](https://github.com/juanpalopez/psychic-bassoon/compare/v0.1.0-alpha.8...v0.1.0-alpha.9) (2026-10-25)
 
 
