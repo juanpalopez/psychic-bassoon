@@ -45,6 +45,8 @@ var _flow := IntroFlow.new()
 var _intro := IntroView.new()
 var _glow := SocketGlow.new()
 var _card := TowerCard.new()
+var _hero_view := HeroView.new()
+var _hero_selected := false
 var _glow_shown := false
 ## How many foes the phone check keeps walking (the `?stress=` page parameter), 0 for none.
 var _stress_foes := 0
@@ -124,6 +126,7 @@ func _ready() -> void:
 	$Hud.add_child(_fps)
 	_read_phone_check_params()
 	add_child(_glow)
+	add_child(_hero_view)
 	_menu.info_requested.connect(_on_info_requested)
 	_menu.info_cleared.connect(_card.hide_card)
 	_menu.closed.connect(
@@ -185,6 +188,7 @@ func _process(delta: float) -> void:
 	_towers.sync(_game.towers, _board.surface_height, _game.map.footprint)
 	_foes.update(_game, _clock.accumulator / Game.TICK_SECONDS, _hold)
 	_guards.update(_game)
+	_sync_hero()
 	if ticks_speed > 0:
 		_shots.update(game_seconds)
 	_shots.show_beams(_game, _board.surface_height)
@@ -294,6 +298,8 @@ func _on_tap(position: Vector2) -> void:
 		_menu_button.button_pressed = false
 		return
 	var cell := CellPicker.cell_at(_camera, position, _board.surface_height)
+	if _tap_hero(position, cell):
+		return
 	if cell != BoardSpace.NO_CELL:
 		var anchor := _game.map.socket_anchor_at(cell)
 		if anchor != GameMap.NO_SOCKET and not socket_tappable(anchor):
@@ -302,6 +308,50 @@ func _on_tap(position: Vector2) -> void:
 	select_cell(cell)
 	if cell == BoardSpace.NO_CELL:
 		_show_message("Tap a socket")
+
+
+## Lets a tap select the hero, send it somewhere or let it go (`HeroPick`); true when the tap
+## was the hero's and goes no further. Only a tap gets here, never a drag or a pinch, so
+## panning cannot send the hero anywhere. The move is a command like any other.
+func _tap_hero(position: Vector2, cell: Vector2i) -> bool:
+	var hero := _game.hero
+	if hero == null or not hero.alive:
+		_hero_selected = false
+		return false
+	var on_hero := HeroPick.hits_hero(position, _hero_on_screen(hero), tap_pixels())
+	var walkable := cell != BoardSpace.NO_CELL and _game.hero_graph.is_open(cell)
+	match HeroPick.resolve(on_hero, _hero_selected, walkable):
+		HeroPick.Action.SELECT:
+			select_cell(BoardSpace.NO_CELL)
+			_hero_selected = true
+		HeroPick.Action.DESELECT:
+			_hero_selected = false
+			return on_hero
+		HeroPick.Action.MOVE:
+			_note_if_paused()
+			Game.submit(_game, Command.move_hero(cell.x, cell.y))
+		_:
+			return false
+	return true
+
+
+## Where the hero's body is drawn on screen.
+func _hero_on_screen(hero: Hero) -> Vector2:
+	var at := BoardSpace.point_to_world(hero.x, hero.y)
+	at.y = _board.surface_height(hero.cell) + HeroView.BODY_HEIGHT / 2.0
+	return _camera.unproject_position(at)
+
+
+## Draws the hero; a hero that fell is no longer selected.
+func _sync_hero() -> void:
+	if _game.hero == null or not _game.hero.alive:
+		_hero_selected = false
+	_hero_view.sync(_game.hero, _board.surface_height, _hero_selected)
+
+
+## Whether the hero is selected.
+func hero_selected() -> bool:
+	return _hero_selected
 
 
 ## Whether a socket block is drawn big enough to build, upgrade or sell on: its narrowest
@@ -451,6 +501,7 @@ func _start(map_seed: int) -> void:
 	_foes.reset()
 	_hold.reset()
 	_guards.reset()
+	_hero_selected = false
 	select_cell(BoardSpace.NO_CELL)
 	_game_over.close()
 	_speed = GameSpeed.new()

@@ -44,3 +44,8 @@ const DIRT_PATCH := Color("8c7150")
 const DIRT_PATCH_EDGE := Color("8f8c4c")
 const GRASS_BLADE := Color("5f8a30")
 const GRASS_TIP := Color("a3a052")
+## The hero's placeholder body and the cyan of its selection ring, target marker and walk line.
+const HERO_BODY := Color(0.95, 0.8, 0.25)
+const HERO_RING := Color(0.2, 0.9, 0.9, 0.8)
+const HERO_TARGET := Color(0.2, 0.9, 0.9, 0.5)
+const HERO_PATH := Color(0.2, 0.9, 0.9, 0.9)
