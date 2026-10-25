@@ -18,8 +18,9 @@ const CORNER_TOLERANCE := 0.1
 ## wider than the bridge's cell, so beside a diagonal bank it runs up to 0.095 over the lip.
 const RIVER_OVERHANG := 0.1
 ## Layout valley seeds (#458): a river two or three cells wide, crossed on two or three bridge
-## cells side by side (2, 5 and 11 on three).
-const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5, 11]
+## cells side by side (2, 5 and 11 on three). 6, 10, 12 and 16 have the river bending along the
+## road, where the two cell bed used to hang over the water (#461).
+const LAYOUT_SEEDS: Array[int] = [1, 2, 3, 5, 6, 10, 11, 12, 16]
 
 
 func _flat(_cell: Vector2i) -> float:
@@ -189,14 +190,15 @@ func test_the_bridges_stand_on_the_bridge_cells_with_foes_on_their_planks() -> v
 			assert_almost_eq(
 				top, field.surface_height(bridge.cell), 1e-6, "foes stand on the planks"
 			)
-			# the highest face looking up over the bridge cell's middle is the planks' top
+			# the highest face looking up over the bridge cell is the planks' top (the whole cell:
+			# over a crossing of two or three cells the planks need not fall at a cell's middle)
 			var middle := Vector2(bridge.cell) + Vector2(0.5, 0.5)
 			var along := 0 if bridge.horizontal else 1
 			var plank_top := -INF
 			for i in vertices.size():
 				var off := _sim(vertices[i]) - middle
 				var half := RoadDimensions.deck_width(map.road_width) / 2.0
-				var on_deck := absf(off[along]) < 0.2 and absf(off[1 - along]) < maxf(0.5, half)
+				var on_deck := absf(off[along]) < 0.5 and absf(off[1 - along]) < maxf(0.5, half)
 				if normals[i].y > 0.99 and on_deck:
 					plank_top = maxf(plank_top, vertices[i].y)
 			assert_almost_eq(plank_top, top, 1e-4, label)

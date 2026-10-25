@@ -21,6 +21,8 @@ const LIP_HEIGHT := 0.016
 const LIP_CREST := 0.03
 const LIP_WIDTH := 0.09
 const EDGE_LIFT := 0.002
+## How finely a bed edge is checked for reaching over the water, in cells (#461).
+const BED_DRY_STEP := 0.05
 ## Drawing only: the route's polyline is rounded by this many corner-cutting passes (Chaikin),
 ## then thinned to points at most `ROAD_STEP` apart where it runs straight, and no further than
 ## `ROAD_BEND_DEGREES` off line where it bends.
