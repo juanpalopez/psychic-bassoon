@@ -46,6 +46,7 @@ func _init() -> void:
 	_labels(theme, display, hand)
 	_panels(theme)
 	_tokens(theme, display)
+	_indicators(theme)
 
 	var error := ResourceSaver.save(theme, OUT)
 	print("saved %s: %s" % [OUT, error_string(error)])
@@ -280,3 +281,11 @@ func _tokens(theme: Theme, display: FontFile) -> void:
 	theme.set_color("icon_disabled_color", "BarToken", Color(1, 1, 1, 0.4))
 	theme.set_constant("h_separation", "BarToken", 10)
 	theme.set_constant("line_spacing", "BarToken", -2)
+
+
+## Colours of the edge arrows, read by `EdgeIndicators`.
+func _indicators(theme: Theme) -> void:
+	theme.add_type("Arrow")
+	theme.set_color("foe", "Arrow", SHORT)
+	theme.set_color("hero", "Arrow", ACTION)
+	theme.set_color("edge", "Arrow", NOTE)
