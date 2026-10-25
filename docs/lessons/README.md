@@ -8,6 +8,7 @@ Short records so later runs do not relearn the same thing. Decisions record what
 ## Index (newest first; add a row in the same PR as the entry)
 | Date | Type | Title | Area | Promote | Promoted to |
 | --- | --- | --- | --- | --- | --- |
+| 2026-10-25 | lesson | A rule checked per section misses the segment only the stitch makes | sim | none | |
 | 2026-10-24 | lesson | Import on one thread, and name a stripped Godot crash from the strings its frames reference | tooling | script | godot/project.godot, scripts/run-gut-parallel.sh, scripts/mutate.py |
 | 2026-10-24 | decision | Measure a ground foe's distance to the road band's edge through one combat seam, off until the band is switched on | sim | none | |
 | 2026-10-24 | lesson | Fit the real templates to the real gates before fixing a plan, and let the fit decide the shape | sim | none | |
