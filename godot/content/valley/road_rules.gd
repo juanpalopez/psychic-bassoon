@@ -15,8 +15,9 @@ const MAX_CELL_DEVIATION := 1.0
 const OLD_WIDTH_CELLS := 0.9
 ## The road as a band several foes walk side by side (#430). The layout valley's road is this
 ## wide, in cells, and every cell the band touches is road (#469), so the drawn bed stays on road
-## cells; 0 keeps the one-cell road. The owner's target is 2.4 (#446).
-const ROAD_WIDTH_CELLS := OLD_WIDTH_CELLS
+## cells; 0 keeps the one-cell road. The owner chose 2.0 over 2.4 on 2026-10-25 (#446): the same
+## sockets and lanes, about 570 ms to generate a valley against 2.2 to 2.5 s.
+const ROAD_WIDTH_CELLS := 2.0
 ## A socket block's edge keeps at least this many cells from the band's edge: it may stand
 ## against the band but never on it (1.0 left a third of the blocks, #430).
 const ROAD_CLEARANCE_CELLS := 0.0

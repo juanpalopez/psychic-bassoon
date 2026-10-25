@@ -182,13 +182,14 @@ func test_the_stitched_stand_in_valley_passes_the_checks_for_every_seed() -> voi
 
 
 ## Measured on seeds 1..300 at 40 by 24 (#480): every seed stitches, and the sockets stay between
-## 23 and 30 (the six regions' own ranges, which do not grow with the board).
-func test_every_seed_to_300_stitches_with_23_to_30_sockets() -> void:
+## 23 and 31 (the six regions' own ranges, 4-5, 4-5, 5-6, 2-4, 4-5 and 5-6, which do not grow with
+## the board). The 2.0 band (#446) draws the top of every range on seed 16: 5+5+6+4+5+6.
+func test_every_seed_to_300_stitches_with_23_to_31_sockets() -> void:
 	for seed in range(1, 301):
 		var map := MapGen.generate_layout_valley(seed)
 		assert_not_null(map, "seed %d" % seed)
 		if map != null:
-			assert_between(map.sockets.size(), 23, 30, "seed %d" % seed)
+			assert_between(map.sockets.size(), 23, 31, "seed %d" % seed)
 
 
 func test_seeds_that_once_failed_to_stitch_now_do() -> void:

@@ -126,7 +126,7 @@ func test_a_strip_with_no_block_at_a_bridge_fails() -> void:
 
 func test_a_branch_bend_without_a_block_fails() -> void:
 	var tried := 0
-	for seed in range(1, 41):
+	for seed in range(1, 121):
 		for region in [MEADOW, CROSSING]:
 			var made := _attempt(seed, region)
 			var result: SectionResult = made[2]
@@ -140,7 +140,7 @@ func test_a_branch_bend_without_a_block_fails() -> void:
 			result.socket_levels.clear()
 			result.socket_tags.clear()
 			assert_string_contains(_texts(made), "branch bend")
-	assert_gt(tried, 0, "some lane in seeds 1..40 has a bend")
+	assert_gt(tried, 0, "some lane in seeds 1..120 has a bend")
 
 
 func test_the_placer_covers_a_bend_of_the_lower_lane_and_reaches_both_lanes() -> void:
