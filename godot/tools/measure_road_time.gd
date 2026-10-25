@@ -14,6 +14,8 @@ const STEP := 0.1
 const MEASURED_FOES: Array[String] = ["scrapGoblin", "corrugatedOrc", "cardboardGolem"]
 const LANE_NAMES: Array[String] = ["main road", "lower lane"]
 ## In road order, the same as `ValleyLayout.Region` and the slot ids.
+## `ValleyLayout.generate` builds its slots in `ValleyLayout.Region` order and sets
+## `slot.id` to the index, so the slot id is the enum value (read in valley_layout.gd).
 const REGION_NAMES: Array[String] = [
 	"Outer March",
 	"Sunken Meadow",
@@ -82,7 +84,10 @@ func _stats(map: GameMap, width: float, index: int, rects: Array[Rect2i]) -> Dic
 			fire += STEP
 		if hit_edge:
 			fire_edge += STEP
-		STATS.add_step(walk, cov, expo, STATS.region_of(rects, x, y), in_reach, STEP)
+		var region := STATS.region_of(rects, x, y)
+		# The lead-in before the spawn (x from -0.4 to 0) is outside every rect: it belongs to the
+		# Outer March, so the covered seconds add up to the fire time.
+		STATS.add_step(walk, cov, expo, maxi(region, 0), in_reach, STEP)
 		d += STEP
 	return {
 		"total": route.total,
@@ -92,6 +97,14 @@ func _stats(map: GameMap, width: float, index: int, rects: Array[Rect2i]) -> Dic
 		"cov": cov,
 		"expo": expo,
 	}
+
+
+## True when the lower lane walked exactly the main road's cells in region `r` on every seed.
+func _same_road(lane_walk: Array, r: int) -> bool:
+	for i in mini(lane_walk[0].size(), lane_walk[1].size()):
+		if lane_walk[0][i][r] != lane_walk[1][i][r]:
+			return false
+	return true
 
 
 func _med(a: Array[float]) -> String:
@@ -161,6 +174,10 @@ func _init() -> void:
 			width = float(arg.trim_prefix("--width="))
 		if arg.begins_with("--speed="):
 			scale = float(arg.trim_prefix("--speed="))
+	if not STATS.is_valid_scale(scale):
+		push_error("--speed= must be above 0, got %s" % scale)
+		quit(1)
+		return
 	for seed in range(first, first + n):
 		var t := Time.get_ticks_usec()
 		var layout := ValleyLayout.generate(
@@ -298,6 +315,9 @@ func _init() -> void:
 		if lane_walk[k].is_empty():
 			continue
 		for r in REGION_NAMES.size():
+			if k == 1 and _same_road(lane_walk, r):
+				print("COVERAGE ", LANE_NAMES[k], " ", REGION_NAMES[r], " same road as main road")
+				continue
 			var w: Array[float] = []
 			var c: Array[float] = []
 			var e: Array[float] = []

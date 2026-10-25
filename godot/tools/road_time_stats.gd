@@ -9,6 +9,11 @@ const GATE_MEDIAN_HIGH := 1.10
 const GATE_SEED_MIN := 0.75
 
 
+## True for a speed scale the tool can divide by: above zero.
+static func is_valid_scale(scale: float) -> bool:
+	return scale > 0.0
+
+
 ## The foe's speed in the tool's arithmetic only: `--speed=` multiplies it, content stays as it is.
 static func scaled_speed(base: float, scale: float) -> float:
 	return base * scale

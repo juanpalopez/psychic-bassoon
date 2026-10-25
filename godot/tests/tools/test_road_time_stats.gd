@@ -14,6 +14,9 @@ func _floats(a: Array) -> Array[float]:
 func test_speed_scale_multiplies_only_the_value_it_is_given() -> void:
 	assert_almost_eq(STATS.scaled_speed(1.6, 0.5), 0.8, 0.000001)
 	assert_eq(STATS.scaled_speed(1.6, 1.0), 1.6)
+	assert_true(STATS.is_valid_scale(0.55))
+	assert_false(STATS.is_valid_scale(0.0))
+	assert_false(STATS.is_valid_scale(-1.0))
 
 
 func test_a_speed_scale_never_edits_the_foe_content() -> void:
@@ -60,6 +63,12 @@ func test_the_gate_fails_a_median_above_110_percent() -> void:
 	assert_false(STATS.gate_passes(_floats([1.11, 1.2, 1.3])))
 
 
+func test_the_gate_edges_sit_at_90_and_110_percent() -> void:
+	assert_false(STATS.gate_passes(_floats([1.12, 1.12, 1.12])), "112 percent fails")
+	assert_true(STATS.gate_passes(_floats([1.08, 1.08, 1.08])), "108 percent passes")
+	assert_false(STATS.gate_passes(_floats([0.88, 0.88, 0.88])), "88 percent fails")
+
+
 func test_the_gate_fails_one_seed_below_75_percent() -> void:
 	assert_false(STATS.gate_passes(_floats([0.74, 0.95, 1.0, 1.05, 1.1])))
 
@@ -84,6 +93,16 @@ func test_add_step_counts_walk_always_cover_once_and_exposure_per_tower() -> voi
 	assert_eq(walk, _floats([0.0, 0.5]))
 	assert_eq(covered, _floats([0.0, 0.25]))
 	assert_eq(exposure, _floats([0.0, 0.75]))
+
+
+func test_one_tower_in_reach_covers_the_step_with_exposure_of_dt() -> void:
+	var walk := _floats([0.0])
+	var covered := _floats([0.0])
+	var exposure := _floats([0.0])
+	STATS.add_step(walk, covered, exposure, 0, 1, 0.5)
+	assert_eq(walk, _floats([0.5]))
+	assert_eq(covered, _floats([0.5]))
+	assert_eq(exposure, _floats([0.5]))
 
 
 func test_add_step_ignores_a_point_outside_every_region() -> void:
