@@ -71,3 +71,81 @@ func test_the_button_is_a_tap_target_and_a_press_sends_the_hero_command() -> voi
 		RejectText.of(GameEvent.RejectReason.NO_TARGET)
 	)
 	assert_false(button.disabled)
+
+
+func _main() -> Node:
+	var port := SubViewport.new()
+	port.size = Vector2i(1280, 720)
+	add_child_autofree(port)
+	var main := MAIN_SCENE.instantiate()
+	port.add_child(main)
+	main.set_process(false)
+	await get_tree().process_frame
+	main._start(main.game().seed)
+	main._process(0.0)
+	return main
+
+
+func test_a_paused_game_turns_the_button_off() -> void:
+	assert_false(HeroAbilityState.of(_hero(), true).enabled)
+	assert_true(HeroAbilityState.of(_hero(), false).enabled)
+
+
+func test_the_button_hides_when_covered() -> void:
+	var button := HeroAbilityButton.new()
+	add_child_autofree(button)
+	button.show_hero(_hero(), false)
+	assert_true(button.visible)
+	button.show_hero(_hero(), true)
+	assert_false(button.visible)
+
+
+func test_the_button_follows_the_pause_in_the_game() -> void:
+	var main := await _main()
+	var button := main._whirl as HeroAbilityButton
+	assert_false(button.disabled)
+	main._speed.paused = true
+	main._process(0.0)
+	assert_true(button.disabled)
+
+
+func test_a_hero_cast_shows_the_toast() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = game.hero.id
+	game.events.append(event)
+	main._after_tick(game)
+	assert_eq((main.get_node("Hud/Message") as Label).text, HeroAbilityState.CAST_MESSAGE)
+
+
+func test_a_tower_ability_shows_no_whirl_toast() -> void:
+	var main := await _main()
+	var game: GameState = main.game()
+	var event := GameEvent.of(GameEvent.Kind.ABILITY_USED)
+	event.tower_id = game.hero.id + 1000
+	game.events.append(event)
+	main._after_tick(game)
+	assert_ne((main.get_node("Hud/Message") as Label).text, HeroAbilityState.CAST_MESSAGE)
+
+
+func test_a_world_tap_beside_the_button_is_not_swallowed() -> void:
+	var main := await _main()
+	var button := main._whirl as HeroAbilityButton
+	var rect := button.get_global_rect()
+	var beside := Vector2(rect.position.x - 20.0, rect.get_center().y)
+	assert_false(rect.has_point(beside))
+	main._on_tap(beside)
+	main._process(0.0)
+	var answered: bool = (
+		main.selected_cell() != BoardSpace.NO_CELL
+		or (main.get_node("Hud/Message") as Label).visible
+	)
+	assert_true(answered)
+
+
+func test_the_edge_arrows_stop_above_the_button() -> void:
+	var canvas := Vector2(1280.0, 720.0)
+	var room := EdgeIndicators.new().room(canvas)
+	assert_lte(room.end.y, HudLayout.ability_rect(canvas).position.y)
+	assert_false(room.intersects(HudLayout.ability_rect(canvas)))

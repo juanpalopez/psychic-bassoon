@@ -213,7 +213,7 @@ func _process(delta: float) -> void:
 	_menu.set_buttons(_game.buttons)
 	_close_if_zoomed_out()
 	_refresh_panel()
-	_whirl.show_hero(_game.hero, _menu.visible or _panel.visible)
+	_whirl.show_hero(_game.hero, _menu.visible or _panel.visible, _speed.paused)
 	_message_left = maxf(0.0, _message_left - delta)
 	_message.visible = _message_left > 0.0
 	_top_bar.show_state(_game)

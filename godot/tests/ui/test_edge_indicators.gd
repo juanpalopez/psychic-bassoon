@@ -27,7 +27,9 @@ func test_the_free_room_stays_clear_of_the_hud_rows() -> void:
 	add_child_autofree(arrows)
 	var room := arrows.room(Vector2(1280.0, 720.0))
 	assert_eq(room.position.y, HudLayout.TOP_CLEAR)
-	assert_eq(room.end.y, 720.0 - HudLayout.BOTTOM_CLEAR)
+	# the hero ability button sits in the row above the bottom row; the arrows stop above it
+	var button := HudLayout.ability_rect(Vector2(1280.0, 720.0))
+	assert_eq(room.end.y, button.position.y - HudLayout.GAP)
 
 
 func test_a_tap_on_the_minimap_asks_for_that_spot() -> void:
