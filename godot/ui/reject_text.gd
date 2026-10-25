@@ -37,4 +37,12 @@ static func of(reason: GameEvent.RejectReason) -> String:
 			return "Still cooling down"
 		GameEvent.RejectReason.NO_TARGET:
 			return "No foe in reach"
+		GameEvent.RejectReason.NO_HERO:
+			return "There is no hero"
+		GameEvent.RejectReason.NOT_WALKABLE:
+			return "The hero cannot stand there"
+		GameEvent.RejectReason.UNREACHABLE:
+			return "The hero cannot get there"
+		GameEvent.RejectReason.HERO_FALLEN:
+			return "The hero has fallen"
 	return "That did not work"
